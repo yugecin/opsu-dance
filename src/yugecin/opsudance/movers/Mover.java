@@ -43,7 +43,7 @@ public abstract class Mover {
 	}
 
 	protected final double getT(int time) {
-		return (time - startT) / totalT;
+		return ((double)time - startT) / totalT;
 	}
 
 	public abstract double[] getPointAt(int time);
