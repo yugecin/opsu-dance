@@ -561,4 +561,12 @@ public class Utils {
 			return null;
 		}
 	}
+
+	public static int getQuadrant(double x, double y) {
+		if (x < Container.width / 2d) {
+			return y < Container.height / 2d ? 2 : 3;
+		}
+		return y < Container.height / 2d ? 1 : 4;
+	}
+
 }
