@@ -41,8 +41,6 @@ public class Container extends AppGameContainer {
 	protected SlickException e = null;
 
 	public static Container instance;
-	public static int width;
-	public static int height;
 
 	/**
 	 * Create a new container wrapping a game

@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import itdelatrisu.opsu.Container;
+import itdelatrisu.opsu.Options;
 
 public class RektSpinner extends Spinner {
 
@@ -25,11 +25,11 @@ public class RektSpinner extends Spinner {
 	public void init() {
 		init(new double[][] {
 			{ 10, 10 },
-			{ Container.width / 2d, 10 },
-			{ Container.width - 10, 10 },
-			{ Container.width - 10, Container.height - 10 },
-			{ Container.width / 2d, Container.height - 10 },
-			{ 10, Container.height - 10 }
+			{ Options.width / 2d, 10 },
+			{ Options.width - 10, 10 },
+			{ Options.width - 10, Options.height - 10 },
+			{ Options.width / 2d, Options.height - 10 },
+			{ 10, Options.height - 10 }
 		});
 	}
 

@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.movers;
 
-import itdelatrisu.opsu.Container;
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 
@@ -63,7 +63,7 @@ public class CircleMover extends Mover {
 				double a = ang + SOME_CONSTANT * t;
 				pos[0] = (startX + (endX - startX) * t) - middlexoffset - Math.cos(a) * radius;
 				pos[1] = (startY + (endY - startY) * t) - middleyoffset - Math.sin(a) * radius;
-				if (pos[0] < 0 || Container.width < pos[0] || pos[1] < 0 || Container.height < pos[1]) {
+				if (pos[0] < 0 || Options.width < pos[0] || pos[1] < 0 || Options.height < pos[1]) {
 					pass = false;
 					break;
 				}
