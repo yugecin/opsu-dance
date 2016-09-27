@@ -603,7 +603,6 @@ public class Options {
 			@Override
 			public void read(String s) {
 				super.read(s);
-				System.out.println(bool);
 				Dancer.LAZY_SLIDERS = bool;
 			}
 		},
@@ -634,6 +633,36 @@ public class Options {
 				super.read(s);
 				AutoMoverFactory.CIRCLE_STREAM = bool ? 58 : 85;
 			}
+		},
+
+		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
+			// TODO
+		},
+
+		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 1, -20, 20) {
+			// TODO
+
+			@Override
+			public String getValueString() {
+				return "x" + val;
+			}
+		},
+
+		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", 5, -20, 20) {
+			// TODO
+
+			@Override
+			public String getValueString() {
+				return "x" + val;
+			}
+		},
+
+		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", true) {
+			// TODO
+		},
+
+		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true) {
+			// TODO
 		};
 
 
