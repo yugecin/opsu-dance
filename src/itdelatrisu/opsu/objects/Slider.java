@@ -107,6 +107,8 @@ public class Slider extends GameObject {
 	/** Container dimensions. */
 	private static int containerWidth, containerHeight;
 
+	private int repeats;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -169,6 +171,8 @@ public class Slider extends GameObject {
 			for (int i = 0; i < tickCount; i++, t += tickTOffset)
 				ticksT[i] = t;
 		}
+
+		repeats = hitObject.getRepeatCount();
 	}
 
 	@Override
@@ -581,6 +585,14 @@ public class Slider extends GameObject {
 		tickIndex = 0;
 		ticksHit = 0;
 		tickIntervals = 1;
+	}
+
+	public Curve getCurve() {
+		return curve;
+	}
+
+	public int getRepeats() {
+		return repeats;
 	}
 
 	@Override

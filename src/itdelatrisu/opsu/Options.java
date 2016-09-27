@@ -596,7 +596,15 @@ public class Options {
 		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", true) {
 			@Override
 			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.LAZY_SLIDERS = bool;
+			}
 
+			@Override
+			public void read(String s) {
+				super.read(s);
+				System.out.println(bool);
+				Dancer.LAZY_SLIDERS = bool;
 			}
 		},
 
