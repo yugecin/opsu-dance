@@ -28,4 +28,9 @@ public class HalfCircleMoverFactory implements MoverFactory {
 		return new HalfCircleMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "Half circle";
+	}
+
 }

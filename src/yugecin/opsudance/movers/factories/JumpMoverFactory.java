@@ -28,4 +28,9 @@ public class JumpMoverFactory implements MoverFactory {
 		return new JumpMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "Jump";
+	}
+
 }

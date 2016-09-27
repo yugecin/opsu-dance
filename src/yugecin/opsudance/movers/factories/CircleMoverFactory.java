@@ -28,4 +28,9 @@ public class CircleMoverFactory implements MoverFactory {
 		return new CircleMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "Circle";
+	}
+
 }

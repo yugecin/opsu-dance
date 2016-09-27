@@ -28,4 +28,9 @@ public class LinearMoverFactory implements MoverFactory {
 		return new LinearMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "Linear";
+	}
+
 }

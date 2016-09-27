@@ -28,4 +28,9 @@ public class HalfEllipseMoverFactory implements MoverFactory {
 		return new HalfEllipseMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "Half ellipse";
+	}
+
 }

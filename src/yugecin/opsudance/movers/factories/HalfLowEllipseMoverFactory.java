@@ -30,4 +30,9 @@ public class HalfLowEllipseMoverFactory implements MoverFactory {
 		return m;
 	}
 
+	@Override
+	public String toString() {
+		return "Half low ellipse";
+	}
+
 }

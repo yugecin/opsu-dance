@@ -28,4 +28,9 @@ public class QuartCircleMoverFactory implements MoverFactory {
 		return new QuartCircleMover(start, end, dir);
 	}
 
+	@Override
+	public String toString() {
+		return "1/4th circle";
+	}
+
 }
