@@ -94,7 +94,9 @@ public class Cursor {
 	/**
 	 * Constructor.
 	 */
-	public Cursor() {}
+	public Cursor() {
+		resetLocations();
+	}
 
 	/**
 	 * Draws the cursor.
@@ -158,14 +160,12 @@ public class Cursor {
 
 		// TODO: use an image buffer
 		int removeCount = 0;
-		float FPSmod = Math.max(container.getFPS(), 1) / 60f;
+		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
 		if (newStyle) {
 			// new style: add all points between cursor movements
-			if (lastPosition == null) {
-				lastPosition = new Point(mouseX, mouseY);
-				return;
+			if (!addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
+				trail.add(new Point(mouseX, mouseY));
 			}
-			addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY);
 			lastPosition.move(mouseX, mouseY);
 
 			removeCount = (int) (trail.size() / (6 * FPSmod)) + 1;
@@ -212,8 +212,9 @@ public class Cursor {
 	 * Adds all points between (x1, y1) and (x2, y2) to the cursor point lists.
 	 * @author http://rosettacode.org/wiki/Bitmap/Bresenham's_line_algorithm#Java
 	 */
-	private void addCursorPoints(int x1, int y1, int x2, int y2) {
+	private boolean addCursorPoints(int x1, int y1, int x2, int y2) {
 		// delta of exact value and rounded value of the dependent variable
+		boolean added = false;
 		int d = 0;
 		int dy = Math.abs(y2 - y1);
 		int dx = Math.abs(x2 - x1);
@@ -228,6 +229,7 @@ public class Cursor {
 			for (int i = 0; ; i++) {
 				if (i == k) {
 					trail.add(new Point(x1, y1));
+					added = true;
 					i = 0;
 				}
 				if (x1 == x2)
@@ -243,6 +245,7 @@ public class Cursor {
 			for (int i = 0; ; i++) {
 				if (i == k) {
 					trail.add(new Point(x1, y1));
+					added = true;
 					i = 0;
 				}
 				if (y1 == y2)
@@ -255,6 +258,7 @@ public class Cursor {
 				}
 			}
 		}
+		return added;
 	}
 
 	/**
@@ -289,7 +293,7 @@ public class Cursor {
 	 * Resets all cursor location data.
 	 */
 	public void resetLocations() {
-		lastPosition = null;
+		lastPosition = new Point(0, 0);
 		trail.clear();
 	}
 
