@@ -49,7 +49,7 @@ public class AutoEllipseMoverFactory extends AutoMoverFactory {
 
 	@Override
 	public String toString() {
-		return "Auto ellipse";
+		return "Auto ellipse size";
 	}
 
 }

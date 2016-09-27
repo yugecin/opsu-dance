@@ -33,4 +33,9 @@ public class RektSpinner extends Spinner {
 		});
 	}
 
+	@Override
+	public String toString() {
+		return "Rekt";
+	}
+
 }

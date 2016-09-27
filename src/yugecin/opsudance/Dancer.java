@@ -19,7 +19,9 @@ package yugecin.opsudance;
 
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.GameObject;
+import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
@@ -56,8 +58,15 @@ public class Dancer {
 	private Mover mover;
 	private Spinner spinner;
 
+	private int moverFactoryIndex;
+	private int spinnerIndex;
+
 	public float x;
 	public float y;
+
+	private boolean isCurrentLazySlider;
+
+	public static boolean LAZY_SLIDERS;
 
 	public Dancer() {
 		moverFactory = moverFactories[0];
@@ -65,6 +74,7 @@ public class Dancer {
 	}
 
 	public void init(String mapname) {
+		isCurrentLazySlider = false;
 		p = null;
 		rand = new Random(mapname.hashCode());
 		dir = 1;
@@ -73,9 +83,45 @@ public class Dancer {
 		}
 	}
 
+	public int getSpinnerIndex() {
+		return spinnerIndex;
+	}
+
+	public void setSpinnerIndex(int spinnerIndex) {
+		if (spinnerIndex < 0 || spinnerIndex >= spinners.length) {
+			spinnerIndex = 0;
+		}
+		this.spinnerIndex = spinnerIndex;
+		spinner = spinners[spinnerIndex];
+	}
+
+	public int getMoverFactoryIndex() {
+		return moverFactoryIndex;
+	}
+
+	public void setMoverFactoryIndex(int moverFactoryIndex) {
+		if (moverFactoryIndex < 0 || moverFactoryIndex >= moverFactories.length) {
+			moverFactoryIndex = 0;
+		}
+		this.moverFactoryIndex = moverFactoryIndex;
+		moverFactory = moverFactories[moverFactoryIndex];
+	}
+
 	public void update(int time, GameObject p, GameObject c) {
 		if (this.p != p) {
 			this.p = p;
+			isCurrentLazySlider = false;
+			// detect lazy sliders, should work pretty good
+			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x , c.end.y) <= Circle.diameter * 0.8f) {
+				Slider s = (Slider) c;
+				Vec2f mid = s.getCurve().pointAt(1f);
+				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
+					mid = s.getCurve().pointAt(0.5f);
+					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
+						isCurrentLazySlider = true;
+					}
+				}
+			}
 			if (rand.nextInt(2) == 1) {
 				dir *= -1;
 			}
@@ -102,6 +148,9 @@ public class Dancer {
 				c.end = new Vec2f(x, y);
 			} else {
 				Vec2f point = c.getPointAt(time);
+				if (isCurrentLazySlider) {
+					point = c.start;
+				}
 				x = point.x;
 				y = point.y;
 			}

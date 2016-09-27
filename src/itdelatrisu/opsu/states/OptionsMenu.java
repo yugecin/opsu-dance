@@ -103,6 +103,20 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.REPLAY_SEEKING,
 			GameOption.DISABLE_UPDATER,
 			GameOption.ENABLE_WATCH_SERVICE
+		}),
+		DANCE ("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER,
+			GameOption.DANCE_SPINNER,
+			GameOption.DANCE_LAZY_SLIDERS,
+			GameOption.DANCE_CIRCLE_STREAMS,
+			GameOption.DANCE_ONLY_CIRCLE_STACKS,
+		}),
+		PIPPI ("Pippi", new GameOption[] {
+			GameOption.PIPPI_ENABLE,
+			GameOption.PIPPI_ANGLE_INC_MUL,
+			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
+			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
+			GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
 		});
 
 		/** Total number of tabs. */
