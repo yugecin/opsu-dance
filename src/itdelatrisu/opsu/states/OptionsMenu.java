@@ -103,6 +103,9 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.REPLAY_SEEKING,
 			GameOption.DISABLE_UPDATER,
 			GameOption.ENABLE_WATCH_SERVICE
+		}),
+		DANCE ("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER
 		});
 
 		/** Total number of tabs. */
