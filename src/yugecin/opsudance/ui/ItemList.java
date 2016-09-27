@@ -18,6 +18,7 @@
 
 package yugecin.opsudance.ui;
 
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Color;
@@ -84,7 +85,20 @@ public class ItemList {
 		}
 	}
 
+	private int startStart;
+	private int mouseStartX;
+	private int mouseStartY;
+
 	public void mousePressed(int button, int x, int y) {
+		mouseStartX = x;
+		mouseStartY = y;
+		startStart = start;
+	}
+
+	public void mouseReleased(int button, int x, int y) {
+		if (Utils.distance(x, y, mouseStartX, mouseStartY) > 5) {
+			return;
+		}
 		if (UI.getBackButton().contains(x, y)) {
 			visible = false;
 		}
@@ -108,7 +122,12 @@ public class ItemList {
 	}
 
 	public void mouseDragged(int oldx, int oldy, int x, int y) {
-
+		start = startStart - (y - mouseStartY) / (Fonts.MEDIUM.getLineHeight() + 5);
+		if (start < 0) {
+			start = 0;
+		} else if (start > items.length - 1) {
+			start = items.length - 1;
+		}
 	}
 
 	public void mouseWheelMoved(int delta) {
