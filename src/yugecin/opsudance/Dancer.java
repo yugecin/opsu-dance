@@ -56,6 +56,9 @@ public class Dancer {
 	private Mover mover;
 	private Spinner spinner;
 
+	private int moverFactoryIndex;
+	private int spinnerIndex;
+
 	public float x;
 	public float y;
 
@@ -71,6 +74,24 @@ public class Dancer {
 		for (Spinner s : spinners) {
 			s.init();
 		}
+	}
+
+	public int getSpinnerIndex() {
+		return spinnerIndex;
+	}
+
+	public void setSpinnerIndex(int spinnerIndex) {
+		this.spinnerIndex = spinnerIndex;
+		spinner = spinners[spinnerIndex];
+	}
+
+	public int getMoverFactoryIndex() {
+		return moverFactoryIndex;
+	}
+
+	public void setMoverFactoryIndex(int moverFactoryIndex) {
+		this.moverFactoryIndex = moverFactoryIndex;
+		moverFactory = moverFactories[moverFactoryIndex];
 	}
 
 	public void update(int time, GameObject p, GameObject c) {

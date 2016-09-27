@@ -105,7 +105,11 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.ENABLE_WATCH_SERVICE
 		}),
 		DANCE ("Dance", new GameOption[] {
-			GameOption.DANCE_MOVER
+			GameOption.DANCE_MOVER,
+			GameOption.DANCE_SPINNER,
+			GameOption.DANCE_LAZY_SLIDERS,
+			GameOption.DANCE_CIRCLE_STREAMS,
+			GameOption.DANCE_ONLY_CIRCLE_STACKS,
 		});
 
 		/** Total number of tabs. */

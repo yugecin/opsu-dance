@@ -54,6 +54,8 @@ import org.newdawn.slick.util.ResourceLoader;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
+import yugecin.opsudance.Dancer;
+import yugecin.opsudance.movers.factories.AutoMoverFactory;
 
 /**
  * Handles all user options.
@@ -538,8 +540,94 @@ public class Options {
 		ENABLE_WATCH_SERVICE ("Enable Watch Service", "WatchService", "Watch the beatmap directory for changes. Requires a restart.", false),
 
 		DANCE_MOVER ("Mover algorithm", "Mover", "Algorithm that decides how to move from note to note" ) {
+			@Override
+			public Object[] getListItems() {
+				return Dancer.moverFactories;
+			}
 
+			@Override
+			public void clickListItem(int index) {
+				Dancer.instance.setMoverFactoryIndex(index);
+			}
+
+			@Override
+			public String getValueString() {
+				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()].toString();
+			}
+
+			@Override
+			public String write() {
+				return Dancer.instance.getMoverFactoryIndex() + "";
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.instance.setMoverFactoryIndex(Integer.parseInt(s));
+			}
+		},
+
+		DANCE_SPINNER ("Spinner", "Spinner", "Spinner style") {
+			@Override
+			public Object[] getListItems() {
+				return Dancer.spinners;
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.instance.setSpinnerIndex(index);
+			}
+
+			@Override
+			public String getValueString() {
+				return Dancer.spinners[Dancer.instance.getSpinnerIndex()].toString();
+			}
+
+			@Override
+			public String write() {
+				return Dancer.instance.getSpinnerIndex() + "";
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.instance.setSpinnerIndex(Integer.parseInt(s));
+			}
+		},
+
+		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", true) {
+			@Override
+			public void click(GameContainer container) {
+
+			}
+		},
+
+		DANCE_ONLY_CIRCLE_STACKS ("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", true) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				AutoMoverFactory.ONLY_CIRCLE_STACKS = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				AutoMoverFactory.ONLY_CIRCLE_STACKS = bool;
+			}
+		},
+
+		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", false) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				AutoMoverFactory.CIRCLE_STREAM = bool ? 58 : 85;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				AutoMoverFactory.CIRCLE_STREAM = bool ? 58 : 85;
+			}
 		};
+
 
 		/** Option name. */
 		private final String name;
@@ -690,7 +778,7 @@ public class Options {
 		 * Fired when an item in the value list has been clicked
 		 * @param index the itemindex which has been clicked
 		 */
-		public void clickListItem(int index) { };
+		public void clickListItem(int index) { }
 
 		/**
 		 * Processes a mouse drag action (via override).
