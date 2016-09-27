@@ -92,4 +92,9 @@ public abstract class GameObject {
 	 * Resets all internal state so that the hit object can be reused.
 	 */
 	public abstract void reset();
+
+	public abstract boolean isCircle();
+	public abstract boolean isSlider();
+	public abstract boolean isSpinner();
+
 }

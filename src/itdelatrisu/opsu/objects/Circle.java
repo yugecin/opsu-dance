@@ -36,7 +36,7 @@ import org.newdawn.slick.Graphics;
 /**
  * Data type representing a circle object.
  */
-public class Circle implements GameObject {
+public class Circle extends GameObject {
 	/** The diameter of hit circles. */
 	private static float diameter;
 
@@ -208,4 +208,20 @@ public class Circle implements GameObject {
 
 	@Override
 	public void reset() {}
+
+	@Override
+	public boolean isCircle() {
+		return true;
+	}
+
+	@Override
+	public boolean isSlider() {
+		return false;
+	}
+
+	@Override
+	public boolean isSpinner() {
+		return false;
+	}
+
 }

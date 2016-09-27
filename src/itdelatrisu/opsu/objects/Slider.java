@@ -40,7 +40,7 @@ import org.newdawn.slick.Image;
 /**
  * Data type representing a slider object.
  */
-public class Slider implements GameObject {
+public class Slider extends GameObject {
 	/** Slider ball frames. */
 	private static Image[] sliderBallImages;
 
@@ -582,4 +582,20 @@ public class Slider implements GameObject {
 		ticksHit = 0;
 		tickIntervals = 1;
 	}
+
+	@Override
+	public boolean isCircle() {
+		return false;
+	}
+
+	@Override
+	public boolean isSlider() {
+		return true;
+	}
+
+	@Override
+	public boolean isSpinner() {
+		return false;
+	}
+
 }
