@@ -25,13 +25,25 @@ import org.newdawn.slick.Graphics;
 /**
  * Interface for hit object types used during gameplay.
  */
-public interface GameObject {
+public abstract class GameObject {
+
+	public Vec2f start;
+	public Vec2f end;
+
+	private int time;
+
+	public void updateStartEndPositions(int startTime) {
+		time = startTime;
+		start = getPointAt(startTime);
+		end = getPointAt(getEndTime());
+	}
+
 	/**
 	 * Draws the hit object to the graphics context.
 	 * @param g the graphics context
 	 * @param trackPosition the current track position
 	 */
-	public void draw(Graphics g, int trackPosition);
+	public abstract void draw(Graphics g, int trackPosition);
 
 	/**
 	 * Updates the hit object.
@@ -43,7 +55,7 @@ public interface GameObject {
 	 * @param trackPosition the track position
 	 * @return true if object ended
 	 */
-	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition);
+	public abstract boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition);
 
 	/**
 	 * Processes a mouse click.
@@ -52,28 +64,37 @@ public interface GameObject {
 	 * @param trackPosition the track position
 	 * @return true if a hit result was processed
 	 */
-	public boolean mousePressed(int x, int y, int trackPosition);
+	public abstract boolean mousePressed(int x, int y, int trackPosition);
 
 	/**
 	 * Returns the coordinates of the hit object at a given track position.
 	 * @param trackPosition the track position
 	 * @return the position vector
 	 */
-	public Vec2f getPointAt(int trackPosition);
+	public abstract Vec2f getPointAt(int trackPosition);
+
+	public int getTime() {
+		return time;
+	}
 
 	/**
 	 * Returns the end time of the hit object.
 	 * @return the end time, in milliseconds
 	 */
-	public int getEndTime();
+	public abstract int getEndTime();
 
 	/**
 	 * Updates the position of the hit object.
 	 */
-	public void updatePosition();
+	public abstract void updatePosition();
 
 	/**
 	 * Resets all internal state so that the hit object can be reused.
 	 */
-	public void reset();
+	public abstract void reset();
+
+	public abstract boolean isCircle();
+	public abstract boolean isSlider();
+	public abstract boolean isSpinner();
+
 }

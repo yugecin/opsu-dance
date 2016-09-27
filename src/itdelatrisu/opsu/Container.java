@@ -51,20 +51,8 @@ public class Container extends AppGameContainer {
 	public Container(Game game) throws SlickException {
 		super(game);
 		instance = this;
-	}
-
-	/**
-	 * Create a new container wrapping a game
-	 *
-	 * @param game The game to be wrapped
-	 * @param width The width of the display required
-	 * @param height The height of the display required
-	 * @param fullscreen True if we want fullscreen mode
-	 * @throws SlickException Indicates a failure to initialise the display
-	 */
-	public Container(Game game, int width, int height, boolean fullscreen) throws SlickException {
-		super(game, width, height, fullscreen);
-		instance = this;
+		width = this.getWidth();
+		height = this.getHeight();
 	}
 
 	@Override

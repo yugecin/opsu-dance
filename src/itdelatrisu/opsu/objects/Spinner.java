@@ -39,7 +39,7 @@ import org.newdawn.slick.Image;
 /**
  * Data type representing a spinner object.
  */
-public class Spinner implements GameObject {
+public class Spinner extends GameObject {
 	/** Container dimensions. */
 	private static int width, height;
 
@@ -409,4 +409,20 @@ public class Spinner implements GameObject {
 		deltaOverflow = 0;
 		isSpinning = false;
 	}
+
+	@Override
+	public boolean isCircle() {
+		return false;
+	}
+
+	@Override
+	public boolean isSlider() {
+		return false;
+	}
+
+	@Override
+	public boolean isSpinner() {
+		return true;
+	}
+
 }

@@ -55,13 +55,13 @@ public class ErrorHandler {
 		optionsLogReport = {"Send Report", "View Error Log", "Close"};
 
 	/** Text area for Exception. */
-	private static final JTextArea textArea = new JTextArea(7, 30);
+	private static final JTextArea textArea = new JTextArea(15, 100);
 	static {
 		textArea.setEditable(false);
 		textArea.setBackground(UIManager.getColor("Panel.background"));
 		textArea.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		textArea.setTabSize(2);
-		textArea.setLineWrap(true);
+		textArea.setLineWrap(false);
 		textArea.setWrapStyleWord(true);
 	}
 
