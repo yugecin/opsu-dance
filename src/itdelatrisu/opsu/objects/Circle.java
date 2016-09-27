@@ -38,7 +38,7 @@ import org.newdawn.slick.Graphics;
  */
 public class Circle extends GameObject {
 	/** The diameter of hit circles. */
-	private static float diameter;
+	public static float diameter;
 
 	/** The associated HitObject. */
 	private HitObject hitObject;
