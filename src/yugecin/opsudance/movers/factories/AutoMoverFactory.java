@@ -107,7 +107,7 @@ public class AutoMoverFactory implements MoverFactory {
 
 	@Override
 	public String toString() {
-		return "Auto";
+		return "Auto decide";
 	}
 
 }
