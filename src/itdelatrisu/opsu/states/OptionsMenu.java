@@ -31,8 +31,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -44,6 +43,7 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
+import yugecin.opsudance.ui.ItemList;
 
 /**
  * "Game Options" state.
@@ -174,13 +174,18 @@ public class OptionsMenu extends BasicGameState {
 	private Graphics g;
 	private final int state;
 
+	private final ItemList list;
+
 	public OptionsMenu(int state) {
 		this.state = state;
+		list = new ItemList();
 	}
 
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
+		list.init(container);
+
 		this.container = container;
 		this.game = game;
 		this.input = container.getInput();
@@ -241,7 +246,7 @@ public class OptionsMenu extends BasicGameState {
 		for (OptionTab tab : OptionTab.VALUES_REVERSED) {
 			if (tab != currentTab)
 				UI.drawTab(tab.button.getX(), tab.button.getY(),
-						tab.getName(), false, tab == hoverTab);
+						tab.getName(), false, tab == hoverTab && !list.isVisible());
 		}
 		UI.drawTab(currentTab.button.getX(), currentTab.button.getY(),
 				currentTab.getName(), true, false);
@@ -250,6 +255,10 @@ public class OptionsMenu extends BasicGameState {
 		float lineY = OptionTab.DISPLAY.button.getY() + (GameImage.MENU_TAB.getImage().getHeight() / 2f);
 		g.drawLine(0, lineY, width, lineY);
 		g.resetLineWidth();
+
+		if (list.isVisible()) {
+			list.render(container, game, g);
+		}
 
 		UI.getBackButton().draw();
 
@@ -283,7 +292,19 @@ public class OptionsMenu extends BasicGameState {
 	public int getID() { return state; }
 
 	@Override
+	public void mouseReleased(int button, int x, int y) {
+		if (list.isVisible()) {
+			list.mouseReleased(button, x, y);
+		}
+	}
+
+	@Override
 	public void mousePressed(int button, int x, int y) {
+		if (list.isVisible()) {
+			list.mousePressed(button, x, y);
+			return;
+		}
+
 		// key entry state
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
@@ -313,9 +334,22 @@ public class OptionsMenu extends BasicGameState {
 		}
 
 		// options (click only)
-		GameOption option = getOptionAt(y);
-		if (option != null)
-			option.click(container);
+		final GameOption option = getOptionAt(y);
+		if (option != null) {
+			Object[] listItems = option.getListItems();
+			if (listItems == null) {
+				option.click(container);
+			} else {
+				list.setItems(listItems);
+				list.setClickListener(new Observer() {
+					@Override
+					public void update(Observable o, Object arg) {
+						option.clickListItem((int) arg);
+					}
+				});
+				list.show();
+			}
+		}
 
 		// special key entry states
 		if (option == GameOption.KEY_LEFT) {
@@ -329,6 +363,11 @@ public class OptionsMenu extends BasicGameState {
 
 	@Override
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (list.isVisible()) {
+			list.mouseDragged(oldx, oldy, newx, newy);
+			return;
+		}
+
 		// key entry state
 		if (keyEntryLeft || keyEntryRight)
 			return;
@@ -356,12 +395,20 @@ public class OptionsMenu extends BasicGameState {
 
 	@Override
 	public void mouseWheelMoved(int newValue) {
+		if (list.isVisible()) {
+			list.mouseWheelMoved(newValue);
+		}
 		if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT))
 			UI.changeVolume((newValue < 0) ? -1 : 1);
 	}
 
 	@Override
 	public void keyPressed(int key, char c) {
+		if (list.isVisible()) {
+			list.keyPressed(key, c);
+			return;
+		}
+
 		// key entry state
 		if (keyEntryLeft || keyEntryRight) {
 			if (keyEntryLeft)

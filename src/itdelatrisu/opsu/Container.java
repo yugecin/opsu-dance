@@ -40,6 +40,8 @@ public class Container extends AppGameContainer {
 	/** SlickException causing game failure. */
 	protected SlickException e = null;
 
+	public static Container instance;
+
 	/**
 	 * Create a new container wrapping a game
 	 *
@@ -48,6 +50,7 @@ public class Container extends AppGameContainer {
 	 */
 	public Container(Game game) throws SlickException {
 		super(game);
+		instance = this;
 	}
 
 	/**
@@ -61,6 +64,7 @@ public class Container extends AppGameContainer {
 	 */
 	public Container(Game game, int width, int height, boolean fullscreen) throws SlickException {
 		super(game, width, height, fullscreen);
+		instance = this;
 	}
 
 	@Override

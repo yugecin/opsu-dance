@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -282,20 +280,20 @@ public class Options {
 			public String getValueString() { return resolution.toString(); }
 
 			@Override
-			public void click(GameContainer container) {
-				do {
-					resolution = resolution.next();
-				} while (resolution != Resolution.RES_800_600 && (
-				         container.getScreenWidth() < resolution.getWidth() ||
-				         container.getScreenHeight() < resolution.getHeight()));
+			public Object[] getListItems() {
+				return Resolution.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				resolution = Resolution.values()[index];
 			}
 
 			@Override
 			public void read(String s) {
 				try {
-					Resolution res = Resolution.valueOf(String.format("RES_%s", s.replace('x', '_')));
-					resolution = res;
-				} catch (IllegalArgumentException e) {}
+					resolution = Resolution.valueOf(String.format("RES_%s", s.replace('x', '_')));
+				} catch (IllegalArgumentException ignored) {}
 			}
 		},
 //		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
@@ -304,9 +302,13 @@ public class Options {
 			public String getValueString() { return skinName; }
 
 			@Override
-			public void click(GameContainer container) {
-				skinDirIndex = (skinDirIndex + 1) % skinDirs.length;
-				skinName = skinDirs[skinDirIndex];
+			public Object[] getListItems() {
+				return skinDirs;
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				skinName = skinDirs[index];
 			}
 
 			@Override
@@ -319,10 +321,19 @@ public class Options {
 			}
 
 			@Override
-			public void click(GameContainer container) {
-				targetFPSindex = (targetFPSindex + 1) % targetFPS.length;
-				container.setTargetFrameRate(getTargetFPS());
-				container.setVSync(getTargetFPS() == 60);
+			public Object[] getListItems() {
+				String[] list = new String[targetFPS.length];
+				for (int i = 0; i < targetFPS.length; i++) {
+					list[i] = String.format(targetFPS[i] == 60 ? "%dfps (vsync)" : "%dfps", targetFPS[i]);
+				}
+				return list;
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				targetFPSindex = index;
+				Container.instance.setTargetFrameRate(targetFPS[index]);
+				Container.instance.setVSync(targetFPS[index] == 60);
 			}
 
 			@Override
@@ -360,7 +371,14 @@ public class Options {
 			public String getValueString() { return screenshotFormat[screenshotFormatIndex].toUpperCase(); }
 
 			@Override
-			public void click(GameContainer container) { screenshotFormatIndex = (screenshotFormatIndex + 1) % screenshotFormat.length; }
+			public Object[] getListItems() {
+				return screenshotFormat;
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				screenshotFormatIndex = index;
+			}
 
 			@Override
 			public String write() { return Integer.toString(screenshotFormatIndex); }
@@ -657,6 +675,18 @@ public class Options {
 		 * @param container the game container
 		 */
 		public void click(GameContainer container) { bool = !bool; }
+
+		/**
+		 * Get a list of values to choose from
+		 * @return list with value string or null if no list should be shown
+		 */
+		public Object[] getListItems() { return null; }
+
+		/**
+		 * Fired when an item in the value list has been clicked
+		 * @param index the itemindex which has been clicked
+		 */
+		public void clickListItem(int index) { };
 
 		/**
 		 * Processes a mouse drag action (via override).
