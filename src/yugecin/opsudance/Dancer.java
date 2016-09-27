@@ -81,6 +81,9 @@ public class Dancer {
 	}
 
 	public void setSpinnerIndex(int spinnerIndex) {
+		if (spinnerIndex < 0 || spinnerIndex >= spinners.length) {
+			spinnerIndex = 0;
+		}
 		this.spinnerIndex = spinnerIndex;
 		spinner = spinners[spinnerIndex];
 	}
@@ -90,6 +93,9 @@ public class Dancer {
 	}
 
 	public void setMoverFactoryIndex(int moverFactoryIndex) {
+		if (moverFactoryIndex < 0 || moverFactoryIndex >= moverFactories.length) {
+			moverFactoryIndex = 0;
+		}
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
 	}
