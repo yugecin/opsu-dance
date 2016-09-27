@@ -193,9 +193,15 @@ public class Utils {
 	 * @return the Euclidean distance between points (x1,y1) and (x2,y2)
 	 */
 	public static float distance(float x1, float y1, float x2, float y2) {
-		float v1 = Math.abs(x1 - x2);
-		float v2 = Math.abs(y1 - y2);
-		return (float) Math.sqrt((v1 * v1) + (v2 * v2));
+		float v1 = x1 - x2;
+		float v2 = y1 - y2;
+		return (float) Math.sqrt(v1 * v1 + v2 * v2);
+	}
+
+	public static double distance(double x1, double y1, double x2, double y2) {
+		double dx = x1 - x2;
+		double dy = y1 - y2;
+		return Math.sqrt(dx * dx + dy * dy);
 	}
 
 	/**
@@ -561,4 +567,12 @@ public class Utils {
 			return null;
 		}
 	}
+
+	public static int getQuadrant(double x, double y) {
+		if (x < Options.width / 2d) {
+			return y < Options.height / 2d ? 2 : 3;
+		}
+		return y < Options.height / 2d ? 1 : 4;
+	}
+
 }

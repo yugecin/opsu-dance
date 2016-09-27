@@ -797,6 +797,9 @@ public class Options {
 	/** Current screen resolution. */
 	private static Resolution resolution = Resolution.RES_1024_768;
 
+	public static int width;
+	public static int height;
+
 	/** The available skin directories. */
 	private static String[] skinDirs;
 
@@ -914,6 +917,9 @@ public class Options {
 		} catch (SlickException e) {
 			ErrorHandler.error("Failed to set display mode.", e, true);
 		}
+
+		width = resolution.width;
+		height = resolution.height;
 
 		// set borderless window if dimensions match screen size
 		boolean borderless = (screenWidth == resolution.getWidth() && screenHeight == resolution.getHeight());

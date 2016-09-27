@@ -26,7 +26,7 @@ import org.newdawn.slick.Graphics;
 /**
  * Dummy hit object, used when another GameObject class cannot be created.
  */
-public class DummyObject implements GameObject {
+public class DummyObject extends GameObject {
 	/** The associated HitObject. */
 	private HitObject hitObject;
 
@@ -67,4 +67,20 @@ public class DummyObject implements GameObject {
 
 	@Override
 	public void reset() {}
+
+	@Override
+	public boolean isCircle() {
+		return false;
+	}
+
+	@Override
+	public boolean isSlider() {
+		return false;
+	}
+
+	@Override
+	public boolean isSpinner() {
+		return false;
+	}
+
 }

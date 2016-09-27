@@ -73,6 +73,7 @@ import org.newdawn.slick.state.transition.DelayedFadeOutTransition;
 import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
+import yugecin.opsudance.Dancer;
 
 /**
  * "Game" state.
@@ -341,19 +342,17 @@ public class Game extends BasicGameState {
 		autoMousePosition.set(width / 2, height / 2);
 		autoMousePressed = false;
 		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
-			Vec2f autoPoint = null;
-			if (isLeadIn()) {
-				// lead-in
-				float progress = Math.max((float) (leadInTime - beatmap.audioLeadIn) / approachTime, 0f);
-				autoMousePosition.y = height / (2f - progress);
-			} else if (objectIndex == 0 && trackPosition < firstObjectTime) {
-				// before first object
-				timeDiff = firstObjectTime - trackPosition;
-				if (timeDiff < approachTime) {
-					Vec2f point = gameObjects[0].getPointAt(trackPosition);
-					autoPoint = getPointAt(autoMousePosition.x, autoMousePosition.y, point.x, point.y, 1f - ((float) timeDiff / approachTime));
+			Vec2f autoPoint;
+			if (objectIndex == 0) {
+				autoPoint = gameObjects[0].getPointAt(trackPosition);
+			} else if (objectIndex < beatmap.objects.length - 1) {
+				Dancer d = Dancer.instance;
+				d.update(trackPosition, gameObjects[objectIndex - 1], gameObjects[objectIndex]);
+				autoPoint = new Vec2f(d.x, d.y);
+				if (trackPosition < gameObjects[objectIndex].getTime()) {
+					autoMousePressed = true;
 				}
-			} else if (objectIndex < beatmap.objects.length) {
+				/*
 				// normal object
 				int objectTime = beatmap.objects[objectIndex].getTime();
 				if (trackPosition < objectTime) {
@@ -386,14 +385,14 @@ public class Game extends BasicGameState {
 					autoPoint = gameObjects[objectIndex].getPointAt(trackPosition);
 					autoMousePressed = true;
 				}
+				*/
 			} else {
 				// last object
 				autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
 			}
 
 			// set mouse coordinates
-			if (autoPoint != null)
-				autoMousePosition.set(autoPoint.x, autoPoint.y);
+			autoMousePosition.set(autoPoint.x, autoPoint.y);
 		}
 
 		// "flashlight" mod: restricted view of hit objects around cursor
@@ -1139,6 +1138,8 @@ public class Game extends BasicGameState {
 		if (beatmap == null || beatmap.objects == null)
 			throw new RuntimeException("Running game with no beatmap loaded.");
 
+		Dancer.instance.init(beatmap.getTitle());
+
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
 
@@ -1216,7 +1217,6 @@ public class Game extends BasicGameState {
 					ErrorHandler.error(String.format("Failed to create %s at index %d:\n%s",
 							hitObject.getTypeName(), i, hitObject.toString()), e, true);
 					gameObjects[i] = new DummyObject(hitObject);
-					continue;
 				}
 			}
 
@@ -1265,6 +1265,10 @@ public class Game extends BasicGameState {
 				replaySkipTime = -1;
 				replayFrames = new LinkedList<ReplayFrame>();
 				replayFrames.add(new ReplayFrame(0, 0, input.getMouseX(), input.getMouseY(), 0));
+			}
+
+			for (int i = 0; i < gameObjects.length; i++) {
+				gameObjects[i].updateStartEndPositions(beatmap.objects[i].getTime());
 			}
 
 			leadInTime = beatmap.audioLeadIn + approachTime;
@@ -1754,22 +1758,6 @@ public class Game extends BasicGameState {
 		if (replayFrames != null)
 			replayFrames.add(frame);
 		return frame;
-	}
-
-	/**
-	 * Returns the point at the t value between a start and end point.
-	 * @param startX the starting x coordinate
-	 * @param startY the starting y coordinate
-	 * @param endX the ending x coordinate
-	 * @param endY the ending y coordinate
-	 * @param t the t value [0, 1]
-	 * @return the position vector
-	 */
-	private Vec2f getPointAt(float startX, float startY, float endX, float endY, float t) {
-		// "autopilot" mod: move quicker between objects
-		if (GameMod.AUTOPILOT.isActive())
-			t = Utils.clamp(t * 2f, 0f, 1f);
-		return new Vec2f(startX + (endX - startX) * t, startY + (endY - startY) * t);
 	}
 
 	/**
