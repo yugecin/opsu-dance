@@ -98,6 +98,9 @@ public class MainMenu extends BasicGameState {
 	/** Button linking to repository. */
 	private MenuButton repoButton;
 
+	/** Button linking to dance repository. */
+	private MenuButton danceRepoButton;
+
 	/** Buttons for installing updates. */
 	private MenuButton updateButton, restartButton;
 
@@ -194,11 +197,21 @@ public class MainMenu extends BasicGameState {
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {  // only if a webpage can be opened
 			Image repoImg = GameImage.REPOSITORY.getImage();
 			repoButton = new MenuButton(repoImg,
-					startX - repoImg.getWidth(), startY - repoImg.getHeight()
+					startX - repoImg.getWidth() * 2.5f, startY - repoImg.getHeight()
 			);
 			repoButton.setHoverAnimationDuration(350);
 			repoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
 			repoButton.setHoverExpand();
+		}
+
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {  // only if a webpage can be opened
+			Image repoImg = GameImage.REPOSITORY.getImage();
+			danceRepoButton = new MenuButton(repoImg,
+				startX - repoImg.getWidth(), startY - repoImg.getHeight()
+			);
+			danceRepoButton.setHoverAnimationDuration(350);
+			danceRepoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
+			danceRepoButton.setHoverExpand();
 		}
 
 		// initialize update buttons
@@ -277,8 +290,21 @@ public class MainMenu extends BasicGameState {
 		}
 
 		// draw repository button
-		if (repoButton != null)
+		if (repoButton != null) {
 			repoButton.draw();
+			String text = "opsu!";
+			int fheight = Fonts.SMALL.getLineHeight();
+			int fwidth = Fonts.SMALL.getWidth(text);
+			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, height * 0.997f - fheight, text, Color.white);
+		}
+
+		if (danceRepoButton != null) {
+			danceRepoButton.draw();
+			String text = "opsu!dance";
+			int fheight = Fonts.SMALL.getLineHeight();
+			int fwidth = Fonts.SMALL.getWidth(text);
+			Fonts.SMALL.drawString(danceRepoButton.getX() - fwidth / 2, height * 0.997f - fheight, text, Color.white);
+		}
 
 		// draw update button
 		if (Updater.get().showButton()) {
@@ -327,6 +353,8 @@ public class MainMenu extends BasicGameState {
 		exitButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 		if (repoButton != null)
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
+		if (danceRepoButton != null)
+			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
 		if (Updater.get().showButton()) {
 			updateButton.autoHoverUpdate(delta, true);
 			restartButton.autoHoverUpdate(delta, false);
@@ -441,6 +469,8 @@ public class MainMenu extends BasicGameState {
 			musicPrevious.resetHover();
 		if (repoButton != null && !repoButton.contains(mouseX, mouseY))
 			repoButton.resetHover();
+		if (danceRepoButton != null && !danceRepoButton.contains(mouseX, mouseY))
+			danceRepoButton.resetHover();
 		updateButton.resetHover();
 		restartButton.resetHover();
 		if (!downloadsButton.contains(mouseX, mouseY))
@@ -506,6 +536,17 @@ public class MainMenu extends BasicGameState {
 		if (repoButton != null && repoButton.contains(x, y)) {
 			try {
 				Desktop.getDesktop().browse(Options.REPOSITORY_URI);
+			} catch (UnsupportedOperationException e) {
+				UI.sendBarNotification("The repository web page could not be opened.");
+			} catch (IOException e) {
+				ErrorHandler.error("Could not browse to repository URI.", e, false);
+			}
+			return;
+		}
+
+		if (danceRepoButton != null && danceRepoButton.contains(x, y)) {
+			try {
+				Desktop.getDesktop().browse(Options.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
 				UI.sendBarNotification("The repository web page could not be opened.");
 			} catch (IOException e) {
@@ -640,6 +681,8 @@ public class MainMenu extends BasicGameState {
 		musicPrevious.resetHover();
 		if (repoButton != null)
 			repoButton.resetHover();
+		if (danceRepoButton != null)
+			danceRepoButton.resetHover();
 		updateButton.resetHover();
 		restartButton.resetHover();
 		downloadsButton.resetHover();

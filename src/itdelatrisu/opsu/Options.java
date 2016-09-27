@@ -103,6 +103,9 @@ public class Options {
 	/** Repository address. */
 	public static final URI REPOSITORY_URI = URI.create("https://github.com/itdelatrisu/opsu");
 
+	/** Dance repository address. */
+	public static final URI DANCE_REPOSITORY_URI = URI.create("https://github.com/yugecin/opsu-dance");
+
 	/** Issue reporting address. */
 	public static final String ISSUES_URL = "https://github.com/itdelatrisu/opsu/issues/new?title=%s&body=%s";
 
