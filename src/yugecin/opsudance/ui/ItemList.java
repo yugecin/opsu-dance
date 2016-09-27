@@ -100,7 +100,7 @@ public class ItemList {
 		}
 		y -= 5;
 		int index = y / (Fonts.MEDIUM.getLineHeight() + 5);
-		index -= start;
+		index += start;
 		if (index >= 0 && index < items.length) {
 			observer.update(null, index);
 			visible = false;
