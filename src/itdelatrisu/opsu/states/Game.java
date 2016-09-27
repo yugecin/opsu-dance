@@ -1216,8 +1216,8 @@ public class Game extends BasicGameState {
 					ErrorHandler.error(String.format("Failed to create %s at index %d:\n%s",
 							hitObject.getTypeName(), i, hitObject.toString()), e, true);
 					gameObjects[i] = new DummyObject(hitObject);
-					continue;
 				}
+				gameObjects[i].updateStartEndPositions(hitObjectTime);
 			}
 
 			// stack calculations
