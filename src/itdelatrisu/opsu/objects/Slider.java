@@ -196,10 +196,12 @@ public class Slider extends GameObject {
 		curve.draw(color,curveInterval);
 		color.a = alpha;
 
+		/*
 		// end circle
 		Vec2f endCircPos = curve.pointAt(curveInterval);
 		hitCircle.drawCentered(endCircPos.x, endCircPos.y, color);
 		hitCircleOverlay.drawCentered(endCircPos.x, endCircPos.y, Colors.WHITE_FADE);
+		*/
 
 		// start circle
 		hitCircle.drawCentered(x, y, color);
