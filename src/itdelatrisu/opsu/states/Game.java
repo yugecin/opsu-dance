@@ -345,7 +345,7 @@ public class Game extends BasicGameState {
 			Vec2f autoPoint;
 			if (objectIndex == 0) {
 				autoPoint = gameObjects[0].getPointAt(trackPosition);
-			} else if (objectIndex < beatmap.objects.length - 1) {
+			} else if (objectIndex < beatmap.objects.length) {
 				Dancer d = Dancer.instance;
 				d.update(trackPosition, gameObjects[objectIndex - 1], gameObjects[objectIndex]);
 				autoPoint = new Vec2f(d.x, d.y);
