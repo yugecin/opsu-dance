@@ -652,6 +652,20 @@ public class Options {
 			}
 		},
 
+		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", true) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.drawApproach = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.drawApproach = bool;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},

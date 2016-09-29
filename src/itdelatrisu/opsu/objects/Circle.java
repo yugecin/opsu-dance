@@ -32,6 +32,7 @@ import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.Dancer;
 
 /**
  * Data type representing a circle object.
@@ -120,7 +121,7 @@ public class Circle extends GameObject {
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 
-		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive())
+		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive() && Dancer.drawApproach)
 			GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
 		GameImage.HITCIRCLE.getImage().drawCentered(x, y, color);
 		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();

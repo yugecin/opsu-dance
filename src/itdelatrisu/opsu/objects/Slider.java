@@ -37,6 +37,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.Dancer;
 
 /**
  * Data type representing a slider object.
@@ -296,7 +297,7 @@ public class Slider extends GameObject {
 			if (mirror) {
 				g.rotate(x, y, -180f);
 			}
-			if (!GameMod.HIDDEN.isActive()) {
+			if (!GameMod.HIDDEN.isActive() && Dancer.drawApproach) {
 				GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
 			}
 			g.popTransform();
