@@ -394,8 +394,8 @@ public class CurveRenderState {
 				ByteBuffer buff = BufferUtils.createByteBuffer(slider.getWidth() * 4);
 				for (int i = 0; i < slider.getWidth(); ++i) {
 					Color col = slider.getColor(i, 0);
-					buff.put((byte) (255 * col.r));
-					buff.put((byte) (255 * col.g));
+					buff.put((byte) (255 * col.b));
+					buff.put((byte) (255 * col.b)); // I know this looks strange...
 					buff.put((byte) (255 * col.b));
 					buff.put((byte) (255 * col.a));
 				}

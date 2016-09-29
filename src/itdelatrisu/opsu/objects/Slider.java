@@ -110,7 +110,7 @@ public class Slider extends GameObject {
 
 	private int repeats;
 
-	private static Color curveColor = new Color(0, 0, 0);
+	private static Color curveColor = new Color(0, 0, 0, 20);
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
