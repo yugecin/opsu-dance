@@ -43,7 +43,7 @@ public class DummyObject extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition) {}
+	public void draw(Graphics g, int trackPosition, boolean mirror) {}
 
 	@Override
 	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition) {

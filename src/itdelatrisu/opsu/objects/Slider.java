@@ -32,10 +32,12 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.Dancer;
 
 /**
  * Data type representing a slider object.
@@ -109,6 +111,8 @@ public class Slider extends GameObject {
 
 	private int repeats;
 
+	private static Color curveColor = new Color(0, 0, 0, 20);
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -176,7 +180,12 @@ public class Slider extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition) {
+	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		Color orig = color;
+		if (mirror) {
+			color = Utils.shiftHue(color, 180d);
+		}
+
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int approachTime = game.getApproachTime();
 		final int fadeInTime = game.getFadeInTime();
@@ -193,8 +202,13 @@ public class Slider extends GameObject {
 		Vec2f endPos = curve.pointAt(1);
 
 		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
-		curve.draw(color,curveInterval);
+		curve.draw(curveColor, curveInterval);
 		color.a = alpha;
+
+		g.pushTransform();
+		if (mirror) {
+			g.rotate(x, y, -180f);
+		}
 
 		/*
 		// end circle
@@ -208,6 +222,8 @@ public class Slider extends GameObject {
 		if (!overlayAboveNumber)
 			hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
 
+		g.popTransform();
+
 		// ticks
 		if (ticksT != null) {
 			float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
@@ -215,10 +231,21 @@ public class Slider extends GameObject {
 			for (int i = 0; i < ticksT.length; i++) {
 				Vec2f c = curve.pointAt(ticksT[i]);
 				Colors.WHITE_FADE.a = decorationsAlpha;
+				g.pushTransform();
+				if (mirror) {
+					g.rotate(c.x, c.y, -180f);
+				}
 				tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
+				g.popTransform();
 				Colors.WHITE_FADE.a = alpha;
 			}
 		}
+
+		g.pushTransform();
+		if (mirror) {
+			g.rotate(x, y, -180f);
+		}
+
 		if (GameMod.HIDDEN.isActive()) {
 			final int hiddenDecayTime = game.getHiddenDecayTime();
 			final int hiddenTimeDiff = game.getHiddenTimeDiff();
@@ -234,6 +261,8 @@ public class Slider extends GameObject {
 			        hitCircle.getWidth() * 0.40f / data.getDefaultSymbolImage(0).getHeight(), alpha);
 		if (overlayAboveNumber)
 			hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
+
+		g.popTransform();
 
 		// repeats
 		if (curveInterval == 1.0f) {
@@ -264,8 +293,14 @@ public class Slider extends GameObject {
 
 		if (timeDiff >= 0) {
 			// approach circle
-			if (!GameMod.HIDDEN.isActive())
+			g.pushTransform();
+			if (mirror) {
+				g.rotate(x, y, -180f);
+			}
+			if (!GameMod.HIDDEN.isActive() && Dancer.drawApproach) {
 				GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
+			}
+			g.popTransform();
 		} else {
 			// Since update() might not have run before drawing during a replay, the
 			// slider time may not have been calculated, which causes NAN numbers and flicker.
@@ -303,6 +338,8 @@ public class Slider extends GameObject {
 		}
 
 		Colors.WHITE_FADE.a = oldAlpha;
+
+		color = orig;
 	}
 
 	/**

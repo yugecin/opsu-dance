@@ -32,6 +32,7 @@ import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.Dancer;
 
 /**
  * Data type representing a circle object.
@@ -89,7 +90,12 @@ public class Circle extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition) {
+	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		Color orig = color;
+		if (mirror) {
+			color = Utils.shiftHue(color, 180d);
+		}
+
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int approachTime = game.getApproachTime();
 		final int fadeInTime = game.getFadeInTime();
@@ -97,6 +103,11 @@ public class Circle extends GameObject {
 		float approachScale = 1 + scale * 3;
 		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
 		float alpha = Utils.clamp(1 - fadeinScale, 0, 1);
+
+		g.pushTransform();
+		if (mirror) {
+			g.rotate(x, y, -180f);
+		}
 
 		if (GameMod.HIDDEN.isActive()) {
 			final int hiddenDecayTime = game.getHiddenDecayTime();
@@ -110,7 +121,7 @@ public class Circle extends GameObject {
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 
-		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive())
+		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive() && Dancer.drawApproach)
 			GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
 		GameImage.HITCIRCLE.getImage().drawCentered(x, y, color);
 		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
@@ -122,6 +133,9 @@ public class Circle extends GameObject {
 			GameImage.HITCIRCLE_OVERLAY.getImage().drawCentered(x, y, Colors.WHITE_FADE);
 
 		Colors.WHITE_FADE.a = oldAlpha;
+
+		g.popTransform();
+		color = orig;
 	}
 
 	/**

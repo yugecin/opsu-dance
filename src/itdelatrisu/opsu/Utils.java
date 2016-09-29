@@ -58,6 +58,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Animation;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
@@ -573,6 +574,17 @@ public class Utils {
 			return y < Options.height / 2d ? 2 : 3;
 		}
 		return y < Options.height / 2d ? 1 : 4;
+	}
+
+	public static Color shiftHue(Color color, double H) {
+		double U = Math.cos(H * Math.PI / 180d);
+		double W = Math.sin(H * Math.PI / 180d);
+
+		Color n = new Color(0, 0, 0);
+		n.r = (float) ((0.299d + 0.701d * U + 0.168d * W) * color.r + (0.587d - 0.587d * U + 0.330d * W) * color.g + (0.114d - 0.114d * U - 0.497 * W) * color.b);
+		n.g = (float) ((0.299 + 0.299 * U - 0.328 * W) * color.r + (0.587d - 0.413 * U + 0.035 * W) * color.g + (0.114d - 0.114d * U - 0.292 * W) * color.b);
+		n.b = (float) ((0.299d + 0.300d * U + 1.250d * W) * color.r + (0.587d - 0.585d * U + 1.050d * W) * color.g + (0.114 - 0.886 * U - 0.203 * W) * color.b);
+		return n;
 	}
 
 }
