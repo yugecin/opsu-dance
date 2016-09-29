@@ -10,4 +10,4 @@ opsu!dance (everything in the src package yugecin.opsudance) was made by me ([@y
 
 ###License
 **This software is licensed under GNU GPL version 3.**
-You can find the full text of the license [LICENSE](here).
+You can find the full text of the license [here](LICENSE).
