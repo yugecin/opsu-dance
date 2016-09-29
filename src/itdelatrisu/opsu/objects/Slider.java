@@ -177,6 +177,20 @@ public class Slider extends GameObject {
 
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		Color orig = color;
+		if (mirror) {
+			double H = 180d;
+			double U = Math.cos(H * Math.PI / 180d);
+			double W = Math.sin(H * Math.PI / 180d);
+
+			Color n = new Color(0, 0, 0);
+			n.r = (float) ((0.299d + 0.701d * U + 0.168d * W) * color.r + (0.587d - 0.587d * U + 0.330d * W) * color.g + (0.114d - 0.114d * U - 0.497 * W) * color.b);
+			n.g = (float) ((0.299 + 0.299 * U - 0.328 * W) * color.r + (0.587d - 0.413 * U + 0.035 * W) * color.g + (0.114d - 0.114d * U - 0.292 * W) * color.b);
+			n.b = (float) ((0.299d + 0.300d * U + 1.250d * W) * color.r + (0.587d - 0.585d * U + 1.050d * W) * color.g + (0.114 - 0.886 * U - 0.203 * W) * color.b);
+			n.a = color.a;
+			color = n;
+		}
+
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int approachTime = game.getApproachTime();
 		final int fadeInTime = game.getFadeInTime();
@@ -329,6 +343,8 @@ public class Slider extends GameObject {
 		}
 
 		Colors.WHITE_FADE.a = oldAlpha;
+
+		color = orig;
 	}
 
 	/**
