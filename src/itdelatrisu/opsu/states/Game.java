@@ -601,11 +601,13 @@ public class Game extends BasicGameState {
 			UI.draw(g, replayX, replayY, replayKeyPressed);
 		else if (GameMod.AUTO.isActive()) {
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, autoMousePressed);
-			double dx = autoMousePosition.x - Options.width / 2d;
-			double dy = autoMousePosition.y - Options.height / 2d;
-			double d = Math.sqrt(dx * dx + dy * dy);
-			double a = Math.atan2(dy, dx) + Math.PI;
-			mirrorCursor.draw((int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2), autoMousePressed);
+			if (Dancer.mirror) {
+				double dx = autoMousePosition.x - Options.width / 2d;
+				double dy = autoMousePosition.y - Options.height / 2d;
+				double d = Math.sqrt(dx * dx + dy * dy);
+				double a = Math.atan2(dy, dx) + Math.PI;
+				mirrorCursor.draw((int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2), autoMousePressed);
+			}
 		}
 		else if (GameMod.AUTOPILOT.isActive())
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, Utils.isGameKeyPressed());
@@ -1397,10 +1399,12 @@ public class Game extends BasicGameState {
 			// normal case
 			if (!loseState) {
 				gameObj.draw(g, trackPosition, false);
-				g.pushTransform();
-				g.rotate(Options.width / 2f, Options.height / 2f, 180f);
-				gameObj.draw(g, trackPosition, true);
-				g.popTransform();
+				if (Dancer.mirror) {
+					g.pushTransform();
+					g.rotate(Options.width / 2f, Options.height / 2f, 180f);
+					gameObj.draw(g, trackPosition, true);
+					g.popTransform();
+				}
 			}
 			// death: make objects "fall" off the screen
 			else {

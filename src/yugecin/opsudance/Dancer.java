@@ -50,6 +50,8 @@ public class Dancer {
 
 	public static Dancer instance = new Dancer();
 
+	public static boolean mirror; // this should really get its own place somewhere...
+
 	private int dir;
 	private GameObject p;
 	private Random rand;

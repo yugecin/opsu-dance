@@ -638,6 +638,20 @@ public class Options {
 			}
 		},
 
+		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff", false) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.mirror = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.mirror = bool;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},
