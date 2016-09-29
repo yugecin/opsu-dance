@@ -47,10 +47,7 @@ import itdelatrisu.opsu.render.FrameBufferCache;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
-import itdelatrisu.opsu.ui.Colors;
-import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.MenuButton;
-import itdelatrisu.opsu.ui.UI;
+import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.io.File;
@@ -269,8 +266,11 @@ public class Game extends BasicGameState {
 	private Input input;
 	private final int state;
 
+	private final Cursor mirrorCursor;
+
 	public Game(int state) {
 		this.state = state;
+		mirrorCursor = new Cursor();
 	}
 
 	@Override
@@ -599,8 +599,14 @@ public class Game extends BasicGameState {
 
 		if (isReplay)
 			UI.draw(g, replayX, replayY, replayKeyPressed);
-		else if (GameMod.AUTO.isActive())
+		else if (GameMod.AUTO.isActive()) {
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, autoMousePressed);
+			double dx = autoMousePosition.x - Options.width / 2d;
+			double dy = autoMousePosition.y - Options.height / 2d;
+			double d = Math.sqrt(dx * dx + dy * dy);
+			double a = Math.atan2(dy, dx) + Math.PI;
+			mirrorCursor.draw((int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2), autoMousePressed);
+		}
 		else if (GameMod.AUTOPILOT.isActive())
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, Utils.isGameKeyPressed());
 		else
@@ -1389,9 +1395,13 @@ public class Game extends BasicGameState {
 			GameObject gameObj = gameObjects[idx];
 
 			// normal case
-			if (!loseState)
-				gameObj.draw(g, trackPosition);
-
+			if (!loseState) {
+				gameObj.draw(g, trackPosition, false);
+				g.pushTransform();
+				g.rotate(Options.width / 2f, Options.height / 2f, 180f);
+				gameObj.draw(g, trackPosition, true);
+				g.popTransform();
+			}
 			// death: make objects "fall" off the screen
 			else {
 				// time the object began falling
@@ -1417,7 +1427,7 @@ public class Game extends BasicGameState {
 				g.translate(0, dt * dt * container.getHeight());
 				Vec2f rotationCenter = gameObj.getPointAt(beatmap.objects[idx].getTime());
 				g.rotate(rotationCenter.x, rotationCenter.y, rotSpeed * dt);
-				gameObj.draw(g, trackPosition);
+				gameObj.draw(g, trackPosition, false);
 
 				g.popTransform();
 			}

@@ -89,7 +89,7 @@ public class Circle extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition) {
+	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int approachTime = game.getApproachTime();
 		final int fadeInTime = game.getFadeInTime();
@@ -97,6 +97,11 @@ public class Circle extends GameObject {
 		float approachScale = 1 + scale * 3;
 		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
 		float alpha = Utils.clamp(1 - fadeinScale, 0, 1);
+
+		g.pushTransform();
+		if (mirror) {
+			g.rotate(x, y, -180f);
+		}
 
 		if (GameMod.HIDDEN.isActive()) {
 			final int hiddenDecayTime = game.getHiddenDecayTime();
@@ -122,6 +127,8 @@ public class Circle extends GameObject {
 			GameImage.HITCIRCLE_OVERLAY.getImage().drawCentered(x, y, Colors.WHITE_FADE);
 
 		Colors.WHITE_FADE.a = oldAlpha;
+
+		g.popTransform();
 	}
 
 	/**

@@ -175,7 +175,10 @@ public class Spinner extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition) {
+	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		if (mirror) {
+			return;
+		}
 		// only draw spinners shortly before start time
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int fadeInTime = game.getFadeInTime();
