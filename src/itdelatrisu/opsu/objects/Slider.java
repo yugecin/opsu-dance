@@ -32,6 +32,7 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -108,6 +109,8 @@ public class Slider extends GameObject {
 	private static int containerWidth, containerHeight;
 
 	private int repeats;
+
+	private static Color curveColor = new Color(0, 0, 0);
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
@@ -198,7 +201,7 @@ public class Slider extends GameObject {
 		Vec2f endPos = curve.pointAt(1);
 
 		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
-		curve.draw(color,curveInterval);
+		curve.draw(curveColor, curveInterval);
 		color.a = alpha;
 
 		g.pushTransform();
