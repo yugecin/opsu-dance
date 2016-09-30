@@ -159,7 +159,9 @@ public class Slider extends GameObject {
 		this.data = data;
 		this.color = color;
 		this.comboEnd = comboEnd;
-		this.color = Utils.nextColor();
+		if (Dancer.rgbobj) {
+			this.color = Utils.nextColor();
+		}
 		updatePosition();
 
 		// slider time calculations

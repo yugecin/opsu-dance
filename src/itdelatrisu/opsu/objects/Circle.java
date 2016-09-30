@@ -89,7 +89,9 @@ public class Circle extends GameObject {
 		this.color = color;
 		this.comboEnd = comboEnd;
 		updatePosition();
-		this.color = Utils.nextColor();
+		if (Dancer.rgbobj) {
+			this.color = Utils.nextColor();
+		}
 	}
 
 	@Override

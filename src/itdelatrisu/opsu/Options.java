@@ -666,6 +666,20 @@ public class Options {
 			}
 		},
 
+		DANCE_RGB_OBJECTS ("Use rgb objects", "RGBObj", "Give each object a new color", false) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.rgbobj = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.rgbobj = bool;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},
