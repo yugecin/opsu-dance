@@ -114,6 +114,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_DRAW_APPROACH,
 			GameOption.DANCE_RGB_OBJECTS,
 			GameOption.DANCE_REMOVE_BG,
+			GameOption.DANCE_HIDE_UI,
 		}),
 		PIPPI ("Pippi", new GameOption[] {
 			GameOption.PIPPI_ENABLE,

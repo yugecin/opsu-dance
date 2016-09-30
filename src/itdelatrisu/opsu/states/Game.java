@@ -487,74 +487,76 @@ public class Game extends BasicGameState {
 
 		// non-break
 		else {
-			// game elements
-			data.drawGameElements(g, false, objectIndex == 0);
+			if (!GameMod.AUTO.isActive() || !Dancer.hideui) {
+				// game elements
+				data.drawGameElements(g, false, objectIndex == 0);
 
-			// skip beginning
-			if (objectIndex == 0 &&
-			    trackPosition < beatmap.objects[0].getTime() - SKIP_OFFSET)
-				skipButton.draw();
+				// skip beginning
+				if (objectIndex == 0 &&
+						trackPosition < beatmap.objects[0].getTime() - SKIP_OFFSET)
+					skipButton.draw();
 
-			// show retries
-			if (retries >= 2 && timeDiff >= -1000) {
-				int retryHeight = Math.max(
-						GameImage.SCOREBAR_BG.getImage().getHeight(),
-						GameImage.SCOREBAR_KI.getImage().getHeight()
-				);
-				float oldAlpha = Colors.WHITE_FADE.a;
-				if (timeDiff < -500)
-					Colors.WHITE_FADE.a = (1000 + timeDiff) / 500f;
-				Fonts.MEDIUM.drawString(
-						2 + (width / 100), retryHeight,
-						String.format("%d retries and counting...", retries),
-						Colors.WHITE_FADE
-				);
-				Colors.WHITE_FADE.a = oldAlpha;
-			}
+				// show retries
+				if (retries >= 2 && timeDiff >= -1000) {
+					int retryHeight = Math.max(
+							GameImage.SCOREBAR_BG.getImage().getHeight(),
+							GameImage.SCOREBAR_KI.getImage().getHeight()
+					);
+					float oldAlpha = Colors.WHITE_FADE.a;
+					if (timeDiff < -500)
+						Colors.WHITE_FADE.a = (1000 + timeDiff) / 500f;
+					Fonts.MEDIUM.drawString(
+							2 + (width / 100), retryHeight,
+							String.format("%d retries and counting...", retries),
+							Colors.WHITE_FADE
+					);
+					Colors.WHITE_FADE.a = oldAlpha;
+				}
 
-			if (isLeadIn())
-				trackPosition = (leadInTime - Options.getMusicOffset()) * -1;  // render approach circles during song lead-in
+				if (isLeadIn())
+					trackPosition = (leadInTime - Options.getMusicOffset()) * -1;  // render approach circles during song lead-in
 
-			// countdown
-			if (beatmap.countdown > 0) {
-				float speedModifier = GameMod.getSpeedMultiplier() * playbackSpeed.getModifier();
-				timeDiff = firstObjectTime - trackPosition;
-				if (timeDiff >= 500 * speedModifier && timeDiff < 3000 * speedModifier) {
-					if (timeDiff >= 1500 * speedModifier) {
-						GameImage.COUNTDOWN_READY.getImage().drawCentered(width / 2, height / 2);
-						if (!countdownReadySound) {
-							SoundController.playSound(SoundEffect.READY);
-							countdownReadySound = true;
+				// countdown
+				if (beatmap.countdown > 0) {
+					float speedModifier = GameMod.getSpeedMultiplier() * playbackSpeed.getModifier();
+					timeDiff = firstObjectTime - trackPosition;
+					if (timeDiff >= 500 * speedModifier && timeDiff < 3000 * speedModifier) {
+						if (timeDiff >= 1500 * speedModifier) {
+							GameImage.COUNTDOWN_READY.getImage().drawCentered(width / 2, height / 2);
+							if (!countdownReadySound) {
+								SoundController.playSound(SoundEffect.READY);
+								countdownReadySound = true;
+							}
 						}
-					}
-					if (timeDiff < 2000 * speedModifier) {
-						GameImage.COUNTDOWN_3.getImage().draw(0, 0);
-						if (!countdown3Sound) {
-							SoundController.playSound(SoundEffect.COUNT3);
-							countdown3Sound = true;
+						if (timeDiff < 2000 * speedModifier) {
+							GameImage.COUNTDOWN_3.getImage().draw(0, 0);
+							if (!countdown3Sound) {
+								SoundController.playSound(SoundEffect.COUNT3);
+								countdown3Sound = true;
+							}
 						}
-					}
-					if (timeDiff < 1500 * speedModifier) {
-						GameImage.COUNTDOWN_2.getImage().draw(width - GameImage.COUNTDOWN_2.getImage().getWidth(), 0);
-						if (!countdown2Sound) {
-							SoundController.playSound(SoundEffect.COUNT2);
-							countdown2Sound = true;
+						if (timeDiff < 1500 * speedModifier) {
+							GameImage.COUNTDOWN_2.getImage().draw(width - GameImage.COUNTDOWN_2.getImage().getWidth(), 0);
+							if (!countdown2Sound) {
+								SoundController.playSound(SoundEffect.COUNT2);
+								countdown2Sound = true;
+							}
 						}
-					}
-					if (timeDiff < 1000 * speedModifier) {
-						GameImage.COUNTDOWN_1.getImage().drawCentered(width / 2, height / 2);
-						if (!countdown1Sound) {
-							SoundController.playSound(SoundEffect.COUNT1);
-							countdown1Sound = true;
+						if (timeDiff < 1000 * speedModifier) {
+							GameImage.COUNTDOWN_1.getImage().drawCentered(width / 2, height / 2);
+							if (!countdown1Sound) {
+								SoundController.playSound(SoundEffect.COUNT1);
+								countdown1Sound = true;
+							}
 						}
-					}
-				} else if (timeDiff >= -500 * speedModifier && timeDiff < 500 * speedModifier) {
-					Image go = GameImage.COUNTDOWN_GO.getImage();
-					go.setAlpha((timeDiff < 0) ? 1 - (timeDiff / speedModifier / -500f) : 1);
-					go.drawCentered(width / 2, height / 2);
-					if (!countdownGoSound) {
-						SoundController.playSound(SoundEffect.GO);
-						countdownGoSound = true;
+					} else if (timeDiff >= -500 * speedModifier && timeDiff < 500 * speedModifier) {
+						Image go = GameImage.COUNTDOWN_GO.getImage();
+						go.setAlpha((timeDiff < 0) ? 1 - (timeDiff / speedModifier / -500f) : 1);
+						go.drawCentered(width / 2, height / 2);
+						if (!countdownGoSound) {
+							SoundController.playSound(SoundEffect.GO);
+							countdownGoSound = true;
+						}
 					}
 				}
 			}
@@ -564,11 +566,11 @@ public class Game extends BasicGameState {
 				drawHitObjects(g, trackPosition);
 		}
 
-		if (GameMod.AUTO.isActive())
+		if (!Dancer.hideui && GameMod.AUTO.isActive())
 			GameImage.UNRANKED.getImage().drawCentered(width / 2, height * 0.077f);
 
 		// draw replay speed button
-		if (isReplay || GameMod.AUTO.isActive())
+		if (isReplay || (!Dancer.hideui && GameMod.AUTO.isActive()))
 			playbackSpeed.getButton().draw();
 
 		// draw music position bar (for replay seeking)

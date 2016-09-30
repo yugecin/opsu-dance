@@ -698,6 +698,20 @@ public class Options {
 			// TODO
 		},
 
+		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.hideui = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.hideui = bool;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},
