@@ -213,7 +213,7 @@ public class OptionsMenu extends BasicGameState {
 
 		// option tabs
 		Image tabImage = GameImage.MENU_TAB.getImage();
-		float tabX = width * 0.032f + Fonts.DEFAULT.getWidth("Change the way opsu! behaves") + (tabImage.getWidth() / 2);
+		float tabX = width * 0.032f + (tabImage.getWidth() / 3);
 		float tabY = Fonts.XLARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				height * 0.015f - (tabImage.getHeight() / 2f);
 		int tabOffset = Math.min(tabImage.getWidth(), width / OptionTab.SIZE);
@@ -239,7 +239,7 @@ public class OptionsMenu extends BasicGameState {
 		// title
 		float marginX = width * 0.015f, marginY = height * 0.01f;
 		Fonts.XLARGE.drawString(marginX, marginY, "Options", Color.white);
-		Fonts.DEFAULT.drawString(marginX, marginY + Fonts.XLARGE.getLineHeight() * 0.92f,
+		Fonts.DEFAULT.drawString(marginX + Fonts.XLARGE.getWidth("Options") * 1.2f, marginY + Fonts.XLARGE.getLineHeight() * 0.9f - Fonts.DEFAULT.getLineHeight(),
 				"Change the way opsu! behaves", Color.white);
 
 		// game options
