@@ -224,8 +224,9 @@ public class OptionsMenu extends BasicGameState {
 
 		// game option coordinate modifiers
 		textY = (int) (tabY + tabImage.getHeight());
-		int backHeight = GameImage.MENU_BACK.getAnimation(1).getHeight();
-		offsetY = (height - textY - (backHeight * 4 / 5)) / maxOptionsScreen;
+		//int backHeight = GameImage.MENU_BACK.getAnimation(1).getHeight();
+		//offsetY = (height - textY - (backHeight * 4 / 5)) / maxOptionsScreen;
+		offsetY = (int) ((Fonts.MEDIUM.getLineHeight() + Fonts.SMALL.getLineHeight()) * 1.1f);
 	}
 
 	@Override
@@ -486,12 +487,12 @@ public class OptionsMenu extends BasicGameState {
 	 */
 	private void drawOption(GameOption option, int pos, boolean focus) {
 		int width = container.getWidth();
-		int textHeight = Fonts.LARGE.getLineHeight();
+		int textHeight = Fonts.MEDIUM.getLineHeight();
 		float y = textY + (pos * offsetY);
 		Color color = (focus) ? Color.cyan : Color.white;
 
-		Fonts.LARGE.drawString(width / 30, y, option.getName(), color);
-		Fonts.LARGE.drawString(width / 2, y, option.getValueString(), color);
+		Fonts.MEDIUM.drawString(width / 30, y, option.getName(), color);
+		Fonts.MEDIUM.drawString(width / 2, y, option.getValueString(), color);
 		Fonts.SMALL.drawString(width / 30, y + textHeight, option.getDescription(), color);
 		g.setColor(Colors.WHITE_ALPHA);
 		g.drawLine(0, y + textHeight, width, y + textHeight);
@@ -506,7 +507,7 @@ public class OptionsMenu extends BasicGameState {
 		if (y < textY || y > textY + (offsetY * maxOptionsScreen))
 			return null;
 
-		int index = (y - textY + Fonts.LARGE.getLineHeight()) / offsetY;
+		int index = (y - textY) / offsetY;
 		if (index >= currentTab.options.length)
 			return null;
 
