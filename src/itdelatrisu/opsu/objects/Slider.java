@@ -184,7 +184,8 @@ public class Slider extends GameObject {
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {
-			color = Utils.currentShiftColor();
+			//color = Utils.currentShiftColor();
+			color = Utils.shiftHue(color, 180f);
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;
