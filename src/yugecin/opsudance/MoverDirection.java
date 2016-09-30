@@ -30,7 +30,7 @@ public enum MoverDirection {
 	RIGHT ("Right", 1) {
 		@Override
 		public int getDirection(int currentDirection) {
-			return 0;
+			return -1;
 		}
 	},
 	ALTERNATE ("Alternate", 2) {
@@ -50,7 +50,7 @@ public enum MoverDirection {
 	};
 
 	public String displayName;
-	private int nr;
+	public int nr;
 
 	private static Random rand;
 
@@ -64,5 +64,10 @@ public enum MoverDirection {
 	}
 
 	public abstract int getDirection(int currentDirection);
+
+	@Override
+	public String toString() {
+		return displayName;
+	}
 
 }

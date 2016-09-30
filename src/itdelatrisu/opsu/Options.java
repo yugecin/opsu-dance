@@ -55,6 +55,7 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.MoverDirection;
 import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 
@@ -568,6 +569,33 @@ public class Options {
 			@Override
 			public void read(String s) {
 				Dancer.instance.setMoverFactoryIndex(Integer.parseInt(s));
+			}
+		},
+
+		DANCE_MOVER_DIRECTION ("Mover direction", "MoverDirection", "The direction the mover goes" ) {
+			@Override
+			public String getValueString() {
+				return Dancer.moverDirection.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return MoverDirection.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.moverDirection = MoverDirection.values()[index];
+			}
+
+			@Override
+			public String write() {
+				return "" + Dancer.moverDirection.nr;
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.moverDirection = MoverDirection.values()[Integer.parseInt(s)];
 			}
 		},
 

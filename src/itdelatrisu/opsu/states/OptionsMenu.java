@@ -107,6 +107,7 @@ public class OptionsMenu extends BasicGameState {
 		}),
 		DANCE ("Dance", new GameOption[] {
 			GameOption.DANCE_MOVER,
+			GameOption.DANCE_MOVER_DIRECTION,
 			GameOption.DANCE_SPINNER,
 			GameOption.DANCE_LAZY_SLIDERS,
 			GameOption.DANCE_CIRCLE_STREAMS,
