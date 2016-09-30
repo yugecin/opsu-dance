@@ -59,6 +59,8 @@ public class Circle extends GameObject {
 	/** Whether or not the circle result ends the combo streak. */
 	private boolean comboEnd;
 
+	public static int hue;
+
 	/**
 	 * Initializes the Circle data type with map modifiers, images, and dimensions.
 	 * @param container the game container
@@ -87,13 +89,15 @@ public class Circle extends GameObject {
 		this.color = color;
 		this.comboEnd = comboEnd;
 		updatePosition();
+		this.color = Utils.nextColor();
+		System.out.println(this.color.getRed());
 	}
 
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {
-			color = Utils.shiftHue(color, 180d);
+			color = Utils.currentShiftColor();
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;
