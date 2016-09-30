@@ -71,6 +71,7 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.ObjectColorOverrides;
 
 /**
  * "Game" state.
@@ -1196,7 +1197,8 @@ public class Game extends BasicGameState {
 			}
 
 			// initialize object maps
-			Color[] combo = beatmap.getComboColors();
+			ObjectColorOverrides.comboColors = beatmap.getComboColors();
+			ObjectColorOverrides.hue = 0f;
 			for (int i = 0; i < beatmap.objects.length; i++) {
 				HitObject hitObject = beatmap.objects[i];
 
@@ -1205,7 +1207,7 @@ public class Game extends BasicGameState {
 				if (i + 1 >= beatmap.objects.length || beatmap.objects[i + 1].isNewCombo())
 					comboEnd = true;
 
-				Color color = combo[hitObject.getComboIndex()];
+				Color color = ObjectColorOverrides.comboColors[hitObject.getComboIndex()];
 
 				// pass beatLength to hit objects
 				int hitObjectTime = hitObject.getTime();

@@ -55,11 +55,10 @@ public class Circle extends GameObject {
 
 	/** The color of this circle. */
 	private Color color;
+	private Color mirrorColor;
 
 	/** Whether or not the circle result ends the combo streak. */
 	private boolean comboEnd;
-
-	public static int hue;
 
 	/**
 	 * Initializes the Circle data type with map modifiers, images, and dimensions.
@@ -86,20 +85,17 @@ public class Circle extends GameObject {
 		this.hitObject = hitObject;
 		this.game = game;
 		this.data = data;
-		this.color = color;
 		this.comboEnd = comboEnd;
 		updatePosition();
-		if (Dancer.rgbobj) {
-			this.color = Utils.nextColor();
-		}
+		this.color = Dancer.colorOverride.getColor(color);
+		this.mirrorColor = Dancer.colorMirrorOverride.getColor(color);
 	}
 
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {
-			//color = Utils.currentShiftColor();
-			color = Utils.shiftHue(color, 180f);
+			color = mirrorColor;
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;

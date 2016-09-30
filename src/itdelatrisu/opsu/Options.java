@@ -55,6 +55,7 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 
 /**
@@ -666,17 +667,76 @@ public class Options {
 			}
 		},
 
-		DANCE_RGB_OBJECTS ("Use rgb objects", "RGBObj", "Give each object a new color", false) {
+		DANCE_OBJECT_COLOR_OVERRIDE ("Object color override", "ObjColorOverride", "Override object colors") {
 			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.rgbobj = bool;
+			public String getValueString() {
+				return Dancer.colorOverride.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return ObjectColorOverrides.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.colorOverride = ObjectColorOverrides.values()[index];
+			}
+
+			@Override
+			public String write() {
+				return "" + Dancer.colorOverride.nr;
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.colorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
+			}
+		},
+
+		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Object color override", "ObjColorOverride", "Override object colors") {
+			@Override
+			public String getValueString() {
+				return Dancer.colorMirrorOverride.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return ObjectColorOverrides.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.colorMirrorOverride = ObjectColorOverrides.values()[index];
+			}
+
+			@Override
+			public String write() {
+				return "" + Dancer.colorMirrorOverride.nr;
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.colorMirrorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
+			}
+		},
+
+		DANCE_RGB_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object color override", Dancer.rgbhueinc, -1800, 1800) {
+			@Override
+			public String getValueString() {
+				return String.format("%.1f°", val / 10f);
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Dancer.rgbhueinc = val;
 			}
 
 			@Override
 			public void read(String s) {
 				super.read(s);
-				Dancer.rgbobj = bool;
+				Dancer.rgbhueinc = val;
 			}
 		},
 

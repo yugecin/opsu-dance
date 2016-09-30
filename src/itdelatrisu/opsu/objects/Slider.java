@@ -72,6 +72,7 @@ public class Slider extends GameObject {
 
 	/** The color of this slider. */
 	private Color color;
+	private Color mirrorColor;
 
 	/** The underlying Curve. */
 	private Curve curve;
@@ -150,18 +151,15 @@ public class Slider extends GameObject {
 	 * @param hitObject the associated HitObject
 	 * @param game the associated Game object
 	 * @param data the associated GameData object
-	 * @param color the color of this slider
 	 * @param comboEnd true if this is the last hit object in the combo
 	 */
 	public Slider(HitObject hitObject, Game game, GameData data, Color color, boolean comboEnd) {
 		this.hitObject = hitObject;
 		this.game = game;
 		this.data = data;
-		this.color = color;
 		this.comboEnd = comboEnd;
-		if (Dancer.rgbobj) {
-			this.color = Utils.nextColor();
-		}
+		this.color = Dancer.colorOverride.getColor(color);
+		this.mirrorColor = Dancer.colorMirrorOverride.getColor(color);
 		updatePosition();
 
 		// slider time calculations
@@ -186,8 +184,7 @@ public class Slider extends GameObject {
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {
-			//color = Utils.currentShiftColor();
-			color = Utils.shiftHue(color, 180f);
+			color = mirrorColor;
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;

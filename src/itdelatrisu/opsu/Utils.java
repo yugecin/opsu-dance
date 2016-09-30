@@ -577,6 +577,7 @@ public class Utils {
 		return y < Options.height / 2d ? 1 : 4;
 	}
 
+	/*
 	public static Color shiftHue(Color color, double H) {
 		double U = Math.cos(H * Math.PI / 180d);
 		double W = Math.sin(H * Math.PI / 180d);
@@ -587,14 +588,6 @@ public class Utils {
 		n.b = (float) ((0.299d + 0.300d * U + 1.250d * W) * color.r + (0.587d - 0.585d * U + 1.050d * W) * color.g + (0.114 - 0.886 * U - 0.203 * W) * color.b);
 		return n;
 	}
-
-	public static Color nextColor() {
-		Circle.hue += 10;
-		return new Color(java.awt.Color.getHSBColor(Circle.hue / 360f, 1.0f, 1.0f).getRGB());
-	}
-
-	public static Color currentShiftColor() {
-		return new Color(java.awt.Color.getHSBColor((Circle.hue + 180f) / 360f, 1.0f, 1.0f).getRGB());
-	}
+	*/
 
 }
