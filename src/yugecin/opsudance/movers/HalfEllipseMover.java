@@ -30,8 +30,8 @@ public class HalfEllipseMover extends Mover {
 
 	public HalfEllipseMover(GameObject start, GameObject end, int dir) {
 		super(start, end, dir);
-		middlex = (startX - endX) / 2d;
-		middley = (startY - endY) / 2d;
+		middlex = (startX + endX) / 2d;
+		middley = (startY + endY) / 2d;
 		radius = Utils.distance(middlex, middley, startX, startY);
 		ang = Math.atan2(startY - middley, startX - middlex);
 		mod = 2d;
@@ -44,8 +44,8 @@ public class HalfEllipseMover extends Mover {
 	@Override
 	public double[] getPointAt(int time) {
 		double Tangle = Math.PI * getT(time) * dir;
-		double x = middlex + Math.cos(Tangle) * radius;
-		double y = middley + Math.sin(Tangle) * radius;
+		double x = middlex + Math.cos(Tangle) * radius * mod; // TODO fix this
+		double y = middley + Math.sin(Tangle) * radius * mod;
 		double dx = middlex - x;
 		double dy = middley - y;
 
