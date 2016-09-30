@@ -498,7 +498,11 @@ public class GameData {
 	 */
 	public void drawSymbolNumber(int n, float x, float y, float scale, float alpha) {
 		int length = (int) (Math.log10(n) + 1);
-		float digitWidth = (getDefaultSymbolImage(0).getWidth() - Options.getSkin().getHitCircleFontOverlap()) * scale;
+		float digitWidth = getDefaultSymbolImage(0).getWidth();
+		if (digitWidth <= 1f) {
+			return;
+		}
+		digitWidth = (digitWidth - Options.getSkin().getHitCircleFontOverlap()) * scale;
 		float cx = x + ((length - 1) * (digitWidth / 2));
 
 		for (int i = 0; i < length; i++) {
