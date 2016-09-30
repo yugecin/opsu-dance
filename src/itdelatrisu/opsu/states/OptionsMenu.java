@@ -175,11 +175,6 @@ public class OptionsMenu extends BasicGameState {
 	/** Current tab. */
 	private OptionTab currentTab;
 
-	/** Max number of options displayed on one screen. */
-	private int maxOptionsScreen = Math.max(
-			Math.max(OptionTab.DISPLAY.options.length, OptionTab.MUSIC.options.length),
-			Math.max(OptionTab.GAMEPLAY.options.length, OptionTab.CUSTOM.options.length));
-
 	/** Key entry states. */
 	private boolean keyEntryLeft = false, keyEntryRight = false;
 
@@ -504,7 +499,7 @@ public class OptionsMenu extends BasicGameState {
 	 * @return the option, or GameOption.NULL if no such option exists
 	 */
 	private GameOption getOptionAt(int y) {
-		if (y < textY || y > textY + (offsetY * maxOptionsScreen))
+		if (y < textY)
 			return null;
 
 		int index = (y - textY) / offsetY;
