@@ -151,15 +151,16 @@ public class Slider extends GameObject {
 	 * @param hitObject the associated HitObject
 	 * @param game the associated Game object
 	 * @param data the associated GameData object
+	 * @param comboColorIndex index of the combo color of this slider
 	 * @param comboEnd true if this is the last hit object in the combo
 	 */
-	public Slider(HitObject hitObject, Game game, GameData data, Color color, boolean comboEnd) {
+	public Slider(HitObject hitObject, Game game, GameData data, int comboColorIndex, boolean comboEnd) {
 		this.hitObject = hitObject;
 		this.game = game;
 		this.data = data;
 		this.comboEnd = comboEnd;
-		this.color = Dancer.colorOverride.getColor(color);
-		this.mirrorColor = Dancer.colorMirrorOverride.getColor(color);
+		color = Dancer.colorOverride.getColor(comboColorIndex);
+		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 		updatePosition();
 
 		// slider time calculations
