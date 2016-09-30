@@ -57,6 +57,7 @@ import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.MoverDirection;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.Pippi;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 
 /**
@@ -797,8 +798,18 @@ public class Options {
 			}
 		},
 
-		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false) {
-			// TODO
+		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", Pippi.circleSlowSliders) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Pippi.circleSlowSliders = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.circleSlowSliders = bool;
+			}
 		},
 
 		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true) {
@@ -815,34 +826,84 @@ public class Options {
 			}
 		},
 
-		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
-			// TODO
-		},
-
-		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 1, -20, 20) {
-			// TODO
+		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", Pippi.enabled) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Pippi.enabled = bool;
+			}
 
 			@Override
-			public String getValueString() {
-				return "x" + val;
+			public void read(String s) {
+				super.read(s);
+				Pippi.enabled = bool;
 			}
 		},
 
-		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", 5, -20, 20) {
-			// TODO
-
+		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", Pippi.angleInc, -200, 200) {
 			@Override
 			public String getValueString() {
-				return "x" + val;
+				return String.format("x%.1f", val / 10f);
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Pippi.angleInc = val;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.angleInc = val;
 			}
 		},
 
-		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", true) {
-			// TODO
+		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", Pippi.angleSliderInc, -200, 200) {
+			@Override
+			public String getValueString() {
+				return String.format("x%.1f", val / 10f);
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Pippi.angleSliderInc = val;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.angleSliderInc = val;
+			}
 		},
 
-		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true) {
-			// TODO
+		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", Pippi.followcircleExpand) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Pippi.followcircleExpand = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.followcircleExpand = bool;
+			}
+		},
+
+		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", Pippi.preventWobblyStreams) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Pippi.preventWobblyStreams = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.preventWobblyStreams = bool;
+			}
 		};
 
 
