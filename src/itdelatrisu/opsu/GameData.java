@@ -1396,10 +1396,20 @@ public class GameData {
 	 * @param sliderHeldToEnd whether or not the slider was held to the end (if applicable)
 	 */
 	public void hitResult(int time, int result, float x, float y, Color color,
+			      boolean end, HitObject hitObject, HitObjectType hitResultType,
+			      boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
+		hitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
+	}
+	public void hitResult(int time, int result, float x, float y, Color color,
 						  boolean end, HitObject hitObject, HitObjectType hitResultType,
-						  boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
-		int hitResult = handleHitResult(time, result, x, y, color, end, hitObject,
+						  boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
+		int hitResult;
+		if (handleResult) {
+			hitResult = handleHitResult(time, result, x, y, color, end, hitObject,
 				hitResultType, repeat, (curve != null && !sliderHeldToEnd));
+		} else {
+			hitResult = HIT_300;
+		}
 
 		if (hitResult == HIT_MISS && (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive()))
 			return;  // "relax" and "autopilot" mods: hide misses

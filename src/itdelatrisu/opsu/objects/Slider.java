@@ -433,7 +433,7 @@ public class Slider extends GameObject {
 			float[] m = Utils.mirrorPoint(cx, cy);
 			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,
-				currentRepeats + 1, curve, sliderHeldToEnd);
+				currentRepeats + 1, curve, sliderHeldToEnd, false);
 		}
 
 		return result;
