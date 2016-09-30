@@ -694,7 +694,7 @@ public class Options {
 			}
 		},
 
-		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Object color override", "ObjColorOverride", "Override object colors") {
+		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Collage object color override", "ObjColorMirroredOverride", "Override collage object colors") {
 			@Override
 			public String getValueString() {
 				return Dancer.colorMirrorOverride.toString();
@@ -737,6 +737,20 @@ public class Options {
 			public void read(String s) {
 				super.read(s);
 				Dancer.rgbhueinc = val;
+			}
+		},
+
+		DANCE_CURSOR_USE_OBJECT_COLOR ("Give object color to cursor", "CursorUseObjectColor", "The color of the last object will be used on the cursor", false) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.cursoruselastobjectcolor = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.cursoruselastobjectcolor = bool;
 			}
 		},
 

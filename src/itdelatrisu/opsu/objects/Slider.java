@@ -650,4 +650,14 @@ public class Slider extends GameObject {
 		return false;
 	}
 
+	@Override
+	public Color getColor() {
+		return color;
+	}
+
+	@Override
+	public Color getMirroredColor() {
+		return mirrorColor;
+	}
+
 }

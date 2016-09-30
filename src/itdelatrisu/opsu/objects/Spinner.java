@@ -428,4 +428,14 @@ public class Spinner extends GameObject {
 		return true;
 	}
 
+	@Override
+	public Color getColor() {
+		return null;
+	}
+
+	@Override
+	public Color getMirroredColor() {
+		return null;
+	}
+
 }

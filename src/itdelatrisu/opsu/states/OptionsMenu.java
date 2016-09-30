@@ -115,6 +115,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
 			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
 			GameOption.DANCE_RGB_INC,
+			GameOption.DANCE_CURSOR_USE_OBJECT_COLOR,
 			GameOption.DANCE_REMOVE_BG,
 			GameOption.DANCE_HIDE_UI,
 		}),

@@ -57,6 +57,7 @@ public class Dancer {
 	public static ObjectColorOverrides colorOverride = ObjectColorOverrides.NONE;
 	public static ObjectColorOverrides colorMirrorOverride = ObjectColorOverrides.NONE;
 	public static int rgbhueinc = 70; // this should really get its own place somewhere...
+	public static boolean cursoruselastobjectcolor;
 
 	private int dir;
 	private GameObject p;

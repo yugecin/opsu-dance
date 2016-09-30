@@ -32,11 +32,9 @@ import java.util.LinkedList;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
+import org.newdawn.slick.*;
 import org.newdawn.slick.state.StateBasedGame;
+import yugecin.opsudance.Dancer;
 
 /**
  * Updates and draws the cursor.
@@ -49,7 +47,7 @@ public class Cursor {
 	private Point lastPosition;
 
 	/** Cursor rotation angle. */
-	private float cursorAngle = 0f;
+	private static float cursorAngle = 0f;
 
 	/** The time in milliseconds when the cursor was last pressed, used for the scaling animation. */
 	private long lastCursorPressTime = 0L;
@@ -70,6 +68,11 @@ public class Cursor {
 	private static GameContainer container;
 	private static StateBasedGame game;
 	private static Input input;
+
+	public static Color lastObjColor = Color.white;
+	public static Color lastMirroredObjColor = Color.white;
+
+	private boolean isMirrored;
 
 	/**
 	 * Initializes the class.
@@ -95,7 +98,12 @@ public class Cursor {
 	 * Constructor.
 	 */
 	public Cursor() {
+		this(false);
+	}
+
+	public Cursor(boolean isMirrored) {
 		resetLocations();
+		this.isMirrored = isMirrored;
 	}
 
 	/**
@@ -182,6 +190,8 @@ public class Cursor {
 		for (int i = 0; i < removeCount && !trail.isEmpty(); i++)
 			trail.remove();
 
+		Color filter = getColorFilter();
+
 		// draw a fading trail
 		float alpha = 0f;
 		float t = 2f / trail.size();
@@ -190,7 +200,7 @@ public class Cursor {
 		cursorTrail.startUse();
 		for (Point p : trail) {
 			alpha += t;
-			cursorTrail.setImageColor(1f, 1f, 1f, alpha);
+			cursorTrail.setImageColor(filter.r, filter.g, filter.b, alpha);
 			cursorTrail.drawEmbedded(
 					p.x - (cursorTrailWidth / 2f), p.y - (cursorTrailHeight / 2f),
 					cursorTrailWidth, cursorTrailHeight, cursorTrailRotation);
@@ -203,9 +213,19 @@ public class Cursor {
 		// draw the other components
 		if (newStyle && skin.isCursorRotated())
 			cursor.setRotation(cursorAngle);
-		cursor.drawCentered(mouseX, mouseY);
+		cursor.drawCentered(mouseX, mouseY, filter);
 		if (hasMiddle)
-			cursorMiddle.drawCentered(mouseX, mouseY);
+			cursorMiddle.drawCentered(mouseX, mouseY, filter);
+	}
+
+	private Color getColorFilter() {
+		if (!Dancer.cursoruselastobjectcolor) {
+			return Color.white;
+		}
+		if (isMirrored) {
+			return lastMirroredObjColor;
+		}
+		return lastObjColor;
 	}
 
 	/**

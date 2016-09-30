@@ -20,6 +20,7 @@ package itdelatrisu.opsu.objects;
 
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
 /**
@@ -96,5 +97,8 @@ public abstract class GameObject {
 	public abstract boolean isCircle();
 	public abstract boolean isSlider();
 	public abstract boolean isSpinner();
+
+	public abstract Color getColor();
+	public abstract Color getMirroredColor();
 
 }

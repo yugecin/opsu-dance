@@ -271,7 +271,7 @@ public class Game extends BasicGameState {
 
 	public Game(int state) {
 		this.state = state;
-		mirrorCursor = new Cursor();
+		mirrorCursor = new Cursor(true);
 	}
 
 	@Override
@@ -876,6 +876,11 @@ public class Game extends BasicGameState {
 					break;
 			}
 		}
+		GameObject g = gameObjects[objectIndex];
+		if (g.isCircle() || g.isSlider() && g.getTime() <= trackPosition) {
+			Cursor.lastObjColor = g.getColor();
+			Cursor.lastMirroredObjColor = g.getMirroredColor();
+		}
 	}
 
 	@Override
@@ -1307,6 +1312,9 @@ public class Game extends BasicGameState {
 	public void leave(GameContainer container, StateBasedGame game)
 			throws SlickException {
 //		container.setMouseGrabbed(false);
+
+		Cursor.lastObjColor = Color.white;
+		Cursor.lastMirroredObjColor = Color.white;
 
 		// re-hide cursor
 		if (GameMod.AUTO.isActive() || isReplay)

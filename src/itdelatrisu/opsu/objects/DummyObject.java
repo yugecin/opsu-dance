@@ -21,6 +21,7 @@ package itdelatrisu.opsu.objects;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
 /**
@@ -81,6 +82,16 @@ public class DummyObject extends GameObject {
 	@Override
 	public boolean isSpinner() {
 		return false;
+	}
+
+	@Override
+	public Color getColor() {
+		return null;
+	}
+
+	@Override
+	public Color getMirroredColor() {
+		return null;
 	}
 
 }

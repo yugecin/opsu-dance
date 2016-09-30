@@ -240,4 +240,14 @@ public class Circle extends GameObject {
 		return false;
 	}
 
+	@Override
+	public Color getColor() {
+		return color;
+	}
+
+	@Override
+	public Color getMirroredColor() {
+		return mirrorColor;
+	}
+
 }
