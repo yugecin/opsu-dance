@@ -473,10 +473,9 @@ public class Game extends BasicGameState {
 					}
 				}
 			} else if (breakLength >= 4000) {
-				// show break end (flash twice for 500ms)
+				// show break end (flash four times for 250ms)
 				int endTimeDiff = endTime - trackPosition;
-				if ((endTimeDiff > 1500 && endTimeDiff < 2000) ||
-					(endTimeDiff > 500 && endTimeDiff < 1000)) {
+				if (endTimeDiff < 2000 && (endTimeDiff / 250 % 2) == 1) {
 					Image arrow = GameImage.WARNINGARROW.getImage();
 					arrow.setRotation(0);
 					arrow.draw(width * 0.15f, height * 0.15f);
