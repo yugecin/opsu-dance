@@ -479,7 +479,7 @@ public class OptionsMenu extends BasicGameState {
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		UI.enter();
-		currentTab = OptionTab.DISPLAY;
+		currentTab = OptionTab.DANCE;
 	}
 
 	/**
