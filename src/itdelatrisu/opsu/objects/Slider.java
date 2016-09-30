@@ -429,6 +429,17 @@ public class Slider extends GameObject {
 		data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				cx, cy, color, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd);
+		if (Dancer.mirror) {
+			double dx = cx - Options.width / 2d;
+			double dy = cy - Options.height / 2d;
+			double ang = Math.atan2(dy, dx);
+			double d = -Math.sqrt(dx * dx + dy * dy);
+			float nx = (float) (Options.width / 2d + Math.cos(ang) * d);
+			float ny = (float) (Options.height / 2d + Math.sin(ang) * d);
+			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
+				nx, ny, mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,
+				currentRepeats + 1, curve, sliderHeldToEnd);
+		}
 
 		return result;
 	}
