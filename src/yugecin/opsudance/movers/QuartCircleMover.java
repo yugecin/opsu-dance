@@ -29,8 +29,8 @@ public class QuartCircleMover extends Mover {
 
 	public QuartCircleMover(GameObject start, GameObject end, int dir) {
 		super(start, end, dir);
-		middlex = (startX - endX) / 2d;
-		middley = (startY - endY) / 2d;
+		middlex = (startX + endX) / 2d;
+		middley = (startY + endY) / 2d;
 		radius = Utils.distance(middlex, middley, startX, startY);
 		ang = Math.atan2(startY - middley, startX - middlex) + Math.PI / 2d * dir;
 		middlex = middlex + Math.cos(ang) * radius;
@@ -45,7 +45,7 @@ public class QuartCircleMover extends Mover {
 
 		return new double[] {
 			middlex + Math.cos(ang) * radius,
-			middlex + Math.sin(ang) * radius
+			middley + Math.sin(ang) * radius
 		};
 	}
 
