@@ -1219,8 +1219,6 @@ public class Game extends BasicGameState {
 				if (i + 1 >= beatmap.objects.length || beatmap.objects[i + 1].isNewCombo())
 					comboEnd = true;
 
-				Color color = ObjectColorOverrides.comboColors[hitObject.getComboIndex()];
-
 				// pass beatLength to hit objects
 				int hitObjectTime = hitObject.getTime();
 				while (timingPointIndex < beatmap.timingPoints.size()) {
@@ -1233,9 +1231,9 @@ public class Game extends BasicGameState {
 
 				try {
 					if (hitObject.isCircle())
-						gameObjects[i] = new Circle(hitObject, this, data, color, comboEnd);
+						gameObjects[i] = new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
 					else if (hitObject.isSlider())
-						gameObjects[i] = new Slider(hitObject, this, data, color, comboEnd);
+						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
 					else if (hitObject.isSpinner())
 						gameObjects[i] = new Spinner(hitObject, this, data);
 				} catch (Exception e) {

@@ -23,8 +23,8 @@ public enum ObjectColorOverrides {
 
 	NONE ("None", 0) {
 		@Override
-		public Color getColor(Color color) {
-			return color;
+		public Color getColor(int comboColorIndex) {
+			return comboColors[comboColorIndex];
 		}
 	},
 	COMBO1 ("Combo1", 1),
@@ -35,15 +35,21 @@ public enum ObjectColorOverrides {
 	COMBO6 ("Combo6", 6),
 	COMBO7 ("Combo7", 7),
 	COMBO8 ("Combo8", 8),
-	RAINBOW ("Rainbow", 9) {
+	OPPOSITECOMBOCOLOR ("Opposite combo color", 9) {
 		@Override
-		public Color getColor(Color color) {
+		public Color getColor(int comboColorIndex) {
+			return comboColors[(comboColorIndex + comboColors.length / 2) % comboColors.length];
+		}
+	},
+	RAINBOW ("Rainbow", 10) {
+		@Override
+		public Color getColor(int comboColorIndex) {
 			return nextRainbowColor();
 		}
 	},
-	RAINBOWSHIFT ("Rainbow + 180° hue shift", 10) {
+	RAINBOWSHIFT ("Rainbow + 180° hue shift", 11) {
 		@Override
-		public Color getColor(Color color) {
+		public Color getColor(int comboColorIndex) {
 			return nextMirrorRainbowColor();
 		}
 	};
@@ -65,7 +71,7 @@ public enum ObjectColorOverrides {
 		return displayText;
 	}
 
-	public Color getColor(Color color) {
+	public Color getColor(int comboColorIndex) {
 		return comboColors[nr % comboColors.length];
 	}
 
