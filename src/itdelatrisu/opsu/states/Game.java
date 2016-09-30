@@ -789,6 +789,12 @@ public class Game extends BasicGameState {
 			return;
 		}
 
+		GameObject g = gameObjects[objectIndex];
+		if (g.isCircle() || g.isSlider() && g.getTime() <= trackPosition) {
+			Cursor.lastObjColor = g.getColor();
+			Cursor.lastMirroredObjColor = g.getMirroredColor();
+		}
+
 		// timing points
 		if (timingPointIndex < beatmap.timingPoints.size()) {
 			TimingPoint timingPoint = beatmap.timingPoints.get(timingPointIndex);
@@ -880,11 +886,6 @@ public class Game extends BasicGameState {
 				else
 					break;
 			}
-		}
-		GameObject g = gameObjects[objectIndex];
-		if (g.isCircle() || g.isSlider() && g.getTime() <= trackPosition) {
-			Cursor.lastObjColor = g.getColor();
-			Cursor.lastMirroredObjColor = g.getMirroredColor();
 		}
 	}
 
