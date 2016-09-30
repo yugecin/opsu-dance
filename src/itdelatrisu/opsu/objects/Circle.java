@@ -90,7 +90,6 @@ public class Circle extends GameObject {
 		this.comboEnd = comboEnd;
 		updatePosition();
 		this.color = Utils.nextColor();
-		System.out.println(this.color.getRed());
 	}
 
 	@Override
