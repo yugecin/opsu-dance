@@ -746,6 +746,21 @@ public enum GameImage {
 						break;
 					}
 				}
+				if (list.isEmpty()) {
+					// look for image without 0-1 etc
+					String name = getImageFileName(filename, dir, type, true);
+					if (name != null) {
+						try {
+							Image img = new Image(name);
+							if (suffix.equals(HD_SUFFIX))
+								img = img.getScaledCopy(0.5f);
+							list.add(img);
+						} catch (SlickException e) {
+							ErrorHandler.error(String.format("Failed to set image '%s'.", name), null, false);
+							break;
+						}
+					}
+				}
 				if (!list.isEmpty())
 					return list.toArray(new Image[list.size()]);
 			}

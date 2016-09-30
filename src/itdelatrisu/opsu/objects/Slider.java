@@ -321,7 +321,11 @@ public class Slider extends GameObject {
 			Image sliderBallFrame = sliderBallImages[(int) (t * sliderTime * 60 / 1000) % sliderBallImages.length];
 			float angle = (float) (Math.atan2(c2.y - c.y, c2.x - c.x) * 180 / Math.PI);
 			sliderBallFrame.setRotation(angle);
-			sliderBallFrame.drawCentered(c.x, c.y);
+			if (Options.getSkin().isAllowSliderBallTint()) {
+				sliderBallFrame.drawCentered(c.x, c.y, color);
+			} else {
+				sliderBallFrame.drawCentered(c.x, c.y);
+			}
 
 			// follow circle
 			if (followCircleActive) {
