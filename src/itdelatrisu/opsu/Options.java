@@ -626,7 +626,7 @@ public class Options {
 			}
 		},
 
-		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", true) {
+		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", Dancer.LAZY_SLIDERS) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -640,7 +640,7 @@ public class Options {
 			}
 		},
 
-		DANCE_ONLY_CIRCLE_STACKS ("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", true) {
+		DANCE_ONLY_CIRCLE_STACKS ("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", AutoMoverFactory.ONLY_CIRCLE_STACKS) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -654,7 +654,7 @@ public class Options {
 			}
 		},
 
-		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", false) {
+		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", AutoMoverFactory.CIRCLE_STREAM == 58) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -668,7 +668,7 @@ public class Options {
 			}
 		},
 
-		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff", false) {
+		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff", Dancer.mirror) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -682,7 +682,7 @@ public class Options {
 			}
 		},
 
-		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", true) {
+		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", Dancer.drawApproach) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -769,7 +769,7 @@ public class Options {
 			}
 		},
 
-		DANCE_CURSOR_USE_OBJECT_COLOR ("Give object color to cursor", "CursorUseObjectColor", "The color of the last object will be used on the cursor", false) {
+		DANCE_CURSOR_USE_OBJECT_COLOR ("Give object color to cursor", "CursorUseObjectColor", "The color of the last object will be used on the cursor", Dancer.cursoruselastobjectcolor) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -783,7 +783,7 @@ public class Options {
 			}
 		},
 
-		DANCE_REMOVE_BG ("Never draw background", "RemoveBG", "Hello darkness my old friend", true) {
+		DANCE_REMOVE_BG ("Never draw background", "RemoveBG", "Hello darkness my old friend", Dancer.removebg) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
@@ -801,7 +801,7 @@ public class Options {
 			// TODO
 		},
 
-		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true) {
+		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", Dancer.hideui) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
