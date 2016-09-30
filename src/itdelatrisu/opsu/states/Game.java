@@ -320,7 +320,7 @@ public class Game extends BasicGameState {
 		}
 
 		// background
-		if (!Dancer.removebg) {
+		if (!Dancer.removebg && GameMod.AUTO.isActive()) {
 			float dimLevel = Options.getBackgroundDim();
 			if (trackPosition < firstObjectTime) {
 				if (timeDiff < approachTime)
@@ -603,7 +603,7 @@ public class Game extends BasicGameState {
 			UI.draw(g, replayX, replayY, replayKeyPressed);
 		else if (GameMod.AUTO.isActive()) {
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, autoMousePressed);
-			if (Dancer.mirror) {
+			if (Dancer.mirror && GameMod.AUTO.isActive()) {
 				double dx = autoMousePosition.x - Options.width / 2d;
 				double dy = autoMousePosition.y - Options.height / 2d;
 				double d = Math.sqrt(dx * dx + dy * dy);
@@ -1401,7 +1401,7 @@ public class Game extends BasicGameState {
 			// normal case
 			if (!loseState) {
 				gameObj.draw(g, trackPosition, false);
-				if (Dancer.mirror) {
+				if (Dancer.mirror && GameMod.AUTO.isActive()) {
 					g.pushTransform();
 					g.rotate(Options.width / 2f, Options.height / 2f, 180f);
 					gameObj.draw(g, trackPosition, true);
