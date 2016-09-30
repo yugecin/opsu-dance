@@ -680,6 +680,20 @@ public class Options {
 			}
 		},
 
+		DANCE_REMOVE_BG ("Never draw background", "RemoveBG", "Hello darkness my old friend", true) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.removebg = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.removebg = bool;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},

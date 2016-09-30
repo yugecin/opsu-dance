@@ -320,18 +320,20 @@ public class Game extends BasicGameState {
 		}
 
 		// background
-		float dimLevel = Options.getBackgroundDim();
-		if (trackPosition < firstObjectTime) {
-			if (timeDiff < approachTime)
-				dimLevel += (1f - dimLevel) * ((float) timeDiff / approachTime);
-			else
-				dimLevel = 1f;
-		}
-		if (Options.isDefaultPlayfieldForced() || !beatmap.drawBackground(width, height, dimLevel, false)) {
-			Image playfield = GameImage.PLAYFIELD.getImage();
-			playfield.setAlpha(dimLevel);
-			playfield.draw();
-			playfield.setAlpha(1f);
+		if (!Dancer.removebg) {
+			float dimLevel = Options.getBackgroundDim();
+			if (trackPosition < firstObjectTime) {
+				if (timeDiff < approachTime)
+					dimLevel += (1f - dimLevel) * ((float) timeDiff / approachTime);
+				else
+					dimLevel = 1f;
+			}
+			if (Options.isDefaultPlayfieldForced() || !beatmap.drawBackground(width, height, dimLevel, false)) {
+				Image playfield = GameImage.PLAYFIELD.getImage();
+				playfield.setAlpha(dimLevel);
+				playfield.draw();
+				playfield.setAlpha(1f);
+			}
 		}
 
 		if (GameMod.FLASHLIGHT.isActive())
