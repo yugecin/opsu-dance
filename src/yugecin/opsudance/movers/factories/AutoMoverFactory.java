@@ -22,6 +22,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.GameObject;
+import yugecin.opsudance.Pippi;
 import yugecin.opsudance.movers.*;
 
 public class AutoMoverFactory implements MoverFactory {
@@ -47,12 +48,9 @@ public class AutoMoverFactory implements MoverFactory {
 
 		}
 
-		/*
-		// TODO streams: linear if pippi+preventwobblystreams
-		if (distance < Circle.diameter * 1.7f && pippi && pippipreventwobblystreams) {
+		if (Pippi.shouldPreventWobblyStream(distance)) {
 			return new LinearMover(start, end, dir);
 		}
-		*/
 
 		endtime = end.getTime();
 

@@ -73,6 +73,7 @@ import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.MoverDirection;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.Pippi;
 
 /**
  * "Game" state.
@@ -631,6 +632,7 @@ public class Game extends BasicGameState {
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
 		UI.update(delta);
+		Pippi.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())
@@ -1165,6 +1167,7 @@ public class Game extends BasicGameState {
 			throw new RuntimeException("Running game with no beatmap loaded.");
 
 		Dancer.instance.reset();
+		Pippi.reset();
 		MoverDirection.reset(beatmap.getTitle());
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
