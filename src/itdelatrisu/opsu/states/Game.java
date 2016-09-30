@@ -560,6 +560,11 @@ public class Game extends BasicGameState {
 						}
 					}
 				}
+			} else {
+				// skip beginning
+				if (objectIndex == 0 &&
+					trackPosition < beatmap.objects[0].getTime() - SKIP_OFFSET)
+					skipButton.draw();
 			}
 
 			// draw hit objects
