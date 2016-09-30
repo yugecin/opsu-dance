@@ -207,6 +207,8 @@ public enum GameMod {
 			mod.active = false;
 		}
 
+		GameMod.AUTO.active = true;
+
 		scoreMultiplier = speedMultiplier = difficultyMultiplier = -1f;
 	}
 
