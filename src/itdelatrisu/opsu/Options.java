@@ -784,6 +784,20 @@ public class Options {
 			}
 		},
 
+		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", Dancer.hideobjects) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.hideobjects = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.hideobjects = bool;
+			}
+		},
+
 		DANCE_REMOVE_BG ("Never draw background", "RemoveBG", "Hello darkness my old friend", Dancer.removebg) {
 			@Override
 			public void click(GameContainer container) {

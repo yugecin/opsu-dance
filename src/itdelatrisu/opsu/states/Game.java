@@ -1422,12 +1422,14 @@ public class Game extends BasicGameState {
 
 			// normal case
 			if (!loseState) {
-				gameObj.draw(g, trackPosition, false);
-				if (Dancer.mirror && GameMod.AUTO.isActive()) {
-					g.pushTransform();
-					g.rotate(Options.width / 2f, Options.height / 2f, 180f);
-					gameObj.draw(g, trackPosition, true);
-					g.popTransform();
+				if (!Dancer.hideobjects) {
+					gameObj.draw(g, trackPosition, false);
+					if (Dancer.mirror && GameMod.AUTO.isActive()) {
+						g.pushTransform();
+						g.rotate(Options.width / 2f, Options.height / 2f, 180f);
+						gameObj.draw(g, trackPosition, true);
+						g.popTransform();
+					}
 				}
 			}
 			// death: make objects "fall" off the screen
@@ -1462,7 +1464,9 @@ public class Game extends BasicGameState {
 		}
 
 		// draw result objects
-		data.drawHitResults(trackPosition);
+		if (!Dancer.hideobjects) {
+			data.drawHitResults(trackPosition);
+		}
 	}
 
 	/**

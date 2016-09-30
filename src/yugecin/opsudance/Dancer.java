@@ -57,6 +57,7 @@ public class Dancer {
 	public static int rgbhueinc = 70; // this should really get its own place somewhere...
 	public static boolean cursoruselastobjectcolor = false;
 	public static MoverDirection moverDirection = MoverDirection.RANDOM;
+	public static boolean hideobjects = false;
 
 	private int dir;
 	private GameObject p;

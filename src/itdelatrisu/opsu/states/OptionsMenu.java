@@ -113,12 +113,15 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_CIRCLE_STREAMS,
 			GameOption.DANCE_ONLY_CIRCLE_STACKS,
 			GameOption.DANCE_MIRROR,
+		}),
+		DANCEDISP ("Dance display", new GameOption[] {
 			GameOption.DANCE_DRAW_APPROACH,
 			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
 			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
 			GameOption.DANCE_RGB_INC,
 			GameOption.DANCE_CURSOR_USE_OBJECT_COLOR,
 			GameOption.DANCE_REMOVE_BG,
+			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,
 		}),
 		PIPPI ("Pippi", new GameOption[] {
