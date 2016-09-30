@@ -478,7 +478,7 @@ public class Game extends BasicGameState {
 					arrow.setRotation(0);
 					arrow.draw(width * 0.15f, height * 0.15f);
 					arrow.draw(width * 0.15f, height * 0.75f);
-					arrow.setRotation(180);
+					arrow = arrow.getFlippedCopy(true, false);
 					arrow.draw(width * 0.75f, height * 0.15f);
 					arrow.draw(width * 0.75f, height * 0.75f);
 				}
