@@ -159,6 +159,9 @@ public class Slider extends GameObject {
 		this.data = data;
 		this.color = color;
 		this.comboEnd = comboEnd;
+		if (Dancer.rgbobj) {
+			this.color = Utils.nextColor();
+		}
 		updatePosition();
 
 		// slider time calculations
@@ -183,7 +186,8 @@ public class Slider extends GameObject {
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {
-			color = Utils.shiftHue(color, 180d);
+			//color = Utils.currentShiftColor();
+			color = Utils.shiftHue(color, 180f);
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;

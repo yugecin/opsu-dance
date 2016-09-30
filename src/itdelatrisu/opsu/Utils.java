@@ -23,6 +23,7 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadNode;
+import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
@@ -585,6 +586,15 @@ public class Utils {
 		n.g = (float) ((0.299 + 0.299 * U - 0.328 * W) * color.r + (0.587d - 0.413 * U + 0.035 * W) * color.g + (0.114d - 0.114d * U - 0.292 * W) * color.b);
 		n.b = (float) ((0.299d + 0.300d * U + 1.250d * W) * color.r + (0.587d - 0.585d * U + 1.050d * W) * color.g + (0.114 - 0.886 * U - 0.203 * W) * color.b);
 		return n;
+	}
+
+	public static Color nextColor() {
+		Circle.hue += 10;
+		return new Color(java.awt.Color.getHSBColor(Circle.hue / 360f, 1.0f, 1.0f).getRGB());
+	}
+
+	public static Color currentShiftColor() {
+		return new Color(java.awt.Color.getHSBColor((Circle.hue + 180f) / 360f, 1.0f, 1.0f).getRGB());
 	}
 
 }
