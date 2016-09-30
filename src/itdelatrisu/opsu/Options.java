@@ -694,6 +694,10 @@ public class Options {
 			}
 		},
 
+		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false) {
+			// TODO
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false) {
 			// TODO
 		},
