@@ -190,13 +190,8 @@ public class Circle extends GameObject {
 			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
 				if (Dancer.mirror) {
-					double dx = x - Options.width / 2d;
-					double dy = y - Options.height / 2d;
-					double ang = Math.atan2(dy, dx);
-					double d = -Math.sqrt(dx * dx + dy * dy);
-					float nx = (float) (Options.width / 2d + Math.cos(ang) * d);
-					float ny = (float) (Options.height / 2d + Math.sin(ang) * d);
-					data.hitResult(time, GameData.HIT_300, nx, ny, mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+					float[] m = Utils.mirrorPoint(x, y);
+					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
 				}
 			}
 
@@ -210,13 +205,8 @@ public class Circle extends GameObject {
 			if (Math.abs(trackPosition - time) < hitResultOffset[GameData.HIT_300]) {
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
 				if (Dancer.mirror) {
-					double dx = x - Options.width / 2d;
-					double dy = y - Options.height / 2d;
-					double ang = Math.atan2(dy, dx);
-					double d = -Math.sqrt(dx * dx + dy * dy);
-					float nx = (float) (Options.width / 2d + Math.cos(ang) * d);
-					float ny = (float) (Options.height / 2d + Math.sin(ang) * d);
-					data.hitResult(time, GameData.HIT_300, nx, ny, mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+					float[] m = Utils.mirrorPoint(x, y);
+					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
 				}
 				return true;
 			}

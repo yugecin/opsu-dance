@@ -1201,13 +1201,8 @@ public class GameData {
 		if (!Dancer.mirror) {
 			return;
 		}
-		double dx = x - Options.width / 2d;
-		double dy = y - Options.height / 2d;
-		double ang = Math.atan2(dy, dx);
-		double d = -Math.sqrt(dx * dx + dy * dy);
-		x = (float) (Options.width / 2d + Math.cos(ang) * d);
-		y = (float) (Options.height / 2d + Math.sin(ang) * d);
-		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, x, y, mirrorcolor, null, null, true, false));
+		float[] m = Utils.mirrorPoint(x, y);
+		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, m[0], m[1], mirrorcolor, null, null, true, false));
 	}
 
 	/**

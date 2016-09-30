@@ -590,4 +590,15 @@ public class Utils {
 	}
 	*/
 
+	public static float[] mirrorPoint(float x, float y) {
+		double dx = x - Options.width / 2d;
+		double dy = y - Options.height / 2d;
+		double ang = Math.atan2(dy, dx);
+		double d = -Math.sqrt(dx * dx + dy * dy);
+		return new float[]{
+			(float) (Options.width / 2d + Math.cos(ang) * d),
+			(float) (Options.height / 2d + Math.sin(ang) * d)
+		};
+	}
+
 }
