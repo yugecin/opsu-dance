@@ -187,8 +187,13 @@ public class Circle extends GameObject {
 		boolean isAutoMod = GameMod.AUTO.isActive();
 
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
-			if (isAutoMod)  // "auto" mod: catch any missed notes due to lag
+			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+				if (Dancer.mirror) {
+					float[] m = Utils.mirrorPoint(x, y);
+					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+				}
+			}
 
 			else  // no more points can be scored, so send a miss
 				data.hitResult(trackPosition, GameData.HIT_MISS, x, y, null, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
@@ -199,6 +204,10 @@ public class Circle extends GameObject {
 		else if (isAutoMod) {
 			if (Math.abs(trackPosition - time) < hitResultOffset[GameData.HIT_300]) {
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+				if (Dancer.mirror) {
+					float[] m = Utils.mirrorPoint(x, y);
+					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
+				}
 				return true;
 			}
 		}

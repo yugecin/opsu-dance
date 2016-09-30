@@ -219,10 +219,12 @@ public class Slider extends GameObject {
 		hitCircleOverlay.drawCentered(endCircPos.x, endCircPos.y, Colors.WHITE_FADE);
 		*/
 
-		// start circle
-		hitCircle.drawCentered(x, y, color);
-		if (!overlayAboveNumber)
-			hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
+		// start circle, don't draw if already clicked
+		if (!sliderClickedInitial) {
+			hitCircle.drawCentered(x, y, color);
+			if (!overlayAboveNumber)
+				hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
+		}
 
 		g.popTransform();
 
@@ -256,13 +258,13 @@ public class Slider extends GameObject {
 				alpha = Math.min(alpha, hiddenAlpha);
 			}
 		}
-		if (sliderClickedInitial)
-			;  // don't draw current combo number if already clicked
-		else
+
+		if (!sliderClickedInitial) {
 			data.drawSymbolNumber(hitObject.getComboNumber(), x, y,
-			        hitCircle.getWidth() * 0.40f / data.getDefaultSymbolImage(0).getHeight(), alpha);
-		if (overlayAboveNumber)
-			hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
+				hitCircle.getWidth() * 0.40f / data.getDefaultSymbolImage(0).getHeight(), alpha);
+			if (overlayAboveNumber)
+				hitCircleOverlay.drawCentered(x, y, Colors.WHITE_FADE);
+		}
 
 		g.popTransform();
 
@@ -427,6 +429,12 @@ public class Slider extends GameObject {
 		data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				cx, cy, color, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd);
+		if (Dancer.mirror) {
+			float[] m = Utils.mirrorPoint(cx, cy);
+			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
+				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,
+				currentRepeats + 1, curve, sliderHeldToEnd);
+		}
 
 		return result;
 	}
@@ -484,6 +492,7 @@ public class Slider extends GameObject {
 					ticksHit++;
 					sliderClickedInitial = true;
 					data.sliderTickResult(time, GameData.HIT_SLIDER30, x, y, hitObject, currentRepeats);
+					data.sendInitialSliderResult(time, x, y, color, mirrorColor);
 				}
 			}
 
