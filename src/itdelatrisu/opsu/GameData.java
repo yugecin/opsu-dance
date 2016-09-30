@@ -43,6 +43,7 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.Dancer;
 
 /**
  * Holds game data and renders all related elements.
@@ -150,7 +151,8 @@ public class GameData {
 		HIT_300G     = 6,   // Geki
 		HIT_SLIDER10 = 7,
 		HIT_SLIDER30 = 8,
-		HIT_MAX      = 9;   // not a hit result
+		HIT_MAX      = 9,   // not a hit result
+		HIT_SLIDER_INITIAL = 10;
 
 	/** Hit result-related images (indexed by HIT_* constants). */
 	private Image[] hitResults;
@@ -928,6 +930,19 @@ public class GameData {
 					}
 				}
 
+				if (hitResult.result == HIT_SLIDER_INITIAL) {
+					float progress = AnimationEquation.OUT_CUBIC.calc(
+						(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
+					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
+					float alpha = 1f - progress;
+					Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
+					Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
+					scaledHitCircle.setAlpha(alpha);
+					scaledHitCircleOverlay.setAlpha(alpha);
+					scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+					scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
+				}
+
 				// hit result
 				if (!hitResult.hideResult && (
 					hitResult.hitResultType == HitObjectType.CIRCLE ||
@@ -1181,6 +1196,20 @@ public class GameData {
 			health = 0f;
 	}
 
+	public void sendInitialSliderResult(int time, float x, float y, Color color, Color mirrorcolor) {
+		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, x, y, color, null, null, true, false));
+		if (!Dancer.mirror) {
+			return;
+		}
+		double dx = x - Options.width / 2d;
+		double dy = y - Options.height / 2d;
+		double ang = Math.atan2(dy, dx);
+		double d = -Math.sqrt(dx * dx + dy * dy);
+		x = (float) (Options.width / 2d + Math.cos(ang) * d);
+		y = (float) (Options.height / 2d + Math.sin(ang) * d);
+		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, x, y, mirrorcolor, null, null, true, false));
+	}
+
 	/**
 	 * Handles a slider tick result.
 	 * @param time the tick start time
@@ -1383,6 +1412,7 @@ public class GameData {
 		boolean hideResult = (hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K) && !Options.isPerfectHitBurstEnabled();
 		hitResultList.add(new HitObjectResult(time, hitResult, x, y, color, hitResultType, curve, expand, hideResult));
 
+		/*
 		// sliders: add the other curve endpoint for the hit animation
 		if (curve != null) {
 			boolean isFirst = (hitResultType == HitObjectType.SLIDER_FIRST);
@@ -1390,6 +1420,7 @@ public class GameData {
 			HitObjectType type = (isFirst) ? HitObjectType.SLIDER_LAST : HitObjectType.SLIDER_FIRST;
 			hitResultList.add(new HitObjectResult(time, hitResult, p.x, p.y, color, type, null, expand, hideResult));
 		}
+		*/
 	}
 
 	/**
