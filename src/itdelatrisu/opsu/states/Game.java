@@ -71,6 +71,7 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.MoverDirection;
 import yugecin.opsudance.ObjectColorOverrides;
 
 /**
@@ -1163,7 +1164,8 @@ public class Game extends BasicGameState {
 		if (beatmap == null || beatmap.objects == null)
 			throw new RuntimeException("Running game with no beatmap loaded.");
 
-		Dancer.instance.init(beatmap.getTitle());
+		Dancer.instance.reset();
+		MoverDirection.reset(beatmap.getTitle());
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
