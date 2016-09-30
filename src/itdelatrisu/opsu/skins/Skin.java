@@ -167,20 +167,11 @@ public class Skin {
 	 * [Fonts]
 	 */
 
-	/** The prefix for the hitcircle font sprites. */
-	protected String hitCirclePrefix = "default";
-
 	/** How much should the hitcircle font sprites overlap? */
 	protected int hitCircleOverlap = -2;
 
-	/** The prefix for the score font sprites. */
-	protected String scorePrefix = "score";
-
 	/** How much should the score font sprites overlap? */
 	protected int scoreOverlap = 0;
-
-	/** The prefix for the combo font sprites. */
-	protected String comboPrefix = "score";
 
 	/** How much should the combo font sprites overlap? */
 	protected int comboOverlap = 0;
@@ -343,29 +334,14 @@ public class Skin {
 	public Color getStarBreakAdditiveColor() { return starBreakAdditive; }
 
 	/**
-	 * Returns the prefix for the hit circle font sprites.
-	 */
-	public String getHitCircleFontPrefix() { return hitCirclePrefix; }
-
-	/**
 	 * Returns the amount of overlap between the hit circle font sprites.
 	 */
 	public int getHitCircleFontOverlap() { return hitCircleOverlap; }
 
 	/**
-	 * Returns the prefix for the score font sprites.
-	 */
-	public String getScoreFontPrefix() { return scorePrefix; }
-
-	/**
 	 * Returns the amount of overlap between the score font sprites.
 	 */
 	public int getScoreFontOverlap() { return scoreOverlap; }
-
-	/**
-	 * Returns the prefix for the combo font sprites.
-	 */
-	public String getComboFontPrefix() { return comboPrefix; }
 
 	/**
 	 * Returns the amount of overlap between the combo font sprites.

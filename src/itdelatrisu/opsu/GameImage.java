@@ -180,31 +180,31 @@ public enum GameImage {
 	RANKING_TITLE ("ranking-title", "png"),
 	RANKING_MAXCOMBO ("ranking-maxcombo", "png"),
 	RANKING_ACCURACY ("ranking-accuracy", "png"),
-	DEFAULT_0 ("default-0", "png"),
-	DEFAULT_1 ("default-1", "png"),
-	DEFAULT_2 ("default-2", "png"),
-	DEFAULT_3 ("default-3", "png"),
-	DEFAULT_4 ("default-4", "png"),
-	DEFAULT_5 ("default-5", "png"),
-	DEFAULT_6 ("default-6", "png"),
-	DEFAULT_7 ("default-7", "png"),
-	DEFAULT_8 ("default-8", "png"),
-	DEFAULT_9 ("default-9", "png"),
-	SCORE_0 ("score-0", "png"),
-	SCORE_1 ("score-1", "png"),
-	SCORE_2 ("score-2", "png"),
-	SCORE_3 ("score-3", "png"),
-	SCORE_4 ("score-4", "png"),
-	SCORE_5 ("score-5", "png"),
-	SCORE_6 ("score-6", "png"),
-	SCORE_7 ("score-7", "png"),
-	SCORE_8 ("score-8", "png"),
-	SCORE_9 ("score-9", "png"),
-	SCORE_COMMA ("score-comma", "png"),
-	SCORE_DOT ("score-dot", "png"),
-	SCORE_PERCENT ("score-percent", "png"),
-	SCORE_X ("score-x", "png"),
-	LIGHTING ("lighting", "png"),
+	DEFAULT_0 ("default-0", "png", true, "0"),
+	DEFAULT_1 ("default-1", "png", true, "1"),
+	DEFAULT_2 ("default-2", "png", true, "2"),
+	DEFAULT_3 ("default-3", "png", true, "3"),
+	DEFAULT_4 ("default-4", "png", true, "4"),
+	DEFAULT_5 ("default-5", "png", true, "5"),
+	DEFAULT_6 ("default-6", "png", true, "6"),
+	DEFAULT_7 ("default-7", "png", true, "7"),
+	DEFAULT_8 ("default-8", "png", true, "8"),
+	DEFAULT_9 ("default-9", "png", true, "9"),
+	SCORE_0 ("score-0", "png", true, "0"),
+	SCORE_1 ("score-1", "png", true, "1"),
+	SCORE_2 ("score-2", "png", true, "2"),
+	SCORE_3 ("score-3", "png", true, "3"),
+	SCORE_4 ("score-4", "png", true, "4"),
+	SCORE_5 ("score-5", "png", true, "5"),
+	SCORE_6 ("score-6", "png", true, "6"),
+	SCORE_7 ("score-7", "png", true, "7"),
+	SCORE_8 ("score-8", "png", true, "8"),
+	SCORE_9 ("score-9", "png", true, "9"),
+	SCORE_COMMA ("score-comma", "png", true, "comma"),
+	SCORE_DOT ("score-dot", "png", true, "dot"),
+	SCORE_PERCENT ("score-percent", "png", true, "percent"),
+	SCORE_X ("score-x", "png", true, "x"),
+	LIGHTING ("lighting", "png", true, "0"),
 
 	// Game Mods
 	MOD_EASY ("selection-mod-easy", "png", false, false),
@@ -374,7 +374,7 @@ public enum GameImage {
 		IMG_JPG = 2;
 
 	/** The file name. */
-	private final String filename;
+	private String filename;
 
 	/** The formatted file name string (for loading multiple images). */
 	private String filenameFormat;
@@ -507,12 +507,34 @@ public enum GameImage {
 	}
 
 	/**
+	 * used for when prefixes change
+	 */
+	public void update() { }
+
+	/**
 	 * Returns an array of HD/SD file name suffixes based on the current options
 	 * and UI scale.
 	 */
 	private static String[] getSuffixes() {
 		return (Options.loadHDImages() && uiscale >= 1) ? SUFFIXES_HD : SUFFIXES_SD;
 	}
+
+
+	private String suffix;
+	private boolean isPrefixable;
+
+	GameImage(String filename, String type, boolean isPrefixable, String suffix) {
+		this(filename, type, true, false);
+		this.isPrefixable = isPrefixable;
+		this.suffix = suffix;
+	}
+
+	public void updatePrefix(String prefix) {
+		if (isPrefixable) {
+			this.filename = prefix + "-" + suffix;
+		}
+	}
+
 
 	/**
 	 * Constructor for game-related images (beatmap-skinnable and preloaded).
@@ -650,6 +672,14 @@ public enum GameImage {
 		if ((defaultImage = loadImageSingle(null)) != null) {
 			isSkinned = false;
 			process();
+			return;
+		}
+		String filenamebackup = filename;
+		filename = "dummy";
+		if ((defaultImage = loadImageSingle(null)) != null) {
+			isSkinned = false;
+			process();
+			filename = filenamebackup;
 			return;
 		}
 

@@ -19,6 +19,7 @@
 package itdelatrisu.opsu.skins;
 
 import itdelatrisu.opsu.ErrorHandler;
+import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 
 import java.io.BufferedReader;
@@ -235,19 +236,41 @@ public class SkinLoader {
 						try {
 							switch (tokens[0]) {
 							case "HitCirclePrefix":
-								skin.hitCirclePrefix = tokens[1];
+								GameImage.DEFAULT_0.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_1.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_2.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_3.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_4.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_5.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_6.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_7.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_8.updatePrefix(tokens[1]);
+								GameImage.DEFAULT_9.updatePrefix(tokens[1]);
 								break;
 							case "HitCircleOverlap":
 								skin.hitCircleOverlap = Integer.parseInt(tokens[1]);
 								break;
 							case "ScorePrefix":
-								skin.scorePrefix = tokens[1];
+								GameImage.SCORE_0.updatePrefix(tokens[1]);
+								GameImage.SCORE_1.updatePrefix(tokens[1]);
+								GameImage.SCORE_2.updatePrefix(tokens[1]);
+								GameImage.SCORE_3.updatePrefix(tokens[1]);
+								GameImage.SCORE_4.updatePrefix(tokens[1]);
+								GameImage.SCORE_5.updatePrefix(tokens[1]);
+								GameImage.SCORE_6.updatePrefix(tokens[1]);
+								GameImage.SCORE_7.updatePrefix(tokens[1]);
+								GameImage.SCORE_8.updatePrefix(tokens[1]);
+								GameImage.SCORE_9.updatePrefix(tokens[1]);
+								GameImage.SCORE_COMMA.updatePrefix(tokens[1]);
+								GameImage.SCORE_PERCENT.updatePrefix(tokens[1]);
+								GameImage.SCORE_X.updatePrefix(tokens[1]);
+								GameImage.SCORE_DOT.updatePrefix(tokens[1]);
 								break;
 							case "ScoreOverlap":
 								skin.scoreOverlap = Integer.parseInt(tokens[1]);
 								break;
 							case "ComboPrefix":
-								skin.comboPrefix = tokens[1];
+								// TODO: seems like this uses the score images
 								break;
 							case "ComboOverlap":
 								skin.comboOverlap = Integer.parseInt(tokens[1]);
