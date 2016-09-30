@@ -44,7 +44,7 @@ public class HalfEllipseMover extends Mover {
 	@Override
 	public double[] getPointAt(int time) {
 		double Tangle = Math.PI * getT(time) * dir;
-		double x = middlex + Math.cos(Tangle) * radius * mod; // TODO fix this
+		double x = middlex + Math.cos(Tangle) * radius;
 		double y = middley + Math.sin(Tangle) * radius * mod;
 		double dx = middlex - x;
 		double dy = middley - y;
@@ -55,7 +55,7 @@ public class HalfEllipseMover extends Mover {
 
 		return new double[] {
 			middlex - Math.cos(my) * d,
-			middley - Math.sin(my) * d
+			middley + Math.sin(my) * d
 		};
 	}
 
