@@ -17,9 +17,14 @@
  */
 package yugecin.opsudance;
 
+import itdelatrisu.opsu.objects.Circle;
+import itdelatrisu.opsu.objects.GameObject;
+
 public class Pippi {
 
-	private int angle;
+	private static double angle = 0;
+	private static int currentdelta;
+	private static final int targetdelta = 4;
 
 	public static boolean enabled;
 	public static int angleInc = 10;
@@ -27,5 +32,56 @@ public class Pippi {
 	public static boolean preventWobblyStreams = true;
 	public static boolean followcircleExpand = true;
 	public static boolean circleSlowSliders = true;
+
+	private static double pippirad;
+	private static double pippiminrad;
+	private static double pippimaxrad;
+	private static GameObject previous;
+
+	public static void reset() {
+		angle = 0;
+		currentdelta = 0;
+		pippiminrad = pippirad = Circle.diameter / 2d - 10d;
+		pippimaxrad = Circle.diameter - 10d;
+	}
+
+	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
+		if (!enabled || c.isSpinner()) {
+			return;
+		}
+		if (currentdelta >= targetdelta && c != previous) {
+			currentdelta = 0;
+			if (c.isSlider() && c.getTime() < time) {
+				angle += angleSliderInc / 1800d * Math.PI;
+				if (followcircleExpand && !isCurrentLazySlider) {
+					if (c.getEndTime() - time < 40 && pippirad > pippimaxrad) {
+						pippirad -= 5d;
+					} else if (time - c.getTime() > 10 && c.getEndTime() - c.getTime() > 600 && pippirad < pippimaxrad){
+						pippirad += 3d;
+					}
+				}
+			} else if (!c.isSpinner()) {
+				if (followcircleExpand && pippirad != pippiminrad) {
+					pippirad = pippiminrad;
+				}
+				angle += angleInc / 1800d * Math.PI;
+			}
+			// don't inc on long movements
+			if (c.getTime() - time > 400) {
+				previous = c;
+				return;
+			}
+		}
+		Dancer.instance.x += pippirad * Math.cos(angle);
+		Dancer.instance.y += pippirad * Math.sin(angle);
+	}
+
+	public static void update(int delta) {
+		currentdelta += delta;
+	}
+
+	public static boolean shouldPreventWobblyStream(double distance) {
+		 return enabled && distance < Circle.diameter * 1.7f && preventWobblyStreams;
+	}
 
 }

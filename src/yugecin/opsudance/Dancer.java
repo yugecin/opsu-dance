@@ -144,8 +144,6 @@ public class Dancer {
 				x = (float) point[0];
 				y = (float) point[1];
 			}
-			x = Utils.clamp(x, 10, Options.width - 10);
-			y = Utils.clamp(y, 10, Options.height - 10);
 		} else {
 			if (c.isSpinner()) {
 				double[] point = spinner.getPoint();
@@ -161,6 +159,9 @@ public class Dancer {
 				y = point.y;
 			}
 		}
+		Pippi.dance(time, c, isCurrentLazySlider);
+		x = Utils.clamp(x, 10, Options.width - 10);
+		y = Utils.clamp(y, 10, Options.height - 10);
 	}
 
 }
