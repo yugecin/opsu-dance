@@ -32,7 +32,6 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -113,6 +112,8 @@ public class Slider extends GameObject {
 	private int repeats;
 
 	private static Color curveColor = new Color(0, 0, 0, 20);
+
+	public static double bpm;
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
@@ -273,8 +274,9 @@ public class Slider extends GameObject {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1; tcurRepeat++) {
 				if (hitObject.getRepeatCount() - 1 > tcurRepeat) {
 					Image arrow = GameImage.REVERSEARROW.getImage();
-					float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
-					Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+					//float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
+					//Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+					Color arrowColor = Color.white;
 					if (tcurRepeat != currentRepeats) {
 						if (sliderTime == 0)
 							continue;
@@ -282,6 +284,7 @@ public class Slider extends GameObject {
 						arrow.setAlpha((float) (t - Math.floor(t)));
 					} else
 						arrow.setAlpha(Options.isSliderSnaking() ? decorationsAlpha : 1f);
+					arrow = arrow.getScaledCopy((float) (1 + 0.3d * (trackPosition % bpm) / bpm));
 					if (tcurRepeat % 2 == 0) {
 						// last circle
 						arrow.setRotation(curve.getEndAngle());
