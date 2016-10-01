@@ -77,7 +77,6 @@ public class Pippi {
 			// don't inc on long movements
 			if (c.getTime() - time > 400) {
 				previous = c;
-				return;
 			}
 		}
 		Dancer.instance.x += pippirad * Math.cos(angle);
