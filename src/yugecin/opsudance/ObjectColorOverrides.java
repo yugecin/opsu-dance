@@ -78,6 +78,10 @@ public enum ObjectColorOverrides {
 		this.nr = nr;
 	}
 
+	public static void reset(String mapname) {
+		hue = mapname.hashCode() % 360;
+	}
+
 	@Override
 	public String toString() {
 		return displayText;

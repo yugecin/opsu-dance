@@ -1331,6 +1331,9 @@ public class Game extends BasicGameState {
 		mirrorFrom = 0;
 		mirrorTo = gameObjects.length;
 
+		ObjectColorOverrides.reset(beatmap.getTitle());
+		CursorColorOverrides.reset(beatmap.getTitle());
+
 		skipButton.resetHover();
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().resetHover();
