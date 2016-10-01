@@ -1183,7 +1183,12 @@ public class Game extends BasicGameState {
 
 		Dancer.instance.reset();
 		Pippi.reset();
-		MoverDirection.reset(beatmap.getTitle());
+		MoverDirection.reset(beatmap.beatmapID);
+
+		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
+
+		ObjectColorOverrides.reset(beatmap.beatmapID);
+		CursorColorOverrides.reset(beatmap.beatmapID);
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
@@ -1230,7 +1235,6 @@ public class Game extends BasicGameState {
 
 			// initialize object maps
 			CursorColorOverrides.comboColors = ObjectColorOverrides.comboColors = beatmap.getComboColors();
-			ObjectColorOverrides.hue = 0f;
 			for (int i = 0; i < beatmap.objects.length; i++) {
 				HitObject hitObject = beatmap.objects[i];
 
@@ -1327,12 +1331,8 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 		}
 
-		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
 		mirrorFrom = 0;
 		mirrorTo = gameObjects.length;
-
-		ObjectColorOverrides.reset(beatmap.getTitle());
-		CursorColorOverrides.reset(beatmap.getTitle());
 
 		skipButton.resetHover();
 		if (isReplay || GameMod.AUTO.isActive())

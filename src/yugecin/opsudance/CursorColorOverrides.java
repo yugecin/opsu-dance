@@ -76,8 +76,8 @@ public enum CursorColorOverrides {
 		this.nr = nr;
 	}
 
-	public static void reset(String mapname) {
-		hue = mapname.hashCode() % 360;
+	public static void reset(int mapID) {
+		hue = mapID % 360;
 	}
 
 	@Override

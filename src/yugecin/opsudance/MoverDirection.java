@@ -59,8 +59,8 @@ public enum MoverDirection {
 		this.nr = nr;
 	}
 
-	public static void reset(String mapName) {
-		rand = new Random(mapName.hashCode());
+	public static void reset(int mapID) {
+		rand = new Random(mapID);
 	}
 
 	public abstract int getDirection(int currentDirection);
