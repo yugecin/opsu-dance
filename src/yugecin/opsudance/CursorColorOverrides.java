@@ -97,11 +97,12 @@ public enum CursorColorOverrides {
 	}
 
 	private static Color nextRainbowColor() {
-		hue += Dancer.rgbhueinc / 10f;
+		hue += Dancer.rgbcursorhueinc / 100f;
 		return new Color(java.awt.Color.getHSBColor(hue / 360f, 1.0f, 1.0f).getRGB());
 	}
 
 	private static Color nextMirrorRainbowColor() {
+		hue += Dancer.rgbcursorhueinc / 100f;
 		return new Color(java.awt.Color.getHSBColor((hue + 180f) / 360f, 1.0f, 1.0f).getRGB());
 	}
 

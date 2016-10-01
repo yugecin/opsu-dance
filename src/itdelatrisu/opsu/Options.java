@@ -756,6 +756,25 @@ public class Options {
 			}
 		},
 
+		DANCE_RGB_OBJECT_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", Dancer.rgbhueinc, -1800, 1800) {
+			@Override
+			public String getValueString() {
+				return String.format("%.1f°", val / 10f);
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Dancer.rgbhueinc = val;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.rgbhueinc = val;
+			}
+		},
+
 		DANCE_CURSOR_COLOR_OVERRIDE ("Cursor color override", "CursorColorOverride", "Override cursor color") {
 			@Override
 			public String getValueString() {
@@ -810,25 +829,24 @@ public class Options {
 			}
 		},
 
-		DANCE_RGB_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow color override", Dancer.rgbhueinc, -1800, 1800) {
+		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", Dancer.rgbhueinc, -1800, 1800) {
 			@Override
 			public String getValueString() {
-				return String.format("%.1f°", val / 10f);
+				return String.format("%.1f°", val / 100f);
 			}
 
 			@Override
 			public void drag(GameContainer container, int d) {
 				super.drag(container, d);
-				Dancer.rgbhueinc = val;
+				Dancer.rgbcursorhueinc = val;
 			}
 
 			@Override
 			public void read(String s) {
 				super.read(s);
-				Dancer.rgbhueinc = val;
+				Dancer.rgbcursorhueinc = val;
 			}
 		},
-
 
 		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", Dancer.hideobjects) {
 			@Override

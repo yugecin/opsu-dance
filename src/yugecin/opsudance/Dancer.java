@@ -65,6 +65,7 @@ public class Dancer {
 	public static int rgbhueinc = 70; // this should really get its own place somewhere...
 	public static CursorColorOverrides cursorColorOverride = CursorColorOverrides.NONE;
 	public static CursorColorOverrides cursorColorMirrorOverride = CursorColorOverrides.NONE;
+	public static int rgbcursorhueinc = 10; // this should really get its own place somewhere...
 	public static MoverDirection moverDirection = MoverDirection.RANDOM;
 	public static boolean hideobjects = false;
 
