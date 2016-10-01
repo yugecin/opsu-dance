@@ -46,6 +46,7 @@ public class Dancer {
 		new BeamSpinner(),
 		new CircleSpinner(),
 		new CubeSpinner(),
+		new HalfCircleSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
