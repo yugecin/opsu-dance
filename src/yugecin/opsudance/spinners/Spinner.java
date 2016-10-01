@@ -22,6 +22,7 @@ public abstract class Spinner {
 	private double[][] points;
 	private int length;
 	private int index;
+	private int delay;
 	public static int DELAY = 3;
 
 	public abstract void init();
@@ -32,7 +33,10 @@ public abstract class Spinner {
 	}
 
 	public double[] getPoint() {
-		index = ++index % length;
+		if (delay++ < DELAY) {
+			index = ++index % length;
+			delay = 0;
+		}
 		return points[index];
 	}
 

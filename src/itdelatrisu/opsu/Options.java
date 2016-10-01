@@ -59,6 +59,7 @@ import yugecin.opsudance.MoverDirection;
 import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.Pippi;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
+import yugecin.opsudance.spinners.Spinner;
 
 /**
  * Handles all user options.
@@ -632,6 +633,25 @@ public class Options {
 			@Override
 			public void read(String s) {
 				Dancer.instance.setSpinnerIndex(Integer.parseInt(s));
+			}
+		},
+
+		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast. Some spinners don't use delays.", Spinner.DELAY, 0, 20) {
+			@Override
+			public String getValueString() {
+				return String.format("%d frames", val);
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Spinner.DELAY = val;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Spinner.DELAY = val;
 			}
 		},
 
