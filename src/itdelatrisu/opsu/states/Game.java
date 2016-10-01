@@ -254,6 +254,9 @@ public class Game extends BasicGameState {
 	/** Music position bar coordinates and dimensions (for replay seeking). */
 	private float musicBarX, musicBarY, musicBarWidth, musicBarHeight;
 
+	private int mirrorFrom;
+	private int mirrorTo;
+
 	/** Music position bar background colors. */
 	private static final Color
 		MUSICBAR_NORMAL = new Color(12, 9, 10, 0.25f),
@@ -1014,6 +1017,17 @@ public class Game extends BasicGameState {
 		case Input.KEY_F12:
 			Utils.takeScreenShot();
 			break;
+		case Input.KEY_M:
+			if (Dancer.mirror) {
+				mirrorTo = objectIndex;
+				Dancer.mirror = false;
+				mirrorCursor.resetLocations();
+			} else {
+				mirrorFrom = objectIndex + 1;
+				mirrorTo = gameObjects.length;
+				Dancer.mirror = true;
+			}
+			break;
 		}
 	}
 
@@ -1314,6 +1328,8 @@ public class Game extends BasicGameState {
 		}
 
 		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
+		mirrorFrom = 0;
+		mirrorTo = gameObjects.length;
 
 		skipButton.resetHover();
 		if (isReplay || GameMod.AUTO.isActive())
@@ -1427,7 +1443,7 @@ public class Game extends BasicGameState {
 			if (!loseState) {
 				if (!Dancer.hideobjects) {
 					gameObj.draw(g, trackPosition, false);
-					if (Dancer.mirror && GameMod.AUTO.isActive()) {
+					if (Dancer.mirror && GameMod.AUTO.isActive() && idx <= mirrorTo && idx >= mirrorFrom) {
 						g.pushTransform();
 						g.rotate(Options.width / 2f, Options.height / 2f, 180f);
 						gameObj.draw(g, trackPosition, true);
