@@ -49,6 +49,7 @@ public class Dancer {
 		new HalfCircleSpinner(),
 		new IlluminatiSpinner(),
 		new LessThanThreeSpinner(),
+		new RektCircleSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
