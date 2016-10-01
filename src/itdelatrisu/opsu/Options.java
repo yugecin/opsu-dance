@@ -694,7 +694,7 @@ public class Options {
 			}
 		},
 
-		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff", Dancer.mirror) {
+		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff. Toggle this ingame by pressing the M key.", Dancer.mirror) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
