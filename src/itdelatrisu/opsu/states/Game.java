@@ -70,10 +70,7 @@ import org.newdawn.slick.state.transition.DelayedFadeOutTransition;
 import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
-import yugecin.opsudance.Dancer;
-import yugecin.opsudance.MoverDirection;
-import yugecin.opsudance.ObjectColorOverrides;
-import yugecin.opsudance.Pippi;
+import yugecin.opsudance.*;
 
 /**
  * "Game" state.
@@ -1218,7 +1215,7 @@ public class Game extends BasicGameState {
 			}
 
 			// initialize object maps
-			ObjectColorOverrides.comboColors = beatmap.getComboColors();
+			CursorColorOverrides.comboColors = ObjectColorOverrides.comboColors = beatmap.getComboColors();
 			ObjectColorOverrides.hue = 0f;
 			for (int i = 0; i < beatmap.objects.length; i++) {
 				HitObject hitObject = beatmap.objects[i];

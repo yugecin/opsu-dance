@@ -63,7 +63,8 @@ public class Dancer {
 	public static ObjectColorOverrides colorOverride = ObjectColorOverrides.NONE;
 	public static ObjectColorOverrides colorMirrorOverride = ObjectColorOverrides.NONE;
 	public static int rgbhueinc = 70; // this should really get its own place somewhere...
-	public static boolean cursoruselastobjectcolor = false;
+	public static CursorColorOverrides cursorColorOverride = CursorColorOverrides.NONE;
+	public static CursorColorOverrides cursorColorMirrorOverride = CursorColorOverrides.NONE;
 	public static MoverDirection moverDirection = MoverDirection.RANDOM;
 	public static boolean hideobjects = false;
 

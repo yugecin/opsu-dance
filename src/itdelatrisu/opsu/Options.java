@@ -54,10 +54,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
-import yugecin.opsudance.Dancer;
-import yugecin.opsudance.MoverDirection;
-import yugecin.opsudance.ObjectColorOverrides;
-import yugecin.opsudance.Pippi;
+import yugecin.opsudance.*;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 
 /**
@@ -759,7 +756,61 @@ public class Options {
 			}
 		},
 
-		DANCE_RGB_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object color override", Dancer.rgbhueinc, -1800, 1800) {
+		DANCE_CURSOR_COLOR_OVERRIDE ("Cursor color override", "CursorColorOverride", "Override cursor color") {
+			@Override
+			public String getValueString() {
+				return Dancer.cursorColorOverride.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return CursorColorOverrides.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
+			}
+
+			@Override
+			public String write() {
+				return "" + Dancer.cursorColorOverride.nr;
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.cursorColorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+			}
+		},
+
+		DANCE_CURSOR_MIRROR_COLOR_OVERRIDE ("Cursor mirror color override", "CursorMirrorColorOverride", "Override mirror cursor color") {
+			@Override
+			public String getValueString() {
+				return Dancer.cursorColorMirrorOverride.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return CursorColorOverrides.values();
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
+			}
+
+			@Override
+			public String write() {
+				return "" + Dancer.cursorColorMirrorOverride.nr;
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+			}
+		},
+
+		DANCE_RGB_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow color override", Dancer.rgbhueinc, -1800, 1800) {
 			@Override
 			public String getValueString() {
 				return String.format("%.1f°", val / 10f);
@@ -778,19 +829,6 @@ public class Options {
 			}
 		},
 
-		DANCE_CURSOR_USE_OBJECT_COLOR ("Give object color to cursor", "CursorUseObjectColor", "The color of the last object will be used on the cursor", Dancer.cursoruselastobjectcolor) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.cursoruselastobjectcolor = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.cursoruselastobjectcolor = bool;
-			}
-		},
 
 		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", Dancer.hideobjects) {
 			@Override
