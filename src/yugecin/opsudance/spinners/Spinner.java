@@ -33,7 +33,7 @@ public abstract class Spinner {
 	}
 
 	public double[] getPoint() {
-		if (delay++ < DELAY) {
+		if (++delay > DELAY) {
 			index = ++index % length;
 			delay = 0;
 		}
