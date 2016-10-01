@@ -36,6 +36,7 @@ public class BeamSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
+		index = ++index % 4;
 		final int MOD = 60;
 
 		point[0] = Options.width / 2d;
