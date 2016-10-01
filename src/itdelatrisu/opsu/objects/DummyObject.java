@@ -43,6 +43,12 @@ public class DummyObject extends GameObject {
 		updatePosition();
 	}
 
+	public DummyObject() {
+		this.hitObject = new HitObject("0,0,0,1,0,0:0:0:0:");
+		updatePosition();
+		updateStartEndPositions(0);
+	}
+
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {}
 
