@@ -20,13 +20,13 @@ package yugecin.opsudance;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.Circle;
+import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
-import yugecin.opsudance.spinners.RektSpinner;
-import yugecin.opsudance.spinners.Spinner;
+import yugecin.opsudance.spinners.*;
 
 public class Dancer {
 
@@ -43,7 +43,15 @@ public class Dancer {
 	};
 
 	public static Spinner[] spinners = new Spinner[] {
-		new RektSpinner()
+		new RektSpinner(),
+		new BeamSpinner(),
+		new CircleSpinner(),
+		new DonutSpinner(),
+		new CubeSpinner(),
+		new HalfCircleSpinner(),
+		new IlluminatiSpinner(),
+		new LessThanThreeSpinner(),
+		new RektCircleSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
@@ -60,6 +68,7 @@ public class Dancer {
 	public static boolean hideobjects = false;
 
 	private int dir;
+	private GameObject d = new DummyObject();
 	private GameObject p;
 
 	private MoverFactory moverFactory;
@@ -83,7 +92,7 @@ public class Dancer {
 
 	public void reset() {
 		isCurrentLazySlider = false;
-		p = null;
+		p = d;
 		dir = 1;
 		for (Spinner s : spinners) {
 			s.init();
@@ -117,6 +126,9 @@ public class Dancer {
 	public void update(int time, GameObject p, GameObject c) {
 		if (this.p != p) {
 			this.p = p;
+			if (this.p == null) {
+				this.p = p = d;
+			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
 			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x , c.end.y) <= Circle.diameter * 0.8f) {

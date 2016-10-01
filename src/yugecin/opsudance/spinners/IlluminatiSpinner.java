@@ -17,23 +17,23 @@
  */
 package yugecin.opsudance.spinners;
 
-public abstract class Spinner {
+import itdelatrisu.opsu.Options;
 
-	private double[][] points;
-	private int length;
-	private int index;
-	public static int DELAY = 3;
+public class IlluminatiSpinner extends Spinner {
 
-	public abstract void init();
-
-	protected final void init(double[][] points) {
-		this.points = points;
-		this.length = points.length;
+	@Override
+	public void init()
+	{
+		init( new double[][] {
+			new double[] { Options.width / 2d - 120, Options.height / 2d + 80 },
+			new double[] { Options.width / 2d, Options.height / 2d - 160 },
+			new double[] { Options.width / 2d + 120, Options.height / 2d + 80 }
+		} );
 	}
 
-	public double[] getPoint() {
-		index = ++index % length;
-		return points[index];
+	@Override
+	public String toString() {
+		return "Illuminati";
 	}
 
 }

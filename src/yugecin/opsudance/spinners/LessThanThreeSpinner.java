@@ -17,23 +17,40 @@
  */
 package yugecin.opsudance.spinners;
 
-public abstract class Spinner {
+import itdelatrisu.opsu.Options;
 
-	private double[][] points;
-	private int length;
-	private int index;
-	public static int DELAY = 3;
+public class LessThanThreeSpinner extends Spinner {
 
-	public abstract void init();
+	private int angle = 0;
 
-	protected final void init(double[][] points) {
-		this.points = points;
-		this.length = points.length;
+	@Override
+	public void init()
+	{
+
 	}
 
-	public double[] getPoint() {
-		index = ++index % length;
-		return points[index];
+	@Override
+	public double[] getPoint()
+	{
+		angle += 18;
+		if( angle > 360 ) angle = 0;
+		double theta = angle / 180d * Math.PI;
+		double[] pos = new double[] {
+			Options.width / 2d,
+			Options.height / 2d
+		};
+
+		double r = 2 - 2 * Math.sin( theta ) + Math.sin( theta ) * Math.sqrt( Math.abs( Math.cos( theta ) ) ) / ( Math.sin( theta ) + 1.4 );
+
+		pos[0] += Math.cos( theta ) * r * 100;
+		pos[1] -= Math.sin( theta ) * r * 100 + 100;
+
+		return pos;
+	}
+
+	@Override
+	public String toString() {
+		return "LessThanThree";
 	}
 
 }

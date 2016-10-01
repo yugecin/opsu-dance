@@ -17,23 +17,41 @@
  */
 package yugecin.opsudance.spinners;
 
-public abstract class Spinner {
+import itdelatrisu.opsu.Options;
 
-	private double[][] points;
-	private int length;
-	private int index;
-	public static int DELAY = 3;
+public class HalfCircleSpinner extends Spinner {
 
-	public abstract void init();
+	private int ang = 0;
+	private double[] point = new double[2];
+	private int skipang = 180;
 
-	protected final void init(double[][] points) {
-		this.points = points;
-		this.length = points.length;
+	@Override
+	public void init()
+	{
+		ang = 0;
+		skipang = 180;
 	}
 
-	public double[] getPoint() {
-		index = ++index % length;
-		return points[index];
+	@Override
+	public double[] getPoint()
+	{
+		ang += 15;
+
+		if( ang > skipang - 160 )
+		{
+			ang = skipang;
+			skipang += 359;
+		}
+
+		point[0] = Options.width / 2.0d + Options.height / 2 * 0.8d * Math.cos(ang/180d*Math.PI);
+		point[1] = Options.height / 2.0d + Options.height / 2 * 0.8d * Math.sin(ang/180d*Math.PI);
+
+		return point;
+	}
+
+	@Override
+	public String toString() {
+		return "Half circle";
 	}
 
 }
