@@ -889,9 +889,12 @@ public class Game extends BasicGameState {
 						trackPosition > beatmap.objects[objectIndex + 1].getTime() - hitResultOffset[GameData.HIT_50]);
 
 				// update hit object and check completion status
-				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition))
+				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
 					objectIndex++;  // done, so increment object index
-				else
+					if (objectIndex >= mirrorTo) {
+						Dancer.mirror = false;
+					}
+				} else
 					break;
 			}
 		}
@@ -1021,10 +1024,21 @@ public class Game extends BasicGameState {
 			if (Dancer.mirror) {
 				mirrorTo = objectIndex;
 				Dancer.mirror = false;
-				mirrorCursor.resetLocations();
 			} else {
+				mirrorCursor.resetLocations();
 				mirrorFrom = objectIndex;
 				mirrorTo = gameObjects.length;
+				Dancer.mirror = true;
+			}
+			break;
+		case Input.KEY_P:
+			if (Dancer.mirror) {
+				mirrorTo = objectIndex;
+				Dancer.mirror = false;
+			} else {
+				mirrorCursor.resetLocations();
+				mirrorFrom = objectIndex;
+				mirrorTo = mirrorFrom + 1;
 				Dancer.mirror = true;
 			}
 			break;
@@ -1446,7 +1460,7 @@ public class Game extends BasicGameState {
 			if (!loseState) {
 				if (!Dancer.hideobjects) {
 					gameObj.draw(g, trackPosition, false);
-					if (Dancer.mirror && GameMod.AUTO.isActive() && idx <= mirrorTo && idx >= mirrorFrom) {
+					if (Dancer.mirror && GameMod.AUTO.isActive() && idx < mirrorTo && idx >= mirrorFrom) {
 						g.pushTransform();
 						g.rotate(Options.width / 2f, Options.height / 2f, 180f);
 						gameObj.draw(g, trackPosition, true);
