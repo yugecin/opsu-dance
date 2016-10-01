@@ -26,6 +26,7 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.spinners.BeamSpinner;
+import yugecin.opsudance.spinners.CircleSpinner;
 import yugecin.opsudance.spinners.RektSpinner;
 import yugecin.opsudance.spinners.Spinner;
 
@@ -46,6 +47,7 @@ public class Dancer {
 	public static Spinner[] spinners = new Spinner[] {
 		new RektSpinner(),
 		new BeamSpinner(),
+		new CircleSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
