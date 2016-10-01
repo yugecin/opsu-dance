@@ -932,6 +932,20 @@ public class Options {
 			}
 		},
 
+		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", Pippi.circleLazySliders) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Pippi.circleLazySliders = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Pippi.circleLazySliders = bool;
+			}
+		},
+
 		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", Dancer.hideui) {
 			@Override
 			public void click(GameContainer container) {

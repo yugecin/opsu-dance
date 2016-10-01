@@ -27,12 +27,13 @@ public class Pippi {
 	private static int currentdelta;
 	private static final int targetdelta = 4;
 
-	public static boolean enabled;
+	public static boolean enabled = false;
 	public static int angleInc = 10;
 	public static int angleSliderInc = 50;
 	public static boolean preventWobblyStreams = true;
 	public static boolean followcircleExpand = true;
-	public static boolean circleSlowSliders = true;
+	public static boolean circleSlowSliders = false;
+	public static boolean circleLazySliders = false;
 
 	private static double pippirad;
 	private static double pippiminrad;
@@ -48,6 +49,9 @@ public class Pippi {
 
 	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
 		boolean slowSlider = circleSlowSliders && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
+		if (!slowSlider) {
+			slowSlider = circleLazySliders && isCurrentLazySlider;
+		}
 		if ((!enabled || c.isSpinner()) && !slowSlider) {
 			return;
 		}
