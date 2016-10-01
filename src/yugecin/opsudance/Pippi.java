@@ -52,6 +52,7 @@ public class Pippi {
 		if (!slowSlider) {
 			slowSlider = circleLazySliders && isCurrentLazySlider;
 		}
+		System.out.println(enabled);
 		if ((!enabled || c.isSpinner()) && !slowSlider) {
 			return;
 		}
@@ -92,7 +93,7 @@ public class Pippi {
 	}
 
 	public static boolean shouldPreventWobblyStream(double distance) {
-		 return enabled && distance < Circle.diameter * 1.7f && preventWobblyStreams;
+		return enabled && distance < Circle.diameter * 0.93f && preventWobblyStreams;
 	}
 
 }
