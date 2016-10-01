@@ -190,7 +190,12 @@ public class Cursor {
 		for (int i = 0; i < removeCount && !trail.isEmpty(); i++)
 			trail.remove();
 
-		Color filter = getColorFilter();
+		Color filter;
+		if (isMirrored) {
+			filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
+		} else {
+			filter = Dancer.cursorColorOverride.getColor();
+		}
 
 		// draw a fading trail
 		float alpha = 0f;
@@ -216,16 +221,6 @@ public class Cursor {
 		cursor.drawCentered(mouseX, mouseY, filter);
 		if (hasMiddle)
 			cursorMiddle.drawCentered(mouseX, mouseY, filter);
-	}
-
-	private Color getColorFilter() {
-		if (!Dancer.cursoruselastobjectcolor) {
-			return Color.white;
-		}
-		if (isMirrored) {
-			return lastMirroredObjColor;
-		}
-		return lastObjColor;
 	}
 
 	/**
