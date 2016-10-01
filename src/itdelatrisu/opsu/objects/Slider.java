@@ -32,7 +32,6 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -113,6 +112,8 @@ public class Slider extends GameObject {
 	private int repeats;
 
 	private static Color curveColor = new Color(0, 0, 0, 20);
+
+	public static double bpm;
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
@@ -282,6 +283,9 @@ public class Slider extends GameObject {
 						arrow.setAlpha((float) (t - Math.floor(t)));
 					} else
 						arrow.setAlpha(Options.isSliderSnaking() ? decorationsAlpha : 1f);
+					float sc = (float) (1 + 0.3d * (trackPosition % bpm) / bpm);
+					System.out.println(sc);
+					arrow = arrow.getScaledCopy(sc);
 					if (tcurRepeat % 2 == 0) {
 						// last circle
 						arrow.setRotation(curve.getEndAngle());

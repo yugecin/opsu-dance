@@ -1313,6 +1313,8 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 		}
 
+		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
+
 		skipButton.resetHover();
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().resetHover();
