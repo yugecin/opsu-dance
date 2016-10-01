@@ -353,7 +353,7 @@ public class Game extends BasicGameState {
 				if (objectIndex > 0) {
 					p = gameObjects[objectIndex - 1];
 				} else {
-					p = null;
+					p = Dancer.d;
 				}
 				Dancer d = Dancer.instance;
 				d.update(trackPosition, p, gameObjects[objectIndex]);

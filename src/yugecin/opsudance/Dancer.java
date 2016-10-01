@@ -24,6 +24,7 @@ import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
+import yugecin.opsudance.movers.LinearMover;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.spinners.*;
@@ -71,7 +72,7 @@ public class Dancer {
 	public static int cursortraillength = 20;
 
 	private int dir;
-	private GameObject d = new DummyObject();
+	public static final GameObject d = new DummyObject();
 	private GameObject p;
 
 	private MoverFactory moverFactory;
@@ -95,7 +96,7 @@ public class Dancer {
 
 	public void reset() {
 		isCurrentLazySlider = false;
-		p = d;
+		p = null;
 		dir = 1;
 		for (Spinner s : spinners) {
 			s.init();
@@ -129,8 +130,11 @@ public class Dancer {
 	public void update(int time, GameObject p, GameObject c) {
 		if (this.p != p) {
 			this.p = p;
-			if (this.p == null) {
-				this.p = p = d;
+			if (this.p == d) {
+				if (c.isSpinner()) {
+					double[] spinnerStartPoint = spinner.getPoint();
+					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
+				}
 			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
