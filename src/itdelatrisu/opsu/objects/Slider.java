@@ -139,7 +139,7 @@ public class Slider extends GameObject {
 		else
 			sliderBallImages = new Image[]{ GameImage.SLIDER_BALL.getImage() };
 		for (int i = 0; i < sliderBallImages.length; i++)
-			sliderBallImages[i] = sliderBallImages[i].getScaledCopy(diameterInt * 118 / 128, diameterInt * 118 / 128);
+			sliderBallImages[i] = sliderBallImages[i].getScaledCopy(diameterInt, diameterInt);
 
 		GameImage.SLIDER_FOLLOWCIRCLE.setImage(GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(diameterInt * 259 / 128, diameterInt * 259 / 128));
 		GameImage.REVERSEARROW.setImage(GameImage.REVERSEARROW.getImage().getScaledCopy(diameterInt, diameterInt));
