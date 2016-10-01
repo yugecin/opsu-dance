@@ -45,6 +45,7 @@ public class Dancer {
 		new RektSpinner(),
 		new BeamSpinner(),
 		new CircleSpinner(),
+		new DonutSpinner(),
 		new CubeSpinner(),
 		new HalfCircleSpinner(),
 		new IlluminatiSpinner(),

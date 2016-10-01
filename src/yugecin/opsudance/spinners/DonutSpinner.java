@@ -19,7 +19,7 @@ package yugecin.opsudance.spinners;
 
 import itdelatrisu.opsu.Options;
 
-public class CircleSpinner extends Spinner {
+public class DonutSpinner extends Spinner {
 
 	private int ang = 0;
 
@@ -38,15 +38,15 @@ public class CircleSpinner extends Spinner {
 
 		double rad = Options.width / 4.0f;
 
-		point[0] = Options.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
-		point[1] = Options.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
+		point[0] = Options.width / 2.0f + rad * Math.sin(ang);
+		point[1] = Options.height / 2.0f - rad * Math.cos(ang);
 
 		return point;
 	}
 
 	@Override
 	public String toString() {
-		return "Circle";
+		return "Donut";
 	}
 
 }
