@@ -29,6 +29,7 @@ public class AutoMoverFactory implements MoverFactory {
 
 	public static boolean ONLY_CIRCLE_STACKS = false;
 	public static int CIRCLE_STREAM = 58;
+	private int starttime;
 	private int endtime;
 	protected Mover m;
 
@@ -52,6 +53,7 @@ public class AutoMoverFactory implements MoverFactory {
 			return new LinearMover(start, end, dir);
 		}
 
+		starttime = start.getEndTime();
 		endtime = end.getTime();
 
 		double velocity = distance / dt;
@@ -92,10 +94,13 @@ public class AutoMoverFactory implements MoverFactory {
 		return last;
 	}
 
-	protected boolean inbounds( Mover m )
+	@SuppressWarnings("SimplifiableIfStatement")
+	protected boolean inbounds(Mover m )
 	{
 		this.m = m;
-		return checkBounds(m.getPointAt(endtime));
+		if (!checkBounds(m.getPointAt((int) (starttime + (endtime - starttime) * 0.3)))) return false;
+		if (!checkBounds(m.getPointAt((int) (starttime + (endtime - starttime) * 0.7)))) return false;
+		return checkBounds(m.getPointAt((int) (starttime + (endtime - starttime) * 0.5)));
 	}
 
 	private boolean checkBounds( double[] pos )
