@@ -1314,7 +1314,7 @@ public class Options {
 	 * @param container the game container
 	 */
 	public static void setNextFPS(GameContainer container) {
-		GameOption.TARGET_FPS.clickListItem((GameOption.TARGET_FPS.val + 1) % targetFPS.length);
+		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
 		UI.sendBarNotification(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString()));
 	}
 
