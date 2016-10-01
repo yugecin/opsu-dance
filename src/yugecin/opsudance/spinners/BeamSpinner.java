@@ -24,7 +24,6 @@ public class BeamSpinner extends Spinner {
 	private double ang = 0;
 	private double[] point;
 	private int index;
-	private int delay = 0;
 
 	@Override
 	public void init()
@@ -37,12 +36,6 @@ public class BeamSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		if( ++delay > DELAY )
-		{
-			delay = 0;
-			index = ++index % 4;
-		}
-
 		final int MOD = 60;
 
 		point[0] = Options.width / 2d;

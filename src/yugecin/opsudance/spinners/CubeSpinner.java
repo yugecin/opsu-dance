@@ -49,7 +49,6 @@ public class CubeSpinner extends Spinner {
 
 	private double size = 0;
 
-	private int delay = 0;
 	private int index = 0;
 
 	private double[] point = new double[2];
@@ -64,12 +63,6 @@ public class CubeSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		if( ++delay <= DELAY )
-		{
-			return point;
-		}
-		delay = 0;
-
 		if( ++index >= 16 )
 		{
 			index = 0;
