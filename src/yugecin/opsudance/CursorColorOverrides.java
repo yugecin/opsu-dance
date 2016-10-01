@@ -36,25 +36,25 @@ public enum CursorColorOverrides {
 	COMBO6 ("Combo6", 6),
 	COMBO7 ("Combo7", 7),
 	COMBO8 ("Combo8", 8),
-	RAINBOW ("Rainbow", 10) {
+	RAINBOW ("Rainbow", 9) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			return nextRainbowColor();
 		}
 	},
-	RAINBOWSHIFT ("Rainbow + 180° hue shift", 11) {
+	RAINBOWSHIFT ("Rainbow + 180° hue shift", 10) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			return nextMirrorRainbowColor();
 		}
 	},
-	BLACK ("Black", 12) {
+	BLACK ("Black", 11) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			return Color.black;
 		}
 	},
-	LASTOBJ ("Use last object's colors", 13) {
+	LASTOBJ ("Use last object's colors", 12) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			if (mirrored) {
