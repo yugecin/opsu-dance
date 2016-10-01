@@ -429,7 +429,7 @@ public class Slider extends GameObject {
 		data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				cx, cy, color, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd);
-		if (Dancer.mirror) {
+		if (Dancer.mirror && GameMod.AUTO.isActive()) {
 			float[] m = Utils.mirrorPoint(cx, cy);
 			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,
