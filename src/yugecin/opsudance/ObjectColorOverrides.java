@@ -52,6 +52,18 @@ public enum ObjectColorOverrides {
 		public Color getColor(int comboColorIndex) {
 			return nextMirrorRainbowColor();
 		}
+	},
+	BLACK ("Black", 12) {
+		@Override
+		public Color getColor(int comboColorIndex) {
+			return Color.black;
+		}
+	},
+	WHITE ("White", 13) {
+		@Override
+		public Color getColor(int comboColorIndex) {
+			return Color.white;
+		}
 	};
 
 	public int nr;
