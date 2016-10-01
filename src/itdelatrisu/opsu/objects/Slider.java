@@ -274,8 +274,9 @@ public class Slider extends GameObject {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1; tcurRepeat++) {
 				if (hitObject.getRepeatCount() - 1 > tcurRepeat) {
 					Image arrow = GameImage.REVERSEARROW.getImage();
-					float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
-					Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+					//float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
+					//Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+					Color arrowColor = Color.white;
 					if (tcurRepeat != currentRepeats) {
 						if (sliderTime == 0)
 							continue;
