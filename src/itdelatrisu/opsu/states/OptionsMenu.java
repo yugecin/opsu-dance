@@ -122,6 +122,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
 			GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
 			GameOption.DANCE_RGB_CURSOR_INC,
+			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
 			GameOption.DANCE_REMOVE_BG,
 			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,

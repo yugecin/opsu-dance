@@ -186,6 +186,10 @@ public class Cursor {
 				removeCount = trail.size() - max;
 		}
 
+		if (Dancer.cursortraillength > 20) {
+			removeCount = trail.size() - Dancer.cursortraillength;
+		}
+
 		// remove points from the lists
 		for (int i = 0; i < removeCount && !trail.isEmpty(); i++)
 			trail.remove();

@@ -848,6 +848,28 @@ public class Options {
 			}
 		},
 
+		DANCE_CURSOR_TRAIL_OVERRIDE ("Cursor trail length override", "CursorTrailOverride", "Override cursor trail length", Dancer.cursortraillength, 20, 400) {
+			@Override
+			public String getValueString() {
+				if (val == 20) {
+					return "Disabled";
+				}
+				return "" + val;
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				Dancer.cursortraillength = val;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.cursortraillength = val;
+			}
+		},
+
 		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", Dancer.hideobjects) {
 			@Override
 			public void click(GameContainer container) {
