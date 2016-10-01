@@ -113,6 +113,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_LAZY_SLIDERS,
 			GameOption.DANCE_CIRCLE_STREAMS,
 			GameOption.DANCE_ONLY_CIRCLE_STACKS,
+			GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
 			GameOption.DANCE_MIRROR,
 		}),
 		DANCEDISP ("Dance display", new GameOption[] {

@@ -115,6 +115,8 @@ public class Slider extends GameObject {
 
 	public static double bpm;
 
+	public float pixelLength;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -163,6 +165,8 @@ public class Slider extends GameObject {
 		color = Dancer.colorOverride.getColor(comboColorIndex);
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 		updatePosition();
+
+		this.pixelLength = hitObject.getPixelLength();
 
 		// slider time calculations
 		this.sliderTime = hitObject.getSliderTime(sliderMultiplier, game.getBeatLength());

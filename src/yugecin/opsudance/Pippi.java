@@ -19,6 +19,7 @@ package yugecin.opsudance;
 
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.GameObject;
+import itdelatrisu.opsu.objects.Slider;
 
 public class Pippi {
 
@@ -46,18 +47,21 @@ public class Pippi {
 	}
 
 	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
-		if (!enabled || c.isSpinner()) {
+		boolean slowSlider = circleSlowSliders && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
+		if ((!enabled || c.isSpinner()) && !slowSlider) {
 			return;
 		}
 		if (currentdelta >= targetdelta && c != previous) {
 			currentdelta = 0;
 			if (c.isSlider() && c.getTime() < time) {
 				angle += angleSliderInc / 1800d * Math.PI;
-				if (followcircleExpand && !isCurrentLazySlider) {
-					if (c.getEndTime() - time < 40 && pippirad > pippimaxrad) {
-						pippirad -= 5d;
-					} else if (time - c.getTime() > 10 && c.getEndTime() - c.getTime() > 600 && pippirad < pippimaxrad){
-						pippirad += 3d;
+				if (!slowSlider) {
+					if (followcircleExpand) {
+						if (c.getEndTime() - time < 40 && pippirad > pippimaxrad) {
+							pippirad -= 5d;
+						} else if (time - c.getTime() > 10 && c.getEndTime() - c.getTime() > 600 && pippirad < pippimaxrad) {
+							pippirad += 3d;
+						}
 					}
 				}
 			} else if (!c.isSpinner()) {
@@ -74,6 +78,9 @@ public class Pippi {
 		}
 		Dancer.instance.x += pippirad * Math.cos(angle);
 		Dancer.instance.y += pippirad * Math.sin(angle);
+		if (slowSlider) {
+			c.end.set(Dancer.instance.x,Dancer.instance.y);
+		}
 	}
 
 	public static void update(int delta) {

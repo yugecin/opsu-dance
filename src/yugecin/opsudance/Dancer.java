@@ -134,7 +134,7 @@ public class Dancer {
 			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
-			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x , c.end.y) <= Circle.diameter * 0.8f) {
+			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
 				Slider s = (Slider) c;
 				Vec2f mid = s.getCurve().pointAt(1f);
 				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
