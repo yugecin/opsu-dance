@@ -44,9 +44,8 @@ public class AutoMoverFactory implements MoverFactory {
 		}
 
 		// stacked: circles if not too quick
-		if (distance < Circle.diameter && ((dt > CIRCLE_STREAM && !ONLY_CIRCLE_STACKS) || distance < HitObject.getStackOffset() * 1.1f)) {
+		if (distance < Circle.diameter && ((dt > CIRCLE_STREAM && !ONLY_CIRCLE_STACKS) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
 			return new CircleMover(start, end, dir);
-
 		}
 
 		if (Pippi.shouldPreventWobblyStream(distance)) {
