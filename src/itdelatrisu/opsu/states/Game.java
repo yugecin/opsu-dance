@@ -1196,7 +1196,6 @@ public class Game extends BasicGameState {
 			throw new RuntimeException("Running game with no beatmap loaded.");
 
 		Dancer.instance.reset();
-		Pippi.reset();
 		MoverDirection.reset(beatmap.beatmapID);
 
 		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
@@ -1345,6 +1344,7 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 		}
 
+		Pippi.reset();
 		mirrorFrom = 0;
 		mirrorTo = gameObjects.length;
 
