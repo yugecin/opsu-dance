@@ -52,7 +52,6 @@ public class Pippi {
 		if (!slowSlider) {
 			slowSlider = circleLazySliders && isCurrentLazySlider;
 		}
-		System.out.println(enabled);
 		if ((!enabled || c.isSpinner()) && !slowSlider) {
 			return;
 		}
