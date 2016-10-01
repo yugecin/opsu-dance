@@ -1023,7 +1023,7 @@ public class Game extends BasicGameState {
 				Dancer.mirror = false;
 				mirrorCursor.resetLocations();
 			} else {
-				mirrorFrom = objectIndex + 1;
+				mirrorFrom = objectIndex;
 				mirrorTo = gameObjects.length;
 				Dancer.mirror = true;
 			}
