@@ -829,10 +829,10 @@ public class Options {
 			}
 		},
 
-		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", Dancer.rgbhueinc, -1800, 1800) {
+		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", Dancer.rgbhueinc, -2000, 2000) {
 			@Override
 			public String getValueString() {
-				return String.format("%.1f°", val / 100f);
+				return String.format("%.2f°", val / 1000f);
 			}
 
 			@Override
