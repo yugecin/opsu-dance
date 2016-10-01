@@ -38,6 +38,12 @@ public class RektCircleSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
+		if( ++delay < DELAY )
+		{
+			return point;
+		}
+		delay = 0;
+
 		final int INC = 50;
 
 		if( index == 0 )
@@ -48,20 +54,20 @@ public class RektCircleSpinner extends Spinner {
 		}
 		else if( index == 1 )
 		{
-			point[0] = Options.width / 2d - size / 2d;
-			point[1] = Options.height / 2d - size / 2d + pos;
+			point[0] = Options.width / 2 - size / 2;
+			point[1] = Options.height / 2 - size / 2 + pos;
 			index++;
 		}
 		else if( index == 2 )
 		{
-			point[0] = Options.width / 2d - size / 2d + pos;
-			point[1] = Options.height / 2d + size / 2d;
+			point[0] = Options.width / 2 - size / 2 + pos;
+			point[1] = Options.height / 2 + size / 2;
 			index++;
 		}
 		else if( index == 3 )
 		{
-			point[0] = Options.width / 2d + size / 2d;
-			point[1] = Options.height / 2d + size / 2d - pos;
+			point[0] = Options.width / 2 + size / 2;
+			point[1] = Options.height / 2 + size / 2 - pos;
 			pos += INC;
 			if( pos > size )
 			{

@@ -22,6 +22,7 @@ public abstract class Spinner {
 	private double[][] points;
 	private int length;
 	private int index;
+	public static int DELAY = 3;
 
 	public abstract void init();
 
