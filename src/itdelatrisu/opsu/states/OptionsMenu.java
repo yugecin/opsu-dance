@@ -70,7 +70,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.MUSIC_VOLUME,
 			GameOption.EFFECT_VOLUME,
 			GameOption.HITSOUND_VOLUME,
-			GameOption.IGNORE_SAMPLE_VOLUME,
+			GameOption.SAMPLE_VOLUME_OVERRIDE,
 			GameOption.MUSIC_OFFSET,
 			GameOption.DISABLE_SOUNDS,
 			GameOption.ENABLE_THEME_SONG

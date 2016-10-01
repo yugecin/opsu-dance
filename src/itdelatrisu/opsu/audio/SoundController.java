@@ -291,8 +291,8 @@ public class SoundController {
 		if (hitSound < 0)
 			return;
 
-		if (Options.ignoreBeatmapSampleVolume()) {
-			sampleVolumeMultiplier = 1f;
+		if (Options.getSampleVolumeOverride() > 0) {
+			sampleVolumeMultiplier = Options.getSampleVolumeOverride();
 		}
 
 		float volume = Options.getHitSoundVolume() * sampleVolumeMultiplier * Options.getMasterVolume();

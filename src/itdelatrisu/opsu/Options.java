@@ -435,7 +435,15 @@ public class Options {
 				container.setMusicVolume(getMasterVolume() * getMusicVolume());
 			}
 		},
-		IGNORE_SAMPLE_VOLUME ("Ignore sample volume", "IgnoreBMSample", "Ignore hitsound volume set by beatmap", true),
+		SAMPLE_VOLUME_OVERRIDE ("Sample volume override", "BMSampleOverride", "Override beatmap hitsound volume", 100, 0, 100) {
+			@Override
+			public String getValueString() {
+				if (val == 0) {
+					return "Disabled";
+				}
+				return super.getValueString();
+			}
+		},
 		EFFECT_VOLUME ("Effect Volume", "VolumeEffect", "Volume of menu and game sounds.", 70, 0, 100),
 		HITSOUND_VOLUME ("Hit Sound Volume", "VolumeHitSound", "Volume of hit sounds.", 30, 0, 100),
 		MUSIC_OFFSET ("Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
@@ -1272,7 +1280,7 @@ public class Options {
 	 * Returns the default hit sound volume.
 	 * @return the hit sound volume [0, 1]
 	 */
-	public static boolean ignoreBeatmapSampleVolume() { return GameOption.IGNORE_SAMPLE_VOLUME.bool; }
+	public static float getSampleVolumeOverride() { return GameOption.SAMPLE_VOLUME_OVERRIDE.val / 100f; }
 
 	/**
 	 * Returns the music offset time.
