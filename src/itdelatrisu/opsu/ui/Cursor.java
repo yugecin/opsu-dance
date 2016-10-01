@@ -171,7 +171,7 @@ public class Cursor {
 		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
 		if (newStyle) {
 			// new style: add all points between cursor movements
-			if (!addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
+			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
 				trail.add(new Point(mouseX, mouseY));
 			}
 			lastPosition.move(mouseX, mouseY);
