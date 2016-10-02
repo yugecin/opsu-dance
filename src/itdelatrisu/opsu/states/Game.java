@@ -457,7 +457,7 @@ public class Game extends BasicGameState {
 				g.fillRect(0, height * 0.875f, width, height * 0.125f);
 			}
 
-			if (!Dancer.hideui && GameMod.AUTO.isActive()) {
+			if (!Dancer.hideui || !GameMod.AUTO.isActive()) {
 				data.drawGameElements(g, true, objectIndex == 0);
 			}
 
