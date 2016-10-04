@@ -2,6 +2,7 @@
 ----- use map offset http://trigger.s-ul.eu/YNq6RuXf this thingy
 ----- detect native res, better resolution settings
 -- sync RGB cursor increment with the hit objects
+-- there is no option for use last object color +180 hue shift (basically inverted)
 -- overshoot mover https://aww.moe/um5nic.gif
 - rename jump mover to touchscreen?
 - random spinner option
