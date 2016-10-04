@@ -32,6 +32,7 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -208,6 +209,12 @@ public class Slider extends GameObject {
 		Image hitCircle = GameImage.HITCIRCLE.getImage();
 		Vec2f endPos = curve.pointAt(1);
 
+		float curveAlpha = 1f;
+		if (GameMod.HIDDEN.isActive() && trackPosition > getTime()) {
+			curveAlpha = Math.max(0f, 1f - ((float) (trackPosition - getTime()) / (getEndTime() - getTime())) * 1.05f);
+		}
+		curveColor.a = curveAlpha;
+
 		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
 		curve.draw(curveColor, curveInterval);
 		color.a = alpha;
@@ -239,7 +246,7 @@ public class Slider extends GameObject {
 			Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
 			for (int i = 0; i < ticksT.length; i++) {
 				Vec2f c = curve.pointAt(ticksT[i]);
-				Colors.WHITE_FADE.a = decorationsAlpha;
+				Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
 				g.pushTransform();
 				if (mirror) {
 					g.rotate(c.x, c.y, -180f);

@@ -908,7 +908,7 @@ public class GameData {
 					float alpha = 1f - progress;
 
 					// slider curve
-					if (hitResult.curve != null) {
+					if (hitResult.curve != null && !GameMod.HIDDEN.isActive()) {
 						float oldWhiteAlpha = Colors.WHITE_FADE.a;
 						float oldColorAlpha = hitResult.color.a;
 						Colors.WHITE_FADE.a = alpha;
