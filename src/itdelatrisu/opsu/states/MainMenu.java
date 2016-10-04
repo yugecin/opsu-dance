@@ -295,7 +295,7 @@ public class MainMenu extends BasicGameState {
 			String text = "opsu!";
 			int fheight = Fonts.SMALL.getLineHeight();
 			int fwidth = Fonts.SMALL.getWidth(text);
-			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, height * 0.997f - fheight, text, Color.white);
+			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
 		}
 
 		if (danceRepoButton != null) {
@@ -303,7 +303,7 @@ public class MainMenu extends BasicGameState {
 			String text = "opsu!dance";
 			int fheight = Fonts.SMALL.getLineHeight();
 			int fwidth = Fonts.SMALL.getWidth(text);
-			Fonts.SMALL.drawString(danceRepoButton.getX() - fwidth / 2, height * 0.997f - fheight, text, Color.white);
+			Fonts.SMALL.drawString(danceRepoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
 		}
 
 		// draw update button
