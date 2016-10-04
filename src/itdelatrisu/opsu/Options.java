@@ -633,22 +633,22 @@ public class Options {
 			}
 		},
 
-		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", Spinner.DELAY, 0, 20) {
+		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", Spinner.DELAY, 0, 200) {
 			@Override
 			public String getValueString() {
-				return String.format("%dms", val);
+				return String.format("%dms", val / 10);
 			}
 
 			@Override
 			public void drag(GameContainer container, int d) {
 				super.drag(container, d);
-				Spinner.DELAY = val;
+				Spinner.DELAY = val / 10;
 			}
 
 			@Override
 			public void read(String s) {
 				super.read(s);
-				Spinner.DELAY = val;
+				Spinner.DELAY = val / 10;
 			}
 		},
 
