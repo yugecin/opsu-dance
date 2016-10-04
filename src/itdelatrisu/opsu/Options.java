@@ -849,6 +849,20 @@ public class Options {
 			}
 		},
 
+		DANCE_CURSOR_ONLY_COLOR_TRAIL ("Only color cursor trail", "OnlyColorTrail", "Don't color the cursor, only the trail", Dancer.onlycolortrail) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.onlycolortrail = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.onlycolortrail = bool;
+			}
+		},
+
 		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", Dancer.rgbhueinc, -2000, 2000) {
 			@Override
 			public String getValueString() {

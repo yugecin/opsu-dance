@@ -222,9 +222,9 @@ public class Cursor {
 		// draw the other components
 		if (newStyle && skin.isCursorRotated())
 			cursor.setRotation(cursorAngle);
-		cursor.drawCentered(mouseX, mouseY, filter);
+		cursor.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
 		if (hasMiddle)
-			cursorMiddle.drawCentered(mouseX, mouseY, filter);
+			cursorMiddle.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
 	}
 
 	/**

@@ -24,7 +24,6 @@ import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import yugecin.opsudance.movers.LinearMover;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.spinners.*;
@@ -71,6 +70,7 @@ public class Dancer {
 	public static boolean hideobjects = false;
 	public static int cursortraillength = 20;
 	public static boolean hidewatermark = false;
+	public static boolean onlycolortrail = false;
 
 	private int dir;
 	public static final GameObject d = new DummyObject();
