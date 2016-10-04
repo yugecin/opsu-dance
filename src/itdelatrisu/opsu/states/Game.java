@@ -637,6 +637,7 @@ public class Game extends BasicGameState {
 			throws SlickException {
 		UI.update(delta);
 		Pippi.update(delta);
+		yugecin.opsudance.spinners.Spinner.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())

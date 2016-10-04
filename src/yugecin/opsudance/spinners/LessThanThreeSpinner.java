@@ -32,7 +32,9 @@ public class LessThanThreeSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		angle += 18;
+		if (waitForDelay()) {
+			angle += 18;
+		}
 		if( angle > 360 ) angle = 0;
 		double theta = angle / 180d * Math.PI;
 		double[] pos = new double[] {

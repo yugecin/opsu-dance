@@ -63,7 +63,7 @@ public class CubeSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		if( ++index >= 16 )
+		if(waitForDelay() && ++index >= 16 )
 		{
 			index = 0;
 			azimuth += 2.0d;

@@ -36,6 +36,10 @@ public class BeamSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
+		if (!waitForDelay()) {
+			return point;
+		}
+
 		index = ++index % 4;
 		final int MOD = 60;
 

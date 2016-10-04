@@ -34,7 +34,9 @@ public class CircleSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		ang += 15;
+		if (waitForDelay()) {
+			ang += 15;
+		}
 
 		double rad = Options.width / 4.0f;
 

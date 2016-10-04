@@ -35,7 +35,9 @@ public class HalfCircleSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		ang += 15;
+		if (waitForDelay()) {
+			ang += 15;
+		}
 
 		if( ang > skipang - 160 )
 		{

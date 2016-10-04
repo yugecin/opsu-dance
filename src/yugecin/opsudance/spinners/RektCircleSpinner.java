@@ -38,8 +38,7 @@ public class RektCircleSpinner extends Spinner {
 	@Override
 	public double[] getPoint()
 	{
-		if( ++delay < DELAY )
-		{
+		if (!waitForDelay()) {
 			return point;
 		}
 		delay = 0;

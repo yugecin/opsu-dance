@@ -633,10 +633,10 @@ public class Options {
 			}
 		},
 
-		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast. Some spinners don't use delays.", Spinner.DELAY, 0, 20) {
+		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", Spinner.DELAY, 0, 20) {
 			@Override
 			public String getValueString() {
-				return String.format("%d frames", val);
+				return String.format("%dms", val);
 			}
 
 			@Override
