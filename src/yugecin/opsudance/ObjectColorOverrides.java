@@ -62,9 +62,11 @@ public enum ObjectColorOverrides {
 	WHITE ("White", 13) {
 		@Override
 		public Color getColor(int comboColorIndex) {
-			return Color.white;
+			return white;
 		}
 	};
+
+	private static Color white = new Color(255, 255, 255);
 
 	public int nr;
 	private String displayText;
