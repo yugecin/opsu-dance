@@ -36,6 +36,7 @@ import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
+import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
@@ -630,6 +631,10 @@ public class Game extends BasicGameState {
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, Utils.isGameKeyPressed());
 		else
 			UI.draw(g);
+
+		if (!Dancer.hidewatermark) {
+			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
+		}
 	}
 
 	@Override

@@ -108,6 +108,10 @@ public class Updater {
 	/** The download object. */
 	private Download download;
 
+	public String getCurrentVersion() {
+		return currentVersion.getMajorVersion() + "." + currentVersion.getMinorVersion() + "." + currentVersion.getIncrementalVersion();
+	}
+
 	/**
 	 * Constructor.
 	 */

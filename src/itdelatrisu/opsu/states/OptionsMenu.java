@@ -44,6 +44,7 @@ import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import yugecin.opsudance.ui.ItemList;
+import yugecin.opsudance.ui.RWM;
 
 /**
  * "Game Options" state.
@@ -129,6 +130,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.DANCE_REMOVE_BG,
 			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,
+			GameOption.DANCE_HIDE_WATERMARK,
 		}),
 		PIPPI ("Pippi", new GameOption[] {
 			GameOption.PIPPI_ENABLE,
@@ -203,16 +205,19 @@ public class OptionsMenu extends BasicGameState {
 	private final int state;
 
 	private final ItemList list;
+	private final RWM rwm;
 
 	public OptionsMenu(int state) {
 		this.state = state;
 		list = new ItemList();
+		rwm = new RWM();
 	}
 
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		list.init(container);
+		rwm.init(container);
 
 		this.container = container;
 		this.game = game;
@@ -288,6 +293,9 @@ public class OptionsMenu extends BasicGameState {
 		if (list.isVisible()) {
 			list.render(container, game, g);
 		}
+		if (rwm.isVisible()) {
+			rwm.render(container, game, g);
+		}
 
 		UI.getBackButton().draw();
 
@@ -311,6 +319,7 @@ public class OptionsMenu extends BasicGameState {
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta)
 			throws SlickException {
+		rwm.update(delta);
 		UI.update(delta);
 		MusicController.loopTrackIfEnded(false);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
@@ -325,12 +334,18 @@ public class OptionsMenu extends BasicGameState {
 		if (list.isVisible()) {
 			list.mouseReleased(button, x, y);
 		}
+		if (rwm.isVisible()) {
+			rwm.mouseReleased(button, x, y);
+		}
 	}
 
 	@Override
 	public void mousePressed(int button, int x, int y) {
 		if (list.isVisible()) {
 			list.mousePressed(button, x, y);
+			return;
+		}
+		if (rwm.isVisible()) {
 			return;
 		}
 
@@ -367,7 +382,11 @@ public class OptionsMenu extends BasicGameState {
 		if (option != null) {
 			Object[] listItems = option.getListItems();
 			if (listItems == null) {
-				option.click(container);
+				if (option.showRWM()) {
+					rwm.show();
+				} else {
+					option.click(container);
+				}
 			} else {
 				list.setItems(listItems);
 				list.setClickListener(new Observer() {
@@ -394,6 +413,9 @@ public class OptionsMenu extends BasicGameState {
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
 		if (list.isVisible()) {
 			list.mouseDragged(oldx, oldy, newx, newy);
+			return;
+		}
+		if (rwm.isVisible()) {
 			return;
 		}
 
@@ -435,6 +457,10 @@ public class OptionsMenu extends BasicGameState {
 	public void keyPressed(int key, char c) {
 		if (list.isVisible()) {
 			list.keyPressed(key, c);
+			return;
+		}
+		if (rwm.isVisible()) {
+			rwm.keyPressed(key, c);
 			return;
 		}
 

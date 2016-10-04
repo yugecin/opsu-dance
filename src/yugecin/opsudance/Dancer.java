@@ -70,6 +70,7 @@ public class Dancer {
 	public static MoverDirection moverDirection = MoverDirection.RANDOM;
 	public static boolean hideobjects = false;
 	public static int cursortraillength = 20;
+	public static boolean hidewatermark = false;
 
 	private int dir;
 	public static final GameObject d = new DummyObject();

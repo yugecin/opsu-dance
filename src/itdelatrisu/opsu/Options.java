@@ -960,6 +960,23 @@ public class Options {
 			}
 		},
 
+		DANCE_HIDE_WATERMARK ("Hide watermark", "HideWaterMark", "Hide the githublink in the top left corner of the playfield", false) {
+			@Override
+			public String getValueString() {
+				return Dancer.hidewatermark ? "Yes" : "No";
+			}
+
+			@Override
+			public void click(GameContainer container) {
+				Dancer.hidewatermark = false;
+			}
+
+			@Override
+			public boolean showRWM() {
+				return !Dancer.hidewatermark;
+			}
+		},
+
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", Pippi.enabled) {
 			@Override
 			public void click(GameContainer container) {
@@ -1130,6 +1147,8 @@ public class Options {
 		 * @return the description string
 		 */
 		public String getDescription() { return description; }
+
+		public boolean showRWM() { return false; } // this is probably a shitty way to implement this :)
 
 		/**
 		 * Returns the boolean value for the option, if applicable.
