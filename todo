@@ -1,5 +1,5 @@
 - start & end delay, can u do like setting for pressing a bind on start of the map and end of the map for recording?
------ use map offset http://trigger.s-ul.eu/YNq6RuXf this thingy
+----- use map offset http://trigger.s-ul.eu/YNq6RuXf this thingy [TimingPoints] 4416 like the first line after timingpoints is the offset for the map
 ----- detect native res, better resolution settings
 -- sync RGB cursor increment with the hit objects
 -- there is no option for use last object color +180 hue shift (basically inverted)
