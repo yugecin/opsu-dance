@@ -52,6 +52,7 @@ public class Dancer {
 		new IlluminatiSpinner(),
 		new LessThanThreeSpinner(),
 		new RektCircleSpinner(),
+		new ApproachCircleSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
@@ -165,6 +166,7 @@ public class Dancer {
 			}
 		} else {
 			if (c.isSpinner()) {
+				Spinner.PROGRESS = (double) (time - c.getTime()) / (double) (c.getEndTime() - c.getTime());
 				double[] point = spinner.getPoint();
 				x = (float) point[0];
 				y = (float) point[1];

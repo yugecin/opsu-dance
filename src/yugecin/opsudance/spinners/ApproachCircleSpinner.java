@@ -17,39 +17,38 @@
  */
 package yugecin.opsudance.spinners;
 
-public abstract class Spinner {
+import itdelatrisu.opsu.Options;
 
-	private double[][] points;
-	private int length;
-	private int index;
-	private static int delay;
-	public static int DELAY = 3;
-	public static double PROGRESS;
+public class ApproachCircleSpinner extends Spinner {
 
-	public abstract void init();
+	private int ang = 0;
 
-	protected final void init(double[][] points) {
-		this.points = points;
-		this.length = points.length;
+	private double[] point = new double[2];
+
+	@Override
+	public void init()
+	{
+		ang = 0;
 	}
 
-	public double[] getPoint() {
+	@Override
+	public double[] getPoint()
+	{
 		if (waitForDelay()) {
-			index = ++index % length;
+			ang += 15;
 		}
-		return points[index];
+
+		double rad = Options.width / 4.0f * (1d - Spinner.PROGRESS);
+
+		point[0] = Options.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
+		point[1] = Options.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
+
+		return point;
 	}
 
-	public boolean waitForDelay() {
-		if (delay >= DELAY) {
-			delay = 0;
-			return true;
-		}
-		return false;
-	}
-
-	public static void update(int delta) {
-		delay += delta;
+	@Override
+	public String toString() {
+		return "Approachcircle";
 	}
 
 }
