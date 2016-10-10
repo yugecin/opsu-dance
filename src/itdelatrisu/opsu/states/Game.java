@@ -804,7 +804,7 @@ public class Game extends BasicGameState {
 		}
 
 		GameObject g = gameObjects[objectIndex];
-		if (g.isCircle() || g.isSlider() && g.getTime() <= trackPosition) {
+		if ((g.isCircle() || g.isSlider()) && g.getTime() <= trackPosition) {
 			Cursor.lastObjColor = g.getColor();
 			Cursor.lastMirroredObjColor = g.getMirroredColor();
 		}
