@@ -235,4 +235,14 @@ public class MultiClip {
 		// reset extra clip count
 		extraClips = 0;
 	}
+
+    /**
+     * Mute the Clip (because destroying it, won't stop it)
+     */
+    public void mute() {
+        try {
+            ((FloatControl) getClip().getControl(FloatControl.Type.MASTER_GAIN)).setValue((float) (Math.log(Float.MIN_VALUE) / Math.log(10.0) * 20.0));
+        } catch (Exception e) {
+        }
+    }
 }
