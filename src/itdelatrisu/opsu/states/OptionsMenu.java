@@ -509,11 +509,22 @@ public class OptionsMenu extends BasicGameState {
 		}
 	}
 
+	private int lastResIdx;
+
 	@Override
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		UI.enter();
 		currentTab = OptionTab.DANCE;
+		lastResIdx = Options.getResolutionIdx();
+	}
+
+	@Override
+	public void leave(GameContainer container, StateBasedGame game) throws SlickException {
+		if (Options.wasResolutionChanged || Options.getResolutionIdx() != lastResIdx) {
+			container.setForceExit(false);
+			container.exit();
+		}
 	}
 
 	/**
