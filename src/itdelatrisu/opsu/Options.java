@@ -302,7 +302,7 @@ public class Options {
 				} catch (IllegalArgumentException ignored) {}
 			}
 		},
-//		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
+		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
 		SKIN ("Skin", "Skin", "Restart (Ctrl+Shift+F5) to apply skin changes.") {
 			@Override
 			public String getValueString() { return skinName; }
@@ -1457,6 +1457,7 @@ public class Options {
 
 		try {
 			app.setDisplayMode(resolution.getWidth(), resolution.getHeight(), false);
+			app.setFullscreen(isFullscreen());
 		} catch (SlickException e) {
 			ErrorHandler.error("Failed to set display mode.", e, true);
 		}
@@ -1464,16 +1465,18 @@ public class Options {
 		width = resolution.width;
 		height = resolution.height;
 
-		// set borderless window if dimensions match screen size
-		boolean borderless = (screenWidth == resolution.getWidth() && screenHeight == resolution.getHeight());
-		System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
+		if (!isFullscreen()) {
+			// set borderless window if dimensions match screen size
+			boolean borderless = (screenWidth == resolution.getWidth() && screenHeight == resolution.getHeight());
+			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
+		}
 	}
 
-//	/**
-//	 * Returns whether or not fullscreen mode is enabled.
-//	 * @return true if enabled
-//	 */
-//	public static boolean isFullscreen() { return fullscreen; }
+	/**
+	 * Returns whether or not fullscreen mode is enabled.
+	 * @return true if enabled
+	 */
+	public static boolean isFullscreen() { return GameOption.FULLSCREEN.getBooleanValue(); }
 
 	/**
 	 * Returns whether or not the FPS counter display is enabled.
