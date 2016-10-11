@@ -65,7 +65,7 @@ public class SpiralSpinner extends Spinner {
 
     @Override
     public double[] getPoint() {
-        if (waitForDelay()) {
+        //if (waitForDelay()) {
             if (down) {
                 if (--index == 0)
                     down = !down;
@@ -77,12 +77,12 @@ public class SpiralSpinner extends Spinner {
             } else if (down && index == SIZE - 2) {
                 rotatePointAroundCenter(points[SIZE - 1], DELTA);
             }
-        }
+        //}
         rotatePointAroundCenter(points[index], DELTA);
         return points[index];
     }
 
-    private static void rotatePointAroundCenter(double[] point, double beta) {
+    private void rotatePointAroundCenter(double[] point, double beta) {
         double angle = Math.atan2(point[1] - Options.height / 2, point[0] - Options.width / 2);
         double rad = Utils.distance(point[0], point[1], Options.width / 2, Options.height / 2);
 
