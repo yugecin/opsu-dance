@@ -17,6 +17,9 @@
  */
 package yugecin.opsudance;
 
+import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
+import awlex.ospu.movers.factories.SpiralMoverFactory;
+import awlex.ospu.spinners.SpiralSpinner;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.Circle;
@@ -39,7 +42,9 @@ public class Dancer {
 		new HalfLowEllipseMoverFactory(),
 		new JumpMoverFactory(),
 		new LinearMoverFactory(),
-		new QuartCircleMoverFactory()
+		new QuartCircleMoverFactory(),
+		new SpiralMoverFactory(),
+		new CenterSpiralMoverFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[] {
@@ -53,6 +58,7 @@ public class Dancer {
 		new LessThanThreeSpinner(),
 		new RektCircleSpinner(),
 		new ApproachCircleSpinner(),
+		new SpiralSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
