@@ -57,8 +57,8 @@ public class SoundController {
 	/** The current track being played, if any. */
 	private static MultiClip currentTrack;
 
-    /** The current SoundComponent being played, if any */
-    private static MultiClip currentSoundComponent;
+	/** The current SoundComponent being played, if any */
+	private static MultiClip currentSoundComponent;
 
 	/** Sample volume multiplier, from timing points [0, 1]. */
 	private static float sampleVolumeMultiplier = 1f;
@@ -385,10 +385,10 @@ public class SoundController {
 		}
 	}
 
-    public static void muteSoundComponent() {
-        if (currentSoundComponent != null) {
-            currentSoundComponent.mute();
-            currentSoundComponent = null;
-        }
-    }
+	public static void muteSoundComponent() {
+		if (currentSoundComponent != null) {
+			currentSoundComponent.mute();
+			currentSoundComponent = null;
+		}
+	}
 }
