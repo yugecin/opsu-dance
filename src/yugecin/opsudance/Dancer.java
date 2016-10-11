@@ -43,8 +43,8 @@ public class Dancer {
 		new JumpMoverFactory(),
 		new LinearMoverFactory(),
 		new QuartCircleMoverFactory(),
-        new SpiralMoverFactory(),
-        new CenterSpiralMoverFactory()
+		new SpiralMoverFactory(),
+		new CenterSpiralMoverFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[] {
@@ -58,7 +58,7 @@ public class Dancer {
 		new LessThanThreeSpinner(),
 		new RektCircleSpinner(),
 		new ApproachCircleSpinner(),
-        new SpiralSpinner()
+		new SpiralSpinner(),
 	};
 
 	public static Dancer instance = new Dancer();
