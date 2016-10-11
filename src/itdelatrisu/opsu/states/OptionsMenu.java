@@ -57,6 +57,7 @@ public class OptionsMenu extends BasicGameState {
 		DISPLAY ("Display", new GameOption[] {
 			GameOption.SCREEN_RESOLUTION,
 			GameOption.FULLSCREEN,
+			GameOption.ALLOW_LARGER_RESOLUTIONS,
 			GameOption.SKIN,
 			GameOption.TARGET_FPS,
 			GameOption.SHOW_FPS,
@@ -508,11 +509,22 @@ public class OptionsMenu extends BasicGameState {
 		}
 	}
 
+	private String resolutionOptions;
+
 	@Override
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		UI.enter();
 		currentTab = OptionTab.DANCE;
+		resolutionOptions = "" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions();
+	}
+
+	@Override
+	public void leave(GameContainer container, StateBasedGame game) throws SlickException {
+		if (!("" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions()).equals(resolutionOptions)) {
+			container.setForceExit(false);
+			container.exit();
+		}
 	}
 
 	/**

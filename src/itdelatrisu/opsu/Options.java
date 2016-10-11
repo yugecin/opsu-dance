@@ -283,25 +283,33 @@ public class Options {
 		// in-game options
 		SCREEN_RESOLUTION ("Screen Resolution", "ScreenResolution", "Restart (Ctrl+Shift+F5) to apply resolution changes.") {
 			@Override
-			public String getValueString() { return resolution.toString(); }
+			public String getValueString() {
+				return resolutions[resolutionIdx];
+			}
 
 			@Override
 			public Object[] getListItems() {
-				return Resolution.values();
+				return resolutions;
 			}
 
 			@Override
 			public void clickListItem(int index) {
-				resolution = Resolution.values()[index];
+				resolutionIdx = index;
 			}
 
 			@Override
 			public void read(String s) {
 				try {
-					resolution = Resolution.valueOf(String.format("RES_%s", s.replace('x', '_')));
-				} catch (IllegalArgumentException ignored) {}
+					resolutionIdx = Integer.parseInt(s);
+				} catch (NumberFormatException ignored) { }
+			}
+
+			@Override
+			public String write() {
+				return resolutionIdx + "";
 			}
 		},
+		ALLOW_LARGER_RESOLUTIONS ("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false),
 		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
 		SKIN ("Skin", "Skin", "Restart (Ctrl+Shift+F5) to apply skin changes.") {
 			@Override
@@ -1276,63 +1284,28 @@ public class Options {
 	/** Map of option display names to GameOptions. */
 	private static HashMap<String, GameOption> optionMap;
 
-	/** Screen resolutions. */
-	private enum Resolution {
-		RES_800_600 (800, 600),
-		RES_1024_600 (1024, 600),
-		RES_1024_768 (1024, 768),
-		RES_1280_720 (1280, 720),
-		RES_1280_800 (1280, 800),
-		RES_1280_960 (1280, 960),
-		RES_1280_1024 (1280, 1024),
-		RES_1366_768 (1366, 768),
-		RES_1440_900 (1440, 900),
-		RES_1600_900 (1600, 900),
-		RES_1600_1200 (1600, 1200),
-		RES_1680_1050 (1680, 1050),
-		RES_1920_1080 (1920, 1080),
-		RES_1920_1200 (1920, 1200),
-		RES_2560_1440 (2560, 1440),
-		RES_2560_1600 (2560, 1600),
-		RES_3840_2160 (3840, 2160);
+	private static String[] resolutions = {
+		null,
+		"800x600",
+		"1024x600",
+		"1024x768",
+		"1280x720",
+		"1280x800",
+		"1280x960",
+		"1280x1024",
+		"1366x768",
+		"1440x900",
+		"1600x900",
+		"1600x1200",
+		"1680x1050",
+		"1920x1080",
+		"1920x1200",
+		"2560x1440",
+		"2560x1600",
+		"3840x2160"
+	};
 
-		/** Screen dimensions. */
-		private int width, height;
-
-		/** Enum values. */
-		private static Resolution[] values = Resolution.values();
-
-		/**
-		 * Constructor.
-		 * @param width the screen width
-		 * @param height the screen height
-		 */
-		Resolution(int width, int height) {
-			this.width = width;
-			this.height = height;
-		}
-
-		/**
-		 * Returns the screen width.
-		 */
-		public int getWidth() { return width; }
-
-		/**
-		 * Returns the screen height.
-		 */
-		public int getHeight() { return height; }
-
-		/**
-		 * Returns the next (larger) Resolution.
-		 */
-		public Resolution next() { return values[(this.ordinal() + 1) % values.length]; }
-
-		@Override
-		public String toString() { return String.format("%sx%s", width, height); }
-	}
-
-	/** Current screen resolution. */
-	private static Resolution resolution = Resolution.RES_1024_768;
+	private static int resolutionIdx;
 
 	public static int width;
 	public static int height;
@@ -1368,6 +1341,14 @@ public class Options {
 
 	// This class should not be instantiated.
 	private Options() {}
+
+	public static int getResolutionIdx() {
+		return resolutionIdx;
+	}
+
+	public static boolean allowLargeResolutions() {
+		return GameOption.ALLOW_LARGER_RESOLUTIONS.getBooleanValue();
+	}
 
 	/**
 	 * Returns the target frame rate.
@@ -1451,23 +1432,32 @@ public class Options {
 		int screenWidth = app.getScreenWidth();
 		int screenHeight = app.getScreenHeight();
 
+		resolutions[0] = screenWidth + "x" + screenHeight;
+		if (resolutionIdx < 0 || resolutionIdx > resolutions.length) {
+			resolutionIdx = 0;
+		}
+		if (!resolutions[resolutionIdx].matches("^[0-9]+x[0-9]+$")) {
+			resolutionIdx = 0;
+		}
+		String[] res = resolutions[resolutionIdx].split("x");
+		width = Integer.parseInt(res[0]);
+		height = Integer.parseInt(res[1]);
+
 		// check for larger-than-screen dimensions
-		if (screenWidth < resolution.getWidth() || screenHeight < resolution.getHeight())
-			resolution = Resolution.RES_800_600;
+		if (!GameOption.ALLOW_LARGER_RESOLUTIONS.getBooleanValue() && (screenWidth < width || screenHeight < height)) {
+			width = 800;
+			height = 600;
+		}
 
 		try {
-			app.setDisplayMode(resolution.getWidth(), resolution.getHeight(), false);
-			app.setFullscreen(isFullscreen());
+			app.setDisplayMode(width, height, isFullscreen());
 		} catch (SlickException e) {
 			ErrorHandler.error("Failed to set display mode.", e, true);
 		}
 
-		width = resolution.width;
-		height = resolution.height;
-
 		if (!isFullscreen()) {
 			// set borderless window if dimensions match screen size
-			boolean borderless = (screenWidth == resolution.getWidth() && screenHeight == resolution.getHeight());
+			boolean borderless = (screenWidth == width && screenHeight == height);
 			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
 		}
 	}
