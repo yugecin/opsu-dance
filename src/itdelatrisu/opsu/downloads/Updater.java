@@ -109,6 +109,9 @@ public class Updater {
 	private Download download;
 
 	public String getCurrentVersion() {
+		if (currentVersion == null) {
+			return "unknown version";
+		}
 		return currentVersion.getMajorVersion() + "." + currentVersion.getMinorVersion() + "." + currentVersion.getIncrementalVersion();
 	}
 
