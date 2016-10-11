@@ -105,7 +105,7 @@ public class CombinedSpiralMover extends Mover {
         int middle = halfTime - startTime;
         for (int i = 1; ret && i < 15; i++) {
             ret = checkBounds(mover.getPointAt(startTime + (middle * i) / 16));
-            System.out.println("i: " + i + " = " + ret);
+            //System.out.println("i: " + i + " = " + ret);
         }
 
         return ret;
@@ -123,7 +123,7 @@ public class CombinedSpiralMover extends Mover {
         int middle = endTime - halfTime;
         for (int i = 1; ret && i < 15; i++) {
             ret = checkBounds(mover.getPointAt(startTime + (middle * i) / 16));
-            System.out.println("i: " + i + " = " + ret);
+            //System.out.println("i: " + i + " = " + ret);
         }
 
         return ret;

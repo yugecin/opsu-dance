@@ -64,7 +64,7 @@ public class SpiralMoverFactory implements MoverFactory {
         int middle = endTime - startTime;
         for (int i = 1; ret && i < 15; i++) {
             ret = checkBounds(mover.getPointAt(startTime + (middle * i) / 16));
-            System.out.println("i: " + i + " = " + ret);
+            //System.out.println("i: " + i + " = " + ret);
         }
 
         return ret;
