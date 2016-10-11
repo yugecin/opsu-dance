@@ -240,6 +240,7 @@ public class GameRanking extends BasicGameState {
 	 * Returns to the song menu.
 	 */
 	private void returnToSongMenu() {
+        SoundController.muteSoundComponent();
 		SoundController.playSound(SoundEffect.MENUBACK);
 		SongMenu songMenu = (SongMenu) game.getState(Opsu.STATE_SONGMENU);
 		if (data.isGameplay())
