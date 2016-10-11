@@ -134,8 +134,6 @@ public class Options {
 	/** Port binding. */
 	private static int port = 49250;
 
-	public static boolean wasResolutionChanged;
-
 	/**
 	 * Returns whether the XDG flag in the manifest (if any) is set to "true".
 	 * @return true if XDG directories are enabled, false otherwise
@@ -311,20 +309,8 @@ public class Options {
 				return resolutionIdx + "";
 			}
 		},
-		ALLOW_LARGER_RESOLUTIONS ("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false) {
-			@Override
-			public void click(GameContainer container) {
-				super.click(container);
-				wasResolutionChanged = true;
-			}
-		},
-		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false) {
-			@Override
-			public void click(GameContainer container) {
-				super.click(container);
-				wasResolutionChanged = true;
-			}
-		},
+		ALLOW_LARGER_RESOLUTIONS ("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false),
+		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
 		SKIN ("Skin", "Skin", "Restart (Ctrl+Shift+F5) to apply skin changes.") {
 			@Override
 			public String getValueString() { return skinName; }
@@ -1358,6 +1344,10 @@ public class Options {
 
 	public static int getResolutionIdx() {
 		return resolutionIdx;
+	}
+
+	public static boolean allowLargeResolutions() {
+		return GameOption.ALLOW_LARGER_RESOLUTIONS.getBooleanValue();
 	}
 
 	/**
