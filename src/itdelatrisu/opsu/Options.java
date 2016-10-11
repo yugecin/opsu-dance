@@ -309,6 +309,7 @@ public class Options {
 				return resolutionIdx + "";
 			}
 		},
+		ALLOW_LARGER_RESOLUTIONS ("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false),
 		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
 		SKIN ("Skin", "Skin", "Restart (Ctrl+Shift+F5) to apply skin changes.") {
 			@Override
@@ -1435,7 +1436,7 @@ public class Options {
 		height = Integer.parseInt(res[1]);
 
 		// check for larger-than-screen dimensions
-		if (screenWidth < width || screenHeight < height) {
+		if (!GameOption.ALLOW_LARGER_RESOLUTIONS.getBooleanValue() && (screenWidth < width || screenHeight < height)) {
 			width = 800;
 			height = 600;
 		}
