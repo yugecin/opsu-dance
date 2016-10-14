@@ -118,18 +118,20 @@ public class Opsu extends StateBasedGame {
 		Options.parseOptions();
 
 		// only allow a single instance
-		try {
-			SERVER_SOCKET = new ServerSocket(Options.getPort(), 1, InetAddress.getLocalHost());
-		} catch (UnknownHostException e) {
-			// shouldn't happen
-		} catch (IOException e) {
-			ErrorHandler.error(String.format(
+		if (!Options.noSingleInstance()) {
+			try {
+				SERVER_SOCKET = new ServerSocket(Options.getPort(), 1, InetAddress.getLocalHost());
+			} catch (UnknownHostException e) {
+				// shouldn't happen
+			} catch (IOException e) {
+				ErrorHandler.error(String.format(
 					"opsu! could not be launched for one of these reasons:\n" +
-					"- An instance of opsu! is already running.\n" +
-					"- Another program is bound to port %d. " +
-					"You can change the port opsu! uses by editing the \"Port\" field in the configuration file.",
+						"- An instance of opsu! is already running.\n" +
+						"- Another program is bound to port %d. " +
+						"You can change the port opsu! uses by editing the \"Port\" field in the configuration file.",
 					Options.getPort()), null, false);
-			System.exit(1);
+				System.exit(1);
+			}
 		}
 
 		File nativeDir;

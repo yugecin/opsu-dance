@@ -134,6 +134,8 @@ public class Options {
 	/** Port binding. */
 	private static int port = 49250;
 
+	private static boolean noSingleInstance;
+
 	/**
 	 * Returns whether the XDG flag in the manifest (if any) is set to "true".
 	 * @return true if XDG directories are enabled, false otherwise
@@ -277,6 +279,15 @@ public class Options {
 				int i = Integer.parseInt(s);
 				if (i > 0 && i <= 65535)
 					port = i;
+			}
+		},
+		NOSINGLEINSTANCE ("NoSingleInstance") {
+			@Override
+			public String write() { return noSingleInstance + ""; }
+
+			@Override
+			public void read(String s) {
+				noSingleInstance = !"false".equals(s);
 			}
 		},
 
@@ -1491,6 +1502,8 @@ public class Options {
 	 * @return the port
 	 */
 	public static int getPort() { return port; }
+
+	public static boolean noSingleInstance() { return noSingleInstance; }
 
 	/**
 	 * Returns the cursor scale.
