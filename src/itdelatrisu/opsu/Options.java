@@ -496,6 +496,7 @@ public class Options {
 		FORCE_DEFAULT_PLAYFIELD ("Force Default Playfield", "ForceDefaultPlayfield", "Override the song background with the default playfield background.", false),
 		IGNORE_BEATMAP_SKINS ("Ignore All Beatmap Skins", "IgnoreBeatmapSkins", "Never use skin element overrides provided by beatmaps.", false),
 		SNAKING_SLIDERS ("Snaking sliders", "SnakingSliders", "Sliders gradually snake out from their starting point.", true),
+		FALLBACK_SLIDERS ("Fallback sliders", "FallbackSliders", "Enable this if sliders won't render", false),
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_COMBO_BURSTS ("Show Combo Bursts", "ComboBurst", "A character image is displayed at combo milestones.", true),
 		SHOW_PERFECT_HIT ("Show Perfect Hits", "PerfectHit", "Whether to show perfect hit result bursts (300s, slider ticks).", true),
@@ -1558,6 +1559,8 @@ public class Options {
 	 * @return true if sliders should snake in
 	 */
 	public static boolean isSliderSnaking() { return GameOption.SNAKING_SLIDERS.getBooleanValue(); }
+
+	public static boolean isFallbackSliders() { return GameOption.FALLBACK_SLIDERS.getBooleanValue(); }
 
 	/**
 	 * Returns the fixed circle size override, if any.

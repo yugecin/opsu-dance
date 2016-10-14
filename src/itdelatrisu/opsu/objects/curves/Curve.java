@@ -62,6 +62,8 @@ public abstract class Curve {
 	/** Points along the curve (set by inherited classes). */
 	protected Vec2f[] curve;
 
+	private Color fallbackSliderColor = new Color(20, 20, 20);
+
 	/**
 	 * Constructor.
 	 * @param hitObject the associated HitObject
@@ -129,14 +131,17 @@ public abstract class Curve {
 		t = Utils.clamp(t, 0f, 1f);
 
 		// peppysliders
-		if (Options.getSkin().getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
+		if (Options.isFallbackSliders() || Options.getSkin().getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
 			int drawUpTo = (int) (curve.length * t);
 			Image hitCircle = GameImage.HITCIRCLE.getImage();
 			Image hitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
 			for (int i = 0; i < drawUpTo; i++)
 				hitCircleOverlay.drawCentered(curve[i].x, curve[i].y, Colors.WHITE_FADE);
+			float a = fallbackSliderColor.a;
+			fallbackSliderColor.a = color.a;
 			for (int i = 0; i < drawUpTo; i++)
-				hitCircle.drawCentered(curve[i].x, curve[i].y, color);
+				hitCircle.drawCentered(curve[i].x, curve[i].y, fallbackSliderColor);
+			fallbackSliderColor.a = a;
 		}
 
 		// mmsliders
