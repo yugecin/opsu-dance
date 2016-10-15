@@ -250,6 +250,7 @@ public class MultiClip {
 				val = -80.0f;
 			}
 			((FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN)).setValue(val);
+		} catch (IllegalArgumentException ignored) {
 		} catch (LineUnavailableException e) {
 			e.printStackTrace();
 		}
