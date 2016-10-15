@@ -245,7 +245,11 @@ public class MultiClip {
 			if (c == null) {
 				return;
 			}
-			((FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN)).setValue((float) (Math.log(Float.MIN_VALUE) / Math.log(10.0) * 20.0));
+			float val = (float) (Math.log(Float.MIN_VALUE) / Math.log(10.0) * 20.0);
+			if (val < -80.0f) {
+				val = -80.0f;
+			}
+			((FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN)).setValue(val);
 		} catch (LineUnavailableException e) {
 			e.printStackTrace();
 		}
