@@ -292,7 +292,6 @@ public class MainMenu extends BasicGameState {
 						}
 					}
 				}
-				System.out.println(i);
 				if (p != null) {
 					double beatLength = beatlen * 100;
 					int realtime = trackposition * 100;
