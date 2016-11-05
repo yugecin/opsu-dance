@@ -29,6 +29,7 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
+import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.Colors;
@@ -269,7 +270,36 @@ public class MainMenu extends BasicGameState {
 			playButton.draw();
 			exitButton.draw();
 		}
-		logo.draw();
+
+		float scale = 1f;
+
+		if (MusicController.isPlaying() && MusicController.getBeatmap() != null) {
+			Beatmap map = MusicController.getBeatmap();
+			TimingPoint p = null;
+			if (map.timingPoints != null) {
+				int time = 0;
+				float beatlen = 0f;
+				int i = 0;
+				for (TimingPoint pts : map.timingPoints) {
+					if (p == null || pts.getTime() < MusicController.getPosition()) {
+						i++;
+						p = pts;
+						if (!p.isInherited()) {
+							beatlen = p.getBeatLength();
+							time = p.getTime();
+						}
+					}
+				}
+				System.out.println(i);
+				if (p != null) {
+					double beatLength = beatlen * 100;
+					int realtime = MusicController.getPosition() * 100;
+					scale -= (0 - (((realtime - time * 100) % beatLength) / beatLength)) * 0.05;
+				}
+			}
+		}
+
+		logo.draw(Color.white, scale);
 
 		// draw music buttons
 		if (MusicController.isPlaying())

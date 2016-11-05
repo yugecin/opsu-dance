@@ -191,14 +191,21 @@ public class MenuButton {
 	/**
 	 * Draws the button.
 	 */
-	public void draw() { draw(Color.white); }
+	public void draw() { draw(Color.white, 1.0f); }
 
 	/**
-	 * Draw the button with a color filter.
+	 * Draws the button with a color filter.
 	 * @param filter the color to filter with when drawing
 	 */
+	public void draw(Color filter) { draw(filter, 1.0f); }
+
+	/**
+	 * Draw the button with a color filter and scale.
+	 * @param filter          the color to filter with when drawing
+	 * @param scaleoverride  the scale to use when drawing
+	 */
 	@SuppressWarnings("deprecation")
-	public void draw(Color filter) {
+	public void draw(Color filter, float scaleoverride) {
 		// animations: get current frame
 		Image image = this.img;
 		if (image == null) {
@@ -208,8 +215,15 @@ public class MenuButton {
 
 		// normal images
 		if (imgL == null) {
+			float scaleposmodx = 0;
+			float scaleposmody = 0;
+			if (scaleoverride != 1f) {
+				image = image.getScaledCopy(scaleoverride);
+				scaleposmodx = image.getWidth() / 2 - xRadius;
+				scaleposmody = image.getHeight() / 2 - yRadius;
+			}
 			if (hoverEffect == 0)
-				image.draw(x - xRadius, y - yRadius, filter);
+				image.draw(x - xRadius - scaleposmodx, y - yRadius - scaleposmody, filter);
 			else {
 				float oldAlpha = image.getAlpha();
 				float oldAngle = image.getRotation();
@@ -223,7 +237,7 @@ public class MenuButton {
 					image.setAlpha(alpha.getValue());
 				if ((hoverEffect & EFFECT_ROTATE) > 0)
 					image.setRotation(angle.getValue());
-				image.draw(x - xRadius, y - yRadius, filter);
+				image.draw(x - xRadius - scaleposmodx, y - yRadius - scaleposmody, filter);
 				if (image == this.img) {
 					image.setAlpha(oldAlpha);
 					image.setRotation(oldAngle);
