@@ -277,6 +277,12 @@ public enum GameImage {
 			return img.getScaledCopy(0.8f);
 		}
 	},
+	MENU_LOGO_PIECE ("logo2piece2", "png", false, true) {
+		@Override
+		protected Image process_sub(Image img, int w, int h) {
+			return img.getScaledCopy(0.8f);
+		}
+	},
 	MENU_PLAY ("menu-play", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

@@ -272,8 +272,10 @@ public class MainMenu extends BasicGameState {
 		}
 
 		float scale = 1f;
+		double position = 0;
 
 		if (MusicController.isPlaying() && MusicController.getBeatmap() != null) {
+			int trackposition = MusicController.getPosition();
 			Beatmap map = MusicController.getBeatmap();
 			TimingPoint p = null;
 			if (map.timingPoints != null) {
@@ -284,7 +286,7 @@ public class MainMenu extends BasicGameState {
 					if (p == null || pts.getTime() < MusicController.getPosition()) {
 						i++;
 						p = pts;
-						if (!p.isInherited()) {
+						if (!p.isInherited() && p.getBeatLength() > 0) {
 							beatlen = p.getBeatLength();
 							time = p.getTime();
 						}
@@ -293,13 +295,24 @@ public class MainMenu extends BasicGameState {
 				System.out.println(i);
 				if (p != null) {
 					double beatLength = beatlen * 100;
-					int realtime = MusicController.getPosition() * 100;
-					scale -= (0 - (((realtime - time * 100) % beatLength) / beatLength)) * 0.05;
+					int realtime = trackposition * 100;
+					position = (((realtime/* - time * 100 idk.. */) % beatLength) / beatLength);
+					scale -= (0 - position) * 0.05;
 				}
 			}
 		}
 
+		//scale = 1f;
 		logo.draw(Color.white, scale);
+
+		Image piece = GameImage.MENU_LOGO_PIECE.getImage();
+		float xRadius = piece.getWidth() / 2;
+		float yRadius = piece.getHeight() / 2;
+		piece = piece.getScaledCopy(scale);
+		float scaleposmodx = piece.getWidth() / 2 - xRadius;
+		float scaleposmody = piece.getHeight() / 2 - yRadius;
+		piece.rotate((float)(position * 360));
+		piece.draw(logo.getX() - xRadius - scaleposmodx, logo.getY() - yRadius - scaleposmody);
 
 		// draw music buttons
 		if (MusicController.isPlaying())
