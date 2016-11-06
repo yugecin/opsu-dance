@@ -273,6 +273,8 @@ public class MainMenu extends BasicGameState {
 
 		float scale = 1f;
 		double position = 0;
+		double beatLength = 1;
+		int realtime = 1;
 
 		if (MusicController.isPlaying() && MusicController.getBeatmap() != null) {
 			int trackposition = MusicController.getPosition();
@@ -293,8 +295,8 @@ public class MainMenu extends BasicGameState {
 					}
 				}
 				if (p != null) {
-					double beatLength = beatlen * 100;
-					int realtime = trackposition * 100;
+					beatLength = beatlen * 100;
+					realtime = trackposition * 100;
 					position = (((realtime/* - time * 100 idk.. */) % beatLength) / beatLength);
 					scale -= (0 - position) * 0.05;
 				}
