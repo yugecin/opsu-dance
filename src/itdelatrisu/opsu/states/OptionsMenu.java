@@ -207,6 +207,7 @@ public class OptionsMenu extends BasicGameState {
 	private Input input;
 	private Graphics g;
 	private final int state;
+	private GameOption selectedOption;
 
 	private final ItemList list;
 	private final RWM rwm;
@@ -268,6 +269,9 @@ public class OptionsMenu extends BasicGameState {
 		GameOption hoverOption = (keyEntryLeft)  ? GameOption.KEY_LEFT :
 		                         (keyEntryRight) ? GameOption.KEY_RIGHT :
 		                                           getOptionAt(mouseY);
+		if (selectedOption != null) {
+			hoverOption = selectedOption;
+		}
 		for (int i = 0; i < currentTab.options.length; i++) {
 			GameOption option = currentTab.options[i];
 			drawOption(option, i, hoverOption == option);
@@ -335,6 +339,7 @@ public class OptionsMenu extends BasicGameState {
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
+		selectedOption = null;
 		if (list.isVisible()) {
 			list.mouseReleased(button, x, y);
 		}
@@ -384,6 +389,7 @@ public class OptionsMenu extends BasicGameState {
 		// options (click only)
 		final GameOption option = getOptionAt(y);
 		if (option != null) {
+			selectedOption = option;
 			Object[] listItems = option.getListItems();
 			if (listItems == null) {
 				if (option.showRWM()) {
@@ -443,9 +449,9 @@ public class OptionsMenu extends BasicGameState {
 		diff = ((diff > 0) ? 1 : -1) * multiplier;
 
 		// options (drag only)
-		GameOption option = getOptionAt(oldy);
-		if (option != null)
-			option.drag(container, diff);
+		if (selectedOption != null) {
+			selectedOption.drag(container, diff);
+		}
 	}
 
 	@Override
