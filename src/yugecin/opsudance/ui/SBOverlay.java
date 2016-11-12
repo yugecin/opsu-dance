@@ -126,6 +126,12 @@ public class SBOverlay {
 			index++;
 			setMusicPosition();
 			updateIndex(index);
+		} else if (key == Input.KEY_ESCAPE && menu) {
+			menu = false;
+			if (speed != 0) {
+				MusicController.resume();
+			}
+			return true;
 		}
 		return false;
 	}
