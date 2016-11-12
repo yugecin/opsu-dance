@@ -308,6 +308,9 @@ public class Game extends BasicGameState {
 		int width = container.getWidth();
 		int height = container.getHeight();
 		int trackPosition = MusicController.getPosition();
+		if (isLeadIn()) {
+			trackPosition -= leadInTime;
+		}
 		if (pauseTime > -1)  // returning from pause screen
 			trackPosition = pauseTime;
 		else if (deathTime > -1)  // "Easy" mod: health bar increasing
@@ -1357,6 +1360,12 @@ public class Game extends BasicGameState {
 			MusicController.setPitch(GameMod.getSpeedMultiplier());
 			MusicController.pause();
 
+			if (gameObjects.length > 0) {
+				int leadIntime = 2000 - gameObjects[0].getTime();
+				if (leadIntime > 0) {
+					this.leadInTime = Math.max(leadIntime, this.leadInTime);
+				}
+			}
 			SoundController.mute(false);
 		}
 
