@@ -19,6 +19,7 @@ package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
+import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -40,9 +41,13 @@ public class SBOverlay {
 	private GameObject[] gameObjects;
 	private HashMap[] optionsMap;
 
+	private int index;
+
+	private final Game game;
 	private final OptionsOverlay options;
 
-	public SBOverlay() {
+	public SBOverlay(Game game) {
+		this.game = game;
 		options = new OptionsOverlay();
 	}
 
@@ -62,6 +67,7 @@ public class SBOverlay {
 		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
 		if (menu) {
 			options.render(g);
 		}
@@ -97,8 +103,29 @@ public class SBOverlay {
 			hide = !hide;
 		} else if (key == Input.KEY_N) {
 			menu = !menu;
+			if (menu && speed != 0) {
+				MusicController.pause();
+			} else if (!menu && speed != 0) {
+				MusicController.resume();
+			}
+		} else if (key == Input.KEY_J && index > 0) {
+			index--;
+			setMusicPosition();
+		} else if (key == Input.KEY_K && index < gameObjects.length - 1) {
+			index++;
+			setMusicPosition();
 		}
 		return false;
+	}
+
+	private void setMusicPosition() {
+		game.setObjectIndex(index);
+		if (speed != 0) {
+			MusicController.setPitch(speed / 10f);
+			MusicController.resume();
+		} else {
+			MusicController.pause();
+		}
 	}
 
 	public void setGameObjects(GameObject[] gameObjects) {
@@ -115,4 +142,9 @@ public class SBOverlay {
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
 		if (menu) options.mouseDragged(oldx, oldy, newx, newy);
 	}
+
+	public void updateIndex(int index) {
+		this.index = index;
+	}
+
 }

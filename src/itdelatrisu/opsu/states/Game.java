@@ -277,7 +277,54 @@ public class Game extends BasicGameState {
 	public Game(int state) {
 		this.state = state;
 		mirrorCursor = new Cursor(true);
-		sbOverlay = new SBOverlay();
+		sbOverlay = new SBOverlay(this);
+	}
+
+	public void setObjectIndex(int newObjIndex) {
+		try {
+			/*
+
+					restart = Restart.MANUAL;
+					enter(container, game);
+					checkpointLoaded = true;
+					if (isLeadIn()) {
+						leadInTime = 0;
+						MusicController.resume();
+					}
+					SoundController.playSound(SoundEffect.MENUHIT);
+					UI.sendBarNotification("Checkpoint loaded.");
+
+					// skip to checkpoint
+					MusicController.setPosition(checkpoint);
+					MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
+					while (objectIndex < gameObjects.length &&
+							beatmap.objects[objectIndex++].getTime() <= checkpoint)
+						;
+					objectIndex--;
+					lastReplayTime = beatmap.objects[objectIndex].getTime();
+				} catch (SlickException e) {
+					ErrorHandler.error("Failed to load checkpoint.", e, false);
+				}
+			 */
+			restart = Restart.MANUAL;
+			enter(container, game);
+			checkpointLoaded = true;
+			if (isLeadIn()) {
+				leadInTime = 0;
+				MusicController.resume();
+			}
+			int checkpoint = gameObjects[newObjIndex].getTime();
+			// skip to checkpoint
+			MusicController.setPosition(checkpoint);
+			while (objectIndex < gameObjects.length && beatmap.objects[objectIndex].getTime() <= checkpoint) {
+				objectIndex++;
+			}
+			objectIndex--;
+			sbOverlay.updateIndex(objectIndex);
+			lastReplayTime = beatmap.objects[objectIndex].getTime();
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -918,6 +965,7 @@ public class Game extends BasicGameState {
 				// update hit object and check completion status
 				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
 					objectIndex++;  // done, so increment object index
+					sbOverlay.updateIndex(objectIndex);
 					if (objectIndex >= mirrorTo) {
 						Dancer.mirror = false;
 					}
@@ -1248,6 +1296,11 @@ public class Game extends BasicGameState {
 
 		// grab the mouse (not working for touchscreen)
 //		container.setMouseGrabbed(true);
+
+
+		if (!checkpointLoaded) {
+			sbOverlay.updateIndex(0);
+		}
 
 		// restart the game
 		if (restart != Restart.FALSE) {

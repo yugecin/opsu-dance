@@ -53,7 +53,6 @@ public class OptionsOverlay {
 		Options.GameOption.DANCE_REMOVE_BG,
 		Options.GameOption.DANCE_HIDE_OBJECTS,
 		Options.GameOption.DANCE_HIDE_UI,
-		Options.GameOption.DANCE_HIDE_WATERMARK,
 		Options.GameOption.PIPPI_ENABLE,
 		Options.GameOption.PIPPI_ANGLE_INC_MUL,
 		Options.GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
