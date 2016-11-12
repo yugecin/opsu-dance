@@ -146,6 +146,9 @@ public class Dancer {
 	}
 
 	public void update(int time, GameObject p, GameObject c) {
+		GameObject[] e = sliderMoverController.process(p, c, time);
+		p = e[0];
+		c = e[1];
 		if (this.p != p) {
 			this.p = p;
 			if (this.p == d) {
@@ -154,7 +157,6 @@ public class Dancer {
 					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 				}
 			}
-			c = sliderMoverController.process(c);
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
 			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
@@ -173,12 +175,6 @@ public class Dancer {
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
 			mover = moverFactory.create(p, c, dir);
-		}
-
-		GameObject next = sliderMoverController.processNext(time);
-		if (next != null) {
-			update(time, c, next);
-			return;
 		}
 
 		if (time < c.getTime()) {

@@ -22,17 +22,16 @@ import itdelatrisu.opsu.objects.GameObject;
 public class DefaultSliderMoverController implements SliderMoverController {
 
 	@Override
-	public GameObject process(GameObject obj) {
-		return obj;
-	}
-
-	@Override
-	public GameObject processNext(int time) {
-		return null;
+	public GameObject[] process(GameObject p, GameObject c, int time) {
+		return new GameObject[] {
+			p,
+			c
+		};
 	}
 
 	@Override
 	public String toString() {
 		return "Nothing special, just follow it";
 	}
+
 }

@@ -21,7 +21,6 @@ import itdelatrisu.opsu.objects.GameObject;
 
 public interface SliderMoverController {
 
-	GameObject process(GameObject obj);
-	GameObject processNext(int time);
+	GameObject[] process(GameObject p, GameObject c, int time);
 
 }
