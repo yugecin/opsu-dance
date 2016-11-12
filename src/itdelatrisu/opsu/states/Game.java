@@ -1727,6 +1727,10 @@ public class Game extends BasicGameState {
 	 */
 	public float getBeatLength() { return beatLength; }
 
+	public float getBeatLengthBase() {
+		return beatLengthBase;
+	}
+
 	/**
 	 * Sets the beat length fields based on a given timing point.
 	 * @param timingPoint the timing point
