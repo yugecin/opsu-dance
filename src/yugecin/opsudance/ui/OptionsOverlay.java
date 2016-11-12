@@ -146,6 +146,7 @@ public class OptionsOverlay {
 					@Override
 					public void update(Observable o, Object arg) {
 						option.clickListItem((int) arg);
+						overlay.saveOption(option);
 					}
 				});
 				list.show();
@@ -183,7 +184,7 @@ public class OptionsOverlay {
 
 	public boolean mouseReleased(int button, int x, int y) {
 		if (selectedOption != null) {
-			overlay.saveOption(selectedOption, selectedOption.write());
+			overlay.saveOption(selectedOption);
 		}
 		selectedOption = null;
 		if (list.isVisible()) {

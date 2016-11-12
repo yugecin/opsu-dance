@@ -163,11 +163,11 @@ public class SBOverlay {
 		this.gameObjects = gameObjects;
 	}
 
-	public void saveOption(Options.GameOption option, String value) {
+	public void saveOption(Options.GameOption option) {
 		if (optionsMap[index] == null) {
 			optionsMap[index] = new HashMap<>();
 		}
-		optionsMap[index].put(option, value);
+		optionsMap[index].put(option, option.write());
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
