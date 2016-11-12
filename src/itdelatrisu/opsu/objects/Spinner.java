@@ -438,4 +438,7 @@ public class Spinner extends GameObject {
 		return null;
 	}
 
+	@Override
+	public void updateColor() {
+	}
 }

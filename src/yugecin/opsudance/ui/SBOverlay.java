@@ -188,6 +188,7 @@ public class SBOverlay {
 			for (Object o : options.entrySet()) {
 				Map.Entry<Options.GameOption, String> next = (Map.Entry<Options.GameOption, String>) o;
 				next.getKey().read(next.getValue());
+				readOption(next.getKey());
 			}
 		}
 	}
@@ -212,6 +213,16 @@ public class SBOverlay {
 		for (Options.GameOption o : options.getSavedOptionList()) {
 			if (initialOptions.containsKey(o)) {
 				o.read(initialOptions.get(o));
+				readOption(o);
+			}
+		}
+	}
+
+	// needed for object color overrides...
+	private void readOption(Options.GameOption o) {
+		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE || o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED) {
+			for (int i = index; i < gameObjects.length; i++) {
+				gameObjects[i].updateColor();
 			}
 		}
 	}

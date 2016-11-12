@@ -117,6 +117,8 @@ public class Slider extends GameObject {
 
 	public float pixelLength;
 
+	private int comboColorIndex;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -162,8 +164,8 @@ public class Slider extends GameObject {
 		this.game = game;
 		this.data = data;
 		this.comboEnd = comboEnd;
-		color = Dancer.colorOverride.getColor(comboColorIndex);
-		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
+		this.comboColorIndex = comboColorIndex;
+		updateColor();
 		updatePosition();
 
 		this.pixelLength = hitObject.getPixelLength();
@@ -708,6 +710,12 @@ public class Slider extends GameObject {
 		}
 
 		return ticks;
+	}
+
+	@Override
+	public void updateColor() {
+		color = Dancer.colorOverride.getColor(comboColorIndex);
+		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}
 
 }
