@@ -29,9 +29,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class SBOverlay {
@@ -47,6 +45,7 @@ public class SBOverlay {
 	private int speed;
 	private GameObject[] gameObjects;
 	private HashMap[] optionsMap;
+	private HashMap<Options.GameOption, String> initialOptions;
 
 	private int index;
 
@@ -56,6 +55,7 @@ public class SBOverlay {
 	public SBOverlay(Game game) {
 		this.game = game;
 		options = new OptionsOverlay(this);
+		initialOptions = new HashMap<>();
 	}
 
 	public void init(GameContainer container, Input input, int width, int height) {
@@ -121,11 +121,23 @@ public class SBOverlay {
 		} else if (key == Input.KEY_J && index > 0) {
 			index--;
 			setMusicPosition();
+			goBackOneSBIndex();
 		} else if (key == Input.KEY_K && index < gameObjects.length - 1) {
 			index++;
 			setMusicPosition();
+			updateIndex(index);
 		}
 		return false;
+	}
+
+	private void goBackOneSBIndex() {
+		if (optionsMap[index + 1] != null) {
+			// new options on previous index, so to revert then we have to reload them all to this point..
+			final int thisIndex = index;
+			for (int i = 0; i <= thisIndex; i++) {
+				updateIndex(thisIndex);
+			}
+		}
 	}
 
 	private void setMusicPosition() {
@@ -178,4 +190,21 @@ public class SBOverlay {
 	public boolean mouseWheelMoved(int newValue) {
 		return menu && options.mouseWheenMoved(newValue);
 	}
+
+	public void enter() {
+		// enter, save current settings
+		for (Options.GameOption o : options.getSavedOptionList()) {
+			initialOptions.put(o, o.write());
+		}
+	}
+
+	public void leave() {
+		// leave, revert the settings saved before entering
+		for (Options.GameOption o : options.getSavedOptionList()) {
+			if (initialOptions.containsKey(o)) {
+				o.read(initialOptions.get(o));
+			}
+		}
+	}
+
 }

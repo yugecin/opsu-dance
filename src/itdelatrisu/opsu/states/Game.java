@@ -1449,6 +1449,7 @@ public class Game extends BasicGameState {
 
 		sbOverlay.setGameObjects(gameObjects);
 		if (!checkpointLoaded) {
+			sbOverlay.enter();
 			sbOverlay.updateIndex(0);
 		}
 
@@ -1466,6 +1467,8 @@ public class Game extends BasicGameState {
 	public void leave(GameContainer container, StateBasedGame game)
 			throws SlickException {
 //		container.setMouseGrabbed(false);
+
+		sbOverlay.leave();
 
 		Cursor.lastObjColor = Color.white;
 		Cursor.lastMirroredObjColor = Color.white;

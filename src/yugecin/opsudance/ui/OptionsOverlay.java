@@ -77,6 +77,10 @@ public class OptionsOverlay {
 		list = new ItemList();
 	}
 
+	public Options.GameOption[] getSavedOptionList() {
+		return options;
+	}
+
 	public void init(GameContainer container, Input input, int width, int height) {
 		list.init(container);
 		this.input = input;
