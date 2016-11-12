@@ -72,6 +72,7 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.*;
+import yugecin.opsudance.ui.SBOverlay;
 
 /**
  * "Game" state.
@@ -271,10 +272,12 @@ public class Game extends BasicGameState {
 	private final int state;
 
 	private final Cursor mirrorCursor;
+	private final SBOverlay sbOverlay;
 
 	public Game(int state) {
 		this.state = state;
 		mirrorCursor = new Cursor(true);
+		sbOverlay = new SBOverlay();
 	}
 
 	@Override
@@ -286,6 +289,8 @@ public class Game extends BasicGameState {
 
 		int width = container.getWidth();
 		int height = container.getHeight();
+
+		sbOverlay.init(input, width, height);
 
 		// create offscreen graphics
 		offscreen = new Image(width, height);
@@ -635,6 +640,8 @@ public class Game extends BasicGameState {
 		else
 			UI.draw(g);
 
+		sbOverlay.render(g);
+
 		if (!Dancer.hidewatermark) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
 		}
@@ -647,6 +654,7 @@ public class Game extends BasicGameState {
 		Pippi.update(delta);
 		yugecin.opsudance.spinners.Spinner.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
+		sbOverlay.update(mouseX, mouseY);
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
@@ -924,6 +932,11 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void keyPressed(int key, char c) {
+
+		if (sbOverlay.keyPressed(key)) {
+			return;
+		}
+
 		int trackPosition = MusicController.getPosition();
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
@@ -1065,7 +1078,15 @@ public class Game extends BasicGameState {
 	}
 
 	@Override
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		sbOverlay.mouseDragged(oldx, oldy, newx, newy);
+	}
+
+	@Override
 	public void mousePressed(int button, int x, int y) {
+		if (sbOverlay.mousePressed(button, x, y)) {
+			return;
+		}
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
 			if (button == Input.MOUSE_MIDDLE_BUTTON)
@@ -1368,6 +1389,8 @@ public class Game extends BasicGameState {
 			}
 			SoundController.mute(false);
 		}
+
+		sbOverlay.setGameObjects(gameObjects);
 
 		Pippi.reset();
 		mirrorFrom = 0;
