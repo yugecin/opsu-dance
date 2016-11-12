@@ -766,7 +766,13 @@ public class Game extends BasicGameState {
 	 */
 	private void updateGame(int mouseX, int mouseY, int delta, int trackPosition, int keys) {
 		// map complete!
-		if (objectIndex >= gameObjects.length || (MusicController.trackEnded() && objectIndex > 0)) {
+		boolean complete = objectIndex >= gameObjects.length;
+		if (GameMod.AUTO.isActive() && complete) {
+			if (gameObjects.length > 0) {
+				complete = trackPosition >= gameObjects[gameObjects.length - 1].getEndTime() + 5000;
+			}
+		}
+		if (complete || (MusicController.trackEnded() && objectIndex > 0)) {
 			// track ended before last object was processed: force a hit result
 			if (MusicController.trackEnded() && objectIndex < gameObjects.length)
 				gameObjects[objectIndex].update(true, delta, mouseX, mouseY, false, trackPosition);
@@ -800,6 +806,10 @@ public class Game extends BasicGameState {
 
 				game.enterState(Opsu.STATE_GAMERANKING, new EasedFadeOutTransition(), new FadeInTransition());
 			}
+			return;
+		}
+
+		if (objectIndex >= gameObjects.length) {
 			return;
 		}
 
