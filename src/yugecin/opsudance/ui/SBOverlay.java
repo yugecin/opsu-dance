@@ -174,6 +174,9 @@ public class SBOverlay {
 
 	public void updateIndex(int index) {
 		this.index = index;
+		if (index >= optionsMap.length) {
+			return;
+		}
 		HashMap options = optionsMap[index];
 		if (options != null) {
 			for (Object o : options.entrySet()) {
