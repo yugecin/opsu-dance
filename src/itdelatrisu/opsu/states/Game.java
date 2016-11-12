@@ -981,7 +981,7 @@ public class Game extends BasicGameState {
 	@Override
 	public void keyPressed(int key, char c) {
 
-		if (sbOverlay.keyPressed(key)) {
+		if (sbOverlay.keyPressed(key, c)) {
 			return;
 		}
 
@@ -1305,10 +1305,6 @@ public class Game extends BasicGameState {
 //		container.setMouseGrabbed(true);
 
 
-		if (!checkpointLoaded) {
-			sbOverlay.updateIndex(0);
-		}
-
 		// restart the game
 		if (restart != Restart.FALSE) {
 			// load mods
@@ -1450,7 +1446,11 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 		}
 
+
 		sbOverlay.setGameObjects(gameObjects);
+		if (!checkpointLoaded) {
+			sbOverlay.updateIndex(0);
+		}
 
 		Pippi.reset();
 		mirrorFrom = 0;

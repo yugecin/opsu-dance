@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.ui;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
@@ -28,7 +29,11 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public class SBOverlay {
 
 	public static boolean isActive = true;
@@ -50,7 +55,7 @@ public class SBOverlay {
 
 	public SBOverlay(Game game) {
 		this.game = game;
-		options = new OptionsOverlay();
+		options = new OptionsOverlay(this);
 	}
 
 	public void init(GameContainer container, Input input, int width, int height) {
@@ -84,9 +89,12 @@ public class SBOverlay {
 		}
 	}
 
-	public boolean keyPressed(int key) {
+	public boolean keyPressed(int key, char c) {
 		if (!isActive) {
 			return false;
+		}
+		if (options.keyPressed(key, c)) {
+			return true;
 		}
 		if (key == Input.KEY_C && speed > 0) {
 			speed -= 1;
@@ -137,6 +145,13 @@ public class SBOverlay {
 		this.gameObjects = gameObjects;
 	}
 
+	public void saveOption(Options.GameOption option, String value) {
+		if (optionsMap[index] == null) {
+			optionsMap[index] = new HashMap<>();
+		}
+		optionsMap[index].put(option, value);
+	}
+
 	public boolean mousePressed(int button, int x, int y) {
 		return menu && options.mousePressed(button, x, y);
 	}
@@ -147,6 +162,13 @@ public class SBOverlay {
 
 	public void updateIndex(int index) {
 		this.index = index;
+		HashMap options = optionsMap[index];
+		if (options != null) {
+			for (Object o : options.entrySet()) {
+				Map.Entry<Options.GameOption, String> next = (Map.Entry<Options.GameOption, String>) o;
+				next.getKey().read(next.getValue());
+			}
+		}
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {

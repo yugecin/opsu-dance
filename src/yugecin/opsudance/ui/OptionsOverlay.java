@@ -70,8 +70,10 @@ public class OptionsOverlay {
 	private final ItemList list;
 	private GameContainer container;
 	private Options.GameOption selectedOption;
+	private final SBOverlay overlay;
 
-	public OptionsOverlay() {
+	public OptionsOverlay(SBOverlay overlay) {
+		this.overlay = overlay;
 		list = new ItemList();
 	}
 
@@ -176,6 +178,9 @@ public class OptionsOverlay {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
+		if (selectedOption != null) {
+			overlay.saveOption(selectedOption, selectedOption.write());
+		}
 		selectedOption = null;
 		if (list.isVisible()) {
 			list.mouseReleased(button, x, y);
@@ -190,5 +195,13 @@ public class OptionsOverlay {
 			return true;
 		}
 		return true;
+	}
+
+	public boolean keyPressed(int key, char c) {
+		if (list.isVisible()) {
+			list.keyPressed(key, c);
+			return true;
+		}
+		return false;
 	}
 }
