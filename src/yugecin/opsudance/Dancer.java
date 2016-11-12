@@ -31,7 +31,6 @@ import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
-import yugecin.opsudance.movers.slidermovers.OveriddenSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.SliderMoverController;
 import yugecin.opsudance.spinners.*;
 
@@ -68,7 +67,6 @@ public class Dancer {
 	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
 		new DefaultSliderMoverController(),
 		new InheritedSliderMoverController(),
-		new OveriddenSliderMoverController()
 	};
 
 	public static Dancer instance = new Dancer();
