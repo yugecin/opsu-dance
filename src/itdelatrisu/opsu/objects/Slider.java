@@ -32,7 +32,6 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -686,6 +685,29 @@ public class Slider extends GameObject {
 	@Override
 	public Color getMirroredColor() {
 		return mirrorColor;
+	}
+
+	public Circle[] getTickPositionCircles() {
+		float tickLengthDiv = 100f * sliderMultiplier / sliderTickRate / (game.getBeatLength() / game.getBeatLengthBase());
+		int tickCount = (int) Math.ceil(pixelLength / tickLengthDiv) - 1;
+		Circle[] ticks = new Circle[1 + ( tickCount + 1 ) * repeats];
+		Vec2f pos;
+		pos = getPointAt( getTime() );
+		pos.set( HitObject.unscaleX( pos.x ), HitObject.unscaleY( pos.y ) );
+		ticks[0] = new Circle(pos.x, pos.y, getTime() );
+		float tickTOffset = 1f / (tickCount + 1) / repeats;
+		float t = tickTOffset;
+		for( int i = 0; i < (tickCount + 1) * repeats; i++, t += tickTOffset ) {
+			pos = getPointAt( getTime() + (int) (t * sliderTimeTotal ) );
+			pos.set( HitObject.unscaleX( pos.x ), HitObject.unscaleY( pos.y ) );
+			ticks[1 + i] = new Circle(pos.x, pos.y, getTime() + (int) (t * sliderTimeTotal));
+		}
+
+		for(Circle c : ticks) {
+			c.updatePosition();
+		}
+
+		return ticks;
 	}
 
 }

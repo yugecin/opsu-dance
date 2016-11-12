@@ -626,6 +626,34 @@ public class Options {
 			}
 		},
 
+		DANCE_SLIDER_MOVER_TYPE ("Slider mover", "SliderMover", "How to move in sliders") {
+			@Override
+			public String getValueString() {
+				return Dancer.sliderMoverController.toString();
+			}
+
+			@Override
+			public Object[] getListItems() {
+				return Dancer.sliderMovers;
+			}
+
+			@Override
+			public void clickListItem(int index) {
+				val = index;
+				Dancer.sliderMoverController = Dancer.sliderMovers[index];
+			}
+
+			@Override
+			public String write() {
+				return String.valueOf(val);
+			}
+
+			@Override
+			public void read(String s) {
+				Dancer.sliderMoverController = Dancer.sliderMovers[val = Integer.parseInt(s)];
+			}
+		},
+
 		DANCE_SPINNER ("Spinner", "Spinner", "Spinner style") {
 			@Override
 			public Object[] getListItems() {

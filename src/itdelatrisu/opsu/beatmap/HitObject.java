@@ -160,6 +160,13 @@ public class HitObject {
 		yOffset = (int) (height - MAX_Y * yMultiplier) / 2;
 	}
 
+	public HitObject( float x, float y, int time) {
+		this.x = x;
+		this.y = y;
+		this.time = time;
+		this.type = HitObject.TYPE_CIRCLE;
+	}
+
 	/**
 	 * Returns the X multiplier for coordinates.
 	 */
@@ -286,6 +293,10 @@ public class HitObject {
 	 */
 	public float getScaledX() { return (x - stack * stackOffset) * xMultiplier + xOffset; }
 
+	public static float unscaleX(float x) {
+		return (x - xOffset) / xMultiplier;
+	}
+
 	/**
 	 * Returns the scaled starting y coordinate.
 	 */
@@ -295,6 +306,14 @@ public class HitObject {
 		else
 			return (y - stack * stackOffset) * yMultiplier + yOffset;
 	}
+
+	public static float unscaleY(float y) {
+		if(GameMod.HARD_ROCK.isActive()) {
+			return ((containerHeight - y) - yOffset) / yMultiplier;
+		}
+		return (y - yOffset) / yMultiplier;
+	}
+
 
 	/**
 	 * Returns the start time.

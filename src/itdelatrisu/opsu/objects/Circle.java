@@ -91,6 +91,11 @@ public class Circle extends GameObject {
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}
 
+	public Circle(float x, float y, int time) {
+		hitObject = new HitObject(x, y, time);
+		super.updateStartEndPositions(time);
+	}
+
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
@@ -229,6 +234,7 @@ public class Circle extends GameObject {
 	public void updatePosition() {
 		this.x = hitObject.getScaledX();
 		this.y = hitObject.getScaledY();
+		super.updateStartEndPositions(hitObject.getTime());
 	}
 
 	@Override

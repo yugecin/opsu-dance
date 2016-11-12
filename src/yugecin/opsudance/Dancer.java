@@ -29,6 +29,9 @@ import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
+import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
+import yugecin.opsudance.movers.slidermovers.SliderMoverController;
 import yugecin.opsudance.spinners.*;
 
 public class Dancer {
@@ -61,6 +64,11 @@ public class Dancer {
 		new SpiralSpinner(),
 	};
 
+	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
+		new DefaultSliderMoverController(),
+		new InheritedSliderMoverController(),
+	};
+
 	public static Dancer instance = new Dancer();
 
 	public static boolean mirror = false; // this should really get its own place somewhere...
@@ -86,6 +94,7 @@ public class Dancer {
 	private MoverFactory moverFactory;
 	private Mover mover;
 	private Spinner spinner;
+	public static SliderMoverController sliderMoverController;
 
 	private int moverFactoryIndex;
 	private int spinnerIndex;
@@ -100,6 +109,7 @@ public class Dancer {
 	public Dancer() {
 		moverFactory = moverFactories[0];
 		spinner = spinners[0];
+		sliderMoverController = sliderMovers[0];
 	}
 
 	public void reset() {
@@ -136,6 +146,9 @@ public class Dancer {
 	}
 
 	public void update(int time, GameObject p, GameObject c) {
+		GameObject[] e = sliderMoverController.process(p, c, time);
+		p = e[0];
+		c = e[1];
 		if (this.p != p) {
 			this.p = p;
 			if (this.p == d) {
