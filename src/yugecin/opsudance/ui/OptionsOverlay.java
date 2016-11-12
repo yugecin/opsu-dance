@@ -21,8 +21,13 @@ import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.state.StateBasedGame;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class OptionsOverlay {
 
@@ -62,15 +67,24 @@ public class OptionsOverlay {
 
 	private int textHeight;
 	private Input input;
+	private final ItemList list;
+	private GameContainer container;
+	private Options.GameOption selectedOption;
 
-	public void init(Input input, int width, int height) {
+	public OptionsOverlay() {
+		list = new ItemList();
+	}
+
+	public void init(GameContainer container, Input input, int width, int height) {
+		list.init(container);
 		this.input = input;
 		this.width = width;
 		this.height = height;
+		this.container = container;
 		textHeight = Fonts.SMALL.getLineHeight();
 	}
 
-	public void render(Graphics g) {
+	public void render(GameContainer container, StateBasedGame game, Graphics g) {
 		int hoverIdx = getOptionIdxAt(input.getMouseY());
 		float a = Color.black.a;
 		Color.black.a = 0.8f;
@@ -78,7 +92,10 @@ public class OptionsOverlay {
 		g.fillRect(0, 0, width, height);
 		Color.black.a = a;
 		for (int i = 0; i < options.length; i++) {
-			drawOption(g, options[i], i, hoverIdx == i);
+			drawOption(g, options[i], i, selectedOption == null ? hoverIdx == i : selectedOption == options[i]);
+		}
+		if (list.isVisible()) {
+			list.render(container, game, g);
 		}
 	}
 
@@ -106,11 +123,72 @@ public class OptionsOverlay {
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
-		return false;
+		if (list.isVisible()) {
+			list.mousePressed(button, x, y);
+			return true;
+		}
+		int idx = getOptionIdxAt(y);
+		if (idx < options.length) {
+			final Options.GameOption option = options[idx];
+			selectedOption = option;
+			Object[] listItems = option.getListItems();
+			if (listItems == null) {
+				option.click(container);
+			} else {
+				list.setItems(listItems);
+				list.setClickListener(new Observer() {
+					@Override
+					public void update(Observable o, Object arg) {
+						option.clickListItem((int) arg);
+					}
+				});
+				list.show();
+			}
+		}
+		return true;
 	}
+
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (list.isVisible()) {
+			list.mouseDragged(oldx, oldy, newx, newy);
+			return;
+		}
 
+		int multiplier;
+		if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON))
+			multiplier = 4;
+		else if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON))
+			multiplier = 1;
+		else
+			return;
+
+		// get direction
+		int diff = newx - oldx;
+		if (diff == 0)
+			return;
+		diff = ((diff > 0) ? 1 : -1) * multiplier;
+
+		// options (drag only)
+		if (selectedOption != null) {
+			selectedOption.drag(container, diff);
+		}
 	}
 
+	public boolean mouseReleased(int button, int x, int y) {
+		selectedOption = null;
+		if (list.isVisible()) {
+			list.mouseReleased(button, x, y);
+			return true;
+		}
+		return true;
+	}
+
+	public boolean mouseWheenMoved(int newValue) {
+		if (list.isVisible()) {
+			list.mouseWheelMoved(newValue);
+			return true;
+		}
+		return true;
+	}
 }

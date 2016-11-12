@@ -22,8 +22,10 @@ import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.state.StateBasedGame;
 
 import java.util.HashMap;
 
@@ -51,15 +53,15 @@ public class SBOverlay {
 		options = new OptionsOverlay();
 	}
 
-	public void init(Input input, int width, int height) {
+	public void init(GameContainer container, Input input, int width, int height) {
 		this.width = width;
 		this.height = height;
 		speed = 10;
 		gameObjects = new GameObject[0];
-		options.init(input, width, height);
+		options.init(container, input, width, height);
 	}
 
-	public void render(Graphics g) {
+	public void render(GameContainer container, StateBasedGame game, Graphics g) {
 		if (!isActive || hide) {
 			return;
 		}
@@ -69,7 +71,7 @@ public class SBOverlay {
 		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
 		if (menu) {
-			options.render(g);
+			options.render(container, game, g);
 		}
 	}
 
@@ -147,4 +149,11 @@ public class SBOverlay {
 		this.index = index;
 	}
 
+	public boolean mouseReleased(int button, int x, int y) {
+		return menu && options.mouseReleased(button, x, y);
+	}
+
+	public boolean mouseWheelMoved(int newValue) {
+		return menu && options.mouseWheenMoved(newValue);
+	}
 }

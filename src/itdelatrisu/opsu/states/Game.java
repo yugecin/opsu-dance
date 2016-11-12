@@ -337,7 +337,7 @@ public class Game extends BasicGameState {
 		int width = container.getWidth();
 		int height = container.getHeight();
 
-		sbOverlay.init(input, width, height);
+		sbOverlay.init(container, input, width, height);
 
 		// create offscreen graphics
 		offscreen = new Image(width, height);
@@ -687,7 +687,7 @@ public class Game extends BasicGameState {
 		else
 			UI.draw(g);
 
-		sbOverlay.render(g);
+		sbOverlay.render(container, game, g);
 
 		if (!Dancer.hidewatermark) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
@@ -1227,6 +1227,10 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
+		if (sbOverlay.mouseReleased(button, x, y)) {
+			return;
+		}
+
 		if (Options.isMouseDisabled())
 			return;
 
@@ -1269,6 +1273,9 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseWheelMoved(int newValue) {
+		if (sbOverlay.mouseWheelMoved(newValue)) {
+			return;
+		}
 		if (Options.isMouseWheelDisabled() || Options.isMouseDisabled())
 			return;
 
