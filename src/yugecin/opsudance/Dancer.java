@@ -29,6 +29,10 @@ import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
+import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
+import yugecin.opsudance.movers.slidermovers.OveriddenSliderMoverController;
+import yugecin.opsudance.movers.slidermovers.SliderMoverController;
 import yugecin.opsudance.spinners.*;
 
 public class Dancer {
@@ -61,6 +65,12 @@ public class Dancer {
 		new SpiralSpinner(),
 	};
 
+	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
+		new DefaultSliderMoverController(),
+		new InheritedSliderMoverController(),
+		new OveriddenSliderMoverController()
+	};
+
 	public static Dancer instance = new Dancer();
 
 	public static boolean mirror = false; // this should really get its own place somewhere...
@@ -86,6 +96,7 @@ public class Dancer {
 	private MoverFactory moverFactory;
 	private Mover mover;
 	private Spinner spinner;
+	public static SliderMoverController sliderMoverController;
 
 	private int moverFactoryIndex;
 	private int spinnerIndex;
@@ -100,6 +111,7 @@ public class Dancer {
 	public Dancer() {
 		moverFactory = moverFactories[0];
 		spinner = spinners[0];
+		sliderMoverController = sliderMovers[0];
 	}
 
 	public void reset() {
@@ -144,6 +156,7 @@ public class Dancer {
 					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 				}
 			}
+			c = sliderMoverController.process(c);
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
 			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
@@ -162,6 +175,12 @@ public class Dancer {
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
 			mover = moverFactory.create(p, c, dir);
+		}
+
+		GameObject next = sliderMoverController.processNext(time);
+		if (next != null) {
+			update(time, c, next);
+			return;
 		}
 
 		if (time < c.getTime()) {
