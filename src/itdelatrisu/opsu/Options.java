@@ -639,13 +639,18 @@ public class Options {
 
 			@Override
 			public void clickListItem(int index) {
+				val = index;
 				Dancer.sliderMoverController = Dancer.sliderMovers[index];
 			}
 
 			@Override
+			public String write() {
+				return String.valueOf(val);
+			}
+
+			@Override
 			public void read(String s) {
-				super.read(s);
-				Dancer.sliderMoverController = Dancer.sliderMovers[val];
+				Dancer.sliderMoverController = Dancer.sliderMovers[val = Integer.parseInt(s)];
 			}
 		},
 
