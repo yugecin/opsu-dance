@@ -84,6 +84,7 @@ public class SBOverlay {
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
 				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getDisplayName(), Color.cyan);
+				Fonts.SMALL.drawString(250, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
 				g.fillRect(0, 50 + i * lh + lh / 4, 10, 10);
 				i++;
 			}
