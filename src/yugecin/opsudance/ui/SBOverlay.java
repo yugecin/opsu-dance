@@ -35,7 +35,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class SBOverlay {
 
-	public static boolean isActive = true;
+	public static boolean isActive = false;
 
 	private boolean hide;
 	private boolean menu;

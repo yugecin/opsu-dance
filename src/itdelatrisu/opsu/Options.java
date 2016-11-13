@@ -57,6 +57,7 @@ import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 import yugecin.opsudance.spinners.Spinner;
+import yugecin.opsudance.ui.SBOverlay;
 
 /**
  * Handles all user options.
@@ -1019,6 +1020,20 @@ public class Options {
 			public void read(String s) {
 				super.read(s);
 				Dancer.hideui = bool;
+			}
+		},
+
+		DANCE_ENABLE_SB ("Enable storyboard", "EnableStoryBoard", "Dance storyboard", false) {
+			@Override
+			public void click(GameContainer container) {
+				super.click(container);
+				SBOverlay.isActive = bool;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				SBOverlay.isActive = bool;
 			}
 		},
 
