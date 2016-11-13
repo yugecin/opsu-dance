@@ -83,6 +83,13 @@ public class SBOverlay {
 				Fonts.SMALL.drawString(10, 50 + i++ * lh, option.getKey().getDisplayName(), Color.cyan);
 			}
 		}
+		if (gameObjects.length > 0) {
+			int start = gameObjects[0].getTime();
+			int end = gameObjects[gameObjects.length - 1].getEndTime();
+			float curtime = (float) (MusicController.getPosition() - start) / (end - start);
+			g.setColor(Color.red);
+			g.fillRect(curtime * width, height - 10f, 10f, 10f);
+		}
 		if (menu) {
 			options.render(container, game, g);
 		}

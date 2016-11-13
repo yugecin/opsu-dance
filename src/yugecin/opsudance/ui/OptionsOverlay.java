@@ -134,7 +134,7 @@ public class OptionsOverlay {
 			return true;
 		}
 		int idx = getOptionIdxAt(y);
-		if (idx < options.length) {
+		if (idx >= 0 && idx < options.length) {
 			final Options.GameOption option = options[idx];
 			selectedOption = option;
 			Object[] listItems = option.getListItems();
