@@ -229,7 +229,7 @@ public class MainMenu extends BasicGameState {
 		restartButton.setHoverRotate(360);
 
 		// logo animations
-		float centerOffsetX = width / 5f;
+		float centerOffsetX = width / 6.5f;
 		logoOpen = new AnimatedValue(100, 0, centerOffsetX, AnimationEquation.OUT_QUAD);
 		logoClose = new AnimatedValue(2200, centerOffsetX, 0, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
