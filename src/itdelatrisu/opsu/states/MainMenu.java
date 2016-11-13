@@ -656,6 +656,12 @@ public class MainMenu extends BasicGameState {
 		switch (key) {
 		case Input.KEY_ESCAPE:
 		case Input.KEY_Q:
+			if (logoTimer > 0) {
+				logoState = LogoState.CLOSING;
+				logoClose.setTime(0);
+				logoTimer = 0;
+				break;
+			}
 			((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).setMenuState(MenuState.EXIT);
 			game.enterState(Opsu.STATE_BUTTONMENU);
 			break;
