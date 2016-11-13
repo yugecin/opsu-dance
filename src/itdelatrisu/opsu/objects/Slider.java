@@ -301,7 +301,7 @@ public class Slider extends GameObject {
 						// last circle
 						arrow.setRotation(curve.getEndAngle());
 						arrow.drawCentered(endPos.x, endPos.y, arrowColor);
-					} else {
+					} else if (sliderClickedInitial) {
 						// first circle
 						arrow.setRotation(curve.getStartAngle());
 						arrow.drawCentered(x, y, arrowColor);
