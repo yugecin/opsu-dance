@@ -22,6 +22,7 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.ObjectColorOverrides;
 
 /**
  * Interface for hit object types used during gameplay.
@@ -32,6 +33,8 @@ public abstract class GameObject {
 	public Vec2f end;
 
 	private int time;
+
+	private float hue;
 
 	public void updateStartEndPositions(int startTime) {
 		time = startTime;
@@ -101,6 +104,14 @@ public abstract class GameObject {
 	public abstract Color getColor();
 	public abstract Color getMirroredColor();
 
-	public abstract void updateColor();
+
+	public void updateColor() {
+		hue = ObjectColorOverrides.hue;
+	}
+
+	// the hue of objectcoloroverrides at the point of this circle..... i know, shit placement... used for sb when hue inc changes / rainbow override
+	public float getHue() {
+		return hue;
+	}
 
 }

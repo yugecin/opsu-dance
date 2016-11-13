@@ -27,6 +27,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
+import yugecin.opsudance.ObjectColorOverrides;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class SBOverlay {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
-				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getDisplayName(), Color.cyan);
+				Fonts.SMALL.drawString(10, 50 + i++ * lh, option.getKey().getDisplayName(), Color.cyan);
 			}
 		}
 		if (menu) {
@@ -175,6 +176,7 @@ public class SBOverlay {
 			optionsMap[index] = new HashMap<>();
 		}
 		optionsMap[index].put(option, option.write());
+		readOption(option);
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
@@ -227,7 +229,12 @@ public class SBOverlay {
 
 	// needed for object color overrides...
 	private void readOption(Options.GameOption o) {
-		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE || o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED) {
+		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE
+			|| o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED
+			|| o == Options.GameOption.DANCE_RGB_OBJECT_INC) {
+			if (index < gameObjects.length) {
+				ObjectColorOverrides.hue = gameObjects[index].getHue();
+			}
 			for (int i = index; i < gameObjects.length; i++) {
 				gameObjects[i].updateColor();
 			}

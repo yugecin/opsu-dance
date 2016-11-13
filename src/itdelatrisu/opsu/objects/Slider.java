@@ -714,6 +714,7 @@ public class Slider extends GameObject {
 
 	@Override
 	public void updateColor() {
+		super.updateColor();
 		color = Dancer.colorOverride.getColor(comboColorIndex);
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}
