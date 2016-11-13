@@ -228,7 +228,9 @@ public class SBOverlay {
 
 	// needed for object color overrides...
 	private void readOption(Options.GameOption o) {
-		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE || o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED) {
+		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE
+			|| o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED
+			|| o == Options.GameOption.DANCE_RGB_OBJECT_INC) {
 			for (int i = index; i < gameObjects.length; i++) {
 				gameObjects[i].updateColor();
 			}
