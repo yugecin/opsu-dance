@@ -348,7 +348,7 @@ public class MusicController {
 	public static void playThemeSong() {
 		Beatmap beatmap = Options.getThemeBeatmap();
 		if (beatmap != null) {
-			play(beatmap, true, false);
+			play(beatmap, false, false);
 			themePlaying = true;
 		}
 	}
