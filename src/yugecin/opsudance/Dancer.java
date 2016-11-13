@@ -27,6 +27,7 @@ import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
+import yugecin.opsudance.movers.LinearMover;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -174,7 +175,11 @@ public class Dancer {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
-			mover = moverFactory.create(p, c, dir);
+			if (p == d) {
+				mover = new LinearMover(p, c, dir);
+			} else {
+				mover = moverFactory.create(p, c, dir);
+			}
 		}
 
 		if (time < c.getTime()) {
