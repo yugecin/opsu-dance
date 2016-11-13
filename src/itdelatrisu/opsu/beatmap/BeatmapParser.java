@@ -24,15 +24,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.io.MD5InputStreamWrapper;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -210,6 +202,63 @@ public class BeatmapParser {
 		currentDirectoryIndex = -1;
 		totalDirectories = -1;
 		return lastNode;
+	}
+
+	public static void parseOnlyTimingPoints(Beatmap map) {
+		if (map == null || map.getFile() == null || !map.getFile().exists()) {
+			return;
+		}
+		if (map.timingPoints == null) {
+			map.timingPoints = new ArrayList<TimingPoint>();
+		}
+		try (
+			InputStream bis = new BufferedInputStream(new FileInputStream(map.getFile()));
+			MD5InputStreamWrapper md5stream = (!hasNoMD5Algorithm) ? new MD5InputStreamWrapper(bis) : null;
+			BufferedReader in = new BufferedReader(new InputStreamReader((md5stream != null) ? md5stream : bis, "UTF-8"));
+		) {
+			String line;
+			boolean found = false;
+			while((line = in.readLine()) != null) {
+				line = line.trim();
+				if(!isValidLine(line)) {
+					continue;
+				}
+				if ("[TimingPoints]".equals(line)) {
+					found = true;
+					continue;
+				}
+				if (found) {
+					if (line.startsWith("[")) {
+						break;
+					}
+					parseSectionTimingPoints(map, line);
+				}
+			}
+			map.timingPoints.trimToSize();
+		} catch (IOException e) {
+			ErrorHandler.error(String.format("Failed to read file '%s'.", map.getFile().getAbsolutePath()), e, false);
+		} catch (NoSuchAlgorithmException e) {
+			ErrorHandler.error("Failed to get MD5 hash stream.", e, true);
+
+			// retry without MD5
+			hasNoMD5Algorithm = true;
+			parseOnlyTimingPoints(map);
+		}
+	}
+
+	private static void parseSectionTimingPoints(Beatmap beatmap, String line) {
+		TimingPoint timingPoint = new TimingPoint(line);
+		if(!timingPoint.isInherited()) {
+			int bpm = Math.round(60000 / timingPoint.getBeatLength());
+			if( beatmap.bpmMin == 0 ) {
+				beatmap.bpmMin = beatmap.bpmMax = bpm;
+			} else if( bpm < beatmap.bpmMin ) {
+				beatmap.bpmMin = bpm;
+			} else if( bpm > beatmap.bpmMax ) {
+				beatmap.bpmMax = bpm;
+			}
+		}
+		beatmap.timingPoints.add(timingPoint);
 	}
 
 	/**
