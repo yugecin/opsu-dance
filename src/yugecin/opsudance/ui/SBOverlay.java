@@ -161,10 +161,13 @@ public class SBOverlay {
 	private void goBackOneSBIndex() {
 		if (index + 1 < optionsMap.length && optionsMap[index + 1] != null) {
 			// new options on previous index, so to revert then we have to reload them all to this point..
-			final int thisIndex = index;
-			for (int i = 0; i <= thisIndex; i++) {
-				updateIndex(i);
-			}
+			reloadSBsettingsToIndex(index);
+		}
+	}
+
+	private void reloadSBsettingsToIndex(final int index) {
+		for (int i = 0; i <= index; i++) {
+			updateIndex(i);
 		}
 	}
 
@@ -236,6 +239,7 @@ public class SBOverlay {
 				if (optionsMap[index].size() == 0) {
 					optionsMap[index] = null;
 				}
+				reloadSBsettingsToIndex(index);
 				return true;
 			}
 			ypos += lh;
