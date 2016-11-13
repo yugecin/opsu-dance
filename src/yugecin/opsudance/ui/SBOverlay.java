@@ -156,7 +156,7 @@ public class SBOverlay {
 			// new options on previous index, so to revert then we have to reload them all to this point..
 			final int thisIndex = index;
 			for (int i = 0; i <= thisIndex; i++) {
-				updateIndex(thisIndex);
+				updateIndex(i);
 			}
 		}
 	}
