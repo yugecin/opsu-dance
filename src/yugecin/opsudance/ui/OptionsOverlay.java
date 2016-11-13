@@ -63,6 +63,7 @@ public class OptionsOverlay {
 		Options.GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
 		Options.GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
 		Options.GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
+		Options.GameOption.SHOW_HIT_LIGHTING,
 	};
 
 	private int textHeight;

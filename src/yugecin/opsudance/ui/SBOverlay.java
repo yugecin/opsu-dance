@@ -29,6 +29,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.ObjectColorOverrides;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,22 +73,26 @@ public class SBOverlay {
 			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
+		Fonts.SMALL.drawString(10, height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
+		g.setColor(Color.red);
 		if (index < optionsMap.length && optionsMap[index] != null) {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
-				Fonts.SMALL.drawString(10, 50 + i++ * lh, option.getKey().getDisplayName(), Color.cyan);
+				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getName(), Color.cyan);
+				Fonts.SMALL.drawString(250, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
+				g.fillRect(0, 50 + i * lh + lh / 4, 10, 10);
+				i++;
 			}
 		}
 		if (gameObjects.length > 0) {
 			int start = gameObjects[0].getTime();
 			int end = gameObjects[gameObjects.length - 1].getEndTime();
 			float curtime = (float) (MusicController.getPosition() - start) / (end - start);
-			g.setColor(Color.red);
 			g.fillRect(curtime * width, height - 10f, 10f, 10f);
 		}
 		if (menu) {
@@ -111,8 +116,10 @@ public class SBOverlay {
 		if (options.keyPressed(key, c)) {
 			return true;
 		}
-		if (key == Input.KEY_C && speed > 0) {
-			speed -= 1;
+		if (key == Input.KEY_C) {
+			if (speed > 0) {
+				speed -= 1;
+			}
 			if (speed == 0) {
 				MusicController.pause();
 			} else {
@@ -174,6 +181,11 @@ public class SBOverlay {
 	public void setGameObjects(GameObject[] gameObjects) {
 		if (this.gameObjects.length != gameObjects.length) {
 			optionsMap = new HashMap[gameObjects.length];
+			// copy all current settings in first obj map
+			optionsMap[0] = new HashMap<>();
+			for (Options.GameOption o : options.getSavedOptionList()) {
+				optionsMap[0].put(o, o.write());
+			}
 		}
 		this.gameObjects = gameObjects;
 	}
@@ -210,7 +222,25 @@ public class SBOverlay {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
-		return menu && options.mouseReleased(button, x, y);
+		if (menu) {
+			return options.mouseReleased(button, x, y);
+		}
+		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
+			return false;
+		}
+		int lh = Fonts.SMALL.getLineHeight();
+		int ypos = 50 + lh / 4;
+		for (Object o : optionsMap[index].entrySet()) {
+			if (y >= ypos && y <= ypos + 10) {
+				optionsMap[index].remove(((Map.Entry<Options.GameOption, String>) o).getKey());
+				if (optionsMap[index].size() == 0) {
+					optionsMap[index] = null;
+				}
+				return true;
+			}
+			ypos += lh;
+		}
+		return false;
 	}
 
 	public boolean mouseWheelMoved(int newValue) {
