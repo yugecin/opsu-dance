@@ -175,6 +175,7 @@ public class SBOverlay {
 			optionsMap[index] = new HashMap<>();
 		}
 		optionsMap[index].put(option, option.write());
+		readOption(option);
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
