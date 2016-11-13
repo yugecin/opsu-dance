@@ -369,13 +369,13 @@ public class MainMenu extends BasicGameState {
 		int trackposition = MusicController.getPosition();
 		TimingPoint p = null;
 		float beatlen = 0f;
-		//int time = 0;
+		int time = 0;
 		for (TimingPoint pts : map.timingPoints) {
 			if (p == null || pts.getTime() < MusicController.getPosition()) {
 				p = pts;
 				if (!p.isInherited() && p.getBeatLength() > 0) {
 					beatlen = p.getBeatLength();
-					//time = p.getTime();
+					time = p.getTime();
 				}
 			}
 		}
@@ -383,7 +383,7 @@ public class MainMenu extends BasicGameState {
 			return null;
 		}
 		double beatLength = beatlen * 100;
-		return (((trackposition * 100/* - time * 100 idk.. */) % beatLength) / beatLength);
+		return (((trackposition * 100 - time * 100) % beatLength) / beatLength);
 	}
 
 	@Override
