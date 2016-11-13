@@ -75,6 +75,13 @@ public class SBOverlay {
 		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
+		if (index < optionsMap.length && optionsMap[index] != null) {
+			int i = 0;
+			for (Object o : optionsMap[index].entrySet()) {
+				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
+				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getDisplayName(), Color.cyan);
+			}
+		}
 		if (menu) {
 			options.render(container, game, g);
 		}
