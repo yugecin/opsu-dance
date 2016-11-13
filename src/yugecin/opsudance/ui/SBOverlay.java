@@ -79,7 +79,7 @@ public class SBOverlay {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
-				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getDisplayName(), Color.cyan);
+				Fonts.SMALL.drawString(10, 50 + i++ * lh, option.getKey().getDisplayName(), Color.cyan);
 			}
 		}
 		if (menu) {
