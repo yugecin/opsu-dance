@@ -503,6 +503,18 @@ public class Options {
 		SHOW_PERFECT_HIT ("Show Perfect Hits", "PerfectHit", "Whether to show perfect hit result bursts (300s, slider ticks).", true),
 		SHOW_FOLLOW_POINTS ("Show Follow Points", "FollowPoints", "Whether to show follow points between hit objects.", true),
 		SHOW_HIT_ERROR_BAR ("Show Hit Error Bar", "ScoreMeter", "Shows precisely how accurate you were with each hit.", false),
+		MAP_START_DELAY ("Map start delay", "StartDelay", "Have a fix amount of time to prepare your play/record", 20, 1, 50) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val * 100);
+			}
+		},
+		MAP_END_DELAY ("Map end delay", "EndDelay", "Have a fix amount of time at the and of the map for a smooth finish", 50, 1, 50) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val * 100);
+			}
+		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
 		FIXED_CS ("Fixed Circle Size (CS)", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
 			@Override
@@ -1695,6 +1707,9 @@ public class Options {
 	 * @return true if enabled
 	 */
 	public static boolean isHitErrorBarEnabled() { return GameOption.SHOW_HIT_ERROR_BAR.getBooleanValue(); }
+
+	public static int getMapStartDelay() { return GameOption.MAP_START_DELAY.getIntegerValue() * 100; }
+	public static int getMapEndDelay() { return GameOption.MAP_END_DELAY.getIntegerValue() * 100; }
 
 	/**
 	 * Returns whether or not to load HD (@2x) images.

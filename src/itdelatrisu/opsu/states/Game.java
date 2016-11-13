@@ -827,7 +827,7 @@ public class Game extends BasicGameState {
 		boolean complete = objectIndex >= gameObjects.length;
 		if (GameMod.AUTO.isActive() && complete) {
 			if (gameObjects.length > 0) {
-				complete = trackPosition >= gameObjects[gameObjects.length - 1].getEndTime() + 5000;
+				complete = trackPosition >= gameObjects[gameObjects.length - 1].getEndTime() + Options.getMapEndDelay();
 			}
 		}
 		if (complete || (MusicController.trackEnded() && objectIndex > 0)) {
@@ -1438,7 +1438,7 @@ public class Game extends BasicGameState {
 			MusicController.pause();
 
 			if (gameObjects.length > 0) {
-				int leadIntime = 2000 - gameObjects[0].getTime();
+				int leadIntime = Options.getMapStartDelay() - gameObjects[0].getTime();
 				if (leadIntime > 0) {
 					this.leadInTime = Math.max(leadIntime, this.leadInTime);
 				}

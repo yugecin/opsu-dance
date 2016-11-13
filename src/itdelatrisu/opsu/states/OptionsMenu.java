@@ -87,7 +87,9 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.SHOW_COMBO_BURSTS,
 			GameOption.SHOW_PERFECT_HIT,
 			GameOption.SHOW_FOLLOW_POINTS,
-			GameOption.SHOW_HIT_ERROR_BAR
+			GameOption.SHOW_HIT_ERROR_BAR,
+			GameOption.MAP_START_DELAY,
+			GameOption.MAP_END_DELAY,
 		}),
 		INPUT ("Input", new GameOption[] {
 			GameOption.KEY_LEFT,
