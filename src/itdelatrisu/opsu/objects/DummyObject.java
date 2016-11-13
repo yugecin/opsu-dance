@@ -100,4 +100,8 @@ public class DummyObject extends GameObject {
 		return null;
 	}
 
+	@Override
+	public void updateColor() {
+	}
+
 }

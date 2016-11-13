@@ -62,6 +62,8 @@ public class Container extends AppGameContainer {
 			getDelta();
 			while (running())
 				gameLoop();
+		} catch(Exception e) {
+			e.printStackTrace();
 		} finally {
 			// destroy the game container
 			close_sub();

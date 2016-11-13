@@ -60,6 +60,8 @@ public class Circle extends GameObject {
 	/** Whether or not the circle result ends the combo streak. */
 	private boolean comboEnd;
 
+	private int comboColorIndex;
+
 	/**
 	 * Initializes the Circle data type with map modifiers, images, and dimensions.
 	 * @param container the game container
@@ -86,9 +88,9 @@ public class Circle extends GameObject {
 		this.game = game;
 		this.data = data;
 		this.comboEnd = comboEnd;
+		this.comboColorIndex = comboColorIndex;
+		updateColor();
 		updatePosition();
-		color = Dancer.colorOverride.getColor(comboColorIndex);
-		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}
 
 	public Circle(float x, float y, int time) {
@@ -263,6 +265,12 @@ public class Circle extends GameObject {
 	@Override
 	public Color getMirroredColor() {
 		return mirrorColor;
+	}
+
+	@Override
+	public void updateColor() {
+		color = Dancer.colorOverride.getColor(comboColorIndex);
+		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}
 
 }

@@ -101,4 +101,6 @@ public abstract class GameObject {
 	public abstract Color getColor();
 	public abstract Color getMirroredColor();
 
+	public abstract void updateColor();
+
 }

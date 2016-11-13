@@ -72,6 +72,7 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.*;
+import yugecin.opsudance.ui.SBOverlay;
 
 /**
  * "Game" state.
@@ -271,10 +272,59 @@ public class Game extends BasicGameState {
 	private final int state;
 
 	private final Cursor mirrorCursor;
+	private final SBOverlay sbOverlay;
 
 	public Game(int state) {
 		this.state = state;
 		mirrorCursor = new Cursor(true);
+		sbOverlay = new SBOverlay(this);
+	}
+
+	public void setObjectIndex(int newObjIndex) {
+		try {
+			/*
+
+					restart = Restart.MANUAL;
+					enter(container, game);
+					checkpointLoaded = true;
+					if (isLeadIn()) {
+						leadInTime = 0;
+						MusicController.resume();
+					}
+					SoundController.playSound(SoundEffect.MENUHIT);
+					UI.sendBarNotification("Checkpoint loaded.");
+
+					// skip to checkpoint
+					MusicController.setPosition(checkpoint);
+					MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
+					while (objectIndex < gameObjects.length &&
+							beatmap.objects[objectIndex++].getTime() <= checkpoint)
+						;
+					objectIndex--;
+					lastReplayTime = beatmap.objects[objectIndex].getTime();
+				} catch (SlickException e) {
+					ErrorHandler.error("Failed to load checkpoint.", e, false);
+				}
+			 */
+			restart = Restart.MANUAL;
+			enter(container, game);
+			checkpointLoaded = true;
+			if (isLeadIn()) {
+				leadInTime = 0;
+				MusicController.resume();
+			}
+			int checkpoint = gameObjects[newObjIndex].getTime();
+			// skip to checkpoint
+			MusicController.setPosition(checkpoint);
+			while (objectIndex < gameObjects.length && beatmap.objects[objectIndex].getTime() <= checkpoint) {
+				objectIndex++;
+			}
+			objectIndex--;
+			sbOverlay.updateIndex(objectIndex);
+			lastReplayTime = beatmap.objects[objectIndex].getTime();
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -286,6 +336,8 @@ public class Game extends BasicGameState {
 
 		int width = container.getWidth();
 		int height = container.getHeight();
+
+		sbOverlay.init(container, input, width, height);
 
 		// create offscreen graphics
 		offscreen = new Image(width, height);
@@ -635,6 +687,8 @@ public class Game extends BasicGameState {
 		else
 			UI.draw(g);
 
+		sbOverlay.render(container, game, g);
+
 		if (!Dancer.hidewatermark) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
 		}
@@ -647,6 +701,7 @@ public class Game extends BasicGameState {
 		Pippi.update(delta);
 		yugecin.opsudance.spinners.Spinner.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
+		sbOverlay.update(mouseX, mouseY);
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
@@ -910,6 +965,7 @@ public class Game extends BasicGameState {
 				// update hit object and check completion status
 				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
 					objectIndex++;  // done, so increment object index
+					sbOverlay.updateIndex(objectIndex);
 					if (objectIndex >= mirrorTo) {
 						Dancer.mirror = false;
 					}
@@ -924,6 +980,11 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void keyPressed(int key, char c) {
+
+		if (sbOverlay.keyPressed(key, c)) {
+			return;
+		}
+
 		int trackPosition = MusicController.getPosition();
 		int mouseX = input.getMouseX();
 		int mouseY = input.getMouseY();
@@ -1065,7 +1126,15 @@ public class Game extends BasicGameState {
 	}
 
 	@Override
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		sbOverlay.mouseDragged(oldx, oldy, newx, newy);
+	}
+
+	@Override
 	public void mousePressed(int button, int x, int y) {
+		if (sbOverlay.mousePressed(button, x, y)) {
+			return;
+		}
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
 			if (button == Input.MOUSE_MIDDLE_BUTTON)
@@ -1158,6 +1227,10 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
+		if (sbOverlay.mouseReleased(button, x, y)) {
+			return;
+		}
+
 		if (Options.isMouseDisabled())
 			return;
 
@@ -1200,6 +1273,9 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseWheelMoved(int newValue) {
+		if (sbOverlay.mouseWheelMoved(newValue)) {
+			return;
+		}
 		if (Options.isMouseWheelDisabled() || Options.isMouseDisabled())
 			return;
 
@@ -1227,6 +1303,7 @@ public class Game extends BasicGameState {
 
 		// grab the mouse (not working for touchscreen)
 //		container.setMouseGrabbed(true);
+
 
 		// restart the game
 		if (restart != Restart.FALSE) {
@@ -1369,6 +1446,13 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 		}
 
+
+		sbOverlay.setGameObjects(gameObjects);
+		if (!checkpointLoaded) {
+			sbOverlay.enter();
+			sbOverlay.updateIndex(0);
+		}
+
 		Pippi.reset();
 		mirrorFrom = 0;
 		mirrorTo = gameObjects.length;
@@ -1383,6 +1467,8 @@ public class Game extends BasicGameState {
 	public void leave(GameContainer container, StateBasedGame game)
 			throws SlickException {
 //		container.setMouseGrabbed(false);
+
+		sbOverlay.leave();
 
 		Cursor.lastObjColor = Color.white;
 		Cursor.lastMirroredObjColor = Color.white;

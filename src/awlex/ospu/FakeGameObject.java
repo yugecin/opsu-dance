@@ -101,4 +101,9 @@ public class FakeGameObject extends GameObject {
     public void setTime(int time) {
         this.halfTime = time;
     }
+
+    @Override
+    public void updateColor() {
+    }
+
 }
