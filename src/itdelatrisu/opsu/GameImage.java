@@ -283,13 +283,13 @@ public enum GameImage {
 			return img.getScaledCopy(0.8f);
 		}
 	},
-	MENU_PLAY ("menu-play", "png", false, false) {
+	MENU_PLAY ("menu-play2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy(0.8f);
 		}
 	},
-	MENU_EXIT ("menu-exit", "png", false, false) {
+	MENU_EXIT ("menu-exit2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy(0.8f);
