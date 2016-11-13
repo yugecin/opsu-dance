@@ -72,6 +72,7 @@ public class SBOverlay {
 			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
+		Fonts.SMALL.drawString(10, height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
