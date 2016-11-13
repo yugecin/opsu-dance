@@ -115,8 +115,10 @@ public class SBOverlay {
 		if (options.keyPressed(key, c)) {
 			return true;
 		}
-		if (key == Input.KEY_C && speed > 0) {
-			speed -= 1;
+		if (key == Input.KEY_C) {
+			if (speed > 0) {
+				speed -= 1;
+			}
 			if (speed == 0) {
 				MusicController.pause();
 			} else {
