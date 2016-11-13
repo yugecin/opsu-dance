@@ -979,7 +979,7 @@ public class Options {
 			}
 		},
 
-		DANCE_REMOVE_BG ("Never draw background", "RemoveBG", "Hello darkness my old friend", Dancer.removebg) {
+		DANCE_REMOVE_BG ("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", Dancer.removebg) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
