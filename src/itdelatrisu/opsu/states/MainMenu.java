@@ -29,6 +29,7 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
+import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.Colors;
@@ -269,7 +270,23 @@ public class MainMenu extends BasicGameState {
 			playButton.draw();
 			exitButton.draw();
 		}
-		logo.draw();
+
+		Double position = getBPMPiecePosition();
+
+		if (position != null) {
+			double scale = 1 - (0 - position) * 0.05;
+			logo.draw(Color.white, (float) scale);
+			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
+			float xRadius = piece.getWidth() / 2;
+			float yRadius = piece.getHeight() / 2;
+			piece = piece.getScaledCopy(logo.getCurrentScale());
+			float scaleposmodx = piece.getWidth() / 2 - xRadius;
+			float scaleposmody = piece.getHeight() / 2 - yRadius;
+			piece.rotate((float)(position * 360));
+			piece.draw(logo.getX() - xRadius - scaleposmodx, logo.getY() - yRadius - scaleposmody);
+		} else {
+			logo.draw();
+		}
 
 		// draw music buttons
 		if (MusicController.isPlaying())
@@ -339,6 +356,34 @@ public class MainMenu extends BasicGameState {
 				marginX, height - bottomMarginY - lineHeight);
 
 		UI.draw(g);
+	}
+
+	private Double getBPMPiecePosition() {
+		if (!MusicController.isPlaying() || MusicController.getBeatmap() == null) {
+			return null;
+		}
+		Beatmap map = MusicController.getBeatmap();
+		if (map.timingPoints == null) {
+			return null;
+		}
+		int trackposition = MusicController.getPosition();
+		TimingPoint p = null;
+		float beatlen = 0f;
+		int time = 0;
+		for (TimingPoint pts : map.timingPoints) {
+			if (p == null || pts.getTime() < MusicController.getPosition()) {
+				p = pts;
+				if (!p.isInherited() && p.getBeatLength() > 0) {
+					beatlen = p.getBeatLength();
+					time = p.getTime();
+				}
+			}
+		}
+		if (p == null) {
+			return null;
+		}
+		double beatLength = beatlen * 100;
+		return (((trackposition * 100 - time * 100) % beatLength) / beatLength);
 	}
 
 	@Override
@@ -611,6 +656,12 @@ public class MainMenu extends BasicGameState {
 		switch (key) {
 		case Input.KEY_ESCAPE:
 		case Input.KEY_Q:
+			if (logoTimer > 0) {
+				logoState = LogoState.CLOSING;
+				logoClose.setTime(0);
+				logoTimer = 0;
+				break;
+			}
 			((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).setMenuState(MenuState.EXIT);
 			game.enterState(Opsu.STATE_BUTTONMENU);
 			break;

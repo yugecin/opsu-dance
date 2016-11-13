@@ -1391,6 +1391,9 @@ public class SongMenu extends BasicGameState {
 
 		focusNode = BeatmapSetList.get().getNode(node, beatmapIndex);
 		Beatmap beatmap = focusNode.getSelectedBeatmap();
+		if (beatmap.timingPoints == null) {
+			BeatmapParser.parseOnlyTimingPoints(beatmap);
+		}
 		MusicController.play(beatmap, false, preview);
 
 		// load scores
