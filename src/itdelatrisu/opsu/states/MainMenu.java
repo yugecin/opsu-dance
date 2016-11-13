@@ -309,7 +309,7 @@ public class MainMenu extends BasicGameState {
 		Image piece = GameImage.MENU_LOGO_PIECE.getImage();
 		float xRadius = piece.getWidth() / 2;
 		float yRadius = piece.getHeight() / 2;
-		piece = piece.getScaledCopy(scale);
+		piece = piece.getScaledCopy(logo.getCurrentScale());
 		float scaleposmodx = piece.getWidth() / 2 - xRadius;
 		float scaleposmody = piece.getHeight() / 2 - yRadius;
 		piece.rotate((float)(position * 360));

@@ -98,6 +98,12 @@ public class MenuButton {
 	/** The default max rotation angle of the button. */
 	private static final float DEFAULT_ANGLE_MAX = 30f;
 
+	private float currentScale = 1f;
+
+	public float getCurrentScale() {
+		return currentScale;
+	}
+
 	/**
 	 * Creates a new button from an Image.
 	 * @param img the image
@@ -213,6 +219,8 @@ public class MenuButton {
 			image = anim.getCurrentFrame();
 		}
 
+		currentScale = 1f;
+
 		// normal images
 		if (imgL == null) {
 			float scaleposmodx = 0;
@@ -221,6 +229,7 @@ public class MenuButton {
 				image = image.getScaledCopy(scaleoverride);
 				scaleposmodx = image.getWidth() / 2 - xRadius;
 				scaleposmody = image.getHeight() / 2 - yRadius;
+				currentScale = scaleoverride;
 			}
 			if (hoverEffect == 0)
 				image.draw(x - xRadius - scaleposmodx, y - yRadius - scaleposmody, filter);
@@ -231,6 +240,9 @@ public class MenuButton {
 					if (scale.getValue() != 1f) {
 						image = image.getScaledCopy(scale.getValue());
 						image.setAlpha(oldAlpha);
+						scaleposmodx = image.getWidth() / 2 - xRadius;
+						scaleposmody = image.getHeight() / 2 - yRadius;
+						currentScale *= scale.getValue();
 					}
 				}
 				if ((hoverEffect & EFFECT_FADE) > 0)
