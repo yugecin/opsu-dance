@@ -27,6 +27,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
+import yugecin.opsudance.ObjectColorOverrides;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -231,6 +232,9 @@ public class SBOverlay {
 		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE
 			|| o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED
 			|| o == Options.GameOption.DANCE_RGB_OBJECT_INC) {
+			if (index < gameObjects.length) {
+				ObjectColorOverrides.hue = gameObjects[index].getHue();
+			}
 			for (int i = index; i < gameObjects.length; i++) {
 				gameObjects[i].updateColor();
 			}
