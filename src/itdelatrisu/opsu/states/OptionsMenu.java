@@ -90,6 +90,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.SHOW_HIT_ERROR_BAR,
 			GameOption.MAP_START_DELAY,
 			GameOption.MAP_END_DELAY,
+			GameOption.EPILEPSY_WARNING,
 		}),
 		INPUT ("Input", new GameOption[] {
 			GameOption.KEY_LEFT,
