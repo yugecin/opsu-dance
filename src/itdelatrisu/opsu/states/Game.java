@@ -259,6 +259,11 @@ public class Game extends BasicGameState {
 	private int mirrorFrom;
 	private int mirrorTo;
 
+	private Image epiImg;
+	private float epiImgX;
+	private float epiImgY;
+	private int epiImgTime;
+
 	/** Music position bar background colors. */
 	private static final Color
 		MUSICBAR_NORMAL = new Color(12, 9, 10, 0.25f),
@@ -392,6 +397,18 @@ public class Game extends BasicGameState {
 				playfield.setAlpha(dimLevel);
 				playfield.draw();
 				playfield.setAlpha(1f);
+			}
+		}
+
+		// epilepsy warning
+		if (epiImgTime > 0) {
+			if (epiImgTime < 200) {
+				// fade out
+				Color c = new Color(Color.white);
+				c.a = epiImgTime / 200f;
+				epiImg.draw(epiImgX, epiImgY, c);
+			} else {
+				epiImg.draw(epiImgX, epiImgY);
 			}
 		}
 
@@ -699,6 +716,9 @@ public class Game extends BasicGameState {
 			throws SlickException {
 		UI.update(delta);
 		Pippi.update(delta);
+		if (epiImgTime > 0) {
+			epiImgTime -= delta;
+		}
 		yugecin.opsudance.spinners.Spinner.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		sbOverlay.update(mouseX, mouseY);
@@ -1307,6 +1327,17 @@ public class Game extends BasicGameState {
 
 		// restart the game
 		if (restart != Restart.FALSE) {
+
+			// load epilepsy warning img
+			epiImgTime = Options.getEpilepsyWarningLength();
+			if (epiImgTime > 0) {
+				epiImg = GameImage.EPILEPSY_WARNING.getImage();
+				float desWidth = container.getWidth() / 2;
+				epiImg = epiImg.getScaledCopy(desWidth / epiImg.getWidth());
+				epiImgX = (container.getWidth() - epiImg.getWidth()) / 2;
+				epiImgY = (container.getHeight() - epiImg.getHeight()) / 2;
+			}
+
 			// load mods
 			if (isReplay) {
 				previousMods = GameMod.getModState();
@@ -1443,6 +1474,7 @@ public class Game extends BasicGameState {
 					this.leadInTime = Math.max(leadIntime, this.leadInTime);
 				}
 			}
+			this.leadInTime += epiImgTime;
 			SoundController.mute(false);
 		}
 

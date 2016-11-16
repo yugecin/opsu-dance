@@ -515,6 +515,15 @@ public class Options {
 				return String.valueOf(val * 100);
 			}
 		},
+		EPILEPSY_WARNING ("Epilepsy warning image", "EpiWarn", "Show a little warning for flashing colours in the beginning", 20, 0, 20) {
+			@Override
+			public String getValueString() {
+				if (val == 0) {
+					return "Disabled";
+				}
+				return String.valueOf(val * 100);
+			}
+		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
 		FIXED_CS ("Fixed Circle Size (CS)", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
 			@Override
@@ -1710,6 +1719,7 @@ public class Options {
 
 	public static int getMapStartDelay() { return GameOption.MAP_START_DELAY.getIntegerValue() * 100; }
 	public static int getMapEndDelay() { return GameOption.MAP_END_DELAY.getIntegerValue() * 100; }
+	public static int getEpilepsyWarningLength() { return GameOption.EPILEPSY_WARNING.getIntegerValue() * 100; }
 
 	/**
 	 * Returns whether or not to load HD (@2x) images.

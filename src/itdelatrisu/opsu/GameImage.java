@@ -41,6 +41,7 @@ public enum GameImage {
 	CURSOR_TRAIL_OLD ("cursortrail2", "png", false, false),  // custom
 
 	// Game
+	EPILEPSY_WARNING ("epiwarning", "png"),
 	SECTION_PASS ("section-pass", "png"),
 	SECTION_FAIL ("section-fail", "png"),
 	WARNINGARROW ("play-warningarrow", "png"),
