@@ -276,14 +276,11 @@ public class MainMenu extends BasicGameState {
 		if (position != null) {
 			double scale = 1 - (0 - position) * 0.05;
 			logo.draw(Color.white, (float) scale);
-			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
-			float xRadius = piece.getWidth() / 2;
-			float yRadius = piece.getHeight() / 2;
-			piece = piece.getScaledCopy(logo.getCurrentScale());
-			float scaleposmodx = piece.getWidth() / 2 - xRadius;
-			float scaleposmody = piece.getHeight() / 2 - yRadius;
+			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getCurrentScale());
+			float scaleposmodx = piece.getWidth() / 2;
+			float scaleposmody = piece.getHeight() / 2;
 			piece.rotate((float)(position * 360));
-			piece.draw(logo.getX() - xRadius - scaleposmodx, logo.getY() - yRadius - scaleposmody);
+			piece.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody);
 		} else {
 			logo.draw();
 		}
