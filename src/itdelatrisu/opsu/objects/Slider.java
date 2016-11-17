@@ -119,6 +119,9 @@ public class Slider extends GameObject {
 
 	private int comboColorIndex;
 
+	private int tickExpand = 0;
+	private final int TICKEXPAND = 200;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -347,7 +350,7 @@ public class Slider extends GameObject {
 
 			// follow circle
 			if (followCircleActive) {
-				GameImage.SLIDER_FOLLOWCIRCLE.getImage().drawCentered(c.x, c.y);
+				GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(1f + (tickExpand / (float) TICKEXPAND) * 0.1f).drawCentered(c.x, c.y);
 
 				// "flashlight" mod: dim the screen
 				if (GameMod.FLASHLIGHT.isActive()) {
@@ -516,9 +519,17 @@ public class Slider extends GameObject {
 				mousePressed(mouseX, mouseY, trackPosition);
 		}
 
+		if (tickExpand > 0) {
+			tickExpand -= delta;
+			if (tickExpand < 0) {
+				tickExpand = 0;
+			}
+		}
+
 		// end of slider
 		if (trackPosition > hitObject.getTime() + sliderTimeTotal) {
 			tickIntervals++;
+			tickExpand = TICKEXPAND;
 
 			// check if cursor pressed and within end circle
 			if (keyPressed || GameMod.RELAX.isActive()) {
@@ -548,6 +559,7 @@ public class Slider extends GameObject {
 			if (Math.floor(t) > currentRepeats) {
 				currentRepeats++;
 				tickIntervals++;
+				tickExpand = TICKEXPAND;
 				isNewRepeat = true;
 			}
 		}
@@ -561,6 +573,7 @@ public class Slider extends GameObject {
 			if (t - Math.floor(t) >= ticksT[tickIndex]) {
 				tickIntervals++;
 				tickIndex = (tickIndex + 1) % ticksT.length;
+				tickExpand = TICKEXPAND;
 				isNewTick = true;
 			}
 		}
