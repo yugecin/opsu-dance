@@ -27,30 +27,13 @@ public class FakeGameObject extends GameObject {
     }
 
     public FakeGameObject(GameObject start, GameObject end) {
-        halfTime = Math.abs(start.getEndTime() + (end.getTime() - start.getEndTime()) / 2);
+        halfTime = start.getEndTime() + (end.getTime() - start.getEndTime()) / 2;
         this.start = new Vec2f();
         this.end = new Vec2f();
         this.start.x = this.end.x = (start.end.x + end.start.x) / 2;
         this.start.y = this.end.y = (start.end.y + end.start.y) / 2;
     }
-    
-    @Override
-    public int getEndTime() {
-        return halfTime;
-    }
-    
-    @Override
-    public int getTime() {
-        return halfTime;
-    }
-    
-    public void setTime(int time) {
-        this.halfTime = time;
-    }
-    
-    /*
-    * Everything down here is unimportant
-     */
+
     @Override
     public void draw(Graphics g, int trackPosition, boolean mirrored) {
 
@@ -70,7 +53,17 @@ public class FakeGameObject extends GameObject {
     public Vec2f getPointAt(int trackPosition) {
         return null;
     }
-    
+
+    @Override
+    public int getEndTime() {
+        return halfTime;
+    }
+
+    @Override
+    public int getTime() {
+        return halfTime;
+    }
+
     @Override
     public void updatePosition() {
 
@@ -103,6 +96,10 @@ public class FakeGameObject extends GameObject {
     @Override
     public Color getMirroredColor() {
         return null;
+    }
+
+    public void setTime(int time) {
+        this.halfTime = time;
     }
 
 }
