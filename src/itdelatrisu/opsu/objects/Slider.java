@@ -558,9 +558,10 @@ public class Slider extends GameObject {
 			float t = getT(trackPosition, true);
 			if (Math.floor(t) > currentRepeats) {
 				currentRepeats++;
-				tickIntervals++;
+				//tickIntervals++;
 				tickExpand = TICKEXPAND;
 				isNewRepeat = true;
+				tickIndex = 0;
 			}
 		}
 
