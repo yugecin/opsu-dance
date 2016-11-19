@@ -70,8 +70,6 @@ public class ArcMover extends PolyMover {
 			percent = ((double) time - middle.getTime()) / (p2.getTime() - middle.getTime());
 			angle = beta + (gamma - beta) * percent;
 		}
-		if (angle > PI)
-			angle -= PI;
 		return new double[]{
 			xm + r * cos(angle),
 			ym + r * sin(angle)

@@ -266,16 +266,17 @@ public class Dancer {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
-			if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getPrefferedBufferSize() - 1) {
-				polyMoverFactory.update(gameObjects[ objectIndex + polyMoverFactory.getPrefferedBufferSize() - 1]);
+
+			if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getPrefferedBufferSize()) {
+				polyMoverFactory.update(gameObjects[polyMoverFactory.getLatestIndex()]);
 			}
 			else {
-				polyMoverFactory.init(gameObjects, objectIndex);
+				polyMoverFactory.init(gameObjects, objectIndex - 1);
 			}
 		}
 
 		if (time < c.getTime()) {
-			if (!p.isSpinner() || !c.isSpinner()) {
+			if (!p.isSpinner() || !c.isSpinner() && polyMoverFactory.isInitialized()) {
 				double[] point = polyMoverFactory.getPointAt(time);
 				x = (float) point[0];
 				y = (float) point[1];

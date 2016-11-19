@@ -594,7 +594,7 @@ public class Options {
 		DISABLE_UPDATER ("Disable Automatic Updates", "DisableUpdater", "Disable automatic checking for updates upon starting opsu!.", false),
 		ENABLE_WATCH_SERVICE ("Enable Watch Service", "WatchService", "Watch the beatmap directory for changes. Requires a restart.", false),
 
-		DANCE_MOVER_TYPE("Mover Type", "Mover type", "More Points", Dancer.multipoint) {
+		DANCE_MOVER_TYPE("Mover Type", "Mover type", "More than 2 Points", Dancer.multipoint) {
 			@Override
 			public void click(GameContainer container) {
 				bool = !bool;
