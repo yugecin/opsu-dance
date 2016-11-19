@@ -31,6 +31,8 @@ public abstract class Mover {
 
 	protected double endX;
 	protected double endY;
+	
+	private GameObject end;
 
 	public Mover(GameObject start, GameObject end, int dir) {
 		this.dir = dir;
@@ -40,6 +42,7 @@ public abstract class Mover {
 		this.endY = end.start.y;
 		this.startT = start.getEndTime();
 		this.totalT = end.getTime() - startT;
+		this.end = end;
 	}
 
 	protected final double getT(int time) {
@@ -48,5 +51,8 @@ public abstract class Mover {
 
 	public abstract double[] getPointAt(int time);
 	public abstract String getName();
-
+	
+	public GameObject getEnd() {
+		return end;
+	}
 }
