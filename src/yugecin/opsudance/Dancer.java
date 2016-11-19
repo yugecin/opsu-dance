@@ -39,7 +39,7 @@ import yugecin.opsudance.movers.slidermovers.SliderMoverController;
 import yugecin.opsudance.spinners.*;
 
 public class Dancer {
-	
+
 	public static MoverFactory[] moverFactories = new MoverFactory[]{
 		new AutoMoverFactory(),
 		new AutoEllipseMoverFactory(),
@@ -53,7 +53,7 @@ public class Dancer {
 		new SpiralMoverFactory(),
 		new CenterSpiralMoverFactory(),
 	};
-	
+
 	public static Spinner[] spinners = new Spinner[]{
 		new RektSpinner(),
 		new BeamSpinner(),
@@ -67,18 +67,18 @@ public class Dancer {
 		new ApproachCircleSpinner(),
 		new SpiralSpinner(),
 	};
-	
+
 	public static SliderMoverController[] sliderMovers = new SliderMoverController[]{
 		new DefaultSliderMoverController(),
 		new InheritedSliderMoverController(),
 	};
-	
+
 	public static PolyMoverFactory[] polyMoverFactories = new PolyMoverFactory[]{
 		new ArcFactory()
 	};
-	
+
 	public static Dancer instance = new Dancer();
-	
+
 	public static boolean multipoint = false;
 	public static boolean mirror = false; // this should really get its own place somewhere...
 	public static boolean drawApproach = true; // this should really get its own place somewhere...
@@ -95,34 +95,34 @@ public class Dancer {
 	public static int cursortraillength = 20;
 	public static boolean hidewatermark = false;
 	public static boolean onlycolortrail = false;
-	
+
 	private int dir;
 	public static final GameObject d = new DummyObject();
 	private GameObject p;
-	
+
 	private MoverFactory moverFactory;
 	private PolyMoverFactory polyMoverFactory;
 	private Mover mover;
 	private Spinner spinner;
 	public static SliderMoverController sliderMoverController;
-	
+
 	private int moverFactoryIndex;
 	private int polyMoverFactoryIndex;
 	private int spinnerIndex;
-	
+
 	public float x;
 	public float y;
-	
+
 	private boolean isCurrentLazySlider;
-	
+
 	public static boolean LAZY_SLIDERS;
-	
+
 	public Dancer() {
 		moverFactory = moverFactories[0];
 		spinner = spinners[0];
 		sliderMoverController = sliderMovers[0];
 	}
-	
+
 	public void reset() {
 		isCurrentLazySlider = false;
 		p = null;
@@ -131,11 +131,11 @@ public class Dancer {
 			s.init();
 		}
 	}
-	
+
 	public int getSpinnerIndex() {
 		return spinnerIndex;
 	}
-	
+
 	public void setSpinnerIndex(int spinnerIndex) {
 		if (spinnerIndex < 0 || spinnerIndex >= spinners.length) {
 			spinnerIndex = 0;
@@ -143,11 +143,11 @@ public class Dancer {
 		this.spinnerIndex = spinnerIndex;
 		spinner = spinners[spinnerIndex];
 	}
-	
+
 	public int getMoverFactoryIndex() {
 		return moverFactoryIndex;
 	}
-	
+
 	public void setMoverFactoryIndex(int moverFactoryIndex) {
 		if (moverFactoryIndex < 0 || moverFactoryIndex >= moverFactories.length) {
 			moverFactoryIndex = 0;
@@ -155,11 +155,11 @@ public class Dancer {
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
 	}
-	
+
 	public int getPolyMoverFactoryIndex() {
 		return polyMoverFactoryIndex;
 	}
-	
+
 	public void setPolyMoverFactoryIndex(int polyMoverFactoryIndex) {
 		if (polyMoverFactoryIndex < 0 || polyMoverFactoryIndex >= polyMoverFactories.length) {
 			polyMoverFactoryIndex = 0;
@@ -167,7 +167,7 @@ public class Dancer {
 		this.polyMoverFactoryIndex = polyMoverFactoryIndex;
 		polyMoverFactory = polyMoverFactories[polyMoverFactoryIndex];
 	}
-	
+
 	public void update(int time, GameObject p, GameObject c) {
 		GameObject[] e = sliderMoverController.process(p, c, time);
 		p = e[0];
@@ -205,7 +205,7 @@ public class Dancer {
 					mover = moverFactory.create(p, c, dir);
 				}
 		}
-		
+
 		if (time < c.getTime()) {
 			if (!p.isSpinner() || !c.isSpinner()) {
 				double[] point = mover.getPointAt(time);
@@ -234,7 +234,7 @@ public class Dancer {
 		x = Utils.clamp(x, 10, Options.width - 10);
 		y = Utils.clamp(y, 10, Options.height - 10);
 	}
-	
+
 	public void update(int time, GameObject[] gameObjects, int objectIndex) {
 		GameObject p, c;
 		GameObject[] e = objectIndex > 0 ? sliderMoverController.process(gameObjects[objectIndex - 1], gameObjects[objectIndex], time)
@@ -266,15 +266,14 @@ public class Dancer {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
-			//	polyMoverFactory.init(gameObjects, objectIndex);
 			if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getPrefferedBufferSize() - 1) {
-				polyMoverFactory.update(gameObjects[polyMoverFactory.getLatestIndex()]);
+				polyMoverFactory.update(gameObjects[ objectIndex + polyMoverFactory.getPrefferedBufferSize() - 1]);
 			}
 			else {
 				polyMoverFactory.init(gameObjects, objectIndex);
 			}
 		}
-		
+
 		if (time < c.getTime()) {
 			if (!p.isSpinner() || !c.isSpinner()) {
 				double[] point = polyMoverFactory.getPointAt(time);
