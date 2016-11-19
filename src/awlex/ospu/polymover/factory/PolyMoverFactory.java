@@ -25,4 +25,6 @@ public interface PolyMoverFactory {
 	int getPrefferedBufferSize();
 	
 	boolean isInitialized();
+	
+	int getLatestIndex();
 }

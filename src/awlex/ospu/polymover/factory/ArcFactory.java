@@ -1,6 +1,7 @@
 package awlex.ospu.polymover.factory;
 
-import awlex.ospu.polymover.Arc;
+import awlex.ospu.polymover.ArcMover;
+import awlex.ospu.polymover.LineMover;
 import awlex.ospu.polymover.PolyMover;
 import itdelatrisu.opsu.objects.GameObject;
 
@@ -10,15 +11,16 @@ import itdelatrisu.opsu.objects.GameObject;
 public class ArcFactory implements PolyMoverFactory {
 	
 	private static final int PREFFERED_BUFFER_SIZE = 3;
-	private PolyMover arc1, arc2;
+	private PolyMover current, previous;
+	private int lastIndex;
 	
 	public double[] getPointAt(int time) {
-		if (arc2 == null) {
-			return arc1.getPointAt(time);
+		if (previous == null) {
+			return current.getPointAt(time);
 		}
 		
-		double[] point1 = arc1.getPointAt(time);
-		double[] point2 = arc2.getPointAt(time);
+		double[] point1 = current.getPointAt(time);
+		double[] point2 = previous.getPointAt(time);
 		
 		return new double[]{
 			(point1[0] + point2[0]) * 0.5,
@@ -30,18 +32,26 @@ public class ArcFactory implements PolyMoverFactory {
 	public void init(GameObject[] objects, int startIndex) {
 		if (objects == null)
 			throw new NullPointerException("Objects musn't be null");
-		arc1 = new Arc(objects[startIndex], objects[startIndex + 1], objects[startIndex + 2]);
-		arc2 = null;
+		
+		GameObject middle = objects[startIndex + 1];
+		if (middle.isSlider() || middle.isSpinner() || !ArcMover.canCricleExistBetweenItems(objects[startIndex], middle, objects[startIndex + 2]))
+			current = new LineMover(objects, startIndex, 3);
+		else
+			current = new ArcMover(objects[startIndex], middle, objects[startIndex + 2]);
+		lastIndex = startIndex + 2;
+		previous = null;
 	}
 	
 	public void update(GameObject p) {
-		GameObject[] items = (arc2 == null ? arc1 : arc2).getItems();
+		GameObject[] items = (previous == null ? current : previous).getItems();
 		GameObject last = items[items.length - 1];
 		if (last != p) {
-			if (arc2 == null)
-				arc2 = arc1;
-			arc1 = new Arc(arc2, p);
+			if (ArcMover.canCricleExistBetweenItems(items[items.length - 2], items[items.length - 1], p)) {
+				previous = current;
+				current = new ArcMover(previous, p);
+			}
 		}
+		lastIndex++;
 	}
 	
 	@Override
@@ -56,6 +66,12 @@ public class ArcFactory implements PolyMoverFactory {
 	
 	@Override
 	public boolean isInitialized() {
-		return arc1 != null;
+		return current != null;
 	}
+	
+	@Override
+	public int getLatestIndex() {
+		return lastIndex;
+	}
+	
 }
