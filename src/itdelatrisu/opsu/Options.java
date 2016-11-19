@@ -594,30 +594,51 @@ public class Options {
 		DISABLE_UPDATER ("Disable Automatic Updates", "DisableUpdater", "Disable automatic checking for updates upon starting opsu!.", false),
 		ENABLE_WATCH_SERVICE ("Enable Watch Service", "WatchService", "Watch the beatmap directory for changes. Requires a restart.", false),
 
+		DANCE_MOVER_TYPE("Mover Type", "Mover type", "More Points", Dancer.multipoint) {
+			@Override
+			public void click(GameContainer container) {
+				bool = !bool;
+				Dancer.multipoint = bool;
+			}
+			
+			@Override
+			public void read(String s) {
+				super.read(s);
+				Dancer.multipoint = bool;
+			}
+		},
+		
 		DANCE_MOVER ("Mover algorithm", "Mover", "Algorithm that decides how to move from note to note" ) {
 			@Override
 			public Object[] getListItems() {
-				return Dancer.moverFactories;
+				return Dancer.multipoint ? Dancer.polyMoverFactories : Dancer.moverFactories;
 			}
 
 			@Override
 			public void clickListItem(int index) {
-				Dancer.instance.setMoverFactoryIndex(index);
+				if (Dancer.multipoint)
+					Dancer.instance.setMoverFactoryIndex(index);
+				else
+					Dancer.instance.setMoverFactoryIndex(index);
 			}
 
 			@Override
 			public String getValueString() {
-				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()].toString();
+				return Dancer.multipoint ? Dancer.polyMoverFactories[Dancer.instance.getPolyMoverFactoryIndex()].toString() : Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()].toString();
 			}
 
 			@Override
 			public String write() {
-				return Dancer.instance.getMoverFactoryIndex() + "";
+				return String.valueOf(Dancer.multipoint ? Dancer.instance.getPolyMoverFactoryIndex() : Dancer.instance.getMoverFactoryIndex());
 			}
 
 			@Override
 			public void read(String s) {
-				Dancer.instance.setMoverFactoryIndex(Integer.parseInt(s));
+				int i = Integer.parseInt(s);
+				if (Dancer.multipoint)
+					Dancer.instance.setPolyMoverFactoryIndex(i);
+				else
+					Dancer.instance.setMoverFactoryIndex(i);
 			}
 		},
 

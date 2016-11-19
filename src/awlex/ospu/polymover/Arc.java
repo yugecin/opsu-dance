@@ -30,16 +30,16 @@ public class Arc extends PolyMover {
 	
 	private void init() {
 		Matrix m = prepareMatrix(p1, middle, p2);
-		xm = m.get(2, 1);
-		ym = m.get(3, 1);
-		r = pow(xm, 2) + pow(ym, 2) - m.get(1, 1);
+		xm = m.get(1, 0) * 0.5;
+		ym = m.get(2, 0) * 0.5;
+		r = sqrt(pow(xm, 2) + pow(ym, 2) - m.get(0, 0));
 		alpha = atan2(p1.end.y - ym, p1.end.x - xm);
 		beta = atan2(middle.end.y - ym, middle.end.x - xm);
 		gamma = atan2(p2.start.y - ym, p2.start.x - xm);
 	}
 	
 	@Override
-	public double[] getPoint(int time) {
+	public double[] getPointAt(int time) {
 		double percent;
 		double angle;
 		if (time < middle.getTime()) {
