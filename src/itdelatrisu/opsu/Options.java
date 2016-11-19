@@ -20,6 +20,7 @@ package itdelatrisu.opsu;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.skins.SkinLoader;
 import itdelatrisu.opsu.ui.Fonts;
@@ -1993,6 +1994,8 @@ public class Options {
 		beatmap.audioFilename = new File(tokens[0]);
 		beatmap.title = tokens[1];
 		beatmap.artist = tokens[2];
+		beatmap.timingPoints = new ArrayList<>(1);
+		beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
 		try {
 			beatmap.endTime = Integer.parseInt(tokens[3]);
 		} catch (NumberFormatException e) {
