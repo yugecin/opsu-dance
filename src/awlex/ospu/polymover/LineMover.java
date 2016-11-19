@@ -9,7 +9,7 @@ import yugecin.opsudance.movers.LinearMover;
  */
 public class LineMover extends PolyMover {
 	
-	GameObject[] objects;
+	private GameObject[] objects;
 	
 	public LineMover(GameObject[] objects, int startIndex, int count) {
 		this.objects = new GameObject[count];
@@ -27,6 +27,6 @@ public class LineMover extends PolyMover {
 	
 	@Override
 	public GameObject[] getItems() {
-		return new GameObject[0];
+		return objects;
 	}
 }

@@ -3,6 +3,7 @@ package awlex.ospu.polymover.factory;
 import awlex.ospu.polymover.ArcMover;
 import awlex.ospu.polymover.LineMover;
 import awlex.ospu.polymover.PolyMover;
+import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 
 /**
@@ -17,6 +18,8 @@ public class ArcFactory implements PolyMoverFactory {
 	public double[] getPointAt(int time) {
 		if (previous == null) {
 			return current.getPointAt(time);
+		} else if (current == null) {
+			return previous.getPointAt(time);
 		}
 		
 		double[] point1 = current.getPointAt(time);
@@ -32,23 +35,41 @@ public class ArcFactory implements PolyMoverFactory {
 	public void init(GameObject[] objects, int startIndex) {
 		if (objects == null)
 			throw new NullPointerException("Objects musn't be null");
-		
+		boolean b;
+		if (b = startIndex == -1) {
+			objects = new GameObject[]{
+				new DummyObject(),
+				objects[0],
+				objects[1]
+			};
+			startIndex++;
+		}
 		GameObject middle = objects[startIndex + 1];
 		if (middle.isSlider() || middle.isSpinner() || !ArcMover.canCricleExistBetweenItems(objects[startIndex], middle, objects[startIndex + 2]))
 			current = new LineMover(objects, startIndex, 3);
 		else
 			current = new ArcMover(objects[startIndex], middle, objects[startIndex + 2]);
 		lastIndex = startIndex + 2;
+		if (b)
+			lastIndex--;
 		previous = null;
 	}
 	
 	public void update(GameObject p) {
-		GameObject[] items = (previous == null ? current : previous).getItems();
+		GameObject[] items = current.getItems();
+		System.out.println(items.length);
 		GameObject last = items[items.length - 1];
 		if (last != p) {
-			if (ArcMover.canCricleExistBetweenItems(items[items.length - 2], items[items.length - 1], p)) {
-				previous = current;
-				current = new ArcMover(previous, p);
+			previous = current;
+			if (!(last.isSpinner() || last.isSlider()))
+				if (ArcMover.canCricleExistBetweenItems(items[items.length - 2], last, p)) {
+					current = new ArcMover(previous, p);
+				}
+				else {
+					current = new LineMover(items, 0, items.length);
+				}
+			else {
+				current = null;
 			}
 		}
 		lastIndex++;
