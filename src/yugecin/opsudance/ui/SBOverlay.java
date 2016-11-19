@@ -184,6 +184,8 @@ public class SBOverlay {
 	public void setGameObjects(GameObject[] gameObjects) {
 		if (this.gameObjects.length != gameObjects.length) {
 			optionsMap = new HashMap[gameObjects.length];
+		}
+		if (optionsMap.length > 0) {
 			// copy all current settings in first obj map
 			optionsMap[0] = new HashMap<>();
 			for (Options.GameOption o : options.getSavedOptionList()) {
