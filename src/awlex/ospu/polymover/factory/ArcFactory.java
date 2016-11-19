@@ -6,6 +6,8 @@ import awlex.ospu.polymover.PolyMover;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 
+import java.util.Arrays;
+
 /**
  * Created by Awlex on 18.11.2016.
  */
@@ -41,13 +43,11 @@ public class ArcFactory implements PolyMoverFactory {
 			objects = new GameObject[]{
 				new DummyObject(),
 				objects[0],
-				objects[1]
+				objects[1],
 			};
-			startIndex++;
+			startIndex = 0;
 		}
 		GameObject middle = objects[startIndex + 1];
-		if (middle.isSlider() || middle.isSpinner())
-			return;
 		if (!ArcMover.canCricleExistBetweenItems(objects[startIndex], middle, objects[startIndex + 2]))
 			current = new LineMover(objects, startIndex, 3);
 		else
@@ -59,19 +59,17 @@ public class ArcFactory implements PolyMoverFactory {
 	}
 
 	public void update(GameObject p) {
-		GameObject[] items = current.getItems();
+		GameObject[] items = (previous == null ? current : previous).getItems();
 		GameObject last = items[items.length - 1];
 		if (last != p) {
 			previous = current;
-			if (!(last.isSpinner() || last.isSlider()))
-				if (ArcMover.canCricleExistBetweenItems(items[items.length - 2], last, p)) {
-					current = new ArcMover(previous, p);
-				}
-				else {
-					current = new LineMover(items, 0, items.length);
-				}
-			else {
-				current = null;
+			if (ArcMover.canCricleExistBetweenItems(items[items.length - 2], last, p)) {
+				current = new ArcMover(items[items.length - 2], last, p);
+			}  else {
+				GameObject[] lineObjects = new GameObject[PREFFERED_BUFFER_SIZE];
+				System.arraycopy(items, items.length - 2, lineObjects, 0, PREFFERED_BUFFER_SIZE - 2);
+				lineObjects[lineObjects.length - 1] = p;
+				current = new LineMover(lineObjects, 0, PREFFERED_BUFFER_SIZE);
 			}
 		}
 		lastIndex++;
