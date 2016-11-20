@@ -25,6 +25,7 @@ import awlex.ospu.polymover.factory.PolyMoverFactory;
 import awlex.ospu.spinners.SpiralSpinner;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
@@ -189,7 +190,7 @@ public class Dancer {
 			p = e[0];
 			c = e[1];
 		}
-		if (this.objectIndex != objectIndex) {
+		if (this.objectIndex != objectIndex || c != gameObjects[objectIndex]) {
 			this.objectIndex = objectIndex;
 			if (objectIndex == 0) {
 				if (c.isSpinner()) {
@@ -267,11 +268,18 @@ public class Dancer {
 			}
 			return;
 		}
+		GameObject p = null;
+		if (objectIndex > 0) {
+			p = gameObjects[objectIndex - 1];
+			GameObject[] e = sliderMoverController.process(p, c, MusicController.getPosition());
+			p = e[0];
+			c = e[1];
+		}
 		if (mover == null || mover.getEnd() != c) {
 			if (objectIndex == 0) {
 				mover = new LinearMover(d, c, dir);
 			} else {
-				mover = moverFactory.create(gameObjects[objectIndex - 1], c, dir);
+				mover = moverFactory.create(p, c, dir);
 			}
 		}
 	}
