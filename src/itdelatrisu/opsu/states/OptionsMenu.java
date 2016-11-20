@@ -521,19 +521,24 @@ public class OptionsMenu extends BasicGameState {
 		}
 	}
 
-	private String resolutionOptions;
+	/**
+	 * This string is built with option values when entering the options menu.
+	 * When leaving the options menu, this string is checked against the new optionstring with the same options.
+	 * If those do not match, it means some option has change which requires a restart
+	 */
+	private String restartOptions;
 
 	@Override
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
 		UI.enter();
 		currentTab = OptionTab.DANCE;
-		resolutionOptions = "" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions();
+		restartOptions = "" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions() + Options.getSkinName();
 	}
 
 	@Override
 	public void leave(GameContainer container, StateBasedGame game) throws SlickException {
-		if (!("" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions()).equals(resolutionOptions)) {
+		if (!("" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions() + Options.getSkinName()).equals(restartOptions)) {
 			container.setForceExit(false);
 			container.exit();
 		}

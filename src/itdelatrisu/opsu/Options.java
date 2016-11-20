@@ -1419,6 +1419,10 @@ public class Options {
 	// This class should not be instantiated.
 	private Options() {}
 
+	public static String getSkinName() {
+		return skinName;
+	}
+
 	public static int getResolutionIdx() {
 		return resolutionIdx;
 	}
