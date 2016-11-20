@@ -299,7 +299,8 @@ public class Slider extends GameObject {
 						arrow.setAlpha((float) (t - Math.floor(t)));
 					} else
 						arrow.setAlpha(Options.isSliderSnaking() ? decorationsAlpha : 1f);
-					arrow = arrow.getScaledCopy((float) (1 + 0.3d * (trackPosition % bpm) / bpm));
+					//arrow = arrow.getScaledCopy((float) (1 + 0.3d * (trackPosition % bpm) / bpm));
+					arrow = arrow.getScaledCopy((float) (1 + 0.2d * ((trackPosition + sliderTime * tcurRepeat) % 292) / 292));
 					if (tcurRepeat % 2 == 0) {
 						// last circle
 						arrow.setRotation(curve.getEndAngle());
