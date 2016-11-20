@@ -69,6 +69,7 @@ public class Dancer {
 		new ApproachCircleSpinner(),
 		new SpiralSpinner(),
 		new FivePointStarSpinner(),
+		new FivePointStarApproachSpinner(),
 	};
 
 	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
