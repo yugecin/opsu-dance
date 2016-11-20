@@ -97,9 +97,9 @@ public class Dancer {
 
 	private int dir;
 	public static final GameObject d = new DummyObject();
-	private GameObject p;
 
 	private GameObject[] gameObjects;
+	private int objectIndex;
 
 	private MoverFactory moverFactory;
 	private Mover mover;
@@ -124,7 +124,7 @@ public class Dancer {
 
 	public void reset() {
 		isCurrentLazySlider = false;
-		p = null;
+		objectIndex = -1;
 		dir = 1;
 		for (Spinner s : spinners) {
 			s.init();
@@ -154,6 +154,8 @@ public class Dancer {
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
 		multipoint = moverFactory.isMultiPoint();
+		// to prevent crashes when changing mover in storyboard, create mover now
+		createNewMover();
 	}
 
 	public int getPolyMoverFactoryMinBufferSize() {
@@ -165,6 +167,12 @@ public class Dancer {
 
 	public void setGameObjects(GameObject[] objs) {
 		this.gameObjects = objs;
+	}
+
+	public void setObjectIndex(int objectIndex) {
+		this.objectIndex = objectIndex;
+		// storyboard
+		createNewMover();
 	}
 
 	public void update(int time, int objectIndex) {
@@ -180,9 +188,9 @@ public class Dancer {
 			p = e[0];
 			c = e[1];
 		}
-		if (this.p != p) {
-			this.p = p;
-			if (this.p == d) {
+		if (this.objectIndex != objectIndex) {
+			this.objectIndex = objectIndex;
+			if (objectIndex == 0) {
 				if (c.isSpinner()) {
 					double[] spinnerStartPoint = spinner.getPoint();
 					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
@@ -206,20 +214,7 @@ public class Dancer {
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
 
-			if (multipoint) {
-				PolyMoverFactory pmf = (PolyMoverFactory) moverFactory;
-				if (pmf.isInitialized() && pmf.getLatestIndex() < objectIndex + pmf.getLatestIndex() - 1) {
-					pmf.update(gameObjects[objectIndex + pmf.getMaxBufferSize() - 1]);
-				} else {
-					pmf.create(gameObjects, objectIndex - 1);
-				}
-			} else if (mover == null || mover.getEnd() != c) {
-				if (p == d) {
-					mover = new LinearMover(p, c, dir);
-				} else {
-					mover = moverFactory.create(p, c, dir);
-				}
-			}
+			createNewMover();
 		}
 
 		if (time < c.getTime()) {
@@ -252,6 +247,32 @@ public class Dancer {
 		Pippi.dance(time, c, isCurrentLazySlider);
 		x = Utils.clamp(x, 10, Options.width - 10);
 		y = Utils.clamp(y, 10, Options.height - 10);
+	}
+
+	private void createNewMover() {
+		if (gameObjects == null) {
+			return;
+		}
+		if (objectIndex < 0) {
+			objectIndex = 0;
+		}
+		GameObject c = gameObjects[objectIndex];
+		if (multipoint) {
+			PolyMoverFactory pmf = (PolyMoverFactory) moverFactory;
+			if (pmf.isInitialized() && pmf.getLatestIndex() < objectIndex + pmf.getLatestIndex() - 1) {
+				pmf.update(gameObjects[objectIndex + pmf.getMaxBufferSize() - 1]);
+			} else {
+				pmf.create(gameObjects, objectIndex - 1);
+			}
+			return;
+		}
+		if (mover == null || mover.getEnd() != c) {
+			if (objectIndex == 0) {
+				mover = new LinearMover(d, c, dir);
+			} else {
+				mover = moverFactory.create(gameObjects[objectIndex - 1], c, dir);
+			}
+		}
 	}
 
 }

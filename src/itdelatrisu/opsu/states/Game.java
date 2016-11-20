@@ -328,6 +328,7 @@ public class Game extends BasicGameState {
 				objectIndex++;
 			}
 			objectIndex--;
+			Dancer.instance.setObjectIndex(objectIndex);
 			sbOverlay.updateIndex(objectIndex);
 			lastReplayTime = beatmap.objects[objectIndex].getTime();
 		} catch (SlickException e) {
@@ -1450,13 +1451,13 @@ public class Game extends BasicGameState {
 		}
 
 
+		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
 		if (!checkpointLoaded) {
 			sbOverlay.enter();
 			sbOverlay.updateIndex(0);
 		}
 
-		Dancer.instance.setGameObjects(gameObjects);
 		Pippi.reset();
 		mirrorFrom = 0;
 		mirrorTo = gameObjects.length;
@@ -1473,6 +1474,7 @@ public class Game extends BasicGameState {
 //		container.setMouseGrabbed(false);
 
 		sbOverlay.leave();
+		Dancer.instance.setGameObjects(null);
 
 		Cursor.lastObjColor = Color.white;
 		Cursor.lastMirroredObjColor = Color.white;
