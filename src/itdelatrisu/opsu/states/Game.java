@@ -316,6 +316,7 @@ public class Game extends BasicGameState {
 			checkpointLoaded = true;
 			if (isLeadIn()) {
 				leadInTime = 0;
+				epiImgTime = 0;
 				MusicController.resume();
 			}
 			int checkpoint = gameObjects[newObjIndex].getTime();
