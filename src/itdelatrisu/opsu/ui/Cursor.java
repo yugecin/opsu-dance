@@ -71,6 +71,8 @@ public class Cursor {
 
 	public static Color lastObjColor = Color.white;
 	public static Color lastMirroredObjColor = Color.white;
+	public static Color nextObjColor = Color.white;
+	public static Color nextMirroredObjColor = Color.white;
 
 	private boolean isMirrored;
 

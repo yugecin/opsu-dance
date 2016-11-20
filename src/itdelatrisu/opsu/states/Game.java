@@ -859,6 +859,9 @@ public class Game extends BasicGameState {
 		if ((g.isCircle() || g.isSlider()) && g.getTime() <= trackPosition) {
 			Cursor.lastObjColor = g.getColor();
 			Cursor.lastMirroredObjColor = g.getMirroredColor();
+		} else {
+			Cursor.nextObjColor = g.getColor();
+			Cursor.nextMirroredObjColor = g.getMirroredColor();
 		}
 
 		// timing points
@@ -1478,6 +1481,8 @@ public class Game extends BasicGameState {
 
 		Cursor.lastObjColor = Color.white;
 		Cursor.lastMirroredObjColor = Color.white;
+		Cursor.nextObjColor = Color.white;
+		Cursor.nextMirroredObjColor = Color.white;
 
 		// re-hide cursor
 		if (GameMod.AUTO.isActive() || isReplay)

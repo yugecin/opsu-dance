@@ -62,6 +62,15 @@ public enum CursorColorOverrides {
 			}
 			return Cursor.lastObjColor;
 		}
+	},
+	NEXTOBJ ("Use next object's colors", 13) {
+		@Override
+		public Color getColor(boolean mirrored) {
+			if (mirrored) {
+				return Cursor.nextMirroredObjColor;
+			}
+			return Cursor.nextObjColor;
+		}
 	};
 
 	public int nr;
