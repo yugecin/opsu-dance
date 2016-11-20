@@ -328,6 +328,7 @@ public class Game extends BasicGameState {
 				objectIndex++;
 			}
 			objectIndex--;
+			Dancer.instance.setObjectIndex(objectIndex);
 			sbOverlay.updateIndex(objectIndex);
 			lastReplayTime = beatmap.objects[objectIndex].getTime();
 		} catch (SlickException e) {
@@ -424,53 +425,13 @@ public class Game extends BasicGameState {
 		autoMousePressed = false;
 		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			Vec2f autoPoint;
-			if (objectIndex < beatmap.objects.length) {
-				GameObject p;
-				if (objectIndex > 0) {
-					p = gameObjects[objectIndex - 1];
-				} else {
-					p = Dancer.d;
-				}
+			if (objectIndex < beatmap.objects.length - Dancer.instance.getPolyMoverFactoryMinBufferSize()) {
 				Dancer d = Dancer.instance;
-				d.update(trackPosition, p, gameObjects[objectIndex]);
+				d.update(trackPosition, objectIndex);
 				autoPoint = new Vec2f(d.x, d.y);
 				if (trackPosition < gameObjects[objectIndex].getTime()) {
 					autoMousePressed = true;
 				}
-				/*
-				// normal object
-				int objectTime = beatmap.objects[objectIndex].getTime();
-				if (trackPosition < objectTime) {
-					Vec2f startPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
-					int startTime = gameObjects[objectIndex - 1].getEndTime();
-					if (beatmap.breaks != null && breakIndex < beatmap.breaks.size()) {
-						// starting a break: keep cursor at previous hit object position
-						if (breakTime > 0 || objectTime > beatmap.breaks.get(breakIndex))
-							autoPoint = startPoint;
-
-						// after a break ends: move startTime to break end time
-						else if (breakIndex > 1) {
-							int lastBreakEndTime = beatmap.breaks.get(breakIndex - 1);
-							if (objectTime > lastBreakEndTime && startTime < lastBreakEndTime)
-								startTime = lastBreakEndTime;
-						}
-					}
-					if (autoPoint == null) {
-						Vec2f endPoint = gameObjects[objectIndex].getPointAt(trackPosition);
-						int totalTime = objectTime - startTime;
-						autoPoint = getPointAt(startPoint.x, startPoint.y, endPoint.x, endPoint.y, (float) (trackPosition - startTime) / totalTime);
-
-						// hit circles: show a mouse press
-						int offset300 = hitResultOffset[GameData.HIT_300];
-						if ((beatmap.objects[objectIndex].isCircle() && objectTime - trackPosition < offset300) ||
-						    (beatmap.objects[objectIndex - 1].isCircle() && trackPosition - beatmap.objects[objectIndex - 1].getTime() < offset300))
-							autoMousePressed = true;
-					}
-				} else {
-					autoPoint = gameObjects[objectIndex].getPointAt(trackPosition);
-					autoMousePressed = true;
-				}
-				*/
 			} else {
 				// last object
 				autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
@@ -1490,6 +1451,7 @@ public class Game extends BasicGameState {
 		}
 
 
+		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
 		if (!checkpointLoaded) {
 			sbOverlay.enter();
@@ -1512,6 +1474,7 @@ public class Game extends BasicGameState {
 //		container.setMouseGrabbed(false);
 
 		sbOverlay.leave();
+		Dancer.instance.setGameObjects(null);
 
 		Cursor.lastObjColor = Color.white;
 		Cursor.lastMirroredObjColor = Color.white;

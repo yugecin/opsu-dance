@@ -613,12 +613,13 @@ public class Options {
 
 			@Override
 			public String write() {
-				return Dancer.instance.getMoverFactoryIndex() + "";
+				return String.valueOf(Dancer.instance.getMoverFactoryIndex());
 			}
 
 			@Override
 			public void read(String s) {
-				Dancer.instance.setMoverFactoryIndex(Integer.parseInt(s));
+				int i = Integer.parseInt(s);
+				Dancer.instance.setMoverFactoryIndex(i);
 			}
 		},
 

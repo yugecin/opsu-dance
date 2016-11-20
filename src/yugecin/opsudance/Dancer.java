@@ -19,6 +19,10 @@ package yugecin.opsudance;
 
 import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
 import awlex.ospu.movers.factories.SpiralMoverFactory;
+import awlex.ospu.polymover.PolyMover;
+import awlex.ospu.polymover.factory.ArcFactory;
+import awlex.ospu.polymover.factory.LinearFactory;
+import awlex.ospu.polymover.factory.PolyMoverFactory;
 import awlex.ospu.spinners.SpiralSpinner;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
@@ -37,7 +41,7 @@ import yugecin.opsudance.spinners.*;
 
 public class Dancer {
 
-	public static MoverFactory[] moverFactories = new MoverFactory[] {
+	public static MoverFactory[] moverFactories = new MoverFactory[]{
 		new AutoMoverFactory(),
 		new AutoEllipseMoverFactory(),
 		new CircleMoverFactory(),
@@ -49,9 +53,11 @@ public class Dancer {
 		new QuartCircleMoverFactory(),
 		new SpiralMoverFactory(),
 		new CenterSpiralMoverFactory(),
+		new LinearFactory(),
+		new ArcFactory(),
 	};
 
-	public static Spinner[] spinners = new Spinner[] {
+	public static Spinner[] spinners = new Spinner[]{
 		new RektSpinner(),
 		new BeamSpinner(),
 		new CircleSpinner(),
@@ -65,13 +71,14 @@ public class Dancer {
 		new SpiralSpinner(),
 	};
 
-	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
+	public static SliderMoverController[] sliderMovers = new SliderMoverController[]{
 		new DefaultSliderMoverController(),
 		new InheritedSliderMoverController(),
 	};
 
 	public static Dancer instance = new Dancer();
 
+	public static boolean multipoint = false;
 	public static boolean mirror = false; // this should really get its own place somewhere...
 	public static boolean drawApproach = true; // this should really get its own place somewhere...
 	public static boolean removebg = true; // this should really get its own place somewhere...
@@ -90,7 +97,9 @@ public class Dancer {
 
 	private int dir;
 	public static final GameObject d = new DummyObject();
-	private GameObject p;
+
+	private GameObject[] gameObjects;
+	private int objectIndex;
 
 	private MoverFactory moverFactory;
 	private Mover mover;
@@ -115,7 +124,7 @@ public class Dancer {
 
 	public void reset() {
 		isCurrentLazySlider = false;
-		p = null;
+		objectIndex = -1;
 		dir = 1;
 		for (Spinner s : spinners) {
 			s.init();
@@ -144,15 +153,44 @@ public class Dancer {
 		}
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
+		multipoint = moverFactory.isMultiPoint();
+		// to prevent crashes when changing mover in storyboard, create mover now
+		createNewMover();
 	}
 
-	public void update(int time, GameObject p, GameObject c) {
-		GameObject[] e = sliderMoverController.process(p, c, time);
-		p = e[0];
-		c = e[1];
-		if (this.p != p) {
-			this.p = p;
-			if (this.p == d) {
+	public int getPolyMoverFactoryMinBufferSize() {
+		if (!multipoint) {
+			return 0;
+		}
+		return ((PolyMoverFactory) moverFactory).getMinBufferSize();
+	}
+
+	public void setGameObjects(GameObject[] objs) {
+		this.gameObjects = objs;
+	}
+
+	public void setObjectIndex(int objectIndex) {
+		this.objectIndex = objectIndex;
+		// storyboard
+		createNewMover();
+	}
+
+	public void update(int time, int objectIndex) {
+		GameObject p;
+		if (objectIndex == 0) {
+			p = d;
+		} else {
+			p = gameObjects[objectIndex - 1];
+		}
+		GameObject c = gameObjects[objectIndex];
+		if (!multipoint) {
+			GameObject[] e = sliderMoverController.process(p, c, time);
+			p = e[0];
+			c = e[1];
+		}
+		if (this.objectIndex != objectIndex) {
+			this.objectIndex = objectIndex;
+			if (objectIndex == 0) {
 				if (c.isSpinner()) {
 					double[] spinnerStartPoint = spinner.getPoint();
 					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
@@ -175,16 +213,18 @@ public class Dancer {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
-			if (p == d) {
-				mover = new LinearMover(p, c, dir);
-			} else {
-				mover = moverFactory.create(p, c, dir);
-			}
+
+			createNewMover();
 		}
 
 		if (time < c.getTime()) {
 			if (!p.isSpinner() || !c.isSpinner()) {
-				double[] point = mover.getPointAt(time);
+				double[] point;
+				if (multipoint) {
+					point = ((PolyMoverFactory) moverFactory).getPointAt(time);
+				} else {
+					point = mover.getPointAt(time);
+				}
 				x = (float) point[0];
 				y = (float) point[1];
 			}
@@ -207,6 +247,32 @@ public class Dancer {
 		Pippi.dance(time, c, isCurrentLazySlider);
 		x = Utils.clamp(x, 10, Options.width - 10);
 		y = Utils.clamp(y, 10, Options.height - 10);
+	}
+
+	private void createNewMover() {
+		if (gameObjects == null) {
+			return;
+		}
+		if (objectIndex < 0) {
+			objectIndex = 0;
+		}
+		GameObject c = gameObjects[objectIndex];
+		if (multipoint) {
+			PolyMoverFactory pmf = (PolyMoverFactory) moverFactory;
+			if (pmf.isInitialized() && pmf.getLatestIndex() < objectIndex + pmf.getLatestIndex() - 1) {
+				pmf.update(gameObjects[objectIndex + pmf.getMaxBufferSize() - 1]);
+			} else {
+				pmf.create(gameObjects, objectIndex - 1);
+			}
+			return;
+		}
+		if (mover == null || mover.getEnd() != c) {
+			if (objectIndex == 0) {
+				mover = new LinearMover(d, c, dir);
+			} else {
+				mover = moverFactory.create(gameObjects[objectIndex - 1], c, dir);
+			}
+		}
 	}
 
 }
