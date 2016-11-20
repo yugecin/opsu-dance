@@ -268,19 +268,17 @@ public class Dancer {
 			}
 			return;
 		}
-		GameObject p = null;
+		GameObject p = d;
 		if (objectIndex > 0) {
 			p = gameObjects[objectIndex - 1];
-			GameObject[] e = sliderMoverController.process(p, c, MusicController.getPosition());
-			p = e[0];
-			c = e[1];
 		}
-		if (mover == null || mover.getEnd() != c) {
-			if (objectIndex == 0) {
-				mover = new LinearMover(d, c, dir);
-			} else {
-				mover = moverFactory.create(p, c, dir);
-			}
+		GameObject[] e = sliderMoverController.process(p, c, MusicController.getPosition());
+		p = e[0];
+		c = e[1];
+		if (mover == null || p == d) {
+			mover = new LinearMover(d, c, dir);
+		} else if (mover.getEnd() != c) {
+			mover = moverFactory.create(p, c, dir);
 		}
 	}
 
