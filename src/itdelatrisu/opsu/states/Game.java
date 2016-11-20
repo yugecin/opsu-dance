@@ -856,12 +856,14 @@ public class Game extends BasicGameState {
 		}
 
 		GameObject g = gameObjects[objectIndex];
-		if ((g.isCircle() || g.isSlider()) && g.getTime() <= trackPosition) {
-			Cursor.lastObjColor = g.getColor();
-			Cursor.lastMirroredObjColor = g.getMirroredColor();
-		} else {
-			Cursor.nextObjColor = g.getColor();
-			Cursor.nextMirroredObjColor = g.getMirroredColor();
+		if (g.isCircle() || g.isSlider()) {
+			if (g.getTime() <= trackPosition) {
+				Cursor.lastObjColor = g.getColor();
+				Cursor.lastMirroredObjColor = g.getMirroredColor();
+			} else {
+				Cursor.nextObjColor = g.getColor();
+				Cursor.nextMirroredObjColor = g.getMirroredColor();
+			}
 		}
 
 		// timing points
