@@ -367,9 +367,17 @@ public class SongMenu extends BasicGameState {
 
 		// selection buttons
 		Image selectionMods = GameImage.SELECTION_MODS.getImage();
-		float selectX = width * 0.183f + selectionMods.getWidth() / 2f;
-		float selectY = height - selectionMods.getHeight() / 2f;
-		float selectOffset = selectionMods.getWidth() * 1.05f;
+		int selectButtonsWidth = selectionMods.getWidth();
+		int selectButtonsHeight = selectionMods.getHeight();
+		if (selectButtonsHeight < 20) {
+			selectButtonsHeight = 100;
+		}
+		if (selectButtonsWidth < 20) {
+			selectButtonsWidth = 100;
+		}
+		float selectX = width * 0.183f + selectButtonsWidth / 2f;
+		float selectY = height - selectButtonsHeight / 2f;
+		float selectOffset = selectButtonsWidth * 1.05f;
 		selectModsButton = new MenuButton(GameImage.SELECTION_MODS_OVERLAY.getImage(),
 				selectX, selectY);
 		selectRandomButton = new MenuButton(GameImage.SELECTION_RANDOM_OVERLAY.getImage(),
@@ -1062,6 +1070,11 @@ public class SongMenu extends BasicGameState {
 			break;
 		case Input.KEY_PRIOR:
 			changeIndex(-MAX_SONG_BUTTONS);
+			break;
+		case Input.KEY_O:
+			if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
+				game.enterState(Opsu.STATE_OPTIONSMENU, new EmptyTransition(), new FadeInTransition());
+			}
 			break;
 		default:
 			// wait for user to finish typing
