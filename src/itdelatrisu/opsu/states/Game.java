@@ -1682,13 +1682,13 @@ public class Game extends BasicGameState {
 	private synchronized boolean skipIntro() {
 		int firstObjectTime = beatmap.objects[0].getTime();
 		int trackPosition = MusicController.getPosition();
-		if (objectIndex == 0 && trackPosition < firstObjectTime - SKIP_OFFSET) {
+		if (objectIndex == 0 && (trackPosition < firstObjectTime - SKIP_OFFSET) || isLeadIn()) {
 			if (isLeadIn()) {
 				leadInTime = 0;
 				epiImgTime = 0;
 				MusicController.resume();
 			}
-			MusicController.setPosition(firstObjectTime - SKIP_OFFSET);
+			MusicController.setPosition(Math.max(0, firstObjectTime - SKIP_OFFSET));
 			MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
 			replaySkipTime = (isReplay) ? -1 : trackPosition;
 			if (isReplay) {
