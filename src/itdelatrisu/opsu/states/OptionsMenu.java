@@ -142,6 +142,7 @@ public class OptionsMenu extends BasicGameState {
 		}),
 		PIPPI ("Pippi", new GameOption[] {
 			GameOption.PIPPI_ENABLE,
+			GameOption.PIPPI_RADIUS_PERCENT,
 			GameOption.PIPPI_ANGLE_INC_MUL,
 			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
 			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,

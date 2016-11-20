@@ -28,6 +28,7 @@ public class Pippi {
 	private static final int targetdelta = 4;
 
 	public static boolean enabled = false;
+	private static int radiusPercent;
 	public static int angleInc = 10;
 	public static int angleSliderInc = 50;
 	public static boolean preventWobblyStreams = true;
@@ -40,10 +41,15 @@ public class Pippi {
 	private static double pippimaxrad;
 	private static GameObject previous;
 
+	public static void setRadiusPercent(int radiusPercent) {
+		Pippi.radiusPercent = radiusPercent;
+		pippiminrad = pippirad = (Circle.diameter / 2d - 10d) * radiusPercent / 100d;
+	}
+
 	public static void reset() {
 		angle = 0;
 		currentdelta = 0;
-		pippiminrad = pippirad = Circle.diameter / 2d - 10d;
+		setRadiusPercent(radiusPercent);
 		pippimaxrad = Circle.diameter - 10d;
 	}
 
