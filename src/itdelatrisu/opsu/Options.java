@@ -516,7 +516,7 @@ public class Options {
 				return String.valueOf(val * 100);
 			}
 		},
-		EPILEPSY_WARNING ("Epilepsy warning image", "EpiWarn", "Show a little warning for flashing colours in the beginning", 20, 0, 20) {
+		EPILEPSY_WARNING ("Epilepsy warning image", "EpiWarn", "Show a little warning for flashing colours in the beginning", 0, 0, 20) {
 			@Override
 			public String getValueString() {
 				if (val == 0) {
