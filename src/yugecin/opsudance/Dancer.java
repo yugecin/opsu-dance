@@ -101,6 +101,8 @@ public class Dancer {
 	public static final GameObject d = new DummyObject();
 	private GameObject p;
 
+	private GameObject[] gameObjects;
+
 	private MoverFactory moverFactory;
 	private PolyMoverFactory polyMoverFactory;
 	private Mover mover;
@@ -169,7 +171,18 @@ public class Dancer {
 		polyMoverFactory = polyMoverFactories[polyMoverFactoryIndex];
 	}
 
-	public void update(int time, GameObject p, GameObject c) {
+	public void setGameObjects(GameObject[] objs) {
+		this.gameObjects = objs;
+	}
+
+	public void update(int time, int objectIndex) {
+		GameObject p;
+		if (objectIndex == 0) {
+			p = d;
+		} else {
+			p = gameObjects[objectIndex - 1];
+		}
+		GameObject c = gameObjects[objectIndex];
 		GameObject[] e = sliderMoverController.process(p, c, time);
 		p = e[0];
 		c = e[1];
@@ -198,31 +211,41 @@ public class Dancer {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
-			if (mover == null || mover.getEnd() != c)
+
+			if (multipoint) {
+				if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getLatestIndex() - 1) {
+					polyMoverFactory.update(gameObjects[objectIndex + polyMoverFactory.getMaxBufferSize() - 1]);
+				} else {
+					polyMoverFactory.create(gameObjects, objectIndex - 1);
+				}
+			} else if (mover == null || mover.getEnd() != c) {
 				if (p == d) {
 					mover = new LinearMover(p, c, dir);
-				}
-				else {
+				} else {
 					mover = moverFactory.create(p, c, dir);
 				}
+			}
 		}
 
 		if (time < c.getTime()) {
 			if (!p.isSpinner() || !c.isSpinner()) {
-				double[] point = mover.getPointAt(time);
+				double[] point;
+				if (multipoint) {
+					point = polyMoverFactory.getPointAt(time);
+				} else {
+					point = mover.getPointAt(time);
+				}
 				x = (float) point[0];
 				y = (float) point[1];
 			}
-		}
-		else {
+		} else {
 			if (c.isSpinner()) {
 				Spinner.PROGRESS = (double) (time - c.getTime()) / (double) (c.getEndTime() - c.getTime());
 				double[] point = spinner.getPoint();
 				x = (float) point[0];
 				y = (float) point[1];
 				c.end = new Vec2f(x, y);
-			}
-			else {
+			} else {
 				Vec2f point = c.getPointAt(time);
 				if (isCurrentLazySlider) {
 					point = c.start;
@@ -236,72 +259,4 @@ public class Dancer {
 		y = Utils.clamp(y, 10, Options.height - 10);
 	}
 
-	public void update(int time, GameObject[] gameObjects, int objectIndex) {
-		GameObject p, c;
-		GameObject[] e = objectIndex > 0 ? sliderMoverController.process(gameObjects[objectIndex - 1], gameObjects[objectIndex], time)
-			: sliderMoverController.process(d, gameObjects[objectIndex], time);
-		p = e[0];
-		c = e[1];
-		if (this.p != p) {
-			this.p = p;
-			if (this.p == d) {
-				if (c.isSpinner()) {
-					double[] spinnerStartPoint = spinner.getPoint();
-					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
-				}
-			}
-
-			isCurrentLazySlider = false;
-			// detect lazy sliders, should work pretty good
-			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
-				Slider s = (Slider) c;
-				Vec2f mid = s.getCurve().pointAt(1f);
-				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
-					mid = s.getCurve().pointAt(0.5f);
-					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
-						isCurrentLazySlider = true;
-					}
-				}
-			}
-			dir = moverDirection.getDirection(dir);
-			if (c.isSpinner()) {
-				double[] spinnerStartPoint = spinner.getPoint();
-				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
-			}
-
-			if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getLatestIndex() - 1) {
-				polyMoverFactory.update(gameObjects[objectIndex + polyMoverFactory.getMaxBufferSize() - 1]);
-			}
-			else {
-				polyMoverFactory.create(gameObjects, objectIndex - 1);
-			}
-		}
-		if (time < c.getTime()) {
-			if (!(p.isSpinner() || c.isSpinner())) {
-				double[] point = polyMoverFactory.getPointAt(time);
-				x = (float) point[0];
-				y = (float) point[1];
-			}
-		}
-		else {
-			if (c.isSpinner()) {
-				Spinner.PROGRESS = (double) (time - c.getTime()) / (double) (c.getEndTime() - c.getTime());
-				double[] point = spinner.getPoint();
-				x = (float) point[0];
-				y = (float) point[1];
-				c.end = new Vec2f(x, y);
-			}
-			else {
-				Vec2f point = c.getPointAt(time);
-				if (isCurrentLazySlider) {
-					point = c.start;
-				}
-				x = point.x;
-				y = point.y;
-			}
-		}
-		Pippi.dance(time, c, isCurrentLazySlider);
-		x = Utils.clamp(x, 10, Options.width - 10);
-		y = Utils.clamp(y, 10, Options.height - 10);
-	}
 }
