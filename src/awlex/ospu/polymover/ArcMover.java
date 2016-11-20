@@ -10,8 +10,9 @@ import static java.lang.Math.*;
 /**
  * Created by Awlex on 13.11.2016.
  */
-public class ArcMover extends PolyMover {
-	
+public class ArcMover implements PolyMover {
+
+	public static final int ITEMS_NEEDED = 3;
 	private GameObject p1, middle, p2;
 	private double xm, ym, r, alpha, beta, gamma;
 	
@@ -20,14 +21,7 @@ public class ArcMover extends PolyMover {
 		this.middle = middle;
 		this.p2 = p2;
 		init();
-	}
-	
-	public ArcMover(PolyMover mover, GameObject p) {
-		GameObject[] items = mover.getItems();
-		p1 = items[items.length - 2];
-		middle = items[items.length - 1];
-		p2 = p;
-		init();
+		System.out.println("r: " + r + " xm: " + xm + " ym: " + ym);
 	}
 	
 	private void init() {
@@ -64,10 +58,11 @@ public class ArcMover extends PolyMover {
 			p2
 		};
 	}
-	
+
 	private static Matrix prepareMatrix(GameObject p1, GameObject middle, GameObject p2) {
 		Matrix a, b;
-		if (!p2.isSlider()) {
+
+		//if (!p2.isSlider()) {
 			a = new Matrix(new double[][]{
 				{1, -p1.end.x, -p1.end.y},
 				{1, -middle.start.x, -middle.start.y},
@@ -78,6 +73,7 @@ public class ArcMover extends PolyMover {
 				{-(pow(middle.start.x, 2) + pow(middle.start.y, 2))},
 				{-(pow(p2.start.x, 2) + pow(p2.start.y, 2))},
 			});
+		/*
 		} else {
 			Circle c = ((Slider) p2).getTickPositionCircles()[0];
 			a = new Matrix(new double[][]{
@@ -91,6 +87,7 @@ public class ArcMover extends PolyMover {
 				{-(pow(c.start.x, 2) + pow(c.start.y, 2))},
 			});
 		}
+		*/
 		return a.solve(b);
 	}
 	

@@ -617,7 +617,7 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				if (Dancer.multipoint)
-					Dancer.instance.setMoverFactoryIndex(index);
+					Dancer.instance.setPolyMoverFactoryIndex(index);
 				else
 					Dancer.instance.setMoverFactoryIndex(index);
 			}

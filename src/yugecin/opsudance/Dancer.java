@@ -19,8 +19,8 @@ package yugecin.opsudance;
 
 import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
 import awlex.ospu.movers.factories.SpiralMoverFactory;
-import awlex.ospu.polymover.PolyMover;
 import awlex.ospu.polymover.factory.ArcFactory;
+import awlex.ospu.polymover.factory.LinearFactory;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
 import awlex.ospu.spinners.SpiralSpinner;
 import itdelatrisu.opsu.Options;
@@ -74,6 +74,7 @@ public class Dancer {
 	};
 
 	public static PolyMoverFactory[] polyMoverFactories = new PolyMoverFactory[]{
+		new LinearFactory(),
 		new ArcFactory()
 	};
 
@@ -267,13 +268,11 @@ public class Dancer {
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 			}
 
-			if (polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getPrefferedBufferSize() - 1) {
-				if (polyMoverFactory.isInitialized()) {
-					polyMoverFactory.update(gameObjects[objectIndex + polyMoverFactory.getPrefferedBufferSize()]);
-				}
-				else {
-					polyMoverFactory.init(gameObjects, objectIndex - 1);
-				}
+			if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getLatestIndex() - 1) {
+				polyMoverFactory.update(gameObjects[objectIndex + polyMoverFactory.getMaxBufferSize() - 1]);
+			}
+			else {
+				polyMoverFactory.create(gameObjects, objectIndex - 1);
 			}
 		}
 
