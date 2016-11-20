@@ -422,6 +422,13 @@ public class OptionsMenu extends BasicGameState {
 			keyEntryLeft = false;
 			keyEntryRight = true;
 		}
+
+		// ctrl+click to reset slider options
+		if (selectedOption != null && selectedOption.isDragOption() && (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL))) {
+			selectedOption.setValue(selectedOption.getDefaultVal() - 1);
+			// trigger update
+			selectedOption.drag(container, 1);
+		}
 	}
 
 	@Override
@@ -437,6 +444,18 @@ public class OptionsMenu extends BasicGameState {
 		// key entry state
 		if (keyEntryLeft || keyEntryRight)
 			return;
+
+		if (selectedOption == null || !selectedOption.isDragOption()) {
+			return;
+		}
+
+		// check control keys (reset to default value on ctrl+click)
+		if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
+			selectedOption.setValue(selectedOption.getDefaultVal() - 1);
+			// trigger update
+			selectedOption.drag(container, 1);
+			return;
+		}
 
 		// check mouse button (right click scrolls faster)
 		int multiplier;
@@ -454,9 +473,7 @@ public class OptionsMenu extends BasicGameState {
 		diff = ((diff > 0) ? 1 : -1) * multiplier;
 
 		// options (drag only)
-		if (selectedOption != null) {
-			selectedOption.drag(container, diff);
-		}
+		selectedOption.drag(container, diff);
 	}
 
 	@Override

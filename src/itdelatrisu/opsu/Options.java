@@ -1189,6 +1189,8 @@ public class Options {
 		/** The boolean value for the option (if applicable). */
 		protected boolean bool;
 
+		private int defaultVal = 0;
+
 		/** The integer value for the option (if applicable). */
 		protected int val;
 
@@ -1244,6 +1246,7 @@ public class Options {
 		GameOption(String name, String displayName, String description, int value, int min, int max) {
 			this(name, displayName, description);
 			this.val = value;
+			this.defaultVal = value;
 			this.min = min;
 			this.max = max;
 			this.type = OptionType.NUMERIC;
@@ -1387,6 +1390,10 @@ public class Options {
 
 		public int getMaxValue() {
 			return max;
+		}
+
+		public int getDefaultVal() {
+			return defaultVal;
 		}
 
 	}
