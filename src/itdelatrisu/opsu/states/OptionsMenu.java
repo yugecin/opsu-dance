@@ -558,9 +558,17 @@ public class OptionsMenu extends BasicGameState {
 		Color color = (focus) ? Color.cyan : Color.white;
 
 		Fonts.MEDIUM.drawString(width / 30, y, option.getName(), color);
-		Fonts.MEDIUM.drawString(width / 2, y, option.getValueString(), color);
 		Fonts.SMALL.drawString(width / 30, y + textHeight, option.getDescription(), color);
+		Fonts.MEDIUM.drawString(width / 2, y, option.getValueString(), color);
 		g.setColor(Colors.WHITE_ALPHA);
+		if (option.isDragOption()) {
+			float availableWidth = width / 2 - width / 30;
+			g.fillRect(width / 2, y + textHeight, 20, 10);
+			g.fillRect(width / 2 + availableWidth - 20, y + textHeight, 20, 10);
+			availableWidth -= 40 + 100;
+			float optionPercent =  (float) (option.getIntegerValue() - option.getMinValue()) / (option.getMaxValue() - option.getMinValue());
+			g.fillRect(width / 2 + 20 + optionPercent * availableWidth, y + textHeight, 100, 10);
+		}
 		g.drawLine(0, y + textHeight, width, y + textHeight);
 	}
 

@@ -1376,7 +1376,20 @@ public class Options {
 			} else if (type == OptionType.BOOLEAN)
 				bool = Boolean.parseBoolean(s);
 		}
-	};
+
+		public boolean isDragOption() {
+			return type == OptionType.NUMERIC;
+		}
+
+		public int getMinValue() {
+			return min;
+		}
+
+		public int getMaxValue() {
+			return max;
+		}
+
+	}
 
 	/** Map of option display names to GameOptions. */
 	private static HashMap<String, GameOption> optionMap;
