@@ -112,6 +112,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.ENABLE_WATCH_SERVICE
 		}),
 		DANCE ("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER_TYPE,
 			GameOption.DANCE_MOVER,
 			GameOption.DANCE_MOVER_DIRECTION,
 			GameOption.DANCE_SLIDER_MOVER_TYPE,
