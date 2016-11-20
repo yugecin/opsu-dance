@@ -41,4 +41,15 @@ public class LineMover implements PolyMover {
 		return objects;
 	}
 
+	@Override
+	public GameObject getLastItem() {
+		int i = objects.length - 1;
+		while (i > 0) {
+			if (objects[i] != null) {
+				break;
+			}
+			i--;
+		}
+		return objects[i];
+	}
 }

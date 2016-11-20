@@ -250,6 +250,7 @@ public class Dancer {
 					c.start.set((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
 				}
 			}
+
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
 			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
@@ -275,7 +276,6 @@ public class Dancer {
 				polyMoverFactory.create(gameObjects, objectIndex - 1);
 			}
 		}
-
 		if (time < c.getTime()) {
 			if (!(p.isSpinner() || c.isSpinner())) {
 				double[] point = polyMoverFactory.getPointAt(time);

@@ -4,7 +4,9 @@ import awlex.ospu.polymover.LineMover;
 import awlex.ospu.polymover.PolyMover;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
+import yugecin.opsudance.Dancer;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,8 +30,7 @@ public abstract class PolyMoverFactory {
 		double[] ret = new double[2];
 		int i = 0;
 		while (i < movers.size()) {
-			GameObject[] items = movers.get(i).getItems();
-			if (items[items.length - 1].getEndTime() < time)
+			if (movers.get(i).getLastItem().getEndTime() < time)
 				break;
 			double[] point = movers.get(i).getPointAt(time);
 			ret[0] += point[0];
@@ -47,17 +48,16 @@ public abstract class PolyMoverFactory {
 		}
 		GameObject[] items = new GameObject[getMaxBufferSize()];
 		int i = 1;
-		items[0] = startIndex == -1 ? new DummyObject() : objects[startIndex];
-		while (i < items.length - 2) {
+		items[0] = startIndex == -1 ? Dancer.d : objects[startIndex];
+		while (i < items.length - 1) {
 			GameObject g = objects[startIndex + i];
 			if (g.isSlider() || g.isSpinner())
 				break;
 			items[i++] = g;
 		}
 		items[i] = objects[startIndex + i];
-		i++;
 		latestIndex = startIndex + getMaxBufferSize() + i - items.length;
-		if (i >= getMinBufferSize()) {
+		if (++i >= getMinBufferSize()) {
 			init(items, i);
 		}
 		else {

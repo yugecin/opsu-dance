@@ -10,4 +10,6 @@ public interface PolyMover {
 	double[] getPointAt(int time);
 
 	GameObject[] getItems();
+
+	GameObject getLastItem();
 }

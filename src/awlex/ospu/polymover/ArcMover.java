@@ -21,7 +21,6 @@ public class ArcMover implements PolyMover {
 		this.middle = middle;
 		this.p2 = p2;
 		init();
-		System.out.println("r: " + r + " xm: " + xm + " ym: " + ym);
 	}
 	
 	private void init() {
@@ -98,5 +97,10 @@ public class ArcMover implements PolyMover {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public GameObject getLastItem() {
+		return p2;
 	}
 }
