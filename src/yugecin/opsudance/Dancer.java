@@ -183,9 +183,11 @@ public class Dancer {
 			p = gameObjects[objectIndex - 1];
 		}
 		GameObject c = gameObjects[objectIndex];
-		GameObject[] e = sliderMoverController.process(p, c, time);
-		p = e[0];
-		c = e[1];
+		if (!multipoint) {
+			GameObject[] e = sliderMoverController.process(p, c, time);
+			p = e[0];
+			c = e[1];
+		}
 		if (this.p != p) {
 			this.p = p;
 			if (this.p == d) {
