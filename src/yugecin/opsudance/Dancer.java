@@ -19,7 +19,6 @@ package yugecin.opsudance;
 
 import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
 import awlex.ospu.movers.factories.SpiralMoverFactory;
-import awlex.ospu.polymover.PolyMover;
 import awlex.ospu.polymover.factory.ArcFactory;
 import awlex.ospu.polymover.factory.LinearFactory;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
@@ -41,7 +40,7 @@ import yugecin.opsudance.spinners.*;
 
 public class Dancer {
 
-	public static MoverFactory[] moverFactories = new MoverFactory[]{
+	public static MoverFactory[] moverFactories = new MoverFactory[] {
 		new AutoMoverFactory(),
 		new AutoEllipseMoverFactory(),
 		new CircleMoverFactory(),
@@ -57,7 +56,7 @@ public class Dancer {
 		new ArcFactory(),
 	};
 
-	public static Spinner[] spinners = new Spinner[]{
+	public static Spinner[] spinners = new Spinner[] {
 		new RektSpinner(),
 		new BeamSpinner(),
 		new CircleSpinner(),
@@ -69,9 +68,10 @@ public class Dancer {
 		new RektCircleSpinner(),
 		new ApproachCircleSpinner(),
 		new SpiralSpinner(),
+		new FivePointStarSpinner(),
 	};
 
-	public static SliderMoverController[] sliderMovers = new SliderMoverController[]{
+	public static SliderMoverController[] sliderMovers = new SliderMoverController[] {
 		new DefaultSliderMoverController(),
 		new InheritedSliderMoverController(),
 	};
