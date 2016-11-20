@@ -40,6 +40,8 @@ public class Container extends AppGameContainer {
 	/** SlickException causing game failure. */
 	protected SlickException e = null;
 
+	private Exception anyException = null;
+
 	public static Container instance;
 
 	/**
@@ -63,14 +65,16 @@ public class Container extends AppGameContainer {
 			while (running())
 				gameLoop();
 		} catch(Exception e) {
-			e.printStackTrace();
+			anyException = e;
 		} finally {
 			// destroy the game container
 			close_sub();
 			destroy();
 
-			// report any critical errors
-			if (e != null) {
+			if (anyException != null) {
+				ErrorHandler.error("Something bad happend while playing", anyException, true);
+				anyException = null;
+			} else if (e != null) {
 				ErrorHandler.error(null, e, true);
 				e = null;
 			}
@@ -112,7 +116,9 @@ public class Container extends AppGameContainer {
 		Options.saveOptions();
 
 		// reset cursor
-		UI.getCursor().reset();
+		if (UI.getCursor() != null) {
+			UI.getCursor().reset();
+		}
 
 		// destroy images
 		InternalTextureLoader.get().clear();
