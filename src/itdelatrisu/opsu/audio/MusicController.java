@@ -22,6 +22,7 @@ import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
 
 import java.io.File;
@@ -252,9 +253,9 @@ public class MusicController {
 	 */
 	public static int getPosition() {
 		if (isPlaying())
-			return (int) (player.getPosition() * 1000 + Options.getMusicOffset());
+			return (int) (player.getPosition() * 1000 + Options.getMusicOffset() + Game.currentMapMusicOffset);
 		else if (isPaused())
-			return Math.max((int) (pauseTime * 1000 + Options.getMusicOffset()), 0);
+			return Math.max((int) (pauseTime * 1000 + Options.getMusicOffset() + Game.currentMapMusicOffset), 0);
 		else
 			return 0;
 	}

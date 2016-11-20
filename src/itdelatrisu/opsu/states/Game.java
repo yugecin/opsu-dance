@@ -256,6 +256,8 @@ public class Game extends BasicGameState {
 	/** Music position bar coordinates and dimensions (for replay seeking). */
 	private float musicBarX, musicBarY, musicBarWidth, musicBarHeight;
 
+	public static int currentMapMusicOffset;
+
 	private int mirrorFrom;
 	private int mirrorTo;
 
@@ -1143,6 +1145,14 @@ public class Game extends BasicGameState {
 				Dancer.mirror = true;
 			}
 			break;
+		case Input.KEY_MINUS:
+			currentMapMusicOffset += 5;
+			UI.sendBarNotification("Current map offset: " + currentMapMusicOffset);
+			break;
+		}
+		if (key == Input.KEY_ADD || c == '+') {
+			currentMapMusicOffset -= 5;
+			UI.sendBarNotification("Current map offset: " + currentMapMusicOffset);
 		}
 	}
 
@@ -1654,6 +1664,9 @@ public class Game extends BasicGameState {
 	 * @param beatmap the beatmap to load
 	 */
 	public void loadBeatmap(Beatmap beatmap) {
+		if (this.beatmap == null || this.beatmap.beatmapID != beatmap.beatmapID) {
+			currentMapMusicOffset = 0;
+		}
 		this.beatmap = beatmap;
 		Display.setTitle(String.format("%s - %s", game.getTitle(), beatmap.toString()));
 		if (beatmap.timingPoints == null)
