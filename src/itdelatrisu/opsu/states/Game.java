@@ -424,11 +424,7 @@ public class Game extends BasicGameState {
 		autoMousePressed = false;
 		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			Vec2f autoPoint;
-			int lastObjectForDancer = beatmap.objects.length;
-			if (Dancer.multipoint) {
-				lastObjectForDancer -= Dancer.polyMoverFactories[Dancer.instance.getPolyMoverFactoryIndex()].getMinBufferSize();
-			}
-			if (objectIndex < lastObjectForDancer) {
+			if (objectIndex < beatmap.objects.length - Dancer.instance.getPolyMoverFactoryMinBufferSize()) {
 				Dancer d = Dancer.instance;
 				d.update(trackPosition, objectIndex);
 				autoPoint = new Vec2f(d.x, d.y);

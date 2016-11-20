@@ -19,6 +19,7 @@ package yugecin.opsudance;
 
 import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
 import awlex.ospu.movers.factories.SpiralMoverFactory;
+import awlex.ospu.polymover.PolyMover;
 import awlex.ospu.polymover.factory.ArcFactory;
 import awlex.ospu.polymover.factory.LinearFactory;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
@@ -52,6 +53,8 @@ public class Dancer {
 		new QuartCircleMoverFactory(),
 		new SpiralMoverFactory(),
 		new CenterSpiralMoverFactory(),
+		new LinearFactory(),
+		new ArcFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[]{
@@ -71,11 +74,6 @@ public class Dancer {
 	public static SliderMoverController[] sliderMovers = new SliderMoverController[]{
 		new DefaultSliderMoverController(),
 		new InheritedSliderMoverController(),
-	};
-
-	public static PolyMoverFactory[] polyMoverFactories = new PolyMoverFactory[]{
-		new LinearFactory(),
-		new ArcFactory()
 	};
 
 	public static Dancer instance = new Dancer();
@@ -104,13 +102,11 @@ public class Dancer {
 	private GameObject[] gameObjects;
 
 	private MoverFactory moverFactory;
-	private PolyMoverFactory polyMoverFactory;
 	private Mover mover;
 	private Spinner spinner;
 	public static SliderMoverController sliderMoverController;
 
 	private int moverFactoryIndex;
-	private int polyMoverFactoryIndex;
 	private int spinnerIndex;
 
 	public float x;
@@ -157,18 +153,14 @@ public class Dancer {
 		}
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
+		multipoint = moverFactory.isMultiPoint();
 	}
 
-	public int getPolyMoverFactoryIndex() {
-		return polyMoverFactoryIndex;
-	}
-
-	public void setPolyMoverFactoryIndex(int polyMoverFactoryIndex) {
-		if (polyMoverFactoryIndex < 0 || polyMoverFactoryIndex >= polyMoverFactories.length) {
-			polyMoverFactoryIndex = 0;
+	public int getPolyMoverFactoryMinBufferSize() {
+		if (!multipoint) {
+			return 0;
 		}
-		this.polyMoverFactoryIndex = polyMoverFactoryIndex;
-		polyMoverFactory = polyMoverFactories[polyMoverFactoryIndex];
+		return ((PolyMoverFactory) moverFactory).getMinBufferSize();
 	}
 
 	public void setGameObjects(GameObject[] objs) {
@@ -215,10 +207,11 @@ public class Dancer {
 			}
 
 			if (multipoint) {
-				if (polyMoverFactory.isInitialized() && polyMoverFactory.getLatestIndex() < objectIndex + polyMoverFactory.getLatestIndex() - 1) {
-					polyMoverFactory.update(gameObjects[objectIndex + polyMoverFactory.getMaxBufferSize() - 1]);
+				PolyMoverFactory pmf = (PolyMoverFactory) moverFactory;
+				if (pmf.isInitialized() && pmf.getLatestIndex() < objectIndex + pmf.getLatestIndex() - 1) {
+					pmf.update(gameObjects[objectIndex + pmf.getMaxBufferSize() - 1]);
 				} else {
-					polyMoverFactory.create(gameObjects, objectIndex - 1);
+					pmf.create(gameObjects, objectIndex - 1);
 				}
 			} else if (mover == null || mover.getEnd() != c) {
 				if (p == d) {
@@ -233,7 +226,7 @@ public class Dancer {
 			if (!p.isSpinner() || !c.isSpinner()) {
 				double[] point;
 				if (multipoint) {
-					point = polyMoverFactory.getPointAt(time);
+					point = ((PolyMoverFactory) moverFactory).getPointAt(time);
 				} else {
 					point = mover.getPointAt(time);
 				}

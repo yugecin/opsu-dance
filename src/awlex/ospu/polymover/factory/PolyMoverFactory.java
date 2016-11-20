@@ -2,18 +2,18 @@ package awlex.ospu.polymover.factory;
 
 import awlex.ospu.polymover.LineMover;
 import awlex.ospu.polymover.PolyMover;
-import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.movers.Mover;
+import yugecin.opsudance.movers.factories.MoverFactory;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by Awlex on 18.11.2016.
  */
-public abstract class PolyMoverFactory {
+public abstract class PolyMoverFactory implements MoverFactory {
 
 	private LinkedList<PolyMover> movers;
 	private int latestIndex;
@@ -40,6 +40,16 @@ public abstract class PolyMoverFactory {
 		ret[0] /= i;
 		ret[1] /= i;
 		return ret;
+	}
+
+	@Override
+	public Mover create(GameObject start, GameObject end, int dir) {
+		throw new UnsupportedOperationException("Polymovers should use the create variant with all the gameobjects + startindex");
+	}
+
+	@Override
+	public boolean isMultiPoint() {
+		return true;
 	}
 
 	public final void create(GameObject[] objects, int startIndex) {
