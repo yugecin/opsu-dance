@@ -53,7 +53,7 @@ public class Dancer {
 		new QuartCircleMoverFactory(),
 		new SpiralMoverFactory(),
 		new CenterSpiralMoverFactory(),
-		new LinearFactory(),
+		//new LinearFactory(),
 		new ArcFactory(),
 	};
 
