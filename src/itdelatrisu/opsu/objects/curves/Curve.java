@@ -62,6 +62,10 @@ public abstract class Curve {
 	/** Points along the curve (set by inherited classes). */
 	protected Vec2f[] curve;
 
+	public Vec2f[] getCurvePoints() {
+		return curve;
+	}
+
 	private Color fallbackSliderColor = new Color(20, 20, 20);
 
 	/**
