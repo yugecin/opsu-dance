@@ -122,6 +122,8 @@ public class Slider extends GameObject {
 	private int tickExpand = 0;
 	private final int TICKEXPAND = 200;
 
+	public int baseSliderFrom;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -221,6 +223,11 @@ public class Slider extends GameObject {
 
 		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
 		//curve.draw(curveColor, curveInterval);
+		float sliderprogress = (float) (trackPosition - getTime()) / sliderTimeTotal;
+		if (sliderprogress > 0) {
+			game.setSlidercurveFrom(baseSliderFrom + (int) (sliderprogress * curve.getCurvePoints().length));
+		}
+		game.setSlidercurveTo(baseSliderFrom + (int) (curveInterval * curve.getCurvePoints().length));
 		color.a = alpha;
 
 		g.pushTransform();

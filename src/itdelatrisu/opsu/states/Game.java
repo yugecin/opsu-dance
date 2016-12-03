@@ -44,9 +44,7 @@ import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.Spinner;
 import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.render.FrameBufferCache;
-import itdelatrisu.opsu.render.KnorkeCurveRenderStuff;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
@@ -1461,12 +1459,15 @@ public class Game extends BasicGameState {
 			List<Vec2f> curvepoints = new ArrayList<>();
 			for (GameObject gameObject : gameObjects) {
 				if (gameObject.isSlider()) {
+					((Slider) gameObject).baseSliderFrom = curvepoints.size();
 					curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
 				}
 			}
 			knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
 		}
 
+		slidercurveFrom = 0;
+		slidercurveTo = 0;
 
 		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
@@ -1511,12 +1512,12 @@ public class Game extends BasicGameState {
 	private float slidercurveTo;
 
 	public void setSlidercurveFrom(int slidercurveFrom) {
-		float pos = slidercurveFrom / knorkesliders.getCurvePoints().length;
-		this.slidercurveFrom = Math.min(pos, this.slidercurveFrom);
+		float pos = (float) slidercurveFrom / knorkesliders.getCurvePoints().length;
+		this.slidercurveFrom = Math.max(pos, this.slidercurveFrom);
 	}
 
 	public void setSlidercurveTo(int slidercurveTo) {
-		float pos = slidercurveTo / knorkesliders.getCurvePoints().length;
+		float pos = (float) slidercurveTo / knorkesliders.getCurvePoints().length;
 		this.slidercurveTo = Math.max(pos, this.slidercurveTo);
 	}
 
