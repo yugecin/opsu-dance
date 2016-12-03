@@ -64,6 +64,7 @@ public class CurveRenderState {
 	
 	/** The point to which the curve has last been rendered into the texture (as an index into {@code curve}). */
 	private int lastPointDrawn;
+	private int firstPointDrawn;
 
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
@@ -85,7 +86,7 @@ public class CurveRenderState {
 
 	/**
 	 * Undo the static state. Static state setup caused by calls to
-	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, float)}
+	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, float, float)}
 	 * are undone.
 	 */
 	public static void shutdown() {
@@ -110,10 +111,11 @@ public class CurveRenderState {
 	 * runs it just draws the cached copy to the screen.
 	 * @param color tint of the curve
 	 * @param borderColor the curve border color
-	 * @param t the point up to which the curve should be drawn (in the interval [0, 1])
+	 * @param t2 the point up to which the curve should be drawn (in the interval [0, 1])
 	 */
-	public void draw(Color color, Color borderColor, float t) {
-		t = Utils.clamp(t, 0.0f, 1.0f);
+	public void draw(Color color, Color borderColor, float t1, float t2) {
+		t1 = Utils.clamp(t1, 0.0f, 1.0f);
+		t2 = Utils.clamp(t2, 0.0f, 1.0f);
 		float alpha = color.a;
 
 		// if this curve hasn't been drawn, draw it and cache the result
@@ -127,13 +129,11 @@ public class CurveRenderState {
 			//write impossible value to make sure the fbo is cleared
 			lastPointDrawn = -1;
 		}
-		
-		int drawUpTo = (int) (t * curve.length);
-		
-		if (lastPointDrawn != drawUpTo) {
-			if (drawUpTo == lastPointDrawn)
-				return;
 
+		int drawFrom = (int) (t1 * curve.length);
+		int drawUpTo = (int) (t2 * curve.length);
+		
+		if (lastPointDrawn != drawUpTo || firstPointDrawn != drawFrom) {
 			int oldFb = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
 			int oldTex = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 			//glGetInteger requires a buffer of size 16, even though just 4
@@ -147,8 +147,11 @@ public class CurveRenderState {
 				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			}
-
-			this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo);
+			if (firstPointDrawn != drawFrom) {
+				this.renderCurve(color, borderColor, drawFrom, drawUpTo, true);
+			} else {
+				this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo, false);
+			}
 			lastPointDrawn = drawUpTo;
 			color.a = 1f;
 
@@ -295,7 +298,7 @@ public class CurveRenderState {
 	 * @param color the color of the curve
 	 * @param borderColor the curve border color
 	 */
-	private void renderCurve(Color color, Color borderColor, int from, int to) {
+	private void renderCurve(Color color, Color borderColor, int from, int to, boolean clearFirst) {
 		staticState.initGradient();
 		RenderState state = saveRenderState();
 		staticState.initShaderProgram();
@@ -310,6 +313,9 @@ public class CurveRenderState {
 		//2*4 is for skipping the first 2 floats (u,v)
 		GL20.glVertexAttribPointer(staticState.attribLoc, 4, GL11.GL_FLOAT, false, 6 * 4, 2 * 4);
 		GL20.glVertexAttribPointer(staticState.texCoordLoc, 2, GL11.GL_FLOAT, false, 6 * 4, 0);
+		if (clearFirst) {
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		}
 		for (int i = from * 2; i < to * 2 - 1; ++i)
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
 		GL11.glFlush();

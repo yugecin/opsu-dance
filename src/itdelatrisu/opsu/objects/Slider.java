@@ -220,7 +220,7 @@ public class Slider extends GameObject {
 		curveColor.a = curveAlpha;
 
 		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
-		curve.draw(curveColor, curveInterval);
+		curve.draw(curveColor, Math.max(0, (trackPosition - getTime()) / sliderTimeTotal), curveInterval);
 		color.a = alpha;
 
 		g.pushTransform();
