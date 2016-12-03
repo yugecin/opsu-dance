@@ -20,6 +20,7 @@ package itdelatrisu.opsu.render;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
+import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import java.nio.ByteBuffer;
@@ -59,9 +60,8 @@ public class CurveRenderState {
 	/** The HitObject associated with the curve to be drawn. */
 	protected HitObject hitObject;
 
-	/** The points along the curve to be drawn. */
 	protected Vec2f[] curve;
-	
+
 	/** The point to which the curve has last been rendered into the texture (as an index into {@code curve}). */
 	private int lastPointDrawn;
 	private int firstPointDrawn;
@@ -100,9 +100,16 @@ public class CurveRenderState {
 	 * @param curve the points along the curve to be drawn
 	 */
 	public CurveRenderState(HitObject hitObject, Vec2f[] curve) {
-		fbo = null;
 		this.hitObject = hitObject;
 		this.curve = curve;
+		FrameBufferCache cache = FrameBufferCache.getInstance();
+		Rendertarget mapping = cache.get(hitObject);
+		if (mapping == null)
+			mapping = cache.insert(hitObject);
+		fbo = mapping;
+		createVertexBuffer(fbo.getVbo());
+		//write impossible value to make sure the fbo is cleared
+		lastPointDrawn = -1;
 	}
 
 	/**
@@ -117,18 +124,6 @@ public class CurveRenderState {
 		t1 = Utils.clamp(t1, 0.0f, 1.0f);
 		t2 = Utils.clamp(t2, 0.0f, 1.0f);
 		float alpha = color.a;
-
-		// if this curve hasn't been drawn, draw it and cache the result
-		if (fbo == null) {
-			FrameBufferCache cache = FrameBufferCache.getInstance();
-			Rendertarget mapping = cache.get(hitObject);
-			if (mapping == null)
-				mapping = cache.insert(hitObject);
-			fbo = mapping;
-			createVertexBuffer(fbo.getVbo());
-			//write impossible value to make sure the fbo is cleared
-			lastPointDrawn = -1;
-		}
 
 		int drawFrom = (int) (t1 * curve.length);
 		int drawUpTo = (int) (t2 * curve.length);
@@ -148,6 +143,7 @@ public class CurveRenderState {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			}
 			if (firstPointDrawn != drawFrom) {
+				firstPointDrawn = drawFrom;
 				this.renderCurve(color, borderColor, drawFrom, drawUpTo, true);
 			} else {
 				this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo, false);
@@ -273,19 +269,26 @@ public class CurveRenderState {
 	private void createVertexBuffer(int bufferID) {
 		int arrayBufferBinding = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
 		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length - 1) * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
-		for (int i = 0; i < curve.length; ++i) {
+		if (curve.length > 0) {
+			fillCone(buff, curve[0].x, curve[0].y);
+		}
+		for (int i = 1; i < curve.length; ++i) {
 			float x = curve[i].x;
 			float y = curve[i].y;
 			fillCone(buff, x, y);
-			if (i != 0) {
-				float last_x = curve[i - 1].x;
-				float last_y = curve[i - 1].y;
-				double diff_x = x - last_x;
-				double diff_y = y - last_y;
+			float last_x = curve[i - 1].x;
+			float last_y = curve[i - 1].y;
+			double diff_x = x - last_x;
+			double diff_y = y - last_y;
+			if (diff_x < Circle.diameter / 8 && diff_y < Circle.diameter / 8) {
 				x = (float) (x - diff_x / 2);
 				y = (float) (y - diff_y / 2);
-				fillCone(buff, x, y);
+			} else {
+				x = curve[i+1].x;
+				y = curve[i+1].y;
+				System.out.println("next");
 			}
+			fillCone(buff, x, y);
 		}
 		buff.flip();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferID);
