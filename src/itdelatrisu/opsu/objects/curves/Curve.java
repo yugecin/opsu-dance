@@ -60,7 +60,7 @@ public abstract class Curve {
 	private CurveRenderState renderState;
 
 	/** Points along the curve (set by inherited classes). */
-	protected Vec2f[] curve;
+	public Vec2f[] curve;
 
 	public Vec2f[] getCurvePoints() {
 		return curve;
@@ -121,25 +121,27 @@ public abstract class Curve {
 	 * Draws the full curve to the graphics context.
 	 * @param color the color filter
 	 */
-	public void draw(Color color) { draw(color, 1f); }
+	public void draw(Color color) { draw(color, 0f, 1f); }
 
 	/**
 	 * Draws the curve in the range [0, t] (where the full range is [0, 1]) to the graphics context.
 	 * @param color the color filter
 	 * @param t set the curve interval to [0, t]
 	 */
-	public void draw(Color color, float t) {
+	public void draw(Color color, float t1, float t2) {
 		if (curve == null)
 			return;
 
-		t = Utils.clamp(t, 0f, 1f);
+		t1 = Utils.clamp(t1, 0f, 1f);
+		t2 = Utils.clamp(t2, 0f, 1f);
 
 		// peppysliders
 		if (Options.isFallbackSliders() || Options.getSkin().getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
-			int drawUpTo = (int) (curve.length * t);
+			int drawFrom = (int) (curve.length * t1);
+			int drawUpTo = (int) (curve.length * t2);
 			Image hitCircle = GameImage.HITCIRCLE.getImage();
 			Image hitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
-			for (int i = 0; i < drawUpTo; i++)
+			for (int i = drawFrom; i < drawUpTo; i++)
 				hitCircleOverlay.drawCentered(curve[i].x, curve[i].y, Colors.WHITE_FADE);
 			float a = fallbackSliderColor.a;
 			fallbackSliderColor.a = color.a;
@@ -152,7 +154,7 @@ public abstract class Curve {
 		else {
 			if (renderState == null)
 				renderState = new CurveRenderState(hitObject, curve);
-			renderState.draw(color, borderColor, t);
+			renderState.draw(color, borderColor, t1, t2);
 		}
 	}
 
