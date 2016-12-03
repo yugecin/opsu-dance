@@ -557,6 +557,7 @@ public class Slider extends GameObject {
 
 			// calculate and send slider result
 			hitResult();
+			game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length);
 			return true;
 		}
 

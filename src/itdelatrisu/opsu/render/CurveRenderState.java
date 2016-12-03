@@ -280,13 +280,14 @@ public class CurveRenderState {
 			float last_y = curve[i - 1].y;
 			double diff_x = x - last_x;
 			double diff_y = y - last_y;
-			if (diff_x < Circle.diameter / 8 && diff_y < Circle.diameter / 8) {
+			float dist = Utils.distance(x, y, last_x, last_y);
+			if (dist < Circle.diameter / 8) {
 				x = (float) (x - diff_x / 2);
 				y = (float) (y - diff_y / 2);
 			} else {
-				x = curve[i+1].x;
-				y = curve[i+1].y;
-				System.out.println("next");
+				// don't mind me
+				x = -100f;
+				y = -100f;
 			}
 			fillCone(buff, x, y);
 		}
