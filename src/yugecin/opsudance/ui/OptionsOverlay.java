@@ -104,8 +104,7 @@ public class OptionsOverlay {
 			if (!options[i].showCondition()) {
 				continue;
 			}
-			j++;
-			drawOption(g, options[j], j, selectedOption == null ? hoverIdx == j : selectedOption == options[j]);
+			drawOption(g, options[i], j++, selectedOption == null ? hoverIdx == i : selectedOption == options[i]);
 		}
 		if (list.isVisible()) {
 			list.render(container, game, g);
