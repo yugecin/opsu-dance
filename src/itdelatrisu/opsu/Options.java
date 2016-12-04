@@ -651,7 +651,7 @@ public class Options {
 			}
 		},
 
-		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 40, 0, 100) {
+		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 40, 10, 60) {
 			@Override
 			public String getValueString() {
 				return val / 10 + "";
@@ -695,7 +695,7 @@ public class Options {
 			}
 		},
 
-		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 40, 0, 100) {
+		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 40, 10, 60) {
 			@Override
 			public String getValueString() {
 				return val / 10 + "";
