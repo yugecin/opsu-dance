@@ -160,7 +160,7 @@ public class Dancer {
 		}
 		this.moverFactoryIndex = moverFactoryIndex;
 		moverFactory = moverFactories[moverFactoryIndex];
-		multipoint = moverFactory.isMultiPoint();
+		multipoint = moverFactory instanceof MoverFactory.MultiPoint;
 		// to prevent crashes when changing mover in storyboard, create mover now
 		createNewMover();
 	}

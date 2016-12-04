@@ -24,8 +24,8 @@ public interface MoverFactory {
 
 	Mover create(GameObject start, GameObject end, int dir);
 
-	default boolean isMultiPoint() {
-		return false;
+	interface MultiPoint {
+
 	}
 
 }

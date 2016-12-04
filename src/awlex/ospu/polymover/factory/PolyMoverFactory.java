@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Awlex on 18.11.2016.
  */
-public abstract class PolyMoverFactory implements MoverFactory {
+public abstract class PolyMoverFactory implements MoverFactory, MoverFactory.MultiPoint {
 
 	private LinkedList<PolyMover> movers;
 	private int latestIndex;
@@ -45,11 +45,6 @@ public abstract class PolyMoverFactory implements MoverFactory {
 	@Override
 	public Mover create(GameObject start, GameObject end, int dir) {
 		throw new UnsupportedOperationException("Polymovers should use the create variant with all the gameobjects + startindex");
-	}
-
-	@Override
-	public boolean isMultiPoint() {
-		return true;
 	}
 
 	public final void create(GameObject[] objects, int startIndex) {
