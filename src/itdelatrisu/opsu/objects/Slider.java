@@ -383,9 +383,7 @@ public class Slider extends GameObject {
 			if (repeats % 2 == 0 && curveIntervalTo == 1 && !reversed) {
 				// fix shrinking sliders for odd repeating sliders
 				reversed = true;
-				if (Options.isMergingSliders()) {
-
-				} else {
+				if (!Options.isMergingSliders()) {
 					curve.reverse();
 				}
 			}
@@ -396,7 +394,12 @@ public class Slider extends GameObject {
 		}
 		if (Options.isMergingSliders()) {
 			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
-				game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curve.getCurvePoints().length));
+				int curvelen = curve.getCurvePoints().length;
+				if (repeats % 2 == 0) {
+					game.spliceSliderCurve(baseSliderFrom + (int) ((1f - curveIntervalFrom) * curvelen), baseSliderFrom + curvelen);
+				} else {
+					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen));
+				}
 			}
 			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
 		} else {
@@ -587,7 +590,7 @@ public class Slider extends GameObject {
 			// calculate and send slider result
 			hitResult();
 			if (Options.isMergingSliders()) {
-				game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length);
+				game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length + 1);
 			}
 			return true;
 		}

@@ -160,9 +160,11 @@ public abstract class Curve {
 	}
 
 	public void reverse() {
-		if (renderState == null)
-			renderState = new CurveRenderState(hitObject, curve);
 		renderState.reverse();
+	}
+
+	public void splice(int from, int to) {
+		renderState.splice(from, to);
 	}
 
 	/**

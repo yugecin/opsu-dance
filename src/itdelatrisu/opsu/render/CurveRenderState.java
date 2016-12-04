@@ -68,6 +68,9 @@ public class CurveRenderState {
 
 	private boolean reversed;
 
+	private int spliceFrom;
+	private int spliceTo;
+
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
 	 * Should be called before any curves are drawn.
@@ -113,10 +116,18 @@ public class CurveRenderState {
 		//write impossible value to make sure the fbo is cleared
 		lastPointDrawn = -1;
 		reversed = false;
+		spliceFrom = spliceTo = -1;
 	}
 
 	public void reverse() {
 		reversed = !reversed;
+	}
+
+	public void splice(int from, int to) {
+		spliceFrom = from * 2;
+		spliceTo = to * 2;
+		firstPointDrawn = -1; // force redraw
+		lastPointDrawn = -1; // force redraw
 	}
 
 	/**
@@ -336,8 +347,12 @@ public class CurveRenderState {
 			from = curve.length * 2 - 1 - to;
 			to = curve.length * 2 - 1 - a;
 		}
-		for (int i = from; i < to; ++i)
+		for (int i = from; i < to; ++i) {
+			if (spliceFrom <= i && i <= spliceTo) {
+				continue;
+			}
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
 		GL20.glDisableVertexAttribArray(staticState.attribLoc);

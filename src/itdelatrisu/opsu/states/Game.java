@@ -1523,6 +1523,10 @@ public class Game extends BasicGameState {
 		this.slidercurveTo = Math.max(pos, this.slidercurveTo);
 	}
 
+	public void spliceSliderCurve(int from, int to) {
+		this.knorkesliders.splice(from, to);
+	}
+
 	/**
 	 * Draws hit objects, hit results, and follow points.
 	 * @param g the graphics context
