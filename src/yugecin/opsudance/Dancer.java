@@ -33,11 +33,14 @@ import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.LinearMover;
 import yugecin.opsudance.movers.Mover;
+import yugecin.opsudance.movers.QuadraticBezierMover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.SliderMoverController;
 import yugecin.opsudance.spinners.*;
+
+import java.awt.*;
 
 public class Dancer {
 
@@ -55,6 +58,7 @@ public class Dancer {
 		new CenterSpiralMoverFactory(),
 		//new LinearFactory(),
 		new ArcFactory(),
+		new QuadraticBezierMoverFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[] {
@@ -131,6 +135,7 @@ public class Dancer {
 		for (Spinner s : spinners) {
 			s.init();
 		}
+		QuadraticBezierMover.reset();
 	}
 
 	public int getSpinnerIndex() {
@@ -214,6 +219,16 @@ public class Dancer {
 			if (c.isSpinner()) {
 				double[] spinnerStartPoint = spinner.getPoint();
 				c.start = new Vec2f((float) spinnerStartPoint[0], (float) spinnerStartPoint[1]);
+			}
+
+			// specific mover stuff
+			if (p.isSlider() && sliderMoverController instanceof DefaultSliderMoverController) {
+				Vec2f st = p.getPointAt(p.getEndTime() - 10);
+				Vec2f en = p.getPointAt(p.getEndTime());
+				//double atan = Math.atan2(en.y - st.y, en.x - st.x);
+				double distance = Utils.distance(st.x, st.y, en.x, en.y);
+				QuadraticBezierMover.p = new Point((int) st.x, (int) st.y);
+				QuadraticBezierMover.setPrevspeed(distance, 10);
 			}
 
 			createNewMover();
