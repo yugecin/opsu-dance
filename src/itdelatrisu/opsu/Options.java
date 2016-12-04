@@ -1150,7 +1150,7 @@ public class Options {
 			}
 		},
 
-		DANCE_ENABLE_SB ("Enable storyboard", "EnableStoryBoard", "Dance storyboard", false) {
+		DANCE_ENABLE_SB ("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false) {
 			@Override
 			public void click(GameContainer container) {
 				super.click(container);
