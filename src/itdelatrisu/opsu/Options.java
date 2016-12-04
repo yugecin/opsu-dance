@@ -58,6 +58,7 @@ import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
 import yugecin.opsudance.movers.QuadraticBezierMover;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
+import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.spinners.Spinner;
 import yugecin.opsudance.ui.SBOverlay;
 
@@ -625,6 +626,11 @@ public class Options {
 		},
 
 		DANCE_QUAD_BEZ_AGRESSIVE ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 500, 0, 2000) {
+			@Override
+			public boolean showCondition() {
+				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
+			}
+
 			@Override
 			public void read(String s) {
 				super.read(s);
@@ -1261,6 +1267,13 @@ public class Options {
 			this.type = OptionType.NUMERIC;
 		}
 
+		/**
+		 * should the option be shown
+		 * @return true if the option should be shown
+		 */
+		public boolean showCondition() {
+			return true;
+		}
 		/**
 		 * Returns the option name.
 		 * @return the name string
