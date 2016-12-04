@@ -114,6 +114,9 @@ public class OptionsMenu extends BasicGameState {
 		DANCE ("Dance", new GameOption[] {
 			GameOption.DANCE_MOVER,
 			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 			GameOption.DANCE_MOVER_DIRECTION,
 			GameOption.DANCE_SLIDER_MOVER_TYPE,
 			GameOption.DANCE_SPINNER,

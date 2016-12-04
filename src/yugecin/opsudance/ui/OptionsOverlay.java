@@ -37,6 +37,9 @@ public class OptionsOverlay {
 	private static Options.GameOption[] options = new Options.GameOption[] {
 		Options.GameOption.DANCE_MOVER,
 		Options.GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+		Options.GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+		Options.GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+		Options.GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 		Options.GameOption.DANCE_MOVER_DIRECTION,
 		Options.GameOption.DANCE_SLIDER_MOVER_TYPE,
 		Options.GameOption.DANCE_SPINNER,

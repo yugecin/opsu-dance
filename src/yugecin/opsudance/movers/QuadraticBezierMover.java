@@ -24,6 +24,7 @@ import java.awt.*;
 
 public class QuadraticBezierMover extends Mover {
 
+	public static int sliderExitAggressivenessfactor = 4;
 	public static int aggressiveness = 50;
 	public static Point p;
 	private static double prevspeed;
@@ -34,7 +35,11 @@ public class QuadraticBezierMover extends Mover {
 	}
 
 	public static void setPrevspeed(double distance, int timedelta) {
-		prevspeed = distance * aggressiveness / timedelta;
+		prevspeed = distance * aggressiveness * sliderExitAggressivenessfactor / timedelta;
+	}
+
+	public static double getPrevspeed() {
+		return prevspeed;
 	}
 
 	private int startTime;
