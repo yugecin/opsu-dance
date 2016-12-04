@@ -195,6 +195,9 @@ public class Slider extends GameObject {
 
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		if (trackPosition > getEndTime()) {
+			return;
+		}
 		Color orig = color;
 		if (mirror) {
 			color = mirrorColor;
@@ -219,15 +222,9 @@ public class Slider extends GameObject {
 		if (GameMod.HIDDEN.isActive() && trackPosition > getTime()) {
 			curveAlpha = Math.max(0f, 1f - ((float) (trackPosition - getTime()) / (getEndTime() - getTime())) * 1.05f);
 		}
-		curveColor.a = curveAlpha;
 
-		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
-		//curve.draw(curveColor, curveInterval);
-		float sliderprogress = (float) (trackPosition - getTime()) / sliderTimeTotal;
-		if (sliderprogress > 0) {
-			game.setSlidercurveFrom(baseSliderFrom + (int) (sliderprogress * curve.getCurvePoints().length));
-		}
-		game.setSlidercurveTo(baseSliderFrom + (int) (curveInterval * curve.getCurvePoints().length));
+		curveColor.a = curveAlpha;
+		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, alpha);
 		color.a = alpha;
 
 		g.pushTransform();
@@ -292,7 +289,7 @@ public class Slider extends GameObject {
 		g.popTransform();
 
 		// repeats
-		if (curveInterval == 1.0f) {
+		if (isCurveCompletelyDrawn) {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1; tcurRepeat++) {
 				if (hitObject.getRepeatCount() - 1 > tcurRepeat) {
 					Image arrow = GameImage.REVERSEARROW.getImage();
@@ -374,6 +371,26 @@ public class Slider extends GameObject {
 		Colors.WHITE_FADE.a = oldAlpha;
 
 		color = orig;
+	}
+
+	private boolean drawSliderTrack(int trackPosition, float snakingSliderProgress) {
+		float curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1f;
+		float curveIntervalFrom = 0f;
+		if (Options.isShrinkingSliders()) {
+			float sliderprogress = (float) (trackPosition - getTime()) / sliderTimeTotal;
+			if (sliderprogress > 0) {
+				curveIntervalFrom = sliderprogress;
+			}
+		}
+		if (Options.isMergingSliders()) {
+			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
+				game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curve.getCurvePoints().length));
+			}
+			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
+		} else {
+			curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
+		}
+		return curveIntervalTo == 1f;
 	}
 
 	/**
@@ -557,7 +574,9 @@ public class Slider extends GameObject {
 
 			// calculate and send slider result
 			hitResult();
-			game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length);
+			if (Options.isMergingSliders()) {
+				game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length);
+			}
 			return true;
 		}
 

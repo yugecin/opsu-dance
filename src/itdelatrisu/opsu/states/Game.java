@@ -1455,15 +1455,17 @@ public class Game extends BasicGameState {
 			this.leadInTime += epiImgTime;
 			SoundController.mute(false);
 
-			// let's create knorkesliders
-			List<Vec2f> curvepoints = new ArrayList<>();
-			for (GameObject gameObject : gameObjects) {
-				if (gameObject.isSlider()) {
-					((Slider) gameObject).baseSliderFrom = curvepoints.size();
-					curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+			if (Options.isMergingSliders()) {
+				// let's create knorkesliders
+				List<Vec2f> curvepoints = new ArrayList<>();
+				for (GameObject gameObject : gameObjects) {
+					if (gameObject.isSlider()) {
+						((Slider) gameObject).baseSliderFrom = curvepoints.size();
+						curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+					}
 				}
+				knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
 			}
-			knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
 		}
 
 		slidercurveFrom = 0;
@@ -1527,7 +1529,9 @@ public class Game extends BasicGameState {
 	 * @param trackPosition the track position
 	 */
 	private void drawHitObjects(Graphics g, int trackPosition) {
-		knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+		if (Options.isMergingSliders()) {
+			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+		}
 		// include previous object in follow points
 		int lastObjectIndex = -1;
 		if (objectIndex > 0 && objectIndex < beatmap.objects.length &&

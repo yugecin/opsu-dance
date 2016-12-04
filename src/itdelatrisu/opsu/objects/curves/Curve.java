@@ -126,7 +126,8 @@ public abstract class Curve {
 	/**
 	 * Draws the curve in the range [0, t] (where the full range is [0, 1]) to the graphics context.
 	 * @param color the color filter
-	 * @param t set the curve interval to [0, t]
+	 * @param t1 interval to draw from
+	 * @param t2 interval to draw to
 	 */
 	public void draw(Color color, float t1, float t2) {
 		if (curve == null)
@@ -145,7 +146,7 @@ public abstract class Curve {
 				hitCircleOverlay.drawCentered(curve[i].x, curve[i].y, Colors.WHITE_FADE);
 			float a = fallbackSliderColor.a;
 			fallbackSliderColor.a = color.a;
-			for (int i = 0; i < drawUpTo; i++)
+			for (int i = drawFrom; i < drawUpTo; i++)
 				hitCircle.drawCentered(curve[i].x, curve[i].y, fallbackSliderColor);
 			fallbackSliderColor.a = a;
 		}
@@ -154,7 +155,7 @@ public abstract class Curve {
 		else {
 			if (renderState == null)
 				renderState = new CurveRenderState(hitObject, curve);
-			renderState.draw(color, borderColor, t1, t2);
+			renderState.draw(color, borderColor, t1, t2); // TODO
 		}
 	}
 
