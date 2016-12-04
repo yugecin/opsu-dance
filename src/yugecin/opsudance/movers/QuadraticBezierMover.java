@@ -24,13 +24,22 @@ import java.awt.*;
 
 public class QuadraticBezierMover extends Mover {
 
+	public static int sliderExitAggressivenessfactor = 4;
 	public static int aggressiveness = 50;
-	private static Point p;
+	public static Point p;
 	private static double prevspeed;
 
 	public static void reset() {
 		p = new Point(0, 0);
 		prevspeed = 0;
+	}
+
+	public static void setPrevspeed(double distance, int timedelta) {
+		prevspeed = distance * aggressiveness * sliderExitAggressivenessfactor / timedelta;
+	}
+
+	public static double getPrevspeed() {
+		return prevspeed;
 	}
 
 	private int startTime;
@@ -42,13 +51,7 @@ public class QuadraticBezierMover extends Mover {
 		this.totalTime = end.getTime() - startTime;
 
 		double startAngle = Math.atan2(startY - p.y, startX - p.x);
-		double angDiff = Math.atan2(startY - endY, startX - endX) - startAngle;
-		while (angDiff < 0) angDiff += Math.PI;
-		while (angDiff > Math.PI) angDiff -= Math.PI;
-		angDiff -= Math.PI / 2;
-		if (angDiff < 0) angDiff = -angDiff;
 		double dist = Utils.distance(startX, startY, endX, endY);
-		//double speed = dist / 10 + dist * (Math.PI - angDiff) / Math.PI;
 		p.x = (int) (startX + Math.cos(startAngle) * prevspeed);
 		p.y = (int) (startY + Math.sin(startAngle) * prevspeed);
 		prevspeed = (dist / totalTime) * aggressiveness;

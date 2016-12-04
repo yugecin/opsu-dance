@@ -114,6 +114,9 @@ public class OptionsMenu extends BasicGameState {
 		DANCE ("Dance", new GameOption[] {
 			GameOption.DANCE_MOVER,
 			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 			GameOption.DANCE_MOVER_DIRECTION,
 			GameOption.DANCE_SLIDER_MOVER_TYPE,
 			GameOption.DANCE_SPINNER,
@@ -606,14 +609,14 @@ public class OptionsMenu extends BasicGameState {
 		if (index >= currentTab.options.length)
 			return null;
 
-		int i = index;
-		while (i >= 0) {
-			if (!currentTab.options[i--].showCondition()) {
-				if (++index >= currentTab.options.length) {
-					return null;
-				}
+		for (GameOption option : currentTab.options) {
+			if (option.showCondition()) {
+				index--;
+			}
+			if (index < 0) {
+				return option;
 			}
 		}
-		return currentTab.options[index];
+		return null;
 	}
 }

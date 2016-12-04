@@ -56,9 +56,11 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
+import yugecin.opsudance.movers.CubicBezierMover;
 import yugecin.opsudance.movers.QuadraticBezierMover;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
+import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.spinners.Spinner;
 import yugecin.opsudance.ui.SBOverlay;
 
@@ -646,6 +648,75 @@ public class Options {
 			public void read(String s) {
 				super.read(s);
 				QuadraticBezierMover.aggressiveness = val;
+			}
+		},
+
+		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 40, 0, 100) {
+			@Override
+			public String getValueString() {
+				return val / 10 + "";
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				QuadraticBezierMover.sliderExitAggressivenessfactor = val / 10;
+			}
+
+			@Override
+			public boolean showCondition() {
+				return DANCE_QUAD_BEZ_AGGRESSIVENESS.showCondition()
+					&& Dancer.sliderMoverController instanceof DefaultSliderMoverController;
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				QuadraticBezierMover.sliderExitAggressivenessfactor = val / 10;
+			}
+		},
+
+		DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS ("Use cubic bezier before sliders", "QuadBezCubicSliders", "Slider entry looks better using this", true) {
+			@Override
+			public void click(GameContainer container) {
+				super.click(container);
+				QuadraticBezierMoverFactory.cubicForSliderEntries = bool;
+			}
+
+			@Override
+			public boolean showCondition() {
+				return DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR.showCondition();
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				QuadraticBezierMoverFactory.cubicForSliderEntries = bool;
+			}
+		},
+
+		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 40, 0, 100) {
+			@Override
+			public String getValueString() {
+				return val / 10 + "";
+			}
+
+			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				CubicBezierMover.aggressivenessfactor = val / 10;
+			}
+
+			@Override
+			public boolean showCondition() {
+				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition()
+					&& DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
+			}
+
+			@Override
+			public void read(String s) {
+				super.read(s);
+				CubicBezierMover.aggressivenessfactor = val / 10;
 			}
 		},
 

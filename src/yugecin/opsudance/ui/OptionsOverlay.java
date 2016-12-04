@@ -37,6 +37,9 @@ public class OptionsOverlay {
 	private static Options.GameOption[] options = new Options.GameOption[] {
 		Options.GameOption.DANCE_MOVER,
 		Options.GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+		Options.GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+		Options.GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+		Options.GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 		Options.GameOption.DANCE_MOVER_DIRECTION,
 		Options.GameOption.DANCE_SLIDER_MOVER_TYPE,
 		Options.GameOption.DANCE_SPINNER,
@@ -127,15 +130,15 @@ public class OptionsOverlay {
 		if (index >= options.length) {
 			return -1;
 		}
-		int i = index;
-		while (i >= 0) {
-			if (!options[i--].showCondition()) {
-				if (++index >= options.length) {
-					return -1;
-				}
+		for (int i = 0; i < options.length; i++) {
+			if (options[i].showCondition()) {
+				index--;
+			}
+			if (index < 0) {
+				return i;
 			}
 		}
-		return index;
+		return -1;
 	}
 
 	public void update(int mouseX, int mouseY) {
