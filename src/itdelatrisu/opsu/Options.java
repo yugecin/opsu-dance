@@ -521,7 +521,7 @@ public class Options {
 				return String.valueOf(val * 100);
 			}
 		},
-		MAP_END_DELAY ("Map end delay", "EndDelay", "Have a fix amount of time at the and of the map for a smooth finish", 50, 1, 50) {
+		MAP_END_DELAY ("Map end delay", "EndDelay", "Have a fix amount of time at the and of the map for a smooth finish", 50, 1, 150) {
 			@Override
 			public String getValueString() {
 				return String.valueOf(val * 100);
