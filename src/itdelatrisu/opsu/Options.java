@@ -56,6 +56,7 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
+import yugecin.opsudance.movers.QuadraticBezierMover;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
 import yugecin.opsudance.spinners.Spinner;
 import yugecin.opsudance.ui.SBOverlay;
@@ -620,6 +621,14 @@ public class Options {
 			public void read(String s) {
 				int i = Integer.parseInt(s);
 				Dancer.instance.setMoverFactoryIndex(i);
+			}
+		},
+
+		DANCE_QUAD_BEZ_AGRESSIVE ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 500, 0, 2000) {
+			@Override
+			public void read(String s) {
+				super.read(s);
+				QuadraticBezierMover.aggressiveness = val / 10;
 			}
 		},
 

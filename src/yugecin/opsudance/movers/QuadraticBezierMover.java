@@ -24,6 +24,7 @@ import java.awt.*;
 
 public class QuadraticBezierMover extends Mover {
 
+	public static int aggressiveness = 50;
 	private static Point p;
 	private static double prevspeed;
 
@@ -50,7 +51,7 @@ public class QuadraticBezierMover extends Mover {
 		//double speed = dist / 10 + dist * (Math.PI - angDiff) / Math.PI;
 		p.x = (int) (startX + Math.cos(startAngle) * prevspeed);
 		p.y = (int) (startY + Math.sin(startAngle) * prevspeed);
-		prevspeed = (dist / totalTime) * 50;
+		prevspeed = (dist / totalTime) * aggressiveness;
 	}
 
 	@Override
