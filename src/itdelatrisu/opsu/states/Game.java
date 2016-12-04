@@ -371,7 +371,7 @@ public class Game extends BasicGameState {
 		int height = container.getHeight();
 		int trackPosition = MusicController.getPosition();
 		if (isLeadIn()) {
-			trackPosition -= leadInTime;
+			trackPosition -= leadInTime - currentMapMusicOffset - Options.getMusicOffset();
 		}
 		if (pauseTime > -1)  // returning from pause screen
 			trackPosition = pauseTime;
