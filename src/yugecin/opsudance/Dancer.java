@@ -33,6 +33,7 @@ import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import yugecin.opsudance.movers.LinearMover;
 import yugecin.opsudance.movers.Mover;
+import yugecin.opsudance.movers.QuadraticBezierMover;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
@@ -55,6 +56,7 @@ public class Dancer {
 		new CenterSpiralMoverFactory(),
 		//new LinearFactory(),
 		new ArcFactory(),
+		new QuadraticBezierMoverFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[] {
@@ -131,6 +133,7 @@ public class Dancer {
 		for (Spinner s : spinners) {
 			s.init();
 		}
+		QuadraticBezierMover.reset();
 	}
 
 	public int getSpinnerIndex() {
