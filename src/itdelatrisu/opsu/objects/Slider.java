@@ -379,14 +379,6 @@ public class Slider extends GameObject {
 		float curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1f;
 		float curveIntervalFrom = 0f;
 		if (Options.isShrinkingSliders()) {
-			// 1 repeat = no repeats..
-			if (repeats % 2 == 0 && curveIntervalTo == 1 && !reversed) {
-				// fix shrinking sliders for odd repeating sliders
-				reversed = true;
-				if (!Options.isMergingSliders()) {
-					curve.reverse();
-				}
-			}
 			float sliderprogress = (trackPosition - getTime() - (sliderTime * (repeats - 1))) / sliderTime;
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
@@ -403,6 +395,13 @@ public class Slider extends GameObject {
 			}
 			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
 		} else {
+			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
+				int curvelen = curve.getCurvePoints().length;
+				if (repeats % 2 == 0) {
+					curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
+					curveIntervalFrom = 0f;
+				}
+			}
 			curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
 		}
 		return curveIntervalTo == 1f;

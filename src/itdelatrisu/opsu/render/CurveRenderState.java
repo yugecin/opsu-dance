@@ -66,8 +66,6 @@ public class CurveRenderState {
 	private int lastPointDrawn;
 	private int firstPointDrawn;
 
-	private boolean reversed;
-
 	private int spliceFrom;
 	private int spliceTo;
 
@@ -115,12 +113,7 @@ public class CurveRenderState {
 		createVertexBuffer(fbo.getVbo());
 		//write impossible value to make sure the fbo is cleared
 		lastPointDrawn = -1;
-		reversed = false;
 		spliceFrom = spliceTo = -1;
-	}
-
-	public void reverse() {
-		reversed = !reversed;
 	}
 
 	public void splice(int from, int to) {
@@ -340,14 +333,7 @@ public class CurveRenderState {
 		if (clearFirst) {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
-		from = from * 2;
-		to = to * 2 - 1;
-		if (reversed) {
-			int a = from;
-			from = curve.length * 2 - 1 - to;
-			to = curve.length * 2 - 1 - a;
-		}
-		for (int i = from; i < to; ++i) {
+		for (int i = from * 2; i < to * 2 - 1; ++i) {
 			if (spliceFrom <= i && i <= spliceTo) {
 				continue;
 			}

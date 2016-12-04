@@ -159,10 +159,6 @@ public abstract class Curve {
 		}
 	}
 
-	public void reverse() {
-		renderState.reverse();
-	}
-
 	public void splice(int from, int to) {
 		renderState.splice(from, to);
 	}
