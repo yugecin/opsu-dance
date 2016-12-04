@@ -416,14 +416,18 @@ public class Slider extends GameObject {
 			}
 			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
 		} else {
-			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
-				int curvelen = curve.getCurvePoints().length;
-				if (repeats % 2 == 0) {
-					curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
-					curveIntervalFrom = 0f;
+			if (Options.isFallbackSliders() && curveIntervalFrom > 0 && repeats % 2 == 0) {
+				curve.draw(curveColor, 1f - curveIntervalTo, 1f - curveIntervalFrom);
+			} else {
+				if (Options.isShrinkingSliders() && curveIntervalFrom > 0 && !Options.isFallbackSliders()) {
+					int curvelen = curve.getCurvePoints().length;
+					if (repeats % 2 == 0) {
+						curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
+						curveIntervalFrom = 0f;
+					}
 				}
+				curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
 			}
-			curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
 		}
 		return curveIntervalTo == 1f;
 	}
