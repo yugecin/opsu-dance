@@ -609,14 +609,14 @@ public class OptionsMenu extends BasicGameState {
 		if (index >= currentTab.options.length)
 			return null;
 
-		int i = index;
-		while (i >= 0) {
-			if (!currentTab.options[i--].showCondition()) {
-				if (++index >= currentTab.options.length) {
-					return null;
-				}
+		for (GameOption option : currentTab.options) {
+			if (option.showCondition()) {
+				index--;
+			}
+			if (index < 0) {
+				return option;
 			}
 		}
-		return currentTab.options[index];
+		return null;
 	}
 }
