@@ -665,7 +665,8 @@ public class Options {
 
 			@Override
 			public boolean showCondition() {
-				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition();
+				return DANCE_QUAD_BEZ_AGGRESSIVENESS.showCondition()
+					&& Dancer.sliderMoverController instanceof DefaultSliderMoverController;
 			}
 
 			@Override
@@ -684,8 +685,7 @@ public class Options {
 
 			@Override
 			public boolean showCondition() {
-				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory
-					&& Dancer.sliderMoverController instanceof DefaultSliderMoverController;
+				return DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR.showCondition();
 			}
 
 			@Override
@@ -709,7 +709,8 @@ public class Options {
 
 			@Override
 			public boolean showCondition() {
-				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition() && DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
+				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition()
+					&& DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
 			}
 
 			@Override
