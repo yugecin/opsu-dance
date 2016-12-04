@@ -25,12 +25,16 @@ import java.awt.*;
 public class QuadraticBezierMover extends Mover {
 
 	public static int aggressiveness = 50;
-	private static Point p;
+	public static Point p;
 	private static double prevspeed;
 
 	public static void reset() {
 		p = new Point(0, 0);
 		prevspeed = 0;
+	}
+
+	public static void setPrevspeed(double distance, int timedelta) {
+		prevspeed = distance * aggressiveness / timedelta;
 	}
 
 	private int startTime;
