@@ -632,6 +632,12 @@ public class Options {
 			}
 
 			@Override
+			public void drag(GameContainer container, int d) {
+				super.drag(container, d);
+				QuadraticBezierMover.aggressiveness = val;
+			}
+
+			@Override
 			public boolean showCondition() {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
 			}
