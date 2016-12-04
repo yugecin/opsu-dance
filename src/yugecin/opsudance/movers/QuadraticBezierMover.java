@@ -42,13 +42,7 @@ public class QuadraticBezierMover extends Mover {
 		this.totalTime = end.getTime() - startTime;
 
 		double startAngle = Math.atan2(startY - p.y, startX - p.x);
-		double angDiff = Math.atan2(startY - endY, startX - endX) - startAngle;
-		while (angDiff < 0) angDiff += Math.PI;
-		while (angDiff > Math.PI) angDiff -= Math.PI;
-		angDiff -= Math.PI / 2;
-		if (angDiff < 0) angDiff = -angDiff;
 		double dist = Utils.distance(startX, startY, endX, endY);
-		//double speed = dist / 10 + dist * (Math.PI - angDiff) / Math.PI;
 		p.x = (int) (startX + Math.cos(startAngle) * prevspeed);
 		p.y = (int) (startY + Math.sin(startAngle) * prevspeed);
 		prevspeed = (dist / totalTime) * aggressiveness;
