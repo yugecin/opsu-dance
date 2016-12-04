@@ -252,19 +252,8 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
-			float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
-			Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
-			for (int i = 0; i < ticksT.length; i++) {
-				Vec2f c = curve.pointAt(ticksT[i]);
-				Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
-				g.pushTransform();
-				if (mirror) {
-					g.rotate(c.x, c.y, -180f);
-				}
-				tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
-				g.popTransform();
-				Colors.WHITE_FADE.a = alpha;
-			}
+			drawSliderTicks(g, trackPosition, curveAlpha, decorationsAlpha, mirror);
+			Colors.WHITE_FADE.a = alpha;
 		}
 
 		g.pushTransform();
@@ -373,6 +362,38 @@ public class Slider extends GameObject {
 		Colors.WHITE_FADE.a = oldAlpha;
 
 		color = orig;
+	}
+
+	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
+		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
+		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
+
+		// calculate which ticks need to be drawn (don't draw if sliderball crossed it)
+		int min = 0;
+		int max = ticksT.length;
+		if (trackPosition > getTime()) {
+			for (int i = 0; i < ticksT.length; ) {
+				if (((trackPosition - getTime()) % sliderTime) / sliderTime < ticksT[i]) {
+					break;
+				}
+				min = ++i;
+			}
+		}
+		if (currentRepeats % 2 == 1) {
+			max -= min;
+			min = 0;
+		}
+
+		for (int i = min; i < max; i++) {
+			Vec2f c = curve.pointAt(ticksT[i]);
+			Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
+			g.pushTransform();
+			if (mirror) {
+				g.rotate(c.x, c.y, -180f);
+			}
+			tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
+			g.popTransform();
+		}
 	}
 
 	private boolean drawSliderTrack(int trackPosition, float snakingSliderProgress) {
