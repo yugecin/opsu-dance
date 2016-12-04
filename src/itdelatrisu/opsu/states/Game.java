@@ -52,9 +52,7 @@ import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.io.File;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -72,6 +70,7 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
 import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.*;
+import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.ui.SBOverlay;
 
 /**
@@ -280,6 +279,8 @@ public class Game extends BasicGameState {
 
 	private final Cursor mirrorCursor;
 	private final SBOverlay sbOverlay;
+
+	private FakeCombinedCurve knorkesliders;
 
 	public Game(int state) {
 		this.state = state;
@@ -1453,8 +1454,22 @@ public class Game extends BasicGameState {
 			}
 			this.leadInTime += epiImgTime;
 			SoundController.mute(false);
+
+			if (Options.isMergingSliders()) {
+				// let's create knorkesliders
+				List<Vec2f> curvepoints = new ArrayList<>();
+				for (GameObject gameObject : gameObjects) {
+					if (gameObject.isSlider()) {
+						((Slider) gameObject).baseSliderFrom = curvepoints.size();
+						curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+					}
+				}
+				knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+			}
 		}
 
+		slidercurveFrom = 0;
+		slidercurveTo = 0;
 
 		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
@@ -1495,12 +1510,32 @@ public class Game extends BasicGameState {
 			GameMod.loadModState(previousMods);
 	}
 
+	private float slidercurveFrom;
+	private float slidercurveTo;
+
+	public void setSlidercurveFrom(int slidercurveFrom) {
+		float pos = (float) slidercurveFrom / knorkesliders.getCurvePoints().length;
+		this.slidercurveFrom = Math.max(pos, this.slidercurveFrom);
+	}
+
+	public void setSlidercurveTo(int slidercurveTo) {
+		float pos = (float) slidercurveTo / knorkesliders.getCurvePoints().length;
+		this.slidercurveTo = Math.max(pos, this.slidercurveTo);
+	}
+
+	public void spliceSliderCurve(int from, int to) {
+		this.knorkesliders.splice(from, to);
+	}
+
 	/**
 	 * Draws hit objects, hit results, and follow points.
 	 * @param g the graphics context
 	 * @param trackPosition the track position
 	 */
 	private void drawHitObjects(Graphics g, int trackPosition) {
+		if (Options.isMergingSliders()) {
+			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+		}
 		// include previous object in follow points
 		int lastObjectIndex = -1;
 		if (objectIndex > 0 && objectIndex < beatmap.objects.length &&

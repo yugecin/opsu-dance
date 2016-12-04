@@ -122,6 +122,10 @@ public class Slider extends GameObject {
 	private int tickExpand = 0;
 	private final int TICKEXPAND = 200;
 
+	public int baseSliderFrom;
+
+	private boolean reversed;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -193,6 +197,9 @@ public class Slider extends GameObject {
 
 	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
+		if (trackPosition > getEndTime()) {
+			return;
+		}
 		Color orig = color;
 		if (mirror) {
 			color = mirrorColor;
@@ -217,10 +224,9 @@ public class Slider extends GameObject {
 		if (GameMod.HIDDEN.isActive() && trackPosition > getTime()) {
 			curveAlpha = Math.max(0f, 1f - ((float) (trackPosition - getTime()) / (getEndTime() - getTime())) * 1.05f);
 		}
-		curveColor.a = curveAlpha;
 
-		float curveInterval = Options.isSliderSnaking() ? alpha : 1f;
-		curve.draw(curveColor, curveInterval);
+		curveColor.a = curveAlpha;
+		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, alpha);
 		color.a = alpha;
 
 		g.pushTransform();
@@ -246,19 +252,8 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
-			float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
-			Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
-			for (int i = 0; i < ticksT.length; i++) {
-				Vec2f c = curve.pointAt(ticksT[i]);
-				Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
-				g.pushTransform();
-				if (mirror) {
-					g.rotate(c.x, c.y, -180f);
-				}
-				tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
-				g.popTransform();
-				Colors.WHITE_FADE.a = alpha;
-			}
+			drawSliderTicks(g, trackPosition, curveAlpha, decorationsAlpha, mirror);
+			Colors.WHITE_FADE.a = alpha;
 		}
 
 		g.pushTransform();
@@ -285,7 +280,7 @@ public class Slider extends GameObject {
 		g.popTransform();
 
 		// repeats
-		if (curveInterval == 1.0f) {
+		if (isCurveCompletelyDrawn) {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1; tcurRepeat++) {
 				if (hitObject.getRepeatCount() - 1 > tcurRepeat) {
 					Image arrow = GameImage.REVERSEARROW.getImage();
@@ -367,6 +362,70 @@ public class Slider extends GameObject {
 		Colors.WHITE_FADE.a = oldAlpha;
 
 		color = orig;
+	}
+
+	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
+		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
+		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
+
+		// calculate which ticks need to be drawn (don't draw if sliderball crossed it)
+		int min = 0;
+		int max = ticksT.length;
+		if (trackPosition > getTime()) {
+			for (int i = 0; i < ticksT.length; ) {
+				if (((trackPosition - getTime()) % sliderTime) / sliderTime < ticksT[i]) {
+					break;
+				}
+				min = ++i;
+			}
+		}
+		if (currentRepeats % 2 == 1) {
+			max -= min;
+			min = 0;
+		}
+
+		for (int i = min; i < max; i++) {
+			Vec2f c = curve.pointAt(ticksT[i]);
+			Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
+			g.pushTransform();
+			if (mirror) {
+				g.rotate(c.x, c.y, -180f);
+			}
+			tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
+			g.popTransform();
+		}
+	}
+
+	private boolean drawSliderTrack(int trackPosition, float snakingSliderProgress) {
+		float curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1f;
+		float curveIntervalFrom = 0f;
+		if (Options.isShrinkingSliders()) {
+			float sliderprogress = (trackPosition - getTime() - (sliderTime * (repeats - 1))) / sliderTime;
+			if (sliderprogress > 0) {
+				curveIntervalFrom = sliderprogress;
+			}
+		}
+		if (Options.isMergingSliders()) {
+			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
+				int curvelen = curve.getCurvePoints().length;
+				if (repeats % 2 == 0) {
+					game.spliceSliderCurve(baseSliderFrom + (int) ((1f - curveIntervalFrom) * curvelen), baseSliderFrom + curvelen);
+				} else {
+					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen) + 1);
+				}
+			}
+			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
+		} else {
+			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
+				int curvelen = curve.getCurvePoints().length;
+				if (repeats % 2 == 0) {
+					curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
+					curveIntervalFrom = 0f;
+				}
+			}
+			curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
+		}
+		return curveIntervalTo == 1f;
 	}
 
 	/**
@@ -550,6 +609,9 @@ public class Slider extends GameObject {
 
 			// calculate and send slider result
 			hitResult();
+			if (Options.isMergingSliders()) {
+				game.setSlidercurveFrom(baseSliderFrom + curve.getCurvePoints().length + 1);
+			}
 			return true;
 		}
 

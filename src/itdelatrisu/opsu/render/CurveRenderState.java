@@ -20,6 +20,7 @@ package itdelatrisu.opsu.render;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
+import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import java.nio.ByteBuffer;
@@ -59,11 +60,14 @@ public class CurveRenderState {
 	/** The HitObject associated with the curve to be drawn. */
 	protected HitObject hitObject;
 
-	/** The points along the curve to be drawn. */
 	protected Vec2f[] curve;
-	
+
 	/** The point to which the curve has last been rendered into the texture (as an index into {@code curve}). */
 	private int lastPointDrawn;
+	private int firstPointDrawn;
+
+	private int spliceFrom;
+	private int spliceTo;
 
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
@@ -85,7 +89,7 @@ public class CurveRenderState {
 
 	/**
 	 * Undo the static state. Static state setup caused by calls to
-	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, float)}
+	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, float, float)}
 	 * are undone.
 	 */
 	public static void shutdown() {
@@ -99,9 +103,24 @@ public class CurveRenderState {
 	 * @param curve the points along the curve to be drawn
 	 */
 	public CurveRenderState(HitObject hitObject, Vec2f[] curve) {
-		fbo = null;
 		this.hitObject = hitObject;
 		this.curve = curve;
+		FrameBufferCache cache = FrameBufferCache.getInstance();
+		Rendertarget mapping = cache.get(hitObject);
+		if (mapping == null)
+			mapping = cache.insert(hitObject);
+		fbo = mapping;
+		createVertexBuffer(fbo.getVbo());
+		//write impossible value to make sure the fbo is cleared
+		lastPointDrawn = -1;
+		spliceFrom = spliceTo = -1;
+	}
+
+	public void splice(int from, int to) {
+		spliceFrom = from * 2;
+		spliceTo = to * 2;
+		firstPointDrawn = -1; // force redraw
+		lastPointDrawn = -1; // force redraw
 	}
 
 	/**
@@ -110,30 +129,17 @@ public class CurveRenderState {
 	 * runs it just draws the cached copy to the screen.
 	 * @param color tint of the curve
 	 * @param borderColor the curve border color
-	 * @param t the point up to which the curve should be drawn (in the interval [0, 1])
+	 * @param t2 the point up to which the curve should be drawn (in the interval [0, 1])
 	 */
-	public void draw(Color color, Color borderColor, float t) {
-		t = Utils.clamp(t, 0.0f, 1.0f);
+	public void draw(Color color, Color borderColor, float t1, float t2) {
+		t1 = Utils.clamp(t1, 0.0f, 1.0f);
+		t2 = Utils.clamp(t2, 0.0f, 1.0f);
 		float alpha = color.a;
 
-		// if this curve hasn't been drawn, draw it and cache the result
-		if (fbo == null) {
-			FrameBufferCache cache = FrameBufferCache.getInstance();
-			Rendertarget mapping = cache.get(hitObject);
-			if (mapping == null)
-				mapping = cache.insert(hitObject);
-			fbo = mapping;
-			createVertexBuffer(fbo.getVbo());
-			//write impossible value to make sure the fbo is cleared
-			lastPointDrawn = -1;
-		}
+		int drawFrom = (int) (t1 * curve.length);
+		int drawUpTo = (int) (t2 * curve.length);
 		
-		int drawUpTo = (int) (t * curve.length);
-		
-		if (lastPointDrawn != drawUpTo) {
-			if (drawUpTo == lastPointDrawn)
-				return;
-
+		if (lastPointDrawn != drawUpTo || firstPointDrawn != drawFrom) {
 			int oldFb = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
 			int oldTex = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 			//glGetInteger requires a buffer of size 16, even though just 4
@@ -147,8 +153,14 @@ public class CurveRenderState {
 				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			}
-
-			this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo);
+			if (firstPointDrawn != drawFrom) {
+				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				firstPointDrawn = drawFrom;
+				this.renderCurve(color, borderColor, drawFrom, drawUpTo, true);
+			} else {
+				this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo, false);
+			}
 			lastPointDrawn = drawUpTo;
 			color.a = 1f;
 
@@ -270,19 +282,27 @@ public class CurveRenderState {
 	private void createVertexBuffer(int bufferID) {
 		int arrayBufferBinding = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
 		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length - 1) * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
-		for (int i = 0; i < curve.length; ++i) {
+		if (curve.length > 0) {
+			fillCone(buff, curve[0].x, curve[0].y);
+		}
+		for (int i = 1; i < curve.length; ++i) {
 			float x = curve[i].x;
 			float y = curve[i].y;
 			fillCone(buff, x, y);
-			if (i != 0) {
-				float last_x = curve[i - 1].x;
-				float last_y = curve[i - 1].y;
-				double diff_x = x - last_x;
-				double diff_y = y - last_y;
+			float last_x = curve[i - 1].x;
+			float last_y = curve[i - 1].y;
+			double diff_x = x - last_x;
+			double diff_y = y - last_y;
+			float dist = Utils.distance(x, y, last_x, last_y);
+			if (dist < Circle.diameter / 8) {
 				x = (float) (x - diff_x / 2);
 				y = (float) (y - diff_y / 2);
-				fillCone(buff, x, y);
+			} else {
+				// don't mind me
+				x = -100f;
+				y = -100f;
 			}
+			fillCone(buff, x, y);
 		}
 		buff.flip();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferID);
@@ -295,7 +315,7 @@ public class CurveRenderState {
 	 * @param color the color of the curve
 	 * @param borderColor the curve border color
 	 */
-	private void renderCurve(Color color, Color borderColor, int from, int to) {
+	private void renderCurve(Color color, Color borderColor, int from, int to, boolean clearFirst) {
 		staticState.initGradient();
 		RenderState state = saveRenderState();
 		staticState.initShaderProgram();
@@ -310,8 +330,15 @@ public class CurveRenderState {
 		//2*4 is for skipping the first 2 floats (u,v)
 		GL20.glVertexAttribPointer(staticState.attribLoc, 4, GL11.GL_FLOAT, false, 6 * 4, 2 * 4);
 		GL20.glVertexAttribPointer(staticState.texCoordLoc, 2, GL11.GL_FLOAT, false, 6 * 4, 0);
-		for (int i = from * 2; i < to * 2 - 1; ++i)
+		if (clearFirst) {
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		}
+		for (int i = from * 2; i < to * 2 - 1; ++i) {
+			if (spliceFrom <= i && i <= spliceTo) {
+				continue;
+			}
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
 		GL20.glDisableVertexAttribArray(staticState.attribLoc);
