@@ -625,7 +625,12 @@ public class Options {
 			}
 		},
 
-		DANCE_QUAD_BEZ_AGRESSIVE ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 500, 0, 2000) {
+		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
+			@Override
+			public String getValueString() {
+				return val + "";
+			}
+
 			@Override
 			public boolean showCondition() {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
@@ -634,7 +639,7 @@ public class Options {
 			@Override
 			public void read(String s) {
 				super.read(s);
-				QuadraticBezierMover.aggressiveness = val / 10;
+				QuadraticBezierMover.aggressiveness = val;
 			}
 		},
 
