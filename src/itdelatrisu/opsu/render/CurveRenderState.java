@@ -66,6 +66,8 @@ public class CurveRenderState {
 	private int lastPointDrawn;
 	private int firstPointDrawn;
 
+	private boolean reversed;
+
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
 	 * Should be called before any curves are drawn.
@@ -110,6 +112,11 @@ public class CurveRenderState {
 		createVertexBuffer(fbo.getVbo());
 		//write impossible value to make sure the fbo is cleared
 		lastPointDrawn = -1;
+		reversed = false;
+	}
+
+	public void reverse() {
+		reversed = !reversed;
 	}
 
 	/**
@@ -322,7 +329,14 @@ public class CurveRenderState {
 		if (clearFirst) {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
-		for (int i = from * 2; i < to * 2 - 1; ++i)
+		from = from * 2;
+		to = to * 2 - 1;
+		if (reversed) {
+			int a = from;
+			from = curve.length * 2 - 1 - to;
+			to = curve.length * 2 - 1 - a;
+		}
+		for (int i = from; i < to; ++i)
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);

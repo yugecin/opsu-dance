@@ -124,6 +124,8 @@ public class Slider extends GameObject {
 
 	public int baseSliderFrom;
 
+	private boolean reversed;
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container
@@ -377,7 +379,17 @@ public class Slider extends GameObject {
 		float curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1f;
 		float curveIntervalFrom = 0f;
 		if (Options.isShrinkingSliders()) {
-			float sliderprogress = (float) (trackPosition - getTime()) / sliderTimeTotal;
+			// 1 repeat = no repeats..
+			if (repeats % 2 == 0 && curveIntervalTo == 1 && !reversed) {
+				// fix shrinking sliders for odd repeating sliders
+				reversed = true;
+				if (Options.isMergingSliders()) {
+
+				} else {
+					curve.reverse();
+				}
+			}
+			float sliderprogress = (trackPosition - getTime() - (sliderTime * (repeats - 1))) / sliderTime;
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
 			}

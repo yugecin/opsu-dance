@@ -159,6 +159,12 @@ public abstract class Curve {
 		}
 	}
 
+	public void reverse() {
+		if (renderState == null)
+			renderState = new CurveRenderState(hitObject, curve);
+		renderState.reverse();
+	}
+
 	/**
 	 * Returns the angle of the first control point.
 	 */
