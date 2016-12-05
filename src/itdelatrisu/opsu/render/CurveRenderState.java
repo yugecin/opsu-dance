@@ -225,7 +225,7 @@ public class CurveRenderState {
 		state.oldProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
 		state.oldArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
 		GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
-		GL11.glEnable(GL11.GL_BLEND);
+		//GL11.glEnable(GL11.GL_BLEND);
 		GL14.glBlendEquation(GL14.GL_FUNC_ADD);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -258,7 +258,7 @@ public class CurveRenderState {
 		GL11.glPopMatrix();
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glPopMatrix();
-		GL11.glEnable(GL11.GL_BLEND);
+		//GL11.glEnable(GL11.GL_BLEND);
 		GL20.glUseProgram(state.oldProgram);
 		GL13.glActiveTexture(state.texUnit);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, state.oldArrayBuffer);
@@ -270,8 +270,8 @@ public class CurveRenderState {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if (state.smoothedPoly)
 			GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
-		if (!state.blendEnabled)
-			GL11.glDisable(GL11.GL_BLEND);
+		//if (!state.blendEnabled)
+		//	GL11.glDisable(GL11.GL_BLEND);
 	}
 
 	/**
