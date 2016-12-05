@@ -380,7 +380,7 @@ public class CurveRenderState {
 		 * Used for new style Slider rendering, defines how many vertices the
 		 * base of the cone has that is used to draw the curve.
 		 */
-		protected static final int DIVIDES = 30;
+		protected static final int DIVIDES = 60;
 
 		/**
 		 * Array to hold the dummy vertex data (texture coordinates and position)

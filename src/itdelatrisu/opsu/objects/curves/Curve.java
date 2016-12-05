@@ -39,7 +39,7 @@ import org.newdawn.slick.util.Log;
  */
 public abstract class Curve {
 	/** Points generated along the curve should be spaced this far apart. */
-	protected static float CURVE_POINTS_SEPERATION = 5;
+	protected static float CURVE_POINTS_SEPERATION = 2.5f;
 
 	/** The curve border color. */
 	private static Color borderColor;
