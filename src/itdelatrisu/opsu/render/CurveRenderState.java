@@ -226,8 +226,6 @@ public class CurveRenderState {
 		state.oldArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
 		GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
 		GL11.glDisable(GL11.GL_BLEND);
-		GL14.glBlendEquation(GL14.GL_FUNC_ADD);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
