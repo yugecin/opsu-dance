@@ -329,6 +329,17 @@ public class Game extends BasicGameState {
 				objectIndex++;
 			}
 			objectIndex--;
+			if (Options.isMergingSliders()) {
+				int obj = objectIndex;
+				while (obj < gameObjects.length) {
+					if (gameObjects[obj] instanceof Slider) {
+						slidercurveFrom = slidercurveTo = (float) ((Slider) gameObjects[obj]).baseSliderFrom / knorkesliders.getCurvePoints().length;
+						break;
+					}
+					obj++;
+				}
+				spliceSliderCurve(-1, -1);
+			}
 			Dancer.instance.setObjectIndex(objectIndex);
 			sbOverlay.updateIndex(objectIndex);
 			lastReplayTime = beatmap.objects[objectIndex].getTime();

@@ -124,8 +124,6 @@ public class Slider extends GameObject {
 
 	public int baseSliderFrom;
 
-	private boolean reversed;
-
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param container the game container

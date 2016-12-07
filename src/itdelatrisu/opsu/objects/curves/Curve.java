@@ -155,11 +155,13 @@ public abstract class Curve {
 		else {
 			if (renderState == null)
 				renderState = new CurveRenderState(hitObject, curve);
-			renderState.draw(color, borderColor, t1, t2); // TODO
+			renderState.draw(color, borderColor, t1, t2);
 		}
 	}
 
 	public void splice(int from, int to) {
+		if (renderState == null)
+			renderState = new CurveRenderState(hitObject, curve);
 		renderState.splice(from, to);
 	}
 
