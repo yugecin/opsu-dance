@@ -290,30 +290,6 @@ public class Game extends BasicGameState {
 
 	public void setObjectIndex(int newObjIndex) {
 		try {
-			/*
-
-					restart = Restart.MANUAL;
-					enter(container, game);
-					checkpointLoaded = true;
-					if (isLeadIn()) {
-						leadInTime = 0;
-						MusicController.resume();
-					}
-					SoundController.playSound(SoundEffect.MENUHIT);
-					UI.sendBarNotification("Checkpoint loaded.");
-
-					// skip to checkpoint
-					MusicController.setPosition(checkpoint);
-					MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
-					while (objectIndex < gameObjects.length &&
-							beatmap.objects[objectIndex++].getTime() <= checkpoint)
-						;
-					objectIndex--;
-					lastReplayTime = beatmap.objects[objectIndex].getTime();
-				} catch (SlickException e) {
-					ErrorHandler.error("Failed to load checkpoint.", e, false);
-				}
-			 */
 			restart = Restart.MANUAL;
 			enter(container, game);
 			checkpointLoaded = true;
