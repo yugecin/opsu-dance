@@ -172,7 +172,7 @@ public class SBOverlay {
 	}
 
 	private void setMusicPosition() {
-		game.setObjectIndex(index);
+		game.loadCheckpoint(gameObjects[index].getTime());
 		if (speed != 0) {
 			MusicController.setPitch(speed / 10f);
 			MusicController.resume();

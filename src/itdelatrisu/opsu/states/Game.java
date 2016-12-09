@@ -288,7 +288,7 @@ public class Game extends BasicGameState {
 		sbOverlay = new SBOverlay(this);
 	}
 
-	public void setObjectIndex(int newObjIndex) {
+	public void loadCheckpoint(int checkpoint) {
 		try {
 			restart = Restart.MANUAL;
 			enter(container, game);
@@ -298,7 +298,6 @@ public class Game extends BasicGameState {
 				epiImgTime = 0;
 				MusicController.resume();
 			}
-			int checkpoint = gameObjects[newObjIndex].getTime();
 			// skip to checkpoint
 			MusicController.setPosition(checkpoint);
 			while (objectIndex < gameObjects.length && beatmap.objects[objectIndex].getTime() <= checkpoint) {
@@ -1031,28 +1030,9 @@ public class Game extends BasicGameState {
 				int checkpoint = Options.getCheckpoint();
 				if (checkpoint == 0 || checkpoint > beatmap.endTime)
 					break;  // invalid checkpoint
-				try {
-					restart = Restart.MANUAL;
-					enter(container, game);
-					checkpointLoaded = true;
-					if (isLeadIn()) {
-						leadInTime = 0;
-						MusicController.resume();
-					}
-					SoundController.playSound(SoundEffect.MENUHIT);
-					UI.sendBarNotification("Checkpoint loaded.");
-
-					// skip to checkpoint
-					MusicController.setPosition(checkpoint);
-					MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
-					while (objectIndex < gameObjects.length &&
-							beatmap.objects[objectIndex++].getTime() <= checkpoint)
-						;
-					objectIndex--;
-					lastReplayTime = beatmap.objects[objectIndex].getTime();
-				} catch (SlickException e) {
-					ErrorHandler.error("Failed to load checkpoint.", e, false);
-				}
+				loadCheckpoint(checkpoint);
+				SoundController.playSound(SoundEffect.MENUHIT);
+				UI.sendBarNotification("Checkpoint loaded.");
 			}
 			break;
 		case Input.KEY_F:
