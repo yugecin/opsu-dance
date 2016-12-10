@@ -144,18 +144,9 @@ public class CurveRenderState {
 			GL11.glGetInteger(GL11.GL_VIEWPORT, oldViewport);
 			EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbo.getID());
 			GL11.glViewport(0, 0, fbo.width, fbo.height);
-			if (lastPointDrawn <= 0 || lastPointDrawn > to) {
-				lastPointDrawn = 0;
-				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			}
-			if (firstPointDrawn != from) {
-				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-				this.renderCurve(color, borderColor, from, to, true);
-			} else {
-				this.renderCurve(color, borderColor, lastPointDrawn, to, false);
-			}
+			GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			this.renderCurve(color, borderColor, from, to, firstPointDrawn != from);
 			lastPointDrawn = to;
 			firstPointDrawn = from;
 			color.a = 1f;
