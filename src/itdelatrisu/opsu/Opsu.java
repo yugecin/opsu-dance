@@ -208,7 +208,11 @@ public class Opsu extends StateBasedGame {
 				// basic game settings
 				Options.setDisplayMode(app);
 				String[] icons = { "icon16.png", "icon32.png" };
-				app.setIcons(icons);
+				try {
+					app.setIcons(icons);
+				} catch (Exception e) {
+					Log.error("could not set icon");
+				}
 				app.setForceExit(true);
 
 				app.start();
