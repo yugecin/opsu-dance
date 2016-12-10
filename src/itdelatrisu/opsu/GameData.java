@@ -898,7 +898,7 @@ public class GameData {
 
 				// hit animation
 				if (hitResult.result != HIT_MISS && (
-				    hitResult.hitResultType == null ||
+				    hitResult.hitResultType == null || // null => initial slider circle
 				    hitResult.hitResultType == HitObjectType.CIRCLE ||
 				    hitResult.hitResultType == HitObjectType.SLIDER_FIRST ||
 				    hitResult.hitResultType == HitObjectType.SLIDER_LAST)) {
@@ -922,13 +922,15 @@ public class GameData {
 							hitResult.color.a = oldColorAlpha;
 						}
 
-						// hit circles
-						Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
-						Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
-						scaledHitCircle.setAlpha(alpha);
-						scaledHitCircleOverlay.setAlpha(alpha);
-						scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
-						scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
+						if (hitResult.hitResultType == null || hitResult.hitResultType == HitObjectType.CIRCLE) {
+							// hit circles
+							Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
+							Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
+							scaledHitCircle.setAlpha(alpha);
+							scaledHitCircleOverlay.setAlpha(alpha);
+							scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+							scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
+						}
 					}
 				}
 
