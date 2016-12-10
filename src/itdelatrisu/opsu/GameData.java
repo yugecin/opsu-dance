@@ -391,7 +391,7 @@ public class GameData {
 		if (hitResultList != null) {
 			for (HitObjectResult hitResult : hitResultList) {
 				if (hitResult.curve != null)
-					hitResult.curve.discardCache();
+					hitResult.curve.discardGeometry();
 			}
 		}
 		hitResultList = new LinkedBlockingDeque<HitObjectResult>();
@@ -964,7 +964,7 @@ public class GameData {
 				hitResult.alpha = 1 - ((float) (trackPosition - hitResult.time) / HITRESULT_FADE_TIME);
 			} else {
 				if (hitResult.curve != null)
-					hitResult.curve.discardCache();
+					hitResult.curve.discardGeometry();
 				iter.remove();
 			}
 		}
@@ -1436,32 +1436,43 @@ public class GameData {
 	 * (i.e. this will not overwrite existing data).
 	 * @param beatmap the beatmap
 	 * @return the ScoreData object
+	 * @see #getCurrentScoreData(Beatmap, boolean)
 	 */
 	public ScoreData getScoreData(Beatmap beatmap) {
-		if (scoreData != null)
-			return scoreData;
-
-		scoreData = new ScoreData();
-		scoreData.timestamp = System.currentTimeMillis() / 1000L;
-		scoreData.MID = beatmap.beatmapID;
-		scoreData.MSID = beatmap.beatmapSetID;
-		scoreData.title = beatmap.title;
-		scoreData.artist = beatmap.artist;
-		scoreData.creator = beatmap.creator;
-		scoreData.version = beatmap.version;
-		scoreData.hit300 = hitResultCount[HIT_300];
-		scoreData.hit100 = hitResultCount[HIT_100];
-		scoreData.hit50 = hitResultCount[HIT_50];
-		scoreData.geki = hitResultCount[HIT_300G];
-		scoreData.katu = hitResultCount[HIT_300K] + hitResultCount[HIT_100K];
-		scoreData.miss = hitResultCount[HIT_MISS];
-		scoreData.score = score;
-		scoreData.combo = comboMax;
-		scoreData.perfect = (comboMax == fullObjectCount);
-		scoreData.mods = GameMod.getModState();
-		scoreData.replayString = (replay == null) ? null : replay.getReplayFilename();
-		scoreData.playerName = null;  // TODO
+		if (scoreData == null)
+			scoreData = getCurrentScoreData(beatmap, false);
 		return scoreData;
+	}
+
+	/**
+	 * Returns a ScoreData object encapsulating all current game data.
+	 * @param beatmap the beatmap
+	 * @param slidingScore if true, use the display score (might not be actual score)
+	 * @return the ScoreData object
+	 * @see #getScoreData(Beatmap)
+	 */
+	public ScoreData getCurrentScoreData(Beatmap beatmap, boolean slidingScore) {
+		ScoreData sd = new ScoreData();
+		sd.timestamp = System.currentTimeMillis() / 1000L;
+		sd.MID = beatmap.beatmapID;
+		sd.MSID = beatmap.beatmapSetID;
+		sd.title = beatmap.title;
+		sd.artist = beatmap.artist;
+		sd.creator = beatmap.creator;
+		sd.version = beatmap.version;
+		sd.hit300 = hitResultCount[HIT_300];
+		sd.hit100 = hitResultCount[HIT_100];
+		sd.hit50 = hitResultCount[HIT_50];
+		sd.geki = hitResultCount[HIT_300G];
+		sd.katu = hitResultCount[HIT_300K] + hitResultCount[HIT_100K];
+		sd.miss = hitResultCount[HIT_MISS];
+		sd.score = slidingScore ? scoreDisplay : score;
+		sd.combo = comboMax;
+		sd.perfect = (comboMax == fullObjectCount);
+		sd.mods = GameMod.getModState();
+		sd.replayString = (replay == null) ? null : replay.getReplayFilename();
+		sd.playerName = null;  // TODO
+		return sd;
 	}
 
 	/**

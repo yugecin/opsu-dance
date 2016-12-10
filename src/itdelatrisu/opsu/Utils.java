@@ -23,7 +23,6 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadNode;
-import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
@@ -44,6 +43,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -51,6 +51,10 @@ import java.util.Scanner;
 import java.util.jar.JarFile;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -349,7 +353,7 @@ public class Utils {
 	 * deletes the directory itself.
 	 * @param dir the directory to delete
 	 */
-	private static void deleteDirectory(File dir) {
+	public static void deleteDirectory(File dir) {
 		if (dir == null || !dir.isDirectory())
 			return;
 
@@ -568,6 +572,30 @@ public class Utils {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Switches validation of SSL certificates on or off by installing a default
+	 * all-trusting {@link TrustManager}.
+	 * @param enabled whether to validate SSL certificates
+	 * @author neu242 (http://stackoverflow.com/a/876785)
+	 */
+	public static void setSSLCertValidation(boolean enabled) {
+		// create a trust manager that does not validate certificate chains
+		TrustManager[] trustAllCerts = new TrustManager[]{
+			new X509TrustManager() {
+				@Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+				@Override public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+				@Override public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+			}
+		};
+
+		// install the all-trusting trust manager
+		try {
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, enabled ? null : trustAllCerts, null);
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {}
 	}
 
 	public static int getQuadrant(double x, double y) {

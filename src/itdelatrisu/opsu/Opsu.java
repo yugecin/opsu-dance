@@ -107,10 +107,13 @@ public class Opsu extends StateBasedGame {
 		} catch (FileNotFoundException e) {
 			Log.error(e);
 		}
+
+		// set default exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				ErrorHandler.error("** Uncaught Exception! **", e, true);
+				System.exit(1);
 			}
 		});
 
@@ -124,16 +127,21 @@ public class Opsu extends StateBasedGame {
 			} catch (UnknownHostException e) {
 				// shouldn't happen
 			} catch (IOException e) {
-				ErrorHandler.error(String.format(
-					"opsu! could not be launched for one of these reasons:\n" +
-						"- An instance of opsu! is already running.\n" +
-						"- Another program is bound to port %d. " +
-						"You can change the port opsu! uses by editing the \"Port\" field in the configuration file.",
-					Options.getPort()), null, false);
-				System.exit(1);
+				errorAndExit(
+					null,
+					String.format(
+						"opsu! could not be launched for one of these reasons:\n" +
+							"- An instance of opsu! is already running.\n" +
+							"- Another program is bound to port %d. " +
+							"You can change the port opsu! uses by editing the \"Port\" field in the configuration file.",
+						Options.getPort()
+					),
+					false
+				);
 			}
 		}
 
+		// load natives
 		File nativeDir;
 		if (!Utils.isJarRunning() && (
 		    (nativeDir = new File("./target/natives/")).isDirectory() ||
@@ -166,7 +174,7 @@ public class Opsu extends StateBasedGame {
 		try {
 			DBController.init();
 		} catch (UnsatisfiedLinkError e) {
-			errorAndExit(e, "The databases could not be initialized.");
+			errorAndExit(e, "The databases could not be initialized.", true);
 		}
 
 		// check if just updated
@@ -213,7 +221,7 @@ public class Opsu extends StateBasedGame {
 				}
 			}
 		} catch (SlickException e) {
-			errorAndExit(e, "An error occurred while creating the game container.");
+			errorAndExit(e, "An error occurred while creating the game container.", true);
 		}
 	}
 
@@ -232,6 +240,7 @@ public class Opsu extends StateBasedGame {
 			} else {
 				if (id == STATE_GAME) {
 					MusicController.pause();
+					MusicController.setPitch(1.0f);
 					MusicController.resume();
 				} else
 					songMenu.resetTrackOnLoad();
@@ -278,15 +287,16 @@ public class Opsu extends StateBasedGame {
 	 * Throws an error and exits the application with the given message.
 	 * @param e the exception that caused the crash
 	 * @param message the message to display
+	 * @param report whether to ask to report the error
 	 */
-	private static void errorAndExit(Throwable e, String message) {
+	private static void errorAndExit(Throwable e, String message, boolean report) {
 		// JARs will not run properly inside directories containing '!'
 		// http://bugs.java.com/view_bug.do?bug_id=4523159
 		if (Utils.isJarRunning() && Utils.getRunningDirectory() != null &&
 			Utils.getRunningDirectory().getAbsolutePath().indexOf('!') != -1)
 			ErrorHandler.error("JARs cannot be run from some paths containing '!'. Please move or rename the file and try again.", null, false);
 		else
-			ErrorHandler.error(message, e, true);
+			ErrorHandler.error(message, e, report);
 		System.exit(1);
 	}
 }

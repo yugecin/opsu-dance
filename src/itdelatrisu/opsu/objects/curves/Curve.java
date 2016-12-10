@@ -101,12 +101,12 @@ public abstract class Curve {
 		Curve.borderColor = borderColor;
 
 		ContextCapabilities capabilities = GLContext.getCapabilities();
-		mmsliderSupported = capabilities.GL_EXT_framebuffer_object;
+		mmsliderSupported = capabilities.OpenGL20;
 		if (mmsliderSupported)
 			CurveRenderState.init(width, height, circleDiameter);
 		else {
 			if (Options.getSkin().getSliderStyle() != Skin.STYLE_PEPPYSLIDER)
-				Log.warn("New slider style requires FBO support.");
+				Log.warn("New slider style requires OpenGL 2.0.");
 		}
 	}
 
@@ -190,8 +190,8 @@ public abstract class Curve {
 	/**
 	 * Discards the slider cache (only used for mmsliders).
 	 */
-	public void discardCache() {
+	public void discardGeometry() {
 		if (renderState != null)
-			renderState.discardCache();
+			renderState.discardGeometry();
 	}
 }
