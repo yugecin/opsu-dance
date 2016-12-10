@@ -1348,8 +1348,6 @@ public class Game extends BasicGameState {
 		Dancer.instance.reset();
 		MoverDirection.reset(beatmap.beatmapID);
 
-		Slider.bpm = beatmap.bpmMin * GameMod.getSpeedMultiplier();
-
 		ObjectColorOverrides.reset(beatmap.beatmapID);
 		CursorColorOverrides.reset(beatmap.beatmapID);
 

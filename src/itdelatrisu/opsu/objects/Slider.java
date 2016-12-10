@@ -119,8 +119,6 @@ public class Slider extends GameObject {
 
 	private static Color curveColor = new Color(0, 0, 0, 20);
 
-	public static double bpm;
-
 	public float pixelLength;
 
 	private int comboColorIndex;
@@ -285,8 +283,7 @@ public class Slider extends GameObject {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1; tcurRepeat++) {
 				if (hitObject.getRepeatCount() - 1 > tcurRepeat) {
 					Image arrow = GameImage.REVERSEARROW.getImage();
-					//float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
-					//Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+					arrow = arrow.getScaledCopy((float) (1 + 0.2d * ((trackPosition + sliderTime * tcurRepeat) % 292) / 292));
 					Color arrowColor = Color.white;
 					if (tcurRepeat != currentRepeats) {
 						if (sliderTime == 0)
@@ -295,13 +292,11 @@ public class Slider extends GameObject {
 						arrow.setAlpha((float) (t - Math.floor(t)));
 					} else
 						arrow.setAlpha(Options.isSliderSnaking() ? decorationsAlpha : 1f);
-					//arrow = arrow.getScaledCopy((float) (1 + 0.3d * (trackPosition % bpm) / bpm));
-					arrow = arrow.getScaledCopy((float) (1 + 0.2d * ((trackPosition + sliderTime * tcurRepeat) % 292) / 292));
 					if (tcurRepeat % 2 == 0) {
 						// last circle
 						arrow.setRotation(curve.getEndAngle());
 						arrow.drawCentered(endPos.x, endPos.y, arrowColor);
-					} else if (sliderClickedInitial) {
+					} else {
 						// first circle
 						arrow.setRotation(curve.getStartAngle());
 						arrow.drawCentered(x, y, arrowColor);
