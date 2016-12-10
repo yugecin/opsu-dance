@@ -369,7 +369,9 @@ public class ScoreDB {
 					version = s.version;
 					list = new ArrayList<ScoreData>();
 				}
-				list.add(s);
+				if (list != null) {
+					list.add(s);
+				}
 			}
 			if (list != null)
 				map.put(version, getSortedArray(list));
