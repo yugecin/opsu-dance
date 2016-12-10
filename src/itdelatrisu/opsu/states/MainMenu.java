@@ -273,7 +273,7 @@ public class MainMenu extends BasicGameState {
 			exitButton.draw();
 		}
 
-		Double position = getBPMPiecePosition();
+		Double position = MusicController.getBeatProgress();
 
 		if (position != null) {
 			double scale = 1 - (0 - position) * 0.05;
@@ -359,34 +359,6 @@ public class MainMenu extends BasicGameState {
 				marginX, height - bottomMarginY - lineHeight);
 
 		UI.draw(g);
-	}
-
-	private Double getBPMPiecePosition() {
-		if (!MusicController.isPlaying() || MusicController.getBeatmap() == null) {
-			return null;
-		}
-		Beatmap map = MusicController.getBeatmap();
-		if (map.timingPoints == null) {
-			return null;
-		}
-		int trackposition = MusicController.getPosition();
-		TimingPoint p = null;
-		float beatlen = 0f;
-		int time = 0;
-		for (TimingPoint pts : map.timingPoints) {
-			if (p == null || pts.getTime() < MusicController.getPosition()) {
-				p = pts;
-				if (!p.isInherited() && p.getBeatLength() > 0) {
-					beatlen = p.getBeatLength();
-					time = p.getTime();
-				}
-			}
-		}
-		if (p == null) {
-			return null;
-		}
-		double beatLength = beatlen * 100;
-		return (((trackposition * 100 - time * 100) % beatLength) / beatLength);
 	}
 
 	@Override

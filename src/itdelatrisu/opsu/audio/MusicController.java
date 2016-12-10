@@ -22,6 +22,7 @@ import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
 
@@ -183,6 +184,49 @@ public class MusicController {
 	 * Returns the beatmap associated with the current track.
 	 */
 	public static Beatmap getBeatmap() { return lastBeatmap; }
+
+	private static float lastBeatLength;
+
+	/**
+	 * Gets the progress of the current beat.
+	 * @return progress as a value in [0, 1], where 0 means a beat just happend and 1 means the next beat is coming now.
+	 */
+	public static Double getBeatProgress() {
+		if (!isPlaying() || getBeatmap() == null) {
+			return null;
+		}
+		Beatmap map = getBeatmap();
+		if (map.timingPoints == null) {
+			return null;
+		}
+		int trackposition = getPosition();
+		TimingPoint p = null;
+		float beatlen = 0f;
+		int time = 0;
+		for (TimingPoint pts : map.timingPoints) {
+			if (p == null || pts.getTime() < getPosition()) {
+				p = pts;
+				if (!p.isInherited() && p.getBeatLength() > 0) {
+					beatlen = p.getBeatLength();
+					time = p.getTime();
+				}
+			}
+		}
+		if (p == null) {
+			return null;
+		}
+		lastBeatLength = beatlen;
+		double beatLength = beatlen * 100;
+		return (((trackposition * 100 - time * 100) % beatLength) / beatLength);
+	}
+
+	/**
+	 * Get the length of the last beat
+	 * @return the length of the last beat
+	 */
+	private float getLastBeatLength() {
+		return lastBeatLength;
+	}
 
 	/**
 	 * Returns true if the current track is playing.
