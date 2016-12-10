@@ -1534,7 +1534,9 @@ public class Game extends BasicGameState {
 						curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
 					}
 				}
-				knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+				if (curvepoints.size() > 0) {
+					knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+				}
 			}
 		}
 
@@ -1603,7 +1605,7 @@ public class Game extends BasicGameState {
 	 * @param trackPosition the track position
 	 */
 	private void drawHitObjects(Graphics g, int trackPosition) {
-		if (Options.isMergingSliders()) {
+		if (Options.isMergingSliders() && knorkesliders != null) {
 			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
 		}
 		// include previous object in follow points
