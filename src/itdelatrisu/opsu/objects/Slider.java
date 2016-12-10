@@ -209,9 +209,9 @@ public class Slider extends GameObject {
 		final int fadeInTime = game.getFadeInTime();
 		float scale = timeDiff / (float) approachTime;
 		float approachScale = 1 + scale * 3;
-		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
-		float alpha = Utils.clamp(1 - fadeinScale, 0, 1);
-		float decorationsAlpha = Utils.clamp(-2.0f * fadeinScale, 0, 1);
+		double fadeinScale = (timeDiff - approachTime + fadeInTime) / (double) fadeInTime;
+		float alpha = Utils.clamp(1 - (float) fadeinScale, 0, 1);
+		float decorationsAlpha = Utils.clamp(-2.0f * (float) fadeinScale, 0, 1);
 		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
@@ -225,7 +225,7 @@ public class Slider extends GameObject {
 		}
 
 		curveColor.a = curveAlpha;
-		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, alpha);
+		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, Utils.clamp(1d - fadeinScale, 0d, 1d));
 		color.a = alpha;
 
 		g.pushTransform();
@@ -401,40 +401,39 @@ public class Slider extends GameObject {
 		}
 	}
 
-	private boolean drawSliderTrack(int trackPosition, float snakingSliderProgress) {
-		float curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1f;
-		float curveIntervalFrom = 0f;
+	private boolean drawSliderTrack(int trackPosition, double snakingSliderProgress) {
+		double curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1d;
+		double curveIntervalFrom = 0d;
 		if (Options.isShrinkingSliders()) {
-			float sliderprogress = (trackPosition - getTime() - (sliderTime * (repeats - 1))) / sliderTime;
+			double sliderprogress = (trackPosition - getTime() - ((double) sliderTime * (repeats - 1))) / (double) sliderTime;
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
+		int curvelen = curve.getCurvePoints().length;
 		if (Options.isMergingSliders()) {
 			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
-				int curvelen = curve.getCurvePoints().length;
 				if (repeats % 2 == 0) {
-					game.spliceSliderCurve(baseSliderFrom + (int) ((1f - curveIntervalFrom) * curvelen), baseSliderFrom + curvelen);
+					game.spliceSliderCurve(baseSliderFrom + (int) ((1d - curveIntervalFrom) * curvelen) - 1, baseSliderFrom + curvelen);
 				} else {
-					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen) + 1);
+					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen));
 				}
 			}
 			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
 		} else {
 			if (Options.isFallbackSliders() && curveIntervalFrom > 0 && repeats % 2 == 0) {
-				curve.draw(curveColor, 1f - curveIntervalTo, 1f - curveIntervalFrom);
+				curve.draw(curveColor, (int) (curveIntervalFrom * curvelen), (int) (curveIntervalTo * curvelen));
 			} else {
 				if (Options.isShrinkingSliders() && curveIntervalFrom > 0 && !Options.isFallbackSliders()) {
-					int curvelen = curve.getCurvePoints().length;
 					if (repeats % 2 == 0) {
-						curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
-						curveIntervalFrom = 0f;
+						curve.splice((int) ((1d - curveIntervalFrom) * curvelen), curvelen);
+						curveIntervalFrom = 0d;
 					}
 				}
-				curve.draw(curveColor, curveIntervalFrom, curveIntervalTo);
+				curve.draw(curveColor, (int) (curveIntervalFrom * curvelen), (int) (curveIntervalTo * curvelen));
 			}
 		}
-		return curveIntervalTo == 1f;
+		return curveIntervalTo == 1d;
 	}
 
 	/**

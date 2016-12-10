@@ -329,7 +329,7 @@ public class Game extends BasicGameState {
 				int obj = objectIndex;
 				while (obj < gameObjects.length) {
 					if (gameObjects[obj] instanceof Slider) {
-						slidercurveFrom = slidercurveTo = (float) ((Slider) gameObjects[obj]).baseSliderFrom / knorkesliders.getCurvePoints().length;
+						slidercurveFrom = slidercurveTo = ((Slider) gameObjects[obj]).baseSliderFrom;
 						break;
 					}
 					obj++;
@@ -1582,17 +1582,15 @@ public class Game extends BasicGameState {
 			GameMod.loadModState(previousMods);
 	}
 
-	private float slidercurveFrom;
-	private float slidercurveTo;
+	private int slidercurveFrom;
+	private int slidercurveTo;
 
 	public void setSlidercurveFrom(int slidercurveFrom) {
-		float pos = (float) slidercurveFrom / knorkesliders.getCurvePoints().length;
-		this.slidercurveFrom = Math.max(pos, this.slidercurveFrom);
+		this.slidercurveFrom = Math.max(slidercurveFrom, this.slidercurveFrom);
 	}
 
 	public void setSlidercurveTo(int slidercurveTo) {
-		float pos = (float) slidercurveTo / knorkesliders.getCurvePoints().length;
-		this.slidercurveTo = Math.max(pos, this.slidercurveTo);
+		this.slidercurveTo = Math.max(slidercurveTo, this.slidercurveTo);
 	}
 
 	public void spliceSliderCurve(int from, int to) {
