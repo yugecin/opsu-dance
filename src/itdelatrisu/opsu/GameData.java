@@ -26,7 +26,6 @@ import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.objects.curves.Curve;
-import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.Colors;
@@ -907,22 +906,21 @@ public class GameData {
 					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
 					float alpha = 1f - progress;
 
-					// slider curve
-					if (hitResult.curve != null && !GameMod.HIDDEN.isActive()) {
-						float oldWhiteAlpha = Colors.WHITE_FADE.a;
-						float oldColorAlpha = hitResult.color.a;
-						Colors.WHITE_FADE.a = alpha;
-						hitResult.color.a = alpha;
-						if (!Options.isShrinkingSliders()) {
-							hitResult.curve.draw(hitResult.color);
+					if (!GameMod.HIDDEN.isActive()) {
+						// slider curve
+						if (hitResult.curve != null) {
+							float oldWhiteAlpha = Colors.WHITE_FADE.a;
+							float oldColorAlpha = hitResult.color.a;
+							Colors.WHITE_FADE.a = alpha;
+							hitResult.color.a = alpha;
+							if (!Options.isShrinkingSliders()) {
+								hitResult.curve.draw(hitResult.color);
+							}
+							Colors.WHITE_FADE.a = oldWhiteAlpha;
+							hitResult.color.a = oldColorAlpha;
 						}
-						Colors.WHITE_FADE.a = oldWhiteAlpha;
-						hitResult.color.a = oldColorAlpha;
-					}
 
-					// hit circles
-					if (!(hitResult.hitResultType == HitObjectType.CIRCLE && GameMod.HIDDEN.isActive())) {
-						// "hidden" mod: expanding animation for only circles not drawn
+						// hit circles
 						Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
 						Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
 						scaledHitCircle.setAlpha(alpha);
@@ -932,7 +930,7 @@ public class GameData {
 					}
 				}
 
-				if (hitResult.result == HIT_SLIDER_INITIAL) {
+				if (hitResult.result == HIT_SLIDER_INITIAL && !GameMod.HIDDEN.isActive()) {
 					float progress = AnimationEquation.OUT_CUBIC.calc(
 						(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
 					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
