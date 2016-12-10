@@ -898,6 +898,7 @@ public class GameData {
 
 				// hit animation
 				if (hitResult.result != HIT_MISS && (
+				    hitResult.hitResultType == null ||
 				    hitResult.hitResultType == HitObjectType.CIRCLE ||
 				    hitResult.hitResultType == HitObjectType.SLIDER_FIRST ||
 				    hitResult.hitResultType == HitObjectType.SLIDER_LAST)) {
@@ -929,19 +930,6 @@ public class GameData {
 						scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
 						scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
 					}
-				}
-
-				if (hitResult.result == HIT_SLIDER_INITIAL && !GameMod.HIDDEN.isActive()) {
-					float progress = AnimationEquation.OUT_CUBIC.calc(
-						(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
-					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
-					float alpha = 1f - progress;
-					Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
-					Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
-					scaledHitCircle.setAlpha(alpha);
-					scaledHitCircleOverlay.setAlpha(alpha);
-					scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
-					scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
 				}
 
 				// hit result
