@@ -89,7 +89,7 @@ public class CurveRenderState {
 
 	/**
 	 * Undo the static state. Static state setup caused by calls to
-	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, float, float)}
+	 * {@link #draw(org.newdawn.slick.Color, org.newdawn.slick.Color, int, int)}
 	 * are undone.
 	 */
 	public static void shutdown() {
@@ -129,17 +129,13 @@ public class CurveRenderState {
 	 * runs it just draws the cached copy to the screen.
 	 * @param color tint of the curve
 	 * @param borderColor the curve border color
-	 * @param t2 the point up to which the curve should be drawn (in the interval [0, 1])
+	 * @param from index to draw from
+	 * @param to index to draw to (exclusive)
 	 */
-	public void draw(Color color, Color borderColor, float t1, float t2) {
-		t1 = Utils.clamp(t1, 0.0f, 1.0f);
-		t2 = Utils.clamp(t2, 0.0f, 1.0f);
+	public void draw(Color color, Color borderColor, int from, int to) {
 		float alpha = color.a;
 
-		int drawFrom = (int) (t1 * curve.length);
-		int drawUpTo = (int) (t2 * curve.length);
-		
-		if (lastPointDrawn != drawUpTo || firstPointDrawn != drawFrom) {
+		if (lastPointDrawn != to || firstPointDrawn != from) {
 			int oldFb = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
 			int oldTex = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 			//glGetInteger requires a buffer of size 16, even though just 4
@@ -148,20 +144,20 @@ public class CurveRenderState {
 			GL11.glGetInteger(GL11.GL_VIEWPORT, oldViewport);
 			EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbo.getID());
 			GL11.glViewport(0, 0, fbo.width, fbo.height);
-			if (lastPointDrawn <= 0 || lastPointDrawn > drawUpTo) {
+			if (lastPointDrawn <= 0 || lastPointDrawn > to) {
 				lastPointDrawn = 0;
 				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			}
-			if (firstPointDrawn != drawFrom) {
+			if (firstPointDrawn != from) {
 				GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-				firstPointDrawn = drawFrom;
-				this.renderCurve(color, borderColor, drawFrom, drawUpTo, true);
+				this.renderCurve(color, borderColor, from, to, true);
 			} else {
-				this.renderCurve(color, borderColor, lastPointDrawn, drawUpTo, false);
+				this.renderCurve(color, borderColor, lastPointDrawn, to, false);
 			}
-			lastPointDrawn = drawUpTo;
+			lastPointDrawn = to;
+			firstPointDrawn = from;
 			color.a = 1f;
 
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, oldTex);

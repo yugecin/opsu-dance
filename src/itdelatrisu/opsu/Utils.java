@@ -189,6 +189,21 @@ public class Utils {
 			return high;
 		return val;
 	}
+	/**
+	 * Clamps a value between a lower and upper bound.
+	 * @param val the value to clamp
+	 * @param low the lower bound
+	 * @param high the upper bound
+	 * @return the clamped value
+	 * @author fluddokt
+	 */
+	public static double clamp(double val, double low, double high) {
+		if (val < low)
+			return low;
+		if (val > high)
+			return high;
+		return val;
+	}
 
 	/**
 	 * Returns the distance between two points.
