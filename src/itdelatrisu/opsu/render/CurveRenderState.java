@@ -189,7 +189,7 @@ public class CurveRenderState {
 	/**
 	 * Discard the cache mapping for this curve object.
 	 */
-	public void discardCache() {
+	public void discardGeometry() {
 		fbo = null;
 		FrameBufferCache.getInstance().freeMappingFor(hitObject);
 	}
