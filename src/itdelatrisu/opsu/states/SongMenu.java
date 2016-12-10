@@ -259,6 +259,9 @@ public class SongMenu extends BasicGameState {
 	/** Header and footer end and start y coordinates, respectively. */
 	private float headerY, footerY;
 
+	/** Height of the footer */
+	private float footerHeight;
+
 	/** Time, in milliseconds, for fading the search bar. */
 	private int searchTransitionTimer = SEARCH_TRANSITION_TIME;
 
@@ -334,6 +337,7 @@ public class SongMenu extends BasicGameState {
 				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				Fonts.SMALL.getLineHeight();
 		footerY = height - GameImage.SELECTION_MODS.getImage().getHeight();
+		footerHeight = height - footerY;
 
 		// initialize sorts
 		for (BeatmapSortOrder sort : BeatmapSortOrder.values())
@@ -505,6 +509,24 @@ public class SongMenu extends BasicGameState {
 		g.drawLine(0, headerY, width, headerY);
 		g.drawLine(0, footerY, width, footerY);
 		g.resetLineWidth();
+
+		// opsu logo in bottom bar
+		Image logo = GameImage.MENU_LOGO.getImage();
+		float logoSize = footerHeight * 2f;
+		logo = logo.getScaledCopy(logoSize / logo.getWidth());
+		Double position = MusicController.getBeatProgress();
+		float x = width - footerHeight * 0.60f;
+		float y = height - footerHeight * 0.40f;
+		if (position != null) {
+			Image ghostLogo = logo.getScaledCopy((float) (1 - (0 - position) * 0.075));
+			logo = logo.getScaledCopy((float) (1 - (position) * 0.075));
+			logoSize = logo.getWidth();
+			logo.draw(x - logoSize / 2, y - logoSize / 2);
+			logoSize = ghostLogo.getWidth();
+			ghostLogo.draw(x - logoSize / 2, y - logoSize / 2, Colors.GHOST_LOGO);
+		} else {
+			logo.draw(x - logoSize / 2, y - logoSize / 2);
+		}
 
 		// header
 		if (focusNode != null) {

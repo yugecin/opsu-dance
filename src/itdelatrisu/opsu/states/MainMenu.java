@@ -126,8 +126,6 @@ public class MainMenu extends BasicGameState {
 	private Input input;
 	private final int state;
 
-	private final Color logoGhostColor = new Color(1.0f, 1.0f, 1.0f, 0.15f);
-
 	public MainMenu(int state) {
 		this.state = state;
 	}
@@ -286,7 +284,7 @@ public class MainMenu extends BasicGameState {
 			Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
 			scaleposmodx = logoCopy.getWidth() / 2;
 			scaleposmody = logoCopy.getHeight() / 2;
-			logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, logoGhostColor);
+			logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
 		} else {
 			logo.draw();
 		}
