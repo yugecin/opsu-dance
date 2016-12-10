@@ -29,7 +29,7 @@ import org.newdawn.slick.state.StateBasedGame;
 import java.util.Observable;
 import java.util.Observer;
 
-public class OptionsOverlay {
+public class OptionsOverlayOld {
 
 	private int width;
 	private int height;
@@ -78,7 +78,7 @@ public class OptionsOverlay {
 	private Options.GameOption selectedOption;
 	private final SBOverlay overlay;
 
-	public OptionsOverlay(SBOverlay overlay) {
+	public OptionsOverlayOld(SBOverlay overlay) {
 		this.overlay = overlay;
 		list = new ItemList();
 	}

@@ -29,7 +29,6 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.ObjectColorOverrides;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,11 +51,11 @@ public class SBOverlay {
 	private int index;
 
 	private final Game game;
-	private final OptionsOverlay options;
+	private final OptionsOverlayOld options;
 
 	public SBOverlay(Game game) {
 		this.game = game;
-		options = new OptionsOverlay(this);
+		options = new OptionsOverlayOld(this);
 		initialOptions = new HashMap<>();
 	}
 
