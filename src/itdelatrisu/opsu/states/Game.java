@@ -1018,13 +1018,20 @@ public class Game extends BasicGameState {
 		if (restart != Restart.LOSE) {
 			// update objects (loop in unlikely event of any skipped indexes)
 			boolean keyPressed = keys != ReplayFrame.KEY_NONE;
+			boolean skippedObject = false;
 			while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
 				// check if we've already passed the next object's start time
 				boolean overlap = (objectIndex + 1 < gameObjects.length &&
 						trackPosition > beatmap.objects[objectIndex + 1].getTime() - hitResultOffset[GameData.HIT_50]);
 
+				if (skippedObject && (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive())) {
+					Vec2f start = gameObjects[objectIndex - 1].start;
+					UI.getCursor().setCursorPosition((int) start.x, (int) start.y);
+				}
+
 				// update hit object and check completion status
 				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
+					skippedObject = true;
 					objectIndex++;  // done, so increment object index
 					sbOverlay.updateIndex(objectIndex);
 					if (objectIndex >= mirrorTo) {

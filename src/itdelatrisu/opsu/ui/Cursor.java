@@ -64,6 +64,8 @@ public class Cursor {
 	/** Stores all previous cursor locations to display a trail. */
 	private LinkedList<Point> trail = new LinkedList<Point>();
 
+	private boolean newStyle;
+
 	// game-related variables
 	private static GameContainer container;
 	private static StateBasedGame game;
@@ -131,16 +133,16 @@ public class Cursor {
 			return;
 
 		// determine correct cursor image
-		Image cursor = null, cursorMiddle = null, cursorTrail = null;
+		Image cursor, cursorMiddle = null, cursorTrail;
 		boolean beatmapSkinned = GameImage.CURSOR.hasBeatmapSkinImage();
-		boolean newStyle, hasMiddle;
+		boolean hasMiddle;
 		Skin skin = Options.getSkin();
 		if (beatmapSkinned) {
 			newStyle = true;  // osu! currently treats all beatmap cursors as new-style cursors
 			hasMiddle = GameImage.CURSOR_MIDDLE.hasBeatmapSkinImage();
 		} else
 			newStyle = hasMiddle = Options.isNewCursorEnabled();
-		if (newStyle || beatmapSkinned) {
+		if (beatmapSkinned || newStyle) {
 			cursor = GameImage.CURSOR.getImage();
 			cursorTrail = GameImage.CURSOR_TRAIL.getImage();
 		} else {
@@ -168,33 +170,7 @@ public class Cursor {
 			cursorTrail = cursorTrail.getScaledCopy(cursorScale);
 		}
 
-		// TODO: use an image buffer
-		int removeCount = 0;
-		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
-		if (newStyle) {
-			// new style: add all points between cursor movements
-			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
-				trail.add(new Point(mouseX, mouseY));
-			}
-			lastPosition.move(mouseX, mouseY);
-
-			removeCount = (int) (trail.size() / (6 * FPSmod)) + 1;
-		} else {
-			// old style: sample one point at a time
-			trail.add(new Point(mouseX, mouseY));
-
-			int max = (int) (10 * FPSmod);
-			if (trail.size() > max)
-				removeCount = trail.size() - max;
-		}
-
-		if (Dancer.cursortraillength > 20) {
-			removeCount = trail.size() - Dancer.cursortraillength;
-		}
-
-		// remove points from the lists
-		for (int i = 0; i < removeCount && !trail.isEmpty(); i++)
-			trail.remove();
+		setCursorPosition(mouseX, mouseY);
 
 		Color filter;
 		if (isMirrored) {
@@ -227,6 +203,41 @@ public class Cursor {
 		cursor.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
 		if (hasMiddle)
 			cursorMiddle.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
+	}
+
+	/**
+	 * Sets the cursor position to given point and updates trail.
+	 * @param mouseX x coordinate to set position to
+	 * @param mouseY y coordinate to set position to
+	 */
+	public void setCursorPosition(int mouseX, int mouseY) {
+		// TODO: use an image buffer
+		int removeCount = 0;
+		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
+		if (newStyle) {
+			// new style: add all points between cursor movements
+			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
+				trail.add(new Point(mouseX, mouseY));
+			}
+			lastPosition.move(mouseX, mouseY);
+
+			removeCount = (int) (trail.size() / (6 * FPSmod)) + 1;
+		} else {
+			// old style: sample one point at a time
+			trail.add(new Point(mouseX, mouseY));
+
+			int max = (int) (10 * FPSmod);
+			if (trail.size() > max)
+				removeCount = trail.size() - max;
+		}
+
+		if (Dancer.cursortraillength > 20) {
+			removeCount = trail.size() - Dancer.cursortraillength;
+		}
+
+		// remove points from the lists
+		for (int i = 0; i < removeCount && !trail.isEmpty(); i++)
+			trail.remove();
 	}
 
 	/**
