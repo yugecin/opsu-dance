@@ -853,7 +853,7 @@ public class Game extends BasicGameState {
 		}
 
 		// update in-game scoreboard
-		if (previousScores != null && trackPosition > firstObjectTime) {
+		if (!Dancer.hideui && previousScores != null && trackPosition > firstObjectTime) {
 			// show scoreboard if selected, and always in break
 			if (scoreboardVisible || breakTime > 0) {
 				currentScoreboardAlpha += 1f / SCOREBOARD_FADE_IN_TIME * delta;
@@ -1142,7 +1142,9 @@ public class Game extends BasicGameState {
 			Utils.takeScreenShot();
 			break;
 		case Input.KEY_TAB:
-			scoreboardVisible = !scoreboardVisible;
+			if (!Dancer.hideui) {
+				scoreboardVisible = !scoreboardVisible;
+			}
 			break;
 		case Input.KEY_M:
 			if (Dancer.mirror) {
