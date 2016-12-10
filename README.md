@@ -1,5 +1,5 @@
 #opsu!dance
-[example video](https://www.youtube.com/watch?v=Jp3VWEiw4CI)  
+[example video](https://www.youtube.com/watch?v=GB7N9MhCvzg)
 fork of [opsu!](https://github.com/itdelatrisu/opsu) with cursordancing auto.  
 I make cursordancing video's -[example](https://www.youtube.com/watch?v=1oFH58X_lTY)-, but I have too many requests and this way I can give people the opportunity to just run it and see the result instead of waiting for me to make a video. Original bot is written in C# and videos are made on osu!, but I don't want to distribute that program, because I don't want to endorse cheating in any way. The sources found in this repo are very representative of the ones of my bot (most files are the exact same, except for C#/java changes).  
   
