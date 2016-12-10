@@ -106,6 +106,12 @@ public class Slider extends GameObject {
 	/** Number of ticks hit and tick intervals so far. */
 	private int ticksHit = 0, tickIntervals = 1;
 
+	/** The current tick time for the follow circle expanding animation. */
+	private int tickExpandTime = 0;
+
+	/** The duration of the follow circle expanding animation on ticks. */
+	private static final int TICK_EXPAND_TIME = 200;
+
 	/** Container dimensions. */
 	private static int containerWidth, containerHeight;
 
@@ -118,9 +124,6 @@ public class Slider extends GameObject {
 	public float pixelLength;
 
 	private int comboColorIndex;
-
-	private int tickExpand = 0;
-	private final int TICKEXPAND = 200;
 
 	public int baseSliderFrom;
 
@@ -344,7 +347,8 @@ public class Slider extends GameObject {
 
 			// follow circle
 			if (followCircleActive) {
-				GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(1f + (tickExpand / (float) TICKEXPAND) * 0.1f).drawCentered(c.x, c.y);
+				float followCircleScale = 1f + (tickExpandTime / (float) TICK_EXPAND_TIME) * 0.1f;
+				GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(followCircleScale).drawCentered(c.x, c.y);
 
 				// "flashlight" mod: dim the screen
 				if (GameMod.FLASHLIGHT.isActive()) {
@@ -362,6 +366,13 @@ public class Slider extends GameObject {
 		color = orig;
 	}
 
+	/**
+	 * Draws slider ticks.
+	 * @param g the graphics context
+	 * @param trackPosition the track position
+	 * @param curveAlpha the curve alpha level
+	 * @param decorationsAlpha the decorations alpha level
+	 */
 	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
 		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
 		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
@@ -382,6 +393,7 @@ public class Slider extends GameObject {
 			min = 0;
 		}
 
+		// draw ticks
 		for (int i = min; i < max; i++) {
 			Vec2f c = curve.pointAt(ticksT[i]);
 			Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
@@ -581,17 +593,10 @@ public class Slider extends GameObject {
 				mousePressed(mouseX, mouseY, trackPosition);
 		}
 
-		if (tickExpand > 0) {
-			tickExpand -= delta;
-			if (tickExpand < 0) {
-				tickExpand = 0;
-			}
-		}
-
 		// end of slider
 		if (trackPosition > hitObject.getTime() + sliderTimeTotal) {
 			tickIntervals++;
-			tickExpand = TICKEXPAND;
+			tickExpandTime = TICK_EXPAND_TIME;
 
 			// check if cursor pressed and within end circle
 			if (keyPressed || GameMod.RELAX.isActive()) {
@@ -617,16 +622,22 @@ public class Slider extends GameObject {
 			return true;
 		}
 
+		// update tick expand time
+		if (tickExpandTime > 0) {
+			tickExpandTime -= delta;
+			if (tickExpandTime < 0)
+				tickExpandTime = 0;
+		}
+
 		// repeats
 		boolean isNewRepeat = false;
 		if (repeatCount - 1 > currentRepeats) {
 			float t = getT(trackPosition, true);
 			if (Math.floor(t) > currentRepeats) {
 				currentRepeats++;
-				//tickIntervals++;
-				tickExpand = TICKEXPAND;
-				isNewRepeat = true;
 				tickIndex = 0;
+				isNewRepeat = true;
+				tickExpandTime = TICK_EXPAND_TIME;
 			}
 		}
 
@@ -639,8 +650,8 @@ public class Slider extends GameObject {
 			if (t - Math.floor(t) >= ticksT[tickIndex]) {
 				tickIntervals++;
 				tickIndex = (tickIndex + 1) % ticksT.length;
-				tickExpand = TICKEXPAND;
 				isNewTick = true;
+				tickExpandTime = TICK_EXPAND_TIME;
 			}
 		}
 
@@ -733,6 +744,7 @@ public class Slider extends GameObject {
 		tickIndex = 0;
 		ticksHit = 0;
 		tickIntervals = 1;
+		tickExpandTime = 0;
 	}
 
 	public Curve getCurve() {
