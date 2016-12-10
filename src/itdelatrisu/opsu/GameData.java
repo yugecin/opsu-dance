@@ -897,7 +897,8 @@ public class GameData {
 				}
 
 				// hit animation
-				if (hitResult.result != HIT_MISS && (
+				if (Options.isHitAnimationEnabled() &&
+				    hitResult.result != HIT_MISS && (
 				    hitResult.hitResultType == null || // null => initial slider circle
 				    hitResult.hitResultType == HitObjectType.CIRCLE ||
 				    hitResult.hitResultType == HitObjectType.SLIDER_FIRST ||

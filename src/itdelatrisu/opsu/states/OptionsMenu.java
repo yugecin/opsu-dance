@@ -86,6 +86,7 @@ public class OptionsMenu extends BasicGameState {
 			GameOption.FALLBACK_SLIDERS,
 			GameOption.MERGING_SLIDERS,
 			GameOption.SHOW_HIT_LIGHTING,
+			GameOption.SHOW_HIT_ANIMATIONS,
 			GameOption.SHOW_COMBO_BURSTS,
 			GameOption.SHOW_PERFECT_HIT,
 			GameOption.SHOW_FOLLOW_POINTS,
