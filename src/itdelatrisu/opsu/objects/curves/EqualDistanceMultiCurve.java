@@ -111,7 +111,7 @@ public abstract class EqualDistanceMultiCurve extends Curve {
 			int cnt = 1;
 
 			if (cnt > ncurve) {
-				return; // TODO this prevents aspire map from crashing the game, but does it breaks stuff?
+				return;
 			}
 
 			Vec2f c2 = curve[cnt++];
