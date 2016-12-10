@@ -255,8 +255,7 @@ public class OptionsMenu extends BasicGameState {
 		// game option coordinate modifiers
 		textY = (int) (tabY + tabImage.getHeight());
 		//int backHeight = GameImage.MENU_BACK.getAnimation(1).getHeight();
-		//offsetY = (height - textY - (backHeight * 4 / 5)) / maxOptionsScreen;
-		offsetY = (int) ((Fonts.MEDIUM.getLineHeight() + Fonts.SMALL.getLineHeight()) * 1.1f);
+		offsetY = (int) ((Fonts.MEDIUM.getLineHeight()) * 1.1f);
 	}
 
 	@Override
@@ -336,6 +335,17 @@ public class OptionsMenu extends BasicGameState {
 		}
 
 		UI.draw(g);
+
+		// current hovering option
+		if (hoverOption != null && !list.isVisible() && !rwm.isVisible()) {
+			String optionDescription = hoverOption.getDescription();
+			float textWidth = Fonts.SMALL.getWidth(optionDescription);
+			Color.black.a = 0.7f;
+			g.setColor(Color.black);
+			g.fillRect(mouseX + 10, mouseY + 10, 10 + textWidth, 10 + Fonts.SMALL.getLineHeight());
+			Fonts.SMALL.drawString(mouseX + 15, mouseY + 15, optionDescription, Color.white);
+			Color.black.a = 1f;
+		}
 	}
 
 	@Override
@@ -584,7 +594,6 @@ public class OptionsMenu extends BasicGameState {
 		Color color = (focus) ? Color.cyan : Color.white;
 
 		Fonts.MEDIUM.drawString(width / 30, y, option.getName(), color);
-		Fonts.SMALL.drawString(width / 30, y + textHeight, option.getDescription(), color);
 		Fonts.MEDIUM.drawString(width / 2, y, option.getValueString(), color);
 		g.setColor(Colors.WHITE_ALPHA);
 		if (option.isDragOption()) {
