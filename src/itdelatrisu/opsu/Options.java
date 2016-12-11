@@ -904,18 +904,7 @@ public class Options {
 		PIPPI_RADIUS_PERCENT ("Pippi radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
 			@Override
 			public String getValueString() {
-				return (val / 2) + "%";
-			}
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Pippi.setRadiusPercent(val / 2);
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.setRadiusPercent(val / 2);
+				return val + "%";
 			}
 		},
 		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 10, -200, 200) {
