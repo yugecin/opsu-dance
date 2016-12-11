@@ -409,18 +409,16 @@ public class OptionsOverlay {
 			}
 		}
 
+		// check if tab was clicked
 		int tScrollOffset = 0;
-		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
-			if (tabs[tabIndex].button.contains(x, y)) {
-				if (selectedTab != tabIndex) {
-					selectedTab = tabIndex;
-					scrollOffset = tScrollOffset;
-					SoundController.playSound(SoundEffect.MENUCLICK);
-				}
+		for (OptionTab tab : tabs) {
+			if (tab.button.contains(x, y)) {
+				scrollOffset = tScrollOffset;
+				SoundController.playSound(SoundEffect.MENUCLICK);
 				return;
 			}
 			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
-			tScrollOffset += tabs[tabIndex].options.length * optionHeight;
+			tScrollOffset += tab.options.length * optionHeight;
 		}
 	}
 
