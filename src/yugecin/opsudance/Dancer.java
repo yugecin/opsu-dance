@@ -20,7 +20,6 @@ package yugecin.opsudance;
 import awlex.ospu.movers.factories.CenterSpiralMoverFactory;
 import awlex.ospu.movers.factories.SpiralMoverFactory;
 import awlex.ospu.polymover.factory.ArcFactory;
-import awlex.ospu.polymover.factory.LinearFactory;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
 import awlex.ospu.spinners.SpiralSpinner;
 import itdelatrisu.opsu.Options;
@@ -85,21 +84,11 @@ public class Dancer {
 	public static Dancer instance = new Dancer();
 
 	public static boolean multipoint = false;
-	public static boolean mirror = false; // this should really get its own place somewhere...
-	public static boolean drawApproach = true; // this should really get its own place somewhere...
-	public static boolean removebg = true; // this should really get its own place somewhere...
-	public static boolean hideui = true; // this should really get its own place somewhere...
 	public static ObjectColorOverrides colorOverride = ObjectColorOverrides.NONE;
 	public static ObjectColorOverrides colorMirrorOverride = ObjectColorOverrides.NONE;
-	public static int rgbhueinc = 70; // this should really get its own place somewhere...
 	public static CursorColorOverrides cursorColorOverride = CursorColorOverrides.NONE;
 	public static CursorColorOverrides cursorColorMirrorOverride = CursorColorOverrides.NONE;
-	public static int rgbcursorhueinc = 100; // this should really get its own place somewhere...
 	public static MoverDirection moverDirection = MoverDirection.RANDOM;
-	public static boolean hideobjects = false;
-	public static int cursortraillength = 20;
-	public static boolean hidewatermark = false;
-	public static boolean onlycolortrail = false;
 
 	private int dir;
 	public static final GameObject d = new DummyObject();
@@ -119,8 +108,6 @@ public class Dancer {
 	public float y;
 
 	private boolean isCurrentLazySlider;
-
-	public static boolean LAZY_SLIDERS;
 
 	public Dancer() {
 		moverFactory = moverFactories[0];
@@ -205,7 +192,7 @@ public class Dancer {
 			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
-			if (c.isSlider() && LAZY_SLIDERS && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
+			if (c.isSlider() && Options.isLazySliders() && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
 				Slider s = (Slider) c;
 				Vec2f mid = s.getCurve().pointAt(1f);
 				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {

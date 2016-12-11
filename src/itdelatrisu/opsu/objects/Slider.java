@@ -311,7 +311,7 @@ public class Slider extends GameObject {
 			if (mirror) {
 				g.rotate(x, y, -180f);
 			}
-			if (!GameMod.HIDDEN.isActive() && Dancer.drawApproach) {
+			if (!GameMod.HIDDEN.isActive() && Options.isDrawApproach()) {
 				GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
 			}
 			g.popTransform();
@@ -516,7 +516,7 @@ public class Slider extends GameObject {
 		data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				cx, cy, color, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd);
-		if (Dancer.mirror && GameMod.AUTO.isActive()) {
+		if (Options.isMirror() && GameMod.AUTO.isActive()) {
 			float[] m = Utils.mirrorPoint(cx, cy);
 			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,

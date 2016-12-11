@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.movers;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 
@@ -24,8 +25,6 @@ import java.awt.*;
 
 public class QuadraticBezierMover extends Mover {
 
-	public static int sliderExitAggressivenessfactor = 4;
-	public static int aggressiveness = 50;
 	public static Point p;
 	private static double prevspeed;
 
@@ -35,7 +34,7 @@ public class QuadraticBezierMover extends Mover {
 	}
 
 	public static void setPrevspeed(double distance, int timedelta) {
-		prevspeed = distance * aggressiveness * sliderExitAggressivenessfactor / timedelta;
+		prevspeed = distance * Options.getQuadBezAggressiveness() * Options.getQuadBezSliderAggressiveness() / timedelta;
 	}
 
 	public static double getPrevspeed() {
@@ -54,7 +53,7 @@ public class QuadraticBezierMover extends Mover {
 		double dist = Utils.distance(startX, startY, endX, endY);
 		p.x = (int) (startX + Math.cos(startAngle) * prevspeed);
 		p.y = (int) (startY + Math.sin(startAngle) * prevspeed);
-		prevspeed = (dist / totalTime) * aggressiveness;
+		prevspeed = (dist / totalTime) * Options.getQuadBezSliderAggressiveness();
 	}
 
 	@Override

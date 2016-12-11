@@ -94,7 +94,6 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	};
 
 	private final static List<GameOption> optionList = new ArrayList<>();
-	public static boolean isActive = false;
 
 	private boolean hide;
 	private boolean menu;
@@ -129,7 +128,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public void render(GameContainer container, Graphics g) {
-		if (!isActive || hide) {
+		if (!Options.isEnableSB() || hide) {
 			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
@@ -161,13 +160,13 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public void update(int delta, int mouseX, int mouseY) {
-		if (isActive && menu) {
+		if (Options.isEnableSB() && menu) {
 			overlay.update(delta, mouseX, mouseY);
 		}
 	}
 
 	public boolean keyPressed(int key, char c) {
-		if (!isActive) {
+		if (!Options.isEnableSB()) {
 			return false;
 		}
 		if (menu && overlay.keyPressed(key, c)) {

@@ -394,7 +394,7 @@ public class Game extends BasicGameState {
 		}
 
 		// background
-		if (!Dancer.removebg && GameMod.AUTO.isActive()) {
+		if (!Options.isRemoveBG() && GameMod.AUTO.isActive()) {
 			float dimLevel = Options.getBackgroundDim();
 			if (trackPosition < firstObjectTime) {
 				if (timeDiff < approachTime)
@@ -508,7 +508,7 @@ public class Game extends BasicGameState {
 				Colors.BLACK_ALPHA.a = a;
 			}
 
-			if (!Dancer.hideui || !GameMod.AUTO.isActive()) {
+			if (!Options.isHideUI() || !GameMod.AUTO.isActive()) {
 				data.drawGameElements(g, true, objectIndex == 0);
 			}
 
@@ -546,7 +546,7 @@ public class Game extends BasicGameState {
 
 		// non-break
 		else {
-			if (!GameMod.AUTO.isActive() || !Dancer.hideui) {
+			if (!GameMod.AUTO.isActive() || !Options.isHideUI()) {
 				// game elements
 				data.drawGameElements(g, false, objectIndex == 0);
 
@@ -670,11 +670,11 @@ public class Game extends BasicGameState {
 			}
 		}
 
-		if (!Dancer.hideui && GameMod.AUTO.isActive())
+		if (!Options.isHideUI() && GameMod.AUTO.isActive())
 			GameImage.UNRANKED.getImage().drawCentered(width / 2, height * 0.077f);
 
 		// draw replay speed button
-		if (isReplay || (!Dancer.hideui && GameMod.AUTO.isActive()))
+		if (isReplay || (!Options.isHideUI()&& GameMod.AUTO.isActive()))
 			playbackSpeed.getButton().draw();
 
 		// draw music position bar (for replay seeking)
@@ -709,7 +709,7 @@ public class Game extends BasicGameState {
 			UI.draw(g, replayX, replayY, replayKeyPressed);
 		else if (GameMod.AUTO.isActive()) {
 			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, autoMousePressed);
-			if (Dancer.mirror && GameMod.AUTO.isActive()) {
+			if (Options.isMirror() && GameMod.AUTO.isActive()) {
 				double dx = autoMousePosition.x - Options.width / 2d;
 				double dy = autoMousePosition.y - Options.height / 2d;
 				double d = Math.sqrt(dx * dx + dy * dy);
@@ -724,7 +724,7 @@ public class Game extends BasicGameState {
 
 		sbOverlay.render(container, g);
 
-		if (!Dancer.hidewatermark) {
+		if (!Options.isHideWM()) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
 		}
 	}
@@ -851,7 +851,7 @@ public class Game extends BasicGameState {
 		}
 
 		// update in-game scoreboard
-		if (!Dancer.hideui && previousScores != null && trackPosition > firstObjectTime) {
+		if (!Options.isHideUI() && previousScores != null && trackPosition > firstObjectTime) {
 			// show scoreboard if selected, and always in break
 			if (scoreboardVisible || breakTime > 0) {
 				currentScoreboardAlpha += 1f / SCOREBOARD_FADE_IN_TIME * delta;
@@ -1033,7 +1033,7 @@ public class Game extends BasicGameState {
 					objectIndex++;  // done, so increment object index
 					sbOverlay.updateIndex(objectIndex);
 					if (objectIndex >= mirrorTo) {
-						Dancer.mirror = false;
+						Options.setMirror(false);
 					}
 				} else
 					break;
@@ -1148,30 +1148,30 @@ public class Game extends BasicGameState {
 			Utils.takeScreenShot();
 			break;
 		case Input.KEY_TAB:
-			if (!Dancer.hideui) {
+			if (!Options.isHideUI()) {
 				scoreboardVisible = !scoreboardVisible;
 			}
 			break;
 		case Input.KEY_M:
-			if (Dancer.mirror) {
+			if (Options.isMirror()) {
 				mirrorTo = objectIndex;
-				Dancer.mirror = false;
+				Options.setMirror(false);
 			} else {
 				mirrorCursor.resetLocations();
 				mirrorFrom = objectIndex;
 				mirrorTo = gameObjects.length;
-				Dancer.mirror = true;
+				Options.setMirror(true);
 			}
 			break;
 		case Input.KEY_P:
-			if (Dancer.mirror) {
+			if (Options.isMirror()) {
 				mirrorTo = objectIndex;
-				Dancer.mirror = false;
+				Options.setMirror(false);
 			} else {
 				mirrorCursor.resetLocations();
 				mirrorFrom = objectIndex;
 				mirrorTo = mirrorFrom + 1;
-				Dancer.mirror = true;
+				Options.setMirror(true);
 			}
 			break;
 		case Input.KEY_MINUS:
@@ -1623,7 +1623,7 @@ public class Game extends BasicGameState {
 			stack.add(index);
 
 			// draw follow points
-			if (!Options.isFollowPointEnabled() || loseState)
+			if (!Options.isFollowPointEnabled() || loseState || !Options.isHideObjects())
 				continue;
 			if (beatmap.objects[index].isSpinner()) {
 				lastObjectIndex = -1;
@@ -1688,9 +1688,9 @@ public class Game extends BasicGameState {
 
 			// normal case
 			if (!loseState) {
-				if (!Dancer.hideobjects) {
+				if (!Options.isHideObjects()) {
 					gameObj.draw(g, trackPosition, false);
-					if (Dancer.mirror && GameMod.AUTO.isActive() && idx < mirrorTo && idx >= mirrorFrom) {
+					if (Options.isMirror() && GameMod.AUTO.isActive() && idx < mirrorTo && idx >= mirrorFrom) {
 						g.pushTransform();
 						g.rotate(Options.width / 2f, Options.height / 2f, 180f);
 						gameObj.draw(g, trackPosition, true);
@@ -1730,7 +1730,7 @@ public class Game extends BasicGameState {
 		}
 
 		// draw result objects
-		if (!Dancer.hideobjects) {
+		if (!Options.isHideObjects()) {
 			data.drawHitResults(trackPosition);
 		}
 	}

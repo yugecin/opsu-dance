@@ -27,8 +27,6 @@ import yugecin.opsudance.movers.*;
 
 public class AutoMoverFactory implements MoverFactory {
 
-	public static boolean ONLY_CIRCLE_STACKS = false;
-	public static int CIRCLE_STREAM = 58;
 	private int starttime;
 	private int endtime;
 	protected Mover m;
@@ -44,7 +42,8 @@ public class AutoMoverFactory implements MoverFactory {
 		}
 
 		// stacked: circles if not too quick
-		if (distance < Circle.diameter && ((dt > CIRCLE_STREAM && !ONLY_CIRCLE_STACKS) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
+		int circle_stream = Options.isCircleStreams() ? 58: 85;
+		if (distance < Circle.diameter && ((dt > circle_stream && !Options.isOnlyCircleStacks()) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
 			return new CircleMover(start, end, dir);
 		}
 

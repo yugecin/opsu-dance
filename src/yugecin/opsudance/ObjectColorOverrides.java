@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance;
 
+import itdelatrisu.opsu.Options;
 import org.newdawn.slick.Color;
 
 public enum ObjectColorOverrides {
@@ -94,7 +95,7 @@ public enum ObjectColorOverrides {
 	}
 
 	private static Color nextRainbowColor() {
-		hue += Dancer.rgbhueinc / 10f;
+		hue += Options.getRGBObjInc() / 10f;
 		return new Color(java.awt.Color.getHSBColor(hue / 360f, 1.0f, 1.0f).getRGB());
 	}
 

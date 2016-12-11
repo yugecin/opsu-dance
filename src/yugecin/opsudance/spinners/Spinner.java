@@ -17,13 +17,14 @@
  */
 package yugecin.opsudance.spinners;
 
+import itdelatrisu.opsu.Options;
+
 public abstract class Spinner {
 
 	private double[][] points;
 	private int length;
 	private int index;
 	private static int delay;
-	public static int DELAY = 3;
 	public static double PROGRESS;
 
 	public abstract void init();
@@ -41,7 +42,7 @@ public abstract class Spinner {
 	}
 
 	public boolean waitForDelay() {
-		if (delay >= DELAY) {
+		if (delay >= Options.getSpinnerDelay()) {
 			delay = 0;
 			return true;
 		}
