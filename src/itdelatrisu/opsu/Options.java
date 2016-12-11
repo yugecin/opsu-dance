@@ -505,9 +505,9 @@ public class Options {
 		FORCE_DEFAULT_PLAYFIELD ("Force Default Playfield", "ForceDefaultPlayfield", "Override the song background with the default playfield background.", false),
 		IGNORE_BEATMAP_SKINS ("Ignore All Beatmap Skins", "IgnoreBeatmapSkins", "Never use skin element overrides provided by beatmaps.", false),
 		SNAKING_SLIDERS ("Snaking sliders", "SnakingSliders", "Sliders gradually snake out from their starting point.", true),
-		SHRINKING_SLIDERS ("Shrinking sliders", "ShrinkingSliders", "Sliders shrinks when sliderball passes - unstable!", false),
+		SHRINKING_SLIDERS ("Shrinking sliders", "ShrinkingSliders", "Sliders shrinks when sliderball passes (aka knorkesliders)", false),
 		FALLBACK_SLIDERS ("Fallback sliders", "FallbackSliders", "Enable this if sliders won't render", false),
-		MERGING_SLIDERS ("Merging sliders", "MergingSliders", "Merge sliders (aka knorkesliders) - unstable!", false) {
+		MERGING_SLIDERS ("Merging sliders", "MergingSliders", "Merge sliders (aka knorkesliders)", false) {
 			@Override
 			public boolean showCondition() {
 				return !FALLBACK_SLIDERS.bool;
