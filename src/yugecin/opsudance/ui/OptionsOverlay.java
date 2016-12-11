@@ -29,7 +29,6 @@ import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.*;
 
-@SuppressWarnings({"unused", "SuspiciousNameCombination"})
 public class OptionsOverlay {
 
 	private Parent parent;
@@ -40,7 +39,6 @@ public class OptionsOverlay {
 	private final Image checkOffImg;
 
 	private OptionTab[] tabs;
-	private OptionTab hoverTab;
 	private int selectedTab;
 	private GameOption hoverOption;
 	private GameOption selectedOption;
@@ -194,7 +192,6 @@ public class OptionsOverlay {
 	}
 
 	private void renderOpenList(Graphics g) {
-		// list
 		g.setColor(Colors.BLACK_ALPHA_85);
 		g.fillRect(listStartX, listStartY, listWidth, listHeight);
 		if (listHoverIndex != -1) {

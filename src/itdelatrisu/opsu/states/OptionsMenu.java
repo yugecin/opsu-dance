@@ -149,10 +149,8 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 		})
 	};
 
-	private GameContainer container;
 	private StateBasedGame game;
 	private Input input;
-	private Graphics g;
 	private final int state;
 
 	private OptionsOverlay optionsOverlay;
@@ -164,14 +162,8 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
-
-		this.container = container;
 		this.game = game;
 		this.input = container.getInput();
-		this.g = container.getGraphics();
-
-		int width = container.getWidth();
-		int height = container.getHeight();
 
 		optionsOverlay = new OptionsOverlay(this, options, 5, container);
 	}
