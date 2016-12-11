@@ -258,7 +258,6 @@ public class OptionsOverlay {
 		updateHoverOption(mouseX, mouseY);
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
-			System.out.println(sliderOptionLength);
 			int min = selectedOption.getMinValue();
 			int max = selectedOption.getMaxValue();
 			int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
