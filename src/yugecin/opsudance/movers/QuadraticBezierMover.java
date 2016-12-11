@@ -53,7 +53,7 @@ public class QuadraticBezierMover extends Mover {
 		double dist = Utils.distance(startX, startY, endX, endY);
 		p.x = (int) (startX + Math.cos(startAngle) * prevspeed);
 		p.y = (int) (startY + Math.sin(startAngle) * prevspeed);
-		prevspeed = (dist / totalTime) * Options.getQuadBezSliderAggressiveness();
+		prevspeed = (dist / totalTime) * Options.getQuadBezAggressiveness();
 	}
 
 	@Override
