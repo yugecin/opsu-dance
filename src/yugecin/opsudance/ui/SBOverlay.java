@@ -18,6 +18,7 @@
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
@@ -26,15 +27,73 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SBOverlay {
+public class SBOverlay implements OptionsOverlay.Parent {
 
+	private static final OptionTab[] options = new OptionsOverlay.OptionTab[]{
+		new OptionTab("Gameplay", new GameOption[] {
+			GameOption.BACKGROUND_DIM,
+			GameOption.SNAKING_SLIDERS,
+			GameOption.SHRINKING_SLIDERS,
+			GameOption.SHOW_HIT_LIGHTING,
+			GameOption.SHOW_COMBO_BURSTS,
+			GameOption.SHOW_PERFECT_HIT,
+			GameOption.SHOW_FOLLOW_POINTS,
+		}),
+		new OptionTab("Input", new GameOption[] {
+			GameOption.CURSOR_SIZE,
+			GameOption.NEW_CURSOR,
+			GameOption.DISABLE_CURSOR
+		}),
+		new OptionTab("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER,
+			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_MOVER_DIRECTION,
+			GameOption.DANCE_SLIDER_MOVER_TYPE,
+			GameOption.DANCE_SPINNER,
+			GameOption.DANCE_SPINNER_DELAY,
+			GameOption.DANCE_LAZY_SLIDERS,
+			GameOption.DANCE_CIRCLE_STREAMS,
+			GameOption.DANCE_ONLY_CIRCLE_STACKS,
+			GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
+			GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS,
+			GameOption.DANCE_MIRROR,
+		}),
+		new OptionTab("Dance display", new GameOption[] {
+			GameOption.DANCE_DRAW_APPROACH,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
+			GameOption.DANCE_RGB_OBJECT_INC,
+			GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
+			GameOption.DANCE_RGB_CURSOR_INC,
+			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
+			GameOption.DANCE_REMOVE_BG,
+			GameOption.DANCE_HIDE_OBJECTS,
+			GameOption.DANCE_HIDE_UI,
+			GameOption.DANCE_ENABLE_SB,
+			GameOption.DANCE_HIDE_WATERMARK,
+		}),
+		new OptionTab ("Pippi", new GameOption[] {
+			GameOption.PIPPI_ENABLE,
+			GameOption.PIPPI_RADIUS_PERCENT,
+			GameOption.PIPPI_ANGLE_INC_MUL,
+			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
+			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
+			GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
+		})
+	};
+
+	private final static List<GameOption> optionList = new ArrayList<>();
 	public static boolean isActive = false;
 
 	private boolean hide;
@@ -51,23 +110,25 @@ public class SBOverlay {
 	private int index;
 
 	private final Game game;
-	private final OptionsOverlayOld options;
+	private final OptionsOverlay overlay;
 
-	public SBOverlay(Game game) {
-		this.game = game;
-		options = new OptionsOverlayOld(this);
-		initialOptions = new HashMap<>();
+	static {
+		for (OptionTab tab : options) {
+			optionList.addAll(Arrays.asList(tab.options));
+		}
 	}
 
-	public void init(GameContainer container, Input input, int width, int height) {
-		this.width = width;
-		this.height = height;
+	public SBOverlay(Game game, GameContainer container) {
+		this.game = game;
+		initialOptions = new HashMap<>();
+		overlay = new OptionsOverlay(this, options, 2, container);
+		this.width = container.getWidth();
+		this.height = container.getHeight();
 		speed = 10;
 		gameObjects = new GameObject[0];
-		options.init(container, input, width, height);
 	}
 
-	public void render(GameContainer container, StateBasedGame game, Graphics g) {
+	public void render(GameContainer container, Graphics g) {
 		if (!isActive || hide) {
 			return;
 		}
@@ -95,16 +156,13 @@ public class SBOverlay {
 			g.fillRect(curtime * width, height - 10f, 10f, 10f);
 		}
 		if (menu) {
-			options.render(container, game, g);
+			overlay.render(g, container.getInput().getMouseX(), container.getInput().getMouseY());
 		}
 	}
 
-	public void update(int mouseX, int mouseY) {
-		if (!isActive) {
-			return;
-		}
-		if (menu) {
-			options.update(mouseX, mouseY);
+	public void update(int delta, int mouseX, int mouseY) {
+		if (isActive && menu) {
+			overlay.update(delta, mouseX, mouseY);
 		}
 	}
 
@@ -112,7 +170,7 @@ public class SBOverlay {
 		if (!isActive) {
 			return false;
 		}
-		if (options.keyPressed(key, c)) {
+		if (menu && overlay.keyPressed(key, c)) {
 			return true;
 		}
 		if (key == Input.KEY_C) {
@@ -147,12 +205,6 @@ public class SBOverlay {
 			index++;
 			setMusicPosition();
 			updateIndex(index);
-		} else if (key == Input.KEY_ESCAPE && menu) {
-			menu = false;
-			if (speed != 0) {
-				MusicController.resume();
-			}
-			return true;
 		}
 		return false;
 	}
@@ -187,27 +239,27 @@ public class SBOverlay {
 		if (optionsMap.length > 0) {
 			// copy all current settings in first obj map
 			optionsMap[0] = new HashMap<>();
-			for (Options.GameOption o : options.getSavedOptionList()) {
+			for (Options.GameOption o : optionList) {
 				optionsMap[0].put(o, o.write());
 			}
 		}
 		this.gameObjects = gameObjects;
 	}
 
-	public void saveOption(Options.GameOption option) {
-		if (optionsMap[index] == null) {
-			optionsMap[index] = new HashMap<>();
-		}
-		optionsMap[index].put(option, option.write());
-		readOption(option);
-	}
-
 	public boolean mousePressed(int button, int x, int y) {
-		return menu && options.mousePressed(button, x, y);
+		if (menu) {
+			return false;
+		}
+		overlay.mousePressed(button, x, y);
+		return true;
 	}
 
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (menu) options.mouseDragged(oldx, oldy, newx, newy);
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (menu) {
+			return false;
+		}
+		overlay.mouseDragged(oldx, oldy, newx, newy);
+		return true;
 	}
 
 	public void updateIndex(int index) {
@@ -227,41 +279,30 @@ public class SBOverlay {
 
 	public boolean mouseReleased(int button, int x, int y) {
 		if (menu) {
-			return options.mouseReleased(button, x, y);
-		}
-		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
 			return false;
 		}
-		int lh = Fonts.SMALL.getLineHeight();
-		int ypos = 50 + lh / 4;
-		for (Object o : optionsMap[index].entrySet()) {
-			if (y >= ypos && y <= ypos + 10) {
-				optionsMap[index].remove(((Map.Entry<Options.GameOption, String>) o).getKey());
-				if (optionsMap[index].size() == 0) {
-					optionsMap[index] = null;
-				}
-				reloadSBsettingsToIndex(index);
-				return true;
-			}
-			ypos += lh;
-		}
-		return false;
+		overlay.mouseReleased(button, x, y);
+		return true;
 	}
 
-	public boolean mouseWheelMoved(int newValue) {
-		return menu && options.mouseWheenMoved(newValue);
+	public boolean mouseWheelMoved(int delta) {
+		if (!menu) {
+			return false;
+		}
+		overlay.mouseWheelMoved(delta);
+		return true;
 	}
 
 	public void enter() {
 		// enter, save current settings
-		for (Options.GameOption o : options.getSavedOptionList()) {
+		for (Options.GameOption o : optionList) {
 			initialOptions.put(o, o.write());
 		}
 	}
 
 	public void leave() {
 		// leave, revert the settings saved before entering
-		for (Options.GameOption o : options.getSavedOptionList()) {
+		for (Options.GameOption o : optionList) {
 			if (initialOptions.containsKey(o)) {
 				o.read(initialOptions.get(o));
 				readOption(o);
@@ -281,6 +322,23 @@ public class SBOverlay {
 				gameObjects[i].updateColor();
 			}
 		}
+	}
+
+	@Override
+	public void onLeave() {
+		menu = false;
+		if (speed != 0) {
+			MusicController.resume();
+		}
+	}
+
+	@Override
+	public void onSaveOption(GameOption option) {
+		if (optionsMap[index] == null) {
+			optionsMap[index] = new HashMap<>();
+		}
+		optionsMap[index].put(option, option.write());
+		readOption(option);
 	}
 
 }

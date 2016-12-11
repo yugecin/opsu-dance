@@ -299,14 +299,13 @@ public class Game extends BasicGameState {
 	private final int state;
 
 	private final Cursor mirrorCursor;
-	private final SBOverlay sbOverlay;
+	private SBOverlay sbOverlay;
 
 	private FakeCombinedCurve knorkesliders;
 
 	public Game(int state) {
 		this.state = state;
 		mirrorCursor = new Cursor(true);
-		sbOverlay = new SBOverlay(this);
 	}
 
 	public void loadCheckpoint(int checkpoint) {
@@ -347,14 +346,13 @@ public class Game extends BasicGameState {
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
+		this.sbOverlay = new SBOverlay(this, container);
 		this.container = container;
 		this.game = game;
 		input = container.getInput();
 
 		int width = container.getWidth();
 		int height = container.getHeight();
-
-		sbOverlay.init(container, input, width, height);
 
 		// create offscreen graphics
 		offscreen = new Image(width, height);
@@ -724,7 +722,7 @@ public class Game extends BasicGameState {
 		else
 			UI.draw(g);
 
-		sbOverlay.render(container, game, g);
+		sbOverlay.render(container, g);
 
 		if (!Dancer.hidewatermark) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
@@ -741,7 +739,7 @@ public class Game extends BasicGameState {
 		}
 		yugecin.opsudance.spinners.Spinner.update(delta);
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
-		sbOverlay.update(mouseX, mouseY);
+		sbOverlay.update(delta, mouseX, mouseY);
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
@@ -1189,7 +1187,10 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		sbOverlay.mouseDragged(oldx, oldy, newx, newy);
+		if (sbOverlay.mouseDragged(oldx, oldy, newx, newy)) {
+			//noinspection UnnecessaryReturnStatement
+			return;
+		}
 	}
 
 	@Override

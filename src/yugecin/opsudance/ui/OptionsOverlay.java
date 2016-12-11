@@ -395,12 +395,13 @@ public class OptionsOverlay {
 		}
 	}
 
-	public void keyPressed(int key, char c) {
+	public boolean keyPressed(int key, char c) {
 		switch (key) {
 			case Input.KEY_ESCAPE:
 				parent.onLeave();
-				break;
+				return true;
 		}
+		return false;
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
