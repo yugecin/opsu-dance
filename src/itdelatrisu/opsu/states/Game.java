@@ -303,6 +303,8 @@ public class Game extends BasicGameState {
 
 	private FakeCombinedCurve knorkesliders;
 
+	private boolean skippedToCheckpoint;
+
 	public Game(int state) {
 		this.state = state;
 		mirrorCursor = new Cursor(true);
@@ -312,6 +314,7 @@ public class Game extends BasicGameState {
 		try {
 			restart = Restart.MANUAL;
 			checkpointLoaded = true;
+			skippedToCheckpoint = true;
 			enter(container, game);
 			if (isLeadIn()) {
 				leadInTime = 0;
@@ -1544,9 +1547,9 @@ public class Game extends BasicGameState {
 		slidercurveFrom = 0;
 		slidercurveTo = 0;
 
-		Dancer.instance.setGameObjects(gameObjects);
-		sbOverlay.setGameObjects(gameObjects);
-		if (restart != Restart.FALSE) {
+		if (!skippedToCheckpoint) {
+			Dancer.instance.setGameObjects(gameObjects);
+			sbOverlay.setGameObjects(gameObjects);
 			sbOverlay.enter();
 			sbOverlay.updateIndex(0);
 		}
@@ -1565,6 +1568,7 @@ public class Game extends BasicGameState {
 	public void leave(GameContainer container, StateBasedGame game)
 			throws SlickException {
 //		container.setMouseGrabbed(false);
+		skippedToCheckpoint = false;
 
 		sbOverlay.leave();
 		Dancer.instance.setGameObjects(null);
