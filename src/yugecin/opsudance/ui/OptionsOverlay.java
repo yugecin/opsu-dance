@@ -407,15 +407,11 @@ public class OptionsOverlay {
 			return;
 		}
 
-		if (hoverOption != null) {
-			if (hoverOption.getType() != OptionType.NUMERIC) {
-				parent.onSaveOption(hoverOption);
-			}
-			if (hoverOption.getType() == OptionType.BOOLEAN) {
-				hoverOption.click(container);
-				SoundController.playSound(SoundEffect.MENUHIT);
-				return;
-			}
+		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
+			hoverOption.click(container);
+			parent.onSaveOption(hoverOption);
+			SoundController.playSound(SoundEffect.MENUHIT);
+			return;
 		}
 
 		// check if tab was clicked
