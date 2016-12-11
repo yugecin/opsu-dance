@@ -521,13 +521,13 @@ public class Options {
 		MAP_START_DELAY ("Map start delay", "StartDelay", "Have a fix amount of time to prepare your play/record", 20, 1, 50) {
 			@Override
 			public String getValueString() {
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		MAP_END_DELAY ("Map end delay", "EndDelay", "Have a fix amount of time at the and of the map for a smooth finish", 50, 1, 150) {
 			@Override
 			public String getValueString() {
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		EPILEPSY_WARNING ("Epilepsy warning image", "EpiWarn", "Show a little warning for flashing colours in the beginning", 0, 0, 20) {
@@ -536,7 +536,7 @@ public class Options {
 				if (val == 0) {
 					return "Disabled";
 				}
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
@@ -637,11 +637,21 @@ public class Options {
 		},
 		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
 			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+
+			@Override
 			public boolean showCondition() {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
 			}
 		},
 		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 4, 1, 6) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+
 			@Override
 			public boolean showCondition() {
 				return DANCE_QUAD_BEZ_AGGRESSIVENESS.showCondition()
@@ -655,6 +665,11 @@ public class Options {
 			}
 		},
 		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 4, 1, 6) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+
 			@Override
 			public boolean showCondition() {
 				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition()
