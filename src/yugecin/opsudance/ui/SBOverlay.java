@@ -285,10 +285,26 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
-		if (!menu) {
+		if (menu) {
+			overlay.mouseReleased(button, x, y);
+			return true;
+		}
+		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
 			return false;
 		}
-		overlay.mouseReleased(button, x, y);
+		int lh = Fonts.SMALL.getLineHeight();
+		int ypos = 50 + lh / 4;
+		for (Object o : optionsMap[index].entrySet()) {
+			if (y >= ypos && y <= ypos + 10) {
+				optionsMap[index].remove(((Map.Entry<Options.GameOption, String>) o).getKey());
+				if (optionsMap[index].size() == 0) {
+					optionsMap[index] = null;
+				}
+				reloadSBsettingsToIndex(index);
+				return true;
+			}
+			ypos += lh;
+		}
 		return true;
 	}
 
