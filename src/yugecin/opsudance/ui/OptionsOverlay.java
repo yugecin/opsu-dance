@@ -94,7 +94,7 @@ public class OptionsOverlay {
 				tabY += GameImage.MENU_TAB.getImage().getHeight() / 2f;
 			}
 		}
-		this.maxScrollOffset = maxScrollOffset;
+		this.maxScrollOffset = maxScrollOffset - optionStartY - optionHeight;
 
 		// calculate other positions
 		optionStartY = (int) (tabY + tabImage.getHeight() / 2 + 2); // +2 for the separator line
@@ -154,7 +154,7 @@ public class OptionsOverlay {
 		}
 		// scrollbar
 		g.setColor(Color.white);
-		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / maxScrollOffset) * (height - optionStartY), 10, 45, 2);
+		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / (maxScrollOffset)) * (height - optionStartY - 45), 10, 45, 2);
 		g.clearClip();
 	}
 
@@ -270,7 +270,7 @@ public class OptionsOverlay {
 	}
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		scrollOffset += oldy - newy;
+		scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
 	}
 
 	public void mouseWheelMoved(int delta) {
