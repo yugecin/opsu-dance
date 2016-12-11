@@ -57,6 +57,8 @@ public class OptionsOverlay {
 	private int scrollOffset;
 	private final int maxScrollOffset;
 
+	private int mousePressY;
+
 	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
 		this.parent = parent;
 		this.container = container;
@@ -229,10 +231,20 @@ public class OptionsOverlay {
 	}
 
 	public void mousePressed(int button, int x, int y) {
+		mousePressY = y;
 		selectedOption = hoverOption;
 
 		if (UI.getBackButton().contains(x, y)) {
 			parent.onLeave();
+			return;
+		}
+	}
+
+	public void mouseReleased(int button, int x, int y) {
+		selectedOption = null;
+
+		// check if clicked, not dragged
+		if (Math.abs(y - mousePressY) >= 5) {
 			return;
 		}
 
@@ -255,10 +267,6 @@ public class OptionsOverlay {
 			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
 			tScrollOffset += tabs[tabIndex].options.length * optionHeight;
 		}
-	}
-
-	public void mouseReleased(int button, int x, int y) {
-		selectedOption = null;
 	}
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
