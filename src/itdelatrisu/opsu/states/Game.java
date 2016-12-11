@@ -1549,9 +1549,9 @@ public class Game extends BasicGameState {
 		slidercurveFrom = 0;
 		slidercurveTo = 0;
 
+		Dancer.instance.setGameObjects(gameObjects);
+		sbOverlay.setGameObjects(gameObjects);
 		if (!skippedToCheckpoint) {
-			Dancer.instance.setGameObjects(gameObjects);
-			sbOverlay.setGameObjects(gameObjects);
 			sbOverlay.enter();
 			sbOverlay.updateIndex(0);
 		}
