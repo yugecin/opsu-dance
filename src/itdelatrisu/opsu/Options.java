@@ -502,6 +502,7 @@ public class Options {
 		DISABLE_MOUSE_BUTTONS ("Disable mouse buttons in play mode", "MouseDisableButtons", "This option will disable all mouse buttons. Specifically for people who use their keyboard to click.", false),
 		DISABLE_CURSOR ("Disable Cursor", "DisableCursor", "Hide the cursor sprite.", false),
 		BACKGROUND_DIM ("Background Dim", "DimLevel", "Percentage to dim the background image during gameplay.", 50, 0, 100),
+		DANCE_REMOVE_BG ("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", true),
 		FORCE_DEFAULT_PLAYFIELD ("Force Default Playfield", "ForceDefaultPlayfield", "Override the song background with the default playfield background.", false),
 		IGNORE_BEATMAP_SKINS ("Ignore All Beatmap Skins", "IgnoreBeatmapSkins", "Never use skin element overrides provided by beatmaps.", false),
 		SNAKING_SLIDERS ("Snaking sliders", "SnakingSliders", "Sliders gradually snake out from their starting point.", true),
@@ -894,7 +895,6 @@ public class Options {
 			}
 		},
 		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", false),
-		DANCE_REMOVE_BG ("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", true),
 		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false),
 		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false),
 		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true),

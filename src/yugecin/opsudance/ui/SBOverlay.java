@@ -38,6 +38,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	private static final OptionTab[] options = new OptionsOverlay.OptionTab[]{
 		new OptionTab("Gameplay", new GameOption[] {
 			GameOption.BACKGROUND_DIM,
+			GameOption.DANCE_REMOVE_BG,
 			GameOption.SNAKING_SLIDERS,
 			GameOption.SHRINKING_SLIDERS,
 			GameOption.SHOW_HIT_LIGHTING,
@@ -78,7 +79,6 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
 			GameOption.DANCE_RGB_CURSOR_INC,
 			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
-			GameOption.DANCE_REMOVE_BG,
 			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,
 			GameOption.DANCE_ENABLE_SB,
