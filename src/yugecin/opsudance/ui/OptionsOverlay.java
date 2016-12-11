@@ -136,7 +136,6 @@ public class OptionsOverlay {
 
 		// UI
 		UI.getBackButton().draw();
-		UI.draw(g);
 
 		// tooltip
 		renderTooltip(g, mouseX, mouseY);

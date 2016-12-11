@@ -175,6 +175,7 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		optionsOverlay.render(g, mouseX, mouseY);
+		UI.draw(g);
 	}
 
 	@Override

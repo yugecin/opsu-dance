@@ -247,7 +247,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
-		if (menu) {
+		if (!menu) {
 			return false;
 		}
 		overlay.mousePressed(button, x, y);
@@ -255,7 +255,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (menu) {
+		if (!menu) {
 			return false;
 		}
 		overlay.mouseDragged(oldx, oldy, newx, newy);
@@ -278,7 +278,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
-		if (menu) {
+		if (!menu) {
 			return false;
 		}
 		overlay.mouseReleased(button, x, y);
