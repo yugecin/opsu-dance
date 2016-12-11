@@ -123,11 +123,14 @@ public class OptionsOverlay {
 	private void renderOptions(Graphics g) {
 		g.setClip(0, optionStartY, width, height - optionStartY);
 		int y = -scrollOffset + optionStartY;
+		selectedTab = 0;
 		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
 			OptionTab tab = tabs[tabIndex];
 			if (y > 0) {
 				int x = optionStartX + (optionWidth - Fonts.LARGE.getWidth(tab.name)) / 2;
 				Fonts.LARGE.drawString(x, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
+			} else {
+				selectedTab++;
 			}
 			y += Fonts.MEDIUM.getLineHeight() * 2;
 			for (int optionIndex = 0; optionIndex < tab.options.length; optionIndex++) {
@@ -233,6 +236,19 @@ public class OptionsOverlay {
 
 		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
 			hoverOption.click(container);
+		}
+
+		int tScrollOffset = 0;
+		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
+			if (tabs[tabIndex].button.contains(x, y)) {
+				if (selectedTab != tabIndex) {
+					selectedTab = tabIndex;
+					scrollOffset = tScrollOffset;
+				}
+				break;
+			}
+			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
+			tScrollOffset += tabs[tabIndex].options.length * optionHeight;
 		}
 	}
 
