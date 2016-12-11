@@ -895,12 +895,7 @@ public class Options {
 		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false),
 		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true),
 		DANCE_ENABLE_SB ("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false),
-		DANCE_HIDE_WATERMARK ("Hide watermark", "HideWaterMark", "Hide the githublink in the top left corner of the playfield", false) {
-			@Override
-			public void read(String s) {
-				bool = false;
-			}
-		},
+		DANCE_HIDE_WATERMARK ("Hide watermark", "HideWaterMark", "Hide the githublink in the top left corner of the playfield", false),
 		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false),
 		PIPPI_RADIUS_PERCENT ("Pippi radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
 			@Override
@@ -1920,6 +1915,7 @@ public class Options {
 					}
 				}
 			}
+			GameOption.DANCE_HIDE_WATERMARK.setValue(false);
 		} catch (IOException e) {
 			ErrorHandler.error(String.format("Failed to read file '%s'.", OPTIONS_FILE.getAbsolutePath()), e, false);
 		}
