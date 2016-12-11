@@ -27,6 +27,7 @@ public class Colors {
 	public static final Color
 		BLACK_ALPHA     = new Color(0, 0, 0, 0.5f),
 		BLACK_ALPHA_75  = new Color(0, 0, 0, 0.75f),
+		BLACK_ALPHA_85  = new Color(0, 0, 0, 0.85f),
 		WHITE_ALPHA     = new Color(255, 255, 255, 0.5f),
 		BLUE_DIVIDER    = new Color(49, 94, 237),
 		BLUE_BACKGROUND = new Color(74, 130, 255),

@@ -48,6 +48,11 @@ public class OptionsOverlay {
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
 	private boolean isListOptionOpen;
+	private int listStartX;
+	private int listStartY;
+	private int listWidth;
+	private int listHeight;
+	private int listHoverIndex;
 
 	private int width;
 	private int height;
@@ -122,6 +127,14 @@ public class OptionsOverlay {
 
 		// options
 		renderOptions(g);
+		if (isListOptionOpen) {
+			renderOpenList(g);
+		}
+
+		// scrollbar
+		g.setColor(Color.white);
+		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / (maxScrollOffset)) * (height - optionStartY - 45), 10, 45, 2);
+		g.clearClip();
 
 		// UI
 		UI.getBackButton().draw();
@@ -145,6 +158,7 @@ public class OptionsOverlay {
 
 	private void renderOptions(Graphics g) {
 		g.setClip(0, optionStartY, width, height - optionStartY);
+		listStartX = listStartY = listWidth = listHeight = 0; // render out of the screen
 		int y = -scrollOffset + optionStartY;
 		selectedTab = 0;
 		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
@@ -166,7 +180,7 @@ public class OptionsOverlay {
 					continue;
 				}
 				maxScrollOffset += optionHeight;
-				if (y > 0 && render) {
+				if ((y > 0 && render) || (isListOptionOpen && hoverOption == option)) {
 					renderOption(g, option, y, option == hoverOption);
 				}
 				y += optionHeight;
@@ -177,11 +191,25 @@ public class OptionsOverlay {
 			}
 		}
 		maxScrollOffset -= optionStartY - optionHeight * 2;
+	}
 
-		// scrollbar
+	private void renderOpenList(Graphics g) {
+		// list
+		g.setColor(Colors.BLACK_ALPHA_85);
+		g.fillRect(listStartX, listStartY, listWidth, listHeight);
+		if (listHoverIndex != -1) {
+			g.setColor(Colors.ORANGE_BUTTON);
+			g.fillRect(listStartX, listStartY + listHoverIndex * optionHeight, listWidth, optionHeight);
+		}
+		g.setLineWidth(1f);
 		g.setColor(Color.white);
-		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / (maxScrollOffset)) * (height - optionStartY - 45), 10, 45, 2);
-		g.clearClip();
+		g.drawRect(listStartX, listStartY, listWidth, listHeight);
+		Object[] listItems = hoverOption.getListItems();
+		int y = listStartY;
+		for (Object item : listItems) {
+			Fonts.MEDIUM.drawString(listStartX + 20, y, item.toString());
+			y += optionHeight;
+		}
 	}
 
 	private void renderOption(Graphics g, GameOption option, int y, boolean focus) {
@@ -189,7 +217,7 @@ public class OptionsOverlay {
 		OptionType type = option.getType();
 		Object[] listItems = option.getListItems();
 		if (listItems != null) {
-			renderListOption(g, option, y, col);
+			renderListOption(g, option, y, col, listItems);
 		} else if (type == OptionType.BOOLEAN) {
 			renderCheckOption(g, option, y, col);
 		} else if (type == OptionType.NUMERIC) {
@@ -199,18 +227,30 @@ public class OptionsOverlay {
 		}
 	}
 
-	private void renderListOption(Graphics g, GameOption option, int y, Color textColor) {
+	private void renderListOption(Graphics g, GameOption option, int y, Color textColor, Object[] listItems) {
 		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
 		int size = (int) (optionHeight * 4f / 5f);
 		int padding = (int) (optionHeight / 10f);
 		nameLen += 20;
-		g.setColor(hoverOption == option ? Colors.ORANGE_BUTTON : Colors.BLACK_ALPHA);
-		g.fillRect(optionStartX + nameLen, y + padding, optionWidth - nameLen, size);
+		int itemStart = optionStartX + nameLen;
+		int itemWidth = optionWidth - nameLen;
+		Color backColor = Colors.BLACK_ALPHA;
+		if (hoverOption == option && listHoverIndex == -1) {
+			backColor = Colors.ORANGE_BUTTON;
+		}
+		g.setColor(backColor);
+		g.fillRect(itemStart, y + padding, itemWidth, size);
 		g.setColor(Color.white);
 		g.setLineWidth(1f);
-		g.drawRect(optionStartX + nameLen, y + padding, optionWidth - nameLen, size);
-		Fonts.MEDIUM.drawString(optionStartX + nameLen + 20, y, option.getValueString(), Color.white);
+		g.drawRect(itemStart, y + padding, itemWidth, size);
+		Fonts.MEDIUM.drawString(itemStart + 20, y, option.getValueString(), Color.white);
+		if (isListOptionOpen && hoverOption == option) {
+			listStartX = optionStartX + nameLen;
+			listStartY = y + padding + size;
+			listWidth = itemWidth;
+			listHeight = listItems.length * optionHeight;
+		}
 	}
 
 	private void renderCheckOption(Graphics g, GameOption option, int y, Color textColor) {
@@ -279,15 +319,34 @@ public class OptionsOverlay {
 			int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
 			selectedOption.setValue(Utils.clamp(value, min, max));
 			selectedOption.drag(container, 0);
+		} else if (isListOptionOpen) {
+			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
+				listHoverIndex = (mouseY - listStartY) / optionHeight;
+			} else {
+				listHoverIndex = -1;
+			}
 		}
 	}
 
 	public void mousePressed(int button, int x, int y) {
+		if (isListOptionOpen) {
+			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
+				hoverOption.clickListItem(listHoverIndex);
+			}
+			isListOptionOpen = false;
+			listHoverIndex = -1;
+			return;
+		}
+
 		mousePressY = y;
 		selectedOption = hoverOption;
 
-		if (selectedOption != null && selectedOption.getType() == OptionType.NUMERIC) {
-			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+		if (selectedOption != null) {
+			if (selectedOption.getListItems() != null) {
+				isListOptionOpen = true;
+			} else if (selectedOption.getType() == OptionType.NUMERIC) {
+				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			}
 		}
 
 		if (UI.getBackButton().contains(x, y)) {
@@ -348,6 +407,9 @@ public class OptionsOverlay {
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
+		if (isListOptionOpen) {
+			return;
+		}
 		if (selectedOption != null) {
 			hoverOption = selectedOption;
 			return;
