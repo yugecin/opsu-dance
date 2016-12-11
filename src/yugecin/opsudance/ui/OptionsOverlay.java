@@ -17,213 +17,489 @@
  */
 package yugecin.opsudance.ui;
 
+import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.Options.GameOption;
+import itdelatrisu.opsu.Options.GameOption.OptionType;
+import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.audio.SoundController;
+import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.state.StateBasedGame;
+import itdelatrisu.opsu.ui.MenuButton;
+import itdelatrisu.opsu.ui.UI;
+import org.newdawn.slick.*;
 
-import java.util.Observable;
-import java.util.Observer;
-
+@SuppressWarnings("UnusedParameters")
 public class OptionsOverlay {
+
+	private Parent parent;
+	private GameContainer container;
+
+	private final Image sliderBallImg;
+	private final Image checkOnImg;
+	private final Image checkOffImg;
+
+	private OptionTab[] tabs;
+	private int selectedTab;
+	private GameOption hoverOption;
+	private GameOption selectedOption;
+	private int sliderOptionStartX;
+	private int sliderOptionLength;
+	private boolean isAdjustingSlider;
+	private boolean isListOptionOpen;
+	private int listStartX;
+	private int listStartY;
+	private int listWidth;
+	private int listHeight;
+	private int listHoverIndex;
 
 	private int width;
 	private int height;
 
-	private static Options.GameOption[] options = new Options.GameOption[] {
-		Options.GameOption.DANCE_MOVER,
-		Options.GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
-		Options.GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
-		Options.GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
-		Options.GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
-		Options.GameOption.DANCE_MOVER_DIRECTION,
-		Options.GameOption.DANCE_SLIDER_MOVER_TYPE,
-		Options.GameOption.DANCE_SPINNER,
-		Options.GameOption.DANCE_SPINNER_DELAY,
-		Options.GameOption.DANCE_LAZY_SLIDERS,
-		Options.GameOption.DANCE_CIRCLE_STREAMS,
-		Options.GameOption.DANCE_ONLY_CIRCLE_STACKS,
-		Options.GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
-		Options.GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS,
-		Options.GameOption.DANCE_MIRROR,
-		Options.GameOption.DANCE_DRAW_APPROACH,
-		Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
-		Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
-		Options.GameOption.DANCE_RGB_OBJECT_INC,
-		Options.GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
-		Options.GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
-		Options.GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
-		Options.GameOption.DANCE_RGB_CURSOR_INC,
-		Options.GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
-		Options.GameOption.DANCE_REMOVE_BG,
-		Options.GameOption.DANCE_HIDE_OBJECTS,
-		Options.GameOption.DANCE_HIDE_UI,
-		Options.GameOption.PIPPI_ENABLE,
-		Options.GameOption.PIPPI_RADIUS_PERCENT,
-		Options.GameOption.PIPPI_ANGLE_INC_MUL,
-		Options.GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
-		Options.GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
-		Options.GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
-		Options.GameOption.SHOW_HIT_LIGHTING,
-	};
+	private int optionWidth;
+	private int optionStartX;
+	private int optionStartY;
+	private int optionHeight;
 
-	private int textHeight;
-	private Input input;
-	private final ItemList list;
-	private GameContainer container;
-	private Options.GameOption selectedOption;
-	private final SBOverlay overlay;
+	private int scrollOffset;
+	private int maxScrollOffset;
 
-	public OptionsOverlay(SBOverlay overlay) {
-		this.overlay = overlay;
-		list = new ItemList();
-	}
+	private int mousePressY;
 
-	public Options.GameOption[] getSavedOptionList() {
-		return options;
-	}
+	private boolean keyEntryLeft;
+	private boolean keyEntryRight;
 
-	public void init(GameContainer container, Input input, int width, int height) {
-		list.init(container);
-		this.input = input;
-		this.width = width;
-		this.height = height;
+	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
+		this.parent = parent;
 		this.container = container;
-		textHeight = Fonts.SMALL.getLineHeight();
+
+		this.tabs = tabs;
+		selectedTab = defaultSelectedTabIndex;
+
+		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(20, 20);
+		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(20, 20);
+		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(20, 20);
+
+		width = container.getWidth();
+		height = container.getHeight();
+
+		// calculate positions
+		optionWidth = width / 2;
+		optionHeight = (int) ((Fonts.MEDIUM.getLineHeight()) * 1.1f);
+		optionStartX = optionWidth / 2;
+
+		// initialize tabs
+		Image tabImage = GameImage.MENU_TAB.getImage();
+		float tabX = width * 0.032f + (tabImage.getWidth() / 3);
+		float tabY = Fonts.XLARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() + height * 0.015f - (tabImage.getHeight() / 2f);
+		int tabOffset = Math.min(tabImage.getWidth(), width / tabs.length);
+		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
+		for (OptionTab tab : tabs) {
+			maxScrollOffset += tab.options.length * optionHeight;
+			tab.button = new MenuButton(tabImage, tabX, tabY);
+			tabX += tabOffset;
+			if (tabX + tabOffset > width) {
+				tabX = 0;
+				tabY += GameImage.MENU_TAB.getImage().getHeight() / 2f;
+			}
+		}
+		maxScrollOffset += -optionStartY - optionHeight;
+
+		// calculate other positions
+		optionStartY = (int) (tabY + tabImage.getHeight() / 2 + 2); // +2 for the separator line
 	}
 
-	public void render(GameContainer container, StateBasedGame game, Graphics g) {
-		int hoverIdx = getOptionIdxAt(input.getMouseY());
-		float a = Color.black.a;
-		Color.black.a = 0.8f;
-		g.setColor(Color.black);
+	public void render(Graphics g, int mouseX, int mouseY) {
+		// bg
+		g.setColor(Colors.BLACK_ALPHA_75);
 		g.fillRect(0, 0, width, height);
-		Color.black.a = a;
-		for (int i = 0, j = 0; i < options.length; i++) {
-			if (!options[i].showCondition()) {
-				continue;
-			}
-			drawOption(g, options[i], j++, selectedOption == null ? hoverIdx == i : selectedOption == options[i]);
+
+		// title
+		renderTitle();
+
+		// option tabs
+		renderTabs(mouseX, mouseY);
+
+		// line separator
+		g.setColor(Color.white);
+		g.setLineWidth(2f);
+		g.drawLine(0, optionStartY - 1, width, optionStartY - 1);
+		g.resetLineWidth();
+
+		// options
+		renderOptions(g);
+		if (isListOptionOpen) {
+			renderOpenList(g);
 		}
-		if (list.isVisible()) {
-			list.render(container, game, g);
+
+		// scrollbar
+		g.setColor(Color.white);
+		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / (maxScrollOffset)) * (height - optionStartY - 45), 10, 45, 2);
+		g.clearClip();
+
+		// UI
+		UI.getBackButton().draw();
+
+		// tooltip
+		renderTooltip(g, mouseX, mouseY);
+
+		// key input options
+		if (keyEntryLeft ||keyEntryRight) {
+			renderKeyEntry(g);
 		}
 	}
 
-	// I know... kill me
-	private void drawOption(Graphics g, Options.GameOption option, int pos, boolean focus) {
-		float y = pos * (textHeight + 5);
-		Color color = (focus) ? Color.cyan : Color.white;
-
-		Fonts.MEDIUM.drawString(width / 6 * 2, y, option.getName(), color);
-		Fonts.MEDIUM.drawString(width / 3 * 2, y, option.getValueString(), color);
-		g.setColor(Colors.WHITE_ALPHA);
-		g.drawLine(0, y + textHeight + 3, width, y + textHeight + 3 + 1);
+	private void renderKeyEntry(Graphics g) {
+		g.setColor(Colors.BLACK_ALPHA_75);
+		g.fillRect(0, 0, width, height);
+		g.setColor(Color.white);
+		String prompt = (keyEntryLeft) ? "Please press the new left-click key." : "Please press the new right-click key.";
+		Fonts.LARGE.drawString((width - Fonts.LARGE.getWidth(prompt)) / 2, (height - Fonts.LARGE.getLineHeight()) / 2, prompt);
 	}
 
-	private int getOptionIdxAt(int y) {
-		int index = y / (textHeight + 5);
-		if (index >= options.length) {
-			return -1;
+	private void renderTooltip(Graphics g, int mouseX, int mouseY) {
+		if (hoverOption != null) {
+			String optionDescription = hoverOption.getDescription();
+			float textWidth = Fonts.SMALL.getWidth(optionDescription);
+			Color.black.a = 0.7f;
+			g.setColor(Color.black);
+			g.fillRoundRect(mouseX + 10, mouseY + 10, 10 + textWidth, 10 + Fonts.SMALL.getLineHeight(), 4);
+			Fonts.SMALL.drawString(mouseX + 15, mouseY + 15, optionDescription, Color.white);
+			Color.black.a = 1f;
 		}
-		for (int i = 0; i < options.length; i++) {
-			if (options[i].showCondition()) {
-				index--;
-			}
-			if (index < 0) {
-				return i;
-			}
-		}
-		return -1;
 	}
 
-	public void update(int mouseX, int mouseY) {
-
-	}
-
-	public boolean mousePressed(int button, int x, int y) {
-		if (list.isVisible()) {
-			list.mousePressed(button, x, y);
-			return true;
-		}
-		int idx = getOptionIdxAt(y);
-		if (idx >= 0 && idx < options.length) {
-			final Options.GameOption option = options[idx];
-			selectedOption = option;
-			Object[] listItems = option.getListItems();
-			if (listItems == null) {
-				option.click(container);
+	private void renderOptions(Graphics g) {
+		g.setClip(0, optionStartY, width, height - optionStartY);
+		listStartX = listStartY = listWidth = listHeight = 0; // render out of the screen
+		int y = -scrollOffset + optionStartY;
+		selectedTab = 0;
+		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
+		boolean render = true;
+		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
+			OptionTab tab = tabs[tabIndex];
+			if (y > 0) {
+				if (render) {
+					int x = optionStartX + (optionWidth - Fonts.LARGE.getWidth(tab.name)) / 2;
+					Fonts.LARGE.drawString(x, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
+				}
 			} else {
-				list.setItems(listItems);
-				list.setClickListener(new Observer() {
-					@Override
-					public void update(Observable o, Object arg) {
-						option.clickListItem((int) arg);
-						overlay.saveOption(option);
-					}
-				});
-				list.show();
+				selectedTab++;
+			}
+			y += Fonts.MEDIUM.getLineHeight() * 2;
+			for (int optionIndex = 0; optionIndex < tab.options.length; optionIndex++) {
+				GameOption option = tab.options[optionIndex];
+				if (!option.showCondition()) {
+					continue;
+				}
+				maxScrollOffset += optionHeight;
+				if ((y > 0 && render) || (isListOptionOpen && hoverOption == option)) {
+					renderOption(g, option, y, option == hoverOption);
+				}
+				y += optionHeight;
+				if (y > height) {
+					render = false;
+					tabIndex = tabs.length;
+				}
 			}
 		}
-		return true;
+		maxScrollOffset -= optionStartY - optionHeight * 2;
 	}
 
+	private void renderOpenList(Graphics g) {
+		g.setColor(Colors.BLACK_ALPHA_85);
+		g.fillRect(listStartX, listStartY, listWidth, listHeight);
+		if (listHoverIndex != -1) {
+			g.setColor(Colors.ORANGE_BUTTON);
+			g.fillRect(listStartX, listStartY + listHoverIndex * optionHeight, listWidth, optionHeight);
+		}
+		g.setLineWidth(1f);
+		g.setColor(Color.white);
+		g.drawRect(listStartX, listStartY, listWidth, listHeight);
+		Object[] listItems = hoverOption.getListItems();
+		int y = listStartY;
+		for (Object item : listItems) {
+			Fonts.MEDIUM.drawString(listStartX + 20, y, item.toString());
+			y += optionHeight;
+		}
+	}
+
+	private void renderOption(Graphics g, GameOption option, int y, boolean focus) {
+		Color col = focus ? Colors.GREEN : Colors.WHITE_FADE;
+		OptionType type = option.getType();
+		Object[] listItems = option.getListItems();
+		if (listItems != null) {
+			renderListOption(g, option, y, col, listItems);
+		} else if (type == OptionType.BOOLEAN) {
+			renderCheckOption(g, option, y, col);
+		} else if (type == OptionType.NUMERIC) {
+			renderSliderOption(g, option, y, col);
+		} else {
+			renderGenericOption(g, option, y, col);
+		}
+	}
+
+	private void renderListOption(Graphics g, GameOption option, int y, Color textColor, Object[] listItems) {
+		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		int size = (int) (optionHeight * 4f / 5f);
+		int padding = (int) (optionHeight / 10f);
+		nameLen += 20;
+		int itemStart = optionStartX + nameLen;
+		int itemWidth = optionWidth - nameLen;
+		Color backColor = Colors.BLACK_ALPHA;
+		if (hoverOption == option && listHoverIndex == -1) {
+			backColor = Colors.ORANGE_BUTTON;
+		}
+		g.setColor(backColor);
+		g.fillRect(itemStart, y + padding, itemWidth, size);
+		g.setColor(Color.white);
+		g.setLineWidth(1f);
+		g.drawRect(itemStart, y + padding, itemWidth, size);
+		Fonts.MEDIUM.drawString(itemStart + 20, y, option.getValueString(), Color.white);
+		if (isListOptionOpen && hoverOption == option) {
+			listStartX = optionStartX + nameLen;
+			listStartY = y + padding + size;
+			listWidth = itemWidth;
+			listHeight = listItems.length * optionHeight;
+		}
+	}
+
+	private void renderCheckOption(Graphics g, GameOption option, int y, Color textColor) {
+		if (option.getBooleanValue()) {
+			checkOnImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+		} else {
+			checkOffImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+		}
+		Fonts.MEDIUM.drawString(optionStartX + 30, y, option.getName(), textColor);
+	}
+
+	private void renderSliderOption(Graphics g, GameOption option, int y, Color textColor) {
+		String value = option.getValueString();
+		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
+		int valueLen = Fonts.MEDIUM.getWidth(value);
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, Colors.BLUE_BACKGROUND);
+		int sliderLen = optionWidth - nameLen - valueLen - 50;
+
+		if (hoverOption == option) {
+			if (!isAdjustingSlider) {
+				sliderOptionLength = sliderLen;
+				sliderOptionStartX = optionStartX + nameLen + 25;
+			} else {
+				sliderLen = sliderOptionLength;
+			}
+		}
+
+		g.setColor(Color.pink);
+		g.setLineWidth(3f);
+		g.drawLine(optionStartX + nameLen + 25, y + optionHeight / 2, optionStartX + nameLen + 25 + sliderLen, y + optionHeight / 2);
+		float sliderValue = (float) (sliderLen + 10) * (option.getIntegerValue() - option.getMinValue()) / (option.getMaxValue() - option.getMinValue());
+		sliderBallImg.draw(optionStartX + nameLen + 25 + sliderValue - 10, y + optionHeight / 2 - 10, Color.pink);
+	}
+
+	private void renderGenericOption(Graphics g, GameOption option, int y, Color textColor) {
+		String value = option.getValueString();
+		int valueLen = Fonts.MEDIUM.getWidth(value);
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, Colors.BLUE_BACKGROUND);
+	}
+
+	public void renderTabs(int mouseX, int mouseY) {
+		for (int i = 0; i < tabs.length; i++) {
+			OptionTab tab = tabs[i];
+			boolean hovering = tab.button.contains(mouseX, mouseY);
+			UI.drawTab(tab.button.getX(), tab.button.getY(), tab.name, i == selectedTab, hovering);
+		}
+	}
+
+	private void renderTitle() {
+		float marginX = width * 0.015f;
+		float marginY = height * 0.01f;
+		Fonts.XLARGE.drawString(marginX, marginY, "Options", Color.white);
+		marginX += Fonts.XLARGE.getWidth("Options") * 1.2f;
+		marginY += Fonts.XLARGE.getLineHeight() * 0.9f - Fonts.DEFAULT.getLineHeight();
+		Fonts.DEFAULT.drawString(marginX, marginY, "Change the way opsu! behaves", Color.white);
+	}
+
+	public void update(int delta, int mouseX, int mouseY) {
+		updateHoverOption(mouseX, mouseY);
+		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		if (isAdjustingSlider) {
+			int min = selectedOption.getMinValue();
+			int max = selectedOption.getMaxValue();
+			int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
+			selectedOption.setValue(Utils.clamp(value, min, max));
+			selectedOption.drag(container, 0);
+		} else if (isListOptionOpen) {
+			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
+				listHoverIndex = (mouseY - listStartY) / optionHeight;
+			} else {
+				listHoverIndex = -1;
+			}
+		}
+	}
+
+	public void mousePressed(int button, int x, int y) {
+		if (keyEntryLeft || keyEntryRight) {
+			keyEntryLeft = keyEntryRight = false;
+			return;
+		}
+
+		if (isListOptionOpen) {
+			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
+				hoverOption.clickListItem(listHoverIndex);
+				parent.onSaveOption(hoverOption);
+				SoundController.playSound(SoundEffect.MENUCLICK);
+			}
+			isListOptionOpen = false;
+			listHoverIndex = -1;
+			return;
+		}
+
+		mousePressY = y;
+		selectedOption = hoverOption;
+
+		if (selectedOption != null) {
+			if (selectedOption.getListItems() != null) {
+				isListOptionOpen = true;
+			} else if (selectedOption.getType() == OptionType.NUMERIC) {
+				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			} else if (selectedOption == GameOption.KEY_LEFT) {
+				keyEntryLeft = true;
+			} else if (selectedOption == GameOption.KEY_RIGHT) {
+				keyEntryLeft = true;
+			}
+		}
+
+		if (UI.getBackButton().contains(x, y)) {
+			parent.onLeave();
+		}
+	}
+
+	public void mouseReleased(int button, int x, int y) {
+		selectedOption = null;
+		isAdjustingSlider = false;
+		sliderOptionLength = 0;
+
+		// check if clicked, not dragged
+		if (Math.abs(y - mousePressY) >= 5) {
+			return;
+		}
+
+		if (hoverOption != null) {
+			parent.onSaveOption(hoverOption);
+			if (hoverOption.getType() == OptionType.BOOLEAN) {
+				hoverOption.click(container);
+				SoundController.playSound(SoundEffect.MENUHIT);
+				return;
+			}
+		}
+
+		int tScrollOffset = 0;
+		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
+			if (tabs[tabIndex].button.contains(x, y)) {
+				if (selectedTab != tabIndex) {
+					selectedTab = tabIndex;
+					scrollOffset = tScrollOffset;
+					SoundController.playSound(SoundEffect.MENUCLICK);
+				}
+				return;
+			}
+			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
+			tScrollOffset += tabs[tabIndex].options.length * optionHeight;
+		}
+	}
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (list.isVisible()) {
-			list.mouseDragged(oldx, oldy, newx, newy);
-			return;
-		}
-
-		int multiplier;
-		if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON))
-			multiplier = 4;
-		else if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON))
-			multiplier = 1;
-		else
-			return;
-
-		// get direction
-		int diff = newx - oldx;
-		if (diff == 0)
-			return;
-		diff = ((diff > 0) ? 1 : -1) * multiplier;
-
-		// options (drag only)
-		if (selectedOption != null) {
-			selectedOption.drag(container, diff);
+		if (!isAdjustingSlider) {
+			scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
 		}
 	}
 
-	public boolean mouseReleased(int button, int x, int y) {
-		if (selectedOption != null) {
-			overlay.saveOption(selectedOption);
+	public void mouseWheelMoved(int delta) {
+		if (!isAdjustingSlider) {
+			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset);
 		}
-		selectedOption = null;
-		if (list.isVisible()) {
-			list.mouseReleased(button, x, y);
-			return true;
-		}
-		return true;
-	}
-
-	public boolean mouseWheenMoved(int newValue) {
-		if (list.isVisible()) {
-			list.mouseWheelMoved(newValue);
-			return true;
-		}
-		return true;
 	}
 
 	public boolean keyPressed(int key, char c) {
-		if (list.isVisible()) {
-			list.keyPressed(key, c);
+		if (keyEntryRight) {
+			Options.setGameKeyRight(key);
+			keyEntryRight = false;
 			return true;
+		}
+
+		if (keyEntryLeft) {
+			Options.setGameKeyLeft(key);
+			keyEntryLeft = false;
+			return true;
+		}
+
+		switch (key) {
+			case Input.KEY_ESCAPE:
+				if (isListOptionOpen) {
+					isListOptionOpen = false;
+					listHoverIndex = -1;
+					return true;
+				}
+				parent.onLeave();
+				return true;
 		}
 		return false;
 	}
+
+	private void updateHoverOption(int mouseX, int mouseY) {
+		if (isListOptionOpen || keyEntryLeft || keyEntryRight) {
+			return;
+		}
+		if (selectedOption != null) {
+			hoverOption = selectedOption;
+			return;
+		}
+		hoverOption = null;
+		if (mouseY < optionStartY || mouseX < optionStartX || mouseX > optionStartX + optionWidth) {
+			return;
+		}
+
+		int mouseVirtualY = scrollOffset + mouseY - optionStartY;
+		for (OptionTab tab : tabs) {
+			mouseVirtualY -= Fonts.MEDIUM.getLineHeight() * 2;
+			for (int optionIndex = 0; optionIndex < tab.options.length; optionIndex++) {
+				GameOption option = tab.options[optionIndex];
+				if (!option.showCondition()) {
+					continue;
+				}
+				if (mouseVirtualY <= optionHeight) {
+					if (mouseVirtualY >= 0) {
+						hoverOption = option;
+					}
+					return;
+				}
+				mouseVirtualY -= optionHeight;
+			}
+		}
+	}
+
+	public static class OptionTab {
+
+		public final String name;
+		public final GameOption[] options;
+		private MenuButton button;
+
+		public OptionTab(String name, GameOption[] options) {
+			this.name = name;
+			this.options = options;
+		}
+
+	}
+
+	public interface Parent {
+
+		void onLeave();
+		void onSaveOption(GameOption option);
+
+	}
+
 }

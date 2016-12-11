@@ -200,9 +200,9 @@ public class Cursor {
 		// draw the other components
 		if (newStyle && skin.isCursorRotated())
 			cursor.setRotation(cursorAngle);
-		cursor.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
+		cursor.drawCentered(mouseX, mouseY, Options.isCursorOnlyColorTrail() ? Color.white : filter);
 		if (hasMiddle)
-			cursorMiddle.drawCentered(mouseX, mouseY, Dancer.onlycolortrail ? Color.white : filter);
+			cursorMiddle.drawCentered(mouseX, mouseY, Options.isCursorOnlyColorTrail() ? Color.white : filter);
 	}
 
 	/**
@@ -231,8 +231,9 @@ public class Cursor {
 				removeCount = trail.size() - max;
 		}
 
-		if (Dancer.cursortraillength > 20) {
-			removeCount = trail.size() - Dancer.cursortraillength;
+		int cursortraillength = Options.getCursorTrailOverride();
+		if (cursortraillength > 20) {
+			removeCount = trail.size() - cursortraillength;
 		}
 
 		// remove points from the lists

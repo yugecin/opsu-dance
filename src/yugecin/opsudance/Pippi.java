@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
@@ -27,14 +28,7 @@ public class Pippi {
 	private static int currentdelta;
 	private static final int targetdelta = 4;
 
-	public static boolean enabled = false;
 	private static int radiusPercent;
-	public static int angleInc = 10;
-	public static int angleSliderInc = 50;
-	public static boolean preventWobblyStreams = true;
-	public static boolean followcircleExpand = true;
-	public static boolean circleSlowSliders = false;
-	public static boolean circleLazySliders = false;
 
 	private static double pippirad;
 	private static double pippiminrad;
@@ -54,19 +48,19 @@ public class Pippi {
 	}
 
 	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
-		boolean slowSlider = circleSlowSliders && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
+		boolean slowSlider = Options.isCircleInSlowSliders() && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
 		if (!slowSlider) {
-			slowSlider = circleLazySliders && isCurrentLazySlider;
+			slowSlider = Options.isCircleInLazySliders() && isCurrentLazySlider;
 		}
-		if ((!enabled || c.isSpinner()) && !slowSlider) {
+		if ((!Options.isPippiEnabled() || c.isSpinner()) && !slowSlider) {
 			return;
 		}
 		if (currentdelta >= targetdelta && c != previous) {
 			currentdelta = 0;
 			if (c.isSlider() && c.getTime() < time) {
-				angle += angleSliderInc / 1800d * Math.PI;
+				angle += Options.getPippiAngIncMultiplierSlider() / 1800d * Math.PI;
 				if (!slowSlider) {
-					if (followcircleExpand) {
+					if (Options.isPippiFollowcircleExpand()) {
 						if (c.getEndTime() - time < 40 && pippirad > pippimaxrad) {
 							pippirad -= 5d;
 						} else if (time - c.getTime() > 10 && c.getEndTime() - c.getTime() > 600 && pippirad < pippimaxrad) {
@@ -75,10 +69,10 @@ public class Pippi {
 					}
 				}
 			} else if (!c.isSpinner()) {
-				if (followcircleExpand && pippirad != pippiminrad) {
+				if (Options.isPippiFollowcircleExpand() && pippirad != pippiminrad) {
 					pippirad = pippiminrad;
 				}
-				angle += angleInc / 1800d * Math.PI;
+				angle += Options.getPippiAngIncMultiplier() / 1800d * Math.PI;
 			}
 			// don't inc on long movements
 			if (c.getTime() - time > 400) {
@@ -97,7 +91,7 @@ public class Pippi {
 	}
 
 	public static boolean shouldPreventWobblyStream(double distance) {
-		return enabled && distance < Circle.diameter * 0.93f && preventWobblyStreams;
+		return Options.isPippiEnabled() && distance < Circle.diameter * 0.93f && Options.isPippiPreventWobblyStreams();
 	}
 
 }

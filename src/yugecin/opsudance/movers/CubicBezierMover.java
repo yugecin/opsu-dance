@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.movers;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
@@ -25,8 +26,6 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import java.awt.*;
 
 public class CubicBezierMover extends Mover {
-
-	public static int aggressivenessfactor = 4;
 
 	private static Point p2 = new Point(0, 0);
 	private static Point p1 = new Point(0, 0);
@@ -42,7 +41,7 @@ public class CubicBezierMover extends Mover {
 			double ang = s.getCurve().getStartAngle() * Math.PI / 180d + Math.PI;
 			Vec2f nextpos = s.getPointAt(s.getTime() + 10);
 			double dist = Utils.distance(end.start.x, end.start.y, nextpos.x, nextpos.y);
-			double speed = dist * QuadraticBezierMover.aggressiveness * aggressivenessfactor / 10;
+			double speed = dist * Options.getQuadBezAggressiveness() * Options.getQuadBezSliderEntryAggressiveness() / 10;
 			p2.x = (int) (end.start.x + Math.cos(ang) * speed);
 			p2.y = (int) (end.start.y + Math.sin(ang) * speed);
 		}

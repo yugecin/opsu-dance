@@ -1190,7 +1190,7 @@ public class GameData {
 
 	public void sendInitialSliderResult(int time, float x, float y, Color color, Color mirrorcolor) {
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, x, y, color, null, null, true, false));
-		if (!Dancer.mirror || !GameMod.AUTO.isActive()) {
+		if (!Options.isMirror() || !GameMod.AUTO.isActive()) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);

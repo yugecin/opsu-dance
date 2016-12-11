@@ -522,13 +522,13 @@ public class Options {
 		MAP_START_DELAY ("Map start delay", "StartDelay", "Have a fix amount of time to prepare your play/record", 20, 1, 50) {
 			@Override
 			public String getValueString() {
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		MAP_END_DELAY ("Map end delay", "EndDelay", "Have a fix amount of time at the and of the map for a smooth finish", 50, 1, 150) {
 			@Override
 			public String getValueString() {
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		EPILEPSY_WARNING ("Epilepsy warning image", "EpiWarn", "Show a little warning for flashing colours in the beginning", 0, 0, 20) {
@@ -537,7 +537,7 @@ public class Options {
 				if (val == 0) {
 					return "Disabled";
 				}
-				return String.valueOf(val * 100);
+				return (val * 100) + "ms";
 			}
 		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
@@ -609,7 +609,6 @@ public class Options {
 		REPLAY_SEEKING ("Replay Seeking", "ReplaySeeking", "Enable a seeking bar on the left side of the screen during replays.", false),
 		DISABLE_UPDATER ("Disable Automatic Updates", "DisableUpdater", "Disable automatic checking for updates upon starting opsu!.", false),
 		ENABLE_WATCH_SERVICE ("Enable Watch Service", "WatchService", "Watch the beatmap directory for changes. Requires a restart.", false),
-
 		DANCE_MOVER ("Mover algorithm", "Mover", "Algorithm that decides how to move from note to note" ) {
 			@Override
 			public Object[] getListItems() {
@@ -637,41 +636,21 @@ public class Options {
 				Dancer.instance.setMoverFactoryIndex(i);
 			}
 		},
-
 		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
 			@Override
 			public String getValueString() {
-				return val + "";
-			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				QuadraticBezierMover.aggressiveness = val;
+				return String.valueOf(val);
 			}
 
 			@Override
 			public boolean showCondition() {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
 			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				QuadraticBezierMover.aggressiveness = val;
-			}
 		},
-
-		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 40, 10, 60) {
+		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 4, 1, 6) {
 			@Override
 			public String getValueString() {
-				return val / 10 + "";
-			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				QuadraticBezierMover.sliderExitAggressivenessfactor = val / 10;
+				return String.valueOf(val);
 			}
 
 			@Override
@@ -679,43 +658,17 @@ public class Options {
 				return DANCE_QUAD_BEZ_AGGRESSIVENESS.showCondition()
 					&& Dancer.sliderMoverController instanceof DefaultSliderMoverController;
 			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				QuadraticBezierMover.sliderExitAggressivenessfactor = val / 10;
-			}
 		},
-
 		DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS ("Use cubic bezier before sliders", "QuadBezCubicSliders", "Slider entry looks better using this", true) {
-			@Override
-			public void click(GameContainer container) {
-				super.click(container);
-				QuadraticBezierMoverFactory.cubicForSliderEntries = bool;
-			}
-
 			@Override
 			public boolean showCondition() {
 				return DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR.showCondition();
 			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				QuadraticBezierMoverFactory.cubicForSliderEntries = bool;
-			}
 		},
-
-		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 40, 10, 60) {
+		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 4, 1, 6) {
 			@Override
 			public String getValueString() {
-				return val / 10 + "";
-			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				CubicBezierMover.aggressivenessfactor = val / 10;
+				return String.valueOf(val);
 			}
 
 			@Override
@@ -723,14 +676,7 @@ public class Options {
 				return DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.showCondition()
 					&& DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
 			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				CubicBezierMover.aggressivenessfactor = val / 10;
-			}
 		},
-
 		DANCE_MOVER_DIRECTION ("Mover direction", "MoverDirection", "The direction the mover goes" ) {
 			@Override
 			public String getValueString() {
@@ -757,7 +703,6 @@ public class Options {
 				Dancer.moverDirection = MoverDirection.values()[Integer.parseInt(s)];
 			}
 		},
-
 		DANCE_SLIDER_MOVER_TYPE ("Slider mover", "SliderMover", "How to move in sliders") {
 			@Override
 			public String getValueString() {
@@ -785,7 +730,6 @@ public class Options {
 				Dancer.sliderMoverController = Dancer.sliderMovers[val = Integer.parseInt(s)];
 			}
 		},
-
 		DANCE_SPINNER ("Spinner", "Spinner", "Spinner style") {
 			@Override
 			public Object[] getListItems() {
@@ -812,96 +756,17 @@ public class Options {
 				Dancer.instance.setSpinnerIndex(Integer.parseInt(s));
 			}
 		},
-
-		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", Spinner.DELAY, 0, 200) {
+		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", 3, 0, 20) {
 			@Override
 			public String getValueString() {
-				return String.format("%dms", val / 10);
-			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Spinner.DELAY = val / 10;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Spinner.DELAY = val / 10;
+				return String.format("%dms", val);
 			}
 		},
-
-		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", Dancer.LAZY_SLIDERS) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.LAZY_SLIDERS = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.LAZY_SLIDERS = bool;
-			}
-		},
-
-		DANCE_ONLY_CIRCLE_STACKS ("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", AutoMoverFactory.ONLY_CIRCLE_STACKS) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				AutoMoverFactory.ONLY_CIRCLE_STACKS = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				AutoMoverFactory.ONLY_CIRCLE_STACKS = bool;
-			}
-		},
-
-		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", AutoMoverFactory.CIRCLE_STREAM == 58) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				AutoMoverFactory.CIRCLE_STREAM = bool ? 58 : 85;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				AutoMoverFactory.CIRCLE_STREAM = bool ? 58 : 85;
-			}
-		},
-
-		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff. Toggle this ingame by pressing the M key.", Dancer.mirror) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.mirror = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.mirror = bool;
-			}
-		},
-
-		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", Dancer.drawApproach) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.drawApproach = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.drawApproach = bool;
-			}
-		},
-
+		DANCE_LAZY_SLIDERS ("Lazy sliders", "LazySliders", "Don't do short sliders", false),
+		DANCE_ONLY_CIRCLE_STACKS ("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", false),
+		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", false),
+		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff. Toggle this ingame by pressing the M key.", false),
+		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", true),
 		DANCE_OBJECT_COLOR_OVERRIDE ("Object color override", "ObjColorOverride", "Override object colors") {
 			@Override
 			public String getValueString() {
@@ -928,7 +793,6 @@ public class Options {
 				Dancer.colorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-
 		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Collage object color override", "ObjColorMirroredOverride", "Override collage object colors") {
 			@Override
 			public String getValueString() {
@@ -955,26 +819,12 @@ public class Options {
 				Dancer.colorMirrorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-
-		DANCE_RGB_OBJECT_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", Dancer.rgbhueinc, -1800, 1800) {
+		DANCE_RGB_OBJECT_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", 70, -1800, 1800) {
 			@Override
 			public String getValueString() {
 				return String.format("%.1f°", val / 10f);
 			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Dancer.rgbhueinc = val;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.rgbhueinc = val;
-			}
 		},
-
 		DANCE_CURSOR_COLOR_OVERRIDE ("Cursor color override", "CursorColorOverride", "Override cursor color") {
 			@Override
 			public String getValueString() {
@@ -1001,7 +851,6 @@ public class Options {
 				Dancer.cursorColorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-
 		DANCE_CURSOR_MIRROR_COLOR_OVERRIDE ("Cursor mirror color override", "CursorMirrorColorOverride", "Override mirror cursor color") {
 			@Override
 			public String getValueString() {
@@ -1028,41 +877,14 @@ public class Options {
 				Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-
-		DANCE_CURSOR_ONLY_COLOR_TRAIL ("Only color cursor trail", "OnlyColorTrail", "Don't color the cursor, only the trail", Dancer.onlycolortrail) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.onlycolortrail = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.onlycolortrail = bool;
-			}
-		},
-
-		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", Dancer.rgbhueinc, -2000, 2000) {
+		DANCE_CURSOR_ONLY_COLOR_TRAIL ("Only color cursor trail", "OnlyColorTrail", "Don't color the cursor, only the trail", false),
+		DANCE_RGB_CURSOR_INC ("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", 100, -2000, 2000) {
 			@Override
 			public String getValueString() {
 				return String.format("%.2f°", val / 1000f);
 			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Dancer.rgbcursorhueinc = val;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.rgbcursorhueinc = val;
-			}
 		},
-
-		DANCE_CURSOR_TRAIL_OVERRIDE ("Cursor trail length override", "CursorTrailOverride", "Override cursor trail length", Dancer.cursortraillength, 20, 400) {
+		DANCE_CURSOR_TRAIL_OVERRIDE ("Cursor trail length override", "CursorTrailOverride", "Override cursor trail length", 20, 20, 400) {
 			@Override
 			public String getValueString() {
 				if (val == 20) {
@@ -1070,141 +892,20 @@ public class Options {
 				}
 				return "" + val;
 			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Dancer.cursortraillength = val;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.cursortraillength = val;
-			}
 		},
-
-		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", Dancer.hideobjects) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.hideobjects = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.hideobjects = bool;
-			}
-		},
-
-		DANCE_REMOVE_BG ("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", Dancer.removebg) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.removebg = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.removebg = bool;
-			}
-		},
-
-		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", Pippi.circleSlowSliders) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Pippi.circleSlowSliders = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.circleSlowSliders = bool;
-			}
-		},
-
-		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", Pippi.circleLazySliders) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Pippi.circleLazySliders = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.circleLazySliders = bool;
-			}
-		},
-
-		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", Dancer.hideui) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Dancer.hideui = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Dancer.hideui = bool;
-			}
-		},
-
-		DANCE_ENABLE_SB ("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false) {
-			@Override
-			public void click(GameContainer container) {
-				super.click(container);
-				SBOverlay.isActive = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				SBOverlay.isActive = bool;
-			}
-		},
-
-		DANCE_HIDE_WATERMARK ("Hide watermark", "HideWaterMark", "Hide the githublink in the top left corner of the playfield", false) {
-			@Override
-			public String getValueString() {
-				return Dancer.hidewatermark ? "Yes" : "No";
-			}
-
-			@Override
-			public void click(GameContainer container) {
-				Dancer.hidewatermark = false;
-			}
-
-			@Override
-			public boolean showRWM() {
-				return !Dancer.hidewatermark;
-			}
-		},
-
-		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", Pippi.enabled) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Pippi.enabled = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.enabled = bool;
-			}
-		},
-
-		PIPPI_RADIUS_PERCENT ("Pippi radius", "PippiRad", "Radius of pippi, percentage of circle radius", 200, 0, 200) {
+		DANCE_HIDE_OBJECTS ("Don't draw objects", "HideObj", "If you only want to see cursors :)", false),
+		DANCE_REMOVE_BG ("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", true),
+		DANCE_CIRLCE_IN_SLOW_SLIDERS ("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false),
+		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false),
+		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true),
+		DANCE_ENABLE_SB ("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false),
+		DANCE_HIDE_WATERMARK ("Hide watermark", "HideWaterMark", "Hide the githublink in the top left corner of the playfield", false),
+		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false),
+		PIPPI_RADIUS_PERCENT ("Pippi radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
 			@Override
 			public String getValueString() {
 				return (val / 2) + "%";
 			}
-
 			@Override
 			public void drag(GameContainer container, int d) {
 				super.drag(container, d);
@@ -1217,72 +918,20 @@ public class Options {
 				Pippi.setRadiusPercent(val / 2);
 			}
 		},
-
-		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", Pippi.angleInc, -200, 200) {
+		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 10, -200, 200) {
 			@Override
 			public String getValueString() {
 				return String.format("x%.1f", val / 10f);
 			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Pippi.angleInc = val;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.angleInc = val;
-			}
 		},
-
-		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", Pippi.angleSliderInc, -200, 200) {
+		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", 50, -200, 200) {
 			@Override
 			public String getValueString() {
 				return String.format("x%.1f", val / 10f);
 			}
-
-			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				Pippi.angleSliderInc = val;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.angleSliderInc = val;
-			}
 		},
-
-		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", Pippi.followcircleExpand) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Pippi.followcircleExpand = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.followcircleExpand = bool;
-			}
-		},
-
-		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", Pippi.preventWobblyStreams) {
-			@Override
-			public void click(GameContainer container) {
-				bool = !bool;
-				Pippi.preventWobblyStreams = bool;
-			}
-
-			@Override
-			public void read(String s) {
-				super.read(s);
-				Pippi.preventWobblyStreams = bool;
-			}
-		};
+		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false),
+		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
 
 
 		/** Option name. */
@@ -1306,7 +955,7 @@ public class Options {
 		private int max, min;
 
 		/** Option types. */
-		private enum OptionType { BOOLEAN, NUMERIC, OTHER };
+		public enum OptionType { BOOLEAN, NUMERIC, OTHER };
 
 		/** Whether or not this is a numeric option. */
 		private OptionType type = OptionType.OTHER;
@@ -1385,8 +1034,6 @@ public class Options {
 		 */
 		public String getDescription() { return description; }
 
-		public boolean showRWM() { return false; } // this is probably a shitty way to implement this :)
-
 		/**
 		 * Returns the boolean value for the option, if applicable.
 		 * @return the boolean value
@@ -1456,7 +1103,7 @@ public class Options {
 		 * @param container the game container
 		 * @param d the dragged distance (modified by multiplier)
 		 */
-		public void drag(GameContainer container, int d) {
+		public void drag(GameContainer container, int d) { // TODO rename this
 			if (type == OptionType.NUMERIC)
 				val = Utils.clamp(val + d, min, max);
 		}
@@ -1495,8 +1142,8 @@ public class Options {
 				bool = Boolean.parseBoolean(s);
 		}
 
-		public boolean isDragOption() {
-			return type == OptionType.NUMERIC;
+		public OptionType getType() {
+			return type;
 		}
 
 		public int getMinValue() {
@@ -1696,6 +1343,88 @@ public class Options {
 			boolean borderless = (screenWidth == width && screenHeight == height);
 			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
 		}
+	}
+
+	public static int getQuadBezAggressiveness() {
+		return GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS.getIntegerValue();
+	}
+	public static int getQuadBezSliderAggressiveness() {
+		return GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR.getIntegerValue();
+	}
+	public static boolean isQuadBezCubicEnabled() {
+		return GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
+	}
+	public static int getQuadBezSliderEntryAggressiveness() {
+		return GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR.getIntegerValue();
+	}
+	public static int getSpinnerDelay() {
+		return GameOption.DANCE_SPINNER_DELAY.getIntegerValue();
+	}
+	public static boolean isLazySliders() {
+		return GameOption.DANCE_LAZY_SLIDERS.getBooleanValue();
+	}
+	public static boolean isOnlyCircleStacks() {
+		return GameOption.DANCE_ONLY_CIRCLE_STACKS.getBooleanValue();
+	}
+	public static boolean isCircleStreams() {
+		return GameOption.DANCE_CIRCLE_STREAMS.getBooleanValue();
+	}
+	public static boolean isMirror() {
+		return GameOption.DANCE_MIRROR.getBooleanValue();
+	}
+	public static void setMirror(boolean mirror) {
+		GameOption.DANCE_MIRROR.setValue(mirror);
+	}
+	public static boolean isDrawApproach() {
+		return GameOption.DANCE_DRAW_APPROACH.getBooleanValue();
+	}
+	public static int getRGBObjInc() {
+		return GameOption.DANCE_RGB_OBJECT_INC.getIntegerValue();
+	}
+	public static boolean isCursorOnlyColorTrail() {
+		return GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL.getBooleanValue();
+	}
+	public static int getRGBCursorInc() {
+		return GameOption.DANCE_RGB_CURSOR_INC.getIntegerValue();
+	}
+	public static int getCursorTrailOverride() {
+		return GameOption.DANCE_CURSOR_TRAIL_OVERRIDE.getIntegerValue();
+	}
+	public static boolean isHideObjects() {
+		return GameOption.DANCE_HIDE_OBJECTS.getBooleanValue();
+	}
+	public static boolean isRemoveBG() {
+		return GameOption.DANCE_REMOVE_BG.getBooleanValue();
+	}
+	public static boolean isCircleInSlowSliders() {
+		return GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS.getBooleanValue();
+	}
+	public static boolean isCircleInLazySliders() {
+		return GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS.getBooleanValue();
+	}
+	public static boolean isHideUI() {
+		return GameOption.DANCE_HIDE_UI.getBooleanValue();
+	}
+	public static boolean isEnableSB() {
+		return GameOption.DANCE_ENABLE_SB.getBooleanValue();
+	}
+	public static boolean isHideWM() {
+		return GameOption.DANCE_HIDE_WATERMARK.getBooleanValue();
+	}
+	public static boolean isPippiEnabled() {
+		return GameOption.PIPPI_ENABLE.getBooleanValue();
+	}
+	public static int getPippiAngIncMultiplier() {
+		return GameOption.PIPPI_ANGLE_INC_MUL.getIntegerValue();
+	}
+	public static int getPippiAngIncMultiplierSlider() {
+		return GameOption.PIPPI_ANGLE_INC_MUL_SLIDER.getIntegerValue();
+	}
+	public static boolean isPippiFollowcircleExpand() {
+		return GameOption.PIPPI_SLIDER_FOLLOW_EXPAND.getBooleanValue();
+	}
+	public static boolean isPippiPreventWobblyStreams() {
+		return GameOption.PIPPI_PREVENT_WOBBLY_STREAMS.getBooleanValue();
 	}
 
 	/**

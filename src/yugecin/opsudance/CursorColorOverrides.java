@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Cursor;
 import org.newdawn.slick.Color;
 
@@ -110,12 +111,12 @@ public enum CursorColorOverrides {
 	}
 
 	private static Color nextRainbowColor() {
-		hue += Dancer.rgbcursorhueinc / 1000f;
+		hue += Options.getRGBCursorInc() / 1000f;
 		return new Color(java.awt.Color.getHSBColor(hue / 360f, 1.0f, 1.0f).getRGB());
 	}
 
 	private static Color nextMirrorRainbowColor() {
-		hue += Dancer.rgbcursorhueinc / 1000f;
+		hue += Options.getRGBCursorInc() / 1000f;
 		return new Color(java.awt.Color.getHSBColor((hue + 180f) / 360f, 1.0f, 1.0f).getRGB());
 	}
 

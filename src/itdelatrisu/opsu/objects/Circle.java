@@ -130,7 +130,7 @@ public class Circle extends GameObject {
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 
-		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive() && Dancer.drawApproach)
+		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive() && Options.isDrawApproach())
 			GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
 		GameImage.HITCIRCLE.getImage().drawCentered(x, y, color);
 		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
@@ -196,7 +196,7 @@ public class Circle extends GameObject {
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
 			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Dancer.mirror && GameMod.AUTO.isActive()) {
+				if (Options.isMirror() && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}
@@ -211,7 +211,7 @@ public class Circle extends GameObject {
 		else if (isAutoMod) {
 			if (Math.abs(trackPosition - time) < hitResultOffset[GameData.HIT_300]) {
 				data.hitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Dancer.mirror && GameMod.AUTO.isActive()) {
+				if (Options.isMirror() && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.hitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}

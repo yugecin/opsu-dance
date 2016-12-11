@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.movers.factories;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.movers.CubicBezierMover;
 import yugecin.opsudance.movers.Mover;
@@ -24,11 +25,9 @@ import yugecin.opsudance.movers.QuadraticBezierMover;
 
 public class QuadraticBezierMoverFactory implements MoverFactory {
 
-	public static boolean cubicForSliderEntries = true;
-
 	@Override
 	public Mover create(GameObject start, GameObject end, int dir) {
-		if (cubicForSliderEntries && end.isSlider()) {
+		if (Options.isQuadBezCubicEnabled() && end.isSlider()) {
 			return new CubicBezierMover(start, end, dir);
 		}
 		return new QuadraticBezierMover(start, end, dir);
