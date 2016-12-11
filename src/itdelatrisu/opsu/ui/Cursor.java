@@ -331,7 +331,7 @@ public class Cursor {
 		trail.clear();
 		if (MusicController.getBeatmap() != null) {
 			setCursorPosition(-1000, -1000);
-			setCursorPosition(0, 0);
+			setCursorPosition(-50, -50);
 		}
 	}
 
