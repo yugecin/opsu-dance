@@ -297,6 +297,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		for (Options.GameOption o : optionList) {
 			initialOptions.put(o, o.write());
 		}
+		speed = 10;
 	}
 
 	public void leave() {
