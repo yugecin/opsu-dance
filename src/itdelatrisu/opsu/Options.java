@@ -47,6 +47,7 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.ClasspathLocation;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.Log;
@@ -56,13 +57,8 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
-import yugecin.opsudance.movers.CubicBezierMover;
-import yugecin.opsudance.movers.QuadraticBezierMover;
-import yugecin.opsudance.movers.factories.AutoMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
-import yugecin.opsudance.spinners.Spinner;
-import yugecin.opsudance.ui.SBOverlay;
 
 /**
  * Handles all user options.
@@ -449,16 +445,16 @@ public class Options {
 		LOAD_VERBOSE ("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false),
 		MASTER_VOLUME ("Master Volume", "VolumeUniversal", "Global volume level.", 35, 0, 100) {
 			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				container.setMusicVolume(getMasterVolume() * getMusicVolume());
+			public void setValue(int value) {
+				super.setValue(value);
+				SoundStore.get().setMusicVolume(getMasterVolume() * getMusicVolume());
 			}
 		},
 		MUSIC_VOLUME ("Music Volume", "VolumeMusic", "Volume of music.", 80, 0, 100) {
 			@Override
-			public void drag(GameContainer container, int d) {
-				super.drag(container, d);
-				container.setMusicVolume(getMasterVolume() * getMusicVolume());
+			public void setValue(int value) {
+				super.setValue(value);
+				SoundStore.get().setMusicVolume(getMasterVolume() * getMusicVolume());
 			}
 		},
 		SAMPLE_VOLUME_OVERRIDE ("Sample volume override", "BMSampleOverride", "Override beatmap hitsound volume", 100, 0, 100) {
@@ -1083,19 +1079,6 @@ public class Options {
 		 * @param index the itemindex which has been clicked
 		 */
 		public void clickListItem(int index) { }
-
-		/**
-		 * Processes a mouse drag action (via override).
-		 * <p>
-		 * By default, only if this is a numeric option, the {@code val} field
-		 * will be shifted by {@code d} within the given bounds.
-		 * @param container the game container
-		 * @param d the dragged distance (modified by multiplier)
-		 */
-		public void drag(GameContainer container, int d) { // TODO rename this
-			if (type == OptionType.NUMERIC)
-				val = Utils.clamp(val + d, min, max);
-		}
 
 		/**
 		 * Returns the string to write to the configuration file (via override).

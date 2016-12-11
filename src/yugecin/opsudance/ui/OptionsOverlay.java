@@ -70,6 +70,9 @@ public class OptionsOverlay {
 	private boolean keyEntryLeft;
 	private boolean keyEntryRight;
 
+	private int prevMouseX;
+	private int prevMouseY;
+
 	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
 		this.parent = parent;
 		this.container = container;
@@ -324,14 +327,15 @@ public class OptionsOverlay {
 	}
 
 	public void update(int delta, int mouseX, int mouseY) {
+		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
+			return;
+		}
+		prevMouseX = mouseX;
+		prevMouseY = mouseY;
 		updateHoverOption(mouseX, mouseY);
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
-			int min = selectedOption.getMinValue();
-			int max = selectedOption.getMaxValue();
-			int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
-			selectedOption.setValue(Utils.clamp(value, min, max));
-			selectedOption.drag(container, 0);
+			updateSliderOption(mouseX, mouseY);
 		} else if (isListOptionOpen) {
 			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
 				listHoverIndex = (mouseY - listStartY) / optionHeight;
@@ -366,6 +370,9 @@ public class OptionsOverlay {
 				isListOptionOpen = true;
 			} else if (selectedOption.getType() == OptionType.NUMERIC) {
 				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+				if (isAdjustingSlider) {
+					updateSliderOption(x, y);
+				}
 			} else if (selectedOption == GameOption.KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (selectedOption == GameOption.KEY_RIGHT) {
@@ -380,6 +387,9 @@ public class OptionsOverlay {
 
 	public void mouseReleased(int button, int x, int y) {
 		selectedOption = null;
+		if (isAdjustingSlider) {
+			parent.onSaveOption(hoverOption);
+		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
 
@@ -389,7 +399,9 @@ public class OptionsOverlay {
 		}
 
 		if (hoverOption != null) {
-			parent.onSaveOption(hoverOption);
+			if (hoverOption.getType() != OptionType.NUMERIC) {
+				parent.onSaveOption(hoverOption);
+			}
 			if (hoverOption.getType() == OptionType.BOOLEAN) {
 				hoverOption.click(container);
 				SoundController.playSound(SoundEffect.MENUHIT);
@@ -448,6 +460,13 @@ public class OptionsOverlay {
 				return true;
 		}
 		return false;
+	}
+
+	private void updateSliderOption(int mouseX, int mouseY) {
+		int min = selectedOption.getMinValue();
+		int max = selectedOption.getMaxValue();
+		int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
+		selectedOption.setValue(Utils.clamp(value, min, max));
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
