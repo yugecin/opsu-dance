@@ -468,7 +468,7 @@ public class OptionsOverlay {
 	private void updateSliderOption(int mouseX, int mouseY) {
 		int min = selectedOption.getMinValue();
 		int max = selectedOption.getMaxValue();
-		int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
+		int value = min + Math.round((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
 		selectedOption.setValue(Utils.clamp(value, min, max));
 	}
 
