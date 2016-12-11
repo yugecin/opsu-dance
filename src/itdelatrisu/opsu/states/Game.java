@@ -311,8 +311,8 @@ public class Game extends BasicGameState {
 	public void loadCheckpoint(int checkpoint) {
 		try {
 			restart = Restart.MANUAL;
-			enter(container, game);
 			checkpointLoaded = true;
+			enter(container, game);
 			if (isLeadIn()) {
 				leadInTime = 0;
 				epiImgTime = 0;
@@ -1546,7 +1546,7 @@ public class Game extends BasicGameState {
 
 		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
-		if (!checkpointLoaded) {
+		if (restart != Restart.FALSE) {
 			sbOverlay.enter();
 			sbOverlay.updateIndex(0);
 		}
