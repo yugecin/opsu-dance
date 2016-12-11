@@ -21,6 +21,8 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.Options.GameOption.OptionType;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.audio.SoundController;
+import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
@@ -236,6 +238,8 @@ public class OptionsOverlay {
 
 		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
 			hoverOption.click(container);
+			SoundController.playSound(SoundEffect.MENUHIT);
+			return;
 		}
 
 		int tScrollOffset = 0;
@@ -244,8 +248,9 @@ public class OptionsOverlay {
 				if (selectedTab != tabIndex) {
 					selectedTab = tabIndex;
 					scrollOffset = tScrollOffset;
+					SoundController.playSound(SoundEffect.MENUCLICK);
 				}
-				break;
+				return;
 			}
 			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
 			tScrollOffset += tabs[tabIndex].options.length * optionHeight;
