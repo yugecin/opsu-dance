@@ -218,7 +218,7 @@ public class OptionsOverlay {
 		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
 		int valueLen = Fonts.MEDIUM.getWidth(value);
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
-		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, Colors.BLUE_BACKGROUND);
 		int sliderLen = optionWidth - nameLen - valueLen - 50;
 
 		if (hoverOption == option) {
@@ -241,7 +241,7 @@ public class OptionsOverlay {
 		String value = option.getValueString();
 		int valueLen = Fonts.MEDIUM.getWidth(value);
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
-		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, Colors.BLUE_BACKGROUND);
 	}
 
 	public void renderTabs(int mouseX, int mouseY) {
