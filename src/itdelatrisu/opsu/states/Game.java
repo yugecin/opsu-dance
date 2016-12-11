@@ -1606,6 +1606,12 @@ public class Game extends BasicGameState {
 	private void drawHitObjects(Graphics g, int trackPosition) {
 		if (Options.isMergingSliders() && knorkesliders != null) {
 			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+			if (Options.isMirror()) {
+				g.pushTransform();
+				g.rotate(Options.width / 2f, Options.height / 2f, 180f);
+				knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+				g.popTransform();
+			}
 		}
 		// include previous object in follow points
 		int lastObjectIndex = -1;
