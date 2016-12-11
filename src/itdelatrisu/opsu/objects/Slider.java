@@ -544,6 +544,7 @@ public class Slider extends GameObject {
 			//else not a hit
 
 			if (result > -1) {
+				data.sendInitialSliderResult(trackPosition, this.x, this.y, color, mirrorColor);
 				data.addHitError(hitObject.getTime(), x,y,trackPosition - hitObject.getTime());
 				sliderClickedInitial = true;
 				data.sliderTickResult(hitObject.getTime(), result, this.x, this.y, hitObject, currentRepeats);
