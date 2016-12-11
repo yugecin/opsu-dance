@@ -58,7 +58,7 @@ public class OptionsOverlay {
 	private int optionHeight;
 
 	private int scrollOffset;
-	private final int maxScrollOffset;
+	private int maxScrollOffset;
 
 	private int mousePressY;
 
@@ -86,7 +86,7 @@ public class OptionsOverlay {
 		float tabX = width * 0.032f + (tabImage.getWidth() / 3);
 		float tabY = Fonts.XLARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() + height * 0.015f - (tabImage.getHeight() / 2f);
 		int tabOffset = Math.min(tabImage.getWidth(), width / tabs.length);
-		int maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
+		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
 		for (int i = 0; i < tabs.length; i++) {
 			maxScrollOffset += tabs[i].options.length * optionHeight;
 			tabs[i].tabIndex = i;
@@ -97,7 +97,7 @@ public class OptionsOverlay {
 				tabY += GameImage.MENU_TAB.getImage().getHeight() / 2f;
 			}
 		}
-		this.maxScrollOffset = maxScrollOffset - optionStartY - optionHeight;
+		maxScrollOffset += -optionStartY - optionHeight;
 
 		// calculate other positions
 		optionStartY = (int) (tabY + tabImage.getHeight() / 2 + 2); // +2 for the separator line
@@ -147,11 +147,15 @@ public class OptionsOverlay {
 		g.setClip(0, optionStartY, width, height - optionStartY);
 		int y = -scrollOffset + optionStartY;
 		selectedTab = 0;
+		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
+		boolean render = true;
 		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
 			OptionTab tab = tabs[tabIndex];
 			if (y > 0) {
-				int x = optionStartX + (optionWidth - Fonts.LARGE.getWidth(tab.name)) / 2;
-				Fonts.LARGE.drawString(x, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
+				if (render) {
+					int x = optionStartX + (optionWidth - Fonts.LARGE.getWidth(tab.name)) / 2;
+					Fonts.LARGE.drawString(x, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
+				}
 			} else {
 				selectedTab++;
 			}
@@ -161,16 +165,19 @@ public class OptionsOverlay {
 				if (!option.showCondition()) {
 					continue;
 				}
-				if (y > 0) {
+				maxScrollOffset += optionHeight;
+				if (y > 0 && render) {
 					renderOption(g, option, y, option == hoverOption);
 				}
 				y += optionHeight;
 				if (y > height) {
+					render = false;
 					tabIndex = tabs.length;
-					break;
 				}
 			}
 		}
+		maxScrollOffset -= optionStartY - optionHeight * 2;
+
 		// scrollbar
 		g.setColor(Color.white);
 		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / (maxScrollOffset)) * (height - optionStartY - 45), 10, 45, 2);
@@ -319,7 +326,7 @@ public class OptionsOverlay {
 
 	public void mouseWheelMoved(int delta) {
 		if (!isAdjustingSlider) {
-			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset - optionStartY);
+			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset);
 		}
 	}
 
