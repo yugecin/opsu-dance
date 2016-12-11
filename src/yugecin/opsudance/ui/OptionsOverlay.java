@@ -29,7 +29,7 @@ import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "SuspiciousNameCombination"})
 public class OptionsOverlay {
 
 	private Parent parent;
@@ -200,8 +200,17 @@ public class OptionsOverlay {
 	}
 
 	private void renderListOption(Graphics g, GameOption option, int y, Color textColor) {
+		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
-		Fonts.MEDIUM.drawString(optionStartX + optionWidth / 2, y, option.getValueString(), textColor);
+		int size = (int) (optionHeight * 4f / 5f);
+		int padding = (int) (optionHeight / 10f);
+		nameLen += 20;
+		g.setColor(hoverOption == option ? Colors.ORANGE_BUTTON : Colors.BLACK_ALPHA);
+		g.fillRect(optionStartX + nameLen, y + padding, optionWidth - nameLen, size);
+		g.setColor(Color.white);
+		g.setLineWidth(1f);
+		g.drawRect(optionStartX + nameLen, y + padding, optionWidth - nameLen, size);
+		Fonts.MEDIUM.drawString(optionStartX + nameLen + 20, y, option.getValueString(), Color.white);
 	}
 
 	private void renderCheckOption(Graphics g, GameOption option, int y, Color textColor) {
