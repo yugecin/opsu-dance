@@ -262,12 +262,19 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public void updateIndex(int index) {
-		this.index = index;
+		if (index < this.index) {
+			this.index = index;
+			reloadSBsettingsToIndex(index);
+			return;
+		}
 		if (index >= optionsMap.length) {
 			return;
 		}
-		HashMap options = optionsMap[index];
-		if (options != null) {
+		for (; this.index < index; this.index++) {
+			HashMap options = optionsMap[this.index];
+			if (options == null) {
+				continue;
+			}
 			for (Object o : options.entrySet()) {
 				Map.Entry<Options.GameOption, String> next = (Map.Entry<Options.GameOption, String>) o;
 				next.getKey().read(next.getValue());
