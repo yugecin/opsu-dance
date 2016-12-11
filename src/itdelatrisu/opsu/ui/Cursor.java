@@ -23,6 +23,7 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -328,8 +329,10 @@ public class Cursor {
 	public void resetLocations() {
 		lastPosition = new Point(0, 0);
 		trail.clear();
-		setCursorPosition(-1000, -1000);
-		setCursorPosition(0, 0);
+		if (MusicController.getBeatmap() != null) {
+			setCursorPosition(-1000, -1000);
+			setCursorPosition(0, 0);
+		}
 	}
 
 	/**
