@@ -19,26 +19,30 @@ package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options.GameOption;
+import itdelatrisu.opsu.Options.GameOption.OptionType;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
+import org.newdawn.slick.*;
 
 @SuppressWarnings("unused")
 public class OptionsOverlay {
 
 	private Parent parent;
+	private GameContainer container;
+
+	private final Image sliderBallImg;
+	private final Image checkOnImg;
+	private final Image checkOffImg;
 
 	private OptionTab[] tabs;
 	private OptionTab hoverTab;
 	private int selectedTab;
 	private GameOption hoverOption;
 	private GameOption selectedOption;
+	private boolean isListOptionOpen;
 
 	private int width;
 	private int height;
@@ -51,14 +55,19 @@ public class OptionsOverlay {
 	private int scrollOffset;
 	private final int maxScrollOffset;
 
-	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, int containerWidth, int containerHeight) {
+	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
 		this.parent = parent;
+		this.container = container;
 
 		this.tabs = tabs;
 		selectedTab = defaultSelectedTabIndex;
 
-		width = containerWidth;
-		height = containerHeight;
+		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(20, 20);
+		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(20, 20);
+		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(20, 20);
+
+		width = container.getWidth();
+		height = container.getHeight();
 
 		// calculate positions
 		optionWidth = width / 2;
@@ -117,7 +126,8 @@ public class OptionsOverlay {
 		for (int tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
 			OptionTab tab = tabs[tabIndex];
 			if (y > 0) {
-				Fonts.LARGE.drawString(optionStartX, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
+				int x = optionStartX + (optionWidth - Fonts.LARGE.getWidth(tab.name)) / 2;
+				Fonts.LARGE.drawString(x, y + Fonts.LARGE.getLineHeight() * 0.6f, tab.name, Color.cyan);
 			}
 			y += Fonts.MEDIUM.getLineHeight() * 2;
 			for (int optionIndex = 0; optionIndex < tab.options.length; optionIndex++) {
@@ -135,13 +145,60 @@ public class OptionsOverlay {
 				}
 			}
 		}
+		// scrollbar
+		g.setColor(Color.white);
+		g.fillRoundRect(optionStartX + optionWidth + 15, optionStartY + ((float) scrollOffset / maxScrollOffset) * (height - optionStartY), 10, 45, 2);
 		g.clearClip();
 	}
 
 	private void renderOption(Graphics g, GameOption option, int y, boolean focus) {
 		Color col = focus ? Colors.GREEN : Colors.WHITE_FADE;
-		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), col);
-		Fonts.MEDIUM.drawString(optionStartX + optionWidth / 2, y, option.getValueString(), col);
+		OptionType type = option.getType();
+		Object[] listItems = option.getListItems();
+		if (listItems != null) {
+			renderListOption(g, option, y, col);
+		} else if (type == OptionType.BOOLEAN) {
+			renderCheckOption(g, option, y, col);
+		} else if (type == OptionType.NUMERIC) {
+			renderSliderOption(g, option, y, col);
+		} else {
+			renderGenericOption(g, option, y, col);
+		}
+	}
+
+	private void renderListOption(Graphics g, GameOption option, int y, Color textColor) {
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth / 2, y, option.getValueString(), textColor);
+	}
+
+	private void renderCheckOption(Graphics g, GameOption option, int y, Color textColor) {
+		if (option.getBooleanValue()) {
+			checkOnImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+		} else {
+			checkOffImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+		}
+		Fonts.MEDIUM.drawString(optionStartX + 30, y, option.getName(), textColor);
+	}
+
+	private void renderSliderOption(Graphics g, GameOption option, int y, Color textColor) {
+		String value = option.getValueString();
+		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
+		int valueLen = Fonts.MEDIUM.getWidth(value);
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, textColor);
+		int sliderLen = optionWidth - nameLen - valueLen - 50;
+		g.setColor(Color.pink);
+		g.setLineWidth(3f);
+		g.drawLine(optionStartX + nameLen + 25, y + optionHeight / 2, optionStartX + nameLen + 25 + sliderLen, y + optionHeight / 2);
+		float sliderValue = (float) (sliderLen + 10) * (option.getIntegerValue() - option.getMinValue()) / (option.getMaxValue() - option.getMinValue());
+		sliderBallImg.draw(optionStartX + nameLen + 25 + sliderValue - 10, y + optionHeight / 2 - 10, Color.pink);
+	}
+
+	private void renderGenericOption(Graphics g, GameOption option, int y, Color textColor) {
+		String value = option.getValueString();
+		int valueLen = Fonts.MEDIUM.getWidth(value);
+		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
+		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, textColor);
 	}
 
 	public void renderTabs(int mouseX, int mouseY) {
@@ -172,6 +229,10 @@ public class OptionsOverlay {
 		if (UI.getBackButton().contains(x, y)) {
 			parent.onLeave();
 			return;
+		}
+
+		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
+			hoverOption.click(container);
 		}
 	}
 

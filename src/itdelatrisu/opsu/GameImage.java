@@ -237,6 +237,9 @@ public enum GameImage {
 	REPLAY_PLAYBACK_HALF ("playback-half", "png", false, false),
 
 	// Non-Game Components
+	CONTROL_SLIDER_BALL ("control-sliderball", "png", false, false),
+	CONTROL_CHECK_ON ("control-check-on", "png", false, false),
+	CONTROL_CHECK_OFF ("control-check-off", "png", false, false),
 	VOLUME ("volume-bg", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

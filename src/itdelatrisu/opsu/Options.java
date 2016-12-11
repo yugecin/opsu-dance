@@ -1305,7 +1305,7 @@ public class Options {
 		private int max, min;
 
 		/** Option types. */
-		private enum OptionType { BOOLEAN, NUMERIC, OTHER };
+		public enum OptionType { BOOLEAN, NUMERIC, OTHER };
 
 		/** Whether or not this is a numeric option. */
 		private OptionType type = OptionType.OTHER;
@@ -1494,8 +1494,8 @@ public class Options {
 				bool = Boolean.parseBoolean(s);
 		}
 
-		public boolean isDragOption() {
-			return type == OptionType.NUMERIC;
+		public OptionType getType() {
+			return type;
 		}
 
 		public int getMinValue() {

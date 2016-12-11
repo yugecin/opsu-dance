@@ -173,7 +173,7 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 		int width = container.getWidth();
 		int height = container.getHeight();
 
-		optionsOverlay = new OptionsOverlay(this, options, 5, width, height);
+		optionsOverlay = new OptionsOverlay(this, options, 5, container);
 	}
 
 	@Override
