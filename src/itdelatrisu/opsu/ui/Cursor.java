@@ -328,6 +328,8 @@ public class Cursor {
 	public void resetLocations() {
 		lastPosition = new Point(0, 0);
 		trail.clear();
+		setCursorPosition(-1000, -1000);
+		setCursorPosition(0, 0);
 	}
 
 	/**
