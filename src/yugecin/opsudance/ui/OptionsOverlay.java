@@ -44,6 +44,9 @@ public class OptionsOverlay {
 	private int selectedTab;
 	private GameOption hoverOption;
 	private GameOption selectedOption;
+	private int sliderOptionStartX;
+	private int sliderOptionLength;
+	private boolean isAdjustingSlider;
 	private boolean isListOptionOpen;
 
 	private int width;
@@ -210,6 +213,16 @@ public class OptionsOverlay {
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
 		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, textColor);
 		int sliderLen = optionWidth - nameLen - valueLen - 50;
+
+		if (hoverOption == option) {
+			if (!isAdjustingSlider) {
+				sliderOptionLength = sliderLen;
+				sliderOptionStartX = optionStartX + nameLen + 25;
+			} else {
+				sliderLen = sliderOptionLength;
+			}
+		}
+
 		g.setColor(Color.pink);
 		g.setLineWidth(3f);
 		g.drawLine(optionStartX + nameLen + 25, y + optionHeight / 2, optionStartX + nameLen + 25 + sliderLen, y + optionHeight / 2);
@@ -244,11 +257,23 @@ public class OptionsOverlay {
 	public void update(int delta, int mouseX, int mouseY) {
 		updateHoverOption(mouseX, mouseY);
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		if (isAdjustingSlider) {
+			System.out.println(sliderOptionLength);
+			int min = selectedOption.getMinValue();
+			int max = selectedOption.getMaxValue();
+			int value = min + (int) ((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
+			selectedOption.setValue(Utils.clamp(value, min, max));
+			selectedOption.drag(container, 0);
+		}
 	}
 
 	public void mousePressed(int button, int x, int y) {
 		mousePressY = y;
 		selectedOption = hoverOption;
+
+		if (selectedOption != null && selectedOption.getType() == OptionType.NUMERIC) {
+			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+		}
 
 		if (UI.getBackButton().contains(x, y)) {
 			parent.onLeave();
@@ -258,6 +283,8 @@ public class OptionsOverlay {
 
 	public void mouseReleased(int button, int x, int y) {
 		selectedOption = null;
+		isAdjustingSlider = false;
+		sliderOptionLength = 0;
 
 		// check if clicked, not dragged
 		if (Math.abs(y - mousePressY) >= 5) {
@@ -286,11 +313,15 @@ public class OptionsOverlay {
 	}
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
+		if (!isAdjustingSlider) {
+			scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
+		}
 	}
 
 	public void mouseWheelMoved(int delta) {
-		scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset - optionStartY);
+		if (!isAdjustingSlider) {
+			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset - optionStartY);
+		}
 	}
 
 	public void keyPressed(int key, char c) {

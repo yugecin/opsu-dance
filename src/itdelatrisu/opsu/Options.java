@@ -1455,7 +1455,7 @@ public class Options {
 		 * @param container the game container
 		 * @param d the dragged distance (modified by multiplier)
 		 */
-		public void drag(GameContainer container, int d) {
+		public void drag(GameContainer container, int d) { // TODO rename this
 			if (type == OptionType.NUMERIC)
 				val = Utils.clamp(val + d, min, max);
 		}
