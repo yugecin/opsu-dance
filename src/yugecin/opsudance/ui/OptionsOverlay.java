@@ -120,8 +120,24 @@ public class OptionsOverlay {
 		// options
 		renderOptions(g);
 
+		// UI
 		UI.getBackButton().draw();
 		UI.draw(g);
+
+		// tooltip
+		renderTooltip(g, mouseX, mouseY);
+	}
+
+	private void renderTooltip(Graphics g, int mouseX, int mouseY) {
+		if (hoverOption != null) {
+			String optionDescription = hoverOption.getDescription();
+			float textWidth = Fonts.SMALL.getWidth(optionDescription);
+			Color.black.a = 0.7f;
+			g.setColor(Color.black);
+			g.fillRoundRect(mouseX + 10, mouseY + 10, 10 + textWidth, 10 + Fonts.SMALL.getLineHeight(), 4);
+			Fonts.SMALL.drawString(mouseX + 15, mouseY + 15, optionDescription, Color.white);
+			Color.black.a = 1f;
+		}
 	}
 
 	private void renderOptions(Graphics g) {
