@@ -1541,6 +1541,10 @@ public class Game extends BasicGameState {
 			}
 		}
 
+		// kickstart cursor trail
+		UI.getCursor().setCursorPosition(-10000, -10000);
+		UI.getCursor().setCursorPosition(0, 0);
+
 		slidercurveFrom = 0;
 		slidercurveTo = 0;
 
