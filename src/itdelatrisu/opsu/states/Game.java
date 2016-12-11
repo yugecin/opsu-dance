@@ -1351,7 +1351,9 @@ public class Game extends BasicGameState {
 	@Override
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
-		UI.enter();
+		if (!skippedToCheckpoint) {
+			UI.enter();
+		}
 
 		if (beatmap == null || beatmap.objects == null)
 			throw new RuntimeException("Running game with no beatmap loaded.");
