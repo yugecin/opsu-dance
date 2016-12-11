@@ -262,6 +262,7 @@ public class OptionsOverlay {
 	}
 
 	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		scrollOffset += oldy - newy;
 	}
 
 	public void mouseWheelMoved(int delta) {
@@ -277,6 +278,10 @@ public class OptionsOverlay {
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
+		if (selectedOption != null) {
+			hoverOption = selectedOption;
+			return;
+		}
 		hoverOption = null;
 		if (mouseY < optionStartY || mouseX < optionStartX || mouseX > optionStartX + optionWidth) {
 			return;
