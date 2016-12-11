@@ -327,12 +327,13 @@ public class Cursor {
 	 * Resets all cursor location data.
 	 */
 	public void resetLocations() {
-		lastPosition = new Point(0, 0);
 		trail.clear();
-		if (MusicController.getBeatmap() != null) {
-			setCursorPosition(-1000, -1000);
-			setCursorPosition(-50, -50);
+		if (lastPosition != null) {
+			for (int i = 0; i < 50; i++) {
+				trail.add(new Point(lastPosition));
+			}
 		}
+		lastPosition = new Point(0, 0);
 	}
 
 	/**
