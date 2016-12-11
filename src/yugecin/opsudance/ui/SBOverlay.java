@@ -198,18 +198,18 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			}
 		} else if (key == Input.KEY_J && index > 0) {
 			index--;
-			setMusicPosition();
 			goBackOneSBIndex();
+			setMusicPosition();
 		} else if (key == Input.KEY_K && index < gameObjects.length - 1) {
 			index++;
-			setMusicPosition();
 			updateIndex(index);
+			setMusicPosition();
 		}
 		return false;
 	}
 
 	private void goBackOneSBIndex() {
-		if (index + 1 < optionsMap.length && optionsMap[index + 1] != null) {
+		if (index + 1 < optionsMap.length) {
 			// new options on previous index, so to revert then we have to reload them all to this point..
 			reloadSBsettingsToIndex(index);
 		}
