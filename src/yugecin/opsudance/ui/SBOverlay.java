@@ -270,7 +270,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		if (index >= optionsMap.length) {
 			return;
 		}
-		for (; this.index < index; this.index++) {
+		for (; this.index <= index; this.index++) {
 			HashMap options = optionsMap[this.index];
 			if (options == null) {
 				continue;
@@ -281,6 +281,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 				readOption(next.getKey());
 			}
 		}
+		this.index--;
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
