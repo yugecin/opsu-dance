@@ -1551,9 +1551,9 @@ public class Game extends BasicGameState {
 
 		Dancer.instance.setGameObjects(gameObjects);
 		sbOverlay.setGameObjects(gameObjects);
+		sbOverlay.updateIndex(objectIndex);
 		if (!skippedToCheckpoint) {
 			sbOverlay.enter();
-			sbOverlay.updateIndex(0);
 		}
 
 		Pippi.reset();

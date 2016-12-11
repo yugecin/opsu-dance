@@ -300,7 +300,8 @@ public class SBOverlay implements OptionsOverlay.Parent {
 				if (optionsMap[index].size() == 0) {
 					optionsMap[index] = null;
 				}
-				reloadSBsettingsToIndex(index);
+				updateIndex(index - 1);
+				updateIndex(index);
 				return true;
 			}
 			ypos += lh;
