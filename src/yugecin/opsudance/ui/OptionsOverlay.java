@@ -18,6 +18,7 @@
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.Options.GameOption.OptionType;
 import itdelatrisu.opsu.Utils;
@@ -65,6 +66,9 @@ public class OptionsOverlay {
 
 	private int mousePressY;
 
+	private boolean keyEntryLeft;
+	private boolean keyEntryRight;
+
 	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
 		this.parent = parent;
 		this.container = container;
@@ -92,7 +96,6 @@ public class OptionsOverlay {
 		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
 		for (int i = 0; i < tabs.length; i++) {
 			maxScrollOffset += tabs[i].options.length * optionHeight;
-			tabs[i].tabIndex = i;
 			tabs[i].button = new MenuButton(tabImage, tabX, tabY);
 			tabX += tabOffset;
 			if (tabX + tabOffset > width) {
@@ -139,6 +142,18 @@ public class OptionsOverlay {
 
 		// tooltip
 		renderTooltip(g, mouseX, mouseY);
+
+		if (keyEntryLeft ||keyEntryRight) {
+			renderKeyEntry(g);
+		}
+	}
+
+	private void renderKeyEntry(Graphics g) {
+		g.setColor(Colors.BLACK_ALPHA_75);
+		g.fillRect(0, 0, width, height);
+		g.setColor(Color.white);
+		String prompt = (keyEntryLeft) ? "Please press the new left-click key." : "Please press the new right-click key.";
+		Fonts.LARGE.drawString((width - Fonts.LARGE.getWidth(prompt)) / 2, (height - Fonts.LARGE.getLineHeight()) / 2, prompt);
 	}
 
 	private void renderTooltip(Graphics g, int mouseX, int mouseY) {
@@ -325,9 +340,16 @@ public class OptionsOverlay {
 	}
 
 	public void mousePressed(int button, int x, int y) {
+		if (keyEntryLeft || keyEntryRight) {
+			keyEntryLeft = keyEntryRight = false;
+			return;
+		}
+
 		if (isListOptionOpen) {
 			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
 				hoverOption.clickListItem(listHoverIndex);
+				parent.onSaveOption(hoverOption);
+				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			isListOptionOpen = false;
 			listHoverIndex = -1;
@@ -342,6 +364,10 @@ public class OptionsOverlay {
 				isListOptionOpen = true;
 			} else if (selectedOption.getType() == OptionType.NUMERIC) {
 				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			} else if (selectedOption == GameOption.KEY_LEFT) {
+				keyEntryLeft = true;
+			} else if (selectedOption == GameOption.KEY_RIGHT) {
+				keyEntryLeft = true;
 			}
 		}
 
@@ -361,10 +387,13 @@ public class OptionsOverlay {
 			return;
 		}
 
-		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
-			hoverOption.click(container);
-			SoundController.playSound(SoundEffect.MENUHIT);
-			return;
+		if (hoverOption != null) {
+			parent.onSaveOption(hoverOption);
+			if (hoverOption.getType() == OptionType.BOOLEAN) {
+				hoverOption.click(container);
+				SoundController.playSound(SoundEffect.MENUHIT);
+				return;
+			}
 		}
 
 		int tScrollOffset = 0;
@@ -395,8 +424,25 @@ public class OptionsOverlay {
 	}
 
 	public boolean keyPressed(int key, char c) {
+		if (keyEntryRight) {
+			Options.setGameKeyRight(key);
+			keyEntryRight = false;
+			return true;
+		}
+
+		if (keyEntryLeft) {
+			Options.setGameKeyLeft(key);
+			keyEntryLeft = false;
+			return true;
+		}
+
 		switch (key) {
 			case Input.KEY_ESCAPE:
+				if (isListOptionOpen) {
+					isListOptionOpen = false;
+					listHoverIndex = -1;
+					return true;
+				}
 				parent.onLeave();
 				return true;
 		}
@@ -404,7 +450,7 @@ public class OptionsOverlay {
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
-		if (isListOptionOpen) {
+		if (isListOptionOpen || keyEntryLeft || keyEntryRight) {
 			return;
 		}
 		if (selectedOption != null) {
@@ -440,7 +486,6 @@ public class OptionsOverlay {
 		public final String name;
 		public final GameOption[] options;
 		private MenuButton button;
-		private int tabIndex;
 
 		public OptionTab(String name, GameOption[] options) {
 			this.name = name;
