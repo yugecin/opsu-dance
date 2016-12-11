@@ -30,6 +30,7 @@ import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.*;
 
+@SuppressWarnings("UnusedParameters")
 public class OptionsOverlay {
 
 	private Parent parent;
@@ -94,9 +95,9 @@ public class OptionsOverlay {
 		float tabY = Fonts.XLARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() + height * 0.015f - (tabImage.getHeight() / 2f);
 		int tabOffset = Math.min(tabImage.getWidth(), width / tabs.length);
 		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
-		for (int i = 0; i < tabs.length; i++) {
-			maxScrollOffset += tabs[i].options.length * optionHeight;
-			tabs[i].button = new MenuButton(tabImage, tabX, tabY);
+		for (OptionTab tab : tabs) {
+			maxScrollOffset += tab.options.length * optionHeight;
+			tab.button = new MenuButton(tabImage, tabX, tabY);
 			tabX += tabOffset;
 			if (tabX + tabOffset > width) {
 				tabX = 0;
@@ -143,6 +144,7 @@ public class OptionsOverlay {
 		// tooltip
 		renderTooltip(g, mouseX, mouseY);
 
+		// key input options
 		if (keyEntryLeft ||keyEntryRight) {
 			renderKeyEntry(g);
 		}
@@ -373,7 +375,6 @@ public class OptionsOverlay {
 
 		if (UI.getBackButton().contains(x, y)) {
 			parent.onLeave();
-			return;
 		}
 	}
 
