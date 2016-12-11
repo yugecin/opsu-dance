@@ -42,12 +42,16 @@ public class OptionsOverlay {
 
 	private OptionTab[] tabs;
 	private int selectedTab;
+
 	private GameOption hoverOption;
 	private GameOption selectedOption;
+
 	private int sliderOptionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
+
 	private boolean isListOptionOpen;
+	private int listItemHeight;
 	private int listStartX;
 	private int listStartY;
 	private int listWidth;
@@ -90,6 +94,7 @@ public class OptionsOverlay {
 		// calculate positions
 		optionWidth = width / 2;
 		optionHeight = (int) ((Fonts.MEDIUM.getLineHeight()) * 1.1f);
+		listItemHeight= (int) (optionHeight * 4f / 5f);
 		optionStartX = optionWidth / 2;
 
 		// initialize tabs
@@ -220,7 +225,7 @@ public class OptionsOverlay {
 		g.fillRect(listStartX, listStartY, listWidth, listHeight);
 		if (listHoverIndex != -1) {
 			g.setColor(Colors.ORANGE_BUTTON);
-			g.fillRect(listStartX, listStartY + listHoverIndex * optionHeight, listWidth, optionHeight);
+			g.fillRect(listStartX, listStartY + listHoverIndex * listItemHeight, listWidth, listItemHeight);
 		}
 		g.setLineWidth(1f);
 		g.setColor(Color.white);
@@ -228,8 +233,8 @@ public class OptionsOverlay {
 		Object[] listItems = hoverOption.getListItems();
 		int y = listStartY;
 		for (Object item : listItems) {
-			Fonts.MEDIUM.drawString(listStartX + 20, y, item.toString());
-			y += optionHeight;
+			Fonts.MEDIUM.drawString(listStartX + 20, y - Fonts.MEDIUM.getLineHeight() * 0.05f, item.toString());
+			y += listItemHeight;
 		}
 	}
 
@@ -251,7 +256,6 @@ public class OptionsOverlay {
 	private void renderListOption(Graphics g, GameOption option, int y, Color textColor, Object[] listItems) {
 		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
 		Fonts.MEDIUM.drawString(optionStartX, y, option.getName(), textColor);
-		int size = (int) (optionHeight * 4f / 5f);
 		int padding = (int) (optionHeight / 10f);
 		nameLen += 20;
 		int itemStart = optionStartX + nameLen;
@@ -261,16 +265,16 @@ public class OptionsOverlay {
 			backColor = Colors.ORANGE_BUTTON;
 		}
 		g.setColor(backColor);
-		g.fillRect(itemStart, y + padding, itemWidth, size);
+		g.fillRect(itemStart, y + padding, itemWidth, listItemHeight);
 		g.setColor(Color.white);
 		g.setLineWidth(1f);
-		g.drawRect(itemStart, y + padding, itemWidth, size);
+		g.drawRect(itemStart, y + padding, itemWidth, listItemHeight);
 		Fonts.MEDIUM.drawString(itemStart + 20, y, option.getValueString(), Color.white);
 		if (isListOptionOpen && hoverOption == option) {
 			listStartX = optionStartX + nameLen;
-			listStartY = y + padding + size;
+			listStartY = y + padding + listItemHeight;
 			listWidth = itemWidth;
-			listHeight = listItems.length * optionHeight;
+			listHeight = listItems.length * listItemHeight;
 		}
 	}
 
@@ -343,7 +347,7 @@ public class OptionsOverlay {
 			updateSliderOption(mouseX, mouseY);
 		} else if (isListOptionOpen) {
 			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
-				listHoverIndex = (mouseY - listStartY) / optionHeight;
+				listHoverIndex = (mouseY - listStartY) / listItemHeight;
 			} else {
 				listHoverIndex = -1;
 			}
