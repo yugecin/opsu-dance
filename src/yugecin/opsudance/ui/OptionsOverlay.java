@@ -98,7 +98,12 @@ public class OptionsOverlay {
 		float tabY = Fonts.XLARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() + height * 0.015f - (tabImage.getHeight() / 2f);
 		int tabOffset = Math.min(tabImage.getWidth(), width / tabs.length);
 		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
+		scrollOffset = 0;
 		for (OptionTab tab : tabs) {
+			if (defaultSelectedTabIndex-- > 0) {
+				scrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
+				scrollOffset += tab.options.length * optionHeight;
+			}
 			maxScrollOffset += tab.options.length * optionHeight;
 			tab.button = new MenuButton(tabImage, tabX, tabY);
 			tabX += tabOffset;
