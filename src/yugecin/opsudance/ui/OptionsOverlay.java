@@ -384,6 +384,7 @@ public class OptionsOverlay {
 		}
 
 		mousePressY = y;
+		selectedOption = hoverOption;
 
 		if (hoverOption != null) {
 			if (hoverOption.getListItems() != null) {
