@@ -77,6 +77,8 @@ public class OptionsOverlay {
 	private int prevMouseX;
 	private int prevMouseY;
 
+	private int sliderSoundDelay;
+
 	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
 		this.parent = parent;
 		this.container = container;
@@ -336,6 +338,9 @@ public class OptionsOverlay {
 	}
 
 	public void update(int delta, int mouseX, int mouseY) {
+		if (sliderSoundDelay > 0) {
+			sliderSoundDelay -= delta;
+		}
 		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
 			return;
 		}
@@ -344,7 +349,12 @@ public class OptionsOverlay {
 		updateHoverOption(mouseX, mouseY);
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
+			int sliderValue = hoverOption.getIntegerValue();
 			updateSliderOption(mouseX, mouseY);
+			if (hoverOption.getIntegerValue() - sliderValue != 0 && sliderSoundDelay <= 0) {
+				sliderSoundDelay = 90;
+				SoundController.playSound(SoundEffect.MENUHIT);
+			}
 		} else if (isListOptionOpen) {
 			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
 				listHoverIndex = (mouseY - listStartY) / listItemHeight;
