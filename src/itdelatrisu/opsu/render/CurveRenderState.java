@@ -105,15 +105,23 @@ public class CurveRenderState {
 	public CurveRenderState(HitObject hitObject, Vec2f[] curve) {
 		this.hitObject = hitObject;
 		this.curve = curve;
+		initFBO();
+	}
+
+
+	private void initFBO() {
 		FrameBufferCache cache = FrameBufferCache.getInstance();
 		Rendertarget mapping = cache.get(hitObject);
-		if (mapping == null)
-			mapping = cache.insert(hitObject);
-		fbo = mapping;
-		createVertexBuffer(fbo.getVbo());
+		if(mapping==null)
+		mapping=cache.insert(hitObject);
+		fbo=mapping;
+
+		createVertexBuffer(fbo.getVbo()
+
+		);
 		//write impossible value to make sure the fbo is cleared
-		lastPointDrawn = -1;
-		spliceFrom = spliceTo = -1;
+		lastPointDrawn=-1;
+		spliceFrom=spliceTo=-1;
 	}
 
 	public void splice(int from, int to) {
@@ -134,6 +142,12 @@ public class CurveRenderState {
 	 */
 	public void draw(Color color, Color borderColor, int from, int to) {
 		float alpha = color.a;
+
+		if (fbo == null) {
+			// this should not be null, but issue #106 claims it is possible, at least 3 people had this...
+			// debugging shows that the draw was called after discardGeometry was, which does not really make sense
+			initFBO();
+		}
 
 		if (lastPointDrawn != to || firstPointDrawn != from) {
 			int oldFb = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
