@@ -251,7 +251,7 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
-			drawSliderTicks(g, trackPosition, curveAlpha, decorationsAlpha, mirror);
+			drawSliderTicks(trackPosition, sliderAlpha, decorationsAlpha, mirror);
 			Colors.WHITE_FADE.a = alpha;
 		}
 
@@ -363,12 +363,12 @@ public class Slider extends GameObject {
 
 	/**
 	 * Draws slider ticks.
-	 * @param g the graphics context
 	 * @param trackPosition the track position
 	 * @param curveAlpha the curve alpha level
 	 * @param decorationsAlpha the decorations alpha level
+	 * @param mirror true to draw mirrored
 	 */
-	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
+	private void drawSliderTicks(int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
 		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
 		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
 
@@ -388,10 +388,22 @@ public class Slider extends GameObject {
 			min = 0;
 		}
 
+		// calculate the tick alpha level
+		float sliderTickAlpha;
+		if (currentRepeats == 0) {
+			sliderTickAlpha = decorationsAlpha;
+		} else {
+			float t = getT(trackPosition, false);
+			if (currentRepeats % 2 == 1) {
+				t = 1f - t;
+			}
+			sliderTickAlpha = Utils.clamp(t * ticksT.length * 2, 0f, 1f);
+		}
+
 		// draw ticks
+		Colors.WHITE_FADE.a = Math.min(curveAlpha, sliderTickAlpha);
 		for (int i = min; i < max; i++) {
 			Vec2f c = curve.pointAt(ticksT[i]);
-			Colors.WHITE_FADE.a = Math.min(curveAlpha, decorationsAlpha);
 			g.pushTransform();
 			if (mirror) {
 				g.rotate(c.x, c.y, -180f);
@@ -633,6 +645,23 @@ public class Slider extends GameObject {
 				tickIndex = 0;
 				isNewRepeat = true;
 				tickExpandTime = TICK_EXPAND_TIME;
+
+				// send hit result, to fade out reversearrow
+				HitObjectType type;
+				float posX, posY;
+				if (currentRepeats % 2 == 1) {
+					type = HitObjectType.SLIDER_LAST;
+					Vec2f endPos = curve.pointAt(1);
+					posX = endPos.x;
+					posY = endPos.y;
+				} else {
+					type = HitObjectType.SLIDER_FIRST;
+					posX = this.x;
+					posY = this.y;
+				}
+				float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
+				Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
+				data.sendRepeatSliderResult(trackPosition, posX, posY, arrowColor, curve, type);
 			}
 		}
 

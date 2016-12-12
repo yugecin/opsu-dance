@@ -141,17 +141,18 @@ public class GameData {
 
 	/** Hit result types. */
 	public static final int
-		HIT_MISS     = 0,
-		HIT_50       = 1,
-		HIT_100      = 2,
-		HIT_300      = 3,
-		HIT_100K     = 4,   // 100-Katu
-		HIT_300K     = 5,   // 300-Katu
-		HIT_300G     = 6,   // Geki
-		HIT_SLIDER10 = 7,
-		HIT_SLIDER30 = 8,
-		HIT_MAX      = 9,   // not a hit result
-		HIT_SLIDER_INITIAL = 10;
+		HIT_MISS          = 0,
+		HIT_50            = 1,
+		HIT_100           = 2,
+		HIT_300           = 3,
+		HIT_100K          = 4,   // 100-Katu
+		HIT_300K          = 5,   // 300-Katu
+		HIT_300G          = 6,   // Geki
+		HIT_SLIDER10      = 7,
+		HIT_SLIDER30      = 8,
+		HIT_MAX           = 9,   // not a hit result
+		HIT_SLIDER_INITIAL = 10,   // not a hit result
+		HIT_SLIDER_REPEAT = 11;  // not a hit result
 
 	/** Hit result-related images (indexed by HIT_* constants). */
 	private Image[] hitResults;
@@ -908,8 +909,21 @@ public class GameData {
 					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
 					float alpha = 1f - progress;
 
+					if (hitResult.result == HIT_SLIDER_REPEAT) {
+						// repeats
+						Image scaledRepeat = GameImage.REVERSEARROW.getImage().getScaledCopy(scale);
+						scaledRepeat.setAlpha(alpha);
+						float ang;
+						if (hitResult.hitResultType == HitObjectType.SLIDER_FIRST) {
+							ang = hitResult.curve.getStartAngle();
+						} else {
+							ang = hitResult.curve.getEndAngle();
+						}
+						scaledRepeat.rotate(ang);
+						scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+					}
 					// "hidden" mod: circle and slider animations not drawn
-					if (!GameMod.HIDDEN.isActive()) {
+					else if (!GameMod.HIDDEN.isActive()) {
 						// slider curve
 						if (hitResult.curve != null) {
 							float oldWhiteAlpha = Colors.WHITE_FADE.a;
@@ -1195,6 +1209,10 @@ public class GameData {
 		}
 		float[] m = Utils.mirrorPoint(x, y);
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, m[0], m[1], mirrorcolor, null, null, true, false));
+	}
+
+	public void sendRepeatSliderResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
+		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, x, y, color, type, curve, true, true));
 	}
 
 	/**
