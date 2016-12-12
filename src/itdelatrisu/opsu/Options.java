@@ -18,11 +18,13 @@
 
 package itdelatrisu.opsu;
 
+import awlex.ospu.polymover.factory.PolyMoverFactory;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.skins.SkinLoader;
+import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
 
@@ -614,6 +616,11 @@ public class Options {
 
 			@Override
 			public void clickListItem(int index) {
+				if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
+					// TODO remove this when #79 is fixed
+					UI.sendBarNotification("This mover is disabled in the storyboard right now");
+					return;
+				}
 				Dancer.instance.setMoverFactoryIndex(index);
 			}
 

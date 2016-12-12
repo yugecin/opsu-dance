@@ -77,6 +77,7 @@ import yugecin.opsudance.ui.SBOverlay;
  * "Game" state.
  */
 public class Game extends BasicGameState {
+	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
 	public enum Restart {
 		/** No restart. */
@@ -1351,6 +1352,7 @@ public class Game extends BasicGameState {
 	@Override
 	public void enter(GameContainer container, StateBasedGame game)
 			throws SlickException {
+		isInGame = true;
 		if (!skippedToCheckpoint) {
 			UI.enter();
 		}
@@ -1569,6 +1571,7 @@ public class Game extends BasicGameState {
 	@Override
 	public void leave(GameContainer container, StateBasedGame game)
 			throws SlickException {
+		isInGame = false;
 //		container.setMouseGrabbed(false);
 		skippedToCheckpoint = false;
 
