@@ -86,6 +86,8 @@ public class OptionsOverlay {
 		this.tabs = tabs;
 		selectedTab = defaultSelectedTabIndex;
 
+		listHoverIndex = -1;
+
 		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(20, 20);
 		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(20, 20);
 		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(20, 20);
