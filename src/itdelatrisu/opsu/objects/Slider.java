@@ -647,20 +647,22 @@ public class Slider extends GameObject {
 				isNewRepeat = true;
 				tickExpandTime = TICK_EXPAND_TIME;
 
-				// send hit result, to fade out reversearrow
-				HitObjectType type;
-				float posX, posY;
-				if (currentRepeats % 2 == 1) {
-					type = HitObjectType.SLIDER_LAST;
-					Vec2f endPos = curve.pointAt(1);
-					posX = endPos.x;
-					posY = endPos.y;
-				} else {
-					type = HitObjectType.SLIDER_FIRST;
-					posX = this.x;
-					posY = this.y;
+				if (Options.isReverseArrowAnimationEnabled()) {
+					// send hit result, to fade out reversearrow
+					HitObjectType type;
+					float posX, posY;
+					if (currentRepeats % 2 == 1) {
+						type = HitObjectType.SLIDER_LAST;
+						Vec2f endPos = curve.pointAt(1);
+						posX = endPos.x;
+						posY = endPos.y;
+					} else {
+						type = HitObjectType.SLIDER_FIRST;
+						posX = this.x;
+						posY = this.y;
+					}
+					data.sendRepeatSliderResult(trackPosition, posX, posY, Color.white, curve, type);
 				}
-				data.sendRepeatSliderResult(trackPosition, posX, posY, Color.white, curve, type);
 			}
 		}
 

@@ -512,6 +512,7 @@ public class Options {
 		},
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_HIT_ANIMATIONS ("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true),
+		SHOW_REVERSEARROW_ANIMATIONS ("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true),
 		SHOW_COMBO_BURSTS ("Show Combo Bursts", "ComboBurst", "A character image is displayed at combo milestones.", true),
 		SHOW_PERFECT_HIT ("Show Perfect Hits", "PerfectHit", "Whether to show perfect hit result bursts (300s, slider ticks).", true),
 		SHOW_FOLLOW_POINTS ("Show Follow Points", "FollowPoints", "Whether to show follow points between hit objects.", true),
@@ -1422,6 +1423,12 @@ public class Options {
 	 * @return true if enabled
 	 */
 	public static boolean isHitAnimationEnabled() { return GameOption.SHOW_HIT_ANIMATIONS.getBooleanValue(); }
+
+	/**
+	 * Returns whether or not hit animation effects are enabled.
+	 * @return true if enabled
+	 */
+	public static boolean isReverseArrowAnimationEnabled() { return GameOption.SHOW_REVERSEARROW_ANIMATIONS.getBooleanValue(); }
 
 	/**
 	 * Returns whether or not combo burst effects are enabled.
