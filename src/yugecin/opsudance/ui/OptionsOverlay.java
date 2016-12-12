@@ -98,7 +98,7 @@ public class OptionsOverlay {
 		// calculate positions
 		optionWidth = width / 2;
 		optionHeight = (int) ((Fonts.MEDIUM.getLineHeight()) * 1.1f);
-		listItemHeight= (int) (optionHeight * 4f / 5f);
+		listItemHeight = (int) (optionHeight * 4f / 5f);
 		optionStartX = optionWidth / 2;
 
 		// initialize tabs
@@ -162,7 +162,7 @@ public class OptionsOverlay {
 		renderTooltip(g, mouseX, mouseY);
 
 		// key input options
-		if (keyEntryLeft ||keyEntryRight) {
+		if (keyEntryLeft || keyEntryRight) {
 			renderKeyEntry(g);
 		}
 	}
@@ -426,7 +426,7 @@ public class OptionsOverlay {
 			} else if (hoverOption == GameOption.KEY_RIGHT) {
 				keyEntryLeft = true;
 			}
-	}
+		}
 
 		// check if tab was clicked
 		int tScrollOffset = 0;
@@ -534,6 +534,7 @@ public class OptionsOverlay {
 	public interface Parent {
 
 		void onLeave();
+
 		void onSaveOption(GameOption option);
 
 	}
