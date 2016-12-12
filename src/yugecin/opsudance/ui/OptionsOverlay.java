@@ -392,10 +392,6 @@ public class OptionsOverlay {
 				if (isAdjustingSlider) {
 					updateSliderOption(x, y);
 				}
-			} else if (selectedOption == GameOption.KEY_LEFT) {
-				keyEntryLeft = true;
-			} else if (selectedOption == GameOption.KEY_RIGHT) {
-				keyEntryLeft = true;
 			}
 		}
 
@@ -417,12 +413,18 @@ public class OptionsOverlay {
 			return;
 		}
 
-		if (hoverOption != null && hoverOption.getType() == OptionType.BOOLEAN) {
-			hoverOption.click(container);
-			parent.onSaveOption(hoverOption);
-			SoundController.playSound(SoundEffect.MENUHIT);
-			return;
-		}
+		if (hoverOption != null) {
+			if (hoverOption.getType() == OptionType.BOOLEAN) {
+				hoverOption.click(container);
+				parent.onSaveOption(hoverOption);
+				SoundController.playSound(SoundEffect.MENUHIT);
+				return;
+			} else if (hoverOption == GameOption.KEY_LEFT) {
+				keyEntryLeft = true;
+			} else if (hoverOption == GameOption.KEY_RIGHT) {
+				keyEntryLeft = true;
+			}
+	}
 
 		// check if tab was clicked
 		int tScrollOffset = 0;
