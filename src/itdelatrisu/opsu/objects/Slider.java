@@ -660,9 +660,7 @@ public class Slider extends GameObject {
 					posX = this.x;
 					posY = this.y;
 				}
-				float colorLuminance = 0.299f*color.r + 0.587f*color.g + 0.114f*color.b;
-				Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
-				data.sendRepeatSliderResult(trackPosition, posX, posY, arrowColor, curve, type);
+				data.sendRepeatSliderResult(trackPosition, posX, posY, Color.white, curve, type);
 			}
 		}
 
