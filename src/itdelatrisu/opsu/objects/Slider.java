@@ -251,7 +251,7 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
-			drawSliderTicks(trackPosition, sliderAlpha, decorationsAlpha, mirror);
+			drawSliderTicks(g, trackPosition, alpha, decorationsAlpha, mirror);
 			Colors.WHITE_FADE.a = alpha;
 		}
 
@@ -363,12 +363,13 @@ public class Slider extends GameObject {
 
 	/**
 	 * Draws slider ticks.
+	 * @param g graphics
 	 * @param trackPosition the track position
 	 * @param curveAlpha the curve alpha level
 	 * @param decorationsAlpha the decorations alpha level
 	 * @param mirror true to draw mirrored
 	 */
-	private void drawSliderTicks(int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
+	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
 		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
 		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
 
