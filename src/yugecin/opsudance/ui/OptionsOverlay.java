@@ -382,12 +382,11 @@ public class OptionsOverlay {
 		}
 
 		mousePressY = y;
-		selectedOption = hoverOption;
 
-		if (selectedOption != null) {
-			if (selectedOption.getListItems() != null) {
+		if (hoverOption != null) {
+			if (hoverOption.getListItems() != null) {
 				isListOptionOpen = true;
-			} else if (selectedOption.getType() == OptionType.NUMERIC) {
+			} else if (hoverOption.getType() == OptionType.NUMERIC) {
 				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
 				if (isAdjustingSlider) {
 					updateSliderOption(x, y);
@@ -478,10 +477,10 @@ public class OptionsOverlay {
 	}
 
 	private void updateSliderOption(int mouseX, int mouseY) {
-		int min = selectedOption.getMinValue();
-		int max = selectedOption.getMaxValue();
+		int min = hoverOption.getMinValue();
+		int max = hoverOption.getMaxValue();
 		int value = min + Math.round((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
-		selectedOption.setValue(Utils.clamp(value, min, max));
+		hoverOption.setValue(Utils.clamp(value, min, max));
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
