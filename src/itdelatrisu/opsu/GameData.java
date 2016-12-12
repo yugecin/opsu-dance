@@ -1213,7 +1213,7 @@ public class GameData {
 
 	public void sendRepeatSliderResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, x, y, color, type, curve, true, true));
-		if (Options.isMirror()) {
+		if (!Options.isMirror()) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
