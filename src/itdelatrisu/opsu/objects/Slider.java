@@ -429,7 +429,7 @@ public class Slider extends GameObject {
 				if (repeats % 2 == 0) {
 					game.spliceSliderCurve(baseSliderFrom + (int) ((1d - curveIntervalFrom) * curvelen) - 1, baseSliderFrom + curvelen);
 				} else {
-					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen));
+					game.setSlidercurveFrom(baseSliderFrom + (int) (curveIntervalFrom * curvelen) + 1);
 				}
 			}
 			game.setSlidercurveTo(baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
