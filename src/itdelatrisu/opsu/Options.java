@@ -910,6 +910,11 @@ public class Options {
 			public String getValueString() {
 				return val + "%";
 			}
+			@Override
+			public void setValue(int value) {
+				super.setValue(value);
+				Pippi.setRadiusPercent(value);
+			}
 		},
 		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 10, -200, 200) {
 			@Override
