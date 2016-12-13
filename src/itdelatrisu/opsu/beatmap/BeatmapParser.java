@@ -151,7 +151,12 @@ public class BeatmapParser {
 
 				// Parse hit objects only when needed to save time/memory.
 				// Change boolean to 'true' to parse them immediately.
-				Beatmap beatmap = parseFile(file, dir, beatmaps, false);
+				Beatmap beatmap = null;
+				try {
+					beatmap = parseFile(file, dir, beatmaps, false);
+				} catch(Exception e) {
+					Log.error("could not parse beatmap " + file.getName() + ": " + e.getMessage()); // TODO: show right bottom notification
+				}
 
 				// add to parsed beatmap list
 				if (beatmap != null) {
