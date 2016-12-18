@@ -284,7 +284,10 @@ public class MainMenu extends BasicGameState {
 			Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
 			scaleposmodx = logoCopy.getWidth() / 2;
 			scaleposmody = logoCopy.getHeight() / 2;
+			float a = Colors.GHOST_LOGO.a;
+			Colors.GHOST_LOGO.a *= (1d - position);
 			logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
+			Colors.GHOST_LOGO.a = a;
 		} else {
 			logo.draw();
 		}

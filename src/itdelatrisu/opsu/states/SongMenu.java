@@ -515,15 +515,18 @@ public class SongMenu extends BasicGameState {
 		float logoSize = footerHeight * 2f;
 		logo = logo.getScaledCopy(logoSize / logo.getWidth());
 		Double position = MusicController.getBeatProgress();
-		float x = width - footerHeight * 0.60f;
+		float x = width - footerHeight * 0.61f;
 		float y = height - footerHeight * 0.40f;
 		if (position != null) {
-			Image ghostLogo = logo.getScaledCopy((float) (1 - (0 - position) * 0.075));
-			logo = logo.getScaledCopy((float) (1 - (position) * 0.075));
+			Image ghostLogo = logo.getScaledCopy((float) (1 - (0 - position) * 0.15));
+			logo = logo.getScaledCopy((float) (1 - (position) * 0.15));
 			logoSize = logo.getWidth();
 			logo.draw(x - logoSize / 2, y - logoSize / 2);
 			logoSize = ghostLogo.getWidth();
+			float a = Colors.GHOST_LOGO.a;
+			Colors.GHOST_LOGO.a *= (1d - position);
 			ghostLogo.draw(x - logoSize / 2, y - logoSize / 2, Colors.GHOST_LOGO);
+			Colors.GHOST_LOGO.a = a;
 		} else {
 			logo.draw(x - logoSize / 2, y - logoSize / 2);
 		}
