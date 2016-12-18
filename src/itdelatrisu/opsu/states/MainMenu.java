@@ -32,11 +32,8 @@ import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
-import itdelatrisu.opsu.ui.Colors;
-import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.MenuButton;
+import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.MenuButton.Expand;
-import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -125,6 +122,9 @@ public class MainMenu extends BasicGameState {
 	private StateBasedGame game;
 	private Input input;
 	private final int state;
+
+	private float hue = 0;
+	private boolean huedone = false;
 
 	public MainMenu(int state) {
 		this.state = state;
@@ -273,14 +273,16 @@ public class MainMenu extends BasicGameState {
 
 		Double position = MusicController.getBeatProgress();
 
+		// logo
+		Color color = Options.isColorMainMenuLogo() ? Cursor.lastCursorColor : Color.white;
 		if (position != null) {
 			double scale = 1 - (0 - position) * 0.05;
-			logo.draw(Color.white, (float) scale);
+			logo.draw(color, (float) scale);
 			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getCurrentScale());
 			float scaleposmodx = piece.getWidth() / 2;
 			float scaleposmody = piece.getHeight() / 2;
 			piece.rotate((float)(position * 360));
-			piece.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody);
+			piece.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, color);
 			Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
 			scaleposmodx = logoCopy.getWidth() / 2;
 			scaleposmody = logoCopy.getHeight() / 2;
@@ -289,7 +291,7 @@ public class MainMenu extends BasicGameState {
 			logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
 			Colors.GHOST_LOGO.a = a;
 		} else {
-			logo.draw();
+			logo.draw(color);
 		}
 
 		// draw music buttons

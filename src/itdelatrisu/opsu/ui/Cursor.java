@@ -76,6 +76,7 @@ public class Cursor {
 	public static Color lastMirroredObjColor = Color.white;
 	public static Color nextObjColor = Color.white;
 	public static Color nextMirroredObjColor = Color.white;
+	public static Color lastCursorColor = Color.white;
 
 	private boolean isMirrored;
 
@@ -177,7 +178,7 @@ public class Cursor {
 		if (isMirrored) {
 			filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
 		} else {
-			filter = Dancer.cursorColorOverride.getColor();
+			lastCursorColor = filter = Dancer.cursorColorOverride.getColor();
 		}
 
 		// draw a fading trail

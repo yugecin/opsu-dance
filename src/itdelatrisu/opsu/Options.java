@@ -445,6 +445,7 @@ public class Options {
 		},
 		DYNAMIC_BACKGROUND ("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true),
 		LOAD_VERBOSE ("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false),
+		COLOR_MAIN_MENU_LOGO ("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false),
 		MASTER_VOLUME ("Master Volume", "VolumeUniversal", "Global volume level.", 35, 0, 100) {
 			@Override
 			public void setValue(int value) {
@@ -1544,6 +1545,12 @@ public class Options {
 	 * @return true if enabled
 	 */
 	public static boolean isLoadVerbose() { return GameOption.LOAD_VERBOSE.getBooleanValue(); }
+
+	/**
+	 * Returns whether or not to color the main menu logo.
+	 * @return true if enabled
+	 */
+	public static boolean isColorMainMenuLogo() { return GameOption.COLOR_MAIN_MENU_LOGO.getBooleanValue(); }
 
 	/**
 	 * Returns the track checkpoint time.

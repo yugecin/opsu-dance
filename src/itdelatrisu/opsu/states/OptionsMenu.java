@@ -58,7 +58,8 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 			GameOption.SCREENSHOT_FORMAT,
 			GameOption.DYNAMIC_BACKGROUND,
 			GameOption.LOAD_HD_IMAGES,
-			GameOption.LOAD_VERBOSE
+			GameOption.LOAD_VERBOSE,
+			GameOption.COLOR_MAIN_MENU_LOGO,
 		}),
 		new OptionTab("Music", new GameOption[] {
 			GameOption.MASTER_VOLUME,
