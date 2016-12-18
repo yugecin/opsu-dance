@@ -271,28 +271,26 @@ public class MainMenu extends BasicGameState {
 			exitButton.draw();
 		}
 
-		Double position = MusicController.getBeatProgress();
-
 		// logo
+		Double position = MusicController.getBeatProgress();
 		Color color = Options.isColorMainMenuLogo() ? Cursor.lastCursorColor : Color.white;
-		if (position != null) {
-			double scale = 1 - (0 - position) * 0.05;
-			logo.draw(color, (float) scale);
+		boolean renderPiece = position != null;
+		if (position == null) {
+			position = System.currentTimeMillis() % 1000 / 1000d;
+		}
+		double scale = 1 - (0 - position) * 0.05;
+		logo.draw(color, (float) scale);
+		if (renderPiece) {
 			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getCurrentScale());
 			float scaleposmodx = piece.getWidth() / 2;
 			float scaleposmody = piece.getHeight() / 2;
-			piece.rotate((float)(position * 360));
+			piece.rotate((float) (position * 360));
 			piece.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, color);
-			Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
-			scaleposmodx = logoCopy.getWidth() / 2;
-			scaleposmody = logoCopy.getHeight() / 2;
-			float a = Colors.GHOST_LOGO.a;
-			Colors.GHOST_LOGO.a *= (1d - position);
-			logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
-			Colors.GHOST_LOGO.a = a;
-		} else {
-			logo.draw(color);
 		}
+		Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
+		float scaleposmodx = logoCopy.getWidth() / 2;
+		float scaleposmody = logoCopy.getHeight() / 2;
+		logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
 
 		// draw music buttons
 		if (MusicController.isPlaying())
