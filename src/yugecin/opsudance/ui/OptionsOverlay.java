@@ -451,6 +451,7 @@ public class OptionsOverlay {
 		if (!isAdjustingSlider) {
 			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset);
 		}
+		updateHoverOption(prevMouseX, prevMouseY);
 	}
 
 	public boolean keyPressed(int key, char c) {
