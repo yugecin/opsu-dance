@@ -284,9 +284,9 @@ public class OptionsOverlay {
 
 	private void renderCheckOption(Graphics g, GameOption option, int y, Color textColor) {
 		if (option.getBooleanValue()) {
-			checkOnImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+			checkOnImg.draw(optionStartX, y + optionHeight / 2 - 10, Color.pink);
 		} else {
-			checkOffImg.draw(optionStartX, y + optionHeight / 4, Color.pink);
+			checkOffImg.draw(optionStartX, y + optionHeight / 2 - 10, Color.pink);
 		}
 		Fonts.MEDIUM.drawString(optionStartX + 30, y, option.getName(), textColor);
 	}
