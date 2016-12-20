@@ -380,6 +380,7 @@ public class OptionsOverlay {
 			}
 			isListOptionOpen = false;
 			listHoverIndex = -1;
+			updateHoverOption(x, y);
 			return;
 		}
 
