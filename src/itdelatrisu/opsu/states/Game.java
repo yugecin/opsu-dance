@@ -961,7 +961,7 @@ public class Game extends BasicGameState {
 
 			// start timer
 			gameFinished = true;
-			gameFinishedTimer.setTime(0);
+			gameFinishedTimer.setTime(2500);
 
 			return;
 		}
