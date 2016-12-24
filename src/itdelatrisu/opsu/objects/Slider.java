@@ -740,9 +740,7 @@ public class Slider extends GameObject {
 					posX, posY, hitObject, currentRepeats);
 
 				// fade out reverse arrow
-				float colorLuminance = Utils.getLuminance(color);
-				Color arrowColor = colorLuminance < 0.8f ? Color.white : Color.black;
-				data.sendSliderRepeatResult(trackPosition, posX, posY, arrowColor, curve, type);
+				data.sendSliderRepeatResult(trackPosition, posX, posY, Color.white, curve, type);
 			}
 
 			// held during new tick
