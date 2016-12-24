@@ -141,23 +141,23 @@ public class GameData {
 
 	/** Hit result types. */
 	public static final int
-		HIT_MISS          = 0,
-		HIT_50            = 1,
-		HIT_100           = 2,
-		HIT_300           = 3,
-		HIT_100K          = 4,   // 100-Katu
-		HIT_300K          = 5,   // 300-Katu
-		HIT_300G          = 6,   // Geki
-		HIT_SLIDER10      = 7,
-		HIT_SLIDER30      = 8,
-		HIT_MAX           = 9,   // not a hit result
-		HIT_SLIDER_INITIAL = 10,   // not a hit result
-		HIT_SLIDER_REPEAT = 11;  // not a hit result
+		HIT_MISS             = 0,
+		HIT_50               = 1,
+		HIT_100              = 2,
+		HIT_300              = 3,
+		HIT_100K             = 4,   // 100-Katu
+		HIT_300K             = 5,   // 300-Katu
+		HIT_300G             = 6,   // Geki
+		HIT_SLIDER10         = 7,
+		HIT_SLIDER30         = 8,
+		HIT_MAX              = 9,   // not a hit result
+		HIT_SLIDER_REPEAT    = 10,  // not a hit result
+		HIT_ANIMATION_RESULT = 11;  // not a hit result
 
-	/** Hit result-related images (indexed by HIT_* constants). */
+	/** Hit result-related images (indexed by HIT_* constants to HIT_MAX). */
 	private Image[] hitResults;
 
-	/** Counts of each hit result so far. */
+	/** Counts of each hit result so far (indexed by HIT_* constants to HIT_MAX). */
 	private int[] hitResultCount;
 
 	/** Total objects including slider hits/ticks (for determining Full Combo status). */
@@ -193,7 +193,7 @@ public class GameData {
 	/** Current x coordinate of the combo burst image (for sliding animation). */
 	private float comboBurstX;
 
-	/** Time offsets for obtaining each hit result (indexed by HIT_* constants). */
+	/** Time offsets for obtaining each hit result (indexed by HIT_* constants to HIT_MAX). */
 	private int[] hitResultOffset;
 
 	/** List of hit result objects associated with hit objects. */
@@ -557,10 +557,11 @@ public class GameData {
 	 * @param x the starting x coordinate
 	 * @param y the y coordinate
 	 * @param scale the scale to apply
+	 * @param alpha the alpha level
 	 * @param fixedsize the width to use for all symbols
 	 * @param rightAlign align right (true) or left (false)
 	 */
-	public void drawFixedSizeSymbolString(String str, float x, float y, float scale, float fixedsize, boolean rightAlign) {
+	public void drawFixedSizeSymbolString(String str, float x, float y, float scale, float alpha, float fixedsize, boolean rightAlign) {
 		char[] c = str.toCharArray();
 		float cx = x;
 		if (rightAlign) {
@@ -569,14 +570,18 @@ public class GameData {
 				if (scale != 1.0f)
 					digit = digit.getScaledCopy(scale);
 				cx -= fixedsize;
+				digit.setAlpha(alpha);
 				digit.draw(cx + (fixedsize - digit.getWidth()) / 2, y);
+				digit.setAlpha(1f);
 			}
 		} else {
 			for (int i = 0; i < c.length; i++) {
 				Image digit = getScoreSymbolImage(c[i]);
 				if (scale != 1.0f)
 					digit = digit.getScaledCopy(scale);
+				digit.setAlpha(alpha);
 				digit.draw(cx + (fixedsize - digit.getWidth()) / 2, y);
+				digit.setAlpha(1f);
 				cx += fixedsize;
 			}
 		}
@@ -589,9 +594,10 @@ public class GameData {
 	 * @param g the graphics context
 	 * @param breakPeriod if true, will not draw scorebar and combo elements, and will draw grade
 	 * @param firstObject true if the first hit object's start time has not yet passed
+	 * @param alpha the alpha level at which to render all elements (except the hit error bar)
 	 */
 	@SuppressWarnings("deprecation")
-	public void drawGameElements(Graphics g, boolean breakPeriod, boolean firstObject) {
+	public void drawGameElements(Graphics g, boolean breakPeriod, boolean firstObject, float alpha) {
 		boolean relaxAutoPilot = (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive());
 		int margin = (int) (width * 0.008f);
 		float uiScale = GameImage.getUIscale();
@@ -599,14 +605,14 @@ public class GameData {
 		// score
 		if (!relaxAutoPilot)
 			drawFixedSizeSymbolString((scoreDisplay < 100000000) ? String.format("%08d", scoreDisplay) : Long.toString(scoreDisplay),
-					width - margin, 0, 1.0f, getScoreSymbolImage('0').getWidth() - 2, true);
+					width - margin, 0, 1f, alpha, getScoreSymbolImage('0').getWidth() - 2, true);
 
 		// score percentage
 		int symbolHeight = getScoreSymbolImage('0').getHeight();
 		if (!relaxAutoPilot)
 			drawSymbolString(
 					String.format((scorePercentDisplay < 10f) ? "0%.2f%%" : "%.2f%%", scorePercentDisplay),
-					width - margin, symbolHeight, 0.60f, 1f, true);
+					width - margin, symbolHeight, 0.60f, alpha, true);
 
 		// map progress circle
 		Beatmap beatmap = MusicController.getBeatmap();
@@ -620,23 +626,27 @@ public class GameData {
 				getScoreSymbolImage('%').getWidth()
 		) * 0.60f - circleDiameter);
 		if (!relaxAutoPilot) {
+			float oldWhiteAlpha = Colors.WHITE_ALPHA.a;
+			Colors.WHITE_ALPHA.a = alpha;
 			g.setAntiAlias(true);
 			g.setLineWidth(2f);
-			g.setColor(Color.white);
+			g.setColor(Colors.WHITE_ALPHA);
 			g.drawOval(circleX, symbolHeight, circleDiameter, circleDiameter);
 			if (trackPosition > firstObjectTime) {
 				// map progress (white)
-				g.fillArc(circleX, symbolHeight, circleDiameter, circleDiameter,
-						-90, -90 + (int) (360f * (trackPosition - firstObjectTime) / (beatmap.endTime - firstObjectTime))
-				);
+				float progress = Math.min((float) (trackPosition - firstObjectTime) / (beatmap.endTime - firstObjectTime), 1f);
+				g.fillArc(circleX, symbolHeight, circleDiameter, circleDiameter, -90, -90 + (int) (360f * progress));
 			} else {
 				// lead-in time (yellow)
+				float progress = (float) trackPosition / firstObjectTime;
+				float oldYellowAlpha = Colors.YELLOW_ALPHA.a;
+				Colors.YELLOW_ALPHA.a *= alpha;
 				g.setColor(Colors.YELLOW_ALPHA);
-				g.fillArc(circleX, symbolHeight, circleDiameter, circleDiameter,
-						-90 + (int) (360f * trackPosition / firstObjectTime), -90
-				);
+				g.fillArc(circleX, symbolHeight, circleDiameter, circleDiameter, -90 + (int) (360f * progress), -90);
+				Colors.YELLOW_ALPHA.a = oldYellowAlpha;
 			}
 			g.setAntiAlias(false);
+			Colors.WHITE_ALPHA.a = oldWhiteAlpha;
 		}
 
 		// mod icons
@@ -646,10 +656,12 @@ public class GameData {
 			int modCount = 0;
 			for (GameMod mod : GameMod.VALUES_REVERSED) {
 				if (mod.isActive()) {
+					mod.getImage().setAlpha(alpha);
 					mod.getImage().draw(
 							modX - (modCount * (modWidth / 2f)),
 							symbolHeight + circleDiameter + 10
 					);
+					mod.getImage().setAlpha(1f);
 					modCount++;
 				}
 			}
@@ -697,8 +709,8 @@ public class GameData {
 			float tickWidth = 2 * uiScale;
 			for (HitErrorInfo info : hitErrorList) {
 				int time = info.time;
-				float alpha = 1 - ((float) (trackPosition - time) / HIT_ERROR_FADE_TIME);
-				white.a = alpha * hitErrorAlpha;
+				float tickAlpha = 1 - ((float) (trackPosition - time) / HIT_ERROR_FADE_TIME);
+				white.a = tickAlpha * hitErrorAlpha;
 				g.setColor(white);
 				g.fillRect((hitErrorX + info.timeDiff - 1) * uiScale, tickY, tickWidth, tickHeight);
 			}
@@ -721,9 +733,12 @@ public class GameData {
 			float colourX = 4 * uiScale, colourY = 15 * uiScale;
 			Image colourCropped = colour.getSubImage(0, 0, (int) (645 * uiScale * healthRatio), colour.getHeight());
 
-			scorebar.setAlpha(1f);
+			scorebar.setAlpha(alpha);
 			scorebar.draw(0, 0);
+			scorebar.setAlpha(1f);
+			colourCropped.setAlpha(alpha);
 			colourCropped.draw(colourX, colourY);
+			colourCropped.setAlpha(1f);
 
 			Image ki = null;
 			if (health >= 50f)
@@ -734,7 +749,9 @@ public class GameData {
 				ki = GameImage.SCOREBAR_KI_DANGER2.getImage();
 			if (comboPopTime < COMBO_POP_TIME)
 				ki = ki.getScaledCopy(1f + (0.45f * (1f - (float) comboPopTime / COMBO_POP_TIME)));
+			ki.setAlpha(alpha);
 			ki.drawCentered(colourX + colourCropped.getWidth(), colourY);
+			ki.setAlpha(1f);
 
 			// combo burst
 			if (comboBurstIndex != -1 && comboBurstAlpha > 0f) {
@@ -750,8 +767,8 @@ public class GameData {
 				float comboPopFront = 1 + comboPop * 0.08f;
 				String comboString = String.format("%dx", combo);
 				if (comboPopTime != COMBO_POP_TIME)
-					drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopBack), comboPopBack, 0.5f, false);
-				drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopFront), comboPopFront, 1f, false);
+					drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopBack), comboPopBack, 0.5f * alpha, false);
+				drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopFront), comboPopFront, alpha, false);
 			}
 		} else if (!relaxAutoPilot) {
 			// grade
@@ -759,9 +776,9 @@ public class GameData {
 			if (grade != Grade.NULL) {
 				Image gradeImage = grade.getSmallImage();
 				float gradeScale = symbolHeight * 0.75f / gradeImage.getHeight();
-				gradeImage.getScaledCopy(gradeScale).draw(
-						circleX - gradeImage.getWidth(), symbolHeight
-				);
+				gradeImage = gradeImage.getScaledCopy(gradeScale);
+				gradeImage.setAlpha(alpha);
+				gradeImage.draw(circleX - gradeImage.getWidth(), symbolHeight);
 			}
 		}
 	}
@@ -786,7 +803,7 @@ public class GameData {
 		drawFixedSizeSymbolString(
 				(score < 100000000) ? String.format("%08d", score) : Long.toString(score),
 				210 * uiScale, (rankingHeight + 50) * uiScale,
-				scoreTextScale, getScoreSymbolImage('0').getWidth() * scoreTextScale - 2, false
+				scoreTextScale, 1f, getScoreSymbolImage('0').getWidth() * scoreTextScale - 2, false
 		);
 
 		// result counts
@@ -897,63 +914,17 @@ public class GameData {
 					lighting.drawCentered(hitResult.x, hitResult.y, hitResult.color);
 				}
 
-				// hit animation
-				if (Options.isHitAnimationEnabled() &&
-				    hitResult.result != HIT_MISS && (
-				    hitResult.hitResultType == null || // null => initial slider circle
-				    hitResult.hitResultType == HitObjectType.CIRCLE ||
-				    hitResult.hitResultType == HitObjectType.SLIDER_FIRST ||
-				    hitResult.hitResultType == HitObjectType.SLIDER_LAST)) {
-					float progress = AnimationEquation.OUT_CUBIC.calc(
-							(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
-					float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
-					float alpha = 1f - progress;
-
-					if (hitResult.result == HIT_SLIDER_REPEAT) {
-						// repeats
-						Image scaledRepeat = GameImage.REVERSEARROW.getImage().getScaledCopy(scale);
-						scaledRepeat.setAlpha(alpha);
-						float ang;
-						if (hitResult.hitResultType == HitObjectType.SLIDER_FIRST) {
-							ang = hitResult.curve.getStartAngle();
-						} else {
-							ang = hitResult.curve.getEndAngle();
-						}
-						scaledRepeat.rotate(ang);
-						scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
-					}
-					// "hidden" mod: circle and slider animations not drawn
-					else if (!GameMod.HIDDEN.isActive()) {
-						// slider curve
-						if (hitResult.curve != null) {
-							float oldWhiteAlpha = Colors.WHITE_FADE.a;
-							float oldColorAlpha = hitResult.color.a;
-							Colors.WHITE_FADE.a = alpha;
-							hitResult.color.a = alpha;
-							if (!Options.isShrinkingSliders()) {
-								hitResult.curve.draw(hitResult.color);
-							}
-							Colors.WHITE_FADE.a = oldWhiteAlpha;
-							hitResult.color.a = oldColorAlpha;
-						}
-
-						if (hitResult.hitResultType == null || hitResult.hitResultType == HitObjectType.CIRCLE) {
-							// hit circles
-							Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
-							Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
-							scaledHitCircle.setAlpha(alpha);
-							scaledHitCircleOverlay.setAlpha(alpha);
-							scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
-							scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
-						}
-					}
+				// hit animations (only draw when the "Hidden" mod is not enabled)
+				if (!GameMod.HIDDEN.isActive()) {
+					drawHitAnimations(hitResult, trackPosition);
 				}
 
 				// hit result
 				if (!hitResult.hideResult && (
-					hitResult.hitResultType == HitObjectType.CIRCLE ||
-				    hitResult.hitResultType == HitObjectType.SPINNER ||
-				    hitResult.curve != null)) {
+				    hitResult.hitResultType == HitObjectType.CIRCLE ||
+				    hitResult.hitResultType == HitObjectType.SLIDER_FIRST ||
+				    hitResult.hitResultType == HitObjectType.SLIDER_LAST ||
+				    hitResult.hitResultType == HitObjectType.SPINNER)) {
 					float scaleProgress = AnimationEquation.IN_OUT_BOUNCE.calc(
 							(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_TEXT_BOUNCE_TIME) / HITCIRCLE_TEXT_BOUNCE_TIME);
 					float scale = 1f + (HITCIRCLE_TEXT_ANIM_SCALE - 1f) * scaleProgress;
@@ -972,6 +943,64 @@ public class GameData {
 				iter.remove();
 			}
 		}
+	}
+
+	/**
+	 * Draw the hit animations:
+	 *   circles, reverse arrows, slider curves (fading out and/or expanding).
+	 * @param hitResult the hit result
+	 * @param trackPosition the current track position (in ms)
+	 */
+	private void drawHitAnimations(HitObjectResult hitResult, int trackPosition) {
+		// fade out slider curve
+		if (hitResult.result != HIT_SLIDER_REPEAT && hitResult.curve != null) {
+			float progress = AnimationEquation.OUT_CUBIC.calc(
+				(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
+			float alpha = 1f - progress;
+			float oldWhiteAlpha = Colors.WHITE_FADE.a;
+			float oldColorAlpha = hitResult.color.a;
+			Colors.WHITE_FADE.a = hitResult.color.a = alpha;
+			hitResult.curve.draw(hitResult.color);
+			Colors.WHITE_FADE.a = oldWhiteAlpha;
+			hitResult.color.a = oldColorAlpha;
+		}
+
+		// miss, don't draw an animation
+		if (hitResult.result == HIT_MISS) {
+			return;
+		}
+
+		// not a circle?
+		if (hitResult.hitResultType != HitObjectType.CIRCLE &&
+		    hitResult.hitResultType != HitObjectType.SLIDER_FIRST &&
+		    hitResult.hitResultType != HitObjectType.SLIDER_LAST) {
+			return;
+		}
+
+		// hit circles
+		float progress = AnimationEquation.OUT_CUBIC.calc(
+			(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
+		float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
+		float alpha = 1f - progress;
+		if (hitResult.result == HIT_SLIDER_REPEAT) {
+			// repeats
+			Image scaledRepeat = GameImage.REVERSEARROW.getImage().getScaledCopy(scale);
+			scaledRepeat.setAlpha(alpha);
+			float ang;
+			if (hitResult.hitResultType == HitObjectType.SLIDER_FIRST) {
+				ang = hitResult.curve.getStartAngle();
+			} else {
+				ang = hitResult.curve.getEndAngle();
+			}
+			scaledRepeat.rotate(ang);
+			scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+		}
+		Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
+		Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
+		scaledHitCircle.setAlpha(alpha);
+		scaledHitCircleOverlay.setAlpha(alpha);
+		scaledHitCircle.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+		scaledHitCircleOverlay.drawCentered(hitResult.x, hitResult.y);
 	}
 
 	/**
@@ -1202,22 +1231,34 @@ public class GameData {
 			health = 0f;
 	}
 
-	public void sendInitialSliderResult(int time, float x, float y, Color color, Color mirrorcolor) {
-		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, x, y, color, null, null, true, false));
-		if (!Options.isMirror() || !GameMod.AUTO.isActive()) {
-			return;
-		}
-		float[] m = Utils.mirrorPoint(x, y);
-		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_INITIAL, m[0], m[1], mirrorcolor, null, null, true, false));
-	}
-
-	public void sendRepeatSliderResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
+	/**
+	 * Handles a slider repeat result (animation only: arrow).
+	 * @param time the repeat time
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param color the arrow color
+	 * @param curve the slider curve
+	 * @param type the hit object type
+	 */
+	public void sendSliderRepeatResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, x, y, color, type, curve, true, true));
 		if (!Options.isMirror()) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, m[0], m[1], color, type, curve, true, true));
+	}
+
+	/**
+	 * Handles a slider start result (animation only: initial circle).
+	 * @param time the hit time
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param color the slider color
+	 * @param expand whether or not the hit result animation should expand
+	 */
+	public void sendSliderStartResult(int time, float x, float y, Color color, boolean expand) {
+		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, x, y, color, HitObjectType.CIRCLE, null, expand, true));
 	}
 
 	/**
@@ -1229,7 +1270,7 @@ public class GameData {
 	 * @param hitObject the hit object
 	 * @param repeat the current repeat number
 	 */
-	public void sliderTickResult(int time, int result, float x, float y, HitObject hitObject, int repeat) {
+	public void sendSliderTickResult(int time, int result, float x, float y, HitObject hitObject, int repeat) {
 		int hitValue = 0;
 		switch (result) {
 		case HIT_SLIDER30:
@@ -1415,6 +1456,23 @@ public class GameData {
 			      boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
 		hitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
 	}
+
+	/**
+	 * Handles a hit result.
+	 * @param time the object start time
+	 * @param result the hit result (HIT_* constants)
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param color the combo color
+	 * @param end true if this is the last hit object in the combo
+	 * @param hitObject the hit object
+	 * @param hitResultType the type of hit object for the result
+	 * @param expand whether or not the hit result animation should expand (if applicable)
+	 * @param repeat the current repeat number (for sliders, or 0 otherwise)
+	 * @param curve the slider curve (or null if not applicable)
+	 * @param sliderHeldToEnd whether or not the slider was held to the end (if applicable)
+	 * @param handleResult whether or not to send a score result
+	 */
 	public void hitResult(int time, int result, float x, float y, Color color,
 						  boolean end, HitObject hitObject, HitObjectType hitResultType,
 						  boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
@@ -1431,16 +1489,6 @@ public class GameData {
 
 		boolean hideResult = (hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K) && !Options.isPerfectHitBurstEnabled();
 		hitResultList.add(new HitObjectResult(time, hitResult, x, y, color, hitResultType, curve, expand, hideResult));
-
-		/*
-		// sliders: add the other curve endpoint for the hit animation
-		if (curve != null) {
-			boolean isFirst = (hitResultType == HitObjectType.SLIDER_FIRST);
-			Vec2f p = curve.pointAt((isFirst) ? 1f : 0f);
-			HitObjectType type = (isFirst) ? HitObjectType.SLIDER_LAST : HitObjectType.SLIDER_FIRST;
-			hitResultList.add(new HitObjectResult(time, hitResult, p.x, p.y, color, type, null, expand, hideResult));
-		}
-		*/
 	}
 
 	/**

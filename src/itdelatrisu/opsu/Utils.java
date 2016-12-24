@@ -41,6 +41,7 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -156,6 +157,14 @@ public class Utils {
 	 */
 	public static void drawCentered(Animation anim, float x, float y) {
 		anim.draw(x - (anim.getWidth() / 2f), y - (anim.getHeight() / 2f));
+	}
+
+	/**
+	 * Returns the luminance of a color.
+	 * @param c the color
+	 */
+	public static float getLuminance(Color c) {
+		return 0.299f*c.r + 0.587f*c.g + 0.114f*c.b;
 	}
 
 	/**
@@ -552,6 +561,14 @@ public class Utils {
 			Log.error("Could not get the running directory.", e);
 			return null;
 		}
+	}
+
+	/**
+	 * Returns the current working directory.
+	 * @return the directory
+	 */
+	public static File getWorkingDirectory() {
+		return Paths.get(".").toAbsolutePath().normalize().toFile();
 	}
 
 	/**

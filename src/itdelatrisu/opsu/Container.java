@@ -21,7 +21,9 @@ package itdelatrisu.opsu;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapGroup;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
+import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
@@ -38,12 +40,8 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
  * AppGameContainer extension that sends critical errors to ErrorHandler.
  */
 public class Container extends AppGameContainer {
-	/** SlickException causing game failure. */
-	protected SlickException e = null;
-
-	private Exception anyException = null;
-
-	public static Container instance;
+	/** Exception causing game failure. */
+	protected Exception e = null;
 
 	/**
 	 * Create a new container wrapping a game
@@ -53,9 +51,19 @@ public class Container extends AppGameContainer {
 	 */
 	public Container(Game game) throws SlickException {
 		super(game);
-		instance = this;
-		width = this.getWidth();
-		height = this.getHeight();
+	}
+
+	/**
+	 * Create a new container wrapping a game
+	 *
+	 * @param game The game to be wrapped
+	 * @param width The width of the display required
+	 * @param height The height of the display required
+	 * @param fullscreen True if we want fullscreen mode
+	 * @throws SlickException Indicates a failure to initialise the display
+	 */
+	public Container(Game game, int width, int height, boolean fullscreen) throws SlickException {
+		super(game, width, height, fullscreen);
 	}
 
 	@Override
@@ -66,20 +74,24 @@ public class Container extends AppGameContainer {
 			getDelta();
 			while (running())
 				gameLoop();
-		} catch(Exception e) {
-			anyException = e;
-		} finally {
-			// destroy the game container
-			close_sub();
-			destroy();
+		} catch (Exception e) {
+			this.e = e;
+		}
 
-			if (anyException != null) {
-				ErrorHandler.error("Something bad happend while playing", anyException, true);
-				anyException = null;
-			} else if (e != null) {
-				ErrorHandler.error(null, e, true);
-				e = null;
-			}
+		// destroy the game container
+		try {
+			close_sub();
+		} catch (Exception e) {
+			if (this.e == null)  // suppress if caused by a previous exception
+				this.e = e;
+		}
+		destroy();
+
+		// report any critical errors
+		if (e != null) {
+			ErrorHandler.error(null, e, true);
+			e = null;
+			forceExit = true;
 		}
 
 		if (forceExit) {
@@ -118,9 +130,7 @@ public class Container extends AppGameContainer {
 		Options.saveOptions();
 
 		// reset cursor
-		if (UI.getCursor() != null) {
-			UI.getCursor().reset();
-		}
+		UI.getCursor().reset();
 
 		// destroy images
 		InternalTextureLoader.get().clear();
@@ -137,6 +147,8 @@ public class Container extends AppGameContainer {
 		SoundController.stopTrack();
 
 		// reset BeatmapSetList data
+		BeatmapGroup.set(BeatmapGroup.ALL);
+		BeatmapSortOrder.set(BeatmapSortOrder.TITLE);
 		if (BeatmapSetList.get() != null)
 			BeatmapSetList.get().reset();
 

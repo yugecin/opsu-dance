@@ -49,6 +49,7 @@ import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.*;
+import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.io.File;
@@ -97,6 +98,9 @@ public class Game extends BasicGameState {
 
 	/** Screen fade-out time, in milliseconds, when health hits zero. */
 	private static final int LOSE_FADEOUT_TIME = 500;
+
+	/** Game element fade-out time, in milliseconds, when the game ends. */
+	private static final int FINISHED_FADEOUT_TIME = 400;
 
 	/** Maximum rotation, in degrees, over fade out upon death. */
 	private static final float MAX_ROTATION = 90f;
@@ -287,6 +291,15 @@ public class Game extends BasicGameState {
 	/** The current alpha of the scoreboard. */
 	private float currentScoreboardAlpha;
 
+	/** The star stream shown when passing another score. */
+	private StarStream scoreboardStarStream;
+
+	/** Whether the game is finished (last hit object passed). */
+	private boolean gameFinished = false;
+
+	/** Timer after game has finished, before changing states. */
+	private AnimatedValue gameFinishedTimer = new AnimatedValue(2500, 0, 1, AnimationEquation.LINEAR);
+
 	/** Music position bar background colors. */
 	private static final Color
 		MUSICBAR_NORMAL = new Color(12, 9, 10, 0.25f),
@@ -368,6 +381,12 @@ public class Game extends BasicGameState {
 		musicBarY = height * 0.05f;
 		musicBarWidth = Math.max(width * 0.005f, 7);
 		musicBarHeight = height * 0.9f;
+
+		// initialize scoreboard star stream
+		scoreboardStarStream = new StarStream(0, height * 2f / 3f, width / 4, 0, 0);
+		scoreboardStarStream.setPositionSpread(height / 20f);
+		scoreboardStarStream.setDirectionSpread(10f);
+		scoreboardStarStream.setDurationSpread(700, 100);
 
 		// create the associated GameData object
 		data = new GameData(width, height);
@@ -513,7 +532,7 @@ public class Game extends BasicGameState {
 			}
 
 			if (!Options.isHideUI() || !GameMod.AUTO.isActive()) {
-				data.drawGameElements(g, true, objectIndex == 0);
+				data.drawGameElements(g, true, objectIndex == 0, 1f);
 			}
 
 			if (breakLength >= 8000 &&
@@ -552,7 +571,13 @@ public class Game extends BasicGameState {
 		else {
 			if (!GameMod.AUTO.isActive() || !Options.isHideUI()) {
 				// game elements
-				data.drawGameElements(g, false, objectIndex == 0);
+				float gameElementAlpha = 1f;
+				if (gameFinished) {
+					// game finished: fade everything out
+					float t = 1f - Math.min(gameFinishedTimer.getTime() / (float) FINISHED_FADEOUT_TIME, 1f);
+					gameElementAlpha = AnimationEquation.OUT_CUBIC.calc(t);
+				}
+				data.drawGameElements(g, false, objectIndex == 0, gameElementAlpha);
 
 				// skip beginning
 				if (objectIndex == 0 &&
@@ -639,6 +664,7 @@ public class Game extends BasicGameState {
 			ScoreData currentScore = data.getCurrentScoreData(beatmap, true);
 			while (currentRank > 0 && previousScores[currentRank - 1].score < currentScore.score) {
 				currentRank--;
+				scoreboardStarStream.burst(20);
 				lastRankUpdateTime = trackPosition;
 			}
 
@@ -646,6 +672,9 @@ public class Game extends BasicGameState {
 				Utils.clamp((trackPosition - lastRankUpdateTime) / SCOREBOARD_ANIMATION_TIME, 0f, 1f)
 			);
 			int scoreboardPosition = 2 * container.getHeight() / 3;
+
+			// draw star stream behind the scores
+			scoreboardStarStream.draw();
 
 			if (currentRank < 4) {
 				// draw the (new) top 5 ranks
@@ -749,6 +778,7 @@ public class Game extends BasicGameState {
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
 		int trackPosition = MusicController.getPosition();
 		int firstObjectTime = beatmap.objects[0].getTime();
+		scoreboardStarStream.update(delta);
 
 		// returning from pause screen: must click previous mouse position
 		if (pauseTime > -1) {
@@ -803,11 +833,11 @@ public class Game extends BasicGameState {
 		}
 
 		// normal game update
-		if (!isReplay)
+		if (!isReplay && !gameFinished)
 			addReplayFrameAndRun(mouseX, mouseY, lastKeysPressed, trackPosition);
 
 		// watching replay
-		else {
+		else if (!gameFinished) {
 			// out of frames, use previous data
 			if (replayIndex >= replay.frames.length)
 				updateGame(replayX, replayY, delta, MusicController.getPosition(), lastKeysPressed);
@@ -857,7 +887,8 @@ public class Game extends BasicGameState {
 		// update in-game scoreboard
 		if (!Options.isHideUI() && previousScores != null && trackPosition > firstObjectTime) {
 			// show scoreboard if selected, and always in break
-			if (scoreboardVisible || breakTime > 0) {
+			// hide when game ends
+			if ((scoreboardVisible || breakTime > 0) && !gameFinished) {
 				currentScoreboardAlpha += 1f / SCOREBOARD_FADE_IN_TIME * delta;
 				if (currentScoreboardAlpha > 1f)
 					currentScoreboardAlpha = 1f;
@@ -869,6 +900,14 @@ public class Game extends BasicGameState {
 		}
 
 		data.updateDisplays(delta);
+
+		// game finished: change state after timer expires
+		if (gameFinished && !gameFinishedTimer.update(delta)) {
+			if (checkpointLoaded)  // if checkpoint used, skip ranking screen
+				game.closeRequested();
+			else  // go to ranking screen
+				game.enterState(Opsu.STATE_GAMERANKING, new EasedFadeOutTransition(), new FadeInTransition());
+		}
 	}
 
 	/**
@@ -892,12 +931,8 @@ public class Game extends BasicGameState {
 			if (MusicController.trackEnded() && objectIndex < gameObjects.length)
 				gameObjects[objectIndex].update(true, delta, mouseX, mouseY, false, trackPosition);
 
-			// if checkpoint used, skip ranking screen
-			if (checkpointLoaded)
-				game.closeRequested();
-
-			// go to ranking screen
-			else {
+			// save score and replay
+			if (!checkpointLoaded) {
 				boolean unranked = (GameMod.AUTO.isActive() || GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive());
 				((GameRanking) game.getState(Opsu.STATE_GAMERANKING)).setGameData(data);
 				if (isReplay)
@@ -918,9 +953,12 @@ public class Game extends BasicGameState {
 				// add score to database
 				if (!unranked && !isReplay)
 					ScoreDB.addScore(score);
-
-				game.enterState(Opsu.STATE_GAMERANKING, new EasedFadeOutTransition(), new FadeInTransition());
 			}
+
+			// start timer
+			gameFinished = true;
+			gameFinishedTimer.setTime(0);
+
 			return;
 		}
 
@@ -1050,6 +1088,8 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void keyPressed(int key, char c) {
+		if (gameFinished)
+			return;
 
 		if (sbOverlay.keyPressed(key, c)) {
 			return;
@@ -1199,9 +1239,13 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mousePressed(int button, int x, int y) {
+		if (gameFinished)
+			return;
+
 		if (sbOverlay.mousePressed(button, x, y)) {
 			return;
 		}
+
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
 			if (button == Input.MOUSE_MIDDLE_BUTTON)
@@ -1294,6 +1338,9 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
+		if (gameFinished)
+			return;
+
 		if (sbOverlay.mouseReleased(button, x, y)) {
 			return;
 		}
@@ -1315,6 +1362,9 @@ public class Game extends BasicGameState {
 
 	@Override
 	public void keyReleased(int key, char c) {
+		if (gameFinished)
+			return;
+
 		int keys = ReplayFrame.KEY_NONE;
 		if (key == Options.getGameKeyLeft())
 			keys = ReplayFrame.KEY_K1;
@@ -1343,7 +1393,7 @@ public class Game extends BasicGameState {
 		if (sbOverlay.mouseWheelMoved(newValue)) {
 			return;
 		}
-		if (Options.isMouseWheelDisabled() || Options.isMouseDisabled())
+		if (Options.isMouseWheelDisabled())
 			return;
 
 		UI.changeVolume((newValue < 0) ? -1 : 1);
@@ -1375,6 +1425,11 @@ public class Game extends BasicGameState {
 
 		// restart the game
 		if (restart != Restart.FALSE) {
+			// update play stats
+			if (restart == Restart.NEW) {
+				beatmap.incrementPlayCounter();
+				BeatmapDB.updatePlayStatistics(beatmap);
+			}
 
 			// load epilepsy warning img
 			epiImgTime = Options.getEpilepsyWarningLength();
@@ -1400,11 +1455,13 @@ public class Game extends BasicGameState {
 				loadImages();
 				setMapModifiers();
 				retries = 0;
-			} else if (restart == Restart.MANUAL) {
+			} else if (restart == Restart.MANUAL && !GameMod.AUTO.isActive()) {
 				// retry
 				retries++;
-			} else if (restart == Restart.REPLAY)
+			} else if (restart == Restart.REPLAY || GameMod.AUTO.isActive()) {
+				// replay
 				retries = 0;
+			}
 
 			gameObjects = new GameObject[beatmap.objects.length];
 			playbackSpeed = PlaybackSpeed.NORMAL;
@@ -1613,6 +1670,11 @@ public class Game extends BasicGameState {
 	 * @param trackPosition the track position
 	 */
 	private void drawHitObjects(Graphics g, int trackPosition) {
+		// draw result objects
+		if (!Options.isHideObjects()) {
+			data.drawHitResults(trackPosition);
+		}
+
 		if (Options.isMergingSliders() && knorkesliders != null) {
 			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
 			if (Options.isMirror()) {
@@ -1622,6 +1684,7 @@ public class Game extends BasicGameState {
 				g.popTransform();
 			}
 		}
+
 		// include previous object in follow points
 		int lastObjectIndex = -1;
 		if (objectIndex > 0 && objectIndex < beatmap.objects.length &&
@@ -1736,17 +1799,12 @@ public class Game extends BasicGameState {
 
 				// translate and rotate the object
 				g.translate(0, dt * dt * container.getHeight());
-				Vec2f rotationCenter = gameObj.getPointAt(beatmap.objects[idx].getTime());
+				Vec2f rotationCenter = gameObj.getPointAt((beatmap.objects[idx].getTime() + beatmap.objects[idx].getEndTime()) / 2);
 				g.rotate(rotationCenter.x, rotationCenter.y, rotSpeed * dt);
 				gameObj.draw(g, trackPosition, false);
 
 				g.popTransform();
 			}
-		}
-
-		// draw result objects
-		if (!Options.isHideObjects()) {
-			data.drawHitResults(trackPosition);
 		}
 	}
 
@@ -1760,7 +1818,7 @@ public class Game extends BasicGameState {
 		}
 		this.beatmap = beatmap;
 		Display.setTitle(String.format("%s - %s", game.getTitle(), beatmap.toString()));
-		if (beatmap.timingPoints == null)
+		if (beatmap.breaks == null)
 			BeatmapDB.load(beatmap, BeatmapDB.LOAD_ARRAY);
 		BeatmapParser.parseHitObjects(beatmap);
 		HitSound.setDefaultSampleSet(beatmap.sampleSet);
@@ -1792,6 +1850,9 @@ public class Game extends BasicGameState {
 		autoMousePosition = new Vec2f();
 		autoMousePressed = false;
 		flashlightRadius = container.getHeight() * 2 / 3;
+		scoreboardStarStream.clear();
+		gameFinished = false;
+		gameFinishedTimer.setTime(0);
 
 		System.gc();
 	}

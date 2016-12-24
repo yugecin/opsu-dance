@@ -143,6 +143,12 @@ public class Options {
 
 	private static boolean noSingleInstance;
 
+	/** The theme song string: {@code filename,title,artist,length(ms)} */
+	private static String themeString = "theme.mp3,Rainbows,Kevin MacLeod,219350";
+
+	/** The theme song timing point string (for computing beats to pulse the logo) . */
+	private static String themeTimingPoint = "1080,545.454545454545,4,1,0,100,0,0";
+
 	/**
 	 * Returns whether the XDG flag in the manifest (if any) is set to "true".
 	 * @return true if XDG directories are enabled, false otherwise
@@ -171,8 +177,11 @@ public class Options {
 	 * @return the XDG base directory, or the working directory if unavailable
 	 */
 	private static File getXDGBaseDir(String env, String fallback) {
+		File workingDir = Utils.isJarRunning() ?
+			Utils.getRunningDirectory().getParentFile() : Utils.getWorkingDirectory();
+
 		if (!USE_XDG)
-			return new File("./");
+			return workingDir;
 
 		String OS = System.getProperty("os.name").toLowerCase();
 		if (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0) {
@@ -188,7 +197,7 @@ public class Options {
 				ErrorHandler.error(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath), null, false);
 			return dir;
 		} else
-			return new File("./");
+			return workingDir;
 	}
 
 	/**
@@ -218,12 +227,6 @@ public class Options {
 		File dir = new File(m.group(1));
 		return (dir.isDirectory()) ? dir : null;
 	}
-
-	/**
-	 * The theme song string:
-	 * {@code filename,title,artist,length(ms)}
-	 */
-	private static String themeString = "theme.ogg,On the Bach,Jingle Punks,66000";
 
 	/** Game options. */
 	public enum GameOption {
@@ -275,7 +278,32 @@ public class Options {
 			public String write() { return themeString; }
 
 			@Override
-			public void read(String s) { themeString = s; }
+			public void read(String s) {
+				String oldThemeString = themeString;
+				themeString = s;
+				Beatmap beatmap = getThemeBeatmap();
+				if (beatmap == null) {
+					themeString = oldThemeString;
+					Log.warn(String.format("The theme song string [%s] is malformed.", s));
+				} else if (!beatmap.audioFilename.isFile()) {
+					themeString = oldThemeString;
+					Log.warn(String.format("Cannot find theme song [%s].", beatmap.audioFilename.getAbsolutePath()));
+				}
+			}
+		},
+		THEME_SONG_TIMINGPOINT ("ThemeSongTiming") {
+			@Override
+			public String write() { return themeTimingPoint; }
+
+			@Override
+			public void read(String s) {
+				try {
+					new TimingPoint(s);
+					themeTimingPoint = s;
+				} catch (Exception e) {
+					Log.warn(String.format("The theme song timing point [%s] is malformed.", s));
+				}
+			}
 		},
 		PORT ("Port") {
 			@Override
@@ -1876,25 +1904,26 @@ public class Options {
 
 	/**
 	 * Returns a dummy Beatmap containing the theme song.
-	 * @return the theme song beatmap
+	 * @return the theme song beatmap, or {@code null} if the theme string is malformed
 	 */
 	public static Beatmap getThemeBeatmap() {
 		String[] tokens = themeString.split(",");
-		if (tokens.length != 4) {
-			ErrorHandler.error("Theme song string is malformed.", null, false);
+		if (tokens.length != 4)
 			return null;
-		}
 
 		Beatmap beatmap = new Beatmap(null);
 		beatmap.audioFilename = new File(tokens[0]);
 		beatmap.title = tokens[1];
 		beatmap.artist = tokens[2];
-		beatmap.timingPoints = new ArrayList<>(1);
-		beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
 		try {
 			beatmap.endTime = Integer.parseInt(tokens[3]);
 		} catch (NumberFormatException e) {
-			ErrorHandler.error("Theme song length is not a valid integer", e, false);
+			return null;
+		}
+		try {
+			beatmap.timingPoints = new ArrayList<>(1);
+			beatmap.timingPoints.add(new TimingPoint(themeTimingPoint));
+		} catch (Exception e) {
 			return null;
 		}
 

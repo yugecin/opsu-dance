@@ -32,8 +32,12 @@ import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
-import itdelatrisu.opsu.ui.*;
+import itdelatrisu.opsu.ui.Colors;
+import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.MenuButton.Expand;
+import itdelatrisu.opsu.ui.StarFountain;
+import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -51,8 +55,8 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.EasedFadeOutTransition;
+import org.newdawn.slick.state.transition.FadeInTransition;
 
 /**
  * "Main Menu" state.
@@ -117,14 +121,17 @@ public class MainMenu extends BasicGameState {
 	/** Music position bar coordinates and dimensions. */
 	private float musicBarX, musicBarY, musicBarWidth, musicBarHeight;
 
+	/** Last measure progress value. */
+	private float lastMeasureProgress = 0f;
+
+	/** The star fountain. */
+	private StarFountain starFountain;
+
 	// game-related variables
 	private GameContainer container;
 	private StateBasedGame game;
 	private Input input;
 	private final int state;
-
-	private float hue = 0;
-	private boolean huedone = false;
 
 	public MainMenu(int state) {
 		this.state = state;
@@ -203,9 +210,6 @@ public class MainMenu extends BasicGameState {
 			repoButton.setHoverAnimationDuration(350);
 			repoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
 			repoButton.setHoverExpand();
-		}
-
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {  // only if a webpage can be opened
 			Image repoImg = GameImage.REPOSITORY.getImage();
 			danceRepoButton = new MenuButton(repoImg,
 				startX - repoImg.getWidth(), startY - repoImg.getHeight()
@@ -227,6 +231,9 @@ public class MainMenu extends BasicGameState {
 		restartButton.setHoverAnimationDuration(2000);
 		restartButton.setHoverAnimationEquation(AnimationEquation.LINEAR);
 		restartButton.setHoverRotate(360);
+
+		// initialize star fountain
+		starFountain = new StarFountain(width, height);
 
 		// logo animations
 		float centerOffsetX = width / 6.5f;
@@ -262,6 +269,9 @@ public class MainMenu extends BasicGameState {
 		g.fillRect(0, height * 8 / 9f, width, height / 9f);
 		Colors.BLACK_ALPHA.a = oldAlpha;
 
+		// draw star fountain
+		starFountain.draw();
+
 		// draw downloads button
 		downloadsButton.draw();
 
@@ -271,26 +281,15 @@ public class MainMenu extends BasicGameState {
 			exitButton.draw();
 		}
 
-		// logo
-		Double position = MusicController.getBeatProgress();
-		Color color = Options.isColorMainMenuLogo() ? Cursor.lastCursorColor : Color.white;
-		boolean renderPiece = position != null;
-		if (position == null) {
-			position = System.currentTimeMillis() % 1000 / 1000d;
-		}
-		double scale = 1 - (0 - position) * 0.05;
-		logo.draw(color, (float) scale);
-		if (renderPiece) {
-			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getCurrentScale());
-			float scaleposmodx = piece.getWidth() / 2;
-			float scaleposmody = piece.getHeight() / 2;
-			piece.rotate((float) (position * 360));
-			piece.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, color);
-		}
-		Image logoCopy = GameImage.MENU_LOGO.getImage().getScaledCopy(logo.getCurrentScale() / (float) scale * 1.05f);
-		float scaleposmodx = logoCopy.getWidth() / 2;
-		float scaleposmody = logoCopy.getHeight() / 2;
-		logoCopy.draw(logo.getX() - scaleposmodx, logo.getY() - scaleposmody, Colors.GHOST_LOGO);
+		// draw logo (pulsing)
+		Float position = MusicController.getBeatProgress();
+		if (position == null)  // default to 60bpm
+			position = System.currentTimeMillis() % 1000 / 1000f;
+		float scale = 1f + position * 0.05f;
+		logo.draw(Color.white, scale);
+		float ghostScale = logo.getLastScale() / scale * 1.05f;
+		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
+		ghostLogo.drawCentered(logo.getX(), logo.getY(), Colors.GHOST_LOGO);
 
 		// draw music buttons
 		if (MusicController.isPlaying())
@@ -310,16 +309,13 @@ public class MainMenu extends BasicGameState {
 			g.fillRoundRect(musicBarX, musicBarY, musicBarWidth * musicBarPosition, musicBarHeight, 4);
 		}
 
-		// draw repository button
+		// draw repository buttons
 		if (repoButton != null) {
 			repoButton.draw();
 			String text = "opsu!";
 			int fheight = Fonts.SMALL.getLineHeight();
 			int fwidth = Fonts.SMALL.getWidth(text);
 			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
-		}
-
-		if (danceRepoButton != null) {
 			danceRepoButton.draw();
 			String text = "opsu!dance";
 			int fheight = Fonts.SMALL.getLineHeight();
@@ -367,15 +363,15 @@ public class MainMenu extends BasicGameState {
 			throws SlickException {
 		UI.update(delta);
 		if (MusicController.trackEnded())
-			nextTrack();  // end of track: go to next track
+			nextTrack(false);  // end of track: go to next track
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		logo.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 		playButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 		exitButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
-		if (repoButton != null)
+		if (repoButton != null) {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
-		if (danceRepoButton != null)
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
+		}
 		if (Updater.get().showButton()) {
 			updateButton.autoHoverUpdate(delta, true);
 			restartButton.autoHoverUpdate(delta, false);
@@ -389,6 +385,7 @@ public class MainMenu extends BasicGameState {
 		noHoverUpdate |= contains;
 		musicNext.hoverUpdate(delta, !noHoverUpdate && musicNext.contains(mouseX, mouseY));
 		musicPrevious.hoverUpdate(delta, !noHoverUpdate && musicPrevious.contains(mouseX, mouseY));
+		starFountain.update(delta);
 
 		// window focus change: increase/decrease theme song volume
 		if (MusicController.isThemePlaying() &&
@@ -399,6 +396,14 @@ public class MainMenu extends BasicGameState {
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (!(Options.isDynamicBackgroundEnabled() && beatmap != null && beatmap.isBackgroundLoading()))
 			bgAlpha.update(delta);
+
+		// check measure progress
+		Float measureProgress = MusicController.getMeasureProgress(2);
+		if (measureProgress != null) {
+			if (measureProgress < lastMeasureProgress)
+				starFountain.burst(true);
+			lastMeasureProgress = measureProgress;
+		}
 
 		// buttons
 		int centerX = container.getWidth() / 2;
@@ -472,6 +477,10 @@ public class MainMenu extends BasicGameState {
 			}
 		}
 
+		// reset measure info
+		lastMeasureProgress = 0f;
+		starFountain.clear();
+
 		// reset button hover states if mouse is not currently hovering over the button
 		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 		if (!logo.contains(mouseX, mouseY, 0.25f))
@@ -514,6 +523,7 @@ public class MainMenu extends BasicGameState {
 		// music position bar
 		if (MusicController.isPlaying()) {
 			if (musicPositionBarContains(x, y)) {
+				lastMeasureProgress = 0f;
 				float pos = (x - musicBarX) / musicBarWidth;
 				MusicController.setPosition((int) (pos * MusicController.getDuration()));
 				return;
@@ -531,10 +541,11 @@ public class MainMenu extends BasicGameState {
 			}
 			return;
 		} else if (musicNext.contains(x, y)) {
-			nextTrack();
+			nextTrack(true);
 			UI.sendBarNotification(">> Next");
 			return;
 		} else if (musicPrevious.contains(x, y)) {
+			lastMeasureProgress = 0f;
 			if (!previous.isEmpty()) {
 				SongMenu menu = (SongMenu) game.getState(Opsu.STATE_SONGMENU);
 				menu.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
@@ -657,7 +668,7 @@ public class MainMenu extends BasicGameState {
 			game.enterState(Opsu.STATE_DOWNLOADSMENU, new EasedFadeOutTransition(), new FadeInTransition());
 			break;
 		case Input.KEY_R:
-			nextTrack();
+			nextTrack(true);
 			break;
 		case Input.KEY_UP:
 			UI.changeVolume(1);
@@ -717,9 +728,17 @@ public class MainMenu extends BasicGameState {
 
 	/**
 	 * Plays the next track, and adds the previous one to the stack.
+	 * @param user {@code true} if this was user-initiated, false otherwise (track end)
 	 */
-	private void nextTrack() {
+	private void nextTrack(boolean user) {
+		lastMeasureProgress = 0f;
 		boolean isTheme = MusicController.isThemePlaying();
+		if (isTheme && !user) {
+			// theme was playing, restart
+			// NOTE: not looping due to inaccurate track positions after loop
+			MusicController.playAt(0, false);
+			return;
+		}
 		SongMenu menu = (SongMenu) game.getState(Opsu.STATE_SONGMENU);
 		BeatmapSetNode node = menu.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, false);
 		boolean sameAudio = false;
