@@ -32,12 +32,8 @@ import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
-import itdelatrisu.opsu.ui.Colors;
-import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.MenuButton;
+import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.MenuButton.Expand;
-import itdelatrisu.opsu.ui.StarFountain;
-import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -203,14 +199,15 @@ public class MainMenu extends BasicGameState {
 		// initialize repository button
 		float startX = width * 0.997f, startY = height * 0.997f;
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {  // only if a webpage can be opened
-			Image repoImg = GameImage.REPOSITORY.getImage();
+			Image repoImg;
+			repoImg = GameImage.REPOSITORY.getImage();
 			repoButton = new MenuButton(repoImg,
 					startX - repoImg.getWidth() * 2.5f, startY - repoImg.getHeight()
 			);
 			repoButton.setHoverAnimationDuration(350);
 			repoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
 			repoButton.setHoverExpand();
-			Image repoImg = GameImage.REPOSITORY.getImage();
+			repoImg = GameImage.REPOSITORY.getImage();
 			danceRepoButton = new MenuButton(repoImg,
 				startX - repoImg.getWidth(), startY - repoImg.getHeight()
 			);
@@ -282,11 +279,19 @@ public class MainMenu extends BasicGameState {
 		}
 
 		// draw logo (pulsing)
+		Color color = Options.isColorMainMenuLogo() ? Cursor.lastCursorColor : Color.white;
 		Float position = MusicController.getBeatProgress();
-		if (position == null)  // default to 60bpm
+		boolean renderPiece = position != null;
+		if (position == null) {
 			position = System.currentTimeMillis() % 1000 / 1000f;
+		}
 		float scale = 1f + position * 0.05f;
-		logo.draw(Color.white, scale);
+		logo.draw(color, scale);
+		if (renderPiece) {
+			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getLastScale());
+			piece.rotate(position * 360);
+			piece.drawCentered(logo.getX(), logo.getY(), color);
+		}
 		float ghostScale = logo.getLastScale() / scale * 1.05f;
 		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), Colors.GHOST_LOGO);
@@ -311,15 +316,17 @@ public class MainMenu extends BasicGameState {
 
 		// draw repository buttons
 		if (repoButton != null) {
+			String text;
+			int fheight, fwidth;
 			repoButton.draw();
-			String text = "opsu!";
-			int fheight = Fonts.SMALL.getLineHeight();
-			int fwidth = Fonts.SMALL.getWidth(text);
+			text = "opsu!";
+			fheight = Fonts.SMALL.getLineHeight();
+			fwidth = Fonts.SMALL.getWidth(text);
 			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
 			danceRepoButton.draw();
-			String text = "opsu!dance";
-			int fheight = Fonts.SMALL.getLineHeight();
-			int fwidth = Fonts.SMALL.getWidth(text);
+			text = "opsu!dance";
+			fheight = Fonts.SMALL.getLineHeight();
+			fwidth = Fonts.SMALL.getWidth(text);
 			Fonts.SMALL.drawString(danceRepoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
 		}
 

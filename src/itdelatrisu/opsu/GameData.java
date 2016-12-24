@@ -152,7 +152,8 @@ public class GameData {
 		HIT_SLIDER30         = 8,
 		HIT_MAX              = 9,   // not a hit result
 		HIT_SLIDER_REPEAT    = 10,  // not a hit result
-		HIT_ANIMATION_RESULT = 11;  // not a hit result
+		HIT_SLIDER_REPEAT_M  = 11,  // not a hit result
+		HIT_ANIMATION_RESULT = 12;  // not a hit result
 
 	/** Hit result-related images (indexed by HIT_* constants to HIT_MAX). */
 	private Image[] hitResults;
@@ -953,16 +954,21 @@ public class GameData {
 	 */
 	private void drawHitAnimations(HitObjectResult hitResult, int trackPosition) {
 		// fade out slider curve
-		if (hitResult.result != HIT_SLIDER_REPEAT && hitResult.curve != null) {
-			float progress = AnimationEquation.OUT_CUBIC.calc(
-				(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
-			float alpha = 1f - progress;
-			float oldWhiteAlpha = Colors.WHITE_FADE.a;
-			float oldColorAlpha = hitResult.color.a;
-			Colors.WHITE_FADE.a = hitResult.color.a = alpha;
-			hitResult.curve.draw(hitResult.color);
-			Colors.WHITE_FADE.a = oldWhiteAlpha;
-			hitResult.color.a = oldColorAlpha;
+		if (hitResult.result != HIT_SLIDER_REPEAT && hitResult.result != HIT_SLIDER_REPEAT_M && hitResult.curve != null) {
+			if (!Options.isShrinkingSliders()) {
+				float progress = AnimationEquation.OUT_CUBIC.calc(
+					(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
+				float alpha = 1f - progress;
+				float oldWhiteAlpha = Colors.WHITE_FADE.a;
+				float oldColorAlpha = hitResult.color.a;
+				Colors.WHITE_FADE.a = hitResult.color.a = alpha;
+				hitResult.curve.draw(hitResult.color);
+				Colors.WHITE_FADE.a = oldWhiteAlpha;
+				hitResult.color.a = oldColorAlpha;
+			}
+			if (!Options.isDrawSliderEndCircles()) {
+				return;
+			}
 		}
 
 		// miss, don't draw an animation
@@ -982,7 +988,7 @@ public class GameData {
 			(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
 		float scale = (!hitResult.expand) ? 1f : 1f + (HITCIRCLE_ANIM_SCALE - 1f) * progress;
 		float alpha = 1f - progress;
-		if (hitResult.result == HIT_SLIDER_REPEAT) {
+		if (hitResult.result == HIT_SLIDER_REPEAT || hitResult.result == HIT_SLIDER_REPEAT_M) {
 			// repeats
 			Image scaledRepeat = GameImage.REVERSEARROW.getImage().getScaledCopy(scale);
 			scaledRepeat.setAlpha(alpha);
@@ -992,8 +998,14 @@ public class GameData {
 			} else {
 				ang = hitResult.curve.getEndAngle();
 			}
+			if (hitResult.result == HIT_SLIDER_REPEAT_M) {
+				ang += 180f;
+			}
 			scaledRepeat.rotate(ang);
 			scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
+			if (!Options.isDrawSliderEndCircles()) {
+				return;
+			}
 		}
 		Image scaledHitCircle = GameImage.HITCIRCLE.getImage().getScaledCopy(scale);
 		Image scaledHitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(scale);
@@ -1246,7 +1258,7 @@ public class GameData {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
-		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, m[0], m[1], color, type, curve, true, true));
+		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT_M, m[0], m[1], color, type, curve, true, true));
 	}
 
 	/**
@@ -1259,6 +1271,11 @@ public class GameData {
 	 */
 	public void sendSliderStartResult(int time, float x, float y, Color color, boolean expand) {
 		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, x, y, color, HitObjectType.CIRCLE, null, expand, true));
+		if (!Options.isMirror()) {
+			return;
+		}
+		float[] m = Utils.mirrorPoint(x, y);
+		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, m[0], m[1], color, HitObjectType.CIRCLE, null, expand, true));
 	}
 
 	/**
@@ -1451,10 +1468,10 @@ public class GameData {
 	 * @param curve the slider curve (or null if not applicable)
 	 * @param sliderHeldToEnd whether or not the slider was held to the end (if applicable)
 	 */
-	public void hitResult(int time, int result, float x, float y, Color color,
+	public void sendHitResult(int time, int result, float x, float y, Color color,
 			      boolean end, HitObject hitObject, HitObjectType hitResultType,
 			      boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
-		hitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
+		sendHitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
 	}
 
 	/**
@@ -1473,7 +1490,7 @@ public class GameData {
 	 * @param sliderHeldToEnd whether or not the slider was held to the end (if applicable)
 	 * @param handleResult whether or not to send a score result
 	 */
-	public void hitResult(int time, int result, float x, float y, Color color,
+	public void sendHitResult(int time, int result, float x, float y, Color color,
 						  boolean end, HitObject hitObject, HitObjectType hitResultType,
 						  boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
 		int hitResult;

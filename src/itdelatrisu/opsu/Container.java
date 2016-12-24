@@ -43,6 +43,8 @@ public class Container extends AppGameContainer {
 	/** Exception causing game failure. */
 	protected Exception e = null;
 
+	public static Container instance;
+
 	/**
 	 * Create a new container wrapping a game
 	 *
@@ -51,6 +53,7 @@ public class Container extends AppGameContainer {
 	 */
 	public Container(Game game) throws SlickException {
 		super(game);
+		instance = this;
 	}
 
 	/**

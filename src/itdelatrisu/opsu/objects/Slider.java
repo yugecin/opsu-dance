@@ -228,16 +228,12 @@ public class Slider extends GameObject {
 				Math.max(0f, 1f - ((float) (trackPosition - hitObject.getTime()) / (getEndTime() - hitObject.getTime())) * 1.05f);
 		}
 
-		curveColor.a = curveAlpha;
+		curveColor.a = sliderAlpha;
 		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, Utils.clamp(1d - fadeinScale, 0d, 1d));
 		color.a = alpha;
 
-		g.pushTransform();
-		if (mirror) {
-			g.rotate(x, y, -180f);
-		}
 		// end circle (only draw if ball still has to go there)
-		if (curveInterval == 1f && currentRepeats < repeatCount - (repeatCount % 2 == 0 ? 1 : 0)) {
+		if (Options.isDrawSliderEndCircles() && isCurveCompletelyDrawn && currentRepeats < repeatCount - (repeatCount % 2 == 0 ? 1 : 0)) {
 			Color circleColor = new Color(color);
 			Color overlayColor = new Color(Colors.WHITE_FADE);
 			if (currentRepeats == 0) {
@@ -249,9 +245,14 @@ public class Slider extends GameObject {
 				// fade in end circle after repeats
 				circleColor.a = overlayColor.a = sliderAlpha * getCircleAlphaAfterRepeat(trackPosition, true);
 			}
-			Vec2f endCircPos = curve.pointAt(curveInterval);
+			Vec2f endCircPos = curve.pointAt(1f);
 			hitCircle.drawCentered(endCircPos.x, endCircPos.y, circleColor);
 			hitCircleOverlay.drawCentered(endCircPos.x, endCircPos.y, overlayColor);
+		}
+
+		g.pushTransform();
+		if (mirror) {
+			g.rotate(x, y, -180f);
 		}
 
 		// set first circle colors to fade in after repeats
@@ -263,7 +264,7 @@ public class Slider extends GameObject {
 		}
 
 		// start circle, only draw if ball still has to go there
-		if (!sliderClickedInitial || currentRepeats < repeatCount - (repeatCount % 2 == 1 ? 1 : 0)) {
+		if (!sliderClickedInitial || (Options.isDrawSliderEndCircles() && currentRepeats < repeatCount - (repeatCount % 2 == 1 ? 1 : 0))) {
 			hitCircle.drawCentered(x, y, firstCircleColor);
 			if (!overlayAboveNumber || sliderClickedInitial)
 				hitCircleOverlay.drawCentered(x, y, startCircleOverlayColor);
@@ -572,7 +573,7 @@ public class Slider extends GameObject {
 				currentRepeats + 1, curve, sliderHeldToEnd);
 		if (Options.isMirror() && GameMod.AUTO.isActive()) {
 			float[] m = Utils.mirrorPoint(cx, cy);
-			data.hitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
+			data.sendHitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd, false);
 		}
@@ -602,7 +603,6 @@ public class Slider extends GameObject {
 			//else not a hit
 
 			if (result > -1) {
-				data.sendInitialSliderResult(trackPosition, this.x, this.y, color, mirrorColor);
 				data.addHitError(hitObject.getTime(), x,y,trackPosition - hitObject.getTime());
 				sliderClickedInitial = true;
 				data.sendSliderTickResult(hitObject.getTime(), result, this.x, this.y, hitObject, currentRepeats);

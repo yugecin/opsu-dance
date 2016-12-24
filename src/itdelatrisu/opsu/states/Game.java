@@ -462,8 +462,12 @@ public class Game extends BasicGameState {
 					autoMousePressed = true;
 				}
 			} else {
-				// last object
-				autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
+				if (objectIndex < beatmap.objects.length) {
+					autoPoint = gameObjects[objectIndex].getPointAt(trackPosition);
+				} else {
+					// last object
+					autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
+				}
 			}
 
 			// set mouse coordinates

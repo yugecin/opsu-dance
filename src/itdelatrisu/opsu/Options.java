@@ -541,6 +541,7 @@ public class Options {
 				return !FALLBACK_SLIDERS.bool;
 			}
 		},
+		DRAW_SLIDER_ENDCIRCLES ("Draw slider endcircles", "DrawSliderEndCircles", "Old slider style", false),
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_HIT_ANIMATIONS ("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true),
 		SHOW_REVERSEARROW_ANIMATIONS ("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true),
@@ -1543,6 +1544,7 @@ public class Options {
 
 	public static boolean isShrinkingSliders() { return GameOption.SHRINKING_SLIDERS.getBooleanValue(); }
 	public static boolean isMergingSliders() { return !isFallbackSliders() && GameOption.MERGING_SLIDERS.getBooleanValue(); }
+	public static boolean isDrawSliderEndCircles() { return GameOption.DRAW_SLIDER_ENDCIRCLES.getBooleanValue(); }
 
 	/**
 	 * Returns the fixed circle size override, if any.
