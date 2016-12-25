@@ -18,6 +18,7 @@
 package yugecin.opsudance.sbv2;
 
 import itdelatrisu.opsu.objects.curves.Vec2f;
+import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.sbv2.movers.StoryboardMover;
@@ -52,6 +53,8 @@ public class StoryboardMoveImpl implements StoryboardMove {
 		mover.end = end;
 		if (movers.size() == 0) {
 			mover.start = start;
+			mover.recalculateLength();
+			totalLength += mover.getLength();
 		} else {
 			StoryboardMover lastMover = movers.get(movers.size() - 1);
 			Vec2f mid = new Vec2f(
