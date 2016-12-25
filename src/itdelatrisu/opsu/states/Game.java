@@ -72,6 +72,7 @@ import org.newdawn.slick.state.transition.EmptyTransition;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.*;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
+import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.ui.SBOverlay;
 
 /**
@@ -313,6 +314,7 @@ public class Game extends BasicGameState {
 	private final int state;
 
 	private final Cursor mirrorCursor;
+	private MoveStoryboard msb;
 	private SBOverlay sbOverlay;
 
 	private FakeCombinedCurve knorkesliders;
@@ -363,7 +365,8 @@ public class Game extends BasicGameState {
 	@Override
 	public void init(GameContainer container, StateBasedGame game)
 			throws SlickException {
-		this.sbOverlay = new SBOverlay(this, container);
+		this.msb = new MoveStoryboard(container);
+		this.sbOverlay = new SBOverlay(this, msb, container);
 		this.container = container;
 		this.game = game;
 		input = container.getInput();
@@ -468,6 +471,12 @@ public class Game extends BasicGameState {
 					// last object
 					autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
 				}
+			}
+
+			float[] sbPosition = sbOverlay.getPoint(trackPosition);
+			if (sbPosition != null) {
+				autoPoint.x = sbPosition[0];
+				autoPoint.y = sbPosition[1];
 			}
 
 			// set mouse coordinates
