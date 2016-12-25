@@ -1269,13 +1269,13 @@ public class GameData {
 	 * @param color the slider color
 	 * @param expand whether or not the hit result animation should expand
 	 */
-	public void sendSliderStartResult(int time, float x, float y, Color color, boolean expand) {
+	public void sendSliderStartResult(int time, float x, float y, Color color, Color mirrorColor, boolean expand) {
 		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, x, y, color, HitObjectType.CIRCLE, null, expand, true));
 		if (!Options.isMirror()) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
-		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, m[0], m[1], color, HitObjectType.CIRCLE, null, expand, true));
+		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, m[0], m[1], mirrorColor, HitObjectType.CIRCLE, null, expand, true));
 	}
 
 	/**

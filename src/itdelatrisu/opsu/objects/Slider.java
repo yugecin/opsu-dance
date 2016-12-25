@@ -595,10 +595,10 @@ public class Slider extends GameObject {
 			if (timeDiff < hitResultOffset[GameData.HIT_50]) {
 				result = GameData.HIT_SLIDER30;
 				ticksHit++;
-				data.sendSliderStartResult(trackPosition, this.x, this.y, color, true);
+				data.sendSliderStartResult(trackPosition, this.x, this.y, color, mirrorColor, true);
 			} else if (timeDiff < hitResultOffset[GameData.HIT_MISS]) {
 				result = GameData.HIT_MISS;
-				data.sendSliderStartResult(trackPosition, this.x, this.y, color, false);
+				data.sendSliderStartResult(trackPosition, this.x, this.y, color, mirrorColor, false);
 			}
 			//else not a hit
 
@@ -627,10 +627,10 @@ public class Slider extends GameObject {
 				if (isAutoMod) {  // "auto" mod: catch any missed notes due to lag
 					ticksHit++;
 					data.sendSliderTickResult(time, GameData.HIT_SLIDER30, x, y, hitObject, currentRepeats);
-					data.sendSliderStartResult(time, x, y, color, true);
+					data.sendSliderStartResult(time, x, y, color, mirrorColor, true);
 				} else {
 					data.sendSliderTickResult(time, GameData.HIT_MISS, x, y, hitObject, currentRepeats);
-					data.sendSliderStartResult(trackPosition, x, y, color, false);
+					data.sendSliderStartResult(trackPosition, x, y, color, mirrorColor, false);
 				}
 			}
 
@@ -640,7 +640,7 @@ public class Slider extends GameObject {
 					ticksHit++;
 					sliderClickedInitial = true;
 					data.sendSliderTickResult(time, GameData.HIT_SLIDER30, x, y, hitObject, currentRepeats);
-					data.sendSliderStartResult(time, x, y, color, true);
+					data.sendSliderStartResult(time, x, y, color, mirrorColor, true);
 				}
 			}
 
