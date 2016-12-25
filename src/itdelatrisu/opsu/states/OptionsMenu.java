@@ -79,7 +79,7 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 			GameOption.SHRINKING_SLIDERS,
 			GameOption.FALLBACK_SLIDERS,
 			GameOption.MERGING_SLIDERS,
-			GameOption.MERGING_SLIDERS_MIRROR_POOL,
+			//GameOption.MERGING_SLIDERS_MIRROR_POOL,
 			GameOption.DRAW_SLIDER_ENDCIRCLES,
 			GameOption.SHOW_HIT_LIGHTING,
 			GameOption.SHOW_HIT_ANIMATIONS,
