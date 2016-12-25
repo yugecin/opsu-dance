@@ -342,7 +342,9 @@ public class Game extends BasicGameState {
 			while (objectIndex < gameObjects.length && beatmap.objects[objectIndex].getTime() <= checkpoint) {
 				objectIndex++;
 			}
-			objectIndex--;
+			if (objectIndex > 0) {
+				objectIndex--;
+			}
 			if (Options.isMergingSliders()) {
 				int obj = objectIndex;
 				while (obj < gameObjects.length) {
