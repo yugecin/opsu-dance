@@ -287,14 +287,13 @@ public class CurveRenderState {
 	 */
 	private void createVertexBuffer(int bufferID) {
 		int arrayBufferBinding = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
-		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length * mirrors - 1) * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
+		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length - 1) * mirrors * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
 		if (curve.length > 0) {
 			fillCone(buff, curve[0].x, curve[0].y, 0);
 		}
 
 		for (int mirror = 0; mirror < mirrors; mirror++) {
-			//final float angle = 360f * mirror / mirrors;
-			final float angle = 180f;
+			final float angle = 360f * mirror / mirrors;
 			for (int i = 1; i < curve.length; ++i) {
 				float x = curve[i].x;
 				float y = curve[i].y;
@@ -344,9 +343,12 @@ public class CurveRenderState {
 		if (clearFirst) {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
-		renderCurve(from, to, 0);
-		if (mirrors > 1 && Options.isMirror()) {
-			renderCurve(from, to, 1);
+		int max = mirrors;
+		if (!Options.isMirror()) {
+			max = 1;
+		}
+		for (int i = 0; i < max; i++) {
+			renderCurve(from, to, i);
 		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
@@ -355,11 +357,16 @@ public class CurveRenderState {
 	}
 
 	private void renderCurve(int from, int to, int mirror) {
+		if (from > 0) {
+			from -= mirror;
+		}
+		to -= mirror;
 		for (int i = from * 2; i < to * 2 - 1; ++i) {
 			if (spliceFrom <= i && i <= spliceTo) {
 				continue;
 			}
-			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2) + mirror * curve.length, NewCurveStyleState.DIVIDES + 2);
+			final int index = i + curve.length * 2 * mirror;// + mirror * curve.length / 2;
+			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
 		}
 	}
 
