@@ -1606,16 +1606,26 @@ public class Game extends BasicGameState {
 			SoundController.mute(false);
 
 			if (Options.isMergingSliders()) {
-				// let's create knorkesliders
-				List<Vec2f> curvepoints = new ArrayList<>();
-				for (GameObject gameObject : gameObjects) {
-					if (gameObject.isSlider()) {
-						((Slider) gameObject).baseSliderFrom = curvepoints.size();
-						curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+				if (knorkesliders == null) {
+					// let's create knorkesliders
+					List<Vec2f> curvepoints = new ArrayList<>();
+					for (GameObject gameObject : gameObjects) {
+						if (gameObject.isSlider()) {
+							((Slider) gameObject).baseSliderFrom = curvepoints.size();
+							curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+						}
 					}
-				}
-				if (curvepoints.size() > 0) {
-					knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+					if (curvepoints.size() > 0) {
+						knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+					}
+				} else {
+					int base = 0;
+					for (GameObject gameObject : gameObjects) {
+						if (gameObject.isSlider()) {
+							((Slider) gameObject).baseSliderFrom = base;
+							base += ((Slider) gameObject).getCurve().getCurvePoints().length;
+						}
+					}
 				}
 			}
 		}
@@ -1646,6 +1656,8 @@ public class Game extends BasicGameState {
 		isInGame = false;
 //		container.setMouseGrabbed(false);
 		skippedToCheckpoint = false;
+
+		knorkesliders = null;
 
 		sbOverlay.leave();
 		Dancer.instance.setGameObjects(null);
