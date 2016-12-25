@@ -21,6 +21,7 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.render.RenderUtils;
 import yugecin.opsudance.sbv2.movers.StoryboardMover;
 
 import java.util.ArrayList;
@@ -210,11 +211,11 @@ public class StoryboardMoveImpl implements StoryboardMove {
 			int dif = y;
 			y += Fonts.SMALL.getLineHeight() * 1.1f;
 			dif = y - dif;
-			g.fillRect(screenWidth - 20, y - dif / 2 - 5, 10, 10);
+			RenderUtils.fillCenteredRect(g, screenWidth - 20, y - dif / 2, 5);
 		}
 		g.setColor(Color.cyan);
 		for (Vec2f point : midPoints) {
-			g.fillRect(point.x - POINTSIZE, point.y - POINTSIZE, POINTSIZE * 2 + 1, POINTSIZE * 2 + 1);
+			RenderUtils.fillCenteredRect(g, point.x, point.y, POINTSIZE);
 		}
 	}
 

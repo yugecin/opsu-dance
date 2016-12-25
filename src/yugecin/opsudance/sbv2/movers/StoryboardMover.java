@@ -21,6 +21,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.render.RenderUtils;
 
 public abstract class StoryboardMover {
 
@@ -76,7 +77,7 @@ public abstract class StoryboardMover {
 		g.setColor(renderColor);
 		for (float t = 0; t <= 1f; t += StoryboardMover.CALC_DRAW_INTERVAL) {
 			float[] p = getPointAt(t);
-			g.fillRect(p[0] - 1, p[1] - 1, 3, 3);
+			RenderUtils.fillCenteredRect(g, p[0], p[1], 1);
 		}
 	}
 

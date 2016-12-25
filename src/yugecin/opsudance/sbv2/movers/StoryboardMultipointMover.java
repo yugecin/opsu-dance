@@ -20,6 +20,7 @@ package yugecin.opsudance.sbv2.movers;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.render.RenderUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,9 +78,16 @@ public abstract class StoryboardMultipointMover extends StoryboardMover {
 
 	@Override
 	public void render(Graphics g) {
+		g.setColor(Color.gray);
+		Vec2f lastPoint = start;
+		for (Vec2f point : points) {
+			RenderUtils.drawDottedLine(g, lastPoint.x, lastPoint.y, point.x, point.y, 20, 0);
+			lastPoint = point;
+		}
+		RenderUtils.drawDottedLine(g, lastPoint.x, lastPoint.y, end.x, end.y, 20, 0);
 		g.setColor(pointColor);
 		for (Vec2f point : points) {
-			g.fillRect(point.x - POINTSIZE, point.y - POINTSIZE, POINTSIZE * 2 + 1, POINTSIZE * 2 + 1);
+			RenderUtils.fillCenteredRect(g, point.x, point.y, POINTSIZE);
 		}
 		super.render(g);
 	}
