@@ -29,8 +29,8 @@ public class CubicStoryboardMover extends StoryboardMultipointMover {
 	@Override
 	public void setInitialStart(Vec2f start) {
 		super.setInitialStart(start);
-		super.addPoint(new Vec2f((start.x + end.x) / 3, (start.y + end.y) / 3));
-		super.addPoint(new Vec2f((start.x + end.x) * 2 / 3, (start.y + end.y) * 2 / 3));
+		super.addPoint(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
+		super.addPoint(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
 	}
 
 	@Override
