@@ -63,9 +63,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 	public void add(StoryboardMover mover) {
 		mover.end = end;
 		if (movers.size() == 0) {
-			mover.start = start;
-			mover.recalculateLength();
-			totalLength += mover.getLength();
+			mover.setInitialStart(start);
 		} else {
 			StoryboardMover lastMover = movers.get(movers.size() - 1);
 			Vec2f mid = new Vec2f(
@@ -77,8 +75,10 @@ public class StoryboardMoveImpl implements StoryboardMove {
 			totalLength -= lastMover.getLength();
 			lastMover.recalculateLength();
 			totalLength += lastMover.getLength();
-			mover.start = mid;
+			mover.setInitialStart(mid);
 		}
+		mover.recalculateLength();
+		totalLength += mover.getLength();
 		movers.add(mover);
 		recalculateTimes();
 	}
@@ -100,6 +100,9 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	@Override
 	public void update(int delta, int x, int y) {
+		for (StoryboardMover mover : movers) {
+			mover.update(delta, x, y);
+		}
 		if (currentPoint != null) {
 			moveCurrentPoint(x, y);
 			recalculateDelay -= delta;
@@ -114,12 +117,17 @@ public class StoryboardMoveImpl implements StoryboardMove {
 	@Override
 	public void mousePressed(int x, int y) {
 		int i = 0;
+		for(StoryboardMover mover : movers) {
+			if (mover.mousePressed(x, y)) {
+				return;
+			}
+		}
 		for (Vec2f point : midPoints) {
 			if (point.x - POINTSIZE <= x && x <= point.x + POINTSIZE && point.y - POINTSIZE <= y && y <= point.y + POINTSIZE) {
 				currentPoint = point;
 				prevMover = movers.get(i);
 				nextMover = movers.get(i + 1);
-				break;
+				return;
 			}
 			i++;
 		}
@@ -148,6 +156,15 @@ public class StoryboardMoveImpl implements StoryboardMove {
 					}
 					movers.remove(i);
 					totalLength -= mover.getLength();
+					recalculateTimes();
+					return;
+				}
+			}
+			for(StoryboardMover mover : movers) {
+				float prevLen = mover.getLength();
+				if (mover.mouseReleased(x, y)) {
+					mover.recalculateLength();
+					totalLength += mover.getLength() - prevLen;
 					recalculateTimes();
 				}
 			}

@@ -24,6 +24,7 @@ import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
+import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
 import yugecin.opsudance.ui.SimpleButton;
 
 import java.lang.reflect.InvocationHandler;
@@ -106,6 +107,7 @@ public class MoveStoryboard {
 			getCurrentMoveOrCreateNew().add(new LinearStoryboardMover());
 		}
 		if (btnAddQuadratic.isHovered()) {
+			getCurrentMoveOrCreateNew().add(new QuadraticStoryboardMover());
 		}
 		if (btnAddCubic.isHovered()) {
 		}

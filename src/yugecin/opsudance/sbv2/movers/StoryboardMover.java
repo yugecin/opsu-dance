@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.sbv2.movers;
 
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -28,7 +29,7 @@ public abstract class StoryboardMover {
 	protected float length;
 	public Vec2f start;
 	public Vec2f end;
-	private Color renderColor;
+	private final Color renderColor;
 	public float timeLengthPercentOfTotalTime;
 
 	public StoryboardMover(Color renderColor) {
@@ -36,10 +37,39 @@ public abstract class StoryboardMover {
 	}
 
 	public abstract float[] getPointAt(float t);
-	public abstract void recalculateLength();
-
 	public float getLength() {
 		return length;
+	}
+
+	/**
+	 * Set the start position after just creating this mover
+	 * @param start start position
+	 */
+	public void setInitialStart(Vec2f start) {
+		this.start = start;
+	}
+
+	public void update(int delta, int x, int y) {
+	}
+
+	/**
+	 *
+	 * @param x x pos of mouse
+	 * @param y y pos of mouse
+	 * @return true if mouse pressed something and consecutive checks should be ignored
+	 */
+	public boolean mousePressed(int x, int y) {
+		return false;
+	}
+
+	/**
+	 *
+	 * @param x x pos of mouse
+	 * @param y y pos of mouse
+	 * @return true if mouse released something and length should be recalculated
+	 */
+	public boolean mouseReleased(int x, int y) {
+		return false;
 	}
 
 	public void render(Graphics g) {
@@ -47,6 +77,16 @@ public abstract class StoryboardMover {
 		for (float t = 0; t <= 1f; t += StoryboardMover.CALC_DRAW_INTERVAL) {
 			float[] p = getPointAt(t);
 			g.fillRect(p[0] - 1, p[1] - 1, 3, 3);
+		}
+	}
+
+	public void recalculateLength() {
+		this.length = 0;
+		float[] lastPoint = new float[] { start.x, start.y };
+		for (float t = StoryboardMover.CALC_DRAW_INTERVAL; t <= 1f; t += StoryboardMover.CALC_DRAW_INTERVAL) {
+			float[] p = getPointAt(t);
+			this.length += Utils.distance(lastPoint[0], lastPoint[1], p[0], p[1]);
+			lastPoint = p;
 		}
 	}
 
