@@ -28,7 +28,9 @@ import java.util.List;
 
 public class StoryboardMoveImpl implements StoryboardMove {
 
-	private static final int POINTSIZE = 3;
+	private static final int POINTSIZE = 6;
+
+	private int screenWidth;
 
 	private Vec2f start;
 	private Vec2f end;
@@ -43,12 +45,18 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	private int recalculateDelay;
 
-	public StoryboardMoveImpl(Vec2f start, Vec2f end) {
+	public StoryboardMoveImpl(Vec2f start, Vec2f end, int screenWidth) {
 		this.start = start;
 		this.end = end;
+		this.screenWidth = screenWidth;
 		movers = new ArrayList<>();
 		midPoints = new ArrayList<>();
 		recalculateDelay = 700;
+	}
+
+	@Override
+	public int getAmountOfMovers() {
+		return movers.size();
 	}
 
 	@Override
@@ -119,9 +127,34 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	@Override
 	public void mouseReleased(int x, int y) {
-		if (currentPoint != null) {
+		int posY = 200;
+		if (currentPoint == null) {
+			for (int i = 0; i < movers.size(); i++) {
+				int dif = posY;
+				posY += Fonts.SMALL.getLineHeight() * 1.1f;
+				dif = posY - dif;
+				if (screenWidth - 20 <= x && x <= screenWidth - 10 && posY - dif / 2 - 5 <= y && y <= posY - dif / 2 + 5) {
+					if (movers.size() == 1) {
+						movers.clear();
+						return;
+					}
+					StoryboardMover mover = movers.get(i);
+					if (i == movers.size() - 1) {
+						midPoints.remove(i - 1);
+						movers.get(i - 1).end = mover.end;
+					} else {
+						midPoints.remove(i);
+						movers.get(i + 1).start = mover.start;
+					}
+					movers.remove(i);
+					totalLength -= mover.getLength();
+					recalculateTimes();
+				}
+			}
+		} else {
 			moveCurrentPoint(x, y);
 			recalculateLengths();
+			recalculateTimes();
 			currentPoint = null;
 		}
 		recalculateDelay = 700;
@@ -151,8 +184,16 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	@Override
 	public void render(Graphics g) {
+		g.setColor(Color.red);
+		int y = 200;
 		for (StoryboardMover mover : movers) {
 			mover.render(g);
+			String text = mover.toString();
+			Fonts.SMALL.drawString(screenWidth - Fonts.SMALL.getWidth(text) - 30, y, text);
+			int dif = y;
+			y += Fonts.SMALL.getLineHeight() * 1.1f;
+			dif = y - dif;
+			g.fillRect(screenWidth - 20, y - dif / 2 - 5, 10, 10);
 		}
 		g.setColor(Color.cyan);
 		for (Vec2f point : midPoints) {

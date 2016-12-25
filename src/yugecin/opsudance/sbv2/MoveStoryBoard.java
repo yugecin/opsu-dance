@@ -82,7 +82,7 @@ public class MoveStoryboard {
 		btnAddQuadratic.render(g);
 		btnAddCubic.render(g);
 		if (moves[objectIndex] != null && objectIndex > 0 && trackPosition >= gameObjects[objectIndex - 1].getEndTime() && trackPosition < gameObjects[objectIndex].getTime()) {
-			moves[objectIndex].render(g, width);
+			moves[objectIndex].render(g);
 		}
 	}
 
@@ -95,6 +95,9 @@ public class MoveStoryboard {
 	public void mouseReleased(int x, int y) {
 		if (moves[objectIndex] != null) {
 			moves[objectIndex].mouseReleased(x, y);
+			if (moves[objectIndex].getAmountOfMovers() == 0) {
+				moves[objectIndex] = null;
+			}
 		}
 		if (objectIndex == 0) {
 			return;
@@ -114,7 +117,7 @@ public class MoveStoryboard {
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {
-			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start);
+			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start, width);
 		}
 		return moves[objectIndex];
 	}

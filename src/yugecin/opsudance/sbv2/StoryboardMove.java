@@ -22,6 +22,7 @@ import yugecin.opsudance.sbv2.movers.StoryboardMover;
 
 public interface StoryboardMove {
 
+	int getAmountOfMovers();
 	void add(StoryboardMover mover);
 	float[] getPointAt(float t);
 	void update(int delta, int x, int y);
