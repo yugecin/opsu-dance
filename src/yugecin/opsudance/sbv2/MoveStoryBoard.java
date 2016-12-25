@@ -23,6 +23,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
 import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
 import yugecin.opsudance.ui.SimpleButton;
@@ -110,6 +111,7 @@ public class MoveStoryboard {
 			getCurrentMoveOrCreateNew().add(new QuadraticStoryboardMover());
 		}
 		if (btnAddCubic.isHovered()) {
+			getCurrentMoveOrCreateNew().add(new CubicStoryboardMover());
 		}
 	}
 
