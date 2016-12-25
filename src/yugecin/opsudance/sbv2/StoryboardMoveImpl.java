@@ -41,11 +41,14 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	private float totalLength;
 
+	private int recalculateDelay;
+
 	public StoryboardMoveImpl(Vec2f start, Vec2f end) {
 		this.start = start;
 		this.end = end;
 		movers = new ArrayList<>();
 		midPoints = new ArrayList<>();
+		recalculateDelay = 700;
 	}
 
 	@Override
@@ -91,6 +94,12 @@ public class StoryboardMoveImpl implements StoryboardMove {
 	public void update(int delta, int x, int y) {
 		if (currentPoint != null) {
 			moveCurrentPoint(x, y);
+			recalculateDelay -= delta;
+			if (recalculateDelay < 0) {
+				recalculateDelay = 700;
+				recalculateLengths();
+				recalculateTimes();
+			}
 		}
 	}
 
@@ -112,13 +121,10 @@ public class StoryboardMoveImpl implements StoryboardMove {
 	public void mouseReleased(int x, int y) {
 		if (currentPoint != null) {
 			moveCurrentPoint(x, y);
-			totalLength -= prevMover.getLength() + nextMover.getLength();
-			prevMover.recalculateLength();
-			nextMover.recalculateLength();
-			totalLength += prevMover.getLength() + nextMover.getLength();
+			recalculateLengths();
 			currentPoint = null;
-			recalculateTimes();
 		}
+		recalculateDelay = 700;
 	}
 
 	@Override
@@ -126,6 +132,14 @@ public class StoryboardMoveImpl implements StoryboardMove {
 		for (StoryboardMover mover : movers) {
 			mover.timeLengthPercentOfTotalTime = mover.getLength() / totalLength;
 		}
+	}
+
+	private void recalculateLengths() {
+		totalLength -= prevMover.getLength() + nextMover.getLength();
+		prevMover.recalculateLength();
+		nextMover.recalculateLength();
+		totalLength += prevMover.getLength() + nextMover.getLength();
+		recalculateTimes();
 	}
 
 	private void moveCurrentPoint(int x, int y) {
