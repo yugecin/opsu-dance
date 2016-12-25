@@ -21,6 +21,8 @@ import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
@@ -38,6 +40,10 @@ public class MoveStoryboard {
 	private final SimpleButton btnAddQuadratic;
 	private final SimpleButton btnAddCubic;
 
+	private final SimpleButton btnAnimLin;
+	private final SimpleButton btnAnimCir;
+	private final SimpleButton btnAnimCub;
+
 	private final StoryboardMove dummyMove;
 
 	private int width;
@@ -54,6 +60,9 @@ public class MoveStoryboard {
 		btnAddLinear = new SimpleButton(width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAddQuadratic = new SimpleButton(width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAddCubic = new SimpleButton(width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAnimLin = new SimpleButton(width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimCir = new SimpleButton(width - 250, 80, 40, 25, Fonts.SMALL, "cir", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimCub = new SimpleButton(width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
 		dummyMove = (StoryboardMove) Proxy.newProxyInstance(StoryboardMove.class.getClassLoader(), new Class<?>[]{StoryboardMove.class}, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -83,6 +92,9 @@ public class MoveStoryboard {
 		btnAddLinear.render(g);
 		btnAddQuadratic.render(g);
 		btnAddCubic.render(g);
+		btnAnimLin.render(g);
+		btnAnimCir.render(g);
+		btnAnimCub.render(g);
 		if (moves[objectIndex] != null && objectIndex > 0 && trackPosition >= gameObjects[objectIndex - 1].getEndTime() && trackPosition < gameObjects[objectIndex].getTime()) {
 			moves[objectIndex].render(g);
 		}
@@ -113,6 +125,15 @@ public class MoveStoryboard {
 		if (btnAddCubic.isHovered()) {
 			getCurrentMoveOrCreateNew().add(new CubicStoryboardMover());
 		}
+		if (btnAnimLin.isHovered()) {
+			getCurrentMoveOrDummy().setAnimationEquation(AnimationEquation.LINEAR);
+		}
+		if (btnAnimCir.isHovered()) {
+			getCurrentMoveOrDummy().setAnimationEquation(AnimationEquation.IN_OUT_CIRC);
+		}
+		if (btnAnimCub.isHovered()) {
+			getCurrentMoveOrDummy().setAnimationEquation(AnimationEquation.IN_OUT_CUBIC);
+		}
 	}
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
@@ -126,10 +147,20 @@ public class MoveStoryboard {
 		return moves[objectIndex];
 	}
 
+	private StoryboardMove getCurrentMoveOrDummy() {
+		if (objectIndex < 0 || gameObjects.length <= objectIndex || moves[objectIndex] == null) {
+			return dummyMove;
+		}
+		return moves[objectIndex];
+	}
+
 	public void update(int delta, int x, int y) {
 		btnAddLinear.update(x, y);
 		btnAddQuadratic.update(x, y);
 		btnAddCubic.update(x, y);
+		btnAnimLin.update(x, y);
+		btnAnimCir.update(x, y);
+		btnAnimCub.update(x, y);
 		if (moves[objectIndex] != null) {
 			moves[objectIndex].update(delta, x, y);
 		}

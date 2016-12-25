@@ -17,11 +17,13 @@
  */
 package yugecin.opsudance.sbv2;
 
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.sbv2.movers.StoryboardMover;
 
 public interface StoryboardMove {
 
+	void setAnimationEquation(AnimationEquation eq);
 	int getAmountOfMovers();
 	void add(StoryboardMover mover);
 	float[] getPointAt(float t);

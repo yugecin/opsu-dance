@@ -19,6 +19,7 @@ package yugecin.opsudance.sbv2;
 
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.render.RenderUtils;
@@ -46,13 +47,21 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	private int recalculateDelay;
 
+	private AnimationEquation animationEquation;
+
 	public StoryboardMoveImpl(Vec2f start, Vec2f end, int screenWidth) {
+		this.animationEquation = AnimationEquation.LINEAR;
 		this.start = start;
 		this.end = end;
 		this.screenWidth = screenWidth;
 		movers = new ArrayList<>();
 		midPoints = new ArrayList<>();
 		recalculateDelay = 700;
+	}
+
+	@Override
+	public void setAnimationEquation(AnimationEquation animationEquation) {
+		this.animationEquation = animationEquation;
 	}
 
 	@Override
@@ -89,6 +98,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 		if (movers.size() == 0) {
 			return new float[] { end.x, end.y };
 		}
+		t = animationEquation.calc(t);
 		float cumulativeTime = 0f;
 		for (StoryboardMover mover : movers) {
 			cumulativeTime += mover.timeLengthPercentOfTotalTime;
