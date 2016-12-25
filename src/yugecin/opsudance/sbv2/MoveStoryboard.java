@@ -61,7 +61,7 @@ public class MoveStoryboard {
 		btnAddQuadratic = new SimpleButton(width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAddCubic = new SimpleButton(width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAnimLin = new SimpleButton(width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
-		btnAnimMid = new SimpleButton(width - 250, 80, 40, 25, Fonts.SMALL, "cir", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimMid = new SimpleButton(width - 250, 80, 40, 25, Fonts.SMALL, "mid", Color.blue, Color.white, Color.white, Color.orange);
 		btnAnimCub = new SimpleButton(width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
 		dummyMove = (StoryboardMove) Proxy.newProxyInstance(StoryboardMove.class.getClassLoader(), new Class<?>[]{StoryboardMove.class}, new InvocationHandler() {
 			@Override

@@ -52,7 +52,7 @@ public class SimpleButton {
 		g.setColor(bg);
 		g.fillRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
 		g.setColor(fg);
-		font.drawString(hitbox.x + 20, textY, text);
+		font.drawString(hitbox.x + 5, textY, text);
 		if (isHovered) {
 			g.setColor(hoverBorder);
 		} else {
