@@ -294,6 +294,13 @@ public enum AnimationEquation {
 				return -0.5f * ((float) Math.pow(2, 10 * t) * (float) Math.sin((t - period / 4) * (Math.PI * 2) / period));
 			return (float) Math.pow(2, -10 * t) * (float) Math.sin((t - period / 4) * (Math.PI * 2) / period) * 0.5f + 1;
 		}
+	},
+	IN_OUT_EASE_MIDDLE {
+		@Override
+		public float calc(float t) {
+			float ct = 1f - t;
+			return 3f * ct * ct * t * 0.6f + 3 * ct * t * t * 0.4f + t * t * t * 1f;
+		}
 	};
 
 	/** Overshoot constant for "back" easings. */
