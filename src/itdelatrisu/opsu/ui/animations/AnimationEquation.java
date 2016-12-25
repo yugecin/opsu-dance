@@ -299,7 +299,7 @@ public enum AnimationEquation {
 		@Override
 		public float calc(float t) {
 			float ct = 1f - t;
-			return 3f * ct * ct * t * 0.6f + 3 * ct * t * t * 0.4f + t * t * t * 1f;
+			return 3f * ct * ct * t * 0.1f + 3 * ct * t * t * 0.9f + t * t * t * 1f;
 		}
 	};
 
