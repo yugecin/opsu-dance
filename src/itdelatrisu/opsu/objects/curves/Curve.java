@@ -31,6 +31,7 @@ import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 
 /**
  * Representation of a curve.
@@ -149,14 +150,14 @@ public abstract class Curve {
 		// mmsliders
 		else {
 			if (renderState == null)
-				renderState = new CurveRenderState(hitObject, curve);
+				renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
 			renderState.draw(color, borderColor, from, to);
 		}
 	}
 
 	public void splice(int from, int to) {
 		if (renderState == null)
-			renderState = new CurveRenderState(hitObject, curve);
+			renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
 		renderState.splice(from, to);
 	}
 

@@ -541,6 +541,17 @@ public class Options {
 				return !FALLBACK_SLIDERS.bool;
 			}
 		},
+		MERGING_SLIDERS_MIRROR_POOL ("Merging sliders mirror pool", "MergingSliderMirrorPool", "Amount of mirrors to calculate for merging sliders (impacts performance)", 2, 1, 5) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+
+			@Override
+			public boolean showCondition() {
+				return MERGING_SLIDERS.showCondition() && MERGING_SLIDERS.getBooleanValue();
+			}
+		},
 		DRAW_SLIDER_ENDCIRCLES ("Draw slider endcircles", "DrawSliderEndCircles", "Old slider style", false),
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_HIT_ANIMATIONS ("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true),
@@ -1544,6 +1555,7 @@ public class Options {
 
 	public static boolean isShrinkingSliders() { return GameOption.SHRINKING_SLIDERS.getBooleanValue(); }
 	public static boolean isMergingSliders() { return !isFallbackSliders() && GameOption.MERGING_SLIDERS.getBooleanValue(); }
+	public static int getMergingSlidersMirrorPool() { return GameOption.MERGING_SLIDERS_MIRROR_POOL.getIntegerValue(); }
 	public static boolean isDrawSliderEndCircles() { return GameOption.DRAW_SLIDER_ENDCIRCLES.getBooleanValue(); }
 
 	/**

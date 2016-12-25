@@ -18,6 +18,7 @@
 package itdelatrisu.opsu.render;
 
 import itdelatrisu.opsu.GameImage;
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.Circle;
@@ -31,7 +32,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.newdawn.slick.Color;
@@ -69,6 +69,8 @@ public class CurveRenderState {
 	private int spliceFrom;
 	private int spliceTo;
 
+	private final int mirrors;
+
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
 	 * Should be called before any curves are drawn.
@@ -102,9 +104,14 @@ public class CurveRenderState {
 	 * @param hitObject the HitObject that represents this curve, just used as a unique ID
 	 * @param curve the points along the curve to be drawn
 	 */
-	public CurveRenderState(HitObject hitObject, Vec2f[] curve) {
+	public CurveRenderState(HitObject hitObject, Vec2f[] curve, boolean isKnorkeSlider) {
 		this.hitObject = hitObject;
 		this.curve = curve;
+		if (isKnorkeSlider) {
+			this.mirrors = Options.getMergingSlidersMirrorPool();
+		} else {
+			this.mirrors = 1;
+		}
 		initFBO();
 	}
 
@@ -280,28 +287,32 @@ public class CurveRenderState {
 	 */
 	private void createVertexBuffer(int bufferID) {
 		int arrayBufferBinding = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
-		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length - 1) * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
+		FloatBuffer buff = BufferUtils.createByteBuffer(4 * (4 + 2) * (2 * curve.length - 1) * mirrors * (NewCurveStyleState.DIVIDES + 2)).asFloatBuffer();
 		if (curve.length > 0) {
-			fillCone(buff, curve[0].x, curve[0].y);
+			fillCone(buff, curve[0].x, curve[0].y, 0);
 		}
-		for (int i = 1; i < curve.length; ++i) {
-			float x = curve[i].x;
-			float y = curve[i].y;
-			fillCone(buff, x, y);
-			float last_x = curve[i - 1].x;
-			float last_y = curve[i - 1].y;
-			double diff_x = x - last_x;
-			double diff_y = y - last_y;
-			float dist = Utils.distance(x, y, last_x, last_y);
-			if (dist < Circle.diameter / 8) {
-				x = (float) (x - diff_x / 2);
-				y = (float) (y - diff_y / 2);
-			} else {
-				// don't mind me
-				x = -100f;
-				y = -100f;
+
+		for (int mirror = 0; mirror < mirrors; mirror++) {
+			final float angle = 360f * mirror / mirrors;
+			for (int i = 1; i < curve.length; ++i) {
+				float x = curve[i].x;
+				float y = curve[i].y;
+				fillCone(buff, x, y, angle);
+				float last_x = curve[i - 1].x;
+				float last_y = curve[i - 1].y;
+				double diff_x = x - last_x;
+				double diff_y = y - last_y;
+				float dist = Utils.distance(x, y, last_x, last_y);
+				if (dist < Circle.diameter / 8) {
+					x = (float) (x - diff_x / 2);
+					y = (float) (y - diff_y / 2);
+				} else {
+					// don't mind me
+					x = -100f;
+					y = -100f;
+				}
+				fillCone(buff, x, y, angle);
 			}
-			fillCone(buff, x, y);
 		}
 		buff.flip();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferID);
@@ -332,16 +343,31 @@ public class CurveRenderState {
 		if (clearFirst) {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
-		for (int i = from * 2; i < to * 2 - 1; ++i) {
-			if (spliceFrom <= i && i <= spliceTo) {
-				continue;
-			}
-			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, i * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		int max = mirrors;
+		if (!Options.isMirror()) {
+			max = 1;
+		}
+		for (int i = 0; i < max; i++) {
+			renderCurve(from, to, i);
 		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
 		GL20.glDisableVertexAttribArray(staticState.attribLoc);
 		restoreRenderState(state);
+	}
+
+	private void renderCurve(int from, int to, int mirror) {
+		if (from > 0) {
+			from -= mirror;
+		}
+		to -= mirror;
+		for (int i = from * 2; i < to * 2 - 1; ++i) {
+			if (spliceFrom <= i && i <= spliceTo) {
+				continue;
+			}
+			final int index = i + curve.length * 2 * mirror;
+			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		}
 	}
 
 	/**
@@ -351,7 +377,12 @@ public class CurveRenderState {
 	 * @param x1 x-coordinate of the cone
 	 * @param y1 y-coordinate of the cone
 	 */
-	protected void fillCone(FloatBuffer buff, float x1, float y1) {
+	protected void fillCone(FloatBuffer buff, float x1, float y1, float angle) {
+		if (mirrors > 1) {
+			float[] m = Utils.mirrorPoint(x1, y1, angle);
+			x1 = m[0];
+			y1 = m[1];
+		}
 		float divx = containerWidth / 2.0f;
 		float divy = containerHeight / 2.0f;
 		float offx = -1.0f;
