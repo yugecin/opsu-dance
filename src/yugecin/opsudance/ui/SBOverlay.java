@@ -28,6 +28,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
 import java.util.*;
@@ -109,6 +110,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	private int index;
 
 	private final Game game;
+	private final MoveStoryboard msb;
 	private final OptionsOverlay overlay;
 
 	static {
@@ -117,8 +119,9 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		}
 	}
 
-	public SBOverlay(Game game, GameContainer container) {
+	public SBOverlay(Game game, MoveStoryboard msb, GameContainer container) {
 		this.game = game;
+		this.msb = msb;
 		initialOptions = new HashMap<>();
 		overlay = new OptionsOverlay(this, options, 2, container);
 		this.width = container.getWidth();
@@ -131,6 +134,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		if (!Options.isEnableSB() || hide) {
 			return;
 		}
+		msb.render(g);
 		int lh = Fonts.SMALL.getLineHeight();
 		Fonts.SMALL.drawString(10, height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
 		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
@@ -163,6 +167,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		if (Options.isEnableSB() && menu) {
 			overlay.update(delta, mouseX, mouseY);
 		}
+		msb.update(delta, mouseX, mouseY);
 	}
 
 	public boolean keyPressed(int key, char c) {
@@ -234,6 +239,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	public void setGameObjects(GameObject[] gameObjects) {
 		if (this.gameObjects.length != gameObjects.length) {
 			optionsMap = new HashMap[gameObjects.length];
+			msb.setGameObjects(gameObjects);
 		}
 		if (optionsMap.length > 0) {
 			// copy all current settings in first obj map
@@ -246,6 +252,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
+		msb.mousePressed(x, y);
 		if (!menu) {
 			return false;
 		}
@@ -270,6 +277,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		if (index >= optionsMap.length) {
 			return;
 		}
+		msb.setIndex(index);
 		for (; this.index <= index; this.index++) {
 			HashMap options = optionsMap[this.index];
 			if (options == null) {
@@ -289,6 +297,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			overlay.mouseReleased(button, x, y);
 			return true;
 		}
+		msb.mouseReleased(x, y);
 		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
 			return false;
 		}
@@ -346,6 +355,10 @@ public class SBOverlay implements OptionsOverlay.Parent {
 				gameObjects[i].updateColor();
 			}
 		}
+	}
+
+	public float[] getPoint(int trackPosition) {
+		return msb.getPoint(trackPosition);
 	}
 
 	@Override
