@@ -365,7 +365,7 @@ public class CurveRenderState {
 			if (spliceFrom <= i && i <= spliceTo) {
 				continue;
 			}
-			final int index = i + curve.length * 2 * mirror;// + mirror * curve.length / 2;
+			final int index = i + curve.length * 2 * mirror;
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
 		}
 	}
