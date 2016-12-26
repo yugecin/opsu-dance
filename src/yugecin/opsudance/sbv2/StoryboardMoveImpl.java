@@ -148,7 +148,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 				int dif = posY;
 				posY += Fonts.SMALL.getLineHeight() * 1.1f;
 				dif = posY - dif;
-				if (screenWidth - 20 <= x && x <= screenWidth - 10 && posY - dif / 2 - 5 <= y && y <= posY - dif / 2 + 5) {
+				if (screenWidth - 15 <= x && x <= screenWidth - 5 && posY - dif / 2 - 5 <= y && y <= posY - dif / 2 + 5) {
 					if (movers.size() == 1) {
 						movers.clear();
 						return;
