@@ -22,6 +22,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.render.MovablePointCollectionRenderer;
 import yugecin.opsudance.render.RenderUtils;
 import yugecin.opsudance.sbv2.movers.StoryboardMover;
 
@@ -30,17 +31,14 @@ import java.util.List;
 
 public class StoryboardMoveImpl implements StoryboardMove {
 
-	private static final int POINTSIZE = 6;
+	private final int screenWidth;
 
-	private int screenWidth;
-
-	private Vec2f start;
-	private Vec2f end;
-	private List<StoryboardMover> movers;
-	private List<Vec2f> midPoints;
+	private final Vec2f start;
+	private final Vec2f end;
+	private final List<StoryboardMover> movers;
+	private final MovablePointCollectionRenderer movablePointCollectionRenderer;
 
 	private StoryboardMover nextMover;
-	private Vec2f currentPoint;
 	private StoryboardMover prevMover;
 
 	private float totalLength;
@@ -55,7 +53,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 		this.end = end;
 		this.screenWidth = screenWidth;
 		movers = new ArrayList<>();
-		midPoints = new ArrayList<>();
+		movablePointCollectionRenderer = new MovablePointCollectionRenderer(Color.cyan);
 		recalculateDelay = 700;
 	}
 
@@ -80,7 +78,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 				(lastMover.start.x + lastMover.end.x) / 2f,
 				(lastMover.start.y + lastMover.end.y) / 2f
 			);
-			midPoints.add(mid);
+			movablePointCollectionRenderer.add(mid);
 			lastMover.end = mid;
 			totalLength -= lastMover.getLength();
 			lastMover.recalculateLength();
@@ -114,7 +112,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 		for (StoryboardMover mover : movers) {
 			mover.update(delta, x, y);
 		}
-		if (currentPoint != null) {
+		if (movablePointCollectionRenderer.update(x, y)) {
 			moveCurrentPoint(x, y);
 			recalculateDelay -= delta;
 			if (recalculateDelay < 0) {
@@ -127,27 +125,25 @@ public class StoryboardMoveImpl implements StoryboardMove {
 
 	@Override
 	public void mousePressed(int x, int y) {
-		int i = 0;
 		for(StoryboardMover mover : movers) {
 			if (mover.mousePressed(x, y)) {
 				return;
 			}
 		}
-		for (Vec2f point : midPoints) {
-			if (point.x - POINTSIZE <= x && x <= point.x + POINTSIZE && point.y - POINTSIZE <= y && y <= point.y + POINTSIZE) {
-				currentPoint = point;
-				prevMover = movers.get(i);
-				nextMover = movers.get(i + 1);
-				return;
-			}
-			i++;
+		if (movablePointCollectionRenderer.mousePressed(x, y)) {
+			prevMover = movers.get(movablePointCollectionRenderer.getCurrentPointIndex());
+			nextMover = movers.get(movablePointCollectionRenderer.getCurrentPointIndex() + 1);
 		}
 	}
 
 	@Override
 	public void mouseReleased(int x, int y) {
 		int posY = 200;
-		if (currentPoint == null) {
+		if (movablePointCollectionRenderer.mouseReleased()) {
+			moveCurrentPoint(x, y);
+			recalculateLengths();
+			recalculateTimes();
+		} else {
 			for (int i = 0; i < movers.size(); i++) {
 				int dif = posY;
 				posY += Fonts.SMALL.getLineHeight() * 1.1f;
@@ -159,10 +155,10 @@ public class StoryboardMoveImpl implements StoryboardMove {
 					}
 					StoryboardMover mover = movers.get(i);
 					if (i == movers.size() - 1) {
-						midPoints.remove(i - 1);
+						movablePointCollectionRenderer.remove(i - 1);
 						movers.get(i - 1).end = mover.end;
 					} else {
-						midPoints.remove(i);
+						movablePointCollectionRenderer.remove(i);
 						movers.get(i + 1).start = mover.start;
 					}
 					movers.remove(i);
@@ -179,11 +175,6 @@ public class StoryboardMoveImpl implements StoryboardMove {
 					recalculateTimes();
 				}
 			}
-		} else {
-			moveCurrentPoint(x, y);
-			recalculateLengths();
-			recalculateTimes();
-			currentPoint = null;
 		}
 		recalculateDelay = 700;
 	}
@@ -204,10 +195,8 @@ public class StoryboardMoveImpl implements StoryboardMove {
 	}
 
 	private void moveCurrentPoint(int x, int y) {
-		currentPoint.x = x;
-		currentPoint.y = y;
-		prevMover.end = currentPoint;
-		nextMover.start = currentPoint;
+		prevMover.end.set(x, y);
+		nextMover.start.set(x, y);
 	}
 
 	@Override
@@ -223,10 +212,7 @@ public class StoryboardMoveImpl implements StoryboardMove {
 			dif = y - dif;
 			RenderUtils.fillCenteredRect(g, screenWidth - 20, y - dif / 2, 5);
 		}
-		g.setColor(Color.cyan);
-		for (Vec2f point : midPoints) {
-			RenderUtils.fillCenteredRect(g, point.x, point.y, POINTSIZE);
-		}
+		movablePointCollectionRenderer.render(g);
 	}
 
 }

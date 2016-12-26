@@ -29,15 +29,16 @@ public class QuadraticStoryboardMover extends StoryboardMultipointMover {
 	@Override
 	public void setInitialStart(Vec2f start) {
 		super.setInitialStart(start);
-		super.addPoint(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
+		super.movablePointCollectionRenderer.add(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
 	}
 
 	@Override
 	public float[] getPointAt(float t) {
 		float ct = 1f - t;
+		Vec2f p1 = super.movablePointCollectionRenderer.get(0);
 		return new float[] {
-			ct * ct * start.x + ct * 2 * t * getPoint(0).x + t * t * end.x,
-			ct * ct * start.y + ct * 2 * t * getPoint(0).y + t * t * end.y,
+			ct * ct * start.x + ct * 2 * t * p1.x + t * t * end.x,
+			ct * ct * start.y + ct * 2 * t * p1.y + t * t * end.y,
 		};
 	}
 

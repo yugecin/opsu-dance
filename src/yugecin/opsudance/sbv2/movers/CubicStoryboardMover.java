@@ -29,16 +29,18 @@ public class CubicStoryboardMover extends StoryboardMultipointMover {
 	@Override
 	public void setInitialStart(Vec2f start) {
 		super.setInitialStart(start);
-		super.addPoint(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
-		super.addPoint(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
+		super.movablePointCollectionRenderer.add(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
+		super.movablePointCollectionRenderer.add(new Vec2f((start.x + end.x) / 2, (start.y + end.y) / 2));
 	}
 
 	@Override
 	public float[] getPointAt(float t) {
 		float ct = 1f - t;
+		Vec2f p1 = super.movablePointCollectionRenderer.get(0);
+		Vec2f p2 = super.movablePointCollectionRenderer.get(1);
 		return new float[] {
-			ct * ct * ct * start.x + 3 * ct * ct * t * getPoint(0).x + 3 * ct * t * t * getPoint(1).x + t * t * t * end.x,
-			ct * ct * ct * start.y + 3 * ct * ct * t * getPoint(0).y + 3 * ct * t * t * getPoint(1).y + t * t * t * end.y,
+			ct * ct * ct * start.x + 3 * ct * ct * t * p1.x + 3 * ct * t * t * p2.x + t * t * t * end.x,
+			ct * ct * ct * start.y + 3 * ct * ct * t * p1.y + 3 * ct * t * t * p2.y + t * t * t * end.y,
 		};
 	}
 

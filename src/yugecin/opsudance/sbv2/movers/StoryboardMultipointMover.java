@@ -17,78 +17,38 @@
  */
 package yugecin.opsudance.sbv2.movers;
 
-import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.render.RenderUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import yugecin.opsudance.render.MovablePointCollectionRenderer;
 
 public abstract class StoryboardMultipointMover extends StoryboardMover {
 
-	private static final int POINTSIZE = 6;
-
-	private List<Vec2f> points;
-	private final Color pointColor;
-
-	private Vec2f currentPoint;
+	protected final MovablePointCollectionRenderer movablePointCollectionRenderer;
 
 	public StoryboardMultipointMover(Color renderColor, Color pointColor) {
 		super(renderColor);
-		this.pointColor = pointColor;
-		this.points = new ArrayList<>();
-	}
-
-	public void addPoint(Vec2f point) {
-		points.add(point);
+		movablePointCollectionRenderer = new MovablePointCollectionRenderer(pointColor);
 	}
 
 	@Override
 	public void update(int delta, int x, int y) {
-		if (currentPoint != null) {
-			currentPoint.x = x;
-			currentPoint.y = y;
-		}
+		movablePointCollectionRenderer.update(x, y);
 	}
 
 	@Override
 	public boolean mousePressed(int x, int y) {
-		for (Vec2f point : points) {
-			if (point.x - POINTSIZE <= x && x <= point.x + POINTSIZE && point.y - POINTSIZE <= y && y <= point.y + POINTSIZE) {
-				currentPoint = point;
-				return true;
-			}
-		}
-		return false;
+		return movablePointCollectionRenderer.mousePressed(x, y);
 	}
 
 	@Override
 	public boolean mouseReleased(int x, int y) {
-		if (currentPoint != null) {
-			currentPoint = null;
-			return true;
-		}
-		return false;
-	}
-
-	protected Vec2f getPoint(int index) {
-		return points.get(index);
+		return movablePointCollectionRenderer.mouseReleased();
 	}
 
 	@Override
 	public void render(Graphics g) {
-		g.setColor(Color.gray);
-		Vec2f lastPoint = start;
-		for (Vec2f point : points) {
-			RenderUtils.drawDottedLine(g, lastPoint.x, lastPoint.y, point.x, point.y, 20, 0);
-			lastPoint = point;
-		}
-		RenderUtils.drawDottedLine(g, lastPoint.x, lastPoint.y, end.x, end.y, 20, 0);
-		g.setColor(pointColor);
-		for (Vec2f point : points) {
-			RenderUtils.fillCenteredRect(g, point.x, point.y, POINTSIZE);
-		}
+		movablePointCollectionRenderer.renderWithDottedLines(g, Color.gray, start, end);
 		super.render(g);
 	}
+
 }
