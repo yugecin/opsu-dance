@@ -55,6 +55,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		}),
 		new OptionTab("Dance", new GameOption[] {
 			GameOption.DANCE_MOVER,
+			GameOption.DANCE_EXGON_DELAY,
 			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
 			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
 			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,

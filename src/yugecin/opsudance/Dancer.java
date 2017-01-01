@@ -58,6 +58,7 @@ public class Dancer {
 		//new LinearFactory(),
 		new ArcFactory(),
 		new QuadraticBezierMoverFactory(),
+		new ExgonMoverFactory(),
 	};
 
 	public static Spinner[] spinners = new Spinner[] {

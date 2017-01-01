@@ -59,6 +59,7 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
+import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 
@@ -680,6 +681,16 @@ public class Options {
 			public void read(String s) {
 				int i = Integer.parseInt(s);
 				Dancer.instance.setMoverFactoryIndex(i);
+			}
+		},
+		DANCE_EXGON_DELAY ("ExGon delay", "ExGonDelay", "Delay between moves for the ExGon mover", 25, 2, 750) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+			@Override
+			public boolean showCondition() {
+				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof ExgonMoverFactory;
 			}
 		},
 		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
@@ -1371,6 +1382,9 @@ public class Options {
 		}
 	}
 
+	public static int getExgonDelay() {
+		return GameOption.DANCE_EXGON_DELAY.getIntegerValue();
+	}
 	public static int getQuadBezAggressiveness() {
 		return GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS.getIntegerValue();
 	}
