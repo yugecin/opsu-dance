@@ -30,6 +30,7 @@ public class Container extends AppGameContainer {
 	@Inject
 	public Container(Demux demux) throws SlickException {
 		super(demux);
+		setShowFPS(false);
 	}
 
 	@Override

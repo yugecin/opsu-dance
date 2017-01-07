@@ -23,15 +23,15 @@ import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.Demux;
 import yugecin.opsudance.kernel.InstanceContainer;
 
-public class EmptyState implements GameState {
+public class EmptyRedState implements GameState {
 
 	private int counter;
 
-	private final InstanceContainer instanceContainer;
 	private final Demux demux;
+	private final InstanceContainer instanceContainer;
 
 	@Inject
-	public EmptyState(InstanceContainer instanceContainer, Demux demux) {
+	public EmptyRedState(InstanceContainer instanceContainer, Demux demux) {
 		this.instanceContainer = instanceContainer;
 		this.demux = demux;
 	}
@@ -40,19 +40,19 @@ public class EmptyState implements GameState {
 	public void update(int delta) {
 		counter -= delta;
 		if (counter < 0) {
-			demux.switchState(instanceContainer.provide(EmptyRedState.class));
+			demux.switchState(instanceContainer.provide(EmptyState.class));
 		}
 	}
 
 	@Override
 	public void render(Graphics g) {
-		g.setColor(Color.green);
+		g.setColor(Color.red);
 		g.fillRect(0, 0, 100, 100);
 	}
 
 	@Override
 	public void enter() {
-		counter = 2000;
+		counter = 5000;
 	}
 
 	@Override

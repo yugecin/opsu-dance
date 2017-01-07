@@ -15,48 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.states;
+package yugecin.opsudance.states.transitions;
 
 import com.google.inject.Inject;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
+import yugecin.opsudance.core.Container;
 import yugecin.opsudance.core.Demux;
-import yugecin.opsudance.kernel.InstanceContainer;
 
-public class EmptyState implements GameState {
+public class FadeOutTransitionState extends TransitionState {
 
-	private int counter;
-
-	private final InstanceContainer instanceContainer;
 	private final Demux demux;
+	private final FadeInTransitionState fadeInTransitionState;
 
 	@Inject
-	public EmptyState(InstanceContainer instanceContainer, Demux demux) {
-		this.instanceContainer = instanceContainer;
+	public FadeOutTransitionState(Container container, Demux demux, FadeInTransitionState fadeInTransitionState) {
+		super(container, 200);
 		this.demux = demux;
+		this.fadeInTransitionState = fadeInTransitionState;
 	}
 
 	@Override
-	public void update(int delta) {
-		counter -= delta;
-		if (counter < 0) {
-			demux.switchState(instanceContainer.provide(EmptyRedState.class));
-		}
+	protected float getMaskAlphaLevel() {
+		return (float) fadeTime / fadeTargetTime;
 	}
 
 	@Override
-	public void render(Graphics g) {
-		g.setColor(Color.green);
-		g.fillRect(0, 0, 100, 100);
+	protected void onFadeFinished() {
+		applicableState.leave();
+		demux.switchStateNow(fadeInTransitionState);
+		fadeInTransitionState.enter();
 	}
-
-	@Override
-	public void enter() {
-		counter = 2000;
-	}
-
-	@Override
-	public void leave() {
-	}
-
 }
