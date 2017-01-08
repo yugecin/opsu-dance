@@ -20,7 +20,6 @@ package yugecin.opsudance;
 import com.google.inject.Inject;
 import itdelatrisu.opsu.NativeLoader;
 import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
@@ -33,22 +32,16 @@ public class PreStartupInitializer {
 
 	@Inject
 	public PreStartupInitializer() {
-		// load natives
-		File nativeDir;
-		if (!Utils.isJarRunning() && (
-			(nativeDir = new File("./target/natives/")).isDirectory() ||
-				(nativeDir = new File("./build/natives/")).isDirectory()))
-			;
-		else {
-			nativeDir = Options.NATIVE_DIR;
-			try {
-				new NativeLoader(nativeDir).loadNatives();
-			} catch (IOException e) {
-				Log.error("Error loading natives.", e);
-			}
-		}
+		loadNatives();
+		setResourcePath();
+	}
+
+	private void loadNatives() {
+		File nativeDir = loadNativesUsingOptionsPath();
+
 		System.setProperty("org.lwjgl.librarypath", nativeDir.getAbsolutePath());
 		System.setProperty("java.library.path", nativeDir.getAbsolutePath());
+
 		try {
 			// Workaround for "java.library.path" property being read-only.
 			// http://stackoverflow.com/a/24988095
@@ -58,10 +51,20 @@ public class PreStartupInitializer {
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			Log.warn("Failed to set 'sys_paths' field.", e);
 		}
+	}
 
-		// set the resource paths
+	private File loadNativesUsingOptionsPath() {
+		File nativeDir = Options.NATIVE_DIR;
+		try {
+			new NativeLoader(nativeDir).loadNatives();
+		} catch (IOException e) {
+			Log.error("Error loading natives.", e);
+		}
+		return nativeDir;
+	}
+
+	private void setResourcePath() {
 		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
-
 	}
 
 }
