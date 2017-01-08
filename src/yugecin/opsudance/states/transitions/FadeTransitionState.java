@@ -17,18 +17,27 @@
  */
 package yugecin.opsudance.states.transitions;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.core.Container;
 import yugecin.opsudance.states.GameState;
 
-public abstract class TransitionState implements GameState {
+public abstract class FadeTransitionState extends TransitionState {
 
 	protected GameState applicableState;
 
-	protected final int transitionTargetTime;
-	protected int transitionTime;
+	private final Container container;
 
-	public TransitionState(int transitionTargetTime) {
-		this.transitionTargetTime = transitionTargetTime;
+	protected final int fadeTargetTime;
+	protected int fadeTime;
+
+	private final Color black;
+
+	public FadeTransitionState(Container container, int fadeTargetTime) {
+		super(fadeTargetTime);
+		this.container = container;
+		this.fadeTargetTime = fadeTargetTime;
+		black = new Color(Color.black);
 	}
 
 	public void setApplicableState(GameState applicableState) {
@@ -38,8 +47,8 @@ public abstract class TransitionState implements GameState {
 	@Override
 	public void update(int delta) {
 		applicableState.update(delta);
-		transitionTime += delta;
-		if (transitionTime >= transitionTargetTime) {
+		fadeTime += delta;
+		if (fadeTime >= fadeTargetTime) {
 			onTransitionFinished();
 		}
 	}
@@ -47,16 +56,19 @@ public abstract class TransitionState implements GameState {
 	@Override
 	public void render(Graphics g) {
 		applicableState.render(g);
+		black.a = getMaskAlphaLevel((float) fadeTime / fadeTargetTime);
+		g.setColor(black);
+		g.fillRect(0, 0, container.getWidth(), container.getHeight());
 	}
 
 	@Override
 	public void enter() {
-		transitionTime = 0;
+		fadeTime = 0;
 	}
 
 	@Override
 	public void leave() { }
 
-	protected abstract void onTransitionFinished();
+	protected abstract float getMaskAlphaLevel(float fadeProgress);
 
 }

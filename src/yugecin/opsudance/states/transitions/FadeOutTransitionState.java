@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import yugecin.opsudance.core.Container;
 import yugecin.opsudance.core.Demux;
 
-public class FadeOutTransitionState extends TransitionState {
+public class FadeOutTransitionState extends FadeTransitionState {
 
 	private final Demux demux;
 	private final FadeInTransitionState fadeInTransitionState;
@@ -34,14 +34,15 @@ public class FadeOutTransitionState extends TransitionState {
 	}
 
 	@Override
-	protected float getMaskAlphaLevel() {
-		return (float) fadeTime / fadeTargetTime;
+	protected float getMaskAlphaLevel(float fadeProgress) {
+		return fadeProgress;
 	}
 
 	@Override
-	protected void onFadeFinished() {
+	protected void onTransitionFinished() {
 		applicableState.leave();
 		demux.switchStateNow(fadeInTransitionState);
 		fadeInTransitionState.enter();
 	}
+
 }
