@@ -32,7 +32,6 @@ public class OpsuDance {
 
 	public void start() {
 		try {
-			container.setIcons(new String[] { "icon16.png", "icon32.png" });
 			container.run();
 		} catch (LWJGLException e) {
 			e.printStackTrace();

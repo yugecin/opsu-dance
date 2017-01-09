@@ -20,6 +20,13 @@ package yugecin.opsudance.utils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.newdawn.slick.opengl.ImageIOImageData;
+import org.newdawn.slick.opengl.LoadableImageData;
+import org.newdawn.slick.opengl.TGAImageData;
+import org.newdawn.slick.util.Log;
+import org.newdawn.slick.util.ResourceLoader;
+
+import java.nio.ByteBuffer;
 
 public class GLHelper {
 
@@ -48,6 +55,34 @@ public class GLHelper {
 			}
 		}
 		return foundMode;
+	}
+
+	/**
+	 * from org.newdawn.slick.AppGameContainer#setDisplayMode
+	 */
+	public static void setIcons(String[] refs) {
+		ByteBuffer[] bufs = new ByteBuffer[refs.length];
+
+		for (int i = 0; i < refs.length; i++) {
+			LoadableImageData data;
+			boolean flip = true;
+
+			if (refs[i].endsWith(".tga")) {
+				data = new TGAImageData();
+			} else {
+				flip = false;
+				data = new ImageIOImageData();
+			}
+
+			try {
+				bufs[i] = data.loadImage(ResourceLoader.getResourceAsStream(refs[i]), flip, false, null);
+			} catch (Exception e) {
+				Log.error("failed to set the icon", e);
+				return;
+			}
+		}
+
+		Display.setIcon(bufs);
 	}
 
 }
