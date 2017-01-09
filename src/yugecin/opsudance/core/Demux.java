@@ -18,7 +18,7 @@
 package yugecin.opsudance.core;
 
 import com.google.inject.Inject;
-import org.newdawn.slick.*;
+import org.newdawn.slick.Graphics;
 import yugecin.opsudance.kernel.InstanceContainer;
 import yugecin.opsudance.states.EmptyState;
 import yugecin.opsudance.states.GameState;
@@ -26,7 +26,10 @@ import yugecin.opsudance.states.transitions.FadeInTransitionState;
 import yugecin.opsudance.states.transitions.FadeOutTransitionState;
 import yugecin.opsudance.states.transitions.TransitionState;
 
-public class Demux implements Game {
+/**
+ * state demultiplexer, sends events to current state
+ */
+public class Demux {
 
 	private final InstanceContainer instanceContainer;
 
@@ -40,33 +43,23 @@ public class Demux implements Game {
 		this.instanceContainer = instanceContainer;
 	}
 
-	@Override
-	public void init(GameContainer container) throws SlickException {
+	// cannot do this in constructor, would cause circular dependency
+	public void init() {
+		state = instanceContainer.provide(EmptyState.class);
 		fadeOutTransitionState = instanceContainer.provide(FadeOutTransitionState.class);
 		fadeInTransitionState = instanceContainer.provide(FadeInTransitionState.class);
-		state = instanceContainer.provide(EmptyState.class);
-		state.enter();
 	}
 
-	@Override
-	public void update(GameContainer container, int delta) throws SlickException {
+	public void update(int delta) {
 		state.update(delta);
 	}
 
-	@Override
-	public void render(GameContainer container, Graphics g) throws SlickException {
+	public void render(Graphics g) {
 		state.render(g);
 	}
 
-	@Override
-	public boolean closeRequested() {
-		// TODO for what is this used
+	public boolean onCloseRequest() {
 		return !isTransitioning();
-	}
-
-	@Override
-	public String getTitle() {
-		return "opsu!dance";
 	}
 
 	public boolean isTransitioning() {

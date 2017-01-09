@@ -19,7 +19,7 @@ package yugecin.opsudance.kernel;
 
 import com.google.inject.AbstractModule;
 import yugecin.opsudance.PreStartupInitializer;
-import yugecin.opsudance.core.Container;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.Demux;
 import yugecin.opsudance.states.EmptyRedState;
 import yugecin.opsudance.states.EmptyState;
@@ -31,12 +31,12 @@ public class OpsuDanceModule extends AbstractModule {
 	protected void configure() {
 		bind(InstanceContainer.class).to(InstanceResolver.class);
 		bind(PreStartupInitializer.class).asEagerSingleton();
-		bind(Demux.class).asEagerSingleton();
-		bind(Container.class).asEagerSingleton();
+		bind(DisplayContainer.class).asEagerSingleton();
 		bind(FadeInTransitionState.class).asEagerSingleton();
 		bind(FadeOutTransitionState.class).asEagerSingleton();
 		bind(EmptyRedState.class).asEagerSingleton();
 		bind(EmptyState.class).asEagerSingleton();
+		bind(Demux.class).asEagerSingleton();
 	}
 
 }

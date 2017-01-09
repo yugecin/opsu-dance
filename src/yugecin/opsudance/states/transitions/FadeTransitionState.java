@@ -19,21 +19,21 @@ package yugecin.opsudance.states.transitions;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.Container;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.states.GameState;
 
 public abstract class FadeTransitionState extends TransitionState {
 
 	protected GameState applicableState;
 
-	private final Container container;
+	private final DisplayContainer container;
 
 	protected final int fadeTargetTime;
 	protected int fadeTime;
 
 	private final Color black;
 
-	public FadeTransitionState(Container container, int fadeTargetTime) {
+	public FadeTransitionState(DisplayContainer container, int fadeTargetTime) {
 		super(fadeTargetTime);
 		this.container = container;
 		this.fadeTargetTime = fadeTargetTime;
@@ -58,7 +58,7 @@ public abstract class FadeTransitionState extends TransitionState {
 		applicableState.render(g);
 		black.a = getMaskAlphaLevel((float) fadeTime / fadeTargetTime);
 		g.setColor(black);
-		g.fillRect(0, 0, container.getWidth(), container.getHeight());
+		g.fillRect(0, 0, container.width, container.height);
 	}
 
 	@Override

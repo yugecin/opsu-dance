@@ -18,15 +18,15 @@
 package yugecin.opsudance.states.transitions;
 
 import com.google.inject.Inject;
-import yugecin.opsudance.core.Container;
 import yugecin.opsudance.core.Demux;
+import yugecin.opsudance.core.DisplayContainer;
 
 public class FadeInTransitionState extends FadeTransitionState {
 
 	private final Demux demux;
 
 	@Inject
-	public FadeInTransitionState(Container container, Demux demux) {
+	public FadeInTransitionState(DisplayContainer container, Demux demux) {
 		super(container, 300);
 		this.demux = demux;
 	}

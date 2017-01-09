@@ -15,28 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance;
+package yugecin.opsudance.core;
 
-import com.google.inject.Inject;
-import org.lwjgl.LWJGLException;
-import yugecin.opsudance.core.DisplayContainer;
+public interface ResolutionChangeListener {
 
-public class OpsuDance {
-
-	private final DisplayContainer container;
-
-	@Inject
-	public OpsuDance(DisplayContainer container) {
-		this.container = container;
-	}
-
-	public void start() {
-		try {
-			container.setIcons(new String[] { "icon16.png", "icon32.png" });
-			container.run();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		}
-	}
+	void onDisplayResolutionChanged(int width, int height);
 
 }
