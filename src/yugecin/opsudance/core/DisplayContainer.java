@@ -34,6 +34,8 @@ import yugecin.opsudance.utils.GLHelper;
 import java.util.LinkedList;
 import java.util.List;
 
+import static yugecin.opsudance.kernel.Entrypoint.log;
+
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
@@ -68,6 +70,7 @@ public class DisplayContainer {
 		demux.init();
 		demux.switchStateNow(new EmptyRedState(null, null));
 		setup();
+		log("ready");
 		while(!(Display.isCloseRequested() && demux.onCloseRequest())) {
 			// TODO: lower fps when not visible Display.isVisible
 			int delta = getDelta();

@@ -21,8 +21,20 @@ import yugecin.opsudance.OpsuDance;
 
 public class Entrypoint {
 
+	public static final long startTime = System.currentTimeMillis();
+	public static final boolean isJarRunning = Entrypoint.class.getResource(String.format("%s.class", Entrypoint.class.getSimpleName())).toString().startsWith("jar:");
+
 	public static void main(String[] args) {
+		log("launched");
 		InstanceContainerImpl.initialize().provide(OpsuDance.class).start();
+	}
+
+	public static long runtime() {
+		return System.currentTimeMillis() - startTime;
+	}
+
+	public static void log(String message) {
+		System.out.println(String.format("[%7d] %s", runtime(), message));
 	}
 
 }

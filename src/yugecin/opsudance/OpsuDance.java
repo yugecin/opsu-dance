@@ -21,6 +21,8 @@ import com.google.inject.Inject;
 import org.lwjgl.LWJGLException;
 import yugecin.opsudance.core.DisplayContainer;
 
+import static yugecin.opsudance.kernel.Entrypoint.log;
+
 public class OpsuDance {
 
 	private final DisplayContainer container;
@@ -31,6 +33,7 @@ public class OpsuDance {
 	}
 
 	public void start() {
+		log("initialized");
 		try {
 			container.run();
 		} catch (LWJGLException e) {
