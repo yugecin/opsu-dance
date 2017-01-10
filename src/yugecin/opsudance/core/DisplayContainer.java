@@ -54,6 +54,14 @@ public class DisplayContainer {
 	public int width;
 	public int height;
 
+	public int targetRenderInterval;
+	public int targetBackgroundRenderInterval;
+
+	public int realRenderInterval;
+	public int delta;
+
+	public int timeSinceLastRender;
+
 	private long lastFrame;
 
 	@Inject
@@ -61,6 +69,8 @@ public class DisplayContainer {
 		this.demux = demux;
 		this.nativeDisplayMode = Display.getDisplayMode();
 		this.resolutionChangeListeners = new LinkedList<>();
+		targetRenderInterval = 16; // ~60 fps
+		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
 	}
 
@@ -81,20 +91,40 @@ public class DisplayContainer {
 		setup();
 		log("GL ready");
 		while(!(Display.isCloseRequested() && demux.onCloseRequest())) {
-			// TODO: lower fps when not visible Display.isVisible
-			int delta = getDelta();
+			delta = getDelta();
+
+			timeSinceLastRender += delta;
+
 			input.poll(width, height);
-			GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
-			/*
-			graphics.resetTransform();
-			graphics.resetFont();
-			graphics.resetLineWidth();
-			graphics.resetTransform();
-			*/
-			demux.update(delta);
-			demux.render(graphics);
-			Display.update(true);
-			Display.sync(60);
+
+			int maxRenderInterval;
+			if (Display.isVisible() && Display.isActive()) {
+				maxRenderInterval = targetRenderInterval;
+			} else {
+				maxRenderInterval = targetBackgroundRenderInterval;
+			}
+
+			if (timeSinceLastRender >= maxRenderInterval) {
+				GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
+
+				/*
+				graphics.resetTransform();
+				graphics.resetFont();
+				graphics.resetLineWidth();
+				graphics.resetTransform();
+				*/
+
+				demux.update(timeSinceLastRender);
+				demux.render(graphics);
+
+				realRenderInterval = timeSinceLastRender;
+				timeSinceLastRender = 0;
+
+				Display.update(false);
+			}
+
+			Display.processMessages();
+			Display.sync(1000);
 		}
 		teardown();
 	}

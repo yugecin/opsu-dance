@@ -43,6 +43,10 @@ public class EmptyRedState implements OpsuState {
 	}
 
 	@Override
+	public void preRenderUpdate(int delta) {
+	}
+
+	@Override
 	public void render(Graphics g) {
 		g.setColor(Color.red);
 		g.fillRect(0, 0, 100, 100);
@@ -69,6 +73,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
+		System.out.println("moved");
 		return false;
 	}
 

@@ -22,6 +22,7 @@ import org.newdawn.slick.Graphics;
 public interface OpsuState {
 
 	void update(int delta);
+	void preRenderUpdate(int delta);
 	void render(Graphics g);
 	void enter();
 	void leave();

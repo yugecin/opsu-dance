@@ -43,6 +43,10 @@ public class EmptyState implements OpsuState {
 	}
 
 	@Override
+	public void preRenderUpdate(int delta) {
+	}
+
+	@Override
 	public void render(Graphics g) {
 		g.setColor(Color.green);
 		g.fillRect(0, 0, 100, 100);

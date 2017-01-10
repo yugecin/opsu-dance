@@ -46,6 +46,10 @@ public abstract class TransitionState extends BaseOpsuState {
 	}
 
 	@Override
+	public void preRenderUpdate(int delta) {
+	}
+
+	@Override
 	public void render(Graphics g) {
 		applicableState.render(g);
 	}
