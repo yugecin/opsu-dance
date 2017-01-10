@@ -15,47 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.states;
+package yugecin.opsudance.core.state;
 
-import com.google.inject.Inject;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.state.OpsuState;
-
-public class EmptyState implements OpsuState {
-
-	private int counter;
-
-	private final DisplayContainer displayContainer;
-
-	@Inject
-	public EmptyState(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
-	}
-
-	@Override
-	public void update(int delta) {
-		counter -= delta;
-		if (counter < 0) {
-			displayContainer.switchState(EmptyRedState.class);
-		}
-	}
-
-	@Override
-	public void render(Graphics g) {
-		g.setColor(Color.green);
-		g.fillRect(0, 0, 100, 100);
-	}
-
-	@Override
-	public void enter() {
-		counter = 2000;
-	}
-
-	@Override
-	public void leave() {
-	}
+public abstract class BaseOpsuState implements OpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {

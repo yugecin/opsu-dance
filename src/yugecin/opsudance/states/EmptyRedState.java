@@ -20,28 +20,25 @@ package yugecin.opsudance.states;
 import com.google.inject.Inject;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.Demux;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.kernel.InstanceContainer;
 
 public class EmptyRedState implements OpsuState {
 
 	private int counter;
 
-	private final Demux demux;
-	private final InstanceContainer instanceContainer;
+	private final DisplayContainer displayContainer;
 
 	@Inject
-	public EmptyRedState(InstanceContainer instanceContainer, Demux demux) {
-		this.instanceContainer = instanceContainer;
-		this.demux = demux;
+	public EmptyRedState(DisplayContainer displayContainer) {
+		this.displayContainer = displayContainer;
 	}
 
 	@Override
 	public void update(int delta) {
 		counter -= delta;
 		if (counter < 0) {
-			demux.switchState(instanceContainer.provide(EmptyState.class));
+			displayContainer.switchState(EmptyState.class);
 		}
 	}
 
@@ -58,6 +55,31 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public void leave() {
+	}
+
+	@Override
+	public boolean keyPressed(int key, char c) {
+		return false;
+	}
+
+	@Override
+	public boolean keyReleased(int key, char c) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseWheelMoved(int delta) {
+		return false;
+	}
+
+	@Override
+	public boolean mousePressed(int button, int x, int y) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseReleased(int button, int x, int y) {
+		return false;
 	}
 
 }

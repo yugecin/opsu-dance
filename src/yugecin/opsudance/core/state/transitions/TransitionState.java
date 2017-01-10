@@ -18,9 +18,10 @@
 package yugecin.opsudance.core.state.transitions;
 
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
-public abstract class TransitionState implements OpsuState {
+public abstract class TransitionState extends BaseOpsuState {
 
 	protected OpsuState applicableState;
 

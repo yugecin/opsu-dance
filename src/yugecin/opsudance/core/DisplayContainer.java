@@ -24,11 +24,12 @@ import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.states.EmptyRedState;
+import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.util.LinkedList;
@@ -48,6 +49,7 @@ public class DisplayContainer {
 	private final List<ResolutionChangeListener> resolutionChangeListeners;
 
 	private Graphics graphics;
+	private Input input;
 
 	public int width;
 	public int height;
@@ -66,14 +68,22 @@ public class DisplayContainer {
 		resolutionChangeListeners.add(listener);
 	}
 
+	public void switchState(OpsuState newState) {
+		demux.switchState(newState);
+	}
+
+	public void switchState(Class<? extends OpsuState> newState) {
+		demux.switchState(newState);
+	}
+
 	public void run() throws LWJGLException {
 		demux.init();
-		demux.switchStateNow(new EmptyRedState(null, null));
 		setup();
-		log("ready");
+		log("GL ready");
 		while(!(Display.isCloseRequested() && demux.onCloseRequest())) {
 			// TODO: lower fps when not visible Display.isVisible
 			int delta = getDelta();
+			input.poll(width, height);
 			GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
 			/*
 			graphics.resetTransform();
@@ -152,19 +162,9 @@ public class DisplayContainer {
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		/*
-		if (input == null) {
-			input = new Input(height);
-		}
-		input.init(height);
-		// no need to remove listeners?
-		//input.removeAllListeners();
-		if (game instanceof InputListener) {
-			input.removeListener((InputListener) game);
-			input.addListener((InputListener) game);
-		}
-		*/
-
+		input = new Input(height);
+		input.addKeyListener(demux);
+		input.addMouseListener(demux);
 	}
 
 	private int getDelta() {

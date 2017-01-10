@@ -26,4 +26,29 @@ public interface OpsuState {
 	void enter();
 	void leave();
 
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean keyPressed(int key, char c);
+
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean keyReleased(int key, char c);
+
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean mouseWheelMoved(int delta);
+
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean mousePressed(int button, int x, int y);
+
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean mouseReleased(int button, int x, int y);
+
 }
