@@ -143,8 +143,6 @@ public class DisplayContainer {
 		if (displayMode.getBitsPerPixel() == 16) {
 			InternalTextureLoader.get().set16BitMode();
 		}
-
-		getDelta();
 	}
 
 	private void initGL() {

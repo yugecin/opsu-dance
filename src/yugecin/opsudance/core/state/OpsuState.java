@@ -15,36 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.states.transitions;
+package yugecin.opsudance.core.state;
 
-import com.google.inject.Inject;
-import yugecin.opsudance.core.Demux;
-import yugecin.opsudance.core.DisplayContainer;
+import org.newdawn.slick.Graphics;
 
-public class FadeInTransitionState extends FadeTransitionState {
+public interface OpsuState {
 
-	private final Demux demux;
-
-	@Inject
-	public FadeInTransitionState(DisplayContainer container, Demux demux) {
-		super(container, 300);
-		this.demux = demux;
-	}
-
-	@Override
-	protected float getMaskAlphaLevel(float fadeProgress) {
-		return 1f - fadeProgress;
-	}
-
-	@Override
-	public void enter() {
-		super.enter();
-		applicableState.enter();
-	}
-
-	@Override
-	protected void onTransitionFinished() {
-		demux.switchStateNow(applicableState);
-	}
+	void update(int delta);
+	void render(Graphics g);
+	void enter();
+	void leave();
 
 }

@@ -21,10 +21,10 @@ import com.google.inject.Inject;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.kernel.InstanceContainer;
 import yugecin.opsudance.states.EmptyState;
-import yugecin.opsudance.states.GameState;
-import yugecin.opsudance.states.transitions.FadeInTransitionState;
-import yugecin.opsudance.states.transitions.FadeOutTransitionState;
-import yugecin.opsudance.states.transitions.TransitionState;
+import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
+import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
+import yugecin.opsudance.core.state.transitions.TransitionState;
 
 /**
  * state demultiplexer, sends events to current state
@@ -36,7 +36,7 @@ public class Demux {
 	private TransitionState fadeOutTransitionState;
 	private TransitionState fadeInTransitionState;
 
-	private GameState state;
+	private OpsuState state;
 
 	@Inject
 	public Demux(InstanceContainer instanceContainer) {
@@ -66,7 +66,7 @@ public class Demux {
 		return state == fadeInTransitionState || state == fadeOutTransitionState;
 	}
 
-	public void switchState(GameState newState) {
+	public void switchState(OpsuState newState) {
 		if (isTransitioning()) {
 			return;
 		}
@@ -76,7 +76,7 @@ public class Demux {
 		state.enter();
 	}
 
-	public void switchStateNow(GameState newState) {
+	public void switchStateNow(OpsuState newState) {
 		if (!isTransitioning()) {
 			return;
 		}

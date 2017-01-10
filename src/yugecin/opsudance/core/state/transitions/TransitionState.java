@@ -15,40 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.states.transitions;
+package yugecin.opsudance.core.state.transitions;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.states.GameState;
+import yugecin.opsudance.core.state.OpsuState;
 
-public abstract class FadeTransitionState extends TransitionState {
+public abstract class TransitionState implements OpsuState {
 
-	protected GameState applicableState;
+	protected OpsuState applicableState;
 
-	private final DisplayContainer container;
+	protected final int transitionTargetTime;
+	protected int transitionTime;
 
-	protected final int fadeTargetTime;
-	protected int fadeTime;
-
-	private final Color black;
-
-	public FadeTransitionState(DisplayContainer container, int fadeTargetTime) {
-		super(fadeTargetTime);
-		this.container = container;
-		this.fadeTargetTime = fadeTargetTime;
-		black = new Color(Color.black);
+	public TransitionState(int transitionTargetTime) {
+		this.transitionTargetTime = transitionTargetTime;
 	}
 
-	public void setApplicableState(GameState applicableState) {
+	public void setApplicableState(OpsuState applicableState) {
 		this.applicableState = applicableState;
 	}
 
 	@Override
 	public void update(int delta) {
 		applicableState.update(delta);
-		fadeTime += delta;
-		if (fadeTime >= fadeTargetTime) {
+		transitionTime += delta;
+		if (transitionTime >= transitionTargetTime) {
 			onTransitionFinished();
 		}
 	}
@@ -56,19 +47,16 @@ public abstract class FadeTransitionState extends TransitionState {
 	@Override
 	public void render(Graphics g) {
 		applicableState.render(g);
-		black.a = getMaskAlphaLevel((float) fadeTime / fadeTargetTime);
-		g.setColor(black);
-		g.fillRect(0, 0, container.width, container.height);
 	}
 
 	@Override
 	public void enter() {
-		fadeTime = 0;
+		transitionTime = 0;
 	}
 
 	@Override
 	public void leave() { }
 
-	protected abstract float getMaskAlphaLevel(float fadeProgress);
+	protected abstract void onTransitionFinished();
 
 }

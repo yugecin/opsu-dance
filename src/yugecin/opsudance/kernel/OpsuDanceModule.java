@@ -23,8 +23,8 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.Demux;
 import yugecin.opsudance.states.EmptyRedState;
 import yugecin.opsudance.states.EmptyState;
-import yugecin.opsudance.states.transitions.FadeInTransitionState;
-import yugecin.opsudance.states.transitions.FadeOutTransitionState;
+import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
+import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 
 public class OpsuDanceModule extends AbstractModule {
 

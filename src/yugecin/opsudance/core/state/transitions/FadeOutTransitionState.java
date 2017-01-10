@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.states.transitions;
+package yugecin.opsudance.core.state.transitions;
 
 import com.google.inject.Inject;
 import yugecin.opsudance.core.Demux;

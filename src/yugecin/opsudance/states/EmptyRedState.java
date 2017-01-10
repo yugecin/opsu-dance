@@ -21,9 +21,10 @@ import com.google.inject.Inject;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.Demux;
+import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.kernel.InstanceContainer;
 
-public class EmptyRedState implements GameState {
+public class EmptyRedState implements OpsuState {
 
 	private int counter;
 
