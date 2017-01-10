@@ -130,6 +130,7 @@ public class DisplayContainer {
 	}
 
 	private void setup() {
+		Input.disableControllers();
 		Display.setTitle("opsu!dance");
 		try {
 			// temp displaymode to not flash the screen with a 1ms black window
