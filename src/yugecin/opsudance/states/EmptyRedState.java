@@ -26,6 +26,7 @@ import yugecin.opsudance.core.state.OpsuState;
 public class EmptyRedState implements OpsuState {
 
 	private int counter;
+	private long start;
 
 	private final DisplayContainer displayContainer;
 
@@ -38,6 +39,8 @@ public class EmptyRedState implements OpsuState {
 	public void update(int delta) {
 		counter -= delta;
 		if (counter < 0) {
+			counter = 10000; // to prevent more calls to switch, as this will keep rendingering untill state transitioned
+			System.out.println(System.currentTimeMillis() - start);
 			displayContainer.switchState(EmptyState.class);
 		}
 	}
@@ -55,6 +58,7 @@ public class EmptyRedState implements OpsuState {
 	@Override
 	public void enter() {
 		counter = 5000;
+		start = System.currentTimeMillis();
 	}
 
 	@Override
@@ -63,6 +67,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
+		System.out.println("pressed");
 		return false;
 	}
 
@@ -73,7 +78,6 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
-		System.out.println("moved");
 		return false;
 	}
 

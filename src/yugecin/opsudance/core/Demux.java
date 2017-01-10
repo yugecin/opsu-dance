@@ -86,7 +86,7 @@ public class Demux implements KeyListener, MouseListener {
 	}
 
 	public void preRenderUpdate(int delta) {
-		state.update(delta);
+		state.preRenderUpdate(delta);
 	}
 
 	public void render(Graphics g) {

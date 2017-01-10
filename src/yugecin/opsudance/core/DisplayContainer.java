@@ -96,6 +96,7 @@ public class DisplayContainer {
 			timeSinceLastRender += delta;
 
 			input.poll(width, height);
+			demux.update(delta);
 
 			int maxRenderInterval;
 			if (Display.isVisible() && Display.isActive()) {
@@ -114,7 +115,7 @@ public class DisplayContainer {
 				graphics.resetTransform();
 				*/
 
-				demux.update(timeSinceLastRender);
+				demux.preRenderUpdate(timeSinceLastRender);
 				demux.render(graphics);
 
 				realRenderInterval = timeSinceLastRender;
