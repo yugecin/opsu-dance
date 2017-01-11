@@ -38,7 +38,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
-import static yugecin.opsudance.kernel.Entrypoint.log;
+import static yugecin.opsudance.kernel.Entrypoint.sout;
 
 /**
  * based on org.newdawn.slick.AppGameContainer
@@ -146,7 +146,7 @@ public class DisplayContainer implements ErrorDumpable {
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
 		setDisplayMode(640, 480, false);
-		log("GL ready");
+		sout("GL ready");
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 	}

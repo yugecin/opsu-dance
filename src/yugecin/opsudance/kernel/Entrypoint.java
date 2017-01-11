@@ -24,7 +24,7 @@ public class Entrypoint {
 	public static final long startTime = System.currentTimeMillis();
 
 	public static void main(String[] args) {
-		log("launched");
+		sout("launched");
 		InstanceContainerImpl.initialize().provide(OpsuDance.class).start();
 	}
 
@@ -32,7 +32,7 @@ public class Entrypoint {
 		return System.currentTimeMillis() - startTime;
 	}
 
-	public static void log(String message) {
+	public static void sout(String message) {
 		System.out.println(String.format("[%7d] %s", runtime(), message));
 	}
 

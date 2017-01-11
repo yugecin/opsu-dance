@@ -22,7 +22,7 @@ import org.lwjgl.LWJGLException;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.errorhandling.ErrorHandler;
 
-import static yugecin.opsudance.kernel.Entrypoint.log;
+import static yugecin.opsudance.kernel.Entrypoint.sout;
 
 public class OpsuDance {
 
@@ -34,7 +34,7 @@ public class OpsuDance {
 	}
 
 	public void start() {
-		log("initialized");
+		sout("initialized");
 		container.init();
 		while (rungame());
 	}
