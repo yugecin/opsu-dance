@@ -69,9 +69,8 @@ public class ErrorHandler {
 
 		dump = new StringWriter();
 		dump.append(customMessage).append("\n");
-		dump.append("unhandled ").append(cause.getClass().getSimpleName()).append("\n\n");
 		cause.printStackTrace(new PrintWriter(dump));
-		dump.append("\n\n").append(errorDump);
+		dump.append("\n").append(errorDump);
 		messageBody = dump.toString();
 
 		Log.error("====== start unhandled exception dump");
@@ -188,21 +187,24 @@ public class ErrorHandler {
 	private URI createGithubIssueUrl() {
 		StringWriter dump = new StringWriter();
 
-		dump.append("**opsu!dance version:** ").append(MiscUtils.buildProperties.get().getProperty("version")).append('\n');
+		dump.append(customMessage).append("\n");
+
+		dump.append("**ver** ").append(MiscUtils.buildProperties.get().getProperty("version")).append('\n');
 		String gitHash = Utils.getGitHash();
 		if (gitHash != null) {
-			dump.append("**git hash:** ").append(gitHash.substring(0, 12)).append('\n');
+			dump.append("**git hash** ").append(gitHash.substring(0, 12)).append('\n');
 		}
 
-		dump.append("**os:** ").append(System.getProperty("os.name"))
+		dump.append("**os** ").append(System.getProperty("os.name"))
 			.append(" (").append(System.getProperty("os.arch")).append(")\n");
-		dump.append("**jre:** ").append(System.getProperty("java.version")).append('\n');
-		dump.append("**info dump:**").append('\n');
-		dump.append("```\n").append(errorDump).append("```").append("\n\n");
+		dump.append("**jre** ").append(System.getProperty("java.version")).append('\n');
 
-		dump.append("**trace:**").append("\n```\n");
+		dump.append("**trace**").append("\n```\n");
 		cause.printStackTrace(new PrintWriter(dump));
-		dump.append("```");
+		dump.append("\n```\n");
+
+		dump.append("**info dump**").append('\n');
+		dump.append("```\n").append(errorDump).append("\n```\n\n");
 
 		String issueTitle = "";
 		String issueBody = "";
@@ -216,11 +218,11 @@ public class ErrorHandler {
 	}
 
 	private String truncateGithubIssueBody(String body) {
-		if (body.length() < 1750) {
+		if (body.replaceAll("[^a-zA-Z+-]", "").length() < 1750) {
 			return body;
 		}
 		Log.warn("error dump too long to fit into github issue url, truncating");
-		return body.substring(0, 1740) + "** TRUNCATED **";
+		return body.substring(0, 1640) + "** TRUNCATED **\n```";
 	}
 
 	public boolean shouldIgnoreAndContinue() {
