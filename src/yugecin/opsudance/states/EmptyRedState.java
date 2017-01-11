@@ -66,6 +66,11 @@ public class EmptyRedState implements OpsuState {
 	}
 
 	@Override
+	public boolean onCloseRequest() {
+		return true;
+	}
+
+	@Override
 	public boolean keyPressed(int key, char c) {
 		System.out.println("pressed");
 		return false;

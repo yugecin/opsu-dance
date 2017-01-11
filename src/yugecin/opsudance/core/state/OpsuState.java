@@ -28,6 +28,11 @@ public interface OpsuState {
 	void leave();
 
 	/**
+	 * @return true if closing is allowed
+	 */
+	boolean onCloseRequest();
+
+	/**
 	 * @return false to stop event bubbling
 	 */
 	boolean keyPressed(int key, char c);

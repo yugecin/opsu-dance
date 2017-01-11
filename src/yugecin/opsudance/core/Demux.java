@@ -120,7 +120,7 @@ public class Demux implements KeyListener, MouseListener {
 	}
 
 	public boolean onCloseRequest() {
-		return !isTransitioning();
+		return state.onCloseRequest();
 	}
 
 	/*

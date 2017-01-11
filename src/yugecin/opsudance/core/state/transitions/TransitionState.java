@@ -71,4 +71,9 @@ public abstract class TransitionState extends BaseOpsuState {
 		listener.onFinish();
 	}
 
+	@Override
+	public boolean onCloseRequest() {
+		return false;
+	}
+
 }

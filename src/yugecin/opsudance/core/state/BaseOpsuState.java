@@ -20,6 +20,11 @@ package yugecin.opsudance.core.state;
 public abstract class BaseOpsuState implements OpsuState {
 
 	@Override
+	public boolean onCloseRequest() {
+		return true;
+	}
+
+	@Override
 	public boolean keyPressed(int key, char c) {
 		return false;
 	}

@@ -63,6 +63,11 @@ public class EmptyState implements OpsuState {
 	}
 
 	@Override
+	public boolean onCloseRequest() {
+		return true;
+	}
+
+	@Override
 	public boolean keyPressed(int key, char c) {
 		return false;
 	}
