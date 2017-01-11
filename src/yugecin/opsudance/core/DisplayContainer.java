@@ -31,6 +31,8 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
+import yugecin.opsudance.core.state.transitions.TransitionState;
 import yugecin.opsudance.errorhandling.ErrorDumpable;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -84,16 +86,16 @@ public class DisplayContainer implements ErrorDumpable {
 		resolutionChangeListeners.add(listener);
 	}
 
-	public void switchState(OpsuState newState) {
-		demux.switchState(newState);
-	}
-
 	public void switchState(Class<? extends OpsuState> newState) {
 		demux.switchState(newState);
 	}
 
-	public void init() {
-		demux.init();
+	public void switchStateNow(Class<? extends OpsuState> newState) {
+		demux.switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
+	}
+
+	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
+		demux.switchState(newState, outTransition, outTime, inTransition, inTime);
 	}
 
 	public void run() throws LWJGLException {

@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import org.lwjgl.LWJGLException;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.errorhandling.ErrorHandler;
+import yugecin.opsudance.states.EmptyState;
 
 import static yugecin.opsudance.kernel.Entrypoint.sout;
 
@@ -35,7 +36,7 @@ public class OpsuDance {
 
 	public void start() {
 		sout("initialized");
-		container.init();
+		container.switchStateNow(EmptyState.class);
 		while (rungame());
 	}
 

@@ -22,12 +22,10 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
+import yugecin.opsudance.core.state.BaseOpsuState;
+import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.kernel.InstanceContainer;
-import yugecin.opsudance.states.EmptyState;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
-import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
-import yugecin.opsudance.core.state.transitions.TransitionState;
 
 /**
  * state demultiplexer, sends events to current state
@@ -36,45 +34,73 @@ public class Demux implements KeyListener, MouseListener {
 
 	private final InstanceContainer instanceContainer;
 
-	private TransitionState fadeOutTransitionState;
-	private TransitionState fadeInTransitionState;
+	private TransitionState outTransitionState;
+	private TransitionState inTransitionState;
+
+	private final TransitionFinishedListener outTransitionListener;
+	private final TransitionFinishedListener inTransitionListener;
 
 	private OpsuState state;
 
 	@Inject
-	public Demux(InstanceContainer instanceContainer) {
+	public Demux(final InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
+
+		state = new BaseOpsuState() {
+
+			@Override
+			public void update(int delta) { }
+
+			@Override
+			public void preRenderUpdate(int delta) { }
+
+			@Override
+			public void render(Graphics g) { }
+
+			@Override
+			public void enter() { }
+
+			@Override
+			public void leave() { }
+
+		};
+
+		outTransitionListener = new TransitionFinishedListener() {
+			@Override
+			public void onFinish() {
+				state.leave();
+				outTransitionState.getApplicableState().leave();
+				state = inTransitionState;
+				state.enter();
+				inTransitionState.getApplicableState().enter();
+			}
+		};
+
+		inTransitionListener = new TransitionFinishedListener() {
+			@Override
+			public void onFinish() {
+				state.leave();
+				state = inTransitionState.getApplicableState();
+			}
+		};
 	}
 
-	// cannot do this in constructor, would cause circular dependency
-	public void init() {
-		state = instanceContainer.provide(EmptyState.class);
-		fadeOutTransitionState = instanceContainer.provide(FadeOutTransitionState.class);
-		fadeInTransitionState = instanceContainer.provide(FadeInTransitionState.class);
-	}
 	public boolean isTransitioning() {
-		return state == fadeInTransitionState || state == fadeOutTransitionState;
+		return state instanceof TransitionState;
 	}
 
 	public void switchState(Class<? extends OpsuState> newState) {
-		switchState(instanceContainer.provide(newState));
+		switchState(newState, FadeOutTransitionState.class, 200, FadeInTransitionState.class, 300);
 	}
 
-	public void switchState(OpsuState newState) {
+	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
 		if (isTransitioning()) {
 			return;
 		}
-		fadeOutTransitionState.setApplicableState(state);
-		fadeInTransitionState.setApplicableState(newState);
-		state = fadeOutTransitionState;
+		outTransitionState = instanceContainer.provide(outTransition).set(state, outTime, outTransitionListener);
+		inTransitionState = instanceContainer.provide(inTransition).set(instanceContainer.provide(newState), inTime, inTransitionListener);
+		state = outTransitionState;
 		state.enter();
-	}
-
-	public void switchStateNow(OpsuState newState) {
-		if (!isTransitioning()) {
-			return;
-		}
-		state = newState;
 	}
 
 	/*

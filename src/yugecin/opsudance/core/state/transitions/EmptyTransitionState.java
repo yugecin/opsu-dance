@@ -17,29 +17,11 @@
  */
 package yugecin.opsudance.core.state.transitions;
 
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
-
-public abstract class FadeTransitionState extends TransitionState {
-
-	private final DisplayContainer container;
-
-	private final Color black;
-
-	public FadeTransitionState(DisplayContainer container) {
-		this.container = container;
-		black = new Color(Color.black);
-	}
+public class EmptyTransitionState extends TransitionState {
 
 	@Override
-	public void render(Graphics g) {
-		applicableState.render(g);
-		black.a = getMaskAlphaLevel((float) transitionTime / transitionTargetTime);
-		g.setColor(black);
-		g.fillRect(0, 0, container.width, container.height);
+	public void enter() {
+		finish();
 	}
-
-	protected abstract float getMaskAlphaLevel(float fadeProgress);
 
 }

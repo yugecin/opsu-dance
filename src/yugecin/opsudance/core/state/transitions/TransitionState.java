@@ -25,15 +25,20 @@ public abstract class TransitionState extends BaseOpsuState {
 
 	protected OpsuState applicableState;
 
-	protected final int transitionTargetTime;
+	protected int transitionTargetTime;
 	protected int transitionTime;
 
-	public TransitionState(int transitionTargetTime) {
-		this.transitionTargetTime = transitionTargetTime;
+	private TransitionFinishedListener listener;
+
+	public final TransitionState set(OpsuState applicableState, int targetTime, TransitionFinishedListener listener) {
+		this.applicableState = applicableState;
+		this.transitionTargetTime = targetTime;
+		this.listener = listener;
+		return this;
 	}
 
-	public void setApplicableState(OpsuState applicableState) {
-		this.applicableState = applicableState;
+	public final OpsuState getApplicableState() {
+		return applicableState;
 	}
 
 	@Override
@@ -41,7 +46,7 @@ public abstract class TransitionState extends BaseOpsuState {
 		applicableState.update(delta);
 		transitionTime += delta;
 		if (transitionTime >= transitionTargetTime) {
-			onTransitionFinished();
+			finish();
 		}
 	}
 
@@ -62,6 +67,8 @@ public abstract class TransitionState extends BaseOpsuState {
 	@Override
 	public void leave() { }
 
-	protected abstract void onTransitionFinished();
+	protected final void finish() {
+		listener.onFinish();
+	}
 
 }
