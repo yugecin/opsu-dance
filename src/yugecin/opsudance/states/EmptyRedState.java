@@ -39,7 +39,7 @@ public class EmptyRedState implements OpsuState {
 	public void update(int delta) {
 		counter -= delta;
 		if (counter < 0) {
-			counter = 10000; // to prevent more calls to switch, as this will keep rendingering untill state transitioned
+			counter = 10000; // to prevent more calls to switch, as this will keep rendering until state transitioned
 			System.out.println(System.currentTimeMillis() - start);
 			displayContainer.switchState(EmptyState.class);
 		}
