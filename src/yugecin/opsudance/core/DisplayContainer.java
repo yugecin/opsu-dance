@@ -23,6 +23,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.opengl.InternalTextureLoader;
@@ -30,8 +31,10 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.errorhandling.ErrorDumpable;
 import yugecin.opsudance.utils.GLHelper;
 
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +43,7 @@ import static yugecin.opsudance.kernel.Entrypoint.log;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer {
+public class DisplayContainer implements ErrorDumpable {
 
 	private static SGL GL = Renderer.get();
 
@@ -64,6 +67,9 @@ public class DisplayContainer {
 
 	private long lastFrame;
 
+	private String glVersion;
+	private String glVendor;
+
 	@Inject
 	public DisplayContainer(Demux demux) {
 		this.demux = demux;
@@ -86,10 +92,11 @@ public class DisplayContainer {
 		demux.switchState(newState);
 	}
 
-	public void run() throws LWJGLException {
+	public void init() {
 		demux.init();
-		setup();
-		log("GL ready");
+	}
+
+	public void run() throws LWJGLException {
 		while(!(Display.isCloseRequested() && demux.onCloseRequest())) {
 			delta = getDelta();
 
@@ -130,23 +137,21 @@ public class DisplayContainer {
 		teardown();
 	}
 
-	private void setup() {
+	public void setup() throws LWJGLException {
+		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
-		try {
-			// temp displaymode to not flash the screen with a 1ms black window
-			Display.setDisplayMode(new DisplayMode(100, 100));
-			Display.create();
-			GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-			setDisplayMode(640, 480, false);
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			// TODO errorhandler dialog here
-			Log.error("could not initialize GL", e);
-		}
+		// temp displaymode to not flash the screen with a 1ms black window
+		Display.setDisplayMode(new DisplayMode(100, 100));
+		Display.create();
+		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
+		setDisplayMode(640, 480, false);
+		log("GL ready");
+		glVersion = GL11.glGetString(GL11.GL_VERSION);
+		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 	}
 
-	private void teardown() {
+	public void teardown() {
 		Display.destroy();
 		AL.destroy();
 	}
@@ -208,6 +213,12 @@ public class DisplayContainer {
 
 	public long getTime() {
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump) {
+		dump.append("> DisplayContainer dump").append('\n');
+		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")").append('\n');
 	}
 
 }

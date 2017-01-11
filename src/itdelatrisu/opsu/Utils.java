@@ -591,6 +591,8 @@ public class Utils {
 			return null;
 		File f = new File(".git/refs/remotes/origin/master");
 		if (!f.isFile())
+			f = new File("../.git/refs/remotes/origin/master");
+		if (!f.isFile())
 			return null;
 		try (BufferedReader in = new BufferedReader(new FileReader(f))) {
 			char[] sha = new char[40];

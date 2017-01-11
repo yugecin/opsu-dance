@@ -20,6 +20,7 @@ package yugecin.opsudance;
 import com.google.inject.Inject;
 import org.lwjgl.LWJGLException;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.errorhandling.ErrorHandler;
 
 import static yugecin.opsudance.kernel.Entrypoint.log;
 
@@ -34,11 +35,24 @@ public class OpsuDance {
 
 	public void start() {
 		log("initialized");
+		container.init();
+		while (rungame());
+	}
+
+	private boolean rungame() {
+		try {
+			container.setup();
+		} catch (LWJGLException e) {
+			ErrorHandler.error("could not initialize GL", e, container).showAndExit();
+		}
+		Exception caughtException = null;
 		try {
 			container.run();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			caughtException = e;
 		}
+		container.teardown();
+		return caughtException != null && ErrorHandler.error("update/render error", caughtException, container).show().shouldIgnoreAndContinue();
 	}
 
 }
