@@ -73,7 +73,10 @@ public class ErrorHandler {
 		cause.printStackTrace(new PrintWriter(dump));
 		dump.append("\n\n").append(errorDump);
 		messageBody = dump.toString();
+
+		Log.error("====== start unhandled exception dump");
 		Log.error(messageBody);
+		Log.error("====== end unhandled exception dump");
 	}
 
 	public static ErrorHandler error(String message, Throwable cause, ErrorDumpable... errorInfoProviders) {
@@ -205,11 +208,19 @@ public class ErrorHandler {
 		String issueBody = "";
 		try {
 			issueTitle = URLEncoder.encode("*** Unhandled " + cause.getClass().getSimpleName() + " " + customMessage, "UTF-8");
-			issueBody = URLEncoder.encode(dump.toString(), "UTF-8");
+			issueBody = URLEncoder.encode(truncateGithubIssueBody(dump.toString()), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
 		}
 		return URI.create(String.format(Options.ISSUES_URL, issueTitle, issueBody));
+	}
+
+	private String truncateGithubIssueBody(String body) {
+		if (body.length() < 1750) {
+			return body;
+		}
+		Log.warn("error dump too long to fit into github issue url, truncating");
+		return body.substring(0, 1740) + "** TRUNCATED **";
 	}
 
 	public boolean shouldIgnoreAndContinue() {
