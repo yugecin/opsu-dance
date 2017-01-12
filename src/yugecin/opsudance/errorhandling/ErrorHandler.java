@@ -229,9 +229,4 @@ public class ErrorHandler {
 		return ignoreAndContinue;
 	}
 
-	public void showAndExit() {
-		show();
-		System.exit(1);
-	}
-
 }

@@ -44,7 +44,8 @@ public class OpsuDance {
 		try {
 			container.setup();
 		} catch (LWJGLException e) {
-			ErrorHandler.error("could not initialize GL", e, container).showAndExit();
+			ErrorHandler.error("could not initialize GL", e, container).preventContinue().show();
+			System.exit(1);
 		}
 		Exception caughtException = null;
 		try {
