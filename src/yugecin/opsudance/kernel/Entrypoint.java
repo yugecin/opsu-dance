@@ -25,7 +25,7 @@ public class Entrypoint {
 
 	public static void main(String[] args) {
 		sout("launched");
-		InstanceContainerImpl.initialize().provide(OpsuDance.class).start();
+		InstanceContainerImpl.initialize().provide(OpsuDance.class).start(args);
 	}
 
 	public static long runtime() {
