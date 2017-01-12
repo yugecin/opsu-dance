@@ -134,7 +134,7 @@ public class DisplayContainer implements ErrorDumpable {
 			}
 
 			Display.processMessages();
-			Display.sync(1000);
+			Display.sync(1000); // TODO add option to change this, to not eat CPUs
 		}
 		teardown();
 	}
