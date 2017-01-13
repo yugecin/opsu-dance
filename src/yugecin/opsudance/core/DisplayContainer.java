@@ -30,9 +30,6 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
-import yugecin.opsudance.core.state.transitions.TransitionState;
 import yugecin.opsudance.errorhandling.ErrorDumpable;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -49,7 +46,7 @@ public class DisplayContainer implements ErrorDumpable {
 
 	private static SGL GL = Renderer.get();
 
-	private final Demux demux;
+	public final Demux demux;
 	private final DisplayMode nativeDisplayMode;
 	private final List<ResolutionChangeListener> resolutionChangeListeners;
 
@@ -84,18 +81,6 @@ public class DisplayContainer implements ErrorDumpable {
 
 	public void addResolutionChangeListener(ResolutionChangeListener listener) {
 		resolutionChangeListeners.add(listener);
-	}
-
-	public void switchState(Class<? extends OpsuState> newState) {
-		demux.switchState(newState);
-	}
-
-	public void switchStateNow(Class<? extends OpsuState> newState) {
-		demux.switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
-	}
-
-	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
-		demux.switchState(newState, outTransition, outTime, inTransition, inTime);
 	}
 
 	public void run() throws LWJGLException {

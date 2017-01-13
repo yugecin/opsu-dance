@@ -63,7 +63,7 @@ public class OpsuDance {
 		initUpdater(args);
 		sout("database & updater initialized");
 
-		container.switchStateNow(EmptyState.class);
+		container.demux.switchStateNow(EmptyState.class);
 
 		while (rungame());
 

@@ -93,6 +93,10 @@ public class Demux implements KeyListener, MouseListener {
 		switchState(newState, FadeOutTransitionState.class, 200, FadeInTransitionState.class, 300);
 	}
 
+	public void switchStateNow(Class<? extends OpsuState> newState) {
+		switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
+	}
+
 	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
 		if (isTransitioning()) {
 			return;
