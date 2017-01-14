@@ -23,9 +23,11 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
 import yugecin.opsudance.core.state.transitions.*;
+import yugecin.opsudance.errorhandling.ErrorDumpable;
 import yugecin.opsudance.kernel.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 
+import java.io.StringWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -33,7 +35,7 @@ import java.lang.reflect.Proxy;
 /**
  * state demultiplexer, sends events to current state
  */
-public class Demux implements KeyListener, MouseListener {
+public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 
 	private final InstanceContainer instanceContainer;
 
@@ -96,6 +98,22 @@ public class Demux implements KeyListener, MouseListener {
 		inTransitionState = instanceContainer.provide(inTransition).set(instanceContainer.provide(newState), inTime, inTransitionListener);
 		state = outTransitionState;
 		state.enter();
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump) {
+		dump.append("> Demux dump\n");
+		if (isTransitioning()) {
+			dump.append("doing a transition\n");
+			dump.append("using out transition ").append(outTransitionState.getClass().getSimpleName()).append('\n');
+			dump.append("using in  transition ").append(inTransitionState.getClass().getSimpleName()).append('\n');
+			if (state == inTransitionState) {
+				dump.append("currently doing the in transition\n");
+			} else {
+				dump.append("currently doing the out transition\n");
+			}
+		}
+		state.writeErrorDump(dump);
 	}
 
 	/*

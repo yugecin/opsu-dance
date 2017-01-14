@@ -22,6 +22,8 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
+import java.io.StringWriter;
+
 public abstract class TransitionState extends BaseOpsuState {
 
 	protected OpsuState applicableState;
@@ -77,6 +79,19 @@ public abstract class TransitionState extends BaseOpsuState {
 	@Override
 	public boolean onCloseRequest() {
 		return false;
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump) {
+		dump.append("> TransitionState dump\n");
+		dump.append("progress: ").append(String.valueOf(transitionTime)).append("/").append(String.valueOf(transitionTargetTime)).append('\n');
+		dump.append("applicable state: ");
+		if (applicableState == null) {
+			dump.append("IS NULL");
+			return;
+		}
+		dump.append(applicableState.getClass().getSimpleName()).append('\n');
+		applicableState.writeErrorDump(dump);
 	}
 
 }

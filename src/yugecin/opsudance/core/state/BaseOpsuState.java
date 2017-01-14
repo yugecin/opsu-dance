@@ -20,6 +20,8 @@ package yugecin.opsudance.core.state;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.ResolutionChangeListener;
 
+import java.io.StringWriter;
+
 public abstract class BaseOpsuState implements OpsuState, ResolutionChangeListener {
 
 	protected final DisplayContainer displayContainer;
@@ -89,6 +91,12 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangeListen
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
 		return false;
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump) {
+		dump.append("> BaseOpsuState dump\n");
+		dump.append("isDirty: ").append(String.valueOf(isDirty)).append('\n');
 	}
 
 }

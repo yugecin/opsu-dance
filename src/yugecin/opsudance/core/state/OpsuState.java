@@ -18,8 +18,9 @@
 package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.errorhandling.ErrorDumpable;
 
-public interface OpsuState {
+public interface OpsuState extends ErrorDumpable {
 
 	void update(int delta);
 	void preRenderUpdate(int delta);

@@ -204,8 +204,9 @@ public class DisplayContainer implements ErrorDumpable {
 
 	@Override
 	public void writeErrorDump(StringWriter dump) {
-		dump.append("> DisplayContainer dump").append('\n');
-		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")").append('\n');
+		dump.append("> DisplayContainer dump\n");
+		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
+		demux.writeErrorDump(dump);
 	}
 
 }

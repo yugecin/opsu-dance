@@ -23,6 +23,8 @@ import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OpsuState;
 
+import java.io.StringWriter;
+
 public class EmptyState implements OpsuState {
 
 	private int counter;
@@ -90,6 +92,12 @@ public class EmptyState implements OpsuState {
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
 		return false;
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump) {
+		dump.append("> EmptyState dump\n");
+		dump.append("its green\n");
 	}
 
 }
