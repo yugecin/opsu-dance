@@ -23,7 +23,6 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
-import org.lwjgl.LWJGLException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.errorhandling.ErrorHandler;
@@ -52,18 +51,22 @@ public class OpsuDance {
 	}
 
 	public void start(String[] args) {
-		sout("initialized");
+		try {
+			sout("initialized");
 
-		checkRunningDirectory();
-		Options.parseOptions();
-		ensureSingleInstance();
-		sout("prechecks done and options parsed");
+			checkRunningDirectory();
+			Options.parseOptions();
+			ensureSingleInstance();
+			sout("prechecks done and options parsed");
 
-		initDatabase();
-		initUpdater(args);
-		sout("database & updater initialized");
+			initDatabase();
+			initUpdater(args);
+			sout("database & updater initialized");
 
-		container.demux.switchStateNow(EmptyState.class);
+			container.demux.switchStateNow(EmptyState.class);
+		} catch (Exception e) {
+			errorAndExit("startup failure", e);
+		}
 
 		while (rungame());
 
@@ -75,9 +78,8 @@ public class OpsuDance {
 	private boolean rungame() {
 		try {
 			container.setup();
-		} catch (LWJGLException e) {
-			ErrorHandler.error("could not initialize GL", e).preventContinue().show();
-			System.exit(1);
+		} catch (Exception e) {
+			errorAndExit("could not initialize GL", e);
 		}
 		Exception caughtException = null;
 		try {
