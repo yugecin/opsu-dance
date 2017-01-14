@@ -76,7 +76,7 @@ public class OpsuDance {
 		try {
 			container.setup();
 		} catch (LWJGLException e) {
-			ErrorHandler.error("could not initialize GL", e, container).preventContinue().show();
+			ErrorHandler.error("could not initialize GL", e).preventContinue().show();
 			System.exit(1);
 		}
 		Exception caughtException = null;
@@ -86,7 +86,7 @@ public class OpsuDance {
 			caughtException = e;
 		}
 		container.teardown();
-		return caughtException != null && ErrorHandler.error("update/render error", caughtException, container).show().shouldIgnoreAndContinue();
+		return caughtException != null && ErrorHandler.error("update/render error", caughtException).show().shouldIgnoreAndContinue();
 	}
 
 	private void initDatabase() {

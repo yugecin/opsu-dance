@@ -17,9 +17,11 @@
  */
 package yugecin.opsudance.errorhandling;
 
+import com.google.inject.Inject;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
@@ -39,31 +41,38 @@ import java.net.URLEncoder;
  */
 public class ErrorHandler {
 
-	private final String customMessage;
-	private final Throwable cause;
-	private final String errorDump;
-	private final String messageBody;
+	private static ErrorHandler instance;
+
+	private final DisplayContainer displayContainer;
+
+	private String customMessage;
+	private Throwable cause;
+	private String errorDump;
+	private String messageBody;
 
 	private boolean preventContinue;
 	private boolean preventReport;
 	private boolean ignoreAndContinue;
 
-	private ErrorHandler(String customMessage, Throwable cause, ErrorDumpable[] errorInfoProviders) {
+	@Inject
+	public ErrorHandler(DisplayContainer displayContainer) {
+		this.displayContainer = displayContainer;
+		instance = this;
+	}
+
+	private ErrorHandler init(String customMessage, Throwable cause) {
 		this.customMessage = customMessage;
 		this.cause = cause;
 
 		StringWriter dump = new StringWriter();
-		for (ErrorDumpable infoProvider : errorInfoProviders) {
-			try {
-				infoProvider.writeErrorDump(dump);
-			} catch (Exception e) {
-				dump
-					.append("### ")
-					.append(e.getClass().getSimpleName())
-					.append(" while creating errordump for ")
-					.append(infoProvider.getClass().getSimpleName());
-				e.printStackTrace(new PrintWriter(dump));
-			}
+		try {
+			displayContainer.writeErrorDump(dump);
+		} catch (Exception e) {
+			dump
+				.append("### ")
+				.append(e.getClass().getSimpleName())
+				.append(" while creating errordump");
+			e.printStackTrace(new PrintWriter(dump));
 		}
 		errorDump = dump.toString();
 
@@ -76,10 +85,11 @@ public class ErrorHandler {
 		Log.error("====== start unhandled exception dump");
 		Log.error(messageBody);
 		Log.error("====== end unhandled exception dump");
+		return this;
 	}
 
-	public static ErrorHandler error(String message, Throwable cause, ErrorDumpable... errorInfoProviders) {
-		return new ErrorHandler(message, cause, errorInfoProviders);
+	public static ErrorHandler error(String message, Throwable cause) {
+		return instance.init(message, cause);
 	}
 
 	public ErrorHandler preventReport() {
