@@ -17,7 +17,15 @@
  */
 package yugecin.opsudance.core.state.transitions;
 
+import com.google.inject.Inject;
+import yugecin.opsudance.core.DisplayContainer;
+
 public class EmptyTransitionState extends TransitionState {
+
+	@Inject
+	public EmptyTransitionState(DisplayContainer displayContainer) {
+		super(displayContainer);
+	}
 
 	@Override
 	public void enter() {

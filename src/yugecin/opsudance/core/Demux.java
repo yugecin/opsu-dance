@@ -22,10 +22,13 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
-import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.kernel.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * state demultiplexer, sends events to current state
@@ -46,24 +49,12 @@ public class Demux implements KeyListener, MouseListener {
 	public Demux(final InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
 
-		state = new BaseOpsuState() {
-
+		state = (OpsuState) Proxy.newProxyInstance(OpsuState.class.getClassLoader(), new Class[]{OpsuState.class}, new InvocationHandler() {
 			@Override
-			public void update(int delta) { }
-
-			@Override
-			public void preRenderUpdate(int delta) { }
-
-			@Override
-			public void render(Graphics g) { }
-
-			@Override
-			public void enter() { }
-
-			@Override
-			public void leave() { }
-
-		};
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				return false;
+			}
+		});
 
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override

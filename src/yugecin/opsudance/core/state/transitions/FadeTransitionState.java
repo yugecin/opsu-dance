@@ -23,12 +23,10 @@ import yugecin.opsudance.core.DisplayContainer;
 
 public abstract class FadeTransitionState extends TransitionState {
 
-	private final DisplayContainer container;
-
 	private final Color black;
 
-	public FadeTransitionState(DisplayContainer container) {
-		this.container = container;
+	public FadeTransitionState(DisplayContainer displayContainer) {
+		super(displayContainer);
 		black = new Color(Color.black);
 	}
 
@@ -37,7 +35,7 @@ public abstract class FadeTransitionState extends TransitionState {
 		applicableState.render(g);
 		black.a = getMaskAlphaLevel((float) transitionTime / transitionTargetTime);
 		g.setColor(black);
-		g.fillRect(0, 0, container.width, container.height);
+		g.fillRect(0, 0, displayContainer.width, displayContainer.height);
 	}
 
 	protected abstract float getMaskAlphaLevel(float fadeProgress);

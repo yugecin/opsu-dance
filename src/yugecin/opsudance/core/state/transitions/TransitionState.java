@@ -18,6 +18,7 @@
 package yugecin.opsudance.core.state.transitions;
 
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
@@ -29,6 +30,10 @@ public abstract class TransitionState extends BaseOpsuState {
 	protected int transitionTime;
 
 	private TransitionFinishedListener listener;
+
+	public TransitionState(DisplayContainer displayContainer) {
+		super(displayContainer);
+	}
 
 	public final TransitionState set(OpsuState applicableState, int targetTime, TransitionFinishedListener listener) {
 		this.applicableState = applicableState;
@@ -61,11 +66,9 @@ public abstract class TransitionState extends BaseOpsuState {
 
 	@Override
 	public void enter() {
+		super.enter();
 		transitionTime = 0;
 	}
-
-	@Override
-	public void leave() { }
 
 	protected final void finish() {
 		listener.onFinish();

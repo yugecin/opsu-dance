@@ -17,7 +17,49 @@
  */
 package yugecin.opsudance.core.state;
 
-public abstract class BaseOpsuState implements OpsuState {
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.ResolutionChangeListener;
+
+public abstract class BaseOpsuState implements OpsuState, ResolutionChangeListener {
+
+	protected final DisplayContainer displayContainer;
+
+	/**
+	 * state is dirty when resolution or skin changed but hasn't rendered yet
+	 */
+	private boolean isDirty;
+	private boolean isCurrentState;
+
+	public BaseOpsuState(DisplayContainer displayContainer) {
+		this.displayContainer = displayContainer;
+		displayContainer.addResolutionChangeListener(this);
+	}
+
+	protected void revalidate() {
+	}
+
+	@Override
+	public void onDisplayResolutionChanged(int width, int height) {
+		if (isCurrentState) {
+			revalidate();
+			return;
+		}
+		isDirty = true;
+	}
+
+	@Override
+	public void enter() {
+		isCurrentState = true;
+		if (isDirty) {
+			revalidate();
+			isDirty = false;
+		}
+	}
+
+	@Override
+	public void leave() {
+		isCurrentState = false;
+	}
 
 	@Override
 	public boolean onCloseRequest() {
