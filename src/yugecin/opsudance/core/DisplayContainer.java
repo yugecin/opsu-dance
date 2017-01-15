@@ -18,6 +18,8 @@
 package yugecin.opsudance.core;
 
 import com.google.inject.Inject;
+import itdelatrisu.opsu.GameImage;
+import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
@@ -121,7 +123,7 @@ public class DisplayContainer implements ErrorDumpable {
 		teardown();
 	}
 
-	public void setup() throws LWJGLException {
+	public void setup() throws Exception {
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
@@ -129,7 +131,7 @@ public class DisplayContainer implements ErrorDumpable {
 		Display.setDisplayMode(new DisplayMode(100, 100));
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-		setDisplayMode(640, 480, false);
+		setDisplayMode(800, 600, false);
 		sout("GL ready");
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
@@ -140,7 +142,7 @@ public class DisplayContainer implements ErrorDumpable {
 		AL.destroy();
 	}
 
-	public void setDisplayMode(int width, int height, boolean fullscreen) throws LWJGLException {
+	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {
 		if (this.width == width && this.height == height) {
 			Display.setFullscreen(fullscreen);
 			return;
@@ -174,7 +176,7 @@ public class DisplayContainer implements ErrorDumpable {
 		}
 	}
 
-	private void initGL() {
+	private void initGL() throws Exception {
 		GL.initDisplay(width, height);
 		GL.enterOrtho(width, height);
 
@@ -184,6 +186,9 @@ public class DisplayContainer implements ErrorDumpable {
 		input = new Input(height);
 		input.addKeyListener(demux);
 		input.addMouseListener(demux);
+
+		GameImage.init(width, height);
+		Fonts.init();
 	}
 
 	private int getDelta() {
