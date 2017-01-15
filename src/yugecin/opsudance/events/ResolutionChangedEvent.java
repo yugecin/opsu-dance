@@ -15,10 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.core;
+package yugecin.opsudance.events;
 
-public interface ResolutionChangeListener {
+public class ResolutionChangedEvent {
 
-	void onDisplayResolutionChanged(int width, int height);
+	public final int width;
+	public final int height;
+
+	public ResolutionChangedEvent(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
 
 }

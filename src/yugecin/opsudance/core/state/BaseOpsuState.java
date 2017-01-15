@@ -18,11 +18,12 @@
 package yugecin.opsudance.core.state;
 
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.ResolutionChangeListener;
+import yugecin.opsudance.core.events.EventListener;
+import yugecin.opsudance.events.ResolutionChangedEvent;
 
 import java.io.StringWriter;
 
-public abstract class BaseOpsuState implements OpsuState, ResolutionChangeListener {
+public abstract class BaseOpsuState implements OpsuState, EventListener<ResolutionChangedEvent> {
 
 	protected final DisplayContainer displayContainer;
 
@@ -34,14 +35,14 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangeListen
 
 	public BaseOpsuState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
-		displayContainer.addResolutionChangeListener(this);
+		displayContainer.eventBus.subscribe(ResolutionChangedEvent.class, this);
 	}
 
 	protected void revalidate() {
 	}
 
 	@Override
-	public void onDisplayResolutionChanged(int width, int height) {
+	public void onEvent(ResolutionChangedEvent event) {
 		if (isCurrentState) {
 			revalidate();
 			return;

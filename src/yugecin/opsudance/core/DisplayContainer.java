@@ -30,12 +30,12 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.errorhandling.ErrorDumpable;
+import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
-import java.util.LinkedList;
-import java.util.List;
 
 import static yugecin.opsudance.kernel.Entrypoint.sout;
 
@@ -46,9 +46,10 @@ public class DisplayContainer implements ErrorDumpable {
 
 	private static SGL GL = Renderer.get();
 
+	public final EventBus eventBus;
 	public final Demux demux;
+
 	private final DisplayMode nativeDisplayMode;
-	private final List<ResolutionChangeListener> resolutionChangeListeners;
 
 	private Graphics graphics;
 	private Input input;
@@ -70,17 +71,13 @@ public class DisplayContainer implements ErrorDumpable {
 	private String glVendor;
 
 	@Inject
-	public DisplayContainer(Demux demux) {
+	public DisplayContainer(Demux demux, EventBus eventBus) {
 		this.demux = demux;
+		this.eventBus = eventBus;
 		this.nativeDisplayMode = Display.getDisplayMode();
-		this.resolutionChangeListeners = new LinkedList<>();
 		targetRenderInterval = 16; // ~60 fps
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
-	}
-
-	public void addResolutionChangeListener(ResolutionChangeListener listener) {
-		resolutionChangeListeners.add(listener);
 	}
 
 	public void run() throws LWJGLException {
@@ -170,9 +167,7 @@ public class DisplayContainer implements ErrorDumpable {
 
 		initGL();
 
-		for (ResolutionChangeListener resolutionChangeListener : resolutionChangeListeners) {
-			resolutionChangeListener.onDisplayResolutionChanged(width, height);
-		}
+		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
 
 		if (displayMode.getBitsPerPixel() == 16) {
 			InternalTextureLoader.get().set16BitMode();
