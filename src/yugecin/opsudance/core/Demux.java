@@ -22,6 +22,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
+import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.errorhandling.ErrorDumpable;
 import yugecin.opsudance.kernel.InstanceContainer;
@@ -35,6 +36,8 @@ import java.io.StringWriter;
 public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 
 	private final InstanceContainer instanceContainer;
+
+	private FpsRenderState fpsState;
 
 	private TransitionState outTransitionState;
 	private TransitionState inTransitionState;
@@ -71,6 +74,8 @@ public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 	public void init(Class<? extends OpsuState> startingState) {
 		state = instanceContainer.provide(startingState);
 		state.enter();
+
+		fpsState = instanceContainer.provide(FpsRenderState.class);
 	}
 
 	public boolean isTransitioning() {
@@ -125,6 +130,7 @@ public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 
 	public void render(Graphics g) {
 		state.render(g);
+		fpsState.render(g);
 	}
 
 	public boolean onCloseRequest() {

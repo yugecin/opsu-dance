@@ -80,6 +80,8 @@ public class DisplayContainer implements ErrorDumpable {
 		targetRenderInterval = 16; // ~60 fps
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
+		delta = 1;
+		realRenderInterval = 1;
 	}
 
 	public void run() throws LWJGLException {

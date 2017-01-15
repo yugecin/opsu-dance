@@ -22,6 +22,7 @@ import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.Demux;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
 import yugecin.opsudance.errorhandling.ErrorHandler;
 import yugecin.opsudance.states.EmptyRedState;
@@ -40,6 +41,8 @@ public class OpsuDanceModule extends AbstractModule {
 		bind(DisplayContainer.class).asEagerSingleton();
 
 		bind(ErrorHandler.class).asEagerSingleton();
+
+		bind(FpsRenderState.class).asEagerSingleton();
 
 		bind(EmptyTransitionState.class).asEagerSingleton();
 		bind(FadeInTransitionState.class).asEagerSingleton();
