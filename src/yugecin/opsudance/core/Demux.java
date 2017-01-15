@@ -28,9 +28,6 @@ import yugecin.opsudance.kernel.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 
 import java.io.StringWriter;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 
 /**
  * state demultiplexer, sends events to current state
@@ -51,13 +48,6 @@ public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 	public Demux(final InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
 
-		state = (OpsuState) Proxy.newProxyInstance(OpsuState.class.getClassLoader(), new Class[]{OpsuState.class}, new InvocationHandler() {
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				return false;
-			}
-		});
-
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override
 			public void onFinish() {
@@ -76,6 +66,11 @@ public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 				state = inTransitionState.getApplicableState();
 			}
 		};
+	}
+
+	public void init(Class<? extends OpsuState> startingState) {
+		state = instanceContainer.provide(startingState);
+		state.enter();
 	}
 
 	public boolean isTransitioning() {
