@@ -15,26 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.kernel;
+package yugecin.opsudance.inject;
 
-import yugecin.opsudance.OpsuDance;
-import yugecin.opsudance.inject.OpsuDanceInjector;
+public interface Binder<T> {
 
-public class Entrypoint {
-
-	public static final long startTime = System.currentTimeMillis();
-
-	public static void main(String[] args) {
-		sout("launched");
-		(new OpsuDanceInjector()).provide(OpsuDance.class).start(args);
-	}
-
-	public static long runtime() {
-		return System.currentTimeMillis() - startTime;
-	}
-
-	public static void sout(String message) {
-		System.out.println(String.format("[%7d] %s", runtime(), message));
-	}
-
+	void asEagerSingleton();
+	void asLazySingleton();
+	void to(Class<? extends T> type);
 }
