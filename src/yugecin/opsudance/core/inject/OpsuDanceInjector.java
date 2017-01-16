@@ -18,7 +18,6 @@
 package yugecin.opsudance.core.inject;
 
 import yugecin.opsudance.PreStartupInitializer;
-import yugecin.opsudance.core.Demux;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
@@ -35,7 +34,6 @@ public class OpsuDanceInjector extends Injector {
 		bind(EventBus.class).asEagerSingleton();
 
 		bind(PreStartupInitializer.class).asEagerSingleton();
-		bind(Demux.class).asEagerSingleton();
 		bind(DisplayContainer.class).asEagerSingleton();
 
 		bind(ErrorHandler.class).asEagerSingleton();

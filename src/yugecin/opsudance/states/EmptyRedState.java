@@ -41,7 +41,7 @@ public class EmptyRedState implements OpsuState {
 		if (counter < 0) {
 			counter = 10000; // to prevent more calls to switch, as this will keep rendering until state transitioned
 			System.out.println(System.currentTimeMillis() - start);
-			displayContainer.demux.switchState(EmptyState.class);
+			displayContainer.switchState(EmptyState.class);
 		}
 	}
 

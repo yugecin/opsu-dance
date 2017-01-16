@@ -39,7 +39,7 @@ public class EmptyState implements OpsuState {
 		counter -= delta;
 		if (counter < 0) {
 			counter = 10000; // to prevent more calls to switch, as this will keep rending until state transitioned
-			displayContainer.demux.switchState(EmptyRedState.class);
+			displayContainer.switchState(EmptyRedState.class);
 		}
 	}
 

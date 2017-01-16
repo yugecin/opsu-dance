@@ -27,12 +27,18 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.KeyListener;
+import org.newdawn.slick.MouseListener;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.specialstates.FpsRenderState;
+import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -43,12 +49,22 @@ import static yugecin.opsudance.core.Entrypoint.sout;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable {
+public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
 
 	private static SGL GL = Renderer.get();
 
 	public final EventBus eventBus;
-	public final Demux demux;
+	private final InstanceContainer instanceContainer;
+
+	private FpsRenderState fpsState;
+
+	private TransitionState outTransitionState;
+	private TransitionState inTransitionState;
+
+	private final TransitionFinishedListener outTransitionListener;
+	private final TransitionFinishedListener inTransitionListener;
+
+	private OpsuState state;
 
 	private final DisplayMode nativeDisplayMode;
 
@@ -71,9 +87,29 @@ public class DisplayContainer implements ErrorDumpable {
 	private String glVersion;
 	private String glVendor;
 
-	public DisplayContainer(Demux demux, EventBus eventBus) {
-		this.demux = demux;
+	public DisplayContainer(InstanceContainer instanceContainer, EventBus eventBus) {
+		this.instanceContainer = instanceContainer;
 		this.eventBus = eventBus;
+
+		outTransitionListener = new TransitionFinishedListener() {
+			@Override
+			public void onFinish() {
+				state.leave();
+				outTransitionState.getApplicableState().leave();
+				state = inTransitionState;
+				state.enter();
+				inTransitionState.getApplicableState().enter();
+			}
+		};
+
+		inTransitionListener = new TransitionFinishedListener() {
+			@Override
+			public void onFinish() {
+				state.leave();
+				state = inTransitionState.getApplicableState();
+			}
+		};
+
 		this.nativeDisplayMode = Display.getDisplayMode();
 		targetRenderInterval = 16; // ~60 fps
 		targetBackgroundRenderInterval = 41; // ~24 fps
@@ -82,14 +118,22 @@ public class DisplayContainer implements ErrorDumpable {
 		realRenderInterval = 1;
 	}
 
+	public void init(Class<? extends OpsuState> startingState) {
+		state = instanceContainer.provide(startingState);
+		state.enter();
+
+		fpsState = instanceContainer.provide(FpsRenderState.class);
+	}
+
+
 	public void run() throws LWJGLException {
-		while(!(Display.isCloseRequested() && demux.onCloseRequest())) {
+		while(!(Display.isCloseRequested() && state.onCloseRequest())) {
 			delta = getDelta();
 
 			timeSinceLastRender += delta;
 
 			input.poll(width, height);
-			demux.update(delta);
+			state.update(delta);
 
 			int maxRenderInterval;
 			if (Display.isVisible() && Display.isActive()) {
@@ -108,8 +152,9 @@ public class DisplayContainer implements ErrorDumpable {
 				graphics.resetTransform();
 				*/
 
-				demux.preRenderUpdate(timeSinceLastRender);
-				demux.render(graphics);
+				state.preRenderUpdate(timeSinceLastRender);
+				state.render(graphics);
+				fpsState.render(graphics);
 
 				realRenderInterval = timeSinceLastRender;
 				timeSinceLastRender = 0;
@@ -184,8 +229,8 @@ public class DisplayContainer implements ErrorDumpable {
 		graphics.setAntiAlias(false);
 
 		input = new Input(height);
-		input.addKeyListener(demux);
-		input.addMouseListener(demux);
+		input.addKeyListener(this);
+		input.addMouseListener(this);
 
 		GameImage.init(width, height);
 		Fonts.init();
@@ -206,7 +251,91 @@ public class DisplayContainer implements ErrorDumpable {
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
 		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
-		demux.writeErrorDump(dump);
+		if (isTransitioning()) {
+			dump.append("doing a transition\n");
+			dump.append("using out transition ").append(outTransitionState.getClass().getSimpleName()).append('\n');
+			dump.append("using in  transition ").append(inTransitionState.getClass().getSimpleName()).append('\n');
+			if (state == inTransitionState) {
+				dump.append("currently doing the in transition\n");
+			} else {
+				dump.append("currently doing the out transition\n");
+			}
+		}
+		state.writeErrorDump(dump);
 	}
+
+	public boolean isTransitioning() {
+		return state instanceof TransitionState;
+	}
+
+	public void switchState(Class<? extends OpsuState> newState) {
+		switchState(newState, FadeOutTransitionState.class, 200, FadeInTransitionState.class, 300);
+	}
+
+	public void switchStateNow(Class<? extends OpsuState> newState) {
+		switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
+	}
+
+	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
+		if (isTransitioning()) {
+			return;
+		}
+		outTransitionState = instanceContainer.provide(outTransition).set(state, outTime, outTransitionListener);
+		inTransitionState = instanceContainer.provide(inTransition).set(instanceContainer.provide(newState), inTime, inTransitionListener);
+		state = outTransitionState;
+		state.enter();
+	}
+
+	/*
+	 * input events below, see org.newdawn.slick.KeyListener & org.newdawn.slick.MouseListener
+	 */
+
+	@Override
+	public void keyPressed(int key, char c) {
+		state.keyPressed(key, c);
+	}
+
+	@Override
+	public void keyReleased(int key, char c) {
+		state.keyReleased(key, c);
+	}
+
+	@Override
+	public void mouseWheelMoved(int change) {
+		state.mouseWheelMoved(change);
+	}
+
+	@Override
+	public void mouseClicked(int button, int x, int y, int clickCount) { }
+
+	@Override
+	public void mousePressed(int button, int x, int y) {
+		state.mousePressed(button, x, y);
+	}
+
+	@Override
+	public void mouseReleased(int button, int x, int y) {
+		state.mouseReleased(button, x, y);
+	}
+
+	@Override
+	public void mouseMoved(int oldx, int oldy, int newx, int newy) { }
+
+	@Override
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) { }
+
+	@Override
+	public void setInput(Input input) { }
+
+	@Override
+	public boolean isAcceptingInput() {
+		return true;
+	}
+
+	@Override
+	public void inputEnded() { }
+
+	@Override
+	public void inputStarted() { }
 
 }

@@ -61,7 +61,7 @@ public class OpsuDance {
 			initUpdater(args);
 			sout("database & updater initialized");
 
-			container.demux.init(EmptyState.class);
+			container.init(EmptyState.class);
 		} catch (Exception e) {
 			errorAndExit("startup failure", e);
 		}
