@@ -8,7 +8,7 @@
 		<version>${project.version}</version>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-		<mainClassName>yugecin.opsudance.kernel.Entrypoint</mainClassName>
+		<mainClassName>yugecin.opsudance.core.Entrypoint</mainClassName>
 		<XDG>false</XDG>
 	</properties>
 	<build>

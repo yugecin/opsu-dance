@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.inject;
-
-import yugecin.opsudance.kernel.InstanceContainer;
+package yugecin.opsudance.core.inject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

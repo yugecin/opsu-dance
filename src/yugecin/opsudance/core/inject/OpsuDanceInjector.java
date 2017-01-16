@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.inject;
+package yugecin.opsudance.core.inject;
 
 import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.Demux;
@@ -25,7 +25,7 @@ import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
-import yugecin.opsudance.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.states.EmptyRedState;
 import yugecin.opsudance.states.EmptyState;
 

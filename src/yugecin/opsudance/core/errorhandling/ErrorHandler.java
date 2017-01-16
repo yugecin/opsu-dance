@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.errorhandling;
+package yugecin.opsudance.core.errorhandling;
 
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;

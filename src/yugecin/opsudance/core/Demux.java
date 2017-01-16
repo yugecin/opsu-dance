@@ -23,8 +23,8 @@ import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
-import yugecin.opsudance.errorhandling.ErrorDumpable;
-import yugecin.opsudance.kernel.InstanceContainer;
+import yugecin.opsudance.core.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 
 import java.io.StringWriter;

@@ -32,13 +32,13 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
 
-import static yugecin.opsudance.kernel.Entrypoint.sout;
+import static yugecin.opsudance.core.Entrypoint.sout;
 
 /**
  * based on org.newdawn.slick.AppGameContainer

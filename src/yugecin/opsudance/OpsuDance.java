@@ -24,7 +24,7 @@ import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.states.EmptyState;
 
 import java.io.File;
@@ -33,7 +33,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
-import static yugecin.opsudance.kernel.Entrypoint.sout;
+import static yugecin.opsudance.core.Entrypoint.sout;
 
 /*
  * loosely based on itdelatrisu.opsu.Opsu
