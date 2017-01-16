@@ -17,8 +17,6 @@
  */
 package yugecin.opsudance.core.events;
 
-import com.google.inject.Inject;
-
 import java.util.*;
 
 @SuppressWarnings("unchecked")
@@ -26,7 +24,6 @@ public class EventBus {
 
 	private final List<Subscriber> subscribers;
 
-	@Inject
 	public EventBus() {
 		subscribers = new LinkedList<>();
 	}

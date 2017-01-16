@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance;
 
-import com.google.inject.Inject;
 import itdelatrisu.opsu.NativeLoader;
 import itdelatrisu.opsu.Options;
 import org.newdawn.slick.util.FileSystemLocation;
@@ -30,7 +29,6 @@ import java.lang.reflect.Field;
 
 public class PreStartupInitializer {
 
-	@Inject
 	public PreStartupInitializer() {
 		loadNatives();
 		setResourcePath();

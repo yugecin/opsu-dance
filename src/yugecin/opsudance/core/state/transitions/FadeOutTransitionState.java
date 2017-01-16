@@ -17,12 +17,10 @@
  */
 package yugecin.opsudance.core.state.transitions;
 
-import com.google.inject.Inject;
 import yugecin.opsudance.core.DisplayContainer;
 
 public class FadeOutTransitionState extends FadeTransitionState {
 
-	@Inject
 	public FadeOutTransitionState(DisplayContainer container) {
 		super(container);
 	}

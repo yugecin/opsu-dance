@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance;
 
-import com.google.inject.Inject;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.DBController;
@@ -45,7 +44,6 @@ public class OpsuDance {
 
 	private ServerSocket singleInstanceSocket;
 
-	@Inject
 	public OpsuDance(DisplayContainer container) {
 		this.container = container;
 	}

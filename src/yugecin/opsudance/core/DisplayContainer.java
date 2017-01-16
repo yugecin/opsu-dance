@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.core;
 
-import com.google.inject.Inject;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.LWJGLException;
@@ -72,7 +71,6 @@ public class DisplayContainer implements ErrorDumpable {
 	private String glVersion;
 	private String glVendor;
 
-	@Inject
 	public DisplayContainer(Demux demux, EventBus eventBus) {
 		this.demux = demux;
 		this.eventBus = eventBus;

@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.errorhandling;
 
-import com.google.inject.Inject;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
@@ -54,7 +53,6 @@ public class ErrorHandler {
 	private boolean preventReport;
 	private boolean ignoreAndContinue;
 
-	@Inject
 	public ErrorHandler(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
 		instance = this;

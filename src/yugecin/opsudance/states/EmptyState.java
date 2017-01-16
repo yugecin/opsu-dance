@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.states;
 
-import com.google.inject.Inject;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
@@ -31,7 +30,6 @@ public class EmptyState implements OpsuState {
 
 	private final DisplayContainer displayContainer;
 
-	@Inject
 	public EmptyState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
 	}

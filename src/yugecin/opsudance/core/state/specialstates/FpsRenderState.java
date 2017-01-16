@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.core.state.specialstates;
 
-import com.google.inject.Inject;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -33,7 +32,6 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 	private int y;
 	private int singleHeight;
 
-	@Inject
 	public FpsRenderState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
 		displayContainer.eventBus.subscribe(ResolutionChangedEvent.class, this);

@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.core;
 
-import com.google.inject.Inject;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
@@ -47,7 +46,6 @@ public class Demux implements ErrorDumpable, KeyListener, MouseListener {
 
 	private OpsuState state;
 
-	@Inject
 	public Demux(final InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
 
