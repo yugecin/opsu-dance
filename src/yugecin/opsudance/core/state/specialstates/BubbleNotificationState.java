@@ -80,7 +80,7 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 	}
 
 	public boolean mouseReleased(int x, int y) {
-		if (x < displayContainer.width - Notification.width) {
+		if (x < Notification.finalX) {
 			return false;
 		}
 		for (Notification bubble : bubbles) {
