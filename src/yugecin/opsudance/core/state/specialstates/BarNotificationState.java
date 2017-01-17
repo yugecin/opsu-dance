@@ -18,6 +18,7 @@
 package yugecin.opsudance.core.state.specialstates;
 
 import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
@@ -26,30 +27,38 @@ import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.ResolutionChangedEvent;
 
+import java.util.List;
+
 public class BarNotificationState implements EventListener<BarNotificationEvent> {
 
-	private final int NOTIFICATION_TIME = 5000;
+	private final int IN_TIME = 200;
+	private final int DISPLAY_TIME = 5700 + IN_TIME;
+	private final int OUT_TIME = 200;
+	private final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
 	private final DisplayContainer displayContainer;
 	private final Color bgcol;
+	private final Color textCol;
 
 	private int timeShown;
 
 	private String message;
-	private int textX;
+	private List<String> lines;
 	private int textY;
-	private int barY;
-	private int barHeight;
+
+	private int barHalfTargetHeight;
+	private int barHalfHeight;
 
 	public BarNotificationState(DisplayContainer displayContainer, EventBus eventBus) {
 		this.displayContainer = displayContainer;
-		this.bgcol = new Color(0f, 0f, 0f, 0f);
-		this.timeShown = NOTIFICATION_TIME;
+		this.bgcol = new Color(Color.black);
+		this.textCol = new Color(Color.white);
+		this.timeShown = TOTAL_TIME;
 		eventBus.subscribe(BarNotificationEvent.class, this);
 		eventBus.subscribe(ResolutionChangedEvent.class, new EventListener<ResolutionChangedEvent>() {
 			@Override
 			public void onEvent(ResolutionChangedEvent event) {
-				if (timeShown >= NOTIFICATION_TIME) {
+				if (timeShown >= TOTAL_TIME) {
 					return;
 				}
 				calculatePosition();
@@ -58,22 +67,44 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	}
 
 	public void render(Graphics g, int delta) {
-		if (timeShown >= NOTIFICATION_TIME) {
+		if (timeShown >= TOTAL_TIME) {
 			return;
 		}
 		timeShown += delta;
+		processAnimations();
 		g.setColor(bgcol);
-		g.fillRect(0, barY, displayContainer.width, barHeight);
-		Fonts.LARGE.drawString(textX, textY, message);
+		g.fillRect(0, displayContainer.height / 2 - barHalfHeight, displayContainer.width, barHalfHeight * 2);
+		int y = textY;
+		for (String line : lines) {
+			Fonts.LARGE.drawString((displayContainer.width - Fonts.LARGE.getWidth(line)) / 2, y, line, textCol);
+			y += Fonts.LARGE.getLineHeight();
+		}
+	}
+
+	private void processAnimations() {
+		if (timeShown < IN_TIME) {
+			float progress = (float) timeShown / IN_TIME;
+			barHalfHeight = (int) (barHalfTargetHeight * AnimationEquation.OUT_BACK.calc(progress));
+			textCol.a = progress;
+			bgcol.a = 0.4f * progress;
+			return;
+		}
+		if (timeShown > DISPLAY_TIME) {
+			float progress = 1f - (float) (timeShown - DISPLAY_TIME) / OUT_TIME;
+			textCol.a = progress;
+			bgcol.a = 0.4f * progress;
+			return;
+		}
+		barHalfHeight = barHalfTargetHeight;
+		textCol.a = 1f;
+		bgcol.a = 0.4f;
 	}
 
 	private void calculatePosition() {
-		int textHeight = Fonts.LARGE.getHeight(message);
-		int textWidth = Fonts.LARGE.getWidth(message);
-		textX = (displayContainer.width - textWidth) / 2;
-		textY = (displayContainer.height - textHeight) / 2;
-		barY = textY - 5; // TODO uiscale stuff?
-		barHeight = textHeight + 10;
+		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (displayContainer.width * 0.96f), true);
+		int textHeight = (int) (Fonts.LARGE.getLineHeight() * (lines.size() + 0.5f));
+		textY = (displayContainer.height - textHeight) / 2 + Fonts.LARGE.getLineHeight() / 8;
+		barHalfTargetHeight = textHeight / 2 + Fonts.LARGE.getLineHeight() / 8;
 	}
 
 	@Override
