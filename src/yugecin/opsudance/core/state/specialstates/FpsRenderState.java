@@ -28,6 +28,10 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 
 	private final DisplayContainer displayContainer;
 
+	private final static Color GREEN = new Color(171, 218, 25);
+	private final static Color ORANGE = new Color(255, 204, 34);
+	private final static Color DARKORANGE = new Color(255, 149, 24);
+
 	private int x;
 	private int y;
 	private int singleHeight;
@@ -39,15 +43,26 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 
 	public void render(Graphics g) {
 		int x = this.x;
-		x = drawText(g, (1000 / displayContainer.renderDelta) + " fps", x, this.y);
-		drawText(g, (1000 / displayContainer.delta) + " ups", x, this.y);
+		int target = displayContainer.targetRenderInterval - (displayContainer.targetUpdateInterval % displayContainer.targetRenderInterval);
+		x = drawText(g, getColor(target, displayContainer.renderDelta), (1000 / displayContainer.renderDelta) + " fps", x, this.y);
+		drawText(g, getColor(displayContainer.targetUpdateInterval, displayContainer.delta), (1000 / displayContainer.delta) + " ups", x, this.y);
 	}
 
-	private int drawText(Graphics g, String text, int x, int y) {
+	private Color getColor(int targetValue, int realValue) {
+		if (realValue >= targetValue) {
+			return GREEN;
+		}
+		if (realValue >= targetValue * 0.9f) {
+			return ORANGE;
+		}
+		return DARKORANGE;
+	}
+
+	private int drawText(Graphics g, Color color, String text, int x, int y) {
 		int width = Fonts.SMALL.getWidth(text) + 10;
-		g.setColor(new Color(0, 0x80, 0));
+		g.setColor(color);
 		g.fillRoundRect(x - width, y, width, singleHeight + 6, 2);
-		Fonts.SMALL.drawString(x - width + 3, y + 3, text, Color.white);
+		Fonts.SMALL.drawString(x - width + 3, y + 3, text, Color.black);
 		return x - width - 6;
 	}
 

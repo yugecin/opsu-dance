@@ -81,6 +81,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public int mouseX;
 	public int mouseY;
 
+	private int targetUpdatesPerSecond;
+	public int targetUpdateInterval;
+	private int targetRendersPerSecond;
 	public int targetRenderInterval;
 	public int targetBackgroundRenderInterval;
 
@@ -118,11 +121,22 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		};
 
 		this.nativeDisplayMode = Display.getDisplayMode();
-		targetRenderInterval = 16; // ~60 fps
+		setUPS(1000);
+		setFPS(60);
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
 		delta = 1;
 		renderDelta = 1;
+	}
+
+	public void setUPS(int ups) {
+		targetUpdatesPerSecond = ups;
+		targetUpdateInterval = 1000 / targetUpdatesPerSecond;
+	}
+
+	public void setFPS(int fps) {
+		targetRendersPerSecond = fps;
+		targetRenderInterval = 1000 / targetRendersPerSecond;
 	}
 
 	public void init(Class<? extends OpsuState> startingState) {
@@ -177,7 +191,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			}
 
 			Display.processMessages();
-			Display.sync(1000); // TODO add option to change this, to not eat CPUs
+			Display.sync(targetUpdatesPerSecond);
 		}
 		teardown();
 	}
