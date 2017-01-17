@@ -38,6 +38,7 @@ import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.ResolutionChangedEvent;
@@ -59,6 +60,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private FpsRenderState fpsState;
 	private BarNotificationState barNotifState;
+	private BubbleNotificationState bubNotifState;
 
 	private TransitionState outTransitionState;
 	private TransitionState inTransitionState;
@@ -75,6 +77,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public int width;
 	public int height;
+
+	public int mouseX;
+	public int mouseY;
 
 	public int targetRenderInterval;
 	public int targetBackgroundRenderInterval;
@@ -126,6 +131,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 		fpsState = instanceContainer.provide(FpsRenderState.class);
 		barNotifState = instanceContainer.provide(BarNotificationState.class);
+		bubNotifState = instanceContainer.provide(BubbleNotificationState.class);
 	}
 
 
@@ -136,6 +142,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			timeSinceLastRender += delta;
 
 			input.poll(width, height);
+			mouseX = input.getMouseX();
+			mouseY = input.getMouseY();
 			state.update(delta);
 
 			int maxRenderInterval;
@@ -159,6 +167,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				state.render(graphics);
 				fpsState.render(graphics);
 				barNotifState.render(graphics, timeSinceLastRender);
+				bubNotifState.render(graphics, timeSinceLastRender);
 
 				realRenderInterval = timeSinceLastRender;
 				timeSinceLastRender = 0;
@@ -319,6 +328,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {
+		if (bubNotifState.mouseReleased(x, y)) {
+			return;
+		}
 		state.mouseReleased(button, x, y);
 	}
 
