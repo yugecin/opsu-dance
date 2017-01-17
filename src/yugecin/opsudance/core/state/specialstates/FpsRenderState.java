@@ -58,6 +58,9 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 		return DARKORANGE;
 	}
 
+	/**
+	 * @return x position where the next block can be drawn (right aligned)
+	 */
 	private int drawText(Graphics g, Color color, String text, int x, int y) {
 		int width = Fonts.SMALL.getWidth(text) + 10;
 		g.setColor(color);

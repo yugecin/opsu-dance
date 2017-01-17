@@ -227,7 +227,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		}
 
 		if (displayMode == null) {
-			displayMode = new DisplayMode(width,height);
+			displayMode = new DisplayMode(width, height);
 			if (fullscreen) {
 				fullscreen = false;
 				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);

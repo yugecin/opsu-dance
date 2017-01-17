@@ -189,6 +189,9 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 			this.height = (int) (Fonts.SMALLBOLD.getLineHeight() * (lines.size() + 0.5f));
 		}
 
+		/**
+		 * @return true if this notification expired
+		 */
 		private boolean render(Graphics g, int mouseX, int mouseY, int delta) {
 			timeShown += delta;
 			processAnimations(isMouseHovered(mouseX, mouseY), delta);
