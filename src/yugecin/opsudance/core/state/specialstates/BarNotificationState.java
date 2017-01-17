@@ -66,11 +66,11 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 		});
 	}
 
-	public void render(Graphics g, int delta) {
+	public void render(Graphics g) {
 		if (timeShown >= TOTAL_TIME) {
 			return;
 		}
-		timeShown += delta;
+		timeShown += displayContainer.renderDelta;
 		processAnimations();
 		g.setColor(bgcol);
 		g.fillRect(0, displayContainer.height / 2 - barHalfHeight, displayContainer.width, barHalfHeight * 2);

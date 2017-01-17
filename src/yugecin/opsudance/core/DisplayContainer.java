@@ -84,7 +84,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public int targetRenderInterval;
 	public int targetBackgroundRenderInterval;
 
-	public int realRenderInterval;
+	public int renderDelta;
 	public int delta;
 
 	public int timeSinceLastRender;
@@ -122,7 +122,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
 		delta = 1;
-		realRenderInterval = 1;
+		renderDelta = 1;
 	}
 
 	public void init(Class<? extends OpsuState> startingState) {
@@ -144,7 +144,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			input.poll(width, height);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
-			state.update(delta);
+			state.update();
 
 			int maxRenderInterval;
 			if (Display.isVisible() && Display.isActive()) {
@@ -163,13 +163,14 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				graphics.resetTransform();
 				*/
 
-				state.preRenderUpdate(timeSinceLastRender);
+				renderDelta = timeSinceLastRender;
+
+				state.preRenderUpdate();
 				state.render(graphics);
 				fpsState.render(graphics);
-				bubNotifState.render(graphics, timeSinceLastRender);
-				barNotifState.render(graphics, timeSinceLastRender);
+				bubNotifState.render(graphics);
+				barNotifState.render(graphics);
 
-				realRenderInterval = timeSinceLastRender;
 				timeSinceLastRender = 0;
 
 				Display.update(false);

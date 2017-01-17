@@ -57,12 +57,12 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 		});
 	}
 
-	public void render(Graphics g, int delta) {
+	public void render(Graphics g) {
 		ListIterator<Notification> iter = bubbles.listIterator();
 		if (!iter.hasNext()) {
 			return;
 		}
-		addAnimationTime += delta;
+		addAnimationTime += displayContainer.renderDelta;
 		if (addAnimationTime > IN_TIME) {
 			finishAddAnimation();
 		}
@@ -72,7 +72,7 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 			if (animateUp && addAnimationTime < IN_TIME) {
 				next.y = next.baseY - (int) (addAnimationHeight * AnimationEquation.OUT_QUINT.calc((float) addAnimationTime / IN_TIME));
 			}
-			if (next.render(g, displayContainer.mouseX, displayContainer.mouseY, delta)) {
+			if (next.render(g, displayContainer.mouseX, displayContainer.mouseY, displayContainer.renderDelta)) {
 				iter.remove();
 			}
 			animateUp = true;

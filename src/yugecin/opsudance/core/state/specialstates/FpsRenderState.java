@@ -39,7 +39,7 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 
 	public void render(Graphics g) {
 		int x = this.x;
-		x = drawText(g, (1000 / displayContainer.realRenderInterval) + " fps", x, this.y);
+		x = drawText(g, (1000 / displayContainer.renderDelta) + " fps", x, this.y);
 		drawText(g, (1000 / displayContainer.delta) + " ups", x, this.y);
 	}
 

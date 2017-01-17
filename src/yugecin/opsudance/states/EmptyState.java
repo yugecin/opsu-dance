@@ -35,8 +35,8 @@ public class EmptyState implements OpsuState {
 	}
 
 	@Override
-	public void update(int delta) {
-		counter -= delta;
+	public void update() {
+		counter -= displayContainer.delta;
 		if (counter < 0) {
 			counter = 10000; // to prevent more calls to switch, as this will keep rending until state transitioned
 			displayContainer.switchState(EmptyRedState.class);
@@ -44,7 +44,7 @@ public class EmptyState implements OpsuState {
 	}
 
 	@Override
-	public void preRenderUpdate(int delta) {
+	public void preRenderUpdate() {
 	}
 
 	@Override

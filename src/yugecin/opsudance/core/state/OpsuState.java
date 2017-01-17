@@ -22,8 +22,8 @@ import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 
 public interface OpsuState extends ErrorDumpable {
 
-	void update(int delta);
-	void preRenderUpdate(int delta);
+	void update();
+	void preRenderUpdate();
 	void render(Graphics g);
 	void enter();
 	void leave();

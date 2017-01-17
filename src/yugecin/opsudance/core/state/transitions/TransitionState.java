@@ -49,16 +49,17 @@ public abstract class TransitionState extends BaseOpsuState {
 	}
 
 	@Override
-	public void update(int delta) {
-		applicableState.update(delta);
-		transitionTime += delta;
+	public void update() {
+		applicableState.update();
+		transitionTime += displayContainer.delta;
 		if (transitionTime >= transitionTargetTime) {
 			finish();
 		}
 	}
 
 	@Override
-	public void preRenderUpdate(int delta) {
+	public void preRenderUpdate() {
+		applicableState.preRenderUpdate();
 	}
 
 	@Override
