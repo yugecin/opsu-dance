@@ -130,8 +130,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		state.enter();
 
 		fpsState = instanceContainer.provide(FpsRenderState.class);
-		barNotifState = instanceContainer.provide(BarNotificationState.class);
 		bubNotifState = instanceContainer.provide(BubbleNotificationState.class);
+		barNotifState = instanceContainer.provide(BarNotificationState.class);
 	}
 
 
@@ -166,8 +166,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				state.preRenderUpdate(timeSinceLastRender);
 				state.render(graphics);
 				fpsState.render(graphics);
-				barNotifState.render(graphics, timeSinceLastRender);
 				bubNotifState.render(graphics, timeSinceLastRender);
+				barNotifState.render(graphics, timeSinceLastRender);
 
 				realRenderInterval = timeSinceLastRender;
 				timeSinceLastRender = 0;
