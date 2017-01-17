@@ -21,6 +21,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.events.BarNotificationEvent;
 
 import java.io.StringWriter;
 
@@ -93,6 +94,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
+		displayContainer.eventBus.post(new BarNotificationEvent("this is a\nbar notification"));
 		return false;
 	}
 

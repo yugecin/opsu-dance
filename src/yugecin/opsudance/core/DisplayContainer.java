@@ -37,6 +37,7 @@ import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.ResolutionChangedEvent;
@@ -57,6 +58,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	private final InstanceContainer instanceContainer;
 
 	private FpsRenderState fpsState;
+	private BarNotificationState barNotifState;
 
 	private TransitionState outTransitionState;
 	private TransitionState inTransitionState;
@@ -123,6 +125,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		state.enter();
 
 		fpsState = instanceContainer.provide(FpsRenderState.class);
+		barNotifState = instanceContainer.provide(BarNotificationState.class);
 	}
 
 
@@ -155,6 +158,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				state.preRenderUpdate(timeSinceLastRender);
 				state.render(graphics);
 				fpsState.render(graphics);
+				barNotifState.render(graphics, timeSinceLastRender);
 
 				realRenderInterval = timeSinceLastRender;
 				timeSinceLastRender = 0;

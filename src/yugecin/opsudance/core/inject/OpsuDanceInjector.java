@@ -20,6 +20,7 @@ package yugecin.opsudance.core.inject;
 import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
@@ -39,6 +40,7 @@ public class OpsuDanceInjector extends Injector {
 		bind(ErrorHandler.class).asEagerSingleton();
 
 		bind(FpsRenderState.class).asEagerSingleton();
+		bind(BarNotificationState.class).asEagerSingleton();
 
 		bind(EmptyTransitionState.class).asEagerSingleton();
 		bind(FadeInTransitionState.class).asEagerSingleton();
