@@ -1281,11 +1281,11 @@ public class Options {
 	/**
 	 * Sets the target frame rate to the next available option, and sends a
 	 * bar notification about the action.
-	 * @param container the game container
 	 */
-	public static void setNextFPS(GameContainer container) {
+	public static void setNextFPS(DisplayContainer displayContainer) {
 		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
 		UI.sendBarNotification(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString()));
+		displayContainer.setFPS(GameOption.TARGET_FPS.val);
 	}
 
 	/**

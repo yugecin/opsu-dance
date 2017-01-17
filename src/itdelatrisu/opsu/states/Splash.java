@@ -38,6 +38,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 /**
@@ -46,6 +47,8 @@ import yugecin.opsudance.core.state.BaseOpsuState;
  * Loads game resources and enters "Main Menu" state.
  */
 public class Splash extends BaseOpsuState {
+
+	private final InstanceContainer instanceContainer;
 
 	/** Minimum time, in milliseconds, to display the splash screen (and fade in the logo). */
 	private static final int MIN_SPLASH_TIME = 400;
@@ -71,8 +74,9 @@ public class Splash extends BaseOpsuState {
 	// game-related variables
 	private boolean init = false;
 
-	public Splash(DisplayContainer displayContainer) {
+	public Splash(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
+		this.instanceContainer = instanceContainer;
 	}
 
 	@Override
@@ -102,7 +106,7 @@ public class Splash extends BaseOpsuState {
 	}
 
 	@Override
-	public void update() {
+	public void preRenderUpdate() {
 		if (!init) {
 			init = true;
 
@@ -158,7 +162,7 @@ public class Splash extends BaseOpsuState {
 		}
 
 		// fade in logo
-		if (logoAlpha.update(displayContainer.delta))
+		if (logoAlpha.update(displayContainer.renderDelta))
 			GameImage.MENU_LOGO.getImage().setAlpha(logoAlpha.getValue());
 
 		// change states when loading complete
@@ -166,20 +170,16 @@ public class Splash extends BaseOpsuState {
 			// initialize song list
 			if (BeatmapSetList.get().size() > 0) {
 				BeatmapSetList.get().init();
-				if (Options.isThemeSongEnabled())
+				if (Options.isThemeSongEnabled()) {
 					MusicController.playThemeSong();
-				else
-					//((SongMenu) game.getState(Opsu.STATE_SONGMENU)).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+				} else {
+					instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 					System.out.println(("todo"));
-				// TODO
-			}
-
-			// play the theme song
-			else
+				}
+			} else {
 				MusicController.playThemeSong();
-
-			//game.enterState(Opsu.STATE_MAINMENU);
-
+			}
+			displayContainer.switchState(MainMenu.class);
 		}
 	}
 

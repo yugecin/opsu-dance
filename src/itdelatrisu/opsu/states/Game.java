@@ -1198,7 +1198,8 @@ public class Game extends BasicGameState {
 			UI.changeVolume(-1);
 			break;
 		case Input.KEY_F7:
-			Options.setNextFPS(container);
+			// TODO d
+			//Options.setNextFPS(container);
 			break;
 		case Input.KEY_F10:
 			Options.toggleMouseDisabled();

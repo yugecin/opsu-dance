@@ -705,7 +705,8 @@ public class ButtonMenu extends BasicGameState {
 				menuState.leave(container, game);
 			break;
 		case Input.KEY_F7:
-			Options.setNextFPS(container);
+			// TODO
+			//Options.setNextFPS(displayContainer);
 			break;
 		case Input.KEY_F10:
 			Options.toggleMouseDisabled();

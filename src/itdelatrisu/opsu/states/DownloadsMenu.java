@@ -911,7 +911,8 @@ public class DownloadsMenu extends BasicGameState {
 			resetSearchTimer();
 			break;
 		case Input.KEY_F7:
-			Options.setNextFPS(container);
+			// TODO d
+			//Options.setNextFPS(container);
 			break;
 		case Input.KEY_F10:
 			Options.toggleMouseDisabled();
