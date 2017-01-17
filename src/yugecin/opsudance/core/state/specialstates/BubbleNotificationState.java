@@ -103,6 +103,13 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 			return;
 		}
 		finishAddAnimation();
+		int y = Notification.baseLine;
+		for (Notification bubble : bubbles) {
+			bubble.recalculateDimensions();
+			y -= bubble.height;
+			bubble.baseY = bubble.y = y;
+			y -= Notification.paddingY;
+		}
 	}
 
 	private void finishAddAnimation() {
@@ -159,20 +166,27 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 		private int y;
 		private int baseY;
 		private int height;
-		private List<String> lines;
-		private boolean isFading;
 
+		private final String message;
+		private List<String> lines;
+
+		private boolean isFading;
 		private int hoverTime;
 
 		private Notification(String message, Color borderColor) {
-			this.lines = Fonts.wrap(Fonts.SMALLBOLD, message, (int) (width * 0.96f), true);
-			this.height = (int) (Fonts.SMALLBOLD.getLineHeight() * (lines.size() + 0.5f));
+			this.message = message;
+			recalculateDimensions();
 			this.targetBorderColor = borderColor;
 			this.borderColor = new Color(borderColor);
 			this.textColor = new Color(Color.white);
 			this.bgcol = new Color(Color.black);
 			this.y = baseLine - height;
 			this.baseY = this.y;
+		}
+
+		private void recalculateDimensions() {
+			this.lines = Fonts.wrap(Fonts.SMALLBOLD, message, (int) (width * 0.96f), true);
+			this.height = (int) (Fonts.SMALLBOLD.getLineHeight() * (lines.size() + 0.5f));
 		}
 
 		private boolean render(Graphics g, int mouseX, int mouseY, int delta) {
