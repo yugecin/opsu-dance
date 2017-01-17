@@ -85,7 +85,7 @@ public class Opsu extends StateBasedGame {
 
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException {
-		addState(new Splash(STATE_SPLASH));
+		//addState(new Splash(STATE_SPLASH));
 		addState(new MainMenu(STATE_MAINMENU));
 		addState(new ButtonMenu(STATE_BUTTONMENU));
 		addState(new SongMenu(STATE_SONGMENU));
@@ -206,7 +206,7 @@ public class Opsu extends StateBasedGame {
 				Container app = new Container(opsu);
 
 				// basic game settings
-				Options.setDisplayMode(app);
+				//Options.setDisplayMode(app);
 				String[] icons = { "icon16.png", "icon32.png" };
 				try {
 					app.setIcons(icons);

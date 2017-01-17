@@ -22,6 +22,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
@@ -61,7 +62,8 @@ public class OpsuDance {
 			initUpdater(args);
 			sout("database & updater initialized");
 
-			container.init(EmptyState.class);
+			//container.init(EmptyState.class);
+			container.init(Splash.class);
 		} catch (Exception e) {
 			errorAndExit("startup failure", e);
 		}

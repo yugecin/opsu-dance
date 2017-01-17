@@ -39,6 +39,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
+import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Draws common UI components.
@@ -75,7 +76,7 @@ public class UI {
 	private static AnimatedValue tooltipAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
 
 	// game-related variables
-	private static GameContainer container;
+	private static DisplayContainer displayContainer;
 	private static Input input;
 
 	// This class should not be instantiated.
@@ -83,24 +84,21 @@ public class UI {
 
 	/**
 	 * Initializes UI data.
-	 * @param container the game container
-	 * @param game the game object
 	 */
-	public static void init(GameContainer container, StateBasedGame game) {
-		UI.container = container;
-		UI.input = container.getInput();
+	public static void init(DisplayContainer displayContainer) {
+		UI.displayContainer = displayContainer;
 
 		// initialize cursor
-		Cursor.init(container, game);
+		Cursor.init(displayContainer);
 		cursor.hide();
 
 		// back button
 		if (GameImage.MENU_BACK.getImages() != null) {
 			Animation back = GameImage.MENU_BACK.getAnimation(120);
-			backButton = new MenuButton(back, back.getWidth() / 2f, container.getHeight() - (back.getHeight() / 2f));
+			backButton = new MenuButton(back, back.getWidth() / 2f, displayContainer.height - (back.getHeight() / 2f));
 		} else {
 			Image back = GameImage.MENU_BACK.getImage();
-			backButton = new MenuButton(back, back.getWidth() / 2f, container.getHeight() - (back.getHeight() / 2f));
+			backButton = new MenuButton(back, back.getWidth() / 2f, displayContainer.height - (back.getHeight() / 2f));
 		}
 		backButton.setHoverAnimationDuration(350);
 		backButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
@@ -125,7 +123,6 @@ public class UI {
 	public static void draw(Graphics g) {
 		drawBarNotification(g);
 		drawVolume(g);
-		drawFPS();
 		cursor.draw();
 		drawTooltip(g);
 	}
@@ -140,7 +137,6 @@ public class UI {
 	public static void draw(Graphics g, int mouseX, int mouseY, boolean mousePressed) {
 		drawBarNotification(g);
 		drawVolume(g);
-		drawFPS();
 		cursor.draw(mouseX, mouseY, mousePressed);
 		drawTooltip(g);
 	}
@@ -190,27 +186,6 @@ public class UI {
 	}
 
 	/**
-	 * Draws the FPS at the bottom-right corner of the game container.
-	 * If the option is not activated, this will do nothing.
-	 */
-	public static void drawFPS() {
-		if (!Options.isFPSCounterEnabled())
-			return;
-
-		String fps = String.format("%dFPS", container.getFPS());
-		Fonts.BOLD.drawString(
-				container.getWidth() * 0.997f - Fonts.BOLD.getWidth(fps),
-				container.getHeight() * 0.997f - Fonts.BOLD.getHeight(fps),
-				Integer.toString(container.getFPS()), Color.white
-		);
-		Fonts.DEFAULT.drawString(
-				container.getWidth() * 0.997f - Fonts.BOLD.getWidth("FPS"),
-				container.getHeight() * 0.997f - Fonts.BOLD.getHeight("FPS"),
-				"FPS", Color.white
-		);
-	}
-
-	/**
 	 * Draws the volume bar on the middle right-hand side of the game container.
 	 * Only draws if the volume has recently been changed using with {@link #changeVolume(int)}.
 	 * @param g the graphics context
@@ -219,7 +194,6 @@ public class UI {
 		if (volumeDisplay == -1)
 			return;
 
-		int width = container.getWidth(), height = container.getHeight();
 		Image img = GameImage.VOLUME.getImage();
 
 		// move image in/out
@@ -230,13 +204,13 @@ public class UI {
 		else if (ratio >= 0.9f)
 			xOffset = img.getWidth() * (1 - ((1 - ratio) * 10f));
 
-		img.drawCentered(width - img.getWidth() / 2f + xOffset, height / 2f);
+		img.drawCentered(displayContainer.width - img.getWidth() / 2f + xOffset, displayContainer.height / 2f);
 		float barHeight = img.getHeight() * 0.9f;
 		float volume = Options.getMasterVolume();
 		g.setColor(Color.white);
 		g.fillRoundRect(
-				width - (img.getWidth() * 0.368f) + xOffset,
-				(height / 2f) - (img.getHeight() * 0.47f) + (barHeight * (1 - volume)),
+				displayContainer.width - (img.getWidth() * 0.368f) + xOffset,
+				(displayContainer.height / 2f) - (img.getHeight() * 0.47f) + (barHeight * (1 - volume)),
 				img.getWidth() * 0.15f, barHeight * volume, 3
 		);
 	}
@@ -260,7 +234,7 @@ public class UI {
 	 */
 	public static void changeVolume(int units) {
 		final float UNIT_OFFSET = 0.05f;
-		Options.setMasterVolume(container, Utils.clamp(Options.getMasterVolume() + (UNIT_OFFSET * units), 0f, 1f));
+		Options.setMasterVolume(Utils.clamp(Options.getMasterVolume() + (UNIT_OFFSET * units), 0f, 1f));
 		if (volumeDisplay == -1)
 			volumeDisplay = 0;
 		else if (volumeDisplay >= VOLUME_DISPLAY_TIME / 10)
@@ -294,8 +268,8 @@ public class UI {
 			return;
 
 		// draw loading info
-		float marginX = container.getWidth() * 0.02f, marginY = container.getHeight() * 0.02f;
-		float lineY = container.getHeight() - marginY;
+		float marginX = displayContainer.width * 0.02f, marginY = displayContainer.height * 0.02f;
+		float lineY = displayContainer.height - marginY;
 		int lineOffsetY = Fonts.MEDIUM.getLineHeight();
 		if (Options.isLoadVerbose()) {
 			// verbose: display percentages and file names
@@ -308,7 +282,7 @@ public class UI {
 			Fonts.MEDIUM.drawString(marginX, lineY - (lineOffsetY * 2), text, Color.white);
 			g.setColor(Color.white);
 			g.fillRoundRect(marginX, lineY - (lineOffsetY / 2f),
-					(container.getWidth() - (marginX * 2f)) * progress / 100f, lineOffsetY / 4f, 4
+					(displayContainer.width - (marginX * 2f)) * progress / 100f, lineOffsetY / 4f, 4
 			);
 		}
 	}
@@ -332,7 +306,7 @@ public class UI {
 			float unitBaseX, float unitBaseY, float unitWidth, float scrollAreaHeight,
 			Color bgColor, Color scrollbarColor, boolean right
 	) {
-		float scrollbarWidth = container.getWidth() * 0.00347f;
+		float scrollbarWidth = displayContainer.width * 0.00347f;
 		float scrollbarHeight = scrollAreaHeight * lengthShown / totalLength;
 		float offsetY = (scrollAreaHeight - scrollbarHeight) * (position / (totalLength - lengthShown));
 		float scrollbarX = unitBaseX + unitWidth - ((right) ? scrollbarWidth : 0);
@@ -368,8 +342,7 @@ public class UI {
 		if (tooltipAlpha.getTime() == 0 || tooltip == null)
 			return;
 
-		int containerWidth = container.getWidth(), containerHeight = container.getHeight();
-		int margin = containerWidth / 100, textMarginX = 2;
+		int margin = displayContainer.width / 100, textMarginX = 2;
 		int offset = GameImage.CURSOR_MIDDLE.getImage().getWidth() / 2;
 		int lineHeight = Fonts.SMALL.getLineHeight();
 		int textWidth = textMarginX * 2, textHeight = lineHeight;
@@ -388,12 +361,12 @@ public class UI {
 
 		// get drawing coordinates
 		int x = input.getMouseX() + offset, y = input.getMouseY() + offset;
-		if (x + textWidth > containerWidth - margin)
-			x = containerWidth - margin - textWidth;
+		if (x + textWidth > displayContainer.width - margin)
+			x = displayContainer.width - margin - textWidth;
 		else if (x < margin)
 			x = margin;
-		if (y + textHeight > containerHeight - margin)
-			y = containerHeight - margin - textHeight;
+		if (y + textHeight > displayContainer.height - margin)
+			y = displayContainer.height - margin - textHeight;
 		else if (y < margin)
 			y = margin;
 
@@ -467,13 +440,13 @@ public class UI {
 		float alpha = 1f;
 		if (barNotifTimer >= BAR_NOTIFICATION_TIME * 0.9f)
 			alpha -= 1 - ((BAR_NOTIFICATION_TIME - barNotifTimer) / (BAR_NOTIFICATION_TIME * 0.1f));
-		int midX = container.getWidth() / 2, midY = container.getHeight() / 2;
+		int midX = displayContainer.width / 2, midY = displayContainer.height / 2;
 		float barHeight = Fonts.LARGE.getLineHeight() * (1f + 0.6f * Math.min(barNotifTimer * 15f / BAR_NOTIFICATION_TIME, 1f));
 		float oldAlphaB = Colors.BLACK_ALPHA.a, oldAlphaW = Colors.WHITE_ALPHA.a;
 		Colors.BLACK_ALPHA.a *= alpha;
 		Colors.WHITE_ALPHA.a = alpha;
 		g.setColor(Colors.BLACK_ALPHA);
-		g.fillRect(0, midY - barHeight / 2f, container.getWidth(), barHeight);
+		g.fillRect(0, midY - barHeight / 2f, displayContainer.width, barHeight);
 		Fonts.LARGE.drawString(
 				midX - Fonts.LARGE.getWidth(barNotif) / 2f,
 				midY - Fonts.LARGE.getLineHeight() / 2.2f,

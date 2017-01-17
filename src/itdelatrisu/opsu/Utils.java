@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu;
 
+import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.HitObject;
@@ -71,6 +72,7 @@ import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
+import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Contains miscellaneous utilities.
@@ -89,40 +91,18 @@ public class Utils {
 		Arrays.sort(illegalChars);
 	}
 
-	// game-related variables
-	private static Input input;
-
 	// This class should not be instantiated.
 	private Utils() {}
 
 	/**
 	 * Initializes game settings and class data.
-	 * @param container the game container
-	 * @param game the game object
 	 */
-	public static void init(GameContainer container, StateBasedGame game) {
-		input = container.getInput();
-		int width = container.getWidth();
-		int height = container.getHeight();
+	public static void init(DisplayContainer displayContainer) {
+		// TODO clean this up
 
 		// game settings
-		container.setTargetFrameRate(Options.getTargetFPS());
-		container.setVSync(Options.getTargetFPS() == 60);
-		container.setMusicVolume(Options.getMusicVolume() * Options.getMasterVolume());
-		container.setShowFPS(false);
-		container.getInput().enableKeyRepeat();
-		container.setAlwaysRender(true);
-		container.setUpdateOnlyWhenVisible(false);
-
-		// calculate UI scale
-		GameImage.init(width, height);
-
-		// create fonts
-		try {
-			Fonts.init();
-		} catch (Exception e) {
-			ErrorHandler.error("Failed to load fonts.", e, true);
-		}
+		displayContainer.setFPS(Options.getTargetFPS()); // TODO move this elsewhere
+		MusicController.setMusicVolume(Options.getMusicVolume() * Options.getMasterVolume());
 
 		// load skin
 		Options.loadSkin();
@@ -134,19 +114,19 @@ public class Utils {
 		}
 
 		// initialize game mods
-		GameMod.init(width, height);
+		GameMod.init(displayContainer.width, displayContainer.height);
 
 		// initialize playback buttons
-		PlaybackSpeed.init(width, height);
+		PlaybackSpeed.init(displayContainer.width, displayContainer.height);
 
 		// initialize hit objects
-		HitObject.init(width, height);
+		HitObject.init(displayContainer.width, displayContainer.height);
 
 		// initialize download nodes
-		DownloadNode.init(width, height);
+		DownloadNode.init(displayContainer.width, displayContainer.height);
 
 		// initialize UI components
-		UI.init(container, game);
+		UI.init(displayContainer);
 	}
 
 	/**
@@ -246,12 +226,15 @@ public class Utils {
 	 * @return true if pressed
 	 */
 	public static boolean isGameKeyPressed() {
+		/*
 		boolean mouseDown = !Options.isMouseDisabled() && (
 				input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) ||
 				input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
 		return (mouseDown ||
 				input.isKeyDown(Options.getGameKeyLeft()) ||
 				input.isKeyDown(Options.getGameKeyRight()));
+				*/
+		return true;
 	}
 
 	/**

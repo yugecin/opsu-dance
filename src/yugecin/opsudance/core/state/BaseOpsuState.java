@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.core.state;
 
+import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionChangedEvent;
@@ -39,6 +40,18 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 	}
 
 	protected void revalidate() {
+	}
+
+	@Override
+	public void update() {
+	}
+
+	@Override
+	public void preRenderUpdate() {
+	}
+
+	@Override
+	public void render(Graphics g) {
 	}
 
 	@Override

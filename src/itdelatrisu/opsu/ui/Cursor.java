@@ -36,6 +36,7 @@ import org.lwjgl.LWJGLException;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Updates and draws the cursor.
@@ -68,9 +69,7 @@ public class Cursor {
 	private boolean newStyle;
 
 	// game-related variables
-	private static GameContainer container;
-	private static StateBasedGame game;
-	private static Input input;
+	private static DisplayContainer displayContainer;
 
 	public static Color lastObjColor = Color.white;
 	public static Color lastMirroredObjColor = Color.white;
@@ -82,13 +81,9 @@ public class Cursor {
 
 	/**
 	 * Initializes the class.
-	 * @param container the game container
-	 * @param game the game object
 	 */
-	public static void init(GameContainer container, StateBasedGame game) {
-		Cursor.container = container;
-		Cursor.game = game;
-		Cursor.input = container.getInput();
+	public static void init(DisplayContainer displayContainer) {
+		Cursor.displayContainer = displayContainer;
 
 		// create empty cursor to simulate hiding the cursor
 		try {
@@ -116,12 +111,14 @@ public class Cursor {
 	 * Draws the cursor.
 	 */
 	public void draw() {
+		/*
 		int state = game.getCurrentStateID();
 		boolean mousePressed =
 			(((state == Opsu.STATE_GAME || state == Opsu.STATE_GAMEPAUSEMENU) && Utils.isGameKeyPressed()) ||
 			((input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) &&
 			!(state == Opsu.STATE_GAME && Options.isMouseDisabled())));
 		draw(input.getMouseX(), input.getMouseY(), mousePressed);
+		*/
 	}
 
 	/**
@@ -215,7 +212,7 @@ public class Cursor {
 	public void setCursorPosition(int mouseX, int mouseY) {
 		// TODO: use an image buffer
 		int removeCount = 0;
-		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
+		float FPSmod = Math.max(1000 / displayContainer.renderDelta, 1) / 30f; // TODO
 		if (newStyle) {
 			// new style: add all points between cursor movements
 			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
@@ -349,11 +346,13 @@ public class Cursor {
 	 */
 	public void hide() {
 		if (emptyCursor != null) {
+			/*
 			try {
 				container.setMouseCursor(emptyCursor, 0, 0);
 			} catch (SlickException e) {
 				ErrorHandler.error("Failed to hide the cursor.", e, true);
 			}
+			*/
 		}
 	}
 
@@ -361,6 +360,6 @@ public class Cursor {
 	 * Unhides the cursor.
 	 */
 	public void show() {
-		container.setDefaultMouseCursor();
+		//container.setDefaultMouseCursor();
 	}
 }

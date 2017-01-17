@@ -18,6 +18,7 @@
 package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.GameImage;
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -29,6 +30,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
@@ -70,7 +72,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private OpsuState state;
 
-	private final DisplayMode nativeDisplayMode;
+	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
 	private Input input;
@@ -204,7 +206,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Display.setDisplayMode(new DisplayMode(100, 100));
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-		setDisplayMode(800, 600, false);
+		Options.setDisplayMode(this);
 		sout("GL ready");
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
@@ -257,6 +259,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		graphics.setAntiAlias(false);
 
 		input = new Input(height);
+		input.enableKeyRepeat();
 		input.addKeyListener(this);
 		input.addMouseListener(this);
 

@@ -578,4 +578,13 @@ public class MusicController {
 			ErrorHandler.error("Failed to destroy OpenAL.", e, true);
 		}
 	}
+
+	/**
+	 * Set the default volume for music
+	 * @param volume the new default value for music volume
+	 */
+	public static void setMusicVolume(float volume) {
+		SoundStore.get().setMusicVolume(volume);
+	}
+
 }
