@@ -52,6 +52,7 @@ import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
+import yugecin.opsudance.core.state.OpsuState;
 
 /**
  * "Main Menu" state.
@@ -754,13 +755,11 @@ public class MainMenu extends BaseOpsuState {
 	 * Enters the song menu, or the downloads menu if no beatmaps are loaded.
 	 */
 	private void enterSongMenu() {
-		int state = Opsu.STATE_SONGMENU;
+		Class<? extends OpsuState> state = SongMenu.class;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
-			// TODO
-			//((DownloadsMenu) game.getState(Opsu.STATE_DOWNLOADSMENU)).notifyOnLoad("Download some beatmaps to get started!");
-			//state = Opsu.STATE_DOWNLOADSMENU;
+			instanceContainer.provide(DownloadsMenu.class).notifyOnLoad("Download some beatmaps to get started!");
+			// TODO d state = DownloadsMenu.class;
 		}
-		// TODO
-		//game.enterState(state, new EasedFadeOutTransition(), new FadeInTransition());
+		displayContainer.switchState(state);
 	}
 }

@@ -30,7 +30,6 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
-import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
@@ -76,7 +75,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
-	private Input input;
+	public Input input;
 
 	public int width;
 	public int height;
@@ -298,6 +297,10 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			}
 		}
 		state.writeErrorDump(dump);
+	}
+
+	public boolean isInState(Class<? extends OpsuState> state) {
+		return state.isInstance(state);
 	}
 
 	public boolean isTransitioning() {
