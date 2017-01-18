@@ -17,9 +17,11 @@
  */
 package yugecin.opsudance.core;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
@@ -213,7 +215,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public void teardown() {
 		InternalTextureLoader.get().clear();
-		GameImage.destroyAll();
+		GameImage.destroyImages();
+		GameData.Grade.destroyImages();
+		Beatmap.destroyBackgroundImageCache();
 		Display.destroy();
 	}
 

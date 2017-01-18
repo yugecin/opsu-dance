@@ -42,7 +42,7 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.Dancer;
+import yugecin.opsudance.utils.SlickUtil;
 
 /**
  * Holds game data and renders all related elements.
@@ -101,8 +101,16 @@ public class GameData {
 		 * This does NOT destroy images, so be careful of memory leaks!
 		 */
 		public static void clearReferences() {
-			for (Grade grade : Grade.values())
+			for (Grade grade : Grade.values()) {
 				grade.menuImage = null;
+			}
+		}
+
+		public static void destroyImages() {
+			for (Grade grade : Grade.values()) {
+				SlickUtil.destroyImage(grade.menuImage);
+				grade.menuImage = null;
+			}
 		}
 
 		/**

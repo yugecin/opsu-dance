@@ -28,6 +28,7 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.utils.SlickUtil;
 
 /**
  * Game images.
@@ -461,34 +462,15 @@ public enum GameImage {
 		}
 	}
 
-	public static void destroyAll() {
+	public static void destroyImages() {
 		for (GameImage img : GameImage.values()) {
-			destroyAll(img.defaultImages);
-			destroyImage(img.defaultImage);
-			destroyAll(img.skinImages);
-			destroyImage(img.skinImage);
+			SlickUtil.destroyImages(img.defaultImages);
+			SlickUtil.destroyImage(img.defaultImage);
+			SlickUtil.destroyImages(img.skinImages);
+			SlickUtil.destroyImage(img.skinImage);
 			img.isSkinned = false;
 			img.defaultImages = img.skinImages = null;
 			img.defaultImage = img.skinImage = null;
-		}
-	}
-
-	public static void destroyAll(Image[] imgs) {
-		if (imgs == null) {
-			return;
-		}
-		for (Image i : imgs) {
-			destroyImage(i);
-		}
-	}
-
-	public static void destroyImage(Image image) {
-		if (image == null) {
-			return;
-		}
-		try {
-			image.destroy();
-		} catch (SlickException ignored) {
 		}
 	}
 
