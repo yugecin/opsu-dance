@@ -202,12 +202,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
-		// temp displaymode to not flash the screen with a 1ms black window
-		Display.setDisplayMode(new DisplayMode(100, 100));
+		Options.setDisplayMode(this);
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-		Options.setDisplayMode(this);
+		initGL();
 		sout("GL ready");
+		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 	}
@@ -242,9 +242,11 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Display.setDisplayMode(displayMode);
 		Display.setFullscreen(fullscreen);
 
-		initGL();
+		if (Display.isCreated()) {
+			initGL();
 
-		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+			eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+		}
 
 		if (displayMode.getBitsPerPixel() == 16) {
 			InternalTextureLoader.get().set16BitMode();
