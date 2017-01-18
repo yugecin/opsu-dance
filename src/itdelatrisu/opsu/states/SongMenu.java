@@ -783,7 +783,7 @@ public class SongMenu extends BaseOpsuState {
 					MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
 					instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-					// TODO d displayContainer.switchState(ButtonMenu.class);
+					displayContainer.switchState(ButtonMenu.class);
 				}
 				return;
 			}
@@ -1053,7 +1053,7 @@ public class SongMenu extends BaseOpsuState {
 					} else {
 						// score management
 						instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.SCORE, focusScores[rank]);
-						// TODO d displayContainer.switchState(ButtonMenu.class);
+						displayContainer.switchState(ButtonMenu.class);
 					}
 					return true;
 				}
@@ -1084,18 +1084,17 @@ public class SongMenu extends BaseOpsuState {
 				searchTimer = SEARCH_DELAY;
 				searchTransitionTimer = 0;
 				searchResultString = null;
-			} else {
+			} else*/ {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				((MainMenu) game.getState(Opsu.STATE_MAINMENU)).reset();
-				game.enterState(Opsu.STATE_MAINMENU, new EasedFadeOutTransition(), new FadeInTransition());
+				instanceContainer.provide(MainMenu.class).reset(); // TODO d is this needed
+				displayContainer.switchState(MainMenu.class);
 			}
-			*/
 			return true;
 		case Input.KEY_F1:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.MODS);
-			// TODO d displayContainer.switchState(ButtonMenu.class);
+			displayContainer.switchState(ButtonMenu.class);
 			return true;
 		case Input.KEY_F2:
 			if (focusNode == null)
@@ -1124,7 +1123,7 @@ public class SongMenu extends BaseOpsuState {
 			MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 				MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
 			instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-			// TODO d displayContainer.switchState(ButtonMenu.class);
+			displayContainer.switchState(ButtonMenu.class);
 			return true;
 		case Input.KEY_F5:
 			SoundController.playSound(SoundEffect.MENUHIT);
@@ -1132,7 +1131,7 @@ public class SongMenu extends BaseOpsuState {
 				reloadBeatmaps(false);
 			else {
 				instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.RELOAD);
-				// TODO d displayContainer.switchState(ButtonMenu.class);
+				displayContainer.switchState(ButtonMenu.class);
 			}
 			return true;
 		case Input.KEY_DELETE:
@@ -1143,7 +1142,7 @@ public class SongMenu extends BaseOpsuState {
 				MenuState ms = (focusNode.beatmapIndex == -1 || focusNode.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
 				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, focusNode);
-				// TODO d displayContainer.switchState(ButtonMenu.class);
+				displayContainer.switchState(ButtonMenu.class);
 			}
 			return true;
 		case Input.KEY_F7:

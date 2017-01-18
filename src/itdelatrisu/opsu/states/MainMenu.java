@@ -20,7 +20,6 @@ package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
@@ -47,8 +46,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.state.transition.EasedFadeOutTransition;
-import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
@@ -647,9 +644,8 @@ public class MainMenu extends BaseOpsuState {
 				logoTimer = 0;
 				break;
 			}
-			// TODO
-			//((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).setMenuState(MenuState.EXIT);
-			//game.enterState(Opsu.STATE_BUTTONMENU);
+			instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.EXIT);
+			displayContainer.switchState(ButtonMenu.class);
 			return true;
 		case Input.KEY_P:
 			SoundController.playSound(SoundEffect.MENUHIT);
