@@ -212,6 +212,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void teardown() {
+		InternalTextureLoader.get().clear();
+		GameImage.destroyAll();
 		Display.destroy();
 	}
 

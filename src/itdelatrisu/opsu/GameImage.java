@@ -461,6 +461,37 @@ public enum GameImage {
 		}
 	}
 
+	public static void destroyAll() {
+		for (GameImage img : GameImage.values()) {
+			destroyAll(img.defaultImages);
+			destroyImage(img.defaultImage);
+			destroyAll(img.skinImages);
+			destroyImage(img.skinImage);
+			img.isSkinned = false;
+			img.defaultImages = img.skinImages = null;
+			img.defaultImage = img.skinImage = null;
+		}
+	}
+
+	public static void destroyAll(Image[] imgs) {
+		if (imgs == null) {
+			return;
+		}
+		for (Image i : imgs) {
+			destroyImage(i);
+		}
+	}
+
+	public static void destroyImage(Image image) {
+		if (image == null) {
+			return;
+		}
+		try {
+			image.destroy();
+		} catch (SlickException ignored) {
+		}
+	}
+
 	/**
 	 * Returns the bitmask image type from a type string.
 	 * @param type the type string
