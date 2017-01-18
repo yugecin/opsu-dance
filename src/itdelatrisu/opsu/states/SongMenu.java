@@ -748,7 +748,7 @@ public class SongMenu extends BaseOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		int delta = displayContainer.delta;
+		int delta = displayContainer.renderDelta;
 		UI.update(delta);
 		if (reloadThread == null)
 			MusicController.loopTrackIfEnded(true);
