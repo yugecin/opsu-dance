@@ -174,7 +174,6 @@ public class Splash extends BaseOpsuState {
 					MusicController.playThemeSong();
 				} else {
 					instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-					System.out.println(("todo"));
 				}
 			} else {
 				MusicController.playThemeSong();
