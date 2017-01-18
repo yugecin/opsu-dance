@@ -93,6 +93,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public int renderDelta;
 	public int delta;
 
+	public boolean exitRequested;
+
 	public int timeSinceLastRender;
 
 	private long lastFrame;
@@ -153,7 +155,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 
 	public void run() throws LWJGLException {
-		while(!(Display.isCloseRequested() && state.onCloseRequest())) {
+		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest())) {
 			delta = getDelta();
 
 			timeSinceLastRender += delta;
@@ -196,7 +198,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			Display.processMessages();
 			Display.sync(targetUpdatesPerSecond);
 		}
-		teardown();
 	}
 
 	public void setup() throws Exception {

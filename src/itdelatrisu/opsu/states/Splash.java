@@ -185,16 +185,14 @@ public class Splash extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		if (key == Input.KEY_ESCAPE) {
-			// close program
-			if (++escapeCount >= 3) System.out.println("hi");
-				//container.exit(); // TODO
-
-			// stop parsing beatmaps by sending interrupt to BeatmapParser
-			else if (thread != null)
-				thread.interrupt();
-			return true;
+		if (key != Input.KEY_ESCAPE) {
+			return false;
 		}
-		return false;
+		if (++escapeCount >= 3) {
+			displayContainer.exitRequested = true;
+		} else if (thread != null) {
+			thread.interrupt();
+		}
+		return true;
 	}
 }

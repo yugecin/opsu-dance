@@ -597,9 +597,7 @@ public class MainMenu extends BaseOpsuState {
 			} else if (restartButton.contains(x, y) && status == Updater.Status.UPDATE_DOWNLOADED) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				Updater.get().prepareUpdate();
-				// TODO: exit?
-				//container.setForceExit(false);
-				//container.exit();
+				displayContainer.exitRequested = true;
 				return true;
 			}
 		}
@@ -624,8 +622,7 @@ public class MainMenu extends BaseOpsuState {
 				enterSongMenu();
 				return true;
 			} else if (exitButton.contains(x, y, 0.25f)) {
-				// TODO exit?
-				//container.exit();
+				displayContainer.exitRequested = true;
 				return true;
 			}
 		}
