@@ -71,9 +71,11 @@ public class OpsuDance {
 		while (rungame());
 		container.teardownAL();
 
+		Options.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
+		Utils.deleteDirectory(Options.TEMP_DIR);
 	}
 
 	private boolean rungame() {
