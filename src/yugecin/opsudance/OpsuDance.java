@@ -79,7 +79,8 @@ public class OpsuDance {
 		try {
 			container.setup();
 		} catch (Exception e) {
-			errorAndExit("could not initialize GL", e);
+			ErrorHandler.error("could not initialize GL", e).preventContinue().show();
+			return false;
 		}
 		Exception caughtException = null;
 		try {
