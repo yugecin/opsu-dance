@@ -19,8 +19,8 @@ package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.ui.Fonts;
-import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
@@ -95,6 +95,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private long lastFrame;
 
+	private boolean wasMusicPlaying;
+
 	private String glVersion;
 	private String glVendor;
 
@@ -150,7 +152,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 
-	public void run() throws LWJGLException {
+	public void run() throws Exception {
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest())) {
 			delta = getDelta();
 
@@ -211,7 +213,23 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public void teardown() {
 		Display.destroy();
+	}
+
+	public void teardownAL() {
 		AL.destroy();
+	}
+
+	public void pause() {
+		wasMusicPlaying = MusicController.isPlaying();
+		if (wasMusicPlaying) {
+			MusicController.pause();
+		}
+	}
+
+	public void resume() {
+		if (wasMusicPlaying) {
+			MusicController.resume();
+		}
 	}
 
 	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {

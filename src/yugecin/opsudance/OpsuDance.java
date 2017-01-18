@@ -69,6 +69,7 @@ public class OpsuDance {
 		}
 
 		while (rungame());
+		container.teardownAL();
 
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
@@ -78,6 +79,7 @@ public class OpsuDance {
 	private boolean rungame() {
 		try {
 			container.setup();
+			container.resume();
 		} catch (Exception e) {
 			ErrorHandler.error("could not initialize GL", e).preventContinue().show();
 			return false;
@@ -89,6 +91,7 @@ public class OpsuDance {
 			caughtException = e;
 		}
 		container.teardown();
+		container.pause();
 		return caughtException != null && ErrorHandler.error("update/render error", caughtException).show().shouldIgnoreAndContinue();
 	}
 
