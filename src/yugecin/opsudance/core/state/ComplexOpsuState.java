@@ -73,7 +73,7 @@ public class ComplexOpsuState extends BaseOpsuState {
 		}
 		focusedComponent.setFocused(false);
 		focusedComponent = null;
-		return false;
+		return true;
 	}
 
 	@Override

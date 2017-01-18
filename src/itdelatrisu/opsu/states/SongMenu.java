@@ -22,7 +22,6 @@ import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.Utils;
@@ -62,25 +61,16 @@ import java.nio.file.WatchEvent.Kind;
 import java.util.Map;
 import java.util.Stack;
 
-import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.EasedFadeOutTransition;
-import org.newdawn.slick.state.transition.EmptyTransition;
-import org.newdawn.slick.state.transition.FadeInTransition;
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.core.inject.InstanceContainer;
-import yugecin.opsudance.core.state.BaseOpsuState;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.core.state.ComplexOpsuState;
 
 /**
  * "Song Selection" state.
@@ -88,7 +78,7 @@ import yugecin.opsudance.events.ResolutionChangedEvent;
  * Players are able to select a beatmap to play, view previous scores, choose game mods,
  * manage beatmaps, or change game options from this state.
  */
-public class SongMenu extends BaseOpsuState {
+public class SongMenu extends ComplexOpsuState {
 
 	private final InstanceContainer instanceContainer;
 
@@ -176,8 +166,7 @@ public class SongMenu extends BaseOpsuState {
 	private MenuButton selectModsButton, selectRandomButton, selectMapOptionsButton, selectOptionsButton;
 
 	/** The search textfield. */
-	//private TextField search;
-	// TODO d recreate textfield
+	private TextField searchTextField;
 
 	/**
 	 * Delay timer, in milliseconds, before running another search.
@@ -238,7 +227,7 @@ public class SongMenu extends BaseOpsuState {
 			} finally {
 				finished = true;
 			}
-		};
+		}
 
 		/** Reloads all beatmaps. */
 		private void reloadBeatmaps() {
@@ -329,8 +318,7 @@ public class SongMenu extends BaseOpsuState {
 	private boolean isScrollingToFocusNode = false;
 
 	/** Sort order dropdown menu. */
-	// TODO: d remake dropdownmenu
-	//private DropdownMenu<BeatmapSortOrder> sortMenu;
+	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
 	public SongMenu(final DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
@@ -357,11 +345,10 @@ public class SongMenu extends BaseOpsuState {
 		footerLogoButton.setHoverExpand(1.2f);
 
 		// initialize sorts
-		// TODO d reenable dropdown
-		/*
 		int sortWidth = (int) (displayContainer.width * 0.12f);
-		sortMenu = new DropdownMenu<BeatmapSortOrder>(container, BeatmapSortOrder.values(),
-				displayContainer.width * 0.87f, headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f, sortWidth) {
+		int posX = (int) (displayContainer.width * 0.87f);
+		int posY = (int) (headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f);
+		sortMenu = new DropdownMenu<BeatmapSortOrder>(displayContainer, BeatmapSortOrder.values(), posX, posY, sortWidth) {
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
 				BeatmapSortOrder.set(item);
@@ -375,7 +362,7 @@ public class SongMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public boolean menuClicked(int index) {
+			public boolean canSelect(int index) {
 				if (isInputBlocked())
 					return false;
 
@@ -386,7 +373,7 @@ public class SongMenu extends BaseOpsuState {
 		sortMenu.setBackgroundColor(Colors.BLACK_BG_HOVER);
 		sortMenu.setBorderColor(Colors.BLUE_DIVIDER);
 		sortMenu.setChevronRightColor(Color.white);
-		*/
+		components.add(sortMenu);
 
 		// initialize group tabs
 		for (BeatmapGroup group : BeatmapGroup.values())
@@ -406,20 +393,20 @@ public class SongMenu extends BaseOpsuState {
 		buttonOffset = (footerY - headerY - DIVIDER_LINE_WIDTH) / MAX_SONG_BUTTONS;
 
 		// search
-		// TODO d reenable search box
-		/*
 		int textFieldX = (int) (displayContainer.width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
 		int textFieldY = (int) (headerY + Fonts.BOLD.getLineHeight() / 2);
-		search = new TextField(
-				container, Fonts.BOLD, textFieldX, textFieldY,
-				(int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()
-		);
-		search.setBackgroundColor(Color.transparent);
-		search.setBorderColor(Color.transparent);
-		search.setTextColor(Color.white);
-		search.setConsumeEvents(false);
-		search.setMaxLength(60);
-		*/
+		searchTextField = new TextField(displayContainer, Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
+			@Override
+			public boolean isFocusable() {
+				return false;
+			}
+		};
+		searchTextField.setBackgroundColor(Color.transparent);
+		searchTextField.setBorderColor(Color.transparent);
+		searchTextField.setTextColor(Color.white);
+		searchTextField.setMaxLength(60);
+		searchTextField.setFocused(true);
+		components.add(searchTextField);
 
 		// selection buttons
 		Image selectionMods = GameImage.SELECTION_MODS.getImage();
@@ -481,9 +468,6 @@ public class SongMenu extends BaseOpsuState {
 		int height = displayContainer.height;
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-
-		// TODO d
-		//boolean inDropdownMenu = sortMenu.contains(mouseX, mouseY);
 
 		// background
 		if (focusNode != null) {
@@ -555,11 +539,9 @@ public class SongMenu extends BaseOpsuState {
 			g.clearClip();
 
 			// scroll bar
-			// TODO d
-			/*
-			if (focusScores.length > MAX_SCORE_BUTTONS && ScoreData.areaContains(mouseX, mouseY) && !inDropdownMenu)
+			if (focusScores.length > MAX_SCORE_BUTTONS && ScoreData.areaContains(mouseX, mouseY) && !isAnyComponentFocused()) {
 				ScoreData.drawScrollbar(g, startScorePos.getPosition(), focusScores.length * ScoreData.getButtonOffset());
-			*/
+			}
 		}
 
 		// top/bottom bars
@@ -576,9 +558,7 @@ public class SongMenu extends BaseOpsuState {
 		Float position = MusicController.getBeatProgress();
 		if (position == null)  // default to 60bpm
 			position = System.currentTimeMillis() % 1000 / 1000f;
-		// TODO d
-		/*
-		if (footerLogoButton.contains(mouseX, mouseY, 0.25f) && !inDropdownMenu) {
+		if (footerLogoButton.contains(mouseX, mouseY, 0.25f)) {
 			// hovering over logo: stop pulsing
 			footerLogoButton.draw();
 		} else {
@@ -591,7 +571,6 @@ public class SongMenu extends BaseOpsuState {
 			ghostLogo.drawCentered(footerLogoButton.getX(), footerLogoButton.getY(), Colors.GHOST_LOGO);
 			Colors.GHOST_LOGO.a = oldGhostAlpha;
 		}
-		*/
 
 		// header
 		if (focusNode != null) {
@@ -672,9 +651,7 @@ public class SongMenu extends BaseOpsuState {
 		// group tabs
 		BeatmapGroup currentGroup = BeatmapGroup.current();
 		BeatmapGroup hoverGroup = null;
-		// TODO d
-		/*
-		if (!inDropdownMenu) {
+		if (!isAnyComponentFocused()) {
 			for (BeatmapGroup group : BeatmapGroup.values()) {
 				if (group.contains(mouseX, mouseY)) {
 					hoverGroup = group;
@@ -682,7 +659,6 @@ public class SongMenu extends BaseOpsuState {
 				}
 			}
 		}
-		*/
 		for (BeatmapGroup group : BeatmapGroup.VALUES_REVERSED) {
 			if (group != currentGroup)
 				group.draw(false, group == hoverGroup);
@@ -690,10 +666,9 @@ public class SongMenu extends BaseOpsuState {
 		currentGroup.draw(true, false);
 
 		// search
-		// TODO d
-		/*
-		boolean searchEmpty = search.getText().isEmpty();
-		int searchX = search.getX(), searchY = search.getY();
+		boolean searchEmpty = searchTextField.getText().isEmpty();
+		int searchX = searchTextField.x;
+		int searchY = searchTextField.y;
 		float searchBaseX = width * 0.7f;
 		float searchTextX = width * 0.7125f;
 		float searchRectHeight = Fonts.BOLD.getLineHeight() * 2;
@@ -712,21 +687,15 @@ public class SongMenu extends BaseOpsuState {
 		g.fillRect(searchBaseX, headerY + DIVIDER_LINE_WIDTH / 2, width - searchBaseX, searchRectHeight);
 		Colors.BLACK_ALPHA.a = oldAlpha;
 		Fonts.BOLD.drawString(searchTextX, searchY, "Search:", Colors.GREEN_SEARCH);
-		if (searchEmpty)
+		if (searchEmpty) {
 			Fonts.BOLD.drawString(searchX, searchY, "Type to search!", Color.white);
-		else {
+		} else {
 			g.setColor(Color.white);
-			// TODO: why is this needed to correctly position the TextField?
-			search.setLocation(searchX - 3, searchY - 1);
-			search.render(container, g);
-			search.setLocation(searchX, searchY);
-			Fonts.DEFAULT.drawString(searchTextX, searchY + Fonts.BOLD.getLineHeight(),
-					(searchResultString == null) ? "Searching..." : searchResultString, Color.white);
+			searchTextField.render(g);
+			Fonts.DEFAULT.drawString(searchTextX, searchY + Fonts.BOLD.getLineHeight(), (searchResultString == null) ? "Searching..." : searchResultString, Color.white);
 		}
 
-		// sorting options
-		sortMenu.render(container, g);
-		*/
+		sortMenu.render(g);
 
 		// reloading beatmaps
 		if (reloadThread != null) {
@@ -766,7 +735,6 @@ public class SongMenu extends BaseOpsuState {
 		}
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-		boolean inDropdownMenu = false; // TODO d sortMenu.contains(mouseX, mouseY);
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
@@ -805,9 +773,6 @@ public class SongMenu extends BaseOpsuState {
 		starStream.update(delta);
 
 		// search
-		// TODO d
-		/*
-		search.setFocus(true);
 		searchTimer += delta;
 		if (searchTimer >= SEARCH_DELAY && reloadThread == null && beatmapMenuTimer == -1) {
 			searchTimer = 0;
@@ -816,12 +781,12 @@ public class SongMenu extends BaseOpsuState {
 			if (focusNode != null)
 				oldFocusNode = new SongNode(BeatmapSetList.get().getBaseNode(focusNode.index), focusNode.beatmapIndex);
 
-			if (BeatmapSetList.get().search(search.getText())) {
+			if (BeatmapSetList.get().search(searchTextField.getText())) {
 				// reset song stack
-				randomStack = new Stack<SongNode>();
+				randomStack = new Stack<>();
 
 				// empty search
-				if (search.getText().isEmpty())
+				if (searchTextField.getText().isEmpty())
 					searchResultString = null;
 
 				// search produced new list: re-initialize it
@@ -830,7 +795,7 @@ public class SongMenu extends BaseOpsuState {
 				focusScores = null;
 				if (BeatmapSetList.get().size() > 0) {
 					BeatmapSetList.get().init();
-					if (search.getText().isEmpty()) {  // cleared search
+					if (searchTextField.getText().isEmpty()) {  // cleared search
 						// use previous start/focus if possible
 						if (oldFocusNode != null)
 							setFocus(oldFocusNode.getNode(), oldFocusNode.getIndex(), true, true);
@@ -843,7 +808,7 @@ public class SongMenu extends BaseOpsuState {
 						setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 					}
 					oldFocusNode = null;
-				} else if (!search.getText().isEmpty())
+				} else if (!searchTextField.getText().isEmpty())
 					searchResultString = "No matches found. Hit ESC to reset.";
 			}
 		}
@@ -852,7 +817,6 @@ public class SongMenu extends BaseOpsuState {
 			if (searchTransitionTimer > SEARCH_TRANSITION_TIME)
 				searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		}
-		*/
 
 		// scores
 		if (focusScores != null) {
@@ -874,7 +838,7 @@ public class SongMenu extends BaseOpsuState {
 
 		// mouse hover
 		BeatmapSetNode node = getNodeAtPosition(mouseX, mouseY);
-		if (node != null && !inDropdownMenu) {
+		if (node != null && !isAnyComponentFocused()) {
 			if (node == hoverIndex)
 				hoverOffset.update(delta);
 			else {
@@ -888,11 +852,9 @@ public class SongMenu extends BaseOpsuState {
 		}
 
 		// tooltips
-		// TODO d
-		/*
 		if (sortMenu.baseContains(mouseX, mouseY))
 			UI.updateTooltip(delta, "Sort by...", false);
-		else */if (focusScores != null && ScoreData.areaContains(mouseX, mouseY)) {
+		else if (focusScores != null && ScoreData.areaContains(mouseX, mouseY)) {
 			int startScore = (int) (startScorePos.getPosition() / ScoreData.getButtonOffset());
 			int offset = (int) (-startScorePos.getPosition() + startScore * ScoreData.getButtonOffset());
 			int scoreButtons = Math.min(focusScores.length - startScore, MAX_SCORE_BUTTONS);
@@ -909,6 +871,10 @@ public class SongMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
+		if (super.mousePressed(button, x, y)) {
+			return true;
+		}
+
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
 		}
@@ -924,6 +890,10 @@ public class SongMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
+		if (super.mouseReleased(button, x, y)) {
+			return true;
+		}
+
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
 		}
@@ -973,7 +943,7 @@ public class SongMenu extends BaseOpsuState {
 					songInfo = null;
 					scoreMap = null;
 					focusScores = null;
-					// TODO d search.setText("");
+					searchTextField.setText("");
 					searchTimer = SEARCH_DELAY;
 					searchTransitionTimer = SEARCH_TRANSITION_TIME;
 					searchResultString = null;
@@ -1076,18 +1046,16 @@ public class SongMenu extends BaseOpsuState {
 
 		switch (key) {
 		case Input.KEY_ESCAPE:
-			// TODO d
-			/*
 			if (reloadThread != null) {
 				// beatmap reloading: stop parsing beatmaps by sending interrupt to BeatmapParser
 				reloadThread.interrupt();
-			} else if (!search.getText().isEmpty()) {
+			} else if (!searchTextField.getText().isEmpty()) {
 				// clear search text
-				search.setText("");
+				searchTextField.setText("");
 				searchTimer = SEARCH_DELAY;
 				searchTransitionTimer = 0;
 				searchResultString = null;
-			} else*/ {
+			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
 				displayContainer.switchState(MainMenu.class);
@@ -1206,9 +1174,8 @@ public class SongMenu extends BaseOpsuState {
 			// TODO: accept all characters (current conditions are from TextField class)
 			if ((c > 31 && c < 127) || key == Input.KEY_BACK) {
 				searchTimer = 0;
-				// TODO d
-				//int textLength = search.getText().length();
-				int textLength = 0;
+				searchTextField.keyPressed(key, c);
+				int textLength = searchTextField.getText().length();
 				if (lastSearchTextLength != textLength) {
 					if (key == Input.KEY_BACK) {
 						if (textLength == 0)
@@ -1223,36 +1190,38 @@ public class SongMenu extends BaseOpsuState {
 		return true;
 	}
 
-	// TODO d
-	/*
 	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		// block input
-		if (isInputBlocked())
-			return;
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (super.mouseDragged(oldx, oldy, newx, newy)) {
+			return true;
+		}
+
+		if (isInputBlocked()) {
+			return true;
+		}
 
 		int diff = newy - oldy;
-		if (diff == 0)
-			return;
+		if (diff == 0) {
+			return false;
+		}
 
 		// check mouse button (right click scrolls faster on songs)
 		int multiplier;
-		if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON))
+		if (displayContainer.input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
 			multiplier = 10;
-		else if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON))
+		} else if (displayContainer.input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			multiplier = 1;
-		else
-			return;
+		} else {
+			return false;
+		}
 
-		// score buttons
-		if (focusScores != null && focusScores.length >= MAX_SCORE_BUTTONS && ScoreData.areaContains(oldx, oldy))
+		if (focusScores != null && focusScores.length >= MAX_SCORE_BUTTONS && ScoreData.areaContains(oldx, oldy)) {
 			startScorePos.dragged(-diff * multiplier);
-
-		// song buttons
-		else
+		} else {
 			songScrolling.dragged(-diff * multiplier);
+		}
+		return true;
 	}
-	*/
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
@@ -1302,12 +1271,10 @@ public class SongMenu extends BaseOpsuState {
 		songChangeTimer.setTime(songChangeTimer.getDuration());
 		musicIconBounceTimer.setTime(musicIconBounceTimer.getDuration());
 		starStream.clear();
-		// TODO d
-		//sortMenu.activate();
-		//sortMenu.reset();
+		sortMenu.reset();
 
 		// reset song stack
-		randomStack = new Stack<SongNode>();
+		randomStack = new Stack<>();
 
 		// reload beatmaps if song folder changed
 		if (songFolderChanged && stateAction != MenuState.RELOAD)
@@ -1465,16 +1432,6 @@ public class SongMenu extends BaseOpsuState {
 			stateActionNode = null;
 			stateActionScore = null;
 		}
-	}
-
-	@Override
-	public void leave() {
-		super.leave();
-		// TODO d
-		/*
-		search.setFocus(false);
-		sortMenu.deactivate();
-		*/
 	}
 
 	/**
@@ -1734,8 +1691,7 @@ public class SongMenu extends BaseOpsuState {
 		songInfo = null;
 		hoverOffset.setTime(0);
 		hoverIndex = null;
-		// TODO d
-		//search.setText("");
+		searchTextField.setText("");
 		searchTimer = SEARCH_DELAY;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		searchResultString = null;
