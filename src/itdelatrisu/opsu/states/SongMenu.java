@@ -941,7 +941,6 @@ public class SongMenu extends BaseOpsuState {
 
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			instanceContainer.provide(MainMenu.class).reset(); // TODO d why is this needed
 			displayContainer.switchState(MainMenu.class);
 			return true;
 		}
@@ -1091,7 +1090,6 @@ public class SongMenu extends BaseOpsuState {
 			} else*/ {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				instanceContainer.provide(MainMenu.class).reset(); // TODO d is this needed
 				displayContainer.switchState(MainMenu.class);
 			}
 			return true;

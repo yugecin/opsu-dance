@@ -224,8 +224,6 @@ public class MainMenu extends BaseOpsuState {
 		logoOpen = new AnimatedValue(100, 0, centerOffsetX, AnimationEquation.OUT_QUAD);
 		logoClose = new AnimatedValue(2200, centerOffsetX, 0, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
-
-		reset();
 	}
 
 	@Override
@@ -459,6 +457,14 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void enter() {
 		super.enter();
+
+		logo.setX(displayContainer.width / 2);
+		logoOpen.setTime(0);
+		logoClose.setTime(0);
+		logoButtonAlpha.setTime(0);
+		logoTimer = 0;
+		logoState = LogoState.DEFAULT;
+
 		UI.enter();
 		if (!enterNotification) {
 			if (Updater.get().getStatus() == Updater.Status.UPDATE_AVAILABLE) {
@@ -686,34 +692,6 @@ public class MainMenu extends BaseOpsuState {
 	private boolean musicPositionBarContains(float cx, float cy) {
 		return ((cx > musicBarX && cx < musicBarX + musicBarWidth) &&
 		        (cy > musicBarY && cy < musicBarY + musicBarHeight));
-	}
-
-	/**
-	 * Resets the button states.
-	 */
-	public void reset() {
-		// reset logo
-		logo.setX(displayContainer.width / 2);
-		logoOpen.setTime(0);
-		logoClose.setTime(0);
-		logoButtonAlpha.setTime(0);
-		logoTimer = 0;
-		logoState = LogoState.DEFAULT;
-
-		logo.resetHover();
-		playButton.resetHover();
-		exitButton.resetHover();
-		musicPlay.resetHover();
-		musicPause.resetHover();
-		musicNext.resetHover();
-		musicPrevious.resetHover();
-		if (repoButton != null)
-			repoButton.resetHover();
-		if (danceRepoButton != null)
-			danceRepoButton.resetHover();
-		updateButton.resetHover();
-		restartButton.resetHover();
-		downloadsButton.resetHover();
 	}
 
 	/**

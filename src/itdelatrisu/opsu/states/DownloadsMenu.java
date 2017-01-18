@@ -623,7 +623,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// back
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			instanceContainer.provide(MainMenu.class).reset();
 			displayContainer.switchState(MainMenu.class);
 			return true;
 		}
@@ -910,7 +909,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				instanceContainer.provide(MainMenu.class).reset();
 				displayContainer.switchState(MainMenu.class);
 			}
 			return true;
