@@ -108,6 +108,11 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 	}
 
 	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		return false;
+	}
+
+	@Override
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> BaseOpsuState dump\n");
 		dump.append("isDirty: ").append(String.valueOf(isDirty)).append('\n');

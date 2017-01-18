@@ -386,7 +386,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public void mouseMoved(int oldx, int oldy, int newx, int newy) { }
 
 	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) { }
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		state.mouseDragged(oldx, oldy, newx, newy);
+	}
 
 	@Override
 	public void setInput(Input input) { }
