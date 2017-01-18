@@ -553,8 +553,7 @@ public class MainMenu extends BaseOpsuState {
 		// downloads button actions
 		if (downloadsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
-			// TODO //displayContainer.switchState(DownloadsMenu.class);
-			//game.enterState(Opsu.STATE_DOWNLOADSMENU, new EasedFadeOutTransition(), new FadeInTransition());
+			displayContainer.switchState(DownloadsMenu.class);
 			return true;
 		}
 
@@ -659,9 +658,8 @@ public class MainMenu extends BaseOpsuState {
 				enterSongMenu();
 			return true;
 		case Input.KEY_D:
-			// TODO
-			//SoundController.playSound(SoundEffect.MENUHIT);
-			//game.enterState(Opsu.STATE_DOWNLOADSMENU, new EasedFadeOutTransition(), new FadeInTransition());
+			SoundController.playSound(SoundEffect.MENUHIT);
+			displayContainer.switchState(DownloadsMenu.class);
 			return true;
 		case Input.KEY_R:
 			nextTrack(true);
@@ -754,7 +752,7 @@ public class MainMenu extends BaseOpsuState {
 		Class<? extends OpsuState> state = SongMenu.class;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
 			instanceContainer.provide(DownloadsMenu.class).notifyOnLoad("Download some beatmaps to get started!");
-			// TODO d state = DownloadsMenu.class;
+			state = DownloadsMenu.class;
 		}
 		displayContainer.switchState(state);
 	}

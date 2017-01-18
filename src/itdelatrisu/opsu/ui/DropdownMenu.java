@@ -27,152 +27,62 @@ import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.gui.AbstractComponent;
-import org.newdawn.slick.gui.GUIContext;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.components.Component;
 
-/**
- * Simple dropdown menu.
- * <p>
- * Basic usage:
- * <ul>
- * <li>Override {@link #menuClicked(int)} to perform actions when the menu is clicked
- *     (e.g. play a sound effect, block input under certain conditions).
- * <li>Override {@link #itemSelected(int, Object)} to perform actions when a new item is selected.
- * <li>Call {@link #activate()}/{@link #deactivate()} whenever the component is needed
- *     (e.g. in a state's {@code enter} and {@code leave} events.
- * </ul>
- *
- * @param <E> the type of the elements in the menu
- */
-public class DropdownMenu<E> extends AbstractComponent {
-	/** Padding ratios for drawing. */
+public class DropdownMenu<E> extends Component {
+
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
 
-	/** Whether this component is active. */
-	private boolean active;
+	private final DisplayContainer displayContainer;
 
-	/** The menu items. */
 	private E[] items;
-
-	/** The menu item names. */
 	private String[] itemNames;
+	private int selectedItemIndex = 0;
+	private boolean expanded;
 
-	/** The index of the selected item. */
-	private int itemIndex = 0;
-
-	/** Whether the menu is expanded. */
-	private boolean expanded = false;
-
-	/** The expanding animation progress. */
 	private AnimatedValue expandProgress = new AnimatedValue(300, 0f, 1f, AnimationEquation.LINEAR);
 
-	/** The last update time, in milliseconds. */
-	private long lastUpdateTime;
-
-	/** The top-left coordinates. */
-	private float x, y;
-
-	/** The width and height of the dropdown menu. */
-	private int width, height;
-
-	/** The height of the base item. */
 	private int baseHeight;
-
-	/** The vertical offset between items. */
 	private float offsetY;
 
-	/** The colors to use. */
-	private Color
-		textColor = Color.white, backgroundColor = Color.black,
-		highlightColor = Colors.BLUE_DIVIDER, borderColor = Colors.BLUE_DIVIDER,
-		chevronDownColor = textColor, chevronRightColor = backgroundColor;
+	private Color textColor = Color.white;
+	private Color backgroundColor = Color.black;
+	private Color highlightColor = Colors.BLUE_DIVIDER;
+	private Color borderColor = Colors.BLUE_DIVIDER;
+	private Color chevronDownColor = textColor;
+	private Color chevronRightColor = backgroundColor;
 
-	/** The fonts to use. */
-	private UnicodeFont fontNormal = Fonts.MEDIUM, fontSelected = Fonts.MEDIUMBOLD;
+	private UnicodeFont fontNormal = Fonts.MEDIUM;
+	private UnicodeFont fontSelected = Fonts.MEDIUMBOLD;
 
-	/** The chevron images. */
-	private Image chevronDown, chevronRight;
+	private Image chevronDown;
+	private Image chevronRight;
 
-	/** Should the next click be blocked? */
-	private boolean blockClick = false;
-
-	/**
-	 * Creates a new dropdown menu.
-	 * @param container the container rendering this menu
-	 * @param items the list of items (with names given as their {@code toString()} methods)
-	 * @param x the top-left x coordinate
-	 * @param y the top-left y coordinate
-	 */
-	public DropdownMenu(GUIContext container, E[] items, float x, float y) {
-		this(container, items, x, y, 0);
-	}
-
-	/**
-	 * Creates a new dropdown menu with the given fonts.
-	 * @param container the container rendering this menu
-	 * @param items the list of items (with names given as their {@code toString()} methods)
-	 * @param x the top-left x coordinate
-	 * @param y the top-left y coordinate
-	 * @param normal the normal font
-	 * @param selected the font for the selected item
-	 */
-	public DropdownMenu(GUIContext container, E[] items, float x, float y, UnicodeFont normal, UnicodeFont selected) {
-		this(container, items, x, y, 0, normal, selected);
-	}
-
-	/**
-	 * Creates a new dropdown menu with the given width.
-	 * @param container the container rendering this menu
-	 * @param items the list of items (with names given as their {@code toString()} methods)
-	 * @param x the top-left x coordinate
-	 * @param y the top-left y coordinate
-	 * @param width the menu width
-	 */
-	public DropdownMenu(GUIContext container, E[] items, float x, float y, int width) {
-		super(container);
+	public DropdownMenu(DisplayContainer displayContainer, E[] items, int x, int y, int width) {
+		this.displayContainer = displayContainer;
 		init(items, x, y, width);
 	}
 
-	/**
-	 * Creates a new dropdown menu with the given width and fonts.
-	 * @param container the container rendering this menu
-	 * @param items the list of items (with names given as their {@code toString()} methods)
-	 * @param x the top-left x coordinate
-	 * @param y the top-left y coordinate
-	 * @param width the menu width
-	 * @param normal the normal font
-	 * @param selected the font for the selected item
-	 */
-	public DropdownMenu(GUIContext container, E[] items, float x, float y, int width, UnicodeFont normal, UnicodeFont selected) {
-		super(container);
-		this.fontNormal = normal;
-		this.fontSelected = selected;
-		init(items, x, y, width);
-	}
-
-	/**
-	 * Returns the maximum item width from the list.
-	 */
 	private int getMaxItemWidth() {
 		int maxWidth = 0;
-		for (int i = 0; i < itemNames.length; i++) {
-			int w = fontSelected.getWidth(itemNames[i]);
-			if (w > maxWidth)
+		for (String itemName : itemNames) {
+			int w = fontSelected.getWidth(itemName);
+			if (w > maxWidth) {
 				maxWidth = w;
+			}
 		}
 		return maxWidth;
 	}
 
-	/**
-	 * Initializes the component.
-	 */
-	private void init(E[] items, float x, float y, int width) {
+	@SuppressWarnings("SuspiciousNameCombination")
+	private void init(E[] items, int x, int y, int width) {
 		this.items = items;
 		this.itemNames = new String[items.length];
-		for (int i = 0; i < itemNames.length; i++)
+		for (int i = 0; i < itemNames.length; i++) {
 			itemNames[i] = items[i].toString();
+		}
 		this.x = x;
 		this.y = y;
 		this.baseHeight = fontNormal.getLineHeight();
@@ -188,77 +98,27 @@ public class DropdownMenu<E> extends AbstractComponent {
 	}
 
 	@Override
-	public void setLocation(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public void updateHover(int x, int y) {
+		this.hovered = this.x <= x && x <= this.x + width && this.y <= y && y <= this.y + (expanded ? height : baseHeight);
+	}
+
+	public boolean baseContains(int x, int y) {
+		return (x > this.x && x < this.x + width && y > this.y && y < this.y + baseHeight);
 	}
 
 	@Override
-	public int getX() { return (int) x; }
+	public void render(Graphics g) {
+		int delta = displayContainer.renderDelta;
 
-	@Override
-	public int getY() { return (int) y; }
-
-	@Override
-	public int getWidth() { return width; }
-
-	@Override
-	public int getHeight() { return (expanded) ? height : baseHeight; }
-
-	/** Activates the component. */
-	public void activate() { this.active = true; }
-
-	/** Deactivates the component. */
-	public void deactivate() { this.active = false; }
-
-	/**
-	 * Returns whether the dropdown menu is currently open.
-	 * @return true if open, false otherwise
-	 */
-	public boolean isOpen() { return expanded; }
-
-	/**
-	 * Opens or closes the dropdown menu.
-	 * @param flag true to open, false to close
-	 */
-	public void open(boolean flag) { this.expanded = flag; }
-
-	/**
-	 * Returns true if the coordinates are within the menu bounds.
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
-	 */
-	public boolean contains(float cx, float cy) {
-		return (cx > x && cx < x + width && (
-		        (cy > y && cy < y + baseHeight) ||
-		        (expanded && cy > y + offsetY && cy < y + height)));
-	}
-
-	/**
-	 * Returns true if the coordinates are within the base item bounds.
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
-	 */
-	public boolean baseContains(float cx, float cy) {
-		return (cx > x && cx < x + width && cy > y && cy < y + baseHeight);
-	}
-
-	@Override
-	public void render(GUIContext container, Graphics g) throws SlickException {
 		// update animation
-		long time = container.getTime();
-		if (lastUpdateTime > 0) {
-			int delta = (int) (time - lastUpdateTime);
-			expandProgress.update((expanded) ? delta : -delta * 2);
-		}
-		this.lastUpdateTime = time;
+		expandProgress.update((expanded) ? delta : -delta * 2);
 
 		// get parameters
-		Input input = container.getInput();
-		int idx = getIndexAt(input.getMouseX(), input.getMouseY());
+		int idx = getIndexAt(displayContainer.mouseY);
 		float t = expandProgress.getValue();
-		if (expanded)
+		if (expanded) {
 			t = AnimationEquation.OUT_CUBIC.calc(t);
+		}
 
 		// background and border
 		Color oldGColor = g.getColor();
@@ -293,12 +153,12 @@ public class DropdownMenu<E> extends AbstractComponent {
 
 		// text
 		chevronDown.draw(x + width - chevronDown.getWidth() - width * CHEVRON_X, y + (baseHeight - chevronDown.getHeight()) / 2f, chevronDownColor);
-		fontNormal.drawString(x + (width * 0.03f), y + (fontNormal.getPaddingTop() + fontNormal.getPaddingBottom()) / 2f, itemNames[itemIndex], textColor);
+		fontNormal.drawString(x + (width * 0.03f), y + (fontNormal.getPaddingTop() + fontNormal.getPaddingBottom()) / 2f, itemNames[selectedItemIndex], textColor);
 		float oldTextAlpha = textColor.a;
 		textColor.a *= t;
 		if (expanded || t >= 0.0001) {
 			for (int i = 0; i < itemNames.length; i++) {
-				Font f = (i == itemIndex) ? fontSelected : fontNormal;
+				Font f = (i == selectedItemIndex) ? fontSelected : fontNormal;
 				if (i == idx && t >= 0.999)
 					chevronRight.draw(x, y + offsetY + (offsetY * i) + (offsetY - chevronRight.getHeight()) / 2f, chevronRightColor);
 				f.drawString(x + chevronRight.getWidth(), y + offsetY + (offsetY * i * t), itemNames[i], textColor);
@@ -310,131 +170,89 @@ public class DropdownMenu<E> extends AbstractComponent {
 	/**
 	 * Returns the index of the item at the given location, -1 for the base item,
 	 * and -2 if there is no item at the location.
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
+	 * @param y the y coordinate
 	 */
-	private int getIndexAt(float cx, float cy) {
-		if (!contains(cx, cy))
+	private int getIndexAt(int y) {
+		if (!hovered) {
 			return -2;
-		if (cy <= y + baseHeight)
+		}
+		if (y <= this.y + baseHeight) {
 			return -1;
-		if (!expanded)
+		}
+		if (!expanded) {
 			return -2;
-		return (int) ((cy - (y + offsetY)) / offsetY);
+		}
+		return (int) ((y - (this.y + offsetY)) / offsetY);
 	}
 
-	/**
-	 * Resets the menu state.
-	 */
 	public void reset() {
 		this.expanded = false;
-		this.lastUpdateTime = 0;
 		expandProgress.setTime(0);
-		blockClick = false;
+	}
+
+
+	@Override
+	public void setFocused(boolean focused) {
+		super.setFocused(focused);
+		expanded = focused;
 	}
 
 	@Override
-	public void mousePressed(int button, int x, int y) {
-		if (!active)
-			return;
+	public boolean isFocusable() {
+		return true;
+	}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON)
-			return;
+	@Override
+	public void mouseReleased(int button) {
+		super.mouseReleased(button);
 
-		int idx = getIndexAt(x, y);
+		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			return;
+		}
+
+		int idx = getIndexAt(displayContainer.mouseY);
 		if (idx == -2) {
 			this.expanded = false;
 			return;
 		}
-		if (!menuClicked(idx))
+		if (!canSelect(selectedItemIndex)) {
 			return;
-		this.expanded = (idx == -1) ? !expanded : false;
-		if (idx >= 0 && itemIndex != idx) {
-			this.itemIndex = idx;
-			itemSelected(idx, items[idx]);
 		}
-		blockClick = true;
-		consumeEvent();
-	}
-
-	@Override
-	public void mouseClicked(int button, int x, int y, int clickCount) {
-		if (!active)
-			return;
-
-		if (blockClick) {
-			blockClick = false;
-			consumeEvent();
+		this.expanded = (idx == -1) && !expanded;
+		if (idx >= 0 && selectedItemIndex != idx) {
+			this.selectedItemIndex = idx;
+			itemSelected(idx, items[selectedItemIndex]);
 		}
 	}
 
-	/**
-	 * Notification that a new item was selected (via override).
-	 * @param index the index of the item selected
-	 * @param item the item selected
-	 */
-	public void itemSelected(int index, E item) {}
-
-	/**
-	 * Notification that the menu was clicked (via override).
-	 * @param index the index of the item clicked, or -1 for the base item
-	 * @return true to process the click, or false to block/intercept it
-	 */
-	public boolean menuClicked(int index) { return true; }
-
-	@Override
-	public void setFocus(boolean focus) { /* does not currently use the "focus" concept */ }
-
-	@Override
-	public void mouseReleased(int button, int x, int y) { /* does not currently use the "focus" concept */ }
-
-	/**
-	 * Selects the item at the given index.
-	 * @param index the list item index
-	 * @throws IllegalArgumentException if {@code index} is negative or greater than or equal to size
-	 */
-	public void setSelectedIndex(int index) {
-		if (index < 0 || index >= items.length)
-			throw new IllegalArgumentException();
-		this.itemIndex = index;
+	protected boolean canSelect(int index) {
+		return true;
 	}
 
-	/**
-	 * Returns the index of the selected item.
-	 */
-	public int getSelectedIndex() { return itemIndex; }
+	protected void itemSelected(int index, E item) {
+	}
 
-	/**
-	 * Returns the selected item.
-	 */
-	public E getSelectedItem() { return items[itemIndex]; }
+	public E getSelectedItem() {
+		return items[selectedItemIndex];
+	}
 
-	/**
-	 * Returns the item at the given index.
-	 * @param index the list item index
-	 */
-	public E getItemAt(int index) { return items[index]; }
+	public void setBackgroundColor(Color c) {
+		this.backgroundColor = c;
+	}
 
-	/**
-	 * Returns the number of items in the list.
-	 */
-	public int getItemCount() { return items.length; }
+	public void setHighlightColor(Color c) {
+		this.highlightColor = c;
+	}
 
-	/** Sets the text color. */
-	public void setTextColor(Color c) { this.textColor = c; }
+	public void setBorderColor(Color c) {
+		this.borderColor = c;
+	}
 
-	/** Sets the background color. */
-	public void setBackgroundColor(Color c) { this.backgroundColor = c; }
+	public void setChevronDownColor(Color c) {
+		this.chevronDownColor = c;
+	}
 
-	/** Sets the highlight color. */
-	public void setHighlightColor(Color c) { this.highlightColor = c; }
-
-	/** Sets the border color. */
-	public void setBorderColor(Color c) { this.borderColor = c; }
-
-	/** Sets the down chevron color. */
-	public void setChevronDownColor(Color c) { this.chevronDownColor = c; }
-
-	/** Sets the right chevron color. */
-	public void setChevronRightColor(Color c) { this.chevronRightColor = c; }
+	public void setChevronRightColor(Color c) {
+		this.chevronRightColor = c;
+	}
 }

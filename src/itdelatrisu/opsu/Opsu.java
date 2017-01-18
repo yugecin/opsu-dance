@@ -93,7 +93,7 @@ public class Opsu extends StateBasedGame {
 		addState(new GamePauseMenu(STATE_GAMEPAUSEMENU));
 		addState(new GameRanking(STATE_GAMERANKING));
 		addState(new OptionsMenu(STATE_OPTIONSMENU));
-		addState(new DownloadsMenu(STATE_DOWNLOADSMENU));
+		//addState(new DownloadsMenu(STATE_DOWNLOADSMENU));
 	}
 
 	/**

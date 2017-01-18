@@ -51,17 +51,15 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.EasedFadeOutTransition;
-import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.state.ComplexOpsuState;
 
 /**
  * Downloads menu.
@@ -69,7 +67,10 @@ import org.newdawn.slick.util.Log;
  * Players are able to download beatmaps off of various servers and import them
  * from this state.
  */
-public class DownloadsMenu extends BasicGameState {
+public class DownloadsMenu extends ComplexOpsuState {
+
+	private final InstanceContainer instanceContainer;
+
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 700;
 
@@ -288,45 +289,42 @@ public class DownloadsMenu extends BasicGameState {
 		}
 	}
 
-	// game-related variables
-	private GameContainer container;
-	private StateBasedGame game;
-	private Input input;
-	private final int state;
-
-	public DownloadsMenu(int state) {
-		this.state = state;
+	public DownloadsMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
+		super(displayContainer);
+		this.instanceContainer = instanceContainer;
 	}
 
 	@Override
-	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		this.container = container;
-		this.game = game;
-		this.input = container.getInput();
+	public void revalidate() {
+		super.revalidate();
 
-		int width = container.getWidth();
-		int height = container.getHeight();
-		float baseX = width * 0.024f;
-		float searchY = (height * 0.04f) + Fonts.LARGE.getLineHeight();
-		float searchWidth = width * 0.3f;
+		components.clear();
+
+		int width = displayContainer.width;
+		int height = displayContainer.height;
+		int baseX = (int) (width * 0.024f);
+		int searchY = (int) (height * 0.04f + Fonts.LARGE.getLineHeight());
+		int searchWidth = (int) (width * 0.3f);
 
 		// search
 		searchTimer = SEARCH_DELAY;
 		searchResultString = "Loading data from server...";
-		search = new TextField(
-				container, Fonts.DEFAULT, (int) baseX, (int) searchY,
-				(int) searchWidth, Fonts.MEDIUM.getLineHeight()
-		);
+		search = new TextField(displayContainer, Fonts.DEFAULT, baseX, searchY, searchWidth, Fonts.MEDIUM.getLineHeight()) {
+			@Override
+			public boolean isFocusable() {
+				return false;
+			}
+		};
+		search.setFocused(true);
 		search.setBackgroundColor(Colors.BLACK_BG_NORMAL);
 		search.setBorderColor(Color.white);
 		search.setTextColor(Color.white);
-		search.setConsumeEvents(false);
 		search.setMaxLength(255);
+		components.add(search);
 
 		// page buttons
-		float pageButtonY = height * 0.2f;
-		float pageButtonWidth = width * 0.7f;
+		int pageButtonY = (int) (height * 0.2f);
+		int pageButtonWidth = (int) (width * 0.7f);
 		Image prevImg = GameImage.MUSIC_PREVIOUS.getImage();
 		Image nextImg = GameImage.MUSIC_NEXT.getImage();
 		prevPage = new MenuButton(prevImg, baseX + prevImg.getWidth() / 2f,
@@ -337,25 +335,25 @@ public class DownloadsMenu extends BasicGameState {
 		nextPage.setHoverExpand(1.5f);
 
 		// buttons
-		float buttonMarginX = width * 0.004f;
-		float buttonHeight = height * 0.038f;
-		float resetWidth = width * 0.085f;
-		float rankedWidth = width * 0.15f;
-		float lowerWidth = width * 0.12f;
-		float topButtonY = searchY + Fonts.MEDIUM.getLineHeight() / 2f;
-		float lowerButtonY = height * 0.995f - searchY - buttonHeight / 2f;
+		int buttonMarginX = (int) (width * 0.004f);
+		int buttonHeight = (int) (height * 0.038f);
+		int resetWidth = (int) (width * 0.085f);
+		int rankedWidth = (int) (width * 0.15f);
+		int lowerWidth = (int) (width * 0.12f);
+		int topButtonY = (int) (searchY + Fonts.MEDIUM.getLineHeight() / 2f);
+		int lowerButtonY = (int) (height * 0.995f - searchY - buttonHeight / 2f);
 		Image button = GameImage.MENU_BUTTON_MID.getImage();
 		Image buttonL = GameImage.MENU_BUTTON_LEFT.getImage();
 		Image buttonR = GameImage.MENU_BUTTON_RIGHT.getImage();
 		buttonL = buttonL.getScaledCopy(buttonHeight / buttonL.getHeight());
 		buttonR = buttonR.getScaledCopy(buttonHeight / buttonR.getHeight());
 		int lrButtonWidth = buttonL.getWidth() + buttonR.getWidth();
-		Image resetButtonImage = button.getScaledCopy((int) resetWidth - lrButtonWidth, (int) buttonHeight);
-		Image rankedButtonImage = button.getScaledCopy((int) rankedWidth - lrButtonWidth, (int) buttonHeight);
-		Image lowerButtonImage = button.getScaledCopy((int) lowerWidth - lrButtonWidth, (int) buttonHeight);
-		float resetButtonWidth = resetButtonImage.getWidth() + lrButtonWidth;
-		float rankedButtonWidth = rankedButtonImage.getWidth() + lrButtonWidth;
-		float lowerButtonWidth = lowerButtonImage.getWidth() + lrButtonWidth;
+		Image resetButtonImage = button.getScaledCopy(resetWidth - lrButtonWidth, buttonHeight);
+		Image rankedButtonImage = button.getScaledCopy(rankedWidth - lrButtonWidth, buttonHeight);
+		Image lowerButtonImage = button.getScaledCopy(lowerWidth - lrButtonWidth, buttonHeight);
+		int resetButtonWidth = resetButtonImage.getWidth() + lrButtonWidth;
+		int rankedButtonWidth = rankedButtonImage.getWidth() + lrButtonWidth;
+		int lowerButtonWidth = lowerButtonImage.getWidth() + lrButtonWidth;
 		clearButton = new MenuButton(lowerButtonImage, buttonL, buttonR,
 				width * 0.75f + buttonMarginX + lowerButtonWidth / 2f, lowerButtonY);
 		importButton = new MenuButton(lowerButtonImage, buttonL, buttonR,
@@ -374,8 +372,8 @@ public class DownloadsMenu extends BasicGameState {
 
 		// dropdown menu
 		int serverWidth = (int) (width * 0.12f);
-		serverMenu = new DropdownMenu<DownloadServer>(container, SERVERS,
-				baseX + searchWidth + buttonMarginX * 3f + resetButtonWidth + rankedButtonWidth, searchY, serverWidth) {
+		int x = baseX + searchWidth + buttonMarginX * 3 + resetButtonWidth + rankedButtonWidth;
+		serverMenu = new DropdownMenu<DownloadServer>(displayContainer, SERVERS, x, searchY, serverWidth) {
 			@Override
 			public void itemSelected(int index, DownloadServer item) {
 				resultList = null;
@@ -388,13 +386,14 @@ public class DownloadsMenu extends BasicGameState {
 				searchResultString = "Loading data from server...";
 				lastQuery = null;
 				pageDir = Page.RESET;
-				if (searchQuery != null)
+				if (searchQuery != null) {
 					searchQuery.interrupt();
+				}
 				resetSearchTimer();
 			}
 
 			@Override
-			public boolean menuClicked(int index) {
+			public boolean canSelect(int index) {
 				// block input during beatmap importing
 				if (importThread != null)
 					return false;
@@ -406,28 +405,25 @@ public class DownloadsMenu extends BasicGameState {
 		serverMenu.setBackgroundColor(Colors.BLACK_BG_HOVER);
 		serverMenu.setBorderColor(Color.black);
 		serverMenu.setChevronRightColor(Color.white);
+		components.add(serverMenu);
 	}
 
 	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g)
-			throws SlickException {
-		int width = container.getWidth();
-		int height = container.getHeight();
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
-		boolean inDropdownMenu = serverMenu.contains(mouseX, mouseY);
+	public void render(Graphics g) {
+		super.render(g);
 
 		// background
 		GameImage.SEARCH_BG.getImage().draw();
 
 		// title
-		Fonts.LARGE.drawString(width * 0.024f, height * 0.03f, "Download Beatmaps!", Color.white);
+		Fonts.LARGE.drawString(displayContainer.width * 0.024f, displayContainer.height * 0.03f, "Download Beatmaps!", Color.white);
 
 		// search
 		g.setColor(Color.white);
 		g.setLineWidth(2f);
-		search.render(container, g);
+		search.render(g);
 		Fonts.BOLD.drawString(
-				search.getX() + search.getWidth() * 0.01f, search.getY() + search.getHeight() * 1.3f,
+				search.x + search.width * 0.01f, search.y + search.height * 1.3f,
 				searchResultString, Color.white
 		);
 
@@ -446,7 +442,7 @@ public class DownloadsMenu extends BasicGameState {
 				if (index >= nodes.length)
 					break;
 				nodes[index].drawResult(g, offset + i * DownloadNode.getButtonOffset(),
-						DownloadNode.resultContains(mouseX, mouseY - offset, i) && !inDropdownMenu,
+						DownloadNode.resultContains(displayContainer.mouseX, displayContainer.mouseY - offset, i) && !serverMenu.isHovered(),
 						(index == focusResult), (previewID == nodes[index].getID()));
 			}
 			g.clearClip();
@@ -457,9 +453,9 @@ public class DownloadsMenu extends BasicGameState {
 
 			// pages
 			if (nodes.length > 0) {
-				float baseX = width * 0.024f;
-				float buttonY = height * 0.2f;
-				float buttonWidth = width * 0.7f;
+				float baseX = displayContainer.width * 0.024f;
+				float buttonY = displayContainer.height * 0.2f;
+				float buttonWidth = displayContainer.width * 0.7f;
 				Fonts.BOLD.drawString(
 						baseX + (buttonWidth - Fonts.BOLD.getWidth("Page 1")) / 2f,
 						buttonY - Fonts.BOLD.getLineHeight() * 1.3f,
@@ -473,11 +469,11 @@ public class DownloadsMenu extends BasicGameState {
 		}
 
 		// downloads
-		float downloadsX = width * 0.75f, downloadsY = search.getY();
+		float downloadsX = displayContainer.width * 0.75f, downloadsY = search.y;
 		g.setColor(Colors.BLACK_BG_NORMAL);
 		g.fillRect(downloadsX, downloadsY,
-				width * 0.25f, height - downloadsY * 2f);
-		Fonts.LARGE.drawString(downloadsX + width * 0.015f, downloadsY + height * 0.015f, "Downloads", Color.white);
+				displayContainer.width * 0.25f, displayContainer.height - downloadsY * 2f);
+		Fonts.LARGE.drawString(downloadsX + displayContainer.width * 0.015f, downloadsY + displayContainer.height * 0.015f, "Downloads", Color.white);
 		int downloadsSize = DownloadList.get().size();
 		if (downloadsSize > 0) {
 			int maxDownloadsShown = DownloadNode.maxDownloadsShown();
@@ -493,7 +489,7 @@ public class DownloadsMenu extends BasicGameState {
 				if (node == null)
 					break;
 				node.drawDownload(g, i * DownloadNode.getInfoHeight() + offset, index,
-						DownloadNode.downloadContains(mouseX, mouseY - offset, i));
+						DownloadNode.downloadContains(displayContainer.mouseX, displayContainer.mouseY - offset, i));
 			}
 			g.clearClip();
 
@@ -510,13 +506,13 @@ public class DownloadsMenu extends BasicGameState {
 		rankedButton.draw(Color.magenta);
 
 		// dropdown menu
-		serverMenu.render(container, g);
+		serverMenu.render(g);
 
 		// importing beatmaps
 		if (importThread != null) {
 			// darken the screen
 			g.setColor(Colors.BLACK_ALPHA);
-			g.fillRect(0, 0, width, height);
+			g.fillRect(0, 0, displayContainer.width, displayContainer.height);
 
 			UI.drawLoadingProgress(g);
 		}
@@ -529,8 +525,10 @@ public class DownloadsMenu extends BasicGameState {
 	}
 
 	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta)
-			throws SlickException {
+	public void preRenderUpdate() {
+		super.preRenderUpdate();
+
+		int delta = displayContainer.renderDelta;
 		UI.update(delta);
 		if (importThread == null)
 			MusicController.loopTrackIfEnded(false);
@@ -547,11 +545,12 @@ public class DownloadsMenu extends BasicGameState {
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).setFocus(importedNode, -1, true, true);
+				instanceContainer.provide(SongMenu.class).setFocus(importedNode, -1, true, true);
 			}
 			importThread = null;
 		}
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
+		int mouseX = displayContainer.mouseX;
+		int mouseY = displayContainer.mouseY;
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
@@ -572,7 +571,6 @@ public class DownloadsMenu extends BasicGameState {
 			focusTimer += delta;
 
 		// search
-		search.setFocus(true);
 		searchTimer += delta;
 		if (searchTimer >= SEARCH_DELAY && importThread == null) {
 			searchTimer = 0;
@@ -608,24 +606,26 @@ public class DownloadsMenu extends BasicGameState {
 	}
 
 	@Override
-	public int getID() { return state; }
+	public boolean mousePressed(int button, int x, int y) {
+		if (super.mousePressed(button, x, y)) {
+			return true;
+		}
 
-	@Override
-	public void mousePressed(int button, int x, int y) {
-		// check mouse button
-		if (button == Input.MOUSE_MIDDLE_BUTTON)
-			return;
+		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			return false;
+		}
 
 		// block input during beatmap importing
-		if (importThread != null)
-			return;
+		if (importThread != null) {
+			return true;
+		}
 
 		// back
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			((MainMenu) game.getState(Opsu.STATE_MAINMENU)).reset();
-			game.enterState(Opsu.STATE_MAINMENU, new EasedFadeOutTransition(), new FadeInTransition());
-			return;
+			instanceContainer.provide(MainMenu.class).reset();
+			displayContainer.switchState(MainMenu.class);
+			return true;
 		}
 
 		// search results
@@ -694,11 +694,12 @@ public class DownloadsMenu extends BasicGameState {
 									}
 								}.start();
 							}
-							return;
+							return true;
 						}
 
-						if (isLoaded)
-							return;
+						if (isLoaded) {
+							return true;
+						}
 
 						SoundController.playSound(SoundEffect.MENUCLICK);
 						if (index == focusResult) {
@@ -725,7 +726,7 @@ public class DownloadsMenu extends BasicGameState {
 						break;
 					}
 				}
-				return;
+				return true;
 			}
 
 			// pages
@@ -741,7 +742,7 @@ public class DownloadsMenu extends BasicGameState {
 							searchQuery.interrupt();
 						resetSearchTimer();
 					}
-					return;
+					return true;
 				}
 				if (pageResultTotal < totalResults && nextPage.contains(x, y)) {
 					if (lastQueryDir == Page.NEXT && searchQuery != null && !searchQuery.isComplete())
@@ -753,7 +754,7 @@ public class DownloadsMenu extends BasicGameState {
 						if (searchQuery != null)
 							searchQuery.interrupt();
 						resetSearchTimer();
-						return;
+						return true;
 					}
 				}
 			}
@@ -763,7 +764,7 @@ public class DownloadsMenu extends BasicGameState {
 		if (clearButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			DownloadList.get().clearInactiveDownloads();
-			return;
+			return true;
 		}
 		if (importButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -771,7 +772,7 @@ public class DownloadsMenu extends BasicGameState {
 			// import songs in new thread
 			importThread = new BeatmapImportThread();
 			importThread.start();
-			return;
+			return true;
 		}
 		if (resetButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -781,7 +782,7 @@ public class DownloadsMenu extends BasicGameState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return;
+			return true;
 		}
 		if (rankedButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -791,7 +792,7 @@ public class DownloadsMenu extends BasicGameState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return;
+			return true;
 		}
 
 		// downloads
@@ -807,8 +808,9 @@ public class DownloadsMenu extends BasicGameState {
 				if (DownloadNode.downloadIconContains(x, y - offset, i)) {
 					SoundController.playSound(SoundEffect.MENUCLICK);
 					DownloadNode node = DownloadList.get().getNode(index);
-					if (node == null)
-						return;
+					if (node == null) {
+						return true;
+					}
 					Download dl = node.getDownload();
 					switch (dl.getStatus()) {
 					case CANCELLED:
@@ -822,62 +824,78 @@ public class DownloadsMenu extends BasicGameState {
 						dl.cancel();
 						break;
 					}
-					return;
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	@Override
-	public void mouseReleased(int button, int x, int y) {
-		// check mouse button
-		if (button == Input.MOUSE_MIDDLE_BUTTON)
-			return;
+	public boolean mouseReleased(int button, int x, int y) {
+		if (super.mouseReleased(button, x, y)) {
+			return true;
+		}
+
+		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			return false;
+		}
 
 		startDownloadIndexPos.released();
 		startResultPos.released();
+		return true;
 	}
 
 	@Override
-	public void mouseWheelMoved(int newValue) {
+	public boolean mouseWheelMoved(int newValue) {
 		// change volume
-		if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT)) {
+		if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
 			UI.changeVolume((newValue < 0) ? -1 : 1);
-			return;
+			return true;
 		}
 
 		// block input during beatmap importing
-		if (importThread != null)
-			return;
+		if (importThread != null) {
+			return true;
+		}
 
 		int shift = (newValue < 0) ? 1 : -1;
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
-		scrollLists(mouseX, mouseY, shift);
+		scrollLists(displayContainer.mouseX, displayContainer.mouseY, shift);
+		return true;
 	}
 
 	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
 		// block input during beatmap importing
-		if (importThread != null)
-			return;
-
-		// check mouse button
-		if (!input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON) &&
-			!input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON))
-			return;
+		if (importThread != null) {
+			return true;
+		}
 
 		int diff = newy - oldy;
-		if (diff == 0)
-			return;
+		if (diff == 0) {
+			return false;
+		}
+
 		startDownloadIndexPos.dragged(-diff);
 		startResultPos.dragged(-diff);
+		return true;
 	}
 
 	@Override
-	public void keyPressed(int key, char c) {
+	public boolean keyReleased(int key, char c) {
+		return super.keyReleased(key, c);
+	}
+
+	@Override
+	public boolean keyPressed(int key, char c) {
+		if (super.keyPressed(key, c)) {
+			return true;
+		}
+
 		// block input during beatmap importing
-		if (importThread != null && !(key == Input.KEY_ESCAPE || key == Input.KEY_F12))
-			return;
+		if (importThread != null && !(key == Input.KEY_ESCAPE || key == Input.KEY_F12)) {
+			return true;
+		}
 
 		switch (key) {
 		case Input.KEY_ESCAPE:
@@ -892,16 +910,16 @@ public class DownloadsMenu extends BasicGameState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				((MainMenu) game.getState(Opsu.STATE_MAINMENU)).reset();
-				game.enterState(Opsu.STATE_MAINMENU, new EasedFadeOutTransition(), new FadeInTransition());
+				instanceContainer.provide(MainMenu.class).reset();
+				displayContainer.switchState(MainMenu.class);
 			}
-			break;
+			return true;
 		case Input.KEY_ENTER:
 			if (!search.getText().isEmpty()) {
 				pageDir = Page.RESET;
 				resetSearchTimer();
 			}
-			break;
+			return true;
 		case Input.KEY_F5:
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			lastQuery = null;
@@ -909,30 +927,31 @@ public class DownloadsMenu extends BasicGameState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			break;
+			return true;
 		case Input.KEY_F7:
 			// TODO d
 			//Options.setNextFPS(container);
-			break;
+			return true;
 		case Input.KEY_F10:
 			Options.toggleMouseDisabled();
-			break;
+			return true;
 		case Input.KEY_F12:
 			Utils.takeScreenShot();
-			break;
-		default:
-			// wait for user to finish typing
-			if (Character.isLetterOrDigit(c) || key == Input.KEY_BACK) {
-				searchTimer = 0;
-				pageDir = Page.RESET;
-			}
-			break;
+			return true;
 		}
+		// wait for user to finish typing
+		if (Character.isLetterOrDigit(c) || key == Input.KEY_BACK) {
+			search.keyPressed(key, c);
+			searchTimer = 0;
+			pageDir = Page.RESET;
+		}
+		return true;
 	}
 
 	@Override
-	public void enter(GameContainer container, StateBasedGame game)
-			throws SlickException {
+	public void enter() {
+		super.enter();
+
 		UI.enter();
 		prevPage.resetHover();
 		nextPage.resetHover();
@@ -940,7 +959,6 @@ public class DownloadsMenu extends BasicGameState {
 		importButton.resetHover();
 		resetButton.resetHover();
 		rankedButton.resetHover();
-		serverMenu.activate();
 		serverMenu.reset();
 		focusResult = -1;
 		startResultPos.setPosition(0);
@@ -954,10 +972,10 @@ public class DownloadsMenu extends BasicGameState {
 	}
 
 	@Override
-	public void leave(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		search.setFocus(false);
-		serverMenu.deactivate();
+	public void leave() {
+		super.leave();
+
+		focusComponent(search);
 		SoundController.stopTrack();
 		MusicController.resume();
 	}
