@@ -395,8 +395,7 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				targetFPSindex = index;
-				Container.instance.setTargetFrameRate(targetFPS[index]);
-				Container.instance.setVSync(targetFPS[index] == 60);
+				displayContainer.setFPS(targetFPS[index]);
 			}
 
 			@Override
@@ -985,6 +984,7 @@ public class Options {
 		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false),
 		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
 
+		public static DisplayContainer displayContainer;
 
 		/** Option name. */
 		private final String name;
@@ -1283,9 +1283,9 @@ public class Options {
 	 * bar notification about the action.
 	 */
 	public static void setNextFPS(DisplayContainer displayContainer) {
+		GameOption.displayContainer = displayContainer; // TODO dirty shit
 		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
 		UI.sendBarNotification(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString()));
-		displayContainer.setFPS(GameOption.TARGET_FPS.val);
 	}
 
 	/**

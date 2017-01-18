@@ -667,21 +667,15 @@ public class ButtonMenu extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		switch (key) {
-		case Input.KEY_ESCAPE:
-			menuState.leave();
-			return true;
-		case Input.KEY_F7:
-			// TODO
-			//Options.setNextFPS(displayContainer);
-			return true;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			return true;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
+		if (super.keyPressed(key, c)) {
 			return true;
 		}
+
+		if (key == Input.KEY_ESCAPE) {
+			menuState.leave();
+			return true;
+		}
+
 		menuState.keyPressed(key, c);
 		return true;
 	}

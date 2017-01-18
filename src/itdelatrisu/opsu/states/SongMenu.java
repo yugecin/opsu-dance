@@ -1064,8 +1064,12 @@ public class SongMenu extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
+		if (super.keyPressed(key, c)) {
+			return true;
+		}
+
 		// block input
-		if ((reloadThread != null && !(key == Input.KEY_ESCAPE || key == Input.KEY_F12)) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
+		if ((reloadThread != null && key != Input.KEY_ESCAPE) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
 			return true;
 		}
 
@@ -1144,16 +1148,6 @@ public class SongMenu extends BaseOpsuState {
 				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, focusNode);
 				displayContainer.switchState(ButtonMenu.class);
 			}
-			return true;
-		case Input.KEY_F7:
-			// TODO d
-			//Options.setNextFPS(container);
-			return true;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			return true;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
 			return true;
 		case Input.KEY_ENTER:
 			if (focusNode == null)

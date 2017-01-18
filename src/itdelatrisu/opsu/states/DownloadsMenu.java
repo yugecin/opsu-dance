@@ -893,7 +893,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// block input during beatmap importing
-		if (importThread != null && !(key == Input.KEY_ESCAPE || key == Input.KEY_F12)) {
+		if (importThread != null && key != Input.KEY_ESCAPE) {
 			return true;
 		}
 
@@ -927,16 +927,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return true;
-		case Input.KEY_F7:
-			// TODO d
-			//Options.setNextFPS(container);
-			return true;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			return true;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
 			return true;
 		}
 		// wait for user to finish typing

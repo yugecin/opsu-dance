@@ -17,7 +17,10 @@
  */
 package yugecin.opsudance.core.state;
 
+import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionChangedEvent;
@@ -89,6 +92,18 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 
 	@Override
 	public boolean keyReleased(int key, char c) {
+		if (key == Input.KEY_F7) {
+			Options.setNextFPS(displayContainer);
+			return true;
+		}
+		if (key == Input.KEY_F10) {
+			Options.toggleMouseDisabled();
+			return true;
+		}
+		if (key == Input.KEY_F12) {
+			Utils.takeScreenShot();
+			return true;
+		}
 		return false;
 	}
 

@@ -95,6 +95,9 @@ public class ComplexOpsuState extends BaseOpsuState {
 
 	@Override
 	public boolean keyReleased(int key, char c) {
+		if (super.keyReleased(key, c)) {
+			return true;
+		}
 		if (focusedComponent != null) {
 			if (key == Input.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);

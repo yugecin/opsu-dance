@@ -634,6 +634,10 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
+		if (super.keyPressed(key, c)) {
+			return true;
+		}
+
 		switch (key) {
 		case Input.KEY_ESCAPE:
 		case Input.KEY_Q:
@@ -669,15 +673,6 @@ public class MainMenu extends BaseOpsuState {
 			return true;
 		case Input.KEY_DOWN:
 			UI.changeVolume(-1);
-			return true;
-		case Input.KEY_F7:
-			Options.setNextFPS(displayContainer);
-			return true;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			return true;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
 			return true;
 		}
 		return false;
