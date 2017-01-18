@@ -43,6 +43,7 @@ import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -206,8 +207,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
 		initGL();
-		sout("GL ready");
-		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 	}
@@ -233,6 +232,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			if (fullscreen) {
 				fullscreen = false;
 				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);
+				eventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
 			}
 		}
 
@@ -244,8 +244,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 		if (Display.isCreated()) {
 			initGL();
-
-			eventBus.post(new ResolutionChangedEvent(this.width, this.height));
 		}
 
 		if (displayMode.getBitsPerPixel() == 16) {
@@ -265,8 +263,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		input.addKeyListener(this);
 		input.addMouseListener(this);
 
+		sout("GL ready");
+
 		GameImage.init(width, height);
 		Fonts.init();
+
+		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
 	}
 
 	private int getDelta() {

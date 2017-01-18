@@ -74,7 +74,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		displayContainer.eventBus.post(new BubbleNotificationEvent("this is a bubble notification... bubbly bubbly bubbly linewraaaaaaaaaap", BubbleNotificationEvent.COMMONCOLOR_RED));
+		displayContainer.eventBus.post(new BubbleNotificationEvent("this is a bubble notification... bubbly bubbly bubbly linewraaaaaaaaaap", BubbleNotificationEvent.COLOR_RED));
 		return false;
 	}
 

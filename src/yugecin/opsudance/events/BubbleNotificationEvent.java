@@ -21,10 +21,11 @@ import org.newdawn.slick.Color;
 
 public class BubbleNotificationEvent {
 
-	public static final Color COMMONCOLOR_RED = new Color(138, 72, 51);
 	public static final Color COMMONCOLOR_GREEN = new Color(98, 131, 59);
 	public static final Color COMMONCOLOR_WHITE = new Color(220, 220, 220);
 	public static final Color COMMONCOLOR_PURPLE = new Color(94, 46, 149);
+	public static final Color COLOR_RED = new Color(178, 62, 41);
+	public static final Color COLOR_ORANGE = new Color(138, 72, 51);
 
 	public final String message;
 	public final Color borderColor;
