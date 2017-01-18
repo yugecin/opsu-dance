@@ -26,10 +26,7 @@ import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.KeyListener;
-import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
@@ -160,6 +157,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			timeSinceLastRender += delta;
 
 			input.poll(width, height);
+			Music.poll(delta);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
 			state.update();
