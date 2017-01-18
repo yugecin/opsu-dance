@@ -37,6 +37,7 @@ import java.io.File;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
@@ -180,6 +181,19 @@ public class Splash extends BaseOpsuState {
 			}
 			displayContainer.switchState(MainMenu.class);
 		}
+	}
+
+	@Override
+	public boolean onCloseRequest() {
+		if (thread != null && thread.isAlive()) {
+			thread.interrupt();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				Log.warn("InterruptedException while waiting for splash thread to die", e);
+			}
+		}
+		return true;
 	}
 
 	@Override
