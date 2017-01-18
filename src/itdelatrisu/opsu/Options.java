@@ -1372,7 +1372,7 @@ public class Options {
 		try {
 			container.setDisplayMode(width, height, isFullscreen());
 		} catch (Exception e) {
-			container.eventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COLOR_RED));
+			container.eventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
 			Log.error("Failed to set display mode.", e);
 		}
 
