@@ -77,7 +77,6 @@ public class UI {
 
 	// game-related variables
 	private static DisplayContainer displayContainer;
-	private static Input input;
 
 	// This class should not be instantiated.
 	private UI() {}
@@ -360,7 +359,8 @@ public class UI {
 			textWidth += Fonts.SMALL.getWidth(tooltip);
 
 		// get drawing coordinates
-		int x = input.getMouseX() + offset, y = input.getMouseY() + offset;
+		int x = displayContainer.mouseX + offset;
+		int y = displayContainer.mouseY + offset;
 		if (x + textWidth > displayContainer.width - margin)
 			x = displayContainer.width - margin - textWidth;
 		else if (x < margin)
