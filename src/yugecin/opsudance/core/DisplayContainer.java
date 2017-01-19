@@ -249,11 +249,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		if (DownloadList.get().hasActiveDownloads()) {
 			eventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 			exitRequested = false;
+			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
 			eventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 			exitRequested = false;
+			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		return true;
