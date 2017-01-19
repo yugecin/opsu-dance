@@ -19,9 +19,11 @@ package yugecin.opsudance;
 
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
@@ -76,6 +78,10 @@ public class OpsuDance {
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
 		Utils.deleteDirectory(Options.TEMP_DIR);
+		CurveRenderState.shutdown();
+		if (!Options.isWatchServiceEnabled()) {
+			BeatmapWatchService.destroy();
+		}
 	}
 
 	private boolean rungame() {
