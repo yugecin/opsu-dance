@@ -71,6 +71,7 @@ import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
+import yugecin.opsudance.ui.OptionsOverlay;
 
 /**
  * "Song Selection" state.
@@ -320,14 +321,20 @@ public class SongMenu extends ComplexOpsuState {
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
+	private final OptionsOverlay optionsOverlay;
+
 	public SongMenu(final DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
 		this.instanceContainer = instanceContainer;
+		optionsOverlay = new OptionsOverlay(this, displayContainer, OptionsMenu.normalOptions, 0);
+		overlays.add(optionsOverlay);
 	}
 
 	@Override
 	public void revalidate() {
 		super.revalidate();
+
+		components.clear();
 
 		// header/footer coordinates
 		headerY = displayContainer.height * 0.0075f + GameImage.MENU_MUSICNOTE.getImage().getHeight() +
@@ -460,8 +467,6 @@ public class SongMenu extends ComplexOpsuState {
 
 	@Override
 	public void render(Graphics g) {
-		super.render(g);
-
 		g.setBackground(Color.black);
 
 		int width = displayContainer.width;
@@ -711,6 +716,8 @@ public class SongMenu extends ComplexOpsuState {
 			UI.getBackButton().draw();
 
 		UI.draw(g);
+
+		super.render(g);
 	}
 
 	@Override
@@ -927,7 +934,7 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		} else if (selectOptionsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
-			// TODO d displayContainer.switchState(OptionsMenu.class);
+			optionsOverlay.show();
 			return true;
 		}
 
@@ -1166,7 +1173,7 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		case Input.KEY_O:
 			if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
-				// TODO d displayContainer.switchState(OptionsMenu.class);
+				optionsOverlay.show();
 			}
 			return true;
 		default:
@@ -1225,6 +1232,10 @@ public class SongMenu extends ComplexOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
+		if (super.mouseWheelMoved(newValue)) {
+			return true;
+		}
+
 		Input input = displayContainer.input;
 
 		if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT)) {

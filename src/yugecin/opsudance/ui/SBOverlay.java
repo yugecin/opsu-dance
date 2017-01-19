@@ -112,7 +112,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 
 	private final Game game;
 	private final MoveStoryboard msb;
-	private final OptionsOverlay overlay;
+	private OptionsOverlay overlay;
 
 	static {
 		for (OptionTab tab : options) {
@@ -124,7 +124,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		this.game = game;
 		this.msb = msb;
 		initialOptions = new HashMap<>();
-		overlay = new OptionsOverlay(this, options, 2, container);
+		//overlay = new OptionsOverlay(this, options, 2, container);
 		this.width = container.getWidth();
 		this.height = container.getHeight();
 		speed = 10;
@@ -160,13 +160,13 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			g.fillRect(curtime * width, height - 10f, 10f, 10f);
 		}
 		if (menu) {
-			overlay.render(g, container.getInput().getMouseX(), container.getInput().getMouseY());
+			//overlay.render(g, container.getInput().getMouseX(), container.getInput().getMouseY());
 		}
 	}
 
 	public void update(int delta, int mouseX, int mouseY) {
 		if (Options.isEnableSB() && menu) {
-			overlay.update(delta, mouseX, mouseY);
+			//overlay.update(delta, mouseX, mouseY);
 		}
 		msb.update(delta, mouseX, mouseY);
 	}

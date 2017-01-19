@@ -415,8 +415,7 @@ public class Options {
 		SHOW_FPS ("Show FPS Counter", "FpsCounter", "Show an FPS counter in the bottom-right hand corner.", true),
 		SHOW_UNICODE ("Prefer Non-English Metadata", "ShowUnicode", "Where available, song titles will be shown in their native language.", false) {
 			@Override
-			public void click(GameContainer container) {
-				super.click(container);
+			public void click() {
 				if (bool) {
 					try {
 						Fonts.LARGE.loadGlyphs();
@@ -468,8 +467,7 @@ public class Options {
 		},
 		NEW_CURSOR ("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true) {
 			@Override
-			public void click(GameContainer container) {
-				super.click(container);
+			public void click() {
 				UI.getCursor().reset();
 			}
 		},
@@ -1131,9 +1129,8 @@ public class Options {
 		 * Processes a mouse click action (via override).
 		 * <p>
 		 * By default, this inverts the current {@code bool} field.
-		 * @param container the game container
 		 */
-		public void click(GameContainer container) { bool = !bool; }
+		public void click() { bool = !bool; }
 
 		/**
 		 * Get a list of values to choose from
@@ -1697,7 +1694,7 @@ public class Options {
 	 * sends a bar notification about the action.
 	 */
 	public static void toggleMouseDisabled() {
-		GameOption.DISABLE_MOUSE_BUTTONS.click(null);
+		GameOption.DISABLE_MOUSE_BUTTONS.click();
 		UI.sendBarNotification((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
 			"Mouse buttons are disabled." : "Mouse buttons are enabled.");
 	}

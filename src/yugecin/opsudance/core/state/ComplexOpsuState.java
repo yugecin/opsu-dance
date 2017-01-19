@@ -24,15 +24,17 @@ import yugecin.opsudance.core.components.Component;
 
 import java.util.LinkedList;
 
-public class ComplexOpsuState extends BaseOpsuState {
+public abstract class ComplexOpsuState extends BaseOpsuState {
 
 	protected final LinkedList<Component> components;
+	protected final LinkedList<OverlayOpsuState> overlays;
 
 	private Component focusedComponent;
 
 	public ComplexOpsuState(DisplayContainer displayContainer) {
 		super(displayContainer);
 		this.components = new LinkedList<>();
+		this.overlays = new LinkedList<>();
 	}
 
 	public final void focusComponent(Component component) {
@@ -47,11 +49,55 @@ public class ComplexOpsuState extends BaseOpsuState {
 	}
 
 	public boolean isAnyComponentFocused() {
-		return focusedComponent != null;
+		return focusedComponent != null || isAnyOverlayActive();
+	}
+
+	public boolean isAnyOverlayActive() {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.active) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean mouseWheelMoved(int delta) {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.mouseWheelMoved(delta)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean mousePressed(int button, int x, int y) {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.mousePressed(button, x, y)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.mouseDragged(oldx, oldy, newx, newy)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.mouseReleased(button, x, y)) {
+				return true;
+			}
+		}
 		if (focusedComponent == null) {
 			for (Component component : components) {
 				if (!component.isFocusable()) {
@@ -83,20 +129,36 @@ public class ComplexOpsuState extends BaseOpsuState {
 			component.updateHover(displayContainer.mouseX, displayContainer.mouseY);
 			component.preRenderUpdate();
 		}
+		for (OverlayOpsuState overlay : overlays) {
+			overlay.preRenderUpdate();
+		}
+	}
+
+	@Override
+	protected void revalidate() {
+		super.revalidate();
+		for (OverlayOpsuState overlay : overlays) {
+			overlay.revalidate();
+		}
 	}
 
 	@Override
 	public void render(Graphics g) {
-		super.render(g);
-		for (Component component : components) {
-			component.render(g);
+		for (OverlayOpsuState overlay : overlays) {
+			overlay.render(g);
 		}
+		super.render(g);
 	}
 
 	@Override
 	public boolean keyReleased(int key, char c) {
 		if (super.keyReleased(key, c)) {
 			return true;
+		}
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.keyReleased(key, c)) {
+				return true;
+			}
 		}
 		if (focusedComponent != null) {
 			if (key == Input.KEY_ESCAPE) {
@@ -112,6 +174,11 @@ public class ComplexOpsuState extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
+		for (OverlayOpsuState overlay : overlays) {
+			if (overlay.keyPressed(key, c)) {
+				return true;
+			}
+		}
 		if (focusedComponent != null) {
 			if (key == Input.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);
