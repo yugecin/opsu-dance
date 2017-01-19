@@ -220,6 +220,17 @@ public class GameRanking extends BaseOpsuState {
 		}
 	}
 
+	@Override
+	public boolean onCloseRequest() {
+		SongMenu songmenu = instanceContainer.provide(SongMenu.class);
+		if (data != null && data.isGameplay()) {
+			songmenu.resetTrackOnLoad();
+		}
+		songmenu.resetGameDataOnLoad();
+		displayContainer.switchState(SongMenu.class);
+		return false;
+	}
+
 	/**
 	 * Returns to the song menu.
 	 */

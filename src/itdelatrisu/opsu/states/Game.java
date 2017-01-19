@@ -1894,7 +1894,9 @@ public class Game extends ComplexOpsuState {
 	 * Resets all game data and structures.
 	 */
 	public void resetGameData() {
-		data.clear();
+		if (data != null) {
+			data.clear();
+		}
 		objectIndex = 0;
 		breakIndex = 0;
 		breakTime = 0;
@@ -1916,7 +1918,9 @@ public class Game extends ComplexOpsuState {
 		autoMousePosition = new Vec2f();
 		autoMousePressed = false;
 		flashlightRadius = displayContainer.height * 2 / 3;
-		scoreboardStarStream.clear();
+		if (scoreboardStarStream != null) {
+			scoreboardStarStream.clear();
+		}
 		gameFinished = false;
 		gameFinishedTimer.setTime(0);
 

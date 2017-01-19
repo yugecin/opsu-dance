@@ -1025,7 +1025,7 @@ public class SongMenu extends ComplexOpsuState {
 					if (button != Input.MOUSE_RIGHT_BUTTON) {
 						// view score
 						instanceContainer.provide(GameRanking.class).setGameData(new GameData(focusScores[rank], displayContainer.width, displayContainer.height));
-						// TODO d displayContainer.switchState(GameRanking.class);
+						displayContainer.switchState(GameRanking.class);
 					} else {
 						// score management
 						instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.SCORE, focusScores[rank]);
