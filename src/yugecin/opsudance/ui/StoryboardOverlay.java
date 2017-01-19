@@ -22,86 +22,27 @@ import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
+import itdelatrisu.opsu.states.OptionsMenu;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SBOverlay implements OptionsOverlay.Parent {
-
-	private static final OptionTab[] options = new OptionsOverlay.OptionTab[]{
-		new OptionTab("Gameplay", new GameOption[] {
-			GameOption.BACKGROUND_DIM,
-			GameOption.DANCE_REMOVE_BG,
-			GameOption.SNAKING_SLIDERS,
-			GameOption.SHRINKING_SLIDERS,
-			GameOption.SHOW_HIT_LIGHTING,
-			GameOption.SHOW_HIT_ANIMATIONS,
-			GameOption.SHOW_COMBO_BURSTS,
-			GameOption.SHOW_PERFECT_HIT,
-			GameOption.SHOW_FOLLOW_POINTS,
-		}),
-		new OptionTab("Input", new GameOption[] {
-			GameOption.CURSOR_SIZE,
-			GameOption.NEW_CURSOR,
-			GameOption.DISABLE_CURSOR
-		}),
-		new OptionTab("Dance", new GameOption[] {
-			GameOption.DANCE_MOVER,
-			GameOption.DANCE_EXGON_DELAY,
-			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
-			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
-			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
-			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
-			GameOption.DANCE_MOVER_DIRECTION,
-			GameOption.DANCE_SLIDER_MOVER_TYPE,
-			GameOption.DANCE_SPINNER,
-			GameOption.DANCE_SPINNER_DELAY,
-			GameOption.DANCE_LAZY_SLIDERS,
-			GameOption.DANCE_CIRCLE_STREAMS,
-			GameOption.DANCE_ONLY_CIRCLE_STACKS,
-			GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
-			GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS,
-			GameOption.DANCE_MIRROR,
-		}),
-		new OptionTab("Dance display", new GameOption[] {
-			GameOption.DANCE_DRAW_APPROACH,
-			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
-			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
-			GameOption.DANCE_RGB_OBJECT_INC,
-			GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
-			GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
-			GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
-			GameOption.DANCE_RGB_CURSOR_INC,
-			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
-			GameOption.DANCE_HIDE_OBJECTS,
-			GameOption.DANCE_HIDE_UI,
-			GameOption.DANCE_HIDE_WATERMARK,
-		}),
-		new OptionTab ("Pippi", new GameOption[] {
-			GameOption.PIPPI_ENABLE,
-			GameOption.PIPPI_RADIUS_PERCENT,
-			GameOption.PIPPI_ANGLE_INC_MUL,
-			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
-			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
-			GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
-		})
-	};
+public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverlay.Listener {
 
 	private final static List<GameOption> optionList = new ArrayList<>();
 
-	private boolean hide;
-	private boolean menu;
+	private final DisplayContainer displayContainer;
 
-	private int width;
-	private int height;
+	private boolean hide;
 
 	private int speed;
 	private GameObject[] gameObjects;
@@ -112,43 +53,42 @@ public class SBOverlay implements OptionsOverlay.Parent {
 
 	private final Game game;
 	private final MoveStoryboard msb;
-	private OptionsOverlay overlay;
+	private final OptionsOverlay optionsOverlay;
 
 	static {
-		for (OptionTab tab : options) {
+		for (OptionTab tab : OptionsMenu.storyboardOptions) {
 			optionList.addAll(Arrays.asList(tab.options));
 		}
 	}
 
-	public SBOverlay(Game game, MoveStoryboard msb, GameContainer container) {
-		this.game = game;
+	public StoryboardOverlay(DisplayContainer displayContainer, MoveStoryboard msb, OptionsOverlay optionsOverlay, Game game) {
+		this.displayContainer = displayContainer;
 		this.msb = msb;
+		this.optionsOverlay = optionsOverlay;
+		this.game = game;
 		initialOptions = new HashMap<>();
-		//overlay = new OptionsOverlay(this, options, 2, container);
-		this.width = container.getWidth();
-		this.height = container.getHeight();
 		speed = 10;
 		gameObjects = new GameObject[0];
 	}
 
-	public void render(GameContainer container, Graphics g) {
+	@Override
+	public void onRender(Graphics g) {
 		if (!Options.isEnableSB() || hide) {
 			return;
 		}
-		msb.render(g);
 		int lh = Fonts.SMALL.getLineHeight();
-		Fonts.SMALL.drawString(10, height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
-		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
-		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
-		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
-		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
+		Fonts.SMALL.drawString(10, displayContainer.height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
+		Fonts.SMALL.drawString(10, displayContainer.height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
+		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh, "Menu: N", Color.cyan);
+		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh * 2, "HIDE: H", Color.cyan);
+		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
 		g.setColor(Color.red);
 		if (index < optionsMap.length && optionsMap[index] != null) {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
 				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getName(), Color.cyan);
-				Fonts.SMALL.drawString(width / 5, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
+				Fonts.SMALL.drawString(displayContainer.width / 5, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
 				g.fillRect(0, 50 + i * lh + lh / 4, 10, 10);
 				i++;
 			}
@@ -157,27 +97,16 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			int start = gameObjects[0].getTime();
 			int end = gameObjects[gameObjects.length - 1].getEndTime();
 			float curtime = (float) (MusicController.getPosition() - start) / (end - start);
-			g.fillRect(curtime * width, height - 10f, 10f, 10f);
-		}
-		if (menu) {
-			//overlay.render(g, container.getInput().getMouseX(), container.getInput().getMouseY());
+			g.fillRect(curtime * displayContainer.width, displayContainer.height - 10f, 10f, 10f);
 		}
 	}
 
-	public void update(int delta, int mouseX, int mouseY) {
-		if (Options.isEnableSB() && menu) {
-			//overlay.update(delta, mouseX, mouseY);
-		}
-		msb.update(delta, mouseX, mouseY);
+	@Override
+	public void onPreRenderUpdate() {
 	}
 
-	public boolean keyPressed(int key, char c) {
-		if (!Options.isEnableSB()) {
-			return false;
-		}
-		if (menu && overlay.keyPressed(key, c)) {
-			return true;
-		}
+	@Override
+	public boolean onKeyPressed(int key, char c) {
 		if (key == Input.KEY_C) {
 			if (speed > 0) {
 				speed -= 1;
@@ -196,11 +125,9 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		} else if (key == Input.KEY_H) {
 			hide = !hide;
 		} else if (key == Input.KEY_N) {
-			menu = !menu;
-			if (menu && speed != 0) {
+			optionsOverlay.show();
+			if (speed != 0) {
 				MusicController.pause();
-			} else if (!menu && speed != 0) {
-				MusicController.resume();
 			}
 		} else if (key == Input.KEY_J && index > 0) {
 			index--;
@@ -211,6 +138,11 @@ public class SBOverlay implements OptionsOverlay.Parent {
 			updateIndex(index);
 			setMusicPosition();
 		}
+		return false;
+	}
+
+	@Override
+	protected boolean onKeyReleased(int key, char c) {
 		return false;
 	}
 
@@ -252,20 +184,13 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		this.gameObjects = gameObjects;
 	}
 
-	public boolean mousePressed(int button, int x, int y) {
-		msb.mousePressed(x, y);
-		if (!menu) {
-			return false;
-		}
-		overlay.mousePressed(button, x, y);
+	@Override
+	public boolean onMousePressed(int button, int x, int y) {
 		return true;
 	}
 
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (!menu) {
-			return false;
-		}
-		overlay.mouseDragged(oldx, oldy, newx, newy);
+	@Override
+	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
 		return true;
 	}
 
@@ -293,12 +218,8 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		this.index--;
 	}
 
-	public boolean mouseReleased(int button, int x, int y) {
-		if (menu) {
-			overlay.mouseReleased(button, x, y);
-			return true;
-		}
-		msb.mouseReleased(x, y);
+	@Override
+	public boolean onMouseReleased(int button, int x, int y) {
 		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
 			return false;
 		}
@@ -318,15 +239,12 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		return true;
 	}
 
-	public boolean mouseWheelMoved(int delta) {
-		if (!menu) {
-			return false;
-		}
-		overlay.mouseWheelMoved(delta);
+	@Override
+	public boolean onMouseWheelMoved(int delta) {
 		return true;
 	}
 
-	public void enter() {
+	public void onEnter() {
 		// enter, save current settings
 		for (Options.GameOption o : optionList) {
 			initialOptions.put(o, o.write());
@@ -334,7 +252,7 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		speed = 10;
 	}
 
-	public void leave() {
+	public void onLeave() {
 		// leave, revert the settings saved before entering
 		for (Options.GameOption o : optionList) {
 			if (initialOptions.containsKey(o)) {
@@ -358,13 +276,8 @@ public class SBOverlay implements OptionsOverlay.Parent {
 		}
 	}
 
-	public float[] getPoint(int trackPosition) {
-		return msb.getPoint(trackPosition);
-	}
-
 	@Override
-	public void onLeave() {
-		menu = false;
+	public void onLeaveOptionsMenu() {
 		if (speed != 0) {
 			MusicController.resume();
 		}

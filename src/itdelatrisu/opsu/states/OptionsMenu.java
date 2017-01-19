@@ -133,4 +133,63 @@ public class OptionsMenu {
 		})
 	};
 
+	public static final OptionTab[] storyboardOptions = new OptionsOverlay.OptionTab[]{
+		new OptionTab("Gameplay", new GameOption[] {
+			GameOption.BACKGROUND_DIM,
+			GameOption.DANCE_REMOVE_BG,
+			GameOption.SNAKING_SLIDERS,
+			GameOption.SHRINKING_SLIDERS,
+			GameOption.SHOW_HIT_LIGHTING,
+			GameOption.SHOW_HIT_ANIMATIONS,
+			GameOption.SHOW_COMBO_BURSTS,
+			GameOption.SHOW_PERFECT_HIT,
+			GameOption.SHOW_FOLLOW_POINTS,
+		}),
+		new OptionTab("Input", new GameOption[] {
+			GameOption.CURSOR_SIZE,
+			GameOption.NEW_CURSOR,
+			GameOption.DISABLE_CURSOR
+		}),
+		new OptionTab("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER,
+			GameOption.DANCE_EXGON_DELAY,
+			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_MOVER_DIRECTION,
+			GameOption.DANCE_SLIDER_MOVER_TYPE,
+			GameOption.DANCE_SPINNER,
+			GameOption.DANCE_SPINNER_DELAY,
+			GameOption.DANCE_LAZY_SLIDERS,
+			GameOption.DANCE_CIRCLE_STREAMS,
+			GameOption.DANCE_ONLY_CIRCLE_STACKS,
+			GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
+			GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS,
+			GameOption.DANCE_MIRROR,
+		}),
+		new OptionTab("Dance display", new GameOption[] {
+			GameOption.DANCE_DRAW_APPROACH,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
+			GameOption.DANCE_RGB_OBJECT_INC,
+			GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
+			GameOption.DANCE_RGB_CURSOR_INC,
+			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
+			GameOption.DANCE_HIDE_OBJECTS,
+			GameOption.DANCE_HIDE_UI,
+			GameOption.DANCE_HIDE_WATERMARK,
+		}),
+		new OptionTab ("Pippi", new GameOption[] {
+			GameOption.PIPPI_ENABLE,
+			GameOption.PIPPI_RADIUS_PERCENT,
+			GameOption.PIPPI_ANGLE_INC_MUL,
+			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
+			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
+			GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
+		})
+	};
+
 }

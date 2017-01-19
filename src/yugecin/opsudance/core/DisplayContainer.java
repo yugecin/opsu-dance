@@ -334,7 +334,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void switchStateNow(Class<? extends OpsuState> newState) {
-		switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
+		switchState(newState, EmptyTransitionState.class, 0, FadeInTransitionState.class, 300);
+	}
+
+	public void switchStateInstantly(Class<? extends OpsuState> newState) {
+		state.leave();
+		state = instanceContainer.provide(newState);
+		state.enter();
 	}
 
 	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {

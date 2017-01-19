@@ -64,10 +64,9 @@ public class Circle extends GameObject {
 
 	/**
 	 * Initializes the Circle data type with map modifiers, images, and dimensions.
-	 * @param container the game container
 	 * @param circleDiameter the circle diameter
 	 */
-	public static void init(GameContainer container, float circleDiameter) {
+	public static void init(float circleDiameter) {
 		diameter = circleDiameter * HitObject.getXMultiplier();  // convert from Osupixels (640x480)
 		int diameterInt = (int) diameter;
 		GameImage.HITCIRCLE.setImage(GameImage.HITCIRCLE.getImage().getScaledCopy(diameterInt, diameterInt));

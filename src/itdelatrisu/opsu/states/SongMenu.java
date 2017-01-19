@@ -326,7 +326,7 @@ public class SongMenu extends ComplexOpsuState {
 	public SongMenu(final DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
 		this.instanceContainer = instanceContainer;
-		optionsOverlay = new OptionsOverlay(this, displayContainer, OptionsMenu.normalOptions, 0);
+		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions, 0);
 		overlays.add(optionsOverlay);
 	}
 
@@ -1794,6 +1794,6 @@ public class SongMenu extends ComplexOpsuState {
 		gameState.loadBeatmap(beatmap);
 		gameState.setRestart(Game.Restart.NEW);
 		gameState.setReplay(null);
-		// TODO d displayContainer.switchState(Game.class);
+		displayContainer.switchState(Game.class);
 	}
 }

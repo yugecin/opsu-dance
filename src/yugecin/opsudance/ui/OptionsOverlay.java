@@ -35,8 +35,9 @@ import yugecin.opsudance.core.state.OverlayOpsuState;
 
 public class OptionsOverlay extends OverlayOpsuState {
 
-	private final ComplexOpsuState parent;
 	private final DisplayContainer displayContainer;
+
+	private Listener listener;
 
 	private Image sliderBallImg;
 	private Image checkOnImg;
@@ -81,14 +82,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private int sliderSoundDelay;
 
-	public OptionsOverlay(ComplexOpsuState parent, DisplayContainer displayContainer, OptionTab[] tabs, int defaultSelectedTabIndex) {
-		this.parent = parent;
+	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] tabs, int defaultSelectedTabIndex) {
 		this.displayContainer = displayContainer;
 
 		this.tabs = tabs;
 		selectedTab = defaultSelectedTabIndex;
 
 		listHoverIndex = -1;
+	}
+
+	public void setListener(Listener listener) {
+		this.listener = listener;
 	}
 
 	@Override
@@ -399,7 +403,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (isListOptionOpen) {
 			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
 				hoverOption.clickListItem(listHoverIndex);
-				// TODO d parent.onSaveOption(hoverOption);
+				if (listener != null) {
+					listener.onSaveOption(hoverOption);
+				}
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			isListOptionOpen = false;
@@ -431,8 +437,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 	@Override
 	public boolean onMouseReleased(int button, int x, int y) {
 		selectedOption = null;
-		if (isAdjustingSlider) {
-			// TODO d parent.onSaveOption(hoverOption);
+		if (isAdjustingSlider && listener != null) {
+			listener.onSaveOption(hoverOption);
 		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
@@ -445,7 +451,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (hoverOption != null) {
 			if (hoverOption.getType() == OptionType.BOOLEAN) {
 				hoverOption.click();
-				// TODO d parent.onSaveOption(hoverOption);
+				if (listener != null) {
+					listener.onSaveOption(hoverOption);
+				}
 				SoundController.playSound(SoundEffect.MENUHIT);
 				return true;
 			} else if (hoverOption == GameOption.KEY_LEFT) {
@@ -466,6 +474,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
 			tScrollOffset += tab.options.length * optionHeight;
 		}
+
+		if (UI.getBackButton().contains(x, y) && listener != null) {
+			listener.onLeaveOptionsMenu();
+		}
+
 		return true;
 	}
 
@@ -500,16 +513,19 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		switch (key) {
-			case Input.KEY_ESCAPE:
-				if (isListOptionOpen) {
-					isListOptionOpen = false;
-					listHoverIndex = -1;
-					return true;
-				}
-				hide();
+		if (key == Input.KEY_ESCAPE) {
+			if (isListOptionOpen) {
+				isListOptionOpen = false;
+				listHoverIndex = -1;
 				return true;
+			}
+			hide();
+			if (listener != null) {
+				listener.onLeaveOptionsMenu();
+			}
+			return true;
 		}
+
 		return false;
 	}
 
@@ -570,9 +586,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	}
 
-	public interface Parent {
+	public interface Listener {
 
-		void onLeave();
+		void onLeaveOptionsMenu();
 		void onSaveOption(GameOption option);
 
 	}

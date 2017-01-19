@@ -26,8 +26,13 @@ public abstract class OverlayOpsuState implements OpsuState {
 	protected boolean active;
 	protected boolean acceptInput;
 
-	public abstract void hide();
-	public abstract void show();
+	public void hide() {
+		acceptInput = active = false;
+	}
+
+	public void show() {
+		acceptInput = active = true;
+	}
 
 	@Override
 	public final void update() {

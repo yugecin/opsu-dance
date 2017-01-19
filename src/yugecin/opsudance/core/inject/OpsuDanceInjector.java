@@ -57,6 +57,8 @@ public class OpsuDanceInjector extends Injector {
 		bind(ButtonMenu.class).asEagerSingleton();
 		bind(SongMenu.class).asEagerSingleton();
 		bind(DownloadsMenu.class).asEagerSingleton();
+		bind(GameRanking.class).asEagerSingleton();
+		bind(Game.class).asEagerSingleton();
 	}
 
 }
