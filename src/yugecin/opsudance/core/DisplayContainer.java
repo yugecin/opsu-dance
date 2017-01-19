@@ -22,6 +22,8 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.downloads.DownloadList;
+import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
@@ -102,6 +104,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	private String glVersion;
 	private String glVendor;
 
+	private long exitconfirmation;
+
 	public DisplayContainer(InstanceContainer instanceContainer, EventBus eventBus) {
 		this.instanceContainer = instanceContainer;
 		this.eventBus = eventBus;
@@ -155,7 +159,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 
 	public void run() throws Exception {
-		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest())) {
+		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
 
 			timeSinceLastRender += delta;
@@ -236,6 +240,23 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		if (wasMusicPlaying) {
 			MusicController.resume();
 		}
+	}
+
+	private boolean confirmExit() {
+		if (System.currentTimeMillis() - exitconfirmation < 10000) {
+			return true;
+		}
+		if (DownloadList.get().hasActiveDownloads()) {
+			eventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			exitRequested = false;
+			return false;
+		}
+		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
+			eventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			exitRequested = false;
+			return false;
+		}
+		return true;
 	}
 
 	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {
