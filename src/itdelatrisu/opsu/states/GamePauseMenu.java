@@ -19,9 +19,7 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
@@ -31,14 +29,11 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.FadeInTransition;
-import org.newdawn.slick.state.transition.EasedFadeOutTransition;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.state.BaseOpsuState;
 
 /**
  * "Game Pause/Fail" state.
@@ -46,33 +41,22 @@ import org.newdawn.slick.state.transition.EasedFadeOutTransition;
  * Players are able to continue the game (if applicable), retry the beatmap,
  * or return to the song menu from this state.
  */
-public class GamePauseMenu extends BasicGameState {
-	/** "Continue", "Retry", and "Back" buttons. */
+public class GamePauseMenu extends BaseOpsuState {
+
+	private final InstanceContainer instanceContainer;
+
 	private MenuButton continueButton, retryButton, backButton;
 
-	// game-related variables
-	private GameContainer container;
-	private StateBasedGame game;
-	private Input input;
-	private final int state;
-	private Game gameState;
+	private final Game gameState;
 
-	public GamePauseMenu(int state) {
-		this.state = state;
+	public GamePauseMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer, Game gameState) {
+		super(displayContainer);
+		this.instanceContainer = instanceContainer;
+		this.gameState = gameState;
 	}
 
 	@Override
-	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		this.container = container;
-		this.game = game;
-		this.input = container.getInput();
-		this.gameState = (Game) game.getState(Opsu.STATE_GAME);
-	}
-
-	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g)
-			throws SlickException {
+	public void render(Graphics g) {
 		// get background image
 		GameImage bg = (gameState.getRestart() == Game.Restart.LOSE) ?
 				GameImage.FAIL_BACKGROUND : GameImage.PAUSE_OVERLAY;
@@ -97,81 +81,78 @@ public class GamePauseMenu extends BasicGameState {
 	}
 
 	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta)
-			throws SlickException {
+	public void preRenderUpdate() {
+		int delta = displayContainer.renderDelta;
 		UI.update(delta);
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
-		continueButton.hoverUpdate(delta, mouseX, mouseY);
-		retryButton.hoverUpdate(delta, mouseX, mouseY);
-		backButton.hoverUpdate(delta, mouseX, mouseY);
+		continueButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		retryButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		backButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
 	}
 
 	@Override
-	public int getID() { return state; }
-
-	@Override
-	public void keyPressed(int key, char c) {
-		// game keys
-		if (!Keyboard.isRepeatEvent()) {
-			if (key == Options.getGameKeyLeft())
-				mousePressed(Input.MOUSE_LEFT_BUTTON, input.getMouseX(), input.getMouseY());
-			else if (key == Options.getGameKeyRight())
-				mousePressed(Input.MOUSE_RIGHT_BUTTON, input.getMouseX(), input.getMouseY());
+	public boolean keyPressed(int key, char c) {
+		if (super.keyPressed(key, c)) {
+			return true;
 		}
 
-		switch (key) {
-		case Input.KEY_ESCAPE:
+		// game keys
+		if (!Keyboard.isRepeatEvent()) {
+			if (key == Options.getGameKeyLeft()) {
+				mousePressed(Input.MOUSE_LEFT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+			} else if (key == Options.getGameKeyRight()) {
+				mousePressed(Input.MOUSE_RIGHT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+			}
+		}
+
+		if (key == Input.KEY_ESCAPE) {
 			// 'esc' will normally unpause, but will return to song menu if health is zero
 			if (gameState.getRestart() == Game.Restart.LOSE) {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).resetGameDataOnLoad();
+				instanceContainer.provide(SongMenu.class).resetGameDataOnLoad();
 				MusicController.playAt(MusicController.getBeatmap().previewTime, true);
-				if (UI.getCursor().isBeatmapSkinned())
+				if (UI.getCursor().isBeatmapSkinned()) {
 					UI.getCursor().reset();
-				game.enterState(Opsu.STATE_SONGMENU, new EasedFadeOutTransition(), new FadeInTransition());
+				}
+				displayContainer.switchState(SongMenu.class);
 			} else {
 				SoundController.playSound(SoundEffect.MENUBACK);
 				gameState.setRestart(Game.Restart.FALSE);
-				game.enterState(Opsu.STATE_GAME);
+				displayContainer.switchState(Game.class);
 			}
-			break;
-		case Input.KEY_R:
-			// restart
-			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
-				gameState.setRestart(Game.Restart.MANUAL);
-				game.enterState(Opsu.STATE_GAME);
-			}
-			break;
-		case Input.KEY_F7:
-			// TODO d
-			//Options.setNextFPS(container);
-			break;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			break;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
-			break;
+			return true;
 		}
+
+		if (key == Input.KEY_R && (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL))) {
+			gameState.setRestart(Game.Restart.MANUAL);
+			displayContainer.switchState(Game.class);
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
-	public void mousePressed(int button, int x, int y) {
-		if (button == Input.MOUSE_MIDDLE_BUTTON)
-			return;
+	public boolean mousePressed(int button, int x, int y) {
+		if (super.mousePressed(button, x, y)) {
+			return true;
+		}
+
+		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			return true;
+		}
 
 		boolean loseState = (gameState.getRestart() == Game.Restart.LOSE);
 		if (continueButton.contains(x, y) && !loseState) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			gameState.setRestart(Game.Restart.FALSE);
-			game.enterState(Opsu.STATE_GAME);
+			displayContainer.switchState(Game.class);
 		} else if (retryButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
 			gameState.setRestart(Game.Restart.MANUAL);
-			game.enterState(Opsu.STATE_GAME);
+			displayContainer.switchState(Game.class);
 		} else if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			((SongMenu) game.getState(Opsu.STATE_SONGMENU)).resetGameDataOnLoad();
+			instanceContainer.provide(SongMenu.class).resetGameDataOnLoad();
 			if (loseState)
 				MusicController.playAt(MusicController.getBeatmap().previewTime, true);
 			else
@@ -179,21 +160,30 @@ public class GamePauseMenu extends BasicGameState {
 			if (UI.getCursor().isBeatmapSkinned())
 				UI.getCursor().reset();
 			MusicController.setPitch(1.0f);
-			game.enterState(Opsu.STATE_SONGMENU, new EasedFadeOutTransition(), new FadeInTransition());
+			displayContainer.switchState(SongMenu.class);
 		}
+
+		return true;
 	}
 
 	@Override
-	public void mouseWheelMoved(int newValue) {
-		if (Options.isMouseWheelDisabled())
-			return;
+	public boolean mouseWheelMoved(int newValue) {
+		if (super.mouseWheelMoved(newValue)) {
+			return true;
+		}
+
+		if (Options.isMouseWheelDisabled()) {
+			return true;
+		}
 
 		UI.changeVolume((newValue < 0) ? -1 : 1);
+		return true;
 	}
 
 	@Override
-	public void enter(GameContainer container, StateBasedGame game)
-			throws SlickException {
+	public void enter() {
+		super.enter();
+
 		UI.enter();
 		MusicController.pause();
 		continueButton.resetHover();
@@ -201,17 +191,23 @@ public class GamePauseMenu extends BasicGameState {
 		backButton.resetHover();
 	}
 
+	@Override
+	public boolean onCloseRequest() {
+		SongMenu songmenu = instanceContainer.provide(SongMenu.class);
+		songmenu.resetTrackOnLoad();
+		songmenu.resetGameDataOnLoad();
+		displayContainer.switchState(SongMenu.class);
+		return false;
+	}
+
 	/**
 	 * Loads all game pause/fail menu images.
 	 */
 	public void loadImages() {
-		int width = container.getWidth();
-		int height = container.getHeight();
-
 		// initialize buttons
-		continueButton = new MenuButton(GameImage.PAUSE_CONTINUE.getImage(), width / 2f, height * 0.25f);
-		retryButton = new MenuButton(GameImage.PAUSE_RETRY.getImage(), width / 2f, height * 0.5f);
-		backButton = new MenuButton(GameImage.PAUSE_BACK.getImage(), width / 2f, height * 0.75f);
+		continueButton = new MenuButton(GameImage.PAUSE_CONTINUE.getImage(), displayContainer.width / 2f, displayContainer.height * 0.25f);
+		retryButton = new MenuButton(GameImage.PAUSE_RETRY.getImage(), displayContainer.width / 2f, displayContainer.height * 0.5f);
+		backButton = new MenuButton(GameImage.PAUSE_BACK.getImage(), displayContainer.width / 2f, displayContainer.height * 0.75f);
 		final int buttonAnimationDuration = 300;
 		continueButton.setHoverAnimationDuration(buttonAnimationDuration);
 		retryButton.setHoverAnimationDuration(buttonAnimationDuration);
@@ -224,4 +220,5 @@ public class GamePauseMenu extends BasicGameState {
 		retryButton.setHoverExpand();
 		backButton.setHoverExpand();
 	}
+
 }

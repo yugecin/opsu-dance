@@ -66,6 +66,8 @@ import yugecin.opsudance.*;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
+import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
+import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.sbv2.MoveStoryboard;
@@ -802,7 +804,7 @@ public class Game extends ComplexOpsuState {
 
 			// focus lost: go back to pause screen
 			else if (!Display.isActive()) {
-				// TODO d displayContainer.switchState(GamePauseMenu.class);
+				displayContainer.switchStateNow(GamePauseMenu.class);
 				pausePulse = 0f;
 			}
 
@@ -1034,7 +1036,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			// TODO d displayContainer.switchState(GamePauseMenu.class);
+			displayContainer.switchStateNow(GamePauseMenu.class);
 		}
 
 		// drain health
@@ -1061,7 +1063,7 @@ public class Game extends ComplexOpsuState {
 					rotations = new IdentityHashMap<>();
 					SoundController.playSound(SoundEffect.FAIL);
 
-					// TODO d displayContainer.switchState(GamePauseMenu.class, FadeOutTransitionState.class, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, FadeInTransitionState.class, 300);
+					displayContainer.switchState(GamePauseMenu.class, FadeOutTransitionState.class, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, FadeInTransitionState.class, 300);
 				}
 			}
 		}
@@ -1143,7 +1145,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			// TODO d displayContainer.switchStateNow(GamePauseMenu.class);
+			displayContainer.switchStateNow(GamePauseMenu.class);
 			break;
 		case Input.KEY_SPACE:
 			// skip intro
@@ -1296,7 +1298,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			// TODO d displayContainer.switchStateNow(GamePauseMenu.class);
+			displayContainer.switchStateNow(GamePauseMenu.class);
 			return true;
 		}
 
@@ -1973,7 +1975,7 @@ public class Game extends ComplexOpsuState {
 		skipButton.setHoverExpand(1.1f, MenuButton.Expand.UP_LEFT);
 
 		// load other images...
-		// TODO d instanceContainer.provide(GamePauseMenu.class).loadImages();
+		instanceContainer.provide(GamePauseMenu.class).loadImages();
 		data.loadImages();
 	}
 
