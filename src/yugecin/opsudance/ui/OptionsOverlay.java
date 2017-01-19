@@ -30,7 +30,6 @@ import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.*;
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 
 public class OptionsOverlay extends OverlayOpsuState {
@@ -402,9 +401,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		if (isListOptionOpen) {
 			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
-				hoverOption.clickListItem(listHoverIndex);
-				if (listener != null) {
-					listener.onSaveOption(hoverOption);
+				if (0 <= listHoverIndex && listHoverIndex < hoverOption.getListItems().length) {
+					hoverOption.clickListItem(listHoverIndex);
+					if (listener != null) {
+						listener.onSaveOption(hoverOption);
+					}
 				}
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
