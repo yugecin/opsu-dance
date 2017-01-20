@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.core;
 
+import itdelatrisu.opsu.downloads.Updater;
 import yugecin.opsudance.OpsuDance;
 import yugecin.opsudance.core.inject.OpsuDanceInjector;
 
@@ -27,6 +28,10 @@ public class Entrypoint {
 	public static void main(String[] args) {
 		sout("launched");
 		(new OpsuDanceInjector()).provide(OpsuDance.class).start(args);
+
+		if (Updater.get().getStatus() == Updater.Status.UPDATE_FINAL) {
+			Updater.get().runUpdate();
+		}
 	}
 
 	public static long runtime() {
