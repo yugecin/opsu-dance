@@ -102,7 +102,7 @@ public class SkinLoader {
 								if (tokens[1].equalsIgnoreCase("latest"))
 									skin.version = Skin.LATEST_VERSION;
 								else
-									skin.version = Integer.parseInt(tokens[1]);
+									skin.version = Integer.parseInt(tokens[1].trim());
 								break;
 							case "SliderBallFlip":
 								skin.sliderBallFlip = Utils.parseBoolean(tokens[1]);
@@ -178,9 +178,9 @@ public class SkinLoader {
 						try {
 							String[] rgb = tokens[1].split(",");
 							Color color = new Color(
-								Integer.parseInt(rgb[0]),
-								Integer.parseInt(rgb[1]),
-								Integer.parseInt(rgb[2])
+								Integer.parseInt(rgb[0].trim()),
+								Integer.parseInt(rgb[1].trim()),
+								Integer.parseInt(rgb[2].trim())
 							);
 							switch (tokens[0]) {
 							case "Combo1":
