@@ -1171,28 +1171,25 @@ public class SongMenu extends ComplexOpsuState {
 		case Input.KEY_PRIOR:
 			changeIndex(-MAX_SONG_BUTTONS);
 			return true;
-		case Input.KEY_O:
-			if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
-				optionsOverlay.show();
-			}
+		}
+		if (key == Input.KEY_O && (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL))) {
+			optionsOverlay.show();
 			return true;
-		default:
-			// wait for user to finish typing
-			// TODO: accept all characters (current conditions are from TextField class)
-			if ((c > 31 && c < 127) || key == Input.KEY_BACK) {
-				searchTimer = 0;
-				searchTextField.keyPressed(key, c);
-				int textLength = searchTextField.getText().length();
-				if (lastSearchTextLength != textLength) {
-					if (key == Input.KEY_BACK) {
-						if (textLength == 0)
-							searchTransitionTimer = 0;
-					} else if (textLength == 1)
+		}
+		// wait for user to finish typing
+		// TODO: accept all characters (current conditions are from TextField class)
+		if ((c > 31 && c < 127) || key == Input.KEY_BACK) {
+			searchTimer = 0;
+			searchTextField.keyPressed(key, c);
+			int textLength = searchTextField.getText().length();
+			if (lastSearchTextLength != textLength) {
+				if (key == Input.KEY_BACK) {
+					if (textLength == 0)
 						searchTransitionTimer = 0;
-					lastSearchTextLength = textLength;
-				}
+				} else if (textLength == 1)
+					searchTransitionTimer = 0;
+				lastSearchTextLength = textLength;
 			}
-			return true;
 		}
 		return true;
 	}
