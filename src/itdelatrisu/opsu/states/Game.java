@@ -734,10 +734,6 @@ public class Game extends ComplexOpsuState {
 
 		UI.draw(g);
 
-		if (!Options.isHideWM()) {
-			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
-		}
-
 		super.render(g);
 	}
 
