@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.replay;
 
-import com.sun.deploy.security.EnhancedJarVerifier;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
