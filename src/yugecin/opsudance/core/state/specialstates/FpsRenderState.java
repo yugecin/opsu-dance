@@ -22,9 +22,9 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 
-public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
+public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEvent> {
 
 	private final DisplayContainer displayContainer;
 
@@ -38,7 +38,7 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 
 	public FpsRenderState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
-		displayContainer.eventBus.subscribe(ResolutionChangedEvent.class, this);
+		displayContainer.eventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
 	}
 
 	public void render(Graphics g) {
@@ -70,10 +70,10 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 	}
 
 	@Override
-	public void onEvent(ResolutionChangedEvent event) {
+	public void onEvent(ResolutionOrSkinChangedEvent event) {
 		singleHeight = Fonts.SMALL.getLineHeight();
-		x = event.width - 3;
-		y = event.height - 3 - singleHeight - 10;
+		x = displayContainer.width - 3;
+		y = displayContainer.height - 3 - singleHeight - 10;
 	}
 
 }

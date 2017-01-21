@@ -17,14 +17,6 @@
  */
 package yugecin.opsudance.events;
 
-public class ResolutionChangedEvent {
-
-	public final int width;
-	public final int height;
-
-	public ResolutionChangedEvent(int width, int height) {
-		this.width = width;
-		this.height = height;
-	}
+public class ResolutionOrSkinChangedEvent {
 
 }

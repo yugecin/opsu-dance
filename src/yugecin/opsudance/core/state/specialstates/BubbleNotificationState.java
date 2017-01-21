@@ -25,7 +25,7 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -49,9 +49,9 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
 		eventBus.subscribe(BubbleNotificationEvent.class, this);
-		eventBus.subscribe(ResolutionChangedEvent.class, new EventListener<ResolutionChangedEvent>() {
+		eventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
-			public void onEvent(ResolutionChangedEvent event) {
+			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				calculatePositions();
 			}
 		});

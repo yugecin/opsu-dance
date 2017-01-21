@@ -24,11 +24,11 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 
 import java.io.StringWriter;
 
-public abstract class BaseOpsuState implements OpsuState, EventListener<ResolutionChangedEvent> {
+public abstract class BaseOpsuState implements OpsuState, EventListener<ResolutionOrSkinChangedEvent> {
 
 	protected final DisplayContainer displayContainer;
 
@@ -40,7 +40,7 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 
 	public BaseOpsuState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
-		displayContainer.eventBus.subscribe(ResolutionChangedEvent.class, this);
+		displayContainer.eventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
 	}
 
 	protected void revalidate() {
@@ -59,7 +59,7 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 	}
 
 	@Override
-	public void onEvent(ResolutionChangedEvent event) {
+	public void onEvent(ResolutionOrSkinChangedEvent event) {
 		if (isCurrentState) {
 			revalidate();
 			return;

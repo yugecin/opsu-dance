@@ -48,7 +48,7 @@ import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -142,9 +142,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			}
 		};
 
-		eventBus.subscribe(ResolutionChangedEvent.class, new EventListener<ResolutionChangedEvent>() {
+		eventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
-			public void onEvent(ResolutionChangedEvent event) {
+			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				destroyImages();
 			}
 		});
@@ -349,7 +349,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		GameImage.init(width, height);
 		Fonts.init();
 
-		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+		eventBus.post(new ResolutionOrSkinChangedEvent());
 	}
 
 	public void resetCursor() {

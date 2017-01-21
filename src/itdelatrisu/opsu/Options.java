@@ -47,7 +47,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.lwjgl.input.Keyboard;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.SoundStore;
@@ -64,7 +63,7 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionChangedEvent;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -1873,7 +1872,7 @@ public class Options {
 	public static void reloadSkin() {
 		loadSkin();
 		SoundController.init();
-		EventBus.instance.post(new ResolutionChangedEvent(DisplayContainer.instance.width, DisplayContainer.instance.height));
+		EventBus.instance.post(new ResolutionOrSkinChangedEvent());
 	}
 
 	/**
