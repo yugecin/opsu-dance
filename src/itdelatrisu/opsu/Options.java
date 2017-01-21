@@ -20,6 +20,7 @@ package itdelatrisu.opsu;
 
 import awlex.ospu.polymover.factory.PolyMoverFactory;
 import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.skins.Skin;
@@ -377,6 +378,7 @@ public class Options {
 			public void clickListItem(int index) {
 				skinName = skinDirs[index];
 				loadSkin();
+				SoundController.init();
 				EventBus.instance.post(new ResolutionChangedEvent(DisplayContainer.instance.width, DisplayContainer.instance.height));
 			}
 
