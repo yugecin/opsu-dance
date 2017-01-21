@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.downloads;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.Download.DownloadListener;
@@ -38,6 +37,7 @@ import java.util.Properties;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 /**
  * Handles automatic program updates.
@@ -298,7 +298,7 @@ public class Updater {
 			pb.start();
 		} catch (IOException e) {
 			status = Status.INTERNAL_ERROR;
-			ErrorHandler.error("Failed to start new process.", e, true);
+			ErrorHandler.error("Failed to start new process.", e).show();
 		}
 	}
 }

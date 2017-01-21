@@ -59,6 +59,10 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
 import yugecin.opsudance.*;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -195,7 +199,7 @@ public class Options {
 			}
 			File dir = new File(rootPath, "opsu");
 			if (!dir.isDirectory() && !dir.mkdir())
-				ErrorHandler.error(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath), null, false);
+				ErrorHandler.error(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath), new Exception("empty")).preventReport().show();
 			return dir;
 		} else
 			return workingDir;
@@ -393,8 +397,7 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				targetFPSindex = index;
-				Container.instance.setTargetFrameRate(targetFPS[index]);
-				Container.instance.setVSync(targetFPS[index] == 60);
+				displayContainer.setFPS(targetFPS[index]);
 			}
 
 			@Override
@@ -414,8 +417,7 @@ public class Options {
 		SHOW_FPS ("Show FPS Counter", "FpsCounter", "Show an FPS counter in the bottom-right hand corner.", true),
 		SHOW_UNICODE ("Prefer Non-English Metadata", "ShowUnicode", "Where available, song titles will be shown in their native language.", false) {
 			@Override
-			public void click(GameContainer container) {
-				super.click(container);
+			public void click() {
 				if (bool) {
 					try {
 						Fonts.LARGE.loadGlyphs();
@@ -465,13 +467,7 @@ public class Options {
 					val = i;
 			}
 		},
-		NEW_CURSOR ("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true) {
-			@Override
-			public void click(GameContainer container) {
-				super.click(container);
-				UI.getCursor().reset();
-			}
-		},
+		NEW_CURSOR ("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true),
 		DYNAMIC_BACKGROUND ("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true),
 		LOAD_VERBOSE ("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false),
 		COLOR_MAIN_MENU_LOGO ("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false),
@@ -983,6 +979,7 @@ public class Options {
 		PIPPI_SLIDER_FOLLOW_EXPAND ("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false),
 		PIPPI_PREVENT_WOBBLY_STREAMS ("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
 
+		public static DisplayContainer displayContainer;
 
 		/** Option name. */
 		private final String name;
@@ -1129,9 +1126,8 @@ public class Options {
 		 * Processes a mouse click action (via override).
 		 * <p>
 		 * By default, this inverts the current {@code bool} field.
-		 * @param container the game container
 		 */
-		public void click(GameContainer container) { bool = !bool; }
+		public void click() { bool = !bool; }
 
 		/**
 		 * Get a list of values to choose from
@@ -1279,9 +1275,9 @@ public class Options {
 	/**
 	 * Sets the target frame rate to the next available option, and sends a
 	 * bar notification about the action.
-	 * @param container the game container
 	 */
-	public static void setNextFPS(GameContainer container) {
+	public static void setNextFPS(DisplayContainer displayContainer) {
+		GameOption.displayContainer = displayContainer; // TODO dirty shit
 		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
 		UI.sendBarNotification(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString()));
 	}
@@ -1294,10 +1290,9 @@ public class Options {
 
 	/**
 	 * Sets the master volume level (if within valid range).
-	 * @param container the game container
 	 * @param volume the volume [0, 1]
 	 */
-	public static void setMasterVolume(GameContainer container, float volume) {
+	public static void setMasterVolume(float volume) {
 		if (volume >= 0f && volume <= 1f) {
 			GameOption.MASTER_VOLUME.setValue((int) (volume * 100f));
 			MusicController.setVolume(getMasterVolume() * getMusicVolume());
@@ -1346,11 +1341,10 @@ public class Options {
 	 * <p>
 	 * If the configured resolution is larger than the screen size, the smallest
 	 * available resolution will be used.
-	 * @param app the game container
 	 */
-	public static void setDisplayMode(Container app) {
-		int screenWidth = app.getScreenWidth();
-		int screenHeight = app.getScreenHeight();
+	public static void setDisplayMode(DisplayContainer container) {
+		int screenWidth = container.nativeDisplayMode.getWidth();
+		int screenHeight = container.nativeDisplayMode.getHeight();
 
 		resolutions[0] = screenWidth + "x" + screenHeight;
 		if (resolutionIdx < 0 || resolutionIdx > resolutions.length) {
@@ -1370,9 +1364,10 @@ public class Options {
 		}
 
 		try {
-			app.setDisplayMode(width, height, isFullscreen());
-		} catch (SlickException e) {
-			ErrorHandler.error("Failed to set display mode.", e, true);
+			container.setDisplayMode(width, height, isFullscreen());
+		} catch (Exception e) {
+			container.eventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
+			Log.error("Failed to set display mode.", e);
 		}
 
 		if (!isFullscreen()) {
@@ -1696,7 +1691,7 @@ public class Options {
 	 * sends a bar notification about the action.
 	 */
 	public static void toggleMouseDisabled() {
-		GameOption.DISABLE_MOUSE_BUTTONS.click(null);
+		GameOption.DISABLE_MOUSE_BUTTONS.click();
 		UI.sendBarNotification((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
 			"Mouse buttons are disabled." : "Mouse buttons are enabled.");
 	}
@@ -1787,7 +1782,7 @@ public class Options {
 		// use default directory
 		beatmapDir = BEATMAP_DIR;
 		if (!beatmapDir.isDirectory() && !beatmapDir.mkdir())
-			ErrorHandler.error(String.format("Failed to create beatmap directory at '%s'.", beatmapDir.getAbsolutePath()), null, false);
+			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create beatmap directory at '%s'.", beatmapDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return beatmapDir;
 	}
 
@@ -1802,7 +1797,7 @@ public class Options {
 
 		oszDir = new File(DATA_DIR, "SongPacks/");
 		if (!oszDir.isDirectory() && !oszDir.mkdir())
-			ErrorHandler.error(String.format("Failed to create song packs directory at '%s'.", oszDir.getAbsolutePath()), null, false);
+			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create song packs directory at '%s'.", oszDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return oszDir;
 	}
 
@@ -1817,7 +1812,7 @@ public class Options {
 
 		replayImportDir = new File(DATA_DIR, "ReplayImport/");
 		if (!replayImportDir.isDirectory() && !replayImportDir.mkdir())
-			ErrorHandler.error(String.format("Failed to create replay import directory at '%s'.", replayImportDir.getAbsolutePath()), null, false);
+			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create replay import directory at '%s'.", replayImportDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return replayImportDir;
 	}
 
@@ -1867,7 +1862,7 @@ public class Options {
 		// use default directory
 		skinRootDir = SKIN_ROOT_DIR;
 		if (!skinRootDir.isDirectory() && !skinRootDir.mkdir())
-			ErrorHandler.error(String.format("Failed to create skins directory at '%s'.", skinRootDir.getAbsolutePath()), null, false);
+			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create skins directory at '%s'.", skinRootDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return skinRootDir;
 	}
 
@@ -2000,7 +1995,9 @@ public class Options {
 			}
 			GameOption.DANCE_HIDE_WATERMARK.setValue(false);
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", OPTIONS_FILE.getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", OPTIONS_FILE.getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 
@@ -2029,7 +2026,9 @@ public class Options {
 			}
 			writer.close();
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to write to file '%s'.", OPTIONS_FILE.getAbsolutePath()), e, false);
+			String err = String.format("Failed to write to file '%s'.", OPTIONS_FILE.getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 }

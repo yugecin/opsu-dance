@@ -128,6 +128,7 @@ public class FrameBufferCache {
 	 * <p>
 	 * This is necessary for cases when the game gets restarted with a
 	 * different resolution without closing the process.
+	 * // TODO d do we still need this
 	 */
 	public static void shutdown() {
 		FrameBufferCache fbcInstance = FrameBufferCache.getInstance();

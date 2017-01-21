@@ -37,6 +37,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Data type representing a slider object.
@@ -127,13 +128,12 @@ public class Slider extends GameObject {
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
-	 * @param container the game container
 	 * @param circleDiameter the circle diameter
 	 * @param beatmap the associated beatmap
 	 */
-	public static void init(GameContainer container, float circleDiameter, Beatmap beatmap) {
-		containerWidth = container.getWidth();
-		containerHeight = container.getHeight();
+	public static void init(DisplayContainer displayContainer, float circleDiameter, Beatmap beatmap) {
+		containerWidth = displayContainer.width;
+		containerHeight = displayContainer.height;
 
 		diameter = circleDiameter * HitObject.getXMultiplier();  // convert from Osupixels (640x480)
 		int diameterInt = (int) diameter;

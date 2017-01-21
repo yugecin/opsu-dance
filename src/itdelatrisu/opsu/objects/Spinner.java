@@ -35,6 +35,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Data type representing a spinner object.
@@ -109,12 +110,11 @@ public class Spinner extends GameObject {
 
 	/**
 	 * Initializes the Spinner data type with images and dimensions.
-	 * @param container the game container
 	 * @param difficulty the map's overall difficulty value
 	 */
-	public static void init(GameContainer container, float difficulty) {
-		width  = container.getWidth();
-		height = container.getHeight();
+	public static void init(DisplayContainer displayContainer, float difficulty) {
+		width = displayContainer.width;
+		height = displayContainer.height;
 		overallDifficulty = difficulty;
 	}
 

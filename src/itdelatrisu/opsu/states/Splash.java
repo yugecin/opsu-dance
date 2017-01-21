@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
@@ -36,19 +35,22 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import java.io.File;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.state.BaseOpsuState;
 
 /**
  * "Splash Screen" state.
  * <p>
  * Loads game resources and enters "Main Menu" state.
  */
-public class Splash extends BasicGameState {
+public class Splash extends BaseOpsuState {
+
+	private final InstanceContainer instanceContainer;
+
 	/** Minimum time, in milliseconds, to display the splash screen (and fade in the logo). */
 	private static final int MIN_SPLASH_TIME = 400;
 
@@ -71,18 +73,16 @@ public class Splash extends BasicGameState {
 	private AnimatedValue logoAlpha;
 
 	// game-related variables
-	private final int state;
-	private GameContainer container;
 	private boolean init = false;
 
-	public Splash(int state) {
-		this.state = state;
+	public Splash(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
+		super(displayContainer);
+		this.instanceContainer = instanceContainer;
 	}
 
 	@Override
-	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		this.container = container;
+	protected void revalidate() {
+		super.revalidate();
 
 		// check if skin changed
 		if (Options.getSkin() != null)
@@ -92,7 +92,7 @@ public class Splash extends BasicGameState {
 		this.watchServiceChange = Options.isWatchServiceEnabled() && BeatmapWatchService.get() == null;
 
 		// load Utils class first (needed in other 'init' methods)
-		Utils.init(container, game);
+		Utils.init(displayContainer);
 
 		// fade in logo
 		this.logoAlpha = new AnimatedValue(MIN_SPLASH_TIME, 0f, 1f, AnimationEquation.LINEAR);
@@ -100,16 +100,14 @@ public class Splash extends BasicGameState {
 	}
 
 	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g)
-			throws SlickException {
+	public void render(Graphics g) {
 		g.setBackground(Color.black);
-		GameImage.MENU_LOGO.getImage().drawCentered(container.getWidth() / 2, container.getHeight() / 2);
+		GameImage.MENU_LOGO.getImage().drawCentered(displayContainer.width / 2, displayContainer.height / 2);
 		UI.drawLoadingProgress(g);
 	}
 
 	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta)
-			throws SlickException {
+	public void preRenderUpdate() {
 		if (!init) {
 			init = true;
 
@@ -165,7 +163,7 @@ public class Splash extends BasicGameState {
 		}
 
 		// fade in logo
-		if (logoAlpha.update(delta))
+		if (logoAlpha.update(displayContainer.renderDelta))
 			GameImage.MENU_LOGO.getImage().setAlpha(logoAlpha.getValue());
 
 		// change states when loading complete
@@ -173,33 +171,41 @@ public class Splash extends BasicGameState {
 			// initialize song list
 			if (BeatmapSetList.get().size() > 0) {
 				BeatmapSetList.get().init();
-				if (Options.isThemeSongEnabled())
+				if (Options.isThemeSongEnabled()) {
 					MusicController.playThemeSong();
-				else
-					((SongMenu) game.getState(Opsu.STATE_SONGMENU)).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-			}
-
-			// play the theme song
-			else
+				} else {
+					instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+				}
+			} else {
 				MusicController.playThemeSong();
-
-			game.enterState(Opsu.STATE_MAINMENU);
+			}
+			displayContainer.switchState(MainMenu.class);
 		}
 	}
 
 	@Override
-	public int getID() { return state; }
+	public boolean onCloseRequest() {
+		if (thread != null && thread.isAlive()) {
+			thread.interrupt();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				Log.warn("InterruptedException while waiting for splash thread to die", e);
+			}
+		}
+		return true;
+	}
 
 	@Override
-	public void keyPressed(int key, char c) {
-		if (key == Input.KEY_ESCAPE) {
-			// close program
-			if (++escapeCount >= 3)
-				container.exit();
-
-			// stop parsing beatmaps by sending interrupt to BeatmapParser
-			else if (thread != null)
-				thread.interrupt();
+	public boolean keyPressed(int key, char c) {
+		if (key != Input.KEY_ESCAPE) {
+			return false;
 		}
+		if (++escapeCount >= 3) {
+			displayContainer.exitRequested = true;
+		} else if (thread != null) {
+			thread.interrupt();
+		}
+		return true;
 	}
 }

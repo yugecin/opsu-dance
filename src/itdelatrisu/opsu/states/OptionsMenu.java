@@ -18,35 +18,14 @@
 
 package itdelatrisu.opsu.states;
 
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Options.GameOption;
-import itdelatrisu.opsu.audio.MusicController;
-import itdelatrisu.opsu.audio.SoundController;
-import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.ui.UI;
 
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.FadeInTransition;
-import org.newdawn.slick.state.transition.EmptyTransition;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
-/**
- * "Game Options" state.
- * <p>
- * Players are able to view and change various game settings in this state.
- */
-public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent {
+public class OptionsMenu {
 
-	/** Option tabs. */
-	private static final OptionTab[] options = new OptionsOverlay.OptionTab[]{
+	public static final OptionTab[] normalOptions = new OptionsOverlay.OptionTab[]{
 		new OptionTab("Display", new GameOption[]{
 			GameOption.SCREEN_RESOLUTION,
 			GameOption.FULLSCREEN,
@@ -154,104 +133,63 @@ public class OptionsMenu extends BasicGameState implements OptionsOverlay.Parent
 		})
 	};
 
-	private StateBasedGame game;
-	private Input input;
-	private final int state;
-
-	private OptionsOverlay optionsOverlay;
-
-	public OptionsMenu(int state) {
-		this.state = state;
-	}
-
-	@Override
-	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		this.game = game;
-		this.input = container.getInput();
-
-		optionsOverlay = new OptionsOverlay(this, options, 5, container);
-	}
-
-	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-		// background
-		GameImage.OPTIONS_BG.getImage().draw();
-
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
-		optionsOverlay.render(g, mouseX, mouseY);
-		UI.draw(g);
-	}
-
-	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-		UI.update(delta);
-		MusicController.loopTrackIfEnded(false);
-		optionsOverlay.update(delta, input.getMouseX(), input.getMouseY());
-	}
-
-	@Override
-	public int getID() {
-		return state;
-	}
-
-	@Override
-	public void mouseReleased(int button, int x, int y) {
-		optionsOverlay.mouseReleased(button, x, y);
-	}
-
-	@Override
-	public void mousePressed(int button, int x, int y) {
-		optionsOverlay.mousePressed(button, x, y);
-	}
-
-	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		optionsOverlay.mouseDragged(oldx, oldy, newx, newy);
-	}
-
-	@Override
-	public void mouseWheelMoved(int newValue) {
-		optionsOverlay.mouseWheelMoved(newValue);
-	}
-
-	@Override
-	public void keyPressed(int key, char c) {
-		optionsOverlay.keyPressed(key, c);
-	}
-
-	/**
-	 * This string is built with option values when entering the options menu.
-	 * When leaving the options menu, this string is checked against the new optionstring with the same options.
-	 * If those do not match, it means some option has change which requires a restart
-	 */
-	private String restartOptions;
-
-	@Override
-	public void enter(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		UI.enter();
-		restartOptions = "" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions() + Options.getSkinName();
-	}
-
-	@Override
-	public void leave(GameContainer container, StateBasedGame game) throws SlickException {
-		if (!("" + Options.getResolutionIdx() + Options.isFullscreen() + Options.allowLargeResolutions() + Options.getSkinName()).equals(restartOptions)) {
-			container.setForceExit(false);
-			container.exit();
-			return;
-		}
-		SoundController.playSound(SoundEffect.MENUBACK);
-	}
-
-	@Override
-	public void onLeave() {
-		game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
-	}
-
-	@Override
-	public void onSaveOption(GameOption option) {
-
-	}
+	public static final OptionTab[] storyboardOptions = new OptionsOverlay.OptionTab[]{
+		new OptionTab("Gameplay", new GameOption[] {
+			GameOption.BACKGROUND_DIM,
+			GameOption.DANCE_REMOVE_BG,
+			GameOption.SNAKING_SLIDERS,
+			GameOption.SHRINKING_SLIDERS,
+			GameOption.SHOW_HIT_LIGHTING,
+			GameOption.SHOW_HIT_ANIMATIONS,
+			GameOption.SHOW_COMBO_BURSTS,
+			GameOption.SHOW_PERFECT_HIT,
+			GameOption.SHOW_FOLLOW_POINTS,
+		}),
+		new OptionTab("Input", new GameOption[] {
+			GameOption.CURSOR_SIZE,
+			GameOption.NEW_CURSOR,
+			GameOption.DISABLE_CURSOR
+		}),
+		new OptionTab("Dance", new GameOption[] {
+			GameOption.DANCE_MOVER,
+			GameOption.DANCE_EXGON_DELAY,
+			GameOption.DANCE_QUAD_BEZ_AGGRESSIVENESS,
+			GameOption.DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS,
+			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
+			GameOption.DANCE_MOVER_DIRECTION,
+			GameOption.DANCE_SLIDER_MOVER_TYPE,
+			GameOption.DANCE_SPINNER,
+			GameOption.DANCE_SPINNER_DELAY,
+			GameOption.DANCE_LAZY_SLIDERS,
+			GameOption.DANCE_CIRCLE_STREAMS,
+			GameOption.DANCE_ONLY_CIRCLE_STACKS,
+			GameOption.DANCE_CIRLCE_IN_SLOW_SLIDERS,
+			GameOption.DANCE_CIRLCE_IN_LAZY_SLIDERS,
+			GameOption.DANCE_MIRROR,
+		}),
+		new OptionTab("Dance display", new GameOption[] {
+			GameOption.DANCE_DRAW_APPROACH,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE,
+			GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
+			GameOption.DANCE_RGB_OBJECT_INC,
+			GameOption.DANCE_CURSOR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
+			GameOption.DANCE_CURSOR_ONLY_COLOR_TRAIL,
+			GameOption.DANCE_RGB_CURSOR_INC,
+			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
+			GameOption.DANCE_HIDE_OBJECTS,
+			GameOption.DANCE_HIDE_UI,
+			GameOption.DANCE_HIDE_WATERMARK,
+		}),
+		new OptionTab ("Pippi", new GameOption[] {
+			GameOption.PIPPI_ENABLE,
+			GameOption.PIPPI_RADIUS_PERCENT,
+			GameOption.PIPPI_ANGLE_INC_MUL,
+			GameOption.PIPPI_ANGLE_INC_MUL_SLIDER,
+			GameOption.PIPPI_SLIDER_FOLLOW_EXPAND,
+			GameOption.PIPPI_PREVENT_WOBBLY_STREAMS,
+		})
+	};
 
 }

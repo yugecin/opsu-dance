@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.downloads;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
@@ -35,6 +34,8 @@ import java.io.File;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Node containing song data and a Download object.
@@ -402,7 +403,7 @@ public class DownloadNode {
 	public void drawDownload(Graphics g, float position, int id, boolean hover) {
 		Download download = this.download;  // in case clearDownload() is called asynchronously
 		if (download == null) {
-			ErrorHandler.error("Trying to draw download information for button without Download object.", null, false);
+			EventBus.instance.post(new BubbleNotificationEvent("Trying to draw download information for button without Download object", BubbleNotificationEvent.COLOR_ORANGE));
 			return;
 		}
 

@@ -17,7 +17,6 @@
  */
 package itdelatrisu.opsu.downloads.servers;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.DownloadNode;
 
@@ -34,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 /**
  * Download server: http://osu.yas-online.net/
@@ -114,7 +114,7 @@ public class YaSOnlineServer extends DownloadServer {
 			String downloadLink = item.getString("downloadLink");
 			return String.format(DOWNLOAD_FETCH_URL, downloadLink);
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e, true);
+			ErrorHandler.error(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e).show();
 			return null;
 		} finally {
 			Utils.setSSLCertValidation(true);
@@ -186,7 +186,7 @@ public class YaSOnlineServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e, true);
+			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
 		} finally {
 			Utils.setSSLCertValidation(true);
 		}

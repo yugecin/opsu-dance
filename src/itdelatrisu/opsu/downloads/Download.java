@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.downloads;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Utils;
 
 import java.io.File;
@@ -35,6 +34,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * File download.
@@ -142,7 +144,7 @@ public class Download {
 			this.url = new URL(remoteURL);
 		} catch (MalformedURLException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error(String.format("Bad download URL: '%s'", remoteURL), e, true);
+			ErrorHandler.error(String.format("Bad download URL: '%s'", remoteURL), e).show();
 			return;
 		}
 		this.localPath = localPath;
@@ -215,7 +217,7 @@ public class Download {
 							else if (redirectCount > MAX_REDIRECTS)
 								error = String.format("Download for URL '%s' is attempting too many redirects (over %d).", base.toString(), MAX_REDIRECTS);
 							if (error != null) {
-								ErrorHandler.error(error, null, false);
+								EventBus.instance.post(new BubbleNotificationEvent(error, BubbleNotificationEvent.COLOR_ORANGE));
 								throw new IOException();
 							}
 
@@ -417,7 +419,7 @@ public class Download {
 			}
 		} catch (IOException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error("Failed to cancel download.", e, true);
+			ErrorHandler.error("Failed to cancel download.", e).show();
 		}
 	}
 }

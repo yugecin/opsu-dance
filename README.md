@@ -1,23 +1,22 @@
 #opsu!dance
-[example video](https://www.youtube.com/watch?v=QvXWRMg1gwE)  
+[example video](https://www.youtube.com/watch?v=tqZqn7nx8N0)  
   
-fork of [opsu!](https://github.com/itdelatrisu/opsu) with cursordancing auto.  
-I make cursordancing video's -[example](https://www.youtube.com/watch?v=1oFH58X_lTY)-, but I have too many requests and this way I can give people the opportunity to just run it and see the result instead of waiting for me to make a video. Original bot is written in C# and videos are made on osu!, but I don't want to distribute that program, because I don't want to endorse cheating in any way. The sources found in this repo are very representative of the ones of my bot (most files are the exact same, except for C#/java changes).  
+Originally started as a fork of [opsu!](https://github.com/itdelatrisu/opsu) with cursordance stuff. I made a cursordancing bot in C# for osu!, and by adding it into this clone, it allows me to do even more stuff with it. This way I can also provide this client to other players so they can play with it too, as I will not give my bot to people because I don't want to endorse cheating in any way.
+
+As of 2017 some major changes were made in this fork which changed the inner workings of opsu. This was done in an attempt to make the code more organised (for me, my subjective opinion) and allowed a.o. changing resolution and skin at runtime without the need to restart the whole system. This fork was pretty even to opsu! before this change, but now there are way more differences.
+
+My goal is to to add cool cursordancing things to this fork, but also make it possible to play the normal way.
   
+###Downloads
+Click on the releases link (scroll up) to go to the downloadpage with prebuilt jars.
+
+###Building
 You can find general (run/build) instructions in the original [opsu! README](README-OPSU.md).
-
-###Making videos
-You can make videos under following conditions:
-
-* You will wait a reasonable amount of time between making videos, making too much too fast means it won't be entertaining anymore.
-* You will not deny you used opsu!dance to make your video
-* You may provide a link to this repository. This is always very appreciated. Please do keep in mind I only made some adjustements/fixes and added the dancing stuff. opsu! was made by [@itdelatrisu](https://github.com/itdelatrisu) (see credits below)
-* Asking for beatmap requests is discouraged. After all, everyone can download this and see it for themselves.
-* __YOU WILL NOT PRETEND LIKE YOU MADE/OWN THIS SOFTWARE__
+Please note that I am only using maven and gradle scripts are not being updated.
 
 ###Credits
 opsu! was made by Jeffrey Han ([@itdelatrisu](https://github.com/itdelatrisu)). All game concepts and designs are based on work by osu! developer Dean Herbert. Other opsu! credits can be found [here](CREDITS.md).  
-opsu!dance (everything in the src package yugecin.opsudance) was made by me ([@yugecin](https://github.com/yugecin)). Originally in C#, now ported to java. Some edits were made in the opsu! sources.  
+opsu!dance (everything in the src package yugecin.opsudance) was made by me ([@yugecin](https://github.com/yugecin)). Eits were made in the opsu! sources, too.  
 
 ###License
 **This software is licensed under GNU GPL version 3.**

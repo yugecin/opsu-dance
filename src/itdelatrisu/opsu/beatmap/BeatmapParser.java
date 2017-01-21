@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.BeatmapDB;
@@ -35,6 +34,9 @@ import java.util.Map;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Parser for beatmaps.
@@ -243,9 +245,11 @@ public class BeatmapParser {
 			}
 			map.timingPoints.trimToSize();
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", map.getFile().getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", map.getFile().getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		} catch (NoSuchAlgorithmException e) {
-			ErrorHandler.error("Failed to get MD5 hash stream.", e, true);
+			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -646,9 +650,11 @@ public class BeatmapParser {
 			if (md5stream != null)
 				beatmap.md5Hash = md5stream.getMD5();
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", file.getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", file.getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		} catch (NoSuchAlgorithmException e) {
-			ErrorHandler.error("Failed to get MD5 hash stream.", e, true);
+			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -727,7 +733,9 @@ public class BeatmapParser {
 			}
 			beatmap.timingPoints.trimToSize();
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 
@@ -803,9 +811,11 @@ public class BeatmapParser {
 			// check that all objects were parsed
 			if (objectIndex != beatmap.objects.length)
 				ErrorHandler.error(String.format("Parsed %d objects for beatmap '%s', %d objects expected.",
-						objectIndex, beatmap.toString(), beatmap.objects.length), null, true);
+						objectIndex, beatmap.toString(), beatmap.objects.length), new Exception("no")).show();
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 

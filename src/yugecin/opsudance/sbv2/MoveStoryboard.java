@@ -25,6 +25,8 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
 import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
@@ -34,19 +36,19 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public class MoveStoryboard {
+public class MoveStoryboard extends OverlayOpsuState{
 
-	private final SimpleButton btnAddLinear;
-	private final SimpleButton btnAddQuadratic;
-	private final SimpleButton btnAddCubic;
+	private final DisplayContainer displayContainer;
 
-	private final SimpleButton btnAnimLin;
-	private final SimpleButton btnAnimMid;
-	private final SimpleButton btnAnimCub;
+	private SimpleButton btnAddLinear;
+	private SimpleButton btnAddQuadratic;
+	private SimpleButton btnAddCubic;
+
+	private SimpleButton btnAnimLin;
+	private SimpleButton btnAnimMid;
+	private SimpleButton btnAnimCub;
 
 	private final StoryboardMove dummyMove;
-
-	private int width;
 
 	private StoryboardMove[] moves;
 
@@ -55,20 +57,26 @@ public class MoveStoryboard {
 
 	private int trackPosition;
 
-	public MoveStoryboard(GameContainer container) {
-		this.width = container.getWidth();
-		btnAddLinear = new SimpleButton(width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAddQuadratic = new SimpleButton(width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAddCubic = new SimpleButton(width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAnimLin = new SimpleButton(width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
-		btnAnimMid = new SimpleButton(width - 250, 80, 40, 25, Fonts.SMALL, "mid", Color.blue, Color.white, Color.white, Color.orange);
-		btnAnimCub = new SimpleButton(width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
+	public MoveStoryboard(DisplayContainer displayContainer) {
+		this.displayContainer = displayContainer;
 		dummyMove = (StoryboardMove) Proxy.newProxyInstance(StoryboardMove.class.getClassLoader(), new Class<?>[]{StoryboardMove.class}, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 				return null;
 			}
 		});
+	}
+
+	@Override
+	public void revalidate() {
+		super.revalidate();
+
+		btnAddLinear = new SimpleButton(displayContainer.width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAddQuadratic = new SimpleButton(displayContainer.width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAddCubic = new SimpleButton(displayContainer.width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAnimLin = new SimpleButton(displayContainer.width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimMid = new SimpleButton(displayContainer.width - 250, 80, 40, 25, Fonts.SMALL, "mid", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimCub = new SimpleButton(displayContainer.width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
 	}
 
 	/**
@@ -88,7 +96,23 @@ public class MoveStoryboard {
 		return moves[objectIndex].getPointAt(t);
 	}
 
-	public void render(Graphics g) {
+	@Override
+	protected void onPreRenderUpdate() {
+		int x = displayContainer.mouseX;
+		int y = displayContainer.mouseY;
+		btnAddLinear.update(x, y);
+		btnAddQuadratic.update(x, y);
+		btnAddCubic.update(x, y);
+		btnAnimLin.update(x, y);
+		btnAnimMid.update(x, y);
+		btnAnimCub.update(x, y);
+		if (moves[objectIndex] != null) {
+			moves[objectIndex].update(displayContainer.renderDelta, x, y);
+		}
+	}
+
+	@Override
+	protected void onRender(Graphics g) {
 		btnAddLinear.render(g);
 		btnAddQuadratic.render(g);
 		btnAddCubic.render(g);
@@ -100,13 +124,31 @@ public class MoveStoryboard {
 		}
 	}
 
-	public void mousePressed(int x, int y) {
+	@Override
+	protected boolean onKeyPressed(int key, char c) {
+		return false;
+	}
+
+	@Override
+	protected boolean onKeyReleased(int key, char c) {
+		return false;
+	}
+
+	@Override
+	protected boolean onMouseWheelMoved(int delta) {
+		return false;
+	}
+
+	@Override
+	protected boolean onMousePressed(int button, int x, int y) {
 		if (moves[objectIndex] != null) {
 			moves[objectIndex].mousePressed(x, y);
 		}
+		return true;
 	}
 
-	public void mouseReleased(int x, int y) {
+	@Override
+	protected boolean onMouseReleased(int button, int x, int y) {
 		if (moves[objectIndex] != null) {
 			moves[objectIndex].mouseReleased(x, y);
 			if (moves[objectIndex].getAmountOfMovers() == 0) {
@@ -114,7 +156,7 @@ public class MoveStoryboard {
 			}
 		}
 		if (objectIndex == 0) {
-			return;
+			return true;
 		}
 		if (btnAddLinear.isHovered()) {
 			getCurrentMoveOrCreateNew().add(new LinearStoryboardMover());
@@ -134,6 +176,12 @@ public class MoveStoryboard {
 		if (btnAnimCub.isHovered()) {
 			getCurrentMoveOrDummy().setAnimationEquation(AnimationEquation.IN_OUT_EASE_MIDDLE);
 		}
+		return true;
+	}
+
+	@Override
+	protected boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
+		return false;
 	}
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
@@ -142,7 +190,7 @@ public class MoveStoryboard {
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {
-			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start, width);
+			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start, displayContainer.width);
 		}
 		return moves[objectIndex];
 	}
@@ -152,18 +200,6 @@ public class MoveStoryboard {
 			return dummyMove;
 		}
 		return moves[objectIndex];
-	}
-
-	public void update(int delta, int x, int y) {
-		btnAddLinear.update(x, y);
-		btnAddQuadratic.update(x, y);
-		btnAddCubic.update(x, y);
-		btnAnimLin.update(x, y);
-		btnAnimMid.update(x, y);
-		btnAnimCub.update(x, y);
-		if (moves[objectIndex] != null) {
-			moves[objectIndex].update(delta, x, y);
-		}
 	}
 
 	public void setGameObjects(GameObject[] gameObjects) {

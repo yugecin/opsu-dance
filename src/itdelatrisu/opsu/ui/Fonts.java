@@ -40,7 +40,7 @@ import org.newdawn.slick.util.ResourceLoader;
  * Fonts used for drawing.
  */
 public class Fonts {
-	public static UnicodeFont DEFAULT, BOLD, XLARGE, LARGE, MEDIUM, MEDIUMBOLD, SMALL;
+	public static UnicodeFont DEFAULT, BOLD, XLARGE, LARGE, MEDIUM, MEDIUMBOLD, SMALL, SMALLBOLD;
 
 	/** Set of all Unicode strings already loaded per font. */
 	private static HashMap<UnicodeFont, HashSet<String>> loadedGlyphs = new HashMap<UnicodeFont, HashSet<String>>();
@@ -65,6 +65,7 @@ public class Fonts {
 		MEDIUM = new UnicodeFont(font.deriveFont(fontBase * 3 / 2));
 		MEDIUMBOLD = new UnicodeFont(font.deriveFont(Font.BOLD, fontBase * 3 / 2));
 		SMALL = new UnicodeFont(font.deriveFont(fontBase));
+		SMALLBOLD = new UnicodeFont(font.deriveFont(Font.BOLD, fontBase));
 		ColorEffect colorEffect = new ColorEffect();
 		loadFont(DEFAULT, colorEffect);
 		loadFont(BOLD, colorEffect);
@@ -73,6 +74,7 @@ public class Fonts {
 		loadFont(MEDIUM, colorEffect);
 		loadFont(MEDIUMBOLD, colorEffect);
 		loadFont(SMALL, colorEffect);
+		loadFont(SMALLBOLD, colorEffect);
 	}
 
 	/**
@@ -123,7 +125,7 @@ public class Fonts {
 	 * @return the list of split strings
 	 * @author davedes (http://slick.ninjacave.com/forum/viewtopic.php?t=3778)
 	 */
-	public static List<String> wrap(org.newdawn.slick.Font font, String text, int width) {
+	public static List<String> wrap(org.newdawn.slick.Font font, String text, int width, boolean newlines) {
 		List<String> list = new ArrayList<String>();
 		String str = text;
 		String line = "";
@@ -134,7 +136,7 @@ public class Fonts {
 			if (Character.isWhitespace(c))
 				lastSpace = i;
 			String append = line + c;
-			if (font.getWidth(append) > width) {
+			if (font.getWidth(append) > width || (newlines && c == '\n')) {
 				int split = (lastSpace != -1) ? lastSpace : i;
 				int splitTrimmed = split;
 				if (lastSpace != -1 && split < str.length() - 1)
@@ -153,4 +155,5 @@ public class Fonts {
 			list.add(str);
 		return list;
 	}
+
 }
