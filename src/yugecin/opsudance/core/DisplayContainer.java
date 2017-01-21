@@ -59,6 +59,9 @@ import static yugecin.opsudance.core.Entrypoint.sout;
  */
 public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
 
+	@Deprecated
+	public static DisplayContainer instance; // TODO d remove this
+
 	private static SGL GL = Renderer.get();
 
 	public final EventBus eventBus;
@@ -117,6 +120,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		this.eventBus = eventBus;
 		this.cursor = new Cursor();
 		drawCursor = true;
+		instance = this;
 
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override
@@ -317,6 +321,11 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	private void initGL() throws Exception {
+		InternalTextureLoader.get().clear();
+		GameImage.destroyImages();
+		GameData.Grade.destroyImages();
+		Beatmap.destroyBackgroundImageCache();
+
 		GL.initDisplay(width, height);
 		GL.enterOrtho(width, height);
 

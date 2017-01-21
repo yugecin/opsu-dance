@@ -63,6 +63,7 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -346,6 +347,7 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				resolutionIdx = index;
+				setDisplayMode(DisplayContainer.instance);
 			}
 
 			@Override
