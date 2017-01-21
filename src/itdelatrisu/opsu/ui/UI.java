@@ -28,24 +28,16 @@ import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.core.DisplayContainer;
 
 /**
  * Draws common UI components.
  */
 public class UI {
-	/** Cursor. */
-	private static Cursor cursor = new Cursor();
 
 	/** Back button. */
 	private static MenuButton backButton;
@@ -86,10 +78,6 @@ public class UI {
 	public static void init(DisplayContainer displayContainer) {
 		UI.displayContainer = displayContainer;
 
-		// initialize cursor
-		Cursor.init(displayContainer);
-		cursor.hide();
-
 		// back button
 		if (GameImage.MENU_BACK.getImages() != null) {
 			Animation back = GameImage.MENU_BACK.getAnimation(120);
@@ -108,7 +96,6 @@ public class UI {
 	 * @param delta the delta interval since the last call.
 	 */
 	public static void update(int delta) {
-		cursor.update(delta);
 		updateVolumeDisplay(delta);
 		updateBarNotification(delta);
 		tooltipAlpha.update(-delta);
@@ -121,22 +108,6 @@ public class UI {
 	public static void draw(Graphics g) {
 		drawBarNotification(g);
 		drawVolume(g);
-		cursor.draw();
-		drawTooltip(g);
-	}
-
-	/**
-	 * Draws the global UI components: cursor, FPS, volume bar, tooltips, bar notifications.
-	 * @param g the graphics context
-	 * @param mouseX the mouse x coordinate
-	 * @param mouseY the mouse y coordinate
-	 * @param mousePressed whether or not the mouse button is pressed
-	 */
-	public static void draw(Graphics g, int mouseX, int mouseY, boolean mousePressed) {
-		drawBarNotification(g);
-		drawVolume(g);
-		cursor.draw(mouseX, mouseY, mousePressed);
-		drawTooltip(g);
 	}
 
 	/**
@@ -144,15 +115,9 @@ public class UI {
 	 */
 	public static void enter() {
 		backButton.resetHover();
-		cursor.resetLocations();
 		resetBarNotification();
 		resetTooltip();
 	}
-
-	/**
-	 * Returns the game cursor.
-	 */
-	public static Cursor getCursor() { return cursor; }
 
 	/**
 	 * Returns the 'menu-back' MenuButton.

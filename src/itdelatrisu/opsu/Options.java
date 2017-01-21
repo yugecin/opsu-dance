@@ -467,12 +467,7 @@ public class Options {
 					val = i;
 			}
 		},
-		NEW_CURSOR ("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true) {
-			@Override
-			public void click() {
-				UI.getCursor().reset();
-			}
-		},
+		NEW_CURSOR ("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true),
 		DYNAMIC_BACKGROUND ("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true),
 		LOAD_VERBOSE ("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false),
 		COLOR_MAIN_MENU_LOGO ("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false),

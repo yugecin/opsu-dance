@@ -73,6 +73,7 @@ import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
+import yugecin.opsudance.utils.GLHelper;
 
 /**
  * "Game" state.
@@ -449,38 +450,6 @@ public class Game extends ComplexOpsuState {
 		if (GameMod.FLASHLIGHT.isActive())
 			Graphics.setCurrent(g);
 
-		// "auto" and "autopilot" mods: move cursor automatically
-		// TODO: this should really be in update(), not render()
-		autoMousePosition.set(width / 2, height / 2);
-		autoMousePressed = false;
-		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
-			Vec2f autoPoint;
-			if (objectIndex < beatmap.objects.length - Dancer.instance.getPolyMoverFactoryMinBufferSize()) {
-				Dancer d = Dancer.instance;
-				d.update(trackPosition, objectIndex);
-				autoPoint = new Vec2f(d.x, d.y);
-				if (trackPosition < gameObjects[objectIndex].getTime()) {
-					autoMousePressed = true;
-				}
-			} else {
-				if (objectIndex < beatmap.objects.length) {
-					autoPoint = gameObjects[objectIndex].getPointAt(trackPosition);
-				} else {
-					// last object
-					autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
-				}
-			}
-
-			float[] sbPosition = moveStoryboardOverlay.getPoint(trackPosition);
-			if (sbPosition != null) {
-				autoPoint.x = sbPosition[0];
-				autoPoint.y = sbPosition[1];
-			}
-
-			// set mouse coordinates
-			autoMousePosition.set(autoPoint.x, autoPoint.y);
-		}
-
 		// "flashlight" mod: restricted view of hit objects around cursor
 		if (GameMod.FLASHLIGHT.isActive()) {
 			// render hit objects offscreen
@@ -748,22 +717,18 @@ public class Game extends ComplexOpsuState {
 			cursorCirclePulse.drawCentered(pausedMousePosition.x, pausedMousePosition.y);
 		}
 
-		if (isReplay)
-			UI.draw(g, replayX, replayY, replayKeyPressed);
-		else if (GameMod.AUTO.isActive()) {
-			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, autoMousePressed);
+		if (isReplay) {
+			displayContainer.cursor.draw(replayKeyPressed);
+		} else if (GameMod.AUTO.isActive()) {
+			displayContainer.cursor.draw(autoMousePressed);
 			if (Options.isMirror() && GameMod.AUTO.isActive()) {
-				double dx = autoMousePosition.x - Options.width / 2d;
-				double dy = autoMousePosition.y - Options.height / 2d;
-				double d = Math.sqrt(dx * dx + dy * dy);
-				double a = Math.atan2(dy, dx) + Math.PI;
-				mirrorCursor.draw((int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2), autoMousePressed);
+				mirrorCursor.draw(autoMousePressed);
 			}
+		} else if (GameMod.AUTOPILOT.isActive()) {
+			displayContainer.cursor.draw(Utils.isGameKeyPressed());
 		}
-		else if (GameMod.AUTOPILOT.isActive())
-			UI.draw(g, (int) autoMousePosition.x, (int) autoMousePosition.y, Utils.isGameKeyPressed());
-		else
-			UI.draw(g);
+
+		UI.draw(g);
 
 		if (!Options.isHideWM()) {
 			Fonts.SMALL.drawString(0.3f, 0.3f, "opsu!dance " + Updater.get().getCurrentVersion() + " by robin_be | https://github.com/yugecin/opsu-dance");
@@ -926,6 +891,58 @@ public class Game extends ComplexOpsuState {
 		}
 	}
 
+	@Override
+	public void update() {
+		super.update();
+
+		int trackPosition = MusicController.getPosition();
+
+		// "auto" and "autopilot" mods: move cursor automatically
+		autoMousePressed = false;
+		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
+			Vec2f autoPoint;
+			if (objectIndex < beatmap.objects.length - Dancer.instance.getPolyMoverFactoryMinBufferSize()) {
+				Dancer d = Dancer.instance;
+				d.update(trackPosition, objectIndex);
+				autoPoint = new Vec2f(d.x, d.y);
+				if (trackPosition < gameObjects[objectIndex].getTime()) {
+					autoMousePressed = true;
+				}
+			} else {
+				if (objectIndex < beatmap.objects.length) {
+					autoPoint = gameObjects[objectIndex].getPointAt(trackPosition);
+				} else {
+					// last object
+					autoPoint = gameObjects[objectIndex - 1].getPointAt(trackPosition);
+				}
+			}
+
+			float[] sbPosition = moveStoryboardOverlay.getPoint(trackPosition);
+			if (sbPosition != null) {
+				autoPoint.x = sbPosition[0];
+				autoPoint.y = sbPosition[1];
+			}
+
+			// set mouse coordinates
+			autoMousePosition.set(autoPoint.x, autoPoint.y);
+		}
+
+		if (isReplay) {
+			displayContainer.cursor.setCursorPosition(displayContainer.delta, replayX, replayY);
+		} else if (GameMod.AUTO.isActive()) {
+			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+			if (Options.isMirror() && GameMod.AUTO.isActive()) {
+				double dx = autoMousePosition.x - Options.width / 2d;
+				double dy = autoMousePosition.y - Options.height / 2d;
+				double d = Math.sqrt(dx * dx + dy * dy);
+				double a = Math.atan2(dy, dx) + Math.PI;
+				mirrorCursor.setCursorPosition(displayContainer.delta, (int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2));
+			}
+		} else if (GameMod.AUTOPILOT.isActive()) {
+			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+		}
+	}
+
 	/**
 	 * Updates the game.
 	 * @param mouseX the mouse x coordinate
@@ -1078,11 +1095,6 @@ public class Game extends ComplexOpsuState {
 				boolean overlap = (objectIndex + 1 < gameObjects.length &&
 						trackPosition > beatmap.objects[objectIndex + 1].getTime() - hitResultOffset[GameData.HIT_50]);
 
-				if (skippedObject && (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive())) {
-					Vec2f start = gameObjects[objectIndex - 1].start;
-					UI.getCursor().setCursorPosition((int) start.x, (int) start.y);
-				}
-
 				// update hit object and check completion status
 				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
 					skippedObject = true;
@@ -1210,7 +1222,7 @@ public class Game extends ComplexOpsuState {
 				mirrorTo = objectIndex;
 				Options.setMirror(false);
 			} else {
-				mirrorCursor.resetLocations();
+				mirrorCursor.resetLocations((int) autoMousePosition.x, (int) autoMousePosition.y);
 				mirrorFrom = objectIndex;
 				mirrorTo = gameObjects.length;
 				Options.setMirror(true);
@@ -1221,7 +1233,7 @@ public class Game extends ComplexOpsuState {
 				mirrorTo = objectIndex;
 				Options.setMirror(false);
 			} else {
-				mirrorCursor.resetLocations();
+				mirrorCursor.resetLocations((int) autoMousePosition.x, (int) autoMousePosition.y);
 				mirrorFrom = objectIndex;
 				mirrorTo = mirrorFrom + 1;
 				Options.setMirror(true);
@@ -1435,6 +1447,8 @@ public class Game extends ComplexOpsuState {
 	public void enter() {
 		super.enter();
 
+		displayContainer.drawCursor = false;
+
 		overlays.clear();
 		if (Options.isEnableSB()) {
 			overlays.add(optionsOverlay);
@@ -1572,8 +1586,9 @@ public class Game extends ComplexOpsuState {
 			}
 
 			// unhide cursor for "auto" mod and replays
-			if (GameMod.AUTO.isActive() || isReplay)
-				UI.getCursor().show();
+			if (GameMod.AUTO.isActive() || isReplay) {
+				GLHelper.showNativeCursor();
+			}
 
 			// load replay frames
 			if (isReplay) {
@@ -1683,6 +1698,8 @@ public class Game extends ComplexOpsuState {
 	public void leave() {
 		super.leave();
 
+		displayContainer.drawCursor = true;
+
 		MusicController.pause();
 		MusicController.setPitch(1f);
 		MusicController.resume();
@@ -1705,8 +1722,9 @@ public class Game extends ComplexOpsuState {
 		Cursor.nextMirroredObjColor = Color.white;
 
 		// re-hide cursor
-		if (GameMod.AUTO.isActive() || isReplay)
-			UI.getCursor().hide();
+		if (GameMod.AUTO.isActive() || isReplay) {
+			GLHelper.hideNativeCursor();
+		}
 
 		// replays
 		if (isReplay)

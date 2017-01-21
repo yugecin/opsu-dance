@@ -63,6 +63,7 @@ public class GameRanking extends BaseOpsuState {
 	public GameRanking(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
 		this.instanceContainer = instanceContainer;
+
 	}
 
 	@Override
@@ -242,8 +243,8 @@ public class GameRanking extends BaseOpsuState {
 			songMenu.resetTrackOnLoad();
 		}
 		songMenu.resetGameDataOnLoad();
-		if (UI.getCursor().isBeatmapSkinned()) {
-			UI.getCursor().reset();
+		if (displayContainer.cursor.isBeatmapSkinned()) {
+			displayContainer.resetCursor();
 		}
 		displayContainer.switchState(SongMenu.class);
 	}

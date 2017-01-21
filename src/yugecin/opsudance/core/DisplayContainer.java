@@ -25,7 +25,9 @@ import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
+import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.UI;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
@@ -107,9 +109,14 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private long exitconfirmation;
 
+	public final Cursor cursor;
+	public boolean drawCursor;
+
 	public DisplayContainer(InstanceContainer instanceContainer, EventBus eventBus) {
 		this.instanceContainer = instanceContainer;
 		this.eventBus = eventBus;
+		this.cursor = new Cursor();
+		drawCursor = true;
 
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override
@@ -169,7 +176,11 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			Music.poll(delta);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
+
 			state.update();
+			if (drawCursor) {
+				cursor.setCursorPosition(delta, mouseX, mouseY);
+			}
 
 			int maxRenderInterval;
 			if (Display.isVisible() && Display.isActive()) {
@@ -196,6 +207,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				bubNotifState.render(graphics);
 				barNotifState.render(graphics);
 
+				cursor.updateAngle(renderDelta);
+				if (drawCursor) {
+					cursor.draw(input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
+				}
+				UI.drawTooltip(graphics);
+
 				timeSinceLastRender = 0;
 
 				Display.update(false);
@@ -216,6 +233,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		initGL();
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
+		GLHelper.hideNativeCursor();
 	}
 
 	public void teardown() {
@@ -316,6 +334,10 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Fonts.init();
 
 		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+	}
+
+	public void resetCursor() {
+		cursor.reset(mouseX, mouseY);
 	}
 
 	private int getDelta() {
