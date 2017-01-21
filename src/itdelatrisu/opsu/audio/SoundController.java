@@ -42,6 +42,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
@@ -391,7 +392,7 @@ public class SoundController {
 
 				@Override
 				public void error() {
-					UI.sendBarNotification("Failed to download track preview.");
+					EventBus.instance.post(new BarNotificationEvent("Failed to download track preview."));
 				}
 			});
 			try {

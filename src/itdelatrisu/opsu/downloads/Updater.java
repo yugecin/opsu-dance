@@ -38,6 +38,8 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 
 /**
  * Handles automatic program updates.
@@ -249,13 +251,13 @@ public class Updater {
 				@Override
 				public void completed() {
 					status = Status.UPDATE_DOWNLOADED;
-					UI.sendBarNotification("Update has finished downloading.");
+					EventBus.instance.post(new BarNotificationEvent("Update has finished downloading"));
 				}
 
 				@Override
 				public void error() {
 					status = Status.CONNECTION_ERROR;
-					UI.sendBarNotification("Update failed due to a connection error.");
+					EventBus.instance.post(new BarNotificationEvent("Update failed due to a connection error."));
 				}
 			});
 		}

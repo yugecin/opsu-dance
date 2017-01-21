@@ -51,6 +51,7 @@ import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
@@ -470,10 +471,10 @@ public class MainMenu extends BaseOpsuState {
 		UI.enter();
 		if (!enterNotification) {
 			if (Updater.get().getStatus() == Updater.Status.UPDATE_AVAILABLE) {
-				UI.sendBarNotification("An opsu! update is available.");
+				EventBus.instance.post(new BarNotificationEvent("An opsu! update is available."));
 				enterNotification = true;
 			} else if (Updater.get().justUpdated()) {
-				UI.sendBarNotification("opsu! is now up to date!");
+				EventBus.instance.post(new BarNotificationEvent("opsu! is now up to date!"));
 				enterNotification = true;
 			}
 		}
@@ -536,15 +537,15 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
-				UI.sendBarNotification("Pause");
+				EventBus.instance.post(new BarNotificationEvent("Pause"));
 			} else if (!MusicController.isTrackLoading()) {
 				MusicController.resume();
-				UI.sendBarNotification("Play");
+				EventBus.instance.post(new BarNotificationEvent("Play"));
 			}
 			return true;
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
-			UI.sendBarNotification(">> Next");
+			EventBus.instance.post(new BarNotificationEvent(">> Next"));
 			return true;
 		} else if (musicPrevious.contains(x, y)) {
 			lastMeasureProgress = 0f;
@@ -554,7 +555,7 @@ public class MainMenu extends BaseOpsuState {
 					bgAlpha.setTime(0);
 			} else
 				MusicController.setPosition(0);
-			UI.sendBarNotification("<< Previous");
+			EventBus.instance.post(new BarNotificationEvent("<< Previous"));
 			return true;
 		}
 
@@ -570,7 +571,7 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Options.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				UI.sendBarNotification("The repository web page could not be opened.");
+				EventBus.instance.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
 				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
@@ -582,7 +583,7 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Options.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				UI.sendBarNotification("The repository web page could not be opened.");
+				EventBus.instance.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
 				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));

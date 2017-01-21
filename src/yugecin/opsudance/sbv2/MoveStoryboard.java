@@ -20,13 +20,13 @@ package yugecin.opsudance.sbv2;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.OverlayOpsuState;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
 import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
@@ -186,7 +186,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
 		if (gameObjects[objectIndex].isSlider() && trackPosition > gameObjects[objectIndex].getTime() && trackPosition < gameObjects[objectIndex].getEndTime()) {
-			UI.sendBarNotification("wait until the slider ended");
+			EventBus.instance.post(new BarNotificationEvent("Wait until the slider ended"));
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {

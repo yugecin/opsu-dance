@@ -35,6 +35,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
@@ -277,12 +278,12 @@ public class DownloadNode {
 		download.setListener(new DownloadListener() {
 			@Override
 			public void completed() {
-				UI.sendBarNotification(String.format("Download complete: %s", getTitle()));
+				EventBus.instance.post(new BarNotificationEvent(String.format("Download complete: %s", getTitle())));
 			}
 
 			@Override
 			public void error() {
-				UI.sendBarNotification("Download failed due to a connection error.");
+				EventBus.instance.post(new BarNotificationEvent("Download failed due to a connection error."));
 			}
 		});
 		this.download = download;

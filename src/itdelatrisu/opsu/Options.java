@@ -27,7 +27,6 @@ import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.skins.SkinLoader;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.UI;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -62,6 +61,7 @@ import yugecin.opsudance.*;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
@@ -660,7 +660,7 @@ public class Options {
 			public void clickListItem(int index) {
 				if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
 					// TODO remove this when #79 is fixed
-					UI.sendBarNotification("This mover is disabled in the storyboard right now");
+					EventBus.instance.post(new BarNotificationEvent("This mover is disabled in the storyboard right now"));
 					return;
 				}
 				Dancer.instance.setMoverFactoryIndex(index);
@@ -1282,7 +1282,7 @@ public class Options {
 	public static void setNextFPS(DisplayContainer displayContainer) {
 		GameOption.displayContainer = displayContainer; // TODO dirty shit
 		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
-		UI.sendBarNotification(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString()));
+		EventBus.instance.post(new BarNotificationEvent(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString())));
 	}
 
 	/**
@@ -1695,8 +1695,8 @@ public class Options {
 	 */
 	public static void toggleMouseDisabled() {
 		GameOption.DISABLE_MOUSE_BUTTONS.click();
-		UI.sendBarNotification((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
-			"Mouse buttons are disabled." : "Mouse buttons are enabled.");
+		EventBus.instance.post(new BarNotificationEvent((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
+			"Mouse buttons are disabled." : "Mouse buttons are enabled."));
 	}
 
 	/**

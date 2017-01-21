@@ -23,7 +23,6 @@ import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.states.Game;
-import itdelatrisu.opsu.ui.UI;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +47,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
@@ -102,7 +102,7 @@ public class MusicController {
 		if (lastBeatmap == null || !beatmap.audioFilename.equals(lastBeatmap.audioFilename)) {
 			final File audioFile = beatmap.audioFilename;
 			if (!audioFile.isFile() && !ResourceLoader.resourceExists(audioFile.getPath())) {
-				UI.sendBarNotification(String.format("Could not find track '%s'.", audioFile.getName()));
+				EventBus.instance.post(new BarNotificationEvent(String.format("Could not find track '%s'.", audioFile.getName())));
 				return;
 			}
 

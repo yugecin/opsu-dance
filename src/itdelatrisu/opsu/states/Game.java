@@ -64,10 +64,12 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.sbv2.MoveStoryboard;
@@ -1186,7 +1188,7 @@ public class Game extends ComplexOpsuState {
 				int position = (pauseTime > -1) ? pauseTime : trackPosition;
 				if (Options.setCheckpoint(position / 1000)) {
 					SoundController.playSound(SoundEffect.MENUCLICK);
-					UI.sendBarNotification("Checkpoint saved.");
+					EventBus.instance.post(new BarNotificationEvent("Checkpoint saved."));
 				}
 			}
 			break;
@@ -1198,7 +1200,7 @@ public class Game extends ComplexOpsuState {
 					break;  // invalid checkpoint
 				loadCheckpoint(checkpoint);
 				SoundController.playSound(SoundEffect.MENUHIT);
-				UI.sendBarNotification("Checkpoint loaded.");
+				EventBus.instance.post(new BarNotificationEvent("Checkpoint loaded."));
 			}
 			break;
 		case Input.KEY_F:
@@ -1243,12 +1245,12 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_MINUS:
 			currentMapMusicOffset += 5;
-			UI.sendBarNotification("Current map offset: " + currentMapMusicOffset);
+			EventBus.instance.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
 			break;
 		}
 		if (key == Input.KEY_ADD || c == '+') {
 			currentMapMusicOffset -= 5;
-			UI.sendBarNotification("Current map offset: " + currentMapMusicOffset);
+			EventBus.instance.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
 		}
 
 		return true;
