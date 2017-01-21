@@ -189,7 +189,7 @@ public class GameRanking extends BaseOpsuState {
 			Beatmap beatmap = MusicController.getBeatmap();
 			gameState.loadBeatmap(beatmap);
 			SoundController.playSound(SoundEffect.MENUHIT);
-			// TODO d displayContainer.switchState(Game.class);
+			displayContainer.switchState(Game.class);
 		}
 		return true;
 	}
