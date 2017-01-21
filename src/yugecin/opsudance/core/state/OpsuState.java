@@ -58,4 +58,9 @@ public interface OpsuState extends ErrorDumpable {
 	 */
 	boolean mouseReleased(int button, int x, int y);
 
+	/**
+	 * @return false to stop event bubbling
+	 */
+	boolean mouseDragged(int oldx, int oldy, int newx, int newy);
+
 }

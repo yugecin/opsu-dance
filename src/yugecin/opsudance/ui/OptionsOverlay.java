@@ -29,16 +29,18 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.*;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.state.OverlayOpsuState;
 
-@SuppressWarnings("UnusedParameters")
-public class OptionsOverlay {
+public class OptionsOverlay extends OverlayOpsuState {
 
-	private Parent parent;
-	private GameContainer container;
+	private final DisplayContainer displayContainer;
 
-	private final Image sliderBallImg;
-	private final Image checkOnImg;
-	private final Image checkOffImg;
+	private Listener listener;
+
+	private Image sliderBallImg;
+	private Image checkOnImg;
+	private Image checkOffImg;
 
 	private OptionTab[] tabs;
 	private int selectedTab;
@@ -79,21 +81,29 @@ public class OptionsOverlay {
 
 	private int sliderSoundDelay;
 
-	public OptionsOverlay(Parent parent, OptionTab[] tabs, int defaultSelectedTabIndex, GameContainer container) {
-		this.parent = parent;
-		this.container = container;
+	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] tabs, int defaultSelectedTabIndex) {
+		this.displayContainer = displayContainer;
 
 		this.tabs = tabs;
 		selectedTab = defaultSelectedTabIndex;
 
 		listHoverIndex = -1;
+	}
+
+	public void setListener(Listener listener) {
+		this.listener = listener;
+	}
+
+	@Override
+	public void revalidate() {
+		super.revalidate();
 
 		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(20, 20);
 		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(20, 20);
 		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(20, 20);
 
-		width = container.getWidth();
-		height = container.getHeight();
+		width = displayContainer.width;
+		height = displayContainer.height;
 
 		// calculate positions
 		optionWidth = width / 2;
@@ -109,10 +119,12 @@ public class OptionsOverlay {
 		maxScrollOffset = Fonts.MEDIUM.getLineHeight() * 2 * tabs.length;
 		scrollOffset = 0;
 		for (OptionTab tab : tabs) {
+			/*
 			if (defaultSelectedTabIndex-- > 0) {
 				scrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
 				scrollOffset += tab.options.length * optionHeight;
 			}
+			*/
 			maxScrollOffset += tab.options.length * optionHeight;
 			tab.button = new MenuButton(tabImage, tabX, tabY);
 			tabX += tabOffset;
@@ -127,7 +139,8 @@ public class OptionsOverlay {
 		optionStartY = (int) (tabY + tabImage.getHeight() / 2 + 2); // +2 for the separator line
 	}
 
-	public void render(Graphics g, int mouseX, int mouseY) {
+	@Override
+	public void onRender(Graphics g) {
 		// bg
 		g.setColor(Colors.BLACK_ALPHA_75);
 		g.fillRect(0, 0, width, height);
@@ -136,7 +149,7 @@ public class OptionsOverlay {
 		renderTitle();
 
 		// option tabs
-		renderTabs(mouseX, mouseY);
+		renderTabs();
 
 		// line separator
 		g.setColor(Color.white);
@@ -159,7 +172,7 @@ public class OptionsOverlay {
 		UI.getBackButton().draw();
 
 		// tooltip
-		renderTooltip(g, mouseX, mouseY);
+		renderTooltip(g);
 
 		// key input options
 		if (keyEntryLeft || keyEntryRight) {
@@ -175,15 +188,10 @@ public class OptionsOverlay {
 		Fonts.LARGE.drawString((width - Fonts.LARGE.getWidth(prompt)) / 2, (height - Fonts.LARGE.getLineHeight()) / 2, prompt);
 	}
 
-	private void renderTooltip(Graphics g, int mouseX, int mouseY) {
+	private void renderTooltip(Graphics g) {
 		if (hoverOption != null) {
-			String optionDescription = hoverOption.getDescription();
-			float textWidth = Fonts.SMALL.getWidth(optionDescription);
-			Color.black.a = 0.7f;
-			g.setColor(Color.black);
-			g.fillRoundRect(mouseX + 10, mouseY + 10, 10 + textWidth, 10 + Fonts.SMALL.getLineHeight(), 4);
-			Fonts.SMALL.drawString(mouseX + 15, mouseY + 15, optionDescription, Color.white);
-			Color.black.a = 1f;
+			UI.updateTooltip(displayContainer.renderDelta, hoverOption.getDescription(), false);
+			UI.drawTooltip(g);
 		}
 	}
 
@@ -322,10 +330,10 @@ public class OptionsOverlay {
 		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y, value, Colors.BLUE_BACKGROUND);
 	}
 
-	public void renderTabs(int mouseX, int mouseY) {
+	public void renderTabs() {
 		for (int i = 0; i < tabs.length; i++) {
 			OptionTab tab = tabs[i];
-			boolean hovering = tab.button.contains(mouseX, mouseY);
+			boolean hovering = tab.button.contains(displayContainer.mouseX, displayContainer.mouseY);
 			UI.drawTab(tab.button.getX(), tab.button.getY(), tab.name, i == selectedTab, hovering);
 		}
 	}
@@ -339,7 +347,25 @@ public class OptionsOverlay {
 		Fonts.DEFAULT.drawString(marginX, marginY, "Change the way opsu! behaves", Color.white);
 	}
 
-	public void update(int delta, int mouseX, int mouseY) {
+	@Override
+	public void hide() {
+		acceptInput = false;
+		SoundController.playSound(SoundEffect.MENUBACK);
+		active = false;
+	}
+
+	@Override
+	public void show() {
+		acceptInput = true;
+		active = true;
+	}
+
+	@Override
+	public void onPreRenderUpdate() {
+		int mouseX = displayContainer.mouseX;
+		int mouseY = displayContainer.mouseY;
+		int delta = displayContainer.renderDelta;
+
 		if (sliderSoundDelay > 0) {
 			sliderSoundDelay -= delta;
 		}
@@ -352,7 +378,7 @@ public class OptionsOverlay {
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
 			int sliderValue = hoverOption.getIntegerValue();
-			updateSliderOption(mouseX, mouseY);
+			updateSliderOption();
 			if (hoverOption.getIntegerValue() - sliderValue != 0 && sliderSoundDelay <= 0) {
 				sliderSoundDelay = 90;
 				SoundController.playSound(SoundEffect.MENUHIT);
@@ -366,22 +392,27 @@ public class OptionsOverlay {
 		}
 	}
 
-	public void mousePressed(int button, int x, int y) {
+	@Override
+	public boolean onMousePressed(int button, int x, int y) {
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
-			return;
+			return true;
 		}
 
 		if (isListOptionOpen) {
 			if (y > optionStartY && listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
-				hoverOption.clickListItem(listHoverIndex);
-				parent.onSaveOption(hoverOption);
+				if (0 <= listHoverIndex && listHoverIndex < hoverOption.getListItems().length) {
+					hoverOption.clickListItem(listHoverIndex);
+					if (listener != null) {
+						listener.onSaveOption(hoverOption);
+					}
+				}
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			isListOptionOpen = false;
 			listHoverIndex = -1;
 			updateHoverOption(x, y);
-			return;
+			return true;
 		}
 
 		mousePressY = y;
@@ -393,35 +424,39 @@ public class OptionsOverlay {
 			} else if (hoverOption.getType() == OptionType.NUMERIC) {
 				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
 				if (isAdjustingSlider) {
-					updateSliderOption(x, y);
+					updateSliderOption();
 				}
 			}
 		}
 
 		if (UI.getBackButton().contains(x, y)) {
-			parent.onLeave();
+			hide();
 		}
+		return true;
 	}
 
-	public void mouseReleased(int button, int x, int y) {
+	@Override
+	public boolean onMouseReleased(int button, int x, int y) {
 		selectedOption = null;
-		if (isAdjustingSlider) {
-			parent.onSaveOption(hoverOption);
+		if (isAdjustingSlider && listener != null) {
+			listener.onSaveOption(hoverOption);
 		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
 
 		// check if clicked, not dragged
 		if (Math.abs(y - mousePressY) >= 5) {
-			return;
+			return true;
 		}
 
 		if (hoverOption != null) {
 			if (hoverOption.getType() == OptionType.BOOLEAN) {
-				hoverOption.click(container);
-				parent.onSaveOption(hoverOption);
+				hoverOption.click();
+				if (listener != null) {
+					listener.onSaveOption(hoverOption);
+				}
 				SoundController.playSound(SoundEffect.MENUHIT);
-				return;
+				return true;
 			} else if (hoverOption == GameOption.KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (hoverOption == GameOption.KEY_RIGHT) {
@@ -435,27 +470,38 @@ public class OptionsOverlay {
 			if (tab.button.contains(x, y)) {
 				scrollOffset = tScrollOffset;
 				SoundController.playSound(SoundEffect.MENUCLICK);
-				return;
+				return true;
 			}
 			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
 			tScrollOffset += tab.options.length * optionHeight;
 		}
+
+		if (UI.getBackButton().contains(x, y) && listener != null) {
+			listener.onLeaveOptionsMenu();
+		}
+
+		return true;
 	}
 
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+	@Override
+	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
 		if (!isAdjustingSlider) {
 			scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
 		}
+		return true;
 	}
 
-	public void mouseWheelMoved(int delta) {
+	@Override
+	public boolean onMouseWheelMoved(int delta) {
 		if (!isAdjustingSlider) {
 			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset);
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
+		return true;
 	}
 
-	public boolean keyPressed(int key, char c) {
+	@Override
+	public boolean onKeyPressed(int key, char c) {
 		if (keyEntryRight) {
 			Options.setGameKeyRight(key);
 			keyEntryRight = false;
@@ -468,23 +514,31 @@ public class OptionsOverlay {
 			return true;
 		}
 
-		switch (key) {
-			case Input.KEY_ESCAPE:
-				if (isListOptionOpen) {
-					isListOptionOpen = false;
-					listHoverIndex = -1;
-					return true;
-				}
-				parent.onLeave();
+		if (key == Input.KEY_ESCAPE) {
+			if (isListOptionOpen) {
+				isListOptionOpen = false;
+				listHoverIndex = -1;
 				return true;
+			}
+			hide();
+			if (listener != null) {
+				listener.onLeaveOptionsMenu();
+			}
+			return true;
 		}
+
 		return false;
 	}
 
-	private void updateSliderOption(int mouseX, int mouseY) {
+	@Override
+	public boolean onKeyReleased(int key, char c) {
+		return false;
+	}
+
+	private void updateSliderOption() {
 		int min = hoverOption.getMinValue();
 		int max = hoverOption.getMaxValue();
-		int value = min + Math.round((float) (max - min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
+		int value = min + Math.round((float) (max - min) * (displayContainer.mouseX - sliderOptionStartX) / (sliderOptionLength));
 		hoverOption.setValue(Utils.clamp(value, min, max));
 	}
 
@@ -533,10 +587,9 @@ public class OptionsOverlay {
 
 	}
 
-	public interface Parent {
+	public interface Listener {
 
-		void onLeave();
-
+		void onLeaveOptionsMenu();
 		void onSaveOption(GameOption option);
 
 	}

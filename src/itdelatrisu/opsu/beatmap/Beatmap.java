@@ -22,6 +22,7 @@ import itdelatrisu.opsu.Options;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -58,6 +59,14 @@ public class Beatmap implements Comparable<Beatmap> {
 	 * memory leaks if all images have not been destroyed.
 	 */
 	public static void clearBackgroundImageCache() { bgImageCache.clear(); }
+
+	public static void destroyBackgroundImageCache() {
+		Collection<ImageLoader> values = bgImageCache.values();
+		for (ImageLoader value : values) {
+			value.destroy();
+		}
+		bgImageCache.clear();
+	}
 
 	/** The OSU File object associated with this beatmap. */
 	private File file;

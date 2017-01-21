@@ -15,24 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.events;
+package yugecin.opsudance.utils;
 
-import org.newdawn.slick.Color;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
 
-public class BubbleNotificationEvent {
+public class SlickUtil {
 
-	public static final Color COMMONCOLOR_GREEN = new Color(98, 131, 59);
-	public static final Color COMMONCOLOR_WHITE = new Color(220, 220, 220);
-	public static final Color COMMONCOLOR_PURPLE = new Color(94, 46, 149);
-	public static final Color COMMONCOLOR_RED = new Color(141, 49, 16);
-	public static final Color COLOR_ORANGE = new Color(138, 72, 51);
+	public static void destroyImages(Image[] imgs) {
+		if (imgs == null) {
+			return;
+		}
+		for (Image i : imgs) {
+			destroyImage(i);
+		}
+	}
 
-	public final String message;
-	public final Color borderColor;
-
-	public BubbleNotificationEvent(String message, Color borderColor) {
-		this.message = message;
-		this.borderColor = borderColor;
+	public static void destroyImage(Image image) {
+		if (image == null) {
+			return;
+		}
+		try {
+			image.destroy();
+		} catch (SlickException ignored) {
+		}
 	}
 
 }

@@ -20,7 +20,6 @@ package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.Utils;
@@ -39,114 +38,112 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.state.BasicGameState;
-import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.EmptyTransition;
-import org.newdawn.slick.state.transition.FadeInTransition;
+import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.state.BaseOpsuState;
 
 /**
  * Generic button menu state.
  * <p>
  * Displays a header and a set of defined options to the player.
  */
-public class ButtonMenu extends BasicGameState {
+public class ButtonMenu extends BaseOpsuState {
+
 	/** Menu states. */
 	public enum MenuState {
 		/** The exit confirmation screen. */
 		EXIT (new Button[] { Button.YES, Button.NO }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
+			public String[] getTitle() {
 				return new String[] { "Are you sure you want to exit opsu!?" };
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.NO.click(container, game);
+			public void leave() {
+				Button.NO.click();
 			}
 		},
 		/** The initial beatmap management screen (for a non-"favorite" beatmap). */
 		BEATMAP (new Button[] { Button.CLEAR_SCORES, Button.FAVORITE_ADD, Button.DELETE, Button.CANCEL }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
+			public String[] getTitle() {
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
 				String beatmapString = (node != null) ? BeatmapSetList.get().getBaseNode(node.index).toString() : "";
 				return new String[] { beatmapString, "What do you want to do with this beatmap?" };
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.CANCEL.click(container, game);
+			public void leave() {
+				Button.CANCEL.click();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				Input input = container.getInput();
-				if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT))
-					super.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
+					super.mouseWheelMoved(newValue);
+				}
 			}
 		},
 		/** The initial beatmap management screen (for a "favorite" beatmap). */
 		BEATMAP_FAVORITE (new Button[] { Button.CLEAR_SCORES, Button.FAVORITE_REMOVE, Button.DELETE, Button.CANCEL }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
-				return BEATMAP.getTitle(container, game);
+			public String[] getTitle() {
+				return BEATMAP.getTitle();
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				BEATMAP.leave(container, game);
+			public void leave() {
+				BEATMAP.leave();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				BEATMAP.mouseWheelMoved(newValue);
 			}
 		},
 		/** The beatmap deletion screen for a beatmap set with multiple beatmaps. */
 		BEATMAP_DELETE_SELECT (new Button[] { Button.DELETE_GROUP, Button.DELETE_SONG, Button.CANCEL_DELETE }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
+			public String[] getTitle() {
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
 				String beatmapString = (node != null) ? node.toString() : "";
 				return new String[] { String.format("Are you sure you wish to delete '%s' from disk?", beatmapString) };
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.CANCEL_DELETE.click(container, game);
+			public void leave() {
+				Button.CANCEL_DELETE.click();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				MenuState.BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				MenuState.BEATMAP.mouseWheelMoved(newValue);
 			}
 		},
 		/** The beatmap deletion screen for a single beatmap. */
 		BEATMAP_DELETE_CONFIRM (new Button[] { Button.DELETE_CONFIRM, Button.CANCEL_DELETE }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
-				return BEATMAP_DELETE_SELECT.getTitle(container, game);
+			public String[] getTitle() {
+				return BEATMAP_DELETE_SELECT.getTitle();
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.CANCEL_DELETE.click(container, game);
+			public void leave() {
+				Button.CANCEL_DELETE.click();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				MenuState.BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				MenuState.BEATMAP.mouseWheelMoved(newValue);
 			}
 		},
 		/** The beatmap reloading confirmation screen. */
 		RELOAD (new Button[] { Button.RELOAD_CONFIRM, Button.RELOAD_CANCEL }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
+			public String[] getTitle() {
 				return new String[] {
 						"You have requested a full process of your beatmaps.",
 						"This could take a few minutes.",
@@ -155,70 +152,68 @@ public class ButtonMenu extends BasicGameState {
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.RELOAD_CANCEL.click(container, game);
+			public void leave() {
+				Button.RELOAD_CANCEL.click();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				MenuState.BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				MenuState.BEATMAP.mouseWheelMoved(newValue);
 			}
 		},
 		/** The score management screen. */
 		SCORE (new Button[] { Button.DELETE_SCORE, Button.CLOSE }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
+			public String[] getTitle() {
 				return new String[] { "Score Management" };
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.CLOSE.click(container, game);
+			public void leave() {
+				Button.CLOSE.click();
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				MenuState.BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				MenuState.BEATMAP.mouseWheelMoved(newValue);
 			}
 		},
 		/** The game mod selection screen. */
 		MODS (new Button[] { Button.RESET_MODS, Button.CLOSE }) {
 			@Override
-			public String[] getTitle(GameContainer container, StateBasedGame game) {
+			public String[] getTitle() {
 				return new String[] {
 					"Mods provide different ways to enjoy gameplay. Some have an effect on the score you can achieve during ranked play. Others are just for fun."
 				};
 			}
 
 			@Override
-			protected float getBaseY(GameContainer container, StateBasedGame game) {
-				return container.getHeight() * 2f / 3;
+			protected float getBaseY(DisplayContainer displayContainer) {
+				return displayContainer.height * 2f / 3;
 			}
 
 			@Override
-			public void enter(GameContainer container, StateBasedGame game) {
-				super.enter(container, game);
-				for (GameMod mod : GameMod.values())
+			public void enter() {
+				super.enter();
+				for (GameMod mod : GameMod.values()) {
 					mod.resetHover();
+				}
 			}
 
 			@Override
-			public void leave(GameContainer container, StateBasedGame game) {
-				Button.CLOSE.click(container, game);
+			public void leave() {
+				Button.CLOSE.click();
 			}
 
 			@Override
-			public void draw(GameContainer container, StateBasedGame game, Graphics g) {
-				int width = container.getWidth();
-				int height = container.getHeight();
-
+			public void render(Graphics g) {
 				// score multiplier (TODO: fade in color changes)
 				float mult = GameMod.getScoreMultiplier();
 				String multString = String.format("Score Multiplier: %.2fx", mult);
 				Color multColor = (mult == 1f) ? Color.white : (mult > 1f) ? Color.green : Color.red;
-				float multY = Fonts.LARGE.getLineHeight() * 2 + height * 0.06f;
+				float multY = Fonts.LARGE.getLineHeight() * 2 + displayContainer.height * 0.06f;
 				Fonts.LARGE.drawString(
-						(width - Fonts.LARGE.getWidth(multString)) / 2f,
+						(displayContainer.width - Fonts.LARGE.getWidth(multString)) / 2f,
 						multY, multString, multColor);
 
 				// category text
@@ -232,27 +227,28 @@ public class ButtonMenu extends BasicGameState {
 				for (GameMod mod : GameMod.values())
 					mod.draw();
 
-				super.draw(container, game, g);
+				super.render(g);
 			}
 
 			@Override
-			public void update(GameContainer container, int delta, int mouseX, int mouseY) {
-				super.update(container, delta, mouseX, mouseY);
+			public void preRenderUpdate() {
+				super.preRenderUpdate();
 				GameMod hoverMod = null;
 				for (GameMod mod : GameMod.values()) {
-					mod.hoverUpdate(delta, mod.isActive());
-					if (hoverMod == null && mod.contains(mouseX, mouseY))
+					mod.hoverUpdate(displayContainer.renderDelta, mod.isActive());
+					if (hoverMod == null && mod.contains(displayContainer.mouseX, displayContainer.mouseY))
 						hoverMod = mod;
 				}
 
 				// tooltips
-				if (hoverMod != null)
-					UI.updateTooltip(delta, hoverMod.getDescription(), true);
+				if (hoverMod != null) {
+					UI.updateTooltip(displayContainer.renderDelta, hoverMod.getDescription(), true);
+				}
 			}
 
 			@Override
-			public void keyPress(GameContainer container, StateBasedGame game, int key, char c) {
-				super.keyPress(container, game, key, c);
+			public void keyPressed(int key, char c) {
+				super.keyPressed(key, c);
 				for (GameMod mod : GameMod.values()) {
 					if (key == mod.getKey()) {
 						mod.toggle(true);
@@ -262,8 +258,8 @@ public class ButtonMenu extends BasicGameState {
 			}
 
 			@Override
-			public void click(GameContainer container, StateBasedGame game, int cx, int cy) {
-				super.click(container, game, cx, cy);
+			public void mousePressed(int cx, int cy) {
+				super.mousePressed(cx, cy);
 				for (GameMod mod : GameMod.values()) {
 					if (mod.contains(cx, cy)) {
 						boolean prevState = mod.isActive();
@@ -276,10 +272,13 @@ public class ButtonMenu extends BasicGameState {
 			}
 
 			@Override
-			public void scroll(GameContainer container, StateBasedGame game, int newValue) {
-				MenuState.BEATMAP.scroll(container, game, newValue);
+			public void mouseWheelMoved(int newValue) {
+				MenuState.BEATMAP.mouseWheelMoved(newValue);
 			}
 		};
+
+		public static DisplayContainer displayContainer;
+		public static InstanceContainer instanceContainer;
 
 		/** The buttons in the state. */
 		private final Button[] buttons;
@@ -306,15 +305,10 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Initializes the menu state.
-		 * @param container the game container
-		 * @param game the game
-		 * @param button the center button image
-		 * @param buttonL the left button image
-		 * @param buttonR the right button image
 		 */
-		public void init(GameContainer container, StateBasedGame game, Image button, Image buttonL, Image buttonR) {
-			float center = container.getWidth() / 2f;
-			float baseY = getBaseY(container, game);
+		public void revalidate(Image button, Image buttonL, Image buttonR) {
+			float center = displayContainer.width / 2;
+			float baseY = getBaseY(displayContainer);
 			float offsetY = button.getHeight() * 1.25f;
 
 			menuButtons = new MenuButton[buttons.length];
@@ -328,25 +322,21 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Returns the base Y coordinate for the buttons.
-		 * @param container the game container
-		 * @param game the game
 		 */
-		protected float getBaseY(GameContainer container, StateBasedGame game) {
-			float baseY = container.getHeight() * 0.2f;
-			baseY += ((getTitle(container, game).length - 1) * Fonts.LARGE.getLineHeight());
+		protected float getBaseY(DisplayContainer displayContainer) {
+			float baseY = displayContainer.height * 0.2f;
+			baseY += ((getTitle().length - 1) * Fonts.LARGE.getLineHeight());
 			return baseY;
 		}
 
 		/**
 		 * Draws the title and buttons to the graphics context.
-		 * @param container the game container
-		 * @param game the game
 		 * @param g the graphics context
 		 */
-		public void draw(GameContainer container, StateBasedGame game, Graphics g) {
+		public void render(Graphics g) {
 			// draw title
 			if (actualTitle != null) {
-				float marginX = container.getWidth() * 0.015f, marginY = container.getHeight() * 0.01f;
+				float marginX = displayContainer.width * 0.015f, marginY = displayContainer.height * 0.01f;
 				int lineHeight = Fonts.LARGE.getLineHeight();
 				for (int i = 0, size = actualTitle.size(); i < size; i++)
 					Fonts.LARGE.drawString(marginX, marginY + (i * lineHeight), actualTitle.get(i), Color.white);
@@ -361,17 +351,13 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Updates the menu state.
-		 * @param container the game container
-		 * @param delta the delta interval
-		 * @param mouseX the mouse x coordinate
-		 * @param mouseY the mouse y coordinate
 		 */
-		public void update(GameContainer container, int delta, int mouseX, int mouseY) {
-			float center = container.getWidth() / 2f;
-			boolean centerOffsetUpdated = centerOffset.update(delta);
+		public void preRenderUpdate() {
+			float center = displayContainer.width / 2f;
+			boolean centerOffsetUpdated = centerOffset.update(displayContainer.renderDelta);
 			float centerOffsetX = centerOffset.getValue();
 			for (int i = 0; i < buttons.length; i++) {
-				menuButtons[i].hoverUpdate(delta, mouseX, mouseY);
+				menuButtons[i].hoverUpdate(displayContainer.renderDelta, displayContainer.mouseX, displayContainer.mouseY);
 
 				// move button to center
 				if (centerOffsetUpdated)
@@ -381,15 +367,11 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Processes a mouse click action.
-		 * @param container the game container
-		 * @param game the game
-		 * @param cx the x coordinate
-		 * @param cy the y coordinate
 		 */
-		public void click(GameContainer container, StateBasedGame game, int cx, int cy) {
+		public void mousePressed(int x, int y) {
 			for (int i = 0; i < buttons.length; i++) {
-				if (menuButtons[i].contains(cx, cy)) {
-					buttons[i].click(container, game);
+				if (menuButtons[i].contains(x, y)) {
+					buttons[i].click();
 					break;
 				}
 			}
@@ -397,42 +379,34 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Processes a key press action.
-		 * @param container the game container
-		 * @param game the game
 		 * @param key the key code that was pressed (see {@link org.newdawn.slick.Input})
 		 * @param c the character of the key that was pressed
 		 */
-		public void keyPress(GameContainer container, StateBasedGame game, int key, char c) {
+		public void keyPressed(int key, char c) {
 			int index = Character.getNumericValue(c) - 1;
 			if (index >= 0 && index < buttons.length)
-				buttons[index].click(container, game);
+				buttons[index].click();
 		}
 
 		/**
 		 * Retrieves the title strings for the menu state (via override).
-		 * @param container the game container
-		 * @param game the game
 		 */
-		public String[] getTitle(GameContainer container, StateBasedGame game) { return new String[0]; }
+		public String[] getTitle() { return new String[0]; }
 
 		/**
 		 * Processes a mouse wheel movement.
-		 * @param container the game container
-		 * @param game the game
 		 * @param newValue the amount that the mouse wheel moved
 		 */
-		public void scroll(GameContainer container, StateBasedGame game, int newValue) {
+		public void mouseWheelMoved(int newValue) {
 			UI.changeVolume((newValue < 0) ? -1 : 1);
 		}
 
 		/**
 		 * Processes a state enter request.
-		 * @param container the game container
-		 * @param game the game
 		 */
-		public void enter(GameContainer container, StateBasedGame game) {
-			float center = container.getWidth() / 2f;
-			float centerOffsetX = container.getWidth() * OFFSET_WIDTH_RATIO;
+		public void enter() {
+			float center = displayContainer.width / 2f;
+			float centerOffsetX = displayContainer.width * OFFSET_WIDTH_RATIO;
 			centerOffset = new AnimatedValue(700, centerOffsetX, 0, AnimationEquation.OUT_BOUNCE);
 			for (int i = 0; i < buttons.length; i++) {
 				menuButtons[i].setX(center + ((i % 2 == 0) ? centerOffsetX : centerOffsetX * -1));
@@ -440,150 +414,149 @@ public class ButtonMenu extends BasicGameState {
 			}
 
 			// create title string list
-			actualTitle = new ArrayList<String>();
-			String[] title = getTitle(container, game);
-			int maxLineWidth = (int) (container.getWidth() * 0.96f);
-			for (int i = 0; i < title.length; i++) {
+			actualTitle = new ArrayList<>();
+			String[] title = getTitle();
+			int maxLineWidth = (int) (displayContainer.width * 0.96f);
+			for (String aTitle : title) {
 				// wrap text if too long
-				if (Fonts.LARGE.getWidth(title[i]) > maxLineWidth) {
-					List<String> list = Fonts.wrap(Fonts.LARGE, title[i], maxLineWidth, false);
+				if (Fonts.LARGE.getWidth(aTitle) > maxLineWidth) {
+					List<String> list = Fonts.wrap(Fonts.LARGE, aTitle, maxLineWidth, false);
 					actualTitle.addAll(list);
-				} else
-					actualTitle.add(title[i]);
+				} else {
+					actualTitle.add(aTitle);
+				}
 			}
 		}
 
 		/**
 		 * Processes a state exit request (via override).
-		 * @param container the game container
-		 * @param game the game
 		 */
-		public void leave(GameContainer container, StateBasedGame game) {}
-	};
+		public void leave() {}
+	}
 
 	/** Button types. */
 	private enum Button {
 		YES ("Yes", Color.green) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
-				container.exit();
+			public void click() {
+				displayContainer.exitRequested = true;
 			}
 		},
 		NO ("No", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				game.enterState(Opsu.STATE_MAINMENU, new EmptyTransition(), new FadeInTransition());
+				displayContainer.switchState(MainMenu.class);
 			}
 		},
 		CLEAR_SCORES ("Clear local scores", Color.magenta) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.BEATMAP, node);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP, node);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		FAVORITE_ADD ("Add to Favorites", Color.blue) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
 				node.getBeatmapSet().setFavorite(true);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		FAVORITE_REMOVE ("Remove from Favorites", Color.blue) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
 				node.getBeatmapSet().setFavorite(false);
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		DELETE ("Delete...", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
 				MenuState ms = (node.beatmapIndex == -1 || node.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).setMenuState(ms, node);
-				game.enterState(Opsu.STATE_BUTTONMENU);
+				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, node);
+				displayContainer.switchState(ButtonMenu.class);
 			}
 		},
 		CANCEL ("Cancel", Color.gray) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		DELETE_CONFIRM ("Yes, delete this beatmap!", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, node);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, node);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		DELETE_GROUP ("Yes, delete all difficulties!", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
-				DELETE_CONFIRM.click(container, game);
+			public void click() {
+				DELETE_CONFIRM.click();
 			}
 		},
 		DELETE_SONG ("Yes, but only this difficulty", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getNode();
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, node);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, node);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		CANCEL_DELETE ("Nooooo! I didn't mean to!", Color.gray) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
-				CANCEL.click(container, game);
+			public void click() {
+				CANCEL.click();
 			}
 		},
 		RELOAD_CONFIRM ("Let's do it!", Color.green) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.RELOAD);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.RELOAD);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		RELOAD_CANCEL ("Cancel", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
-				CANCEL.click(container, game);
+			public void click() {
+				CANCEL.click();
 			}
 		},
 		DELETE_SCORE ("Delete score", Color.green) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				ScoreData scoreData = ((ButtonMenu) game.getState(Opsu.STATE_BUTTONMENU)).getScoreData();
-				((SongMenu) game.getState(Opsu.STATE_SONGMENU)).doStateActionOnLoad(MenuState.SCORE, scoreData);
-				game.enterState(Opsu.STATE_SONGMENU, new EmptyTransition(), new FadeInTransition());
+				ScoreData scoreData = instanceContainer.provide(ButtonMenu.class).getScoreData();
+				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.SCORE, scoreData);
+				displayContainer.switchState(SongMenu.class);
 			}
 		},
 		CLOSE ("Close", Color.gray) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
-				CANCEL.click(container, game);
+			public void click() {
+				CANCEL.click();
 			}
 		},
 		RESET_MODS ("Reset All Mods", Color.red) {
 			@Override
-			public void click(GameContainer container, StateBasedGame game) {
+			public void click() {
 				SoundController.playSound(SoundEffect.MENUCLICK);
 				for (GameMod mod : GameMod.values()) {
 					if (mod.isActive())
@@ -591,6 +564,9 @@ public class ButtonMenu extends BasicGameState {
 				}
 			}
 		};
+
+		public static DisplayContainer displayContainer;
+		public static InstanceContainer instanceContainer;
 
 		/** The text to show on the button. */
 		private final String text;
@@ -620,10 +596,8 @@ public class ButtonMenu extends BasicGameState {
 
 		/**
 		 * Processes a mouse click action (via override).
-		 * @param container the game container
-		 * @param game the game
 		 */
-		public void click(GameContainer container, StateBasedGame game) {}
+		public void click() {}
 	}
 
 	/** The current menu state. */
@@ -635,97 +609,83 @@ public class ButtonMenu extends BasicGameState {
 	/** The score data to process in the state. */
 	private ScoreData scoreData;
 
-	// game-related variables
-	private GameContainer container;
-	private StateBasedGame game;
-	private Input input;
-	private final int state;
-
-	public ButtonMenu(int state) {
-		this.state = state;
+	public ButtonMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
+		super(displayContainer);
+		Button.displayContainer = MenuState.displayContainer = displayContainer;
+		Button.instanceContainer = MenuState.instanceContainer = instanceContainer;
 	}
 
 	@Override
-	public void init(GameContainer container, StateBasedGame game)
-			throws SlickException {
-		this.container = container;
-		this.game = game;
-		this.input = container.getInput();
+	public void revalidate() {
+		super.revalidate();
 
 		// initialize buttons
 		Image button = GameImage.MENU_BUTTON_MID.getImage();
-		button = button.getScaledCopy(container.getWidth() / 2, button.getHeight());
+		button = button.getScaledCopy(displayContainer.width / 2, button.getHeight());
 		Image buttonL = GameImage.MENU_BUTTON_LEFT.getImage();
 		Image buttonR = GameImage.MENU_BUTTON_RIGHT.getImage();
-		for (MenuState ms : MenuState.values())
-			ms.init(container, game, button, buttonL, buttonR);
-	}
-
-	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g)
-			throws SlickException {
-		g.setBackground(Color.black);
-		if (menuState != null)
-			menuState.draw(container, game, g);
-	}
-
-	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta)
-			throws SlickException {
-		UI.update(delta);
-		MusicController.loopTrackIfEnded(false);
-		if (menuState != null)
-			menuState.update(container, delta, input.getMouseX(), input.getMouseY());
-	}
-
-	@Override
-	public int getID() { return state; }
-
-	@Override
-	public void mousePressed(int button, int x, int y) {
-		// check mouse button
-		if (button == Input.MOUSE_MIDDLE_BUTTON)
-			return;
-
-		if (menuState != null)
-			menuState.click(container, game, x, y);
-	}
-
-	@Override
-	public void mouseWheelMoved(int newValue) {
-		if (menuState != null)
-			menuState.scroll(container, game, newValue);
-	}
-
-	@Override
-	public void keyPressed(int key, char c) {
-		switch (key) {
-		case Input.KEY_ESCAPE:
-			if (menuState != null)
-				menuState.leave(container, game);
-			break;
-		case Input.KEY_F7:
-			Options.setNextFPS(container);
-			break;
-		case Input.KEY_F10:
-			Options.toggleMouseDisabled();
-			break;
-		case Input.KEY_F12:
-			Utils.takeScreenShot();
-			break;
-		default:
-			if (menuState != null)
-				menuState.keyPress(container, game, key, c);
-			break;
+		for (MenuState ms : MenuState.values()) {
+			ms.revalidate(button, buttonL, buttonR);
 		}
 	}
 
 	@Override
-	public void enter(GameContainer container, StateBasedGame game)
-			throws SlickException {
+	public void render(Graphics g) {
+		super.render(g);
+
+		g.setBackground(Color.black);
+		if (menuState == null) {
+			return;
+		}
+		menuState.render(g);
+	}
+
+	@Override
+	public void preRenderUpdate() {
+		super.preRenderUpdate();
+
+		UI.update(displayContainer.renderDelta);
+		MusicController.loopTrackIfEnded(false);
+		menuState.preRenderUpdate();
+	}
+
+	@Override
+	public boolean mousePressed(int button, int x, int y) {
+		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			return false;
+		}
+
+		menuState.mousePressed(x, y);
+		return true;
+	}
+
+	@Override
+	public boolean mouseWheelMoved(int newValue) {
+		menuState.mouseWheelMoved(newValue);
+		return true;
+	}
+
+	@Override
+	public boolean keyPressed(int key, char c) {
+		if (super.keyPressed(key, c)) {
+			return true;
+		}
+
+		if (key == Input.KEY_ESCAPE) {
+			menuState.leave();
+			return true;
+		}
+
+		menuState.keyPressed(key, c);
+		return true;
+	}
+
+	@Override
+	public void enter() {
+		super.enter();
+
 		UI.enter();
-		if (menuState != null)
-			menuState.enter(container, game);
+		menuState.enter();
 	}
 
 	/**

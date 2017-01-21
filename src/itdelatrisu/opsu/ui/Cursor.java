@@ -18,31 +18,22 @@
 
 package itdelatrisu.opsu.ui;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
-import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.awt.Point;
-import java.nio.IntBuffer;
 import java.util.LinkedList;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
 import org.newdawn.slick.*;
-import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.Dancer;
 
 /**
  * Updates and draws the cursor.
  */
 public class Cursor {
-	/** Empty cursor. */
-	private static org.lwjgl.input.Cursor emptyCursor;
 
 	/** Last cursor coordinates. */
 	private Point lastPosition;
@@ -63,14 +54,9 @@ public class Cursor {
 	private static final float CURSOR_SCALE_TIME = 125;
 
 	/** Stores all previous cursor locations to display a trail. */
-	private LinkedList<Point> trail = new LinkedList<Point>();
+	private LinkedList<Point> trail = new LinkedList<>();
 
 	private boolean newStyle;
-
-	// game-related variables
-	private static GameContainer container;
-	private static StateBasedGame game;
-	private static Input input;
 
 	public static Color lastObjColor = Color.white;
 	public static Color lastMirroredObjColor = Color.white;
@@ -81,26 +67,6 @@ public class Cursor {
 	private boolean isMirrored;
 
 	/**
-	 * Initializes the class.
-	 * @param container the game container
-	 * @param game the game object
-	 */
-	public static void init(GameContainer container, StateBasedGame game) {
-		Cursor.container = container;
-		Cursor.game = game;
-		Cursor.input = container.getInput();
-
-		// create empty cursor to simulate hiding the cursor
-		try {
-			int min = org.lwjgl.input.Cursor.getMinCursorSize();
-			IntBuffer tmp = BufferUtils.createIntBuffer(min * min);
-			emptyCursor = new org.lwjgl.input.Cursor(min, min, min/2, min/2, 1, tmp, null);
-		} catch (LWJGLException e) {
-			ErrorHandler.error("Failed to create hidden cursor.", e, true);
-		}
-	}
-
-	/**
 	 * Constructor.
 	 */
 	public Cursor() {
@@ -108,29 +74,15 @@ public class Cursor {
 	}
 
 	public Cursor(boolean isMirrored) {
-		resetLocations();
+		resetLocations(0, 0);
 		this.isMirrored = isMirrored;
 	}
 
 	/**
 	 * Draws the cursor.
-	 */
-	public void draw() {
-		int state = game.getCurrentStateID();
-		boolean mousePressed =
-			(((state == Opsu.STATE_GAME || state == Opsu.STATE_GAMEPAUSEMENU) && Utils.isGameKeyPressed()) ||
-			((input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) &&
-			!(state == Opsu.STATE_GAME && Options.isMouseDisabled())));
-		draw(input.getMouseX(), input.getMouseY(), mousePressed);
-	}
-
-	/**
-	 * Draws the cursor.
-	 * @param mouseX the mouse x coordinate
-	 * @param mouseY the mouse y coordinate
 	 * @param mousePressed whether or not the mouse button is pressed
 	 */
-	public void draw(int mouseX, int mouseY, boolean mousePressed) {
+	public void draw(boolean mousePressed) {
 		if (Options.isCursorDisabled())
 			return;
 
@@ -172,8 +124,6 @@ public class Cursor {
 			cursorTrail = cursorTrail.getScaledCopy(cursorScale);
 		}
 
-		setCursorPosition(mouseX, mouseY);
-
 		Color filter;
 		if (isMirrored) {
 			filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
@@ -195,16 +145,16 @@ public class Cursor {
 					cursorTrailWidth, cursorTrailHeight, cursorTrailRotation);
 		}
 		cursorTrail.drawEmbedded(
-				mouseX - (cursorTrailWidth / 2f), mouseY - (cursorTrailHeight / 2f),
+				lastPosition.x - (cursorTrailWidth / 2f), lastPosition.y - (cursorTrailHeight / 2f),
 				cursorTrailWidth, cursorTrailHeight, cursorTrailRotation);
 		cursorTrail.endUse();
 
 		// draw the other components
 		if (newStyle && skin.isCursorRotated())
 			cursor.setRotation(cursorAngle);
-		cursor.drawCentered(mouseX, mouseY, Options.isCursorOnlyColorTrail() ? Color.white : filter);
+		cursor.drawCentered(lastPosition.x, lastPosition.y, Options.isCursorOnlyColorTrail() ? Color.white : filter);
 		if (hasMiddle)
-			cursorMiddle.drawCentered(mouseX, mouseY, Options.isCursorOnlyColorTrail() ? Color.white : filter);
+			cursorMiddle.drawCentered(lastPosition.x, lastPosition.y, Options.isCursorOnlyColorTrail() ? Color.white : filter);
 	}
 
 	/**
@@ -212,10 +162,10 @@ public class Cursor {
 	 * @param mouseX x coordinate to set position to
 	 * @param mouseY y coordinate to set position to
 	 */
-	public void setCursorPosition(int mouseX, int mouseY) {
+	public void setCursorPosition(int delta, int mouseX, int mouseY) {
 		// TODO: use an image buffer
 		int removeCount = 0;
-		float FPSmod = Math.max(container.getFPS(), 1) / 30f;
+		float FPSmod = Math.max(1000 / Math.max(delta, 1), 1) / 30f; // TODO
 		if (newStyle) {
 			// new style: add all points between cursor movements
 			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
@@ -301,7 +251,7 @@ public class Cursor {
 	 * If the old style cursor is being used, this will do nothing.
 	 * @param delta the delta interval since the last call
 	 */
-	public void update(int delta) {
+	public void updateAngle(int delta) {
 		cursorAngle += delta / 40f;
 		cursorAngle %= 360;
 	}
@@ -309,14 +259,14 @@ public class Cursor {
 	/**
 	 * Resets all cursor data and beatmap skins.
 	 */
-	public void reset() {
+	public void reset(int mouseX, int mouseY) {
 		// destroy skin images
 		GameImage.CURSOR.destroyBeatmapSkinImage();
 		GameImage.CURSOR_MIDDLE.destroyBeatmapSkinImage();
 		GameImage.CURSOR_TRAIL.destroyBeatmapSkinImage();
 
 		// reset locations
-		resetLocations();
+		resetLocations(mouseX, mouseY);
 
 		// reset angles
 		cursorAngle = 0f;
@@ -325,14 +275,12 @@ public class Cursor {
 	/**
 	 * Resets all cursor location data.
 	 */
-	public void resetLocations() {
+	public void resetLocations(int mouseX, int mouseY) {
 		trail.clear();
-		if (lastPosition != null) {
-			for (int i = 0; i < 50; i++) {
-				trail.add(new Point(lastPosition));
-			}
+		lastPosition = new Point(mouseX, mouseY);
+		for (int i = 0; i < 50; i++) {
+			trail.add(new Point(lastPosition));
 		}
-		lastPosition = new Point(0, 0);
 	}
 
 	/**
@@ -344,23 +292,4 @@ public class Cursor {
 		        GameImage.CURSOR_TRAIL.hasBeatmapSkinImage());
 	}
 
-	/**
-	 * Hides the cursor, if possible.
-	 */
-	public void hide() {
-		if (emptyCursor != null) {
-			try {
-				container.setMouseCursor(emptyCursor, 0, 0);
-			} catch (SlickException e) {
-				ErrorHandler.error("Failed to hide the cursor.", e, true);
-			}
-		}
-	}
-
-	/**
-	 * Unhides the cursor.
-	 */
-	public void show() {
-		container.setDefaultMouseCursor();
-	}
 }

@@ -22,10 +22,14 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class EventBus {
 
+	@Deprecated
+	public static EventBus instance; // TODO get rid of this
+
 	private final List<Subscriber> subscribers;
 
 	public EventBus() {
 		subscribers = new LinkedList<>();
+		instance = this;
 	}
 
 	public <T> void subscribe(Class<T> eventType, EventListener<T> eventListener) {

@@ -1,6 +1,6 @@
 package itdelatrisu.opsu.audio;
 
-import itdelatrisu.opsu.ErrorHandler;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -194,7 +194,7 @@ public class MultiClip {
 			try {
 				audioIn.close();
 			} catch (IOException e) {
-				ErrorHandler.error(String.format("Could not close AudioInputStream for MultiClip %s.", name), e, true);
+				ErrorHandler.error(String.format("Could not close AudioInputStream for MultiClip %s.", name), e).show();
 			}
 		}
 	}

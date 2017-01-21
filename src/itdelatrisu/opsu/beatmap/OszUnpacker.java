@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 
 import java.io.File;
@@ -28,6 +27,9 @@ import java.util.List;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Unpacker for OSZ (ZIP) archives.
@@ -97,8 +99,9 @@ public class OszUnpacker {
 			ZipFile zipFile = new ZipFile(file);
 			zipFile.extractAll(dest.getAbsolutePath());
 		} catch (ZipException e) {
-			ErrorHandler.error(String.format("Failed to unzip file %s to dest %s.",
-					file.getAbsolutePath(), dest.getAbsolutePath()), e, false);
+			String err = String.format("Failed to unzip file %s to dest %s.", file.getAbsolutePath(), dest.getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 

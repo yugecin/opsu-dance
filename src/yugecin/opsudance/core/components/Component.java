@@ -15,31 +15,46 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.core;
+package yugecin.opsudance.core.components;
 
-import itdelatrisu.opsu.downloads.Updater;
-import yugecin.opsudance.OpsuDance;
-import yugecin.opsudance.core.inject.OpsuDanceInjector;
+import org.newdawn.slick.Graphics;
 
-public class Entrypoint {
+public abstract class Component {
 
-	public static final long startTime = System.currentTimeMillis();
+	public int width;
+	public int height;
+	public int x;
+	public int y;
 
-	public static void main(String[] args) {
-		sout("launched");
-		(new OpsuDanceInjector()).provide(OpsuDance.class).start(args);
+	protected boolean focused;
+	protected boolean hovered;
 
-		if (Updater.get().getStatus() == Updater.Status.UPDATE_FINAL) {
-			Updater.get().runUpdate();
-		}
+	public abstract boolean isFocusable();
+
+	public boolean isHovered() {
+		return hovered;
 	}
 
-	public static long runtime() {
-		return System.currentTimeMillis() - startTime;
+	public void updateHover(int x, int y) {
+		this.hovered = this.x <= x && x <= this.x + width && this.y <= y && y <= this.y + height;
 	}
 
-	public static void sout(String message) {
-		System.out.println(String.format("[%7d] %s", runtime(), message));
+	public void mouseReleased(int button) {
+	}
+
+	public void preRenderUpdate() {
+	}
+
+	public abstract void render(Graphics g);
+
+	public void keyPressed(int key, char c) {
+	}
+
+	public void keyReleased(int key, char c) {
+	}
+
+	public void setFocused(boolean focused) {
+		this.focused = focused;
 	}
 
 }

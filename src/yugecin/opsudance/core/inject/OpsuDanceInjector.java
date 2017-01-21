@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.core.inject;
 
+import itdelatrisu.opsu.states.*;
 import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
@@ -50,6 +51,15 @@ public class OpsuDanceInjector extends Injector {
 
 		bind(EmptyRedState.class).asEagerSingleton();
 		bind(EmptyState.class).asEagerSingleton();
+
+		bind(Splash.class).asEagerSingleton();
+		bind(MainMenu.class).asEagerSingleton();
+		bind(ButtonMenu.class).asEagerSingleton();
+		bind(SongMenu.class).asEagerSingleton();
+		bind(DownloadsMenu.class).asEagerSingleton();
+		bind(Game.class).asEagerSingleton();
+		bind(GameRanking.class).asEagerSingleton();
+		bind(GamePauseMenu.class).asEagerSingleton();
 	}
 
 }

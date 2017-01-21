@@ -101,6 +101,11 @@ public class EmptyRedState implements OpsuState {
 	}
 
 	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		return false;
+	}
+
+	@Override
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> EmptyRedState dump\n");
 		dump.append("its red\n");

@@ -18,7 +18,7 @@
 
 package itdelatrisu.opsu.db;
 
-import itdelatrisu.opsu.ErrorHandler;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,7 +39,7 @@ public class DBController {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			ErrorHandler.error("Could not load sqlite-JDBC driver.", e, true);
+			ErrorHandler.error("Could not load sqlite-JDBC driver.", e).show();
 		}
 
 		// initialize the databases
@@ -65,7 +65,7 @@ public class DBController {
 			return DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
 		} catch (SQLException e) {
 			// if the error message is "out of memory", it probably means no database file is found
-			ErrorHandler.error(String.format("Could not connect to database: '%s'.", path), e, true);
+			ErrorHandler.error(String.format("Could not connect to database: '%s'.", path), e).show();
 			return null;
 		}
 	}

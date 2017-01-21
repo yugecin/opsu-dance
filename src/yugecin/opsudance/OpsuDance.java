@@ -19,9 +19,11 @@ package yugecin.opsudance;
 
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
@@ -61,23 +63,32 @@ public class OpsuDance {
 			initUpdater(args);
 			sout("database & updater initialized");
 
-			container.init(EmptyState.class);
+			//container.init(EmptyState.class);
+			container.init(Splash.class);
 		} catch (Exception e) {
 			errorAndExit("startup failure", e);
 		}
 
 		while (rungame());
+		container.teardownAL();
 
+		Options.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
+		Utils.deleteDirectory(Options.TEMP_DIR);
+		if (!Options.isWatchServiceEnabled()) {
+			BeatmapWatchService.destroy();
+		}
 	}
 
 	private boolean rungame() {
 		try {
 			container.setup();
+			container.resume();
 		} catch (Exception e) {
-			errorAndExit("could not initialize GL", e);
+			ErrorHandler.error("could not initialize GL", e).allowTerminate().preventContinue().show();
+			return false;
 		}
 		Exception caughtException = null;
 		try {
@@ -86,7 +97,8 @@ public class OpsuDance {
 			caughtException = e;
 		}
 		container.teardown();
-		return caughtException != null && ErrorHandler.error("update/render error", caughtException).show().shouldIgnoreAndContinue();
+		container.pause();
+		return caughtException != null && ErrorHandler.error("update/render error", caughtException).allowTerminate().show().shouldIgnoreAndContinue();
 	}
 
 	private void initDatabase() {
@@ -160,7 +172,7 @@ public class OpsuDance {
 	}
 
 	private void errorAndExit(String errstr) {
-		ErrorHandler.error(errstr, new Throwable()).preventContinue().show();
+		ErrorHandler.error(errstr, new Throwable()).allowTerminate().preventContinue().show();
 		System.exit(1);
 	}
 

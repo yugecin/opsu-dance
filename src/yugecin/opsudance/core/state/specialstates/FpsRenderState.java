@@ -43,16 +43,16 @@ public class FpsRenderState implements EventListener<ResolutionChangedEvent> {
 
 	public void render(Graphics g) {
 		int x = this.x;
-		int target = displayContainer.targetRenderInterval - (displayContainer.targetUpdateInterval % displayContainer.targetRenderInterval);
+		int target = displayContainer.targetRenderInterval + (displayContainer.targetUpdateInterval % displayContainer.targetRenderInterval);
 		x = drawText(g, getColor(target, displayContainer.renderDelta), (1000 / displayContainer.renderDelta) + " fps", x, this.y);
 		drawText(g, getColor(displayContainer.targetUpdateInterval, displayContainer.delta), (1000 / displayContainer.delta) + " ups", x, this.y);
 	}
 
 	private Color getColor(int targetValue, int realValue) {
-		if (realValue >= targetValue) {
+		if (realValue <= targetValue) {
 			return GREEN;
 		}
-		if (realValue >= targetValue * 0.9f) {
+		if (realValue <= targetValue * 1.15f) {
 			return ORANGE;
 		}
 		return DARKORANGE;

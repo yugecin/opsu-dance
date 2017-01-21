@@ -17,18 +17,23 @@
  */
 package yugecin.opsudance.core;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameImage;
+import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.downloads.DownloadList;
+import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.render.CurveRenderState;
+import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
-import org.lwjgl.LWJGLException;
+import itdelatrisu.opsu.ui.UI;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.KeyListener;
-import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
@@ -41,6 +46,7 @@ import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionChangedEvent;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -70,10 +76,10 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private OpsuState state;
 
-	private final DisplayMode nativeDisplayMode;
+	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
-	private Input input;
+	public Input input;
 
 	public int width;
 	public int height;
@@ -90,16 +96,27 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public int renderDelta;
 	public int delta;
 
+	public boolean exitRequested;
+
 	public int timeSinceLastRender;
 
 	private long lastFrame;
 
+	private boolean wasMusicPlaying;
+
 	private String glVersion;
 	private String glVendor;
+
+	private long exitconfirmation;
+
+	public final Cursor cursor;
+	public boolean drawCursor;
 
 	public DisplayContainer(InstanceContainer instanceContainer, EventBus eventBus) {
 		this.instanceContainer = instanceContainer;
 		this.eventBus = eventBus;
+		this.cursor = new Cursor();
+		drawCursor = true;
 
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override
@@ -149,16 +166,21 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 
-	public void run() throws LWJGLException {
-		while(!(Display.isCloseRequested() && state.onCloseRequest())) {
+	public void run() throws Exception {
+		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
 
 			timeSinceLastRender += delta;
 
 			input.poll(width, height);
+			Music.poll(delta);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
+
 			state.update();
+			if (drawCursor) {
+				cursor.setCursorPosition(delta, mouseX, mouseY);
+			}
 
 			int maxRenderInterval;
 			if (Display.isVisible() && Display.isActive()) {
@@ -185,6 +207,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				bubNotifState.render(graphics);
 				barNotifState.render(graphics);
 
+				cursor.updateAngle(renderDelta);
+				if (drawCursor) {
+					cursor.draw(input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
+				}
+				UI.drawTooltip(graphics);
+
 				timeSinceLastRender = 0;
 
 				Display.update(false);
@@ -193,26 +221,64 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			Display.processMessages();
 			Display.sync(targetUpdatesPerSecond);
 		}
-		teardown();
 	}
 
 	public void setup() throws Exception {
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
-		// temp displaymode to not flash the screen with a 1ms black window
-		Display.setDisplayMode(new DisplayMode(100, 100));
+		Options.setDisplayMode(this);
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-		setDisplayMode(800, 600, false);
-		sout("GL ready");
+		initGL();
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
+		GLHelper.hideNativeCursor();
 	}
 
 	public void teardown() {
+		InternalTextureLoader.get().clear();
+		GameImage.destroyImages();
+		GameData.Grade.destroyImages();
+		Beatmap.destroyBackgroundImageCache();
+		CurveRenderState.shutdown();
 		Display.destroy();
+	}
+
+	public void teardownAL() {
 		AL.destroy();
+	}
+
+	public void pause() {
+		wasMusicPlaying = MusicController.isPlaying();
+		if (wasMusicPlaying) {
+			MusicController.pause();
+		}
+	}
+
+	public void resume() {
+		if (wasMusicPlaying) {
+			MusicController.resume();
+		}
+	}
+
+	private boolean confirmExit() {
+		if (System.currentTimeMillis() - exitconfirmation < 10000) {
+			return true;
+		}
+		if (DownloadList.get().hasActiveDownloads()) {
+			eventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			exitRequested = false;
+			exitconfirmation = System.currentTimeMillis();
+			return false;
+		}
+		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
+			eventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			exitRequested = false;
+			exitconfirmation = System.currentTimeMillis();
+			return false;
+		}
+		return true;
 	}
 
 	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {
@@ -231,6 +297,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			if (fullscreen) {
 				fullscreen = false;
 				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);
+				eventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
 			}
 		}
 
@@ -240,9 +307,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Display.setDisplayMode(displayMode);
 		Display.setFullscreen(fullscreen);
 
-		initGL();
-
-		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+		if (Display.isCreated()) {
+			initGL();
+		}
 
 		if (displayMode.getBitsPerPixel() == 16) {
 			InternalTextureLoader.get().set16BitMode();
@@ -257,11 +324,20 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		graphics.setAntiAlias(false);
 
 		input = new Input(height);
+		input.enableKeyRepeat();
 		input.addKeyListener(this);
 		input.addMouseListener(this);
 
+		sout("GL ready");
+
 		GameImage.init(width, height);
 		Fonts.init();
+
+		eventBus.post(new ResolutionChangedEvent(this.width, this.height));
+	}
+
+	public void resetCursor() {
+		cursor.reset(mouseX, mouseY);
 	}
 
 	private int getDelta() {
@@ -292,6 +368,10 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		state.writeErrorDump(dump);
 	}
 
+	public boolean isInState(Class<? extends OpsuState> state) {
+		return state.isInstance(state);
+	}
+
 	public boolean isTransitioning() {
 		return state instanceof TransitionState;
 	}
@@ -301,7 +381,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void switchStateNow(Class<? extends OpsuState> newState) {
-		switchState(newState, EmptyTransitionState.class, 0, EmptyTransitionState.class, 0);
+		switchState(newState, EmptyTransitionState.class, 0, FadeInTransitionState.class, 300);
+	}
+
+	public void switchStateInstantly(Class<? extends OpsuState> newState) {
+		state.leave();
+		state = instanceContainer.provide(newState);
+		state.enter();
 	}
 
 	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
@@ -353,7 +439,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public void mouseMoved(int oldx, int oldy, int newx, int newy) { }
 
 	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) { }
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
+		state.mouseDragged(oldx, oldy, newx, newy);
+	}
 
 	@Override
 	public void setInput(Input input) { }
