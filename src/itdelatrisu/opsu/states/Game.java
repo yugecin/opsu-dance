@@ -333,6 +333,8 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public void revalidate() {
+		super.revalidate();
+
 		// create offscreen graphics
 		try {
 			offscreen = new Image(displayContainer.width, displayContainer.height);
@@ -1445,10 +1447,6 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public void enter() {
-		super.enter();
-
-		displayContainer.drawCursor = false;
-
 		overlays.clear();
 		if (Options.isEnableSB()) {
 			overlays.add(optionsOverlay);
@@ -1457,6 +1455,10 @@ public class Game extends ComplexOpsuState {
 			storyboardOverlay.onEnter();
 			optionsOverlay.revalidate();
 		}
+
+		super.enter();
+
+		displayContainer.drawCursor = false;
 
 		isInGame = true;
 		if (!skippedToCheckpoint) {

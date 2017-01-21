@@ -69,6 +69,8 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	@Override
 	public void revalidate() {
+		super.revalidate();
+
 		btnAddLinear = new SimpleButton(displayContainer.width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAddQuadratic = new SimpleButton(displayContainer.width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
 		btnAddCubic = new SimpleButton(displayContainer.width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
@@ -92,16 +94,6 @@ public class MoveStoryboard extends OverlayOpsuState{
 		}
 		float t = (float) (trackPosition - gameObjects[objectIndex - 1].getEndTime()) / (gameObjects[objectIndex].getTime() - gameObjects[objectIndex - 1].getEndTime());
 		return moves[objectIndex].getPointAt(t);
-	}
-
-	@Override
-	public void hide() {
-
-	}
-
-	@Override
-	public void show() {
-
 	}
 
 	@Override
