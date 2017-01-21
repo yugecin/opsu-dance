@@ -1458,7 +1458,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
+		if (isReplay || GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			displayContainer.drawCursor = false;
 		}
 
