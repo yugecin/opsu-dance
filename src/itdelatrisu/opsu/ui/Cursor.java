@@ -18,9 +18,7 @@
 
 package itdelatrisu.opsu.ui;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Opsu;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
@@ -37,6 +35,7 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.state.StateBasedGame;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 /**
  * Updates and draws the cursor.
@@ -91,7 +90,7 @@ public class Cursor {
 			IntBuffer tmp = BufferUtils.createIntBuffer(min * min);
 			emptyCursor = new org.lwjgl.input.Cursor(min, min, min/2, min/2, 1, tmp, null);
 		} catch (LWJGLException e) {
-			ErrorHandler.error("Failed to create hidden cursor.", e, true);
+			ErrorHandler.error("Failed to create hidden cursor.", e).show();
 		}
 	}
 

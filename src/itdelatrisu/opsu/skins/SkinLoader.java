@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.skins;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 
@@ -32,6 +31,8 @@ import java.util.LinkedList;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Loads skin configuration files.
@@ -290,7 +291,9 @@ public class SkinLoader {
 				}
 			}
 		} catch (IOException e) {
-			ErrorHandler.error(String.format("Failed to read file '%s'.", skinFile.getAbsolutePath()), e, false);
+			String err = String.format("Failed to read file '%s'.", skinFile.getAbsolutePath());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 
 		return skin;

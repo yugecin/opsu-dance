@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.audio;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
@@ -44,8 +43,12 @@ import org.newdawn.slick.MusicListener;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.SoundStore;
+import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Controller for all music.
@@ -152,7 +155,9 @@ public class MusicController {
 			});
 			playAt(position, loop);
 		} catch (Exception e) {
-			ErrorHandler.error(String.format("Could not play track '%s'.", file.getName()), e, false);
+			String err = String.format("Could not play track '%s'.", file.getName());
+			Log.error(err, e);
+			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 
@@ -496,9 +501,7 @@ public class MusicController {
 			trackLoader.interrupt();
 			try {
 				trackLoader.join();
-			} catch (InterruptedException e) {
-				ErrorHandler.error(null, e, true);
-			}
+			} catch (InterruptedException ignored) { }
 		}
 		trackLoader = null;
 
@@ -575,7 +578,7 @@ public class MusicController {
 
 			player = null;
 		} catch (Exception e) {
-			ErrorHandler.error("Failed to destroy OpenAL.", e, true);
+			ErrorHandler.error("Failed to destroy OpenAL.", e).show();
 		}
 	}
 

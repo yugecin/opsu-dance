@@ -18,7 +18,7 @@
 
 package itdelatrisu.opsu.replay;
 
-import itdelatrisu.opsu.ErrorHandler;
+import com.sun.deploy.security.EnhancedJarVerifier;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
@@ -31,6 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Importer for replay files.
@@ -70,7 +72,9 @@ public class ReplayImporter {
 		File replayDir = Options.getReplayDir();
 		if (!replayDir.isDirectory()) {
 			if (!replayDir.mkdir()) {
-				ErrorHandler.error(String.format("Failed to create replay directory '%s'.", replayDir.getAbsolutePath()), null, false);
+				String err = String.format("Failed to create replay directory '%s'.", replayDir.getAbsolutePath());
+				Log.error(err);
+				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 				return;
 			}
 		}
@@ -83,7 +87,9 @@ public class ReplayImporter {
 				r.loadHeader();
 			} catch (IOException e) {
 				moveToFailedDirectory(file);
-				ErrorHandler.error(String.format("Failed to import replay '%s'. The replay file could not be parsed.", file.getName()), e, false);
+				String err = String.format("Failed to import replay '%s'. The replay file could not be parsed.", file.getName());
+				Log.error(err, e);
+				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 				continue;
 			}
 			Beatmap beatmap = BeatmapSetList.get().getBeatmapFromHash(r.beatmapHash);
@@ -100,8 +106,9 @@ public class ReplayImporter {
 				}
 			} else {
 				moveToFailedDirectory(file);
-				ErrorHandler.error(String.format("Failed to import replay '%s'. The associated beatmap could not be found.", file.getName()), null, false);
-				continue;
+				String err = String.format("Failed to import replay '%s'. The associated beatmap could not be found.", file.getName());
+				Log.error(err);
+				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 			}
 		}
 

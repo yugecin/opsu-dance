@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.ui;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
@@ -455,19 +454,4 @@ public class UI {
 		Colors.WHITE_ALPHA.a = oldAlphaW;
 	}
 
-	/**
-	 * Shows a confirmation dialog (used before exiting the game).
-	 * @param message the message to display
-	 * @return true if user selects "yes", false otherwise
-	 */
-	public static boolean showExitConfirmation(String message) {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			ErrorHandler.error("Could not set system look and feel for exit confirmation.", e, true);
-		}
-		int n = JOptionPane.showConfirmDialog(null, message, "Warning",
-				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		return (n != JOptionPane.YES_OPTION);
-	}
 }

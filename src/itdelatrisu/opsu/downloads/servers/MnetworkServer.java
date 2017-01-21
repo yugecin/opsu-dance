@@ -18,9 +18,9 @@
 
 package itdelatrisu.opsu.downloads.servers;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.DownloadNode;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -120,7 +120,7 @@ public class MnetworkServer extends DownloadServer {
 			// store total result count
 			this.totalResults = nodes.length;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e, true);
+			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
 		}
 		return nodes;
 	}

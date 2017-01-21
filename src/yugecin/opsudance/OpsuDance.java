@@ -23,7 +23,6 @@ import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
-import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
@@ -78,7 +77,6 @@ public class OpsuDance {
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
 		Utils.deleteDirectory(Options.TEMP_DIR);
-		CurveRenderState.shutdown();
 		if (!Options.isWatchServiceEnabled()) {
 			BeatmapWatchService.destroy();
 		}
@@ -89,7 +87,7 @@ public class OpsuDance {
 			container.setup();
 			container.resume();
 		} catch (Exception e) {
-			ErrorHandler.error("could not initialize GL", e).preventContinue().show();
+			ErrorHandler.error("could not initialize GL", e).allowTerminate().preventContinue().show();
 			return false;
 		}
 		Exception caughtException = null;
@@ -100,7 +98,7 @@ public class OpsuDance {
 		}
 		container.teardown();
 		container.pause();
-		return caughtException != null && ErrorHandler.error("update/render error", caughtException).show().shouldIgnoreAndContinue();
+		return caughtException != null && ErrorHandler.error("update/render error", caughtException).allowTerminate().show().shouldIgnoreAndContinue();
 	}
 
 	private void initDatabase() {
@@ -174,7 +172,7 @@ public class OpsuDance {
 	}
 
 	private void errorAndExit(String errstr) {
-		ErrorHandler.error(errstr, new Throwable()).preventContinue().show();
+		ErrorHandler.error(errstr, new Throwable()).allowTerminate().preventContinue().show();
 		System.exit(1);
 	}
 

@@ -24,6 +24,7 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.Sys;
 import org.lwjgl.openal.AL;
@@ -222,6 +223,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		GameImage.destroyImages();
 		GameData.Grade.destroyImages();
 		Beatmap.destroyBackgroundImageCache();
+		CurveRenderState.shutdown();
 		Display.destroy();
 	}
 

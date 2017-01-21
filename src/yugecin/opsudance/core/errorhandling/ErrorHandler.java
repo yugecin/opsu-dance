@@ -52,6 +52,7 @@ public class ErrorHandler {
 	private boolean preventContinue;
 	private boolean preventReport;
 	private boolean ignoreAndContinue;
+	private boolean allowTerminate;
 
 	public ErrorHandler(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
@@ -95,6 +96,11 @@ public class ErrorHandler {
 		return this;
 	}
 
+	public ErrorHandler allowTerminate() {
+		allowTerminate = true;
+		return this;
+	}
+
 	public ErrorHandler preventContinue() {
 		preventContinue = true;
 		return this;
@@ -127,7 +133,9 @@ public class ErrorHandler {
 		Object[] messageComponents = new Object[] { message, new JScrollPane(textArea), createViewLogButton(), createReportButton() };
 
 		String[] buttons;
-		if (preventContinue) {
+		if (!allowTerminate && !preventContinue) {
+			buttons = new String[] { "Ignore & continue" };
+		} else if (preventContinue) {
 			buttons = new String[] { "Terminate" };
 		} else {
 			buttons = new String[] { "Terminate", "Ignore & continue" };
@@ -145,7 +153,7 @@ public class ErrorHandler {
 			                                        null,
 			                                        buttons,
 			                                        buttons[buttons.length - 1]);
-		ignoreAndContinue = result == 1;
+		ignoreAndContinue = !allowTerminate || result == 1;
 		frame.dispose();
 
 		return this;

@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 
 import java.io.IOException;
@@ -42,6 +41,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
@@ -96,7 +97,8 @@ public class BeatmapWatchService {
 			ws = new BeatmapWatchService();
 			ws.register(Options.getBeatmapDir().toPath());
 		} catch (IOException e) {
-			ErrorHandler.error("An I/O exception occurred while creating the watch service.", e, true);
+			Log.error("Could not create watch service", e);
+			EventBus.instance.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));
 			return;
 		}
 
@@ -117,8 +119,9 @@ public class BeatmapWatchService {
 			ws.service.shutdownNow();
 			ws = null;
 		} catch (IOException e) {
+			Log.error("An I/O exception occurred while closing the previous watch service.", e);
+			EventBus.instance.post(new BubbleNotificationEvent("An I/O exception occurred while closing the previous watch service.", BubbleNotificationEvent.COMMONCOLOR_RED));
 			ws = null;
-			ErrorHandler.error("An I/O exception occurred while closing the previous watch service.", e, true);
 		}
 	}
 

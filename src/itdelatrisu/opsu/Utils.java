@@ -73,6 +73,9 @@ import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Contains miscellaneous utilities.
@@ -245,14 +248,14 @@ public class Utils {
 		// create the screenshot directory
 		File dir = Options.getScreenshotDir();
 		if (!dir.isDirectory() && !dir.mkdir()) {
-			ErrorHandler.error(String.format("Failed to create screenshot directory at '%s'.", dir.getAbsolutePath()), null, false);
+			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", dir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 			return;
 		}
 
 		// create file name
 		SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		final File file = new File(dir, String.format("screenshot_%s.%s",
-				date.format(new Date()), Options.getScreenshotFormat()));
+		final String fileName = String.format("screenshot_%s.%s", date.format(new Date()), Options.getScreenshotFormat());
+		final File file = new File(dir, fileName);
 
 		SoundController.playSound(SoundEffect.SHUTTER);
 
@@ -279,8 +282,9 @@ public class Utils {
 						}
 					}
 					ImageIO.write(image, Options.getScreenshotFormat(), file);
+					EventBus.instance.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 				} catch (Exception e) {
-					ErrorHandler.error("Failed to take a screenshot.", e, true);
+					ErrorHandler.error("Failed to take a screenshot.", e).show();
 				}
 			}
 		}.start();
@@ -429,7 +433,7 @@ public class Utils {
 			try {
 				json = new JSONObject(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON object.", e, true);
+				ErrorHandler.error("Failed to create JSON object.", e).show();
 			}
 		}
 		return json;
@@ -448,7 +452,7 @@ public class Utils {
 			try {
 				json = new JSONArray(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON array.", e, true);
+				ErrorHandler.error("Failed to create JSON array.", e).show();
 			}
 		}
 		return json;
@@ -490,7 +494,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			ErrorHandler.error("Failed to calculate MD5 hash.", e, true);
+			ErrorHandler.error("Failed to calculate MD5 hash.", e).show();
 		}
 		return null;
 	}
@@ -514,7 +518,7 @@ public class Utils {
 	 * @return true if JAR, false if file
 	 */
 	public static boolean isJarRunning() {
-		return Opsu.class.getResource(String.format("%s.class", Opsu.class.getSimpleName())).toString().startsWith("jar:");
+		return Utils.class.getResource(String.format("%s.class", Utils.class.getSimpleName())).toString().startsWith("jar:");
 	}
 
 	/**
@@ -526,7 +530,7 @@ public class Utils {
 			return null;
 
 		try {
-			return new JarFile(new File(Opsu.class.getProtectionDomain().getCodeSource().getLocation().toURI()), false);
+			return new JarFile(new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI()), false);
 		} catch (URISyntaxException | IOException e) {
 			Log.error("Could not determine the JAR file.", e);
 			return null;
@@ -539,7 +543,7 @@ public class Utils {
 	 */
 	public static File getRunningDirectory() {
 		try {
-			return new File(Opsu.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			return new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 		} catch (URISyntaxException e) {
 			Log.error("Could not get the running directory.", e);
 			return null;

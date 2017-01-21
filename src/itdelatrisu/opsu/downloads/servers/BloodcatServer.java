@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.downloads.servers;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.DownloadNode;
 
@@ -34,6 +33,7 @@ import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 /**
  * Download server: http://bloodcat.com/osu/
@@ -97,7 +97,7 @@ public class BloodcatServer extends DownloadServer {
 				resultCount++;
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e, true);
+			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
 		}
 		return nodes;
 	}

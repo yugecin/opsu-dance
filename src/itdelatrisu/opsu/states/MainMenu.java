@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.states;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
@@ -46,10 +45,13 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * "Main Menu" state.
@@ -570,7 +572,8 @@ public class MainMenu extends BaseOpsuState {
 			} catch (UnsupportedOperationException e) {
 				UI.sendBarNotification("The repository web page could not be opened.");
 			} catch (IOException e) {
-				ErrorHandler.error("Could not browse to repository URI.", e, false);
+				Log.error("could not browse to repo", e);
+				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
 			}
 			return true;
 		}
@@ -581,7 +584,8 @@ public class MainMenu extends BaseOpsuState {
 			} catch (UnsupportedOperationException e) {
 				UI.sendBarNotification("The repository web page could not be opened.");
 			} catch (IOException e) {
-				ErrorHandler.error("Could not browse to repository URI.", e, false);
+				Log.error("could not browse to repo", e);
+				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
 			}
 			return true;
 		}

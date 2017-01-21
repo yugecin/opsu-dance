@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.audio;
 
-import itdelatrisu.opsu.ErrorHandler;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.HitSound.SampleSet;
 import itdelatrisu.opsu.beatmap.HitObject;
@@ -41,6 +40,9 @@ import javax.sound.sampled.LineUnavailableException;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
  * Controller for all (non-music) sound components.
@@ -99,7 +101,7 @@ public class SoundController {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
 			return loadClip(ref, audioIn, isMP3);
 		} catch (Exception e) {
-			ErrorHandler.error(String.format("Failed to load file '%s'.", ref), e, true);
+			ErrorHandler.error(String.format("Failed to load file '%s'.", ref), e).show();
 			return null;
 		}
 	}
@@ -214,7 +216,7 @@ public class SoundController {
 		// menu and game sounds
 		for (SoundEffect s : SoundEffect.values()) {
 			if ((currentFileName = getSoundFileName(s.getFileName())) == null) {
-				ErrorHandler.error(String.format("Could not find sound file '%s'.", s.getFileName()), null, false);
+				EventBus.instance.post(new BubbleNotificationEvent("Could not find sound file " + s.getFileName(), BubbleNotificationEvent.COLOR_ORANGE));
 				continue;
 			}
 			MultiClip newClip = loadClip(currentFileName, currentFileName.endsWith(".mp3"));
@@ -233,7 +235,7 @@ public class SoundController {
 			for (HitSound s : HitSound.values()) {
 				String filename = String.format("%s-%s", ss.getName(), s.getFileName());
 				if ((currentFileName = getSoundFileName(filename)) == null) {
-					ErrorHandler.error(String.format("Could not find hit sound file '%s'.", filename), null, false);
+					EventBus.instance.post(new BubbleNotificationEvent("Could not find hit sound file " + filename, BubbleNotificationEvent.COLOR_ORANGE));
 					continue;
 				}
 				MultiClip newClip = loadClip(currentFileName, false);
@@ -277,7 +279,7 @@ public class SoundController {
 			try {
 				clip.start(volume, listener);
 			} catch (LineUnavailableException e) {
-				ErrorHandler.error(String.format("Could not start a clip '%s'.", clip.getName()), e, true);
+				ErrorHandler.error(String.format("Could not start a clip '%s'.", clip.getName()), e).show();
 			}
 		}
 	}

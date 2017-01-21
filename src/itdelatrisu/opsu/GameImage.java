@@ -27,7 +27,11 @@ import java.util.List;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.utils.SlickUtil;
 
 /**
@@ -706,7 +710,9 @@ public enum GameImage {
 			return;
 		}
 
-		ErrorHandler.error(String.format("Could not find default image '%s'.", filename), null, false);
+		String err = String.format("Could not find default image '%s'.", filename);
+		Log.warn(err);
+		EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 	}
 
 	/**
@@ -765,7 +771,7 @@ public enum GameImage {
 							img = img.getScaledCopy(0.5f);
 						list.add(img);
 					} catch (SlickException e) {
-						ErrorHandler.error(String.format("Failed to set image '%s'.", name), null, false);
+						EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
 						break;
 					}
 				}
@@ -779,7 +785,7 @@ public enum GameImage {
 								img = img.getScaledCopy(0.5f);
 							list.add(img);
 						} catch (SlickException e) {
-							ErrorHandler.error(String.format("Failed to set image '%s'.", name), null, false);
+							EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
 							break;
 						}
 					}
@@ -806,7 +812,7 @@ public enum GameImage {
 						img = img.getScaledCopy(0.5f);
 					return img;
 				} catch (SlickException e) {
-					ErrorHandler.error(String.format("Failed to set image '%s'.", filename), null, false);
+					EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", filename), BubbleNotificationEvent.COMMONCOLOR_RED));
 				}
 			}
 		}
@@ -851,7 +857,7 @@ public enum GameImage {
 				skinImages = null;
 			}
 		} catch (SlickException e) {
-			ErrorHandler.error(String.format("Failed to destroy beatmap skin images for '%s'.", this.name()), e, true);
+			ErrorHandler.error(String.format("Failed to destroy beatmap skin images for '%s'.", this.name()), e).show();
 		}
 	}
 
