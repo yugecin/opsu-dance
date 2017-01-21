@@ -334,7 +334,7 @@ public class Options {
 		},
 
 		// in-game options
-		SCREEN_RESOLUTION ("Screen Resolution", "ScreenResolution", "Restart (Ctrl+Shift+F5) to apply resolution changes.") {
+		SCREEN_RESOLUTION ("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
 			@Override
 			public String getValueString() {
 				return resolutions[resolutionIdx];
@@ -365,7 +365,7 @@ public class Options {
 		},
 		ALLOW_LARGER_RESOLUTIONS ("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false),
 		FULLSCREEN ("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false),
-		SKIN ("Skin", "Skin", "Restart (Ctrl+Shift+F5) to apply skin changes.") {
+		SKIN ("Skin", "Skin", "Change how the game looks.") {
 			@Override
 			public String getValueString() { return skinName; }
 
