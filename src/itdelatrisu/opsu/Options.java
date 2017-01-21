@@ -377,9 +377,7 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				skinName = skinDirs[index];
-				loadSkin();
-				SoundController.init();
-				EventBus.instance.post(new ResolutionChangedEvent(DisplayContainer.instance.width, DisplayContainer.instance.height));
+				reloadSkin();
 			}
 
 			@Override
@@ -1870,6 +1868,12 @@ public class Options {
 		if (!skinRootDir.isDirectory() && !skinRootDir.mkdir())
 			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create skins directory at '%s'.", skinRootDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return skinRootDir;
+	}
+
+	public static void reloadSkin() {
+		loadSkin();
+		SoundController.init();
+		EventBus.instance.post(new ResolutionChangedEvent(DisplayContainer.instance.width, DisplayContainer.instance.height));
 	}
 
 	/**

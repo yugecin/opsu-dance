@@ -19,6 +19,7 @@ package yugecin.opsudance.core.state;
 
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.states.Game;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
@@ -103,6 +104,10 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 		if (key == Input.KEY_F12) {
 			Utils.takeScreenShot();
 			return true;
+		}
+		Input input = displayContainer.input;
+		if (key == Input.KEY_S && input.isKeyDown(Input.KEY_LMENU) && input.isKeyDown(Input.KEY_LSHIFT) &&input.isKeyDown(Input.KEY_LCONTROL) && !displayContainer.isInState(Game.class)) {
+			Options.reloadSkin();
 		}
 		return false;
 	}
