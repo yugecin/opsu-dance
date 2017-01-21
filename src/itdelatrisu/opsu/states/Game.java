@@ -1700,6 +1700,7 @@ public class Game extends ComplexOpsuState {
 	public void leave() {
 		super.leave();
 
+		displayContainer.resetCursor();
 		displayContainer.drawCursor = true;
 
 		MusicController.pause();
