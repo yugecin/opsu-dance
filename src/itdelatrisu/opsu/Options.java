@@ -376,6 +376,8 @@ public class Options {
 			@Override
 			public void clickListItem(int index) {
 				skinName = skinDirs[index];
+				loadSkin();
+				EventBus.instance.post(new ResolutionChangedEvent(DisplayContainer.instance.width, DisplayContainer.instance.height));
 			}
 
 			@Override

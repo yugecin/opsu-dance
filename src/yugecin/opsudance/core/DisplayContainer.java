@@ -40,6 +40,7 @@ import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
@@ -141,6 +142,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			}
 		};
 
+		eventBus.subscribe(ResolutionChangedEvent.class, new EventListener<ResolutionChangedEvent>() {
+			@Override
+			public void onEvent(ResolutionChangedEvent event) {
+				destroyImages();
+			}
+		});
+
 		this.nativeDisplayMode = Display.getDisplayMode();
 		setUPS(1000);
 		setFPS(60);
@@ -241,12 +249,16 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void teardown() {
+		destroyImages();
+		CurveRenderState.shutdown();
+		Display.destroy();
+	}
+
+	public void destroyImages() {
 		InternalTextureLoader.get().clear();
 		GameImage.destroyImages();
 		GameData.Grade.destroyImages();
 		Beatmap.destroyBackgroundImageCache();
-		CurveRenderState.shutdown();
-		Display.destroy();
 	}
 
 	public void teardownAL() {
@@ -321,11 +333,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	private void initGL() throws Exception {
-		InternalTextureLoader.get().clear();
-		GameImage.destroyImages();
-		GameData.Grade.destroyImages();
-		Beatmap.destroyBackgroundImageCache();
-
 		GL.initDisplay(width, height);
 		GL.enterOrtho(width, height);
 
