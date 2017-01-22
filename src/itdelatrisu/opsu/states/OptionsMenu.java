@@ -121,7 +121,6 @@ public class OptionsMenu {
 			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,
 			GameOption.DANCE_ENABLE_SB,
-			GameOption.DANCE_HIDE_WATERMARK,
 		}),
 		new OptionTab ("Pippi", new GameOption[] {
 			GameOption.PIPPI_ENABLE,
@@ -180,7 +179,6 @@ public class OptionsMenu {
 			GameOption.DANCE_CURSOR_TRAIL_OVERRIDE,
 			GameOption.DANCE_HIDE_OBJECTS,
 			GameOption.DANCE_HIDE_UI,
-			GameOption.DANCE_HIDE_WATERMARK,
 		}),
 		new OptionTab ("Pippi", new GameOption[] {
 			GameOption.PIPPI_ENABLE,
