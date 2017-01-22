@@ -103,8 +103,8 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	private void calculatePosition() {
 		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (displayContainer.width * 0.96f), true);
 		int textHeight = (int) (Fonts.LARGE.getLineHeight() * (lines.size() + 0.5f));
-		textY = (displayContainer.height - textHeight) / 2 + Fonts.LARGE.getLineHeight() / 8;
-		barHalfTargetHeight = textHeight / 2 + Fonts.LARGE.getLineHeight() / 8;
+		textY = (displayContainer.height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
+		barHalfTargetHeight = textHeight / 2;
 	}
 
 	@Override
