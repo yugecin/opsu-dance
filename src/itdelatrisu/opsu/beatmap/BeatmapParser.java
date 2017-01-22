@@ -36,6 +36,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
 /**
@@ -158,7 +159,8 @@ public class BeatmapParser {
 				try {
 					beatmap = parseFile(file, dir, beatmaps, false);
 				} catch(Exception e) {
-					Log.error("could not parse beatmap " + file.getName() + ": " + e.getMessage()); // TODO: show right bottom notification
+					Log.error("could not parse beatmap " + file.getName() + ": " + e.getMessage());
+					EventBus.instance.post(new BubbleNotificationEvent("Could not parse beatmap " + file.getName(), BubbleNotificationEvent.COLOR_ORANGE));
 				}
 
 				// add to parsed beatmap list
