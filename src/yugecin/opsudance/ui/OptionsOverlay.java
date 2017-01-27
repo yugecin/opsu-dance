@@ -429,9 +429,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		}
 
-		if (UI.getBackButton().contains(x, y)) {
-			hide();
-		}
 		return true;
 	}
 
@@ -476,10 +473,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 			tScrollOffset += tab.options.length * optionHeight;
 		}
 
-		if (UI.getBackButton().contains(x, y) && listener != null) {
-			listener.onLeaveOptionsMenu();
+		if (UI.getBackButton().contains(x, y)){
+			hide();
+			if (listener != null) {
+				listener.onLeaveOptionsMenu();
+			}
 		}
-
 		return true;
 	}
 
