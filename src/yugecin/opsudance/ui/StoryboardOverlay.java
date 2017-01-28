@@ -241,7 +241,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	@Override
 	public boolean onMouseWheelMoved(int delta) {
-		return true;
+		return false;
 	}
 
 	public void onEnter() {
