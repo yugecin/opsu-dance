@@ -434,7 +434,7 @@ public class Options {
 		},
 		SCREENSHOT_FORMAT ("Screenshot Format", "ScreenshotFormat", "Press F12 to take a screenshot.") {
 			@Override
-			public String getValueString() { return screenshotFormat[screenshotFormatIndex].toUpperCase(); }
+			public String getValueString() { return screenshotFormat[screenshotFormatIndex]; }
 
 			@Override
 			public Object[] getListItems() {
@@ -1243,7 +1243,7 @@ public class Options {
 	private static int targetFPSindex = 0;
 
 	/** Screenshot file formats. */
-	private static String[] screenshotFormat = { "png", "jpg", "bmp" };
+	private static String[] screenshotFormat = { "PNG", "JPG", "BMP" };
 
 	/** Index in screenshotFormat[] array. */
 	private static int screenshotFormatIndex = 0;
@@ -1335,7 +1335,7 @@ public class Options {
 	 * Returns the screenshot file format.
 	 * @return the file extension ("png", "jpg", "bmp")
 	 */
-	public static String getScreenshotFormat() { return screenshotFormat[screenshotFormatIndex]; }
+	public static String getScreenshotFormat() { return screenshotFormat[screenshotFormatIndex].toLowerCase(); }
 
 	/**
 	 * Sets the container size and makes the window borderless if the container
