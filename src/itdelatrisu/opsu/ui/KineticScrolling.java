@@ -61,8 +61,13 @@ public class KineticScrolling {
 	/** The speed multiplier (divides {@link #TIME_CONST}). */
 	private float speedMultiplier = 1f;
 
+	/** Whether or not to allow overscrolling. */
 	private boolean allowOverScroll;
 
+	/**
+	 * Enable or disable the overscrolling flag.
+	 * @param allowOverScroll whether or not to allow overscrolling
+	 */
 	public void setAllowOverScroll(boolean allowOverScroll) {
 		this.allowOverScroll = allowOverScroll;
 	}
