@@ -242,6 +242,7 @@ public enum GameImage {
 	REPLAY_PLAYBACK_HALF ("playback-half", "png", false, false),
 
 	// Non-Game Components
+	SEARCH ("search", "png", false, false),
 	CONTROL_SLIDER_BALL ("control-sliderball", "png", false, false),
 	CONTROL_CHECK_ON ("control-check-on", "png", false, false),
 	CONTROL_CHECK_OFF ("control-check-off", "png", false, false),

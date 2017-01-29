@@ -328,7 +328,7 @@ public class SongMenu extends ComplexOpsuState {
 	public SongMenu(final DisplayContainer displayContainer, InstanceContainer instanceContainer) {
 		super(displayContainer);
 		this.instanceContainer = instanceContainer;
-		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions, 0);
+		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions);
 		overlays.add(optionsOverlay);
 	}
 

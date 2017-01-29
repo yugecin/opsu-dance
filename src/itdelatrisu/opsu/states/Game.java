@@ -326,7 +326,7 @@ public class Game extends ComplexOpsuState {
 		this.instanceContainer = instanceContainer;
 		mirrorCursor = new Cursor(true);
 		this.moveStoryboardOverlay = new MoveStoryboard(displayContainer);
-		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.storyboardOptions, 0);
+		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(displayContainer, moveStoryboardOverlay, optionsOverlay, this);
 		storyboardOverlay.show();
 		moveStoryboardOverlay.show();

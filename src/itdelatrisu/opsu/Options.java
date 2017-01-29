@@ -421,6 +421,7 @@ public class Options {
 		SHOW_UNICODE ("Prefer Non-English Metadata", "ShowUnicode", "Where available, song titles will be shown in their native language.", false) {
 			@Override
 			public void click() {
+				super.click();
 				if (bool) {
 					try {
 						Fonts.LARGE.loadGlyphs();
@@ -1010,6 +1011,12 @@ public class Options {
 		private OptionType type = OptionType.OTHER;
 
 		/**
+		 * If this option should not be shown in the optionsmenu because it does
+		 * not match the search string.
+		 */
+		private boolean filtered;
+
+		/**
 		 * Constructor for internal options (not displayed in-game).
 		 * @param displayName the option name, as displayed in the configuration file
 		 */
@@ -1191,6 +1198,29 @@ public class Options {
 
 		public int getDefaultVal() {
 			return defaultVal;
+		}
+
+		/**
+		 * Update the filtered flag for this option based on the given searchString.
+		 * @param searchString the searched string or null to reset the filtered flag
+		 * @return true if this option does need to be filtered
+		 */
+		public boolean filter(String searchString) {
+			if (searchString == null || searchString.length() == 0) {
+				filtered = false;
+				return false;
+			}
+			filtered = !(displayName.toLowerCase().contains(searchString) || description.toLowerCase().contains(searchString));
+			return filtered;
+		}
+
+		/**
+		 * Check if this option should be filtered (= not shown) because it does not
+		 * match the search string.
+		 * @return true if the option shouldn't be shown.
+		 */
+		public boolean isFiltered() {
+			return filtered;
 		}
 
 	}
