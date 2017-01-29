@@ -271,10 +271,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		int y = -scrollOffset + optionStartY;
 		maxScrollOffset = optionStartY;
 		boolean render = true;
-		int lastNonSkippedSectionIndex = 0;
 		int sectionIndex = 0;
-		for (; sectionIndex < sections.length; sectionIndex++) {
-			lastNonSkippedSectionIndex = sectionIndex;
+		for (; sectionIndex < sections.length && render; sectionIndex++) {
 			OptionTab section = sections[sectionIndex];
 			if (section.filtered) {
 				continue;
@@ -298,7 +296,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if ((y > -optionHeight && render) || (isListOptionOpen && hoverOption == option)) {
+				if (y > -optionHeight || (isListOptionOpen && hoverOption == option)) {
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
@@ -306,15 +304,15 @@ public class OptionsOverlay extends OverlayOpsuState {
 				lineHeight += optionHeight;
 				if (y > height) {
 					render = false;
-					sectionIndex = sections.length;
 					maxScrollOffset += (section.options.length - optionIndex - 1) * optionHeight;
+					break;
 				}
 			}
 			g.setColor(COL_GREY);
 			g.fillRect(paddingLeft, lineStartY, LINEWIDTH, lineHeight);
 		}
 		// iterate over skipped options to correctly calculate max scroll offset
-		for (sectionIndex = lastNonSkippedSectionIndex + 1; sectionIndex < sections.length; sectionIndex++) {
+		for (; sectionIndex < sections.length; sectionIndex++) {
 			maxScrollOffset += Fonts.LARGE.getLineHeight() * 1.5f;
 			if (sections[sectionIndex].options != null) {
 				maxScrollOffset += sections[sectionIndex].options.length * optionHeight;
