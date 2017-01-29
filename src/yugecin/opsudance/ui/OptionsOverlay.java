@@ -321,6 +321,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		}
 		maxScrollOffset -= height * 2 / 3;
+		if (isListOptionOpen) {
+			maxScrollOffset = Math.max(maxScrollOffset, listHeight);
+		}
 		if (maxScrollOffset < 0) {
 			maxScrollOffset = 0;
 		}
