@@ -68,6 +68,12 @@ public class KineticScrolling {
 	public float getPosition() { return position; }
 
 	/**
+	 * Returns the current position as an int.
+	 * @return the position
+	 */
+	public int getIntPosition() { return (int) position; }
+
+	/**
 	 * Returns the target position.
 	 * @return the target position
 	 */

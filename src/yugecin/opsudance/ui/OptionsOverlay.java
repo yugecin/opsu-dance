@@ -26,6 +26,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.KineticScrolling;
 import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.*;
@@ -127,7 +128,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int posSearchY;
 	private int textSearchYOffset;
 
-	private int scrollOffset;
+	private final KineticScrolling scrollHandler;
 	private int maxScrollOffset;
 
 	private int mousePressY;
@@ -140,7 +141,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private int sliderSoundDelay;
 
-	private TextField searchField;
+	private final TextField searchField;
 	private String lastSearchText;
 
 	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] sections) {
@@ -150,6 +151,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		listHoverIndex = -1;
 		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
+		scrollHandler = new KineticScrolling();
 	}
 
 	public void setListener(Listener listener) {
@@ -190,8 +192,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		int searchImgSize = (int) (Fonts.LARGE.getLineHeight() * 0.75f);
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
-
-		scrollOffset = 0;
 	}
 
 	@Override
@@ -215,7 +215,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		// scrollbar
 		g.setColor(COL_WHITE);
-		g.fillRect(width - 5, ((float) scrollOffset / (maxScrollOffset)) * (height - 45), 5, 45);
+		g.fillRect(width - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
 		g.clearClip();
 
 		// UI
@@ -244,7 +244,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
 			}
 		}
-		g.fillRect(0, indicatorPos - scrollOffset, width, optionHeight);
+		g.fillRect(0, indicatorPos - scrollHandler.getPosition(), width, optionHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
@@ -268,7 +268,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderOptions(Graphics g) {
-		int y = -scrollOffset + optionStartY;
+		int y = -scrollHandler.getIntPosition() + optionStartY;
 		maxScrollOffset = optionStartY;
 		boolean render = true;
 		int sectionIndex = 0;
@@ -325,8 +325,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (maxScrollOffset < 0) {
 			maxScrollOffset = 0;
 		}
-		if (scrollOffset > maxScrollOffset) {
-			scrollOffset = maxScrollOffset;
+		scrollHandler.setMinMax(0f, maxScrollOffset);
+		if (scrollHandler.getIntPosition() > maxScrollOffset) {
+			scrollHandler.setPosition(maxScrollOffset);
 		}
 	}
 
@@ -488,13 +489,13 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderTitle() {
-		FontUtil.drawCentered(Fonts.LARGE, width, 0, textOptionsY - scrollOffset, "Options", COL_WHITE);
-		FontUtil.drawCentered(Fonts.MEDIUM, width, 0, textChangeY - scrollOffset, "Change the way opsu! behaves", COL_PINK);
+		FontUtil.drawCentered(Fonts.LARGE, width, 0, textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
+		FontUtil.drawCentered(Fonts.MEDIUM, width, 0, textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
 	}
 
 	private void renderSearch(Graphics g) {
-		int ypos = posSearchY + textSearchYOffset - scrollOffset;
-		if (scrollOffset > posSearchY) {
+		int ypos = posSearchY + textSearchYOffset - scrollHandler.getIntPosition();
+		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
 			g.fillRect(0, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
@@ -533,6 +534,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
 		int delta = displayContainer.renderDelta;
+
+		scrollHandler.update(delta);
 
 		searchField.performKeyRepeat();
 
@@ -654,6 +657,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return false;
 		}
 
+		scrollHandler.pressed();
+
 		mousePressY = y;
 		selectedOption = hoverOption;
 
@@ -681,6 +686,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
+
+		scrollHandler.released();
 
 		// check if clicked, not dragged
 		if (Math.abs(y - mousePressY) >= 5) {
@@ -732,7 +739,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 	@Override
 	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
 		if (!isAdjustingSlider) {
-			scrollOffset = Utils.clamp(scrollOffset + oldy - newy, 0, maxScrollOffset);
+			int diff = newy - oldy;
+			if (diff != 0) {
+				scrollHandler.dragged(-diff);
+			}
 		}
 		return true;
 	}
@@ -740,7 +750,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	@Override
 	public boolean onMouseWheelMoved(int delta) {
 		if (!isAdjustingSlider) {
-			scrollOffset = Utils.clamp(scrollOffset - delta, 0, maxScrollOffset);
+			scrollHandler.scrollOffset(-delta);
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
 		return true;
@@ -813,7 +823,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return;
 		}
 
-		int mouseVirtualY = scrollOffset + mouseY - optionStartY;
+		int mouseVirtualY = scrollHandler.getIntPosition() + mouseY - optionStartY;
 		for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
 			OptionTab section = sections[sectionIndex];
 			if (section.filtered) {
@@ -830,7 +840,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				}
 				if (mouseVirtualY <= optionHeight) {
 					if (mouseVirtualY >= 0) {
-						int indicatorPos = scrollOffset + mouseY - mouseVirtualY;
+						int indicatorPos = scrollHandler.getIntPosition() + mouseY - mouseVirtualY;
 						if (indicatorPos != this.indicatorPos + indicatorOffsetToNextPos) {
 							this.indicatorPos += indicatorOffsetToNextPos; // finish the current moving animation
 							indicatorOffsetToNextPos = indicatorPos - this.indicatorPos;
