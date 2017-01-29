@@ -151,6 +151,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		listHoverIndex = -1;
 		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
+		searchField.setMaxLength(20);
+
 		scrollHandler = new KineticScrolling();
 		scrollHandler.setAllowOverScroll(true);
 	}
@@ -263,7 +265,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (hoverOption.getType() == OptionType.NUMERIC) {
 				tip = "(" + hoverOption.getValueString() + ") " + tip;
 			}
-			UI.updateTooltip(displayContainer.renderDelta, tip, false);
+			UI.updateTooltip(displayContainer.renderDelta, tip, true);
 			UI.drawTooltip(g);
 		}
 	}
@@ -509,6 +511,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	@Override
 	public void hide() {
+		searchField.setFocused(false);
 		acceptInput = false;
 		SoundController.playSound(SoundEffect.MENUBACK);
 		hideAnimationTime = animationtime;
@@ -534,8 +537,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 		int delta = displayContainer.renderDelta;
 
 		scrollHandler.update(delta);
-
-		searchField.performKeyRepeat();
 
 		updateShowHideAnimation(delta);
 		if (animationtime <= 0) {

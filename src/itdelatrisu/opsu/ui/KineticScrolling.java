@@ -115,7 +115,8 @@ public class KineticScrolling {
 				amplitude = 0;
 				target = position = max;
 			}
-		} else if (position < min) {
+		}
+		if (position < min) {
 			if (allowOverScroll) {
 				scrollToPosition(min);
 			} else {

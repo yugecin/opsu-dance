@@ -96,7 +96,16 @@ public class TextField extends Component {
 	}
 
 	public void render(Graphics g) {
-		performKeyRepeat();
+		if (lastKey != -1) {
+			if (displayContainer.input.isKeyDown(lastKey)) {
+				if (repeatTimer < System.currentTimeMillis()) {
+					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
+					keyPressed(lastKey, lastChar);
+				}
+			} else {
+				lastKey = -1;
+			}
+		}
 		Rectangle oldClip = g.getClip();
 		g.setWorldClip(x,y,width, height);
 		
@@ -134,20 +143,6 @@ public class TextField extends Component {
 		g.setFont(temp);
 		g.clearWorldClip();
 		g.setClip(oldClip);
-	}
-
-	public void performKeyRepeat() {
-		if (lastKey == -1) {
-			return;
-		}
-		if (!displayContainer.input.isKeyDown(lastKey)) {
-			lastKey = -1;
-			return;
-		}
-		if (repeatTimer < System.currentTimeMillis()) {
-			repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-			keyPressed(lastKey, lastChar);
-		}
 	}
 
 	public String getText() {
