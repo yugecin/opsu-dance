@@ -26,6 +26,10 @@ public class OptionsMenu {
 
 	public static final OptionTab[] normalOptions = new OptionTab[] {
 		new OptionTab("GENERAL", null),
+		new OptionTab("GENERAL", new GameOption[]{
+			GameOption.DISABLE_UPDATER,
+			GameOption.ENABLE_WATCH_SERVICE
+		}),
 		new OptionTab("LANGUAGE", new GameOption[]{
 			GameOption.SHOW_UNICODE,
 		}),
@@ -108,8 +112,6 @@ public class OptionsMenu {
 		new OptionTab("MISC", new GameOption[] {
 			GameOption.CHECKPOINT,
 			GameOption.REPLAY_SEEKING,
-			GameOption.DISABLE_UPDATER,
-			GameOption.ENABLE_WATCH_SERVICE
 		}),
 		new OptionTab("DANCE", null),
 		new OptionTab("MOVER", new GameOption[]{
