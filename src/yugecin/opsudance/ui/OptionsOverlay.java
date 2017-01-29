@@ -165,7 +165,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	public void revalidate() {
 		super.revalidate();
 
-		finalWidth = Math.max((int) (displayContainer.width * 0.321f), 340);
+		finalWidth = Math.max((int) (displayContainer.width * 0.36f), 340); // 0.321f
 		height = displayContainer.height;
 
 		// calculate positions
