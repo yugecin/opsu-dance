@@ -166,7 +166,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		// calculate positions
 		paddingRight = (int) (displayContainer.width * 0.009375f); // not so accurate
 		paddingLeft = (int) (displayContainer.width * 0.0180f); // not so accurate
-		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625); // not so accurate
+		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625f); // not so accurate
 		optionStartX = paddingTextLeft;
 		textOptionsY = Fonts.LARGE.getLineHeight() * 2;
 		textChangeY = textOptionsY + Fonts.LARGE.getLineHeight();
@@ -544,6 +544,15 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (sliderSoundDelay > 0) {
 			sliderSoundDelay -= delta;
 		}
+
+		if (isListOptionOpen) {
+			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
+				listHoverIndex = (mouseY - listStartY) / listItemHeight;
+			} else {
+				listHoverIndex = -1;
+			}
+		}
+
 		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
 			updateIndicatorAlpha();
 			return;
@@ -559,12 +568,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (hoverOption.getIntegerValue() - sliderValue != 0 && sliderSoundDelay <= 0) {
 				sliderSoundDelay = 90;
 				SoundController.playSound(SoundEffect.MENUHIT);
-			}
-		} else if (isListOptionOpen) {
-			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
-				listHoverIndex = (mouseY - listStartY) / listItemHeight;
-			} else {
-				listHoverIndex = -1;
 			}
 		}
 	}
