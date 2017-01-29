@@ -24,16 +24,16 @@ import itdelatrisu.opsu.Options.GameOption.OptionType;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.ui.Colors;
-import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.KineticScrolling;
-import itdelatrisu.opsu.ui.UI;
+import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.utils.FontUtil;
+
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class OptionsOverlay extends OverlayOpsuState {
 
@@ -80,30 +80,22 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private Image sliderBallImg;
 	private Image checkOnImg;
 	private Image checkOffImg;
-	private Image chevronDownImg;
-	private Image chevronRightImg;
 	private Image searchImg;
 
 	private OptionTab[] sections;
 
 	private GameOption hoverOption;
 	private GameOption selectedOption;
-	private GameOption selectedListOption;
 
 	private int sliderOptionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
 
-	private static final int LISTOPENANIMATIONTIME = 200;
-	private static final int LISTCLOSEANIMATIONTIME = 175;
-	private int listAnimationTime;
-	private boolean isListOptionOpen;
-	private int listItemHeight;
-	private int listStartX;
-	private int listStartY;
-	private int listWidth;
-	private int listHeight;
-	private int listHoverIndex;
+	private final HashMap<GameOption, DropdownMenu<Object>> dropdownMenus;
+	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
+	private int dropdownMenuPaddingY;
+	private DropdownMenu<Object> openDropdownMenu;
+	private int openDropdownVirtualY;
 
 	private int finalWidth;
 	private int width;
@@ -149,7 +141,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		this.sections = sections;
 
-		listHoverIndex = -1;
+		dropdownMenus = new HashMap<>();
+		visibleDropdownMenus = new LinkedList<>();
+
 		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
 		searchField.setMaxLength(20);
 
@@ -179,9 +173,13 @@ public class OptionsOverlay extends OverlayOpsuState {
 		textSearchYOffset = Fonts.MEDIUM.getLineHeight() / 2;
 		optionStartY = posSearchY + Fonts.MEDIUM.getLineHeight() + Fonts.LARGE.getLineHeight();
 
+		if (active) {
+			width = finalWidth;
+			optionWidth = width - optionStartX - paddingRight;
+		}
+
 		optionHeight = (int) (Fonts.MEDIUM.getLineHeight() * 1.3f);
 		optionTextOffsetY = (int) ((optionHeight - Fonts.MEDIUM.getLineHeight()) / 2f);
-		listItemHeight = (int) (optionHeight * 4f / 5f);
 		controlImageSize = (int) (Fonts.MEDIUM.getLineHeight() * 0.7f);
 		controlImagePadding = (optionHeight - controlImageSize) / 2;
 
@@ -189,9 +187,43 @@ public class OptionsOverlay extends OverlayOpsuState {
 		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(controlImageSize, controlImageSize);
 		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(controlImageSize, controlImageSize);
 
-		chevronDownImg = GameImage.CHEVRON_DOWN.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		chevronRightImg = GameImage.CHEVRON_RIGHT.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		chevronRightImg.setImageColor(0f, 0f, 0f);
+		dropdownMenus.clear();
+		for (OptionTab section : sections) {
+			if (section.options == null) {
+				continue;
+			}
+			for (final GameOption option : section.options) {
+				Object[] items = option.getListItems();
+				if (items == null) {
+					continue;
+				}
+				DropdownMenu<Object> menu = new DropdownMenu<Object>(displayContainer, items, 0, 0, 0) {
+					@Override
+					public void itemSelected(int index, Object item) {
+						option.clickListItem(index);
+						openDropdownMenu = null;
+					}
+				};
+				// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
+				String selectedValue = option.getValueString();
+				int idx = 0;
+				for (Object item : items) {
+					if (item.toString().equals(selectedValue)) {
+						break;
+					}
+					idx++;
+				}
+				menu.setSelectedIndex(idx);
+				menu.setBackgroundColor(COL_BG);
+				menu.setBorderColor(Color.transparent);
+				menu.setChevronDownColor(COL_WHITE);
+				menu.setChevronRightColor(COL_BG);
+				menu.setHighlightColor(COL_COMBOBOX_HOVER);
+				menu.setTextColor(COL_WHITE);
+				dropdownMenuPaddingY = (optionHeight - menu.getHeight()); // TODO why isn't this /2 ?
+				dropdownMenus.put(option, menu);
+			}
+		}
 
 		int searchImgSize = (int) (Fonts.LARGE.getLineHeight() * 0.75f);
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
@@ -212,7 +244,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		// options
 		renderOptions(g);
-		renderOpenList(g);
+		if (openDropdownMenu != null) {
+			openDropdownMenu.render(g);
+			if (!openDropdownMenu.isOpen()) {
+				openDropdownMenu = null;
+			}
+		}
 
 		renderSearch(g);
 
@@ -271,6 +308,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderOptions(Graphics g) {
+		visibleDropdownMenus.clear();
 		int y = -scrollHandler.getIntPosition() + optionStartY;
 		maxScrollOffset = optionStartY;
 		boolean render = true;
@@ -299,7 +337,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight || (isListOptionOpen && hoverOption == option)) {
+				if (y > -optionHeight || (openDropdownMenu != null && openDropdownMenu.equals(dropdownMenus.get(option)))) {
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
@@ -321,81 +359,21 @@ public class OptionsOverlay extends OverlayOpsuState {
 				maxScrollOffset += sections[sectionIndex].options.length * optionHeight;
 			}
 		}
-		maxScrollOffset -= height * 2 / 3;
-		if (isListOptionOpen) {
-			maxScrollOffset = Math.max(maxScrollOffset, listHeight);
+		if (openDropdownMenu != null) {
+			maxScrollOffset = Math.max(maxScrollOffset, openDropdownVirtualY + openDropdownMenu.getHeight());
 		}
+		maxScrollOffset -= height * 2 / 3;
 		if (maxScrollOffset < 0) {
 			maxScrollOffset = 0;
 		}
-		scrollHandler.setMinMax(0f, maxScrollOffset);
-	}
-
-	private void renderOpenList(Graphics g) {
-		if (!isListOptionOpen && listAnimationTime == 0) {
-			return;
-		}
-		float progress;
-		int listItemHeight;
-		if (isListOptionOpen) {
-			listAnimationTime = Math.min(LISTOPENANIMATIONTIME, listAnimationTime + displayContainer.renderDelta);
-			progress = (float) listAnimationTime / LISTOPENANIMATIONTIME;
-		} else {
-			listAnimationTime -= displayContainer.renderDelta;
-			if (listAnimationTime <= 0) {
-				listAnimationTime = 0;
-				return;
-			}
-			progress = (float) listAnimationTime / LISTCLOSEANIMATIONTIME;
-		}
-		listItemHeight = (int) (this.listItemHeight * progress);
-		listHeight = (int) (this.listHeight * progress);
-		final int borderRadius = 6;
-		float blackAlphaA = Colors.BLACK_ALPHA_85.a;
-		float whiteA = COL_WHITE.a;
-		float bgA = COL_BG.a;
-		COL_WHITE.a *= progress;
-		COL_BG.a *= progress;
-		Colors.BLACK_ALPHA_85.a *= progress;
-		g.setColor(Colors.BLACK_ALPHA_85);
-		g.fillRoundRect(listStartX, listStartY, listWidth, listHeight, borderRadius, 15);
-		Object[] listItems = selectedListOption.getListItems();
-		if (listHoverIndex != -1) {
-			g.setColor(COL_COMBOBOX_HOVER);
-			if (listHoverIndex == 0) {
-				g.fillRoundRect(listStartX, listStartY + listHoverIndex * listItemHeight, listWidth, listItemHeight, borderRadius, 15);
-				g.fillRect(listStartX, listStartY + listHoverIndex * listItemHeight + listItemHeight / 2, listWidth, listItemHeight / 2);
-			} else if (listHoverIndex == listItems.length - 1) {
-				g.fillRoundRect(listStartX, listStartY + listHoverIndex * listItemHeight, listWidth, listItemHeight, borderRadius, 15);
-				g.fillRect(listStartX, listStartY + listHoverIndex * listItemHeight, listWidth, listItemHeight / 2);
-			} else {
-				g.fillRect(listStartX, listStartY + listHoverIndex * listItemHeight, listWidth, listItemHeight);
-			}
-			chevronRightImg.draw(listStartX + 2, listStartY + listHoverIndex * listItemHeight + (listItemHeight - controlImageSize) / 2, COL_BG);
-		}
-		int y = listStartY;
-		String selectedValue = selectedListOption.getValueString();
-		for (Object item : listItems) {
-			String text = item.toString();
-			Font font;
-			if (text.equals(selectedValue)) {
-				font = Fonts.MEDIUMBOLD;
-			} else {
-				font = Fonts.MEDIUM;
-			}
-			font.drawString(listStartX + 20, y - Fonts.MEDIUM.getLineHeight() * 0.05f, item.toString(), COL_WHITE);
-			y += listItemHeight;
-		}
-		COL_BG.a = bgA;
-		COL_WHITE.a = whiteA;
-		Colors.BLACK_ALPHA_85.a = blackAlphaA;
+		scrollHandler.setMinMax(0, maxScrollOffset);
 	}
 
 	private void renderOption(Graphics g, GameOption option, int y) {
 		OptionType type = option.getType();
 		Object[] listItems = option.getListItems();
 		if (listItems != null) {
-			renderListOption(g, option, y, listItems);
+			renderListOption(g, option, y);
 		} else if (type == OptionType.BOOLEAN) {
 			renderCheckOption(option, y);
 		} else if (type == OptionType.NUMERIC) {
@@ -405,33 +383,30 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 	}
 
-	private void renderListOption(Graphics g, GameOption option, int y, Object[] listItems) {
-		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
+	private void renderListOption(Graphics g, GameOption option, int y) {
+		// draw option name
+		int nameWith = Fonts.MEDIUM.getWidth(option.getName());
 		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.getName(), COL_WHITE);
-		final int padding = (int) (optionHeight / 10f);
-		nameLen += 15;
-		final int comboboxStartX = optionStartX + nameLen;
-		final int comboboxWidth = optionWidth - nameLen;
-		final int borderRadius = 6;
-		if (comboboxWidth <= controlImageSize) {
+		nameWith += 15;
+		int comboboxStartX = optionStartX + nameWith;
+		int comboboxWidth = optionWidth - nameWith;
+		if (comboboxWidth < controlImageSize) {
 			return;
 		}
-		Color backColor = COL_BG;
-		if (hoverOption == option
-			&& comboboxStartX <= displayContainer.mouseX && displayContainer.mouseX < comboboxStartX + comboboxWidth
-			&& y + padding <= displayContainer.mouseY && displayContainer.mouseY < y + padding + listItemHeight) {
-			backColor = COL_COMBOBOX_HOVER;
+		DropdownMenu<Object> dropdown = dropdownMenus.get(option);
+		if (dropdown == null) {
+			return;
 		}
-		g.setColor(backColor);
-		g.fillRoundRect(comboboxStartX, y + padding, comboboxWidth, listItemHeight, borderRadius, 15);
-		Fonts.MEDIUM.drawString(comboboxStartX + 4, y + optionTextOffsetY, option.getValueString(), COL_WHITE);
-		chevronDownImg.draw(width - paddingRight - controlImageSize / 3 - controlImageSize, y + controlImagePadding, COL_WHITE);
-		if (isListOptionOpen && hoverOption == option) {
-			listStartX = comboboxStartX;
-			listStartY = y + optionHeight;
-			listWidth = comboboxWidth;
-			listHeight = listItems.length * listItemHeight;
+		visibleDropdownMenus.add(dropdown);
+		dropdown.setWidth(comboboxWidth);
+		dropdown.x = comboboxStartX;
+		dropdown.y = y + dropdownMenuPaddingY;
+		if (dropdown.isOpen()) {
+			openDropdownMenu = dropdown;
+			openDropdownVirtualY = maxScrollOffset;
+			return;
 		}
+		dropdown.render(g);
 	}
 
 	private void renderCheckOption(GameOption option, int y) {
@@ -538,6 +513,14 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		scrollHandler.update(delta);
 
+		if (openDropdownMenu == null) {
+			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+				menu.updateHover(mouseX, mouseY);
+			}
+		} else {
+			openDropdownMenu.updateHover(mouseX, mouseY);
+		}
+
 		updateShowHideAnimation(delta);
 		if (animationtime <= 0) {
 			active = false;
@@ -546,14 +529,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		if (sliderSoundDelay > 0) {
 			sliderSoundDelay -= delta;
-		}
-
-		if (isListOptionOpen) {
-			if (listStartX <= mouseX && mouseX < listStartX + listWidth && listStartY <= mouseY && mouseY < listStartY + listHeight) {
-				listHoverIndex = (mouseY - listStartY) / listItemHeight;
-			} else {
-				listHoverIndex = -1;
-			}
 		}
 
 		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
@@ -635,23 +610,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (isListOptionOpen) {
-			if (listStartX <= x && x < listStartX + listWidth && listStartY <= y && y < listStartY + listHeight) {
-				if (0 <= listHoverIndex && listHoverIndex < hoverOption.getListItems().length) {
-					hoverOption.clickListItem(listHoverIndex);
-					if (listener != null) {
-						listener.onSaveOption(hoverOption);
-					}
-				}
-				SoundController.playSound(SoundEffect.MENUCLICK);
-			}
-			isListOptionOpen = false;
-			listAnimationTime = LISTCLOSEANIMATIONTIME;
-			listHoverIndex = -1;
-			updateHoverOption(x, y);
-			return false;
-		}
-
 		if (x > width) {
 			return false;
 		}
@@ -661,16 +619,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 		mousePressY = y;
 		selectedOption = hoverOption;
 
-		if (hoverOption != null) {
-			if (hoverOption.getListItems() != null) {
-				isListOptionOpen = true;
-				selectedListOption = hoverOption;
-				listAnimationTime = 0;
-			} else if (hoverOption.getType() == OptionType.NUMERIC) {
-				isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
-				if (isAdjustingSlider) {
-					updateSliderOption();
-				}
+		if (hoverOption != null && hoverOption.getType() == OptionType.NUMERIC) {
+			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			if (isAdjustingSlider) {
+				updateSliderOption();
 			}
 		}
 
@@ -685,6 +637,19 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
+
+		if (openDropdownMenu != null) {
+			openDropdownMenu.mouseReleased(button);
+			updateHoverOption(x, y);
+			return true;
+		} else {
+			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+				menu.mouseReleased(button);
+				if (menu.isOpen()) {
+					return true;
+				}
+			}
+		}
 
 		scrollHandler.released();
 
@@ -711,20 +676,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 				keyEntryLeft = true;
 			}
 		}
-
-		/*
-		// check if tab was clicked
-		int tScrollOffset = 0;
-		for (OptionTab tab : tabs) {
-			if (tab.button.contains(x, y)) {
-				scrollOffset = tScrollOffset;
-				SoundController.playSound(SoundEffect.MENUCLICK);
-				return true;
-			}
-			tScrollOffset += Fonts.MEDIUM.getLineHeight() * 2;
-			tScrollOffset += tab.options.length * optionHeight;
-		}
-		*/
 
 		if (UI.getBackButton().contains(x, y)){
 			hide();
@@ -770,10 +721,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 
 		if (key == Input.KEY_ESCAPE) {
-			if (isListOptionOpen) {
-				isListOptionOpen = false;
-				listAnimationTime = LISTCLOSEANIMATIONTIME;
-				listHoverIndex = -1;
+			if (openDropdownMenu != null) {
+				openDropdownMenu.keyPressed(key, c);
 				return true;
 			}
 			if (lastSearchText.length() != 0) {
@@ -810,7 +759,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
-		if (isListOptionOpen || keyEntryLeft || keyEntryRight) {
+		if (openDropdownMenu != null || keyEntryLeft || keyEntryRight) {
 			return;
 		}
 		if (selectedOption != null) {

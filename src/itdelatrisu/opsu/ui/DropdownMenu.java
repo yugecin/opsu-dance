@@ -39,7 +39,7 @@ public class DropdownMenu<E> extends Component {
 
 	private E[] items;
 	private String[] itemNames;
-	private int selectedItemIndex = 0;
+	private int selectedItemIndex;
 	private boolean expanded;
 
 	private AnimatedValue expandProgress = new AnimatedValue(300, 0f, 1f, AnimationEquation.LINEAR);
@@ -63,6 +63,39 @@ public class DropdownMenu<E> extends Component {
 	public DropdownMenu(DisplayContainer displayContainer, E[] items, int x, int y, int width) {
 		this.displayContainer = displayContainer;
 		init(items, x, y, width);
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		if (expanded) {
+			return height;
+		}
+		return baseHeight;
+	}
+
+	public boolean isOpen() {
+		return expanded;
+	}
+
+	@Override
+	public void keyPressed(int key, char c) {
+		if (key == Input.KEY_ESCAPE) {
+			this.expanded = false;
+		}
+	}
+
+	/**
+	 * Selects the item at the given index.
+	 * @param index the list item index
+	 * @throws IllegalArgumentException if {@code index} is negative or greater than or equal to size
+	 */
+	public void setSelectedIndex(int index) {
+		if (index < 0 || index >= items.length)
+			throw new IllegalArgumentException();
+		this.selectedItemIndex = index;
 	}
 
 	private int getMaxItemWidth() {
@@ -255,4 +288,9 @@ public class DropdownMenu<E> extends Component {
 	public void setChevronRightColor(Color c) {
 		this.chevronRightColor = c;
 	}
+
+	public void setTextColor(Color c) {
+		this.textColor = c;
+	}
+
 }
