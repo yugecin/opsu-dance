@@ -84,6 +84,7 @@ public class Splash extends BaseOpsuState {
 	protected void revalidate() {
 		super.revalidate();
 
+		// TODO d check if below is needed
 		// check if skin changed
 		if (Options.getSkin() != null)
 			this.newSkin = (Options.getSkin().getDirectory() != Options.getSkinDir());
@@ -97,6 +98,9 @@ public class Splash extends BaseOpsuState {
 		// fade in logo
 		this.logoAlpha = new AnimatedValue(MIN_SPLASH_TIME, 0f, 1f, AnimationEquation.LINEAR);
 		GameImage.MENU_LOGO.getImage().setAlpha(0f);
+
+		// pre-revalidate some states to reduce lag between switching
+		instanceContainer.provide(SongMenu.class).revalidate();
 	}
 
 	@Override
