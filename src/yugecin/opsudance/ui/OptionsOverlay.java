@@ -474,7 +474,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			float a = COL_PINK.a;
 			COL_PINK.a *= 0.45f;
 			g.setColor(COL_PINK);
-			g.drawLine(sliderBallPos + controlImageSize, y + optionHeight / 2, sliderEndX, y + optionHeight / 2);
+			g.drawLine(sliderBallPos + controlImageSize + 1, y + optionHeight / 2, sliderEndX, y + optionHeight / 2);
 			COL_PINK.a = a;
 		}
 	}
