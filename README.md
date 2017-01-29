@@ -3,7 +3,7 @@
   
 Originally started as a fork of [opsu!](https://github.com/itdelatrisu/opsu) with cursordance stuff. I made a cursordancing bot in C# for osu!, and by adding it into this clone, it allows me to do even more stuff with it. This way I can also provide this client to other players so they can play with it too, as I will not give my bot to people because I don't want to endorse cheating in any way.
 
-As of 2017 some major changes were made in this fork which changed the inner workings of opsu. This was done in an attempt to make the code more organised (for me, my subjective opinion) and allowed a.o. changing resolution and skin at runtime without the need to restart the whole system. This fork was pretty even to opsu! before this change, but now there are way more differences.
+As of 2017 some major changes were made in this fork which changed the inner workings of opsu. This was done in an attempt to get more control over the base system and allowed a.o. changing resolution and skin at runtime without the need to restart the whole system. This fork was pretty even to opsu! before this change, but now there are way more differences.
 
 My goal is to to add cool cursordancing things to this fork, but also make it possible to play the normal way.
   
