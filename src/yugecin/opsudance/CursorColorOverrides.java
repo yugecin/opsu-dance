@@ -23,7 +23,7 @@ import org.newdawn.slick.Color;
 
 public enum CursorColorOverrides {
 
-	NONE ("None", 0) {
+	NONE ("Do not override", 0) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			return Color.white;

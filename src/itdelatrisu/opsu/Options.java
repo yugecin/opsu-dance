@@ -457,7 +457,7 @@ public class Options {
 					screenshotFormatIndex = i;
 			}
 		},
-		CURSOR_SIZE ("Cursor Size", "CursorSize", "Change the cursor scale.", 100, 50, 200) {
+		CURSOR_SIZE ("Size", "CursorSize", "Change the cursor scale.", 100, 50, 200) {
 			@Override
 			public String getValueString() { return String.format("%.2fx", val / 100f); }
 
@@ -475,21 +475,21 @@ public class Options {
 		DYNAMIC_BACKGROUND ("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true),
 		LOAD_VERBOSE ("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false),
 		COLOR_MAIN_MENU_LOGO ("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false),
-		MASTER_VOLUME ("Master Volume", "VolumeUniversal", "Global volume level.", 35, 0, 100) {
+		MASTER_VOLUME ("Master", "VolumeUniversal", "Global volume level.", 35, 0, 100) {
 			@Override
 			public void setValue(int value) {
 				super.setValue(value);
 				SoundStore.get().setMusicVolume(getMasterVolume() * getMusicVolume());
 			}
 		},
-		MUSIC_VOLUME ("Music Volume", "VolumeMusic", "Volume of music.", 80, 0, 100) {
+		MUSIC_VOLUME ("Music", "VolumeMusic", "Volume of music.", 80, 0, 100) {
 			@Override
 			public void setValue(int value) {
 				super.setValue(value);
 				SoundStore.get().setMusicVolume(getMasterVolume() * getMusicVolume());
 			}
 		},
-		SAMPLE_VOLUME_OVERRIDE ("Sample volume override", "BMSampleOverride", "Override beatmap hitsound volume", 100, 0, 100) {
+		SAMPLE_VOLUME_OVERRIDE ("Sample override", "BMSampleOverride", "Override beatmap hitsound volume", 100, 0, 100) {
 			@Override
 			public String getValueString() {
 				if (val == 0) {
@@ -498,8 +498,8 @@ public class Options {
 				return super.getValueString();
 			}
 		},
-		EFFECT_VOLUME ("Effect Volume", "VolumeEffect", "Volume of menu and game sounds.", 70, 0, 100),
-		HITSOUND_VOLUME ("Hit Sound Volume", "VolumeHitSound", "Volume of hit sounds.", 30, 0, 100),
+		EFFECT_VOLUME ("Effects", "VolumeEffect", "Volume of menu and game sounds.", 70, 0, 100),
+		HITSOUND_VOLUME ("Hit Sounds", "VolumeHitSound", "Volume of hit sounds.", 30, 0, 100),
 		MUSIC_OFFSET ("Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
 			@Override
 			public String getValueString() { return String.format("%dms", val); }
@@ -553,7 +553,7 @@ public class Options {
 				return MERGING_SLIDERS.showCondition() && MERGING_SLIDERS.getBooleanValue();
 			}
 		},
-		DRAW_SLIDER_ENDCIRCLES ("Draw slider endcircles", "DrawSliderEndCircles", "Old slider style", false),
+		DRAW_SLIDER_ENDCIRCLES ("Draw endcircles", "DrawSliderEndCircles", "Old slider style", false),
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_HIT_ANIMATIONS ("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true),
 		SHOW_REVERSEARROW_ANIMATIONS ("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true),
@@ -583,7 +583,7 @@ public class Options {
 			}
 		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
-		FIXED_CS ("Fixed Circle Size (CS)", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
+		FIXED_CS ("Circle Size (CS)", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -597,7 +597,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_HP ("Fixed HP Drain Rate (HP)", "FixedHP", "Determines the rate at which health decreases.", 0, 0, 100) {
+		FIXED_HP ("HP Drain Rate (HP)", "FixedHP", "Determines the rate at which health decreases.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -611,7 +611,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_AR ("Fixed Approach Rate (AR)", "FixedAR", "Determines how long hit circles stay on the screen.", 0, 0, 100) {
+		FIXED_AR ("Approach Rate (AR)", "FixedAR", "Determines how long hit circles stay on the screen.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -625,7 +625,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_OD ("Fixed Overall Difficulty (OD)", "FixedOD", "Determines the time window for hit results.", 0, 0, 100) {
+		FIXED_OD ("Overall Difficulty (OD)", "FixedOD", "Determines the time window for hit results.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -651,7 +651,7 @@ public class Options {
 		REPLAY_SEEKING ("Replay Seeking", "ReplaySeeking", "Enable a seeking bar on the left side of the screen during replays.", false),
 		DISABLE_UPDATER ("Disable Automatic Updates", "DisableUpdater", "Disable automatic checking for updates upon starting opsu!.", false),
 		ENABLE_WATCH_SERVICE ("Enable Watch Service", "WatchService", "Watch the beatmap directory for changes. Requires a restart.", false),
-		DANCE_MOVER ("Mover algorithm", "Mover", "Algorithm that decides how to move from note to note" ) {
+		DANCE_MOVER ("Algorithm", "Mover", "Algorithm that decides how to move from note to note" ) {
 			@Override
 			public Object[] getListItems() {
 				return Dancer.moverFactories;
@@ -693,7 +693,7 @@ public class Options {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof ExgonMoverFactory;
 			}
 		},
-		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Quadratic Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
+		DANCE_QUAD_BEZ_AGGRESSIVENESS ("Bezier aggressiveness", "QuadBezAgr", "AKA initial D factor", 50, 0, 200) {
 			@Override
 			public String getValueString() {
 				return String.valueOf(val);
@@ -704,7 +704,7 @@ public class Options {
 				return Dancer.moverFactories[Dancer.instance.getMoverFactoryIndex()] instanceof QuadraticBezierMoverFactory;
 			}
 		},
-		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Slider exit aggressiveness factor", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 4, 1, 6) {
+		DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR ("Exit aggressiveness", "CubBezSliderExitAgr", "AKA initial D factor for sliderexits", 4, 1, 6) {
 			@Override
 			public String getValueString() {
 				return String.valueOf(val);
@@ -722,7 +722,7 @@ public class Options {
 				return DANCE_QUAD_BEZ_SLIDER_AGGRESSIVENESS_FACTOR.showCondition();
 			}
 		},
-		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Slider entry aggressiveness factor", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 4, 1, 6) {
+		DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR ("Entry aggressiveness", "CubBezSliderEntryAgr", "AKA initial D factor for sliderentries", 4, 1, 6) {
 			@Override
 			public String getValueString() {
 				return String.valueOf(val);
@@ -734,7 +734,7 @@ public class Options {
 					&& DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.getBooleanValue();
 			}
 		},
-		DANCE_MOVER_DIRECTION ("Mover direction", "MoverDirection", "The direction the mover goes" ) {
+		DANCE_MOVER_DIRECTION ("Direction", "MoverDirection", "The direction the mover goes" ) {
 			@Override
 			public String getValueString() {
 				return Dancer.moverDirection.toString();
@@ -787,7 +787,7 @@ public class Options {
 				Dancer.sliderMoverController = Dancer.sliderMovers[val = Integer.parseInt(s)];
 			}
 		},
-		DANCE_SPINNER ("Spinner", "Spinner", "Spinner style") {
+		DANCE_SPINNER ("Algorithm", "Spinner", "Spinner style") {
 			@Override
 			public Object[] getListItems() {
 				return Dancer.spinners;
@@ -813,7 +813,7 @@ public class Options {
 				Dancer.instance.setSpinnerIndex(Integer.parseInt(s));
 			}
 		},
-		DANCE_SPINNER_DELAY ("Spinner delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", 3, 0, 20) {
+		DANCE_SPINNER_DELAY ("Delay", "SpinnerDelay", "Fiddle with this if spinner goes too fast.", 3, 0, 20) {
 			@Override
 			public String getValueString() {
 				return String.format("%dms", val);
@@ -824,7 +824,7 @@ public class Options {
 		DANCE_CIRCLE_STREAMS ("Circle streams", "CircleStreams", "Make circles while streaming", false),
 		DANCE_MIRROR ("Mirror collage", "MirrorCollage", "Hypnotizing stuff. Toggle this ingame by pressing the M key.", false),
 		DANCE_DRAW_APPROACH ("Draw approach circles", "DrawApproach", "Can get a bit busy when using mirror collage", true),
-		DANCE_OBJECT_COLOR_OVERRIDE ("Object color override", "ObjColorOverride", "Override object colors") {
+		DANCE_OBJECT_COLOR_OVERRIDE ("Color", "ObjColorOverride", "Override object colors") {
 			@Override
 			public String getValueString() {
 				return Dancer.colorOverride.toString();
@@ -850,7 +850,7 @@ public class Options {
 				Dancer.colorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Collage object color override", "ObjColorMirroredOverride", "Override collage object colors") {
+		DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED ("Mirror color", "ObjColorMirroredOverride", "Override collage object colors") {
 			@Override
 			public String getValueString() {
 				return Dancer.colorMirrorOverride.toString();
@@ -876,13 +876,13 @@ public class Options {
 				Dancer.colorMirrorOverride = ObjectColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-		DANCE_RGB_OBJECT_INC ("RGB objects increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", 70, -1800, 1800) {
+		DANCE_RGB_OBJECT_INC ("RGB increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", 70, -1800, 1800) {
 			@Override
 			public String getValueString() {
 				return String.format("%.1f°", val / 10f);
 			}
 		},
-		DANCE_CURSOR_COLOR_OVERRIDE ("Cursor color override", "CursorColorOverride", "Override cursor color") {
+		DANCE_CURSOR_COLOR_OVERRIDE ("Color", "CursorColorOverride", "Override cursor color") {
 			@Override
 			public String getValueString() {
 				return Dancer.cursorColorOverride.toString();
@@ -908,7 +908,7 @@ public class Options {
 				Dancer.cursorColorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
 			}
 		},
-		DANCE_CURSOR_MIRROR_COLOR_OVERRIDE ("Cursor mirror color override", "CursorMirrorColorOverride", "Override mirror cursor color") {
+		DANCE_CURSOR_MIRROR_COLOR_OVERRIDE ("Mirror color", "CursorMirrorColorOverride", "Override mirror cursor color") {
 			@Override
 			public String getValueString() {
 				return Dancer.cursorColorMirrorOverride.toString();
@@ -941,7 +941,7 @@ public class Options {
 				return String.format("%.2f°", val / 1000f);
 			}
 		},
-		DANCE_CURSOR_TRAIL_OVERRIDE ("Cursor trail length override", "CursorTrailOverride", "Override cursor trail length", 20, 20, 400) {
+		DANCE_CURSOR_TRAIL_OVERRIDE ("Trail length", "CursorTrailOverride", "Override cursor trail length", 20, 20, 600) {
 			@Override
 			public String getValueString() {
 				if (val == 20) {
@@ -955,8 +955,8 @@ public class Options {
 		DANCE_CIRLCE_IN_LAZY_SLIDERS ("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false),
 		DANCE_HIDE_UI ("Hide all UI", "HideUI", ".", true),
 		DANCE_ENABLE_SB ("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false),
-		PIPPI_ENABLE ("Pippi", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false),
-		PIPPI_RADIUS_PERCENT ("Pippi radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
+		PIPPI_ENABLE ("Enable", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false),
+		PIPPI_RADIUS_PERCENT ("Radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
 			@Override
 			public String getValueString() {
 				return val + "%";
@@ -967,13 +967,13 @@ public class Options {
 				Pippi.setRadiusPercent(value);
 			}
 		},
-		PIPPI_ANGLE_INC_MUL("Pippi angle increment multiplier", "PippiAngIncMul", "How fast pippi's angle increments", 10, -200, 200) {
+		PIPPI_ANGLE_INC_MUL("Normal", "PippiAngIncMul", "How fast pippi's angle increments", 10, -200, 200) {
 			@Override
 			public String getValueString() {
 				return String.format("x%.1f", val / 10f);
 			}
 		},
-		PIPPI_ANGLE_INC_MUL_SLIDER ("Pippi angle increment multiplier slider", "PippiAngIncMulSlider", "Same as above, but in sliders", 50, -200, 200) {
+		PIPPI_ANGLE_INC_MUL_SLIDER ("In slider", "PippiAngIncMulSlider", "Same as above, but in sliders", 50, -200, 200) {
 			@Override
 			public String getValueString() {
 				return String.format("x%.1f", val / 10f);

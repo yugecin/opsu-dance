@@ -22,7 +22,7 @@ import org.newdawn.slick.Color;
 
 public enum ObjectColorOverrides {
 
-	NONE ("None", 0) {
+	NONE ("Do not override", 0) {
 		@Override
 		public Color getColor(int comboColorIndex) {
 			return comboColors[comboColorIndex];

@@ -123,6 +123,8 @@ public class OptionsMenu {
 			GameOption.DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 			GameOption.DANCE_MOVER_DIRECTION,
 			GameOption.DANCE_SLIDER_MOVER_TYPE,
+		}),
+		new OptionTab("SPINNER", new GameOption[]{
 			GameOption.DANCE_SPINNER,
 			GameOption.DANCE_SPINNER_DELAY,
 		}),
