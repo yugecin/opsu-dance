@@ -152,6 +152,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		listHoverIndex = -1;
 		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
 		scrollHandler = new KineticScrolling();
+		scrollHandler.setAllowOverScroll(true);
 	}
 
 	public void setListener(Listener listener) {
@@ -326,9 +327,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 			maxScrollOffset = 0;
 		}
 		scrollHandler.setMinMax(0f, maxScrollOffset);
-		if (scrollHandler.getIntPosition() > maxScrollOffset) {
-			scrollHandler.setPosition(maxScrollOffset);
-		}
 	}
 
 	private void renderOpenList(Graphics g) {
