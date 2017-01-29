@@ -870,8 +870,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateSearch() {
 		OptionTab lastBigSection = null;
 		boolean lastBigSectionMatches = false;
-		for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
-			OptionTab section = sections[sectionIndex];
+		for (OptionTab section : sections) {
 			boolean sectionMatches = section.name.toLowerCase().contains(lastSearchText);
 			if (section.options == null) {
 				lastBigSectionMatches = sectionMatches;
@@ -879,23 +878,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 				section.filtered = true;
 				continue;
 			}
-			boolean allOptionsHidden = true;
-			for (int optionIndex = 0; optionIndex < section.options.length; optionIndex++) {
-				GameOption option = section.options[optionIndex];
+			section.filtered = true;
+			for (GameOption option : section.options) {
 				if (lastBigSectionMatches || sectionMatches) {
-					allOptionsHidden = false;
+					section.filtered = false;
 					option.filter(null);
 					continue;
 				}
 				if (!option.filter(lastSearchText)) {
-					allOptionsHidden = false;
+					section.filtered = false;
+					lastBigSection.filtered = false;
 				}
-			}
-			if (allOptionsHidden) {
-				section.filtered = true;
-			} else {
-				lastBigSection.filtered = false;
-				section.filtered = false;
 			}
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
