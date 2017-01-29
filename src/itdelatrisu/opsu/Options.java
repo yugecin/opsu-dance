@@ -583,7 +583,7 @@ public class Options {
 			}
 		},
 		LOAD_HD_IMAGES ("Load HD Images", "LoadHDImages", String.format("Loads HD (%s) images when available. Increases memory usage and loading times.", GameImage.HD_SUFFIX), true),
-		FIXED_CS ("Circle Size (CS)", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
+		FIXED_CS ("Fixed CS", "FixedCS", "Determines the size of circles and sliders.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -597,7 +597,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_HP ("HP Drain Rate (HP)", "FixedHP", "Determines the rate at which health decreases.", 0, 0, 100) {
+		FIXED_HP ("Fixed HP", "FixedHP", "Determines the rate at which health decreases.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -611,7 +611,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_AR ("Approach Rate (AR)", "FixedAR", "Determines how long hit circles stay on the screen.", 0, 0, 100) {
+		FIXED_AR ("Fixed AR", "FixedAR", "Determines how long hit circles stay on the screen.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
@@ -625,7 +625,7 @@ public class Options {
 					val = i;
 			}
 		},
-		FIXED_OD ("Overall Difficulty (OD)", "FixedOD", "Determines the time window for hit results.", 0, 0, 100) {
+		FIXED_OD ("Fixed OD", "FixedOD", "Determines the time window for hit results.", 0, 0, 100) {
 			@Override
 			public String getValueString() { return (val == 0) ? "Disabled" : String.format("%.1f", val / 10f); }
 
