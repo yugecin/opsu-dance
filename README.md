@@ -12,11 +12,11 @@ Click on the releases link (scroll up) to go to the downloadpage with prebuilt j
 
 ###Building
 You can find general (run/build) instructions in the original [opsu! README](README-OPSU.md).
-Please note that I am only using maven and gradle scripts are not being updated.
+Please note that I am only using maven, gradle scripts are not being updated.
 
 ###Credits
 opsu! was made by Jeffrey Han ([@itdelatrisu](https://github.com/itdelatrisu)). All game concepts and designs are based on work by osu! developer Dean Herbert. Other opsu! credits can be found [here](CREDITS.md).  
-opsu!dance (everything in the src package yugecin.opsudance) was made by me ([@yugecin](https://github.com/yugecin)). Eits were made in the opsu! sources, too.  
+opsu!dance (everything in the src package yugecin.opsudance) was made by me ([@yugecin](https://github.com/yugecin)). Edits were made in the opsu! sources, too.  
 
 ###License
 **This software is licensed under GNU GPL version 3.**
