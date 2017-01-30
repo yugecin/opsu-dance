@@ -345,8 +345,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 				lineHeight += optionHeight;
 				if (y > height) {
 					render = false;
-					maxScrollOffset += (section.options.length - optionIndex - 1) * optionHeight;
-					break;
+					while (++optionIndex < section.options.length) {
+						option = section.options[optionIndex];
+						if (option.showCondition() && !option.isFiltered()) {
+							maxScrollOffset += optionHeight;
+						}
+					}
 				}
 			}
 			g.setColor(COL_GREY);
@@ -354,9 +358,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 		// iterate over skipped options to correctly calculate max scroll offset
 		for (; sectionIndex < sections.length; sectionIndex++) {
+			if (sections[sectionIndex].filtered) {
+				continue;
+			}
 			maxScrollOffset += Fonts.LARGE.getLineHeight() * 1.5f;
-			if (sections[sectionIndex].options != null) {
-				maxScrollOffset += sections[sectionIndex].options.length * optionHeight;
+			if (sections[sectionIndex].options == null) {
+				continue;
+			}
+			for (GameOption option : sections[sectionIndex].options) {
+				if (option.showCondition() && !option.isFiltered()) {
+					maxScrollOffset += optionHeight;
+				}
 			}
 		}
 		if (openDropdownMenu != null) {
