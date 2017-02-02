@@ -92,9 +92,6 @@ public class Splash extends BaseOpsuState {
 		// check if watch service newly enabled
 		this.watchServiceChange = Options.isWatchServiceEnabled() && BeatmapWatchService.get() == null;
 
-		// load Utils class first (needed in other 'init' methods)
-		Utils.init(displayContainer);
-
 		// fade in logo
 		this.logoAlpha = new AnimatedValue(MIN_SPLASH_TIME, 0f, 1f, AnimationEquation.LINEAR);
 		GameImage.MENU_LOGO.getImage().setAlpha(0f);

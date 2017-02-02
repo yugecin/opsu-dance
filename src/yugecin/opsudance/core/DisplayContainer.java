@@ -20,6 +20,7 @@ package yugecin.opsudance.core;
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.downloads.DownloadList;
@@ -146,6 +147,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				destroyImages();
+				Utils.init(DisplayContainer.this); // TODO this shouldn't be here
 				UI.revalidate(); // TODO this shouldn't be here
 			}
 		});
