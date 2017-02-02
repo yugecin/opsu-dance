@@ -678,7 +678,7 @@ public enum GameImage {
 		if (defaultImage != null || defaultImages != null || Options.getSkin() == null)
 			return;
 
-		// try to load multiple images
+		// try to load skin images
 		File skinDir = Options.getSkin().getDirectory();
 		if (filenameFormat != null) {
 			if (skinDir != null && ((defaultImages = loadImageArray(skinDir)) != null)) {
@@ -686,18 +686,20 @@ public enum GameImage {
 				process();
 				return;
 			}
+		}
+		if (skinDir != null && ((defaultImage = loadImageSingle(skinDir)) != null)) {
+			isSkinned = true;
+			process();
+			return;
+		}
+
+		// default images
+		if (filenameFormat != null) {
 			if ((defaultImages = loadImageArray(null)) != null) {
 				isSkinned = false;
 				process();
 				return;
 			}
-		}
-
-		// try to load a single image
-		if (skinDir != null && ((defaultImage = loadImageSingle(skinDir)) != null)) {
-			isSkinned = true;
-			process();
-			return;
 		}
 		if ((defaultImage = loadImageSingle(null)) != null) {
 			isSkinned = false;
@@ -776,21 +778,6 @@ public enum GameImage {
 					} catch (SlickException e) {
 						EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
 						break;
-					}
-				}
-				if (list.isEmpty()) {
-					// look for image without 0-1 etc
-					String name = getImageFileName(filename, dir, type, true);
-					if (name != null) {
-						try {
-							Image img = new Image(name);
-							if (suffix.equals(HD_SUFFIX))
-								img = img.getScaledCopy(0.5f);
-							list.add(img);
-						} catch (SlickException e) {
-							EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
-							break;
-						}
 					}
 				}
 				if (!list.isEmpty())
