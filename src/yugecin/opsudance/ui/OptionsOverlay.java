@@ -259,7 +259,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.clearClip();
 
 		// UI
-		UI.getBackButton().draw();
+		UI.getBackButton().draw(g);
 
 		// tooltip
 		renderTooltip(g);

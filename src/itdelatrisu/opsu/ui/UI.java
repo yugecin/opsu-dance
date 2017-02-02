@@ -33,6 +33,8 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.ui.BackButton;
 
 /**
  * Draws common UI components.
@@ -40,7 +42,7 @@ import yugecin.opsudance.core.DisplayContainer;
 public class UI {
 
 	/** Back button. */
-	private static MenuButton backButton;
+	private static BackButton backButton;
 
 	/** Time to show volume image, in milliseconds. */
 	private static final int VOLUME_DISPLAY_TIME = 1500;
@@ -68,18 +70,10 @@ public class UI {
 	 */
 	public static void init(DisplayContainer displayContainer) {
 		UI.displayContainer = displayContainer;
+	}
 
-		// back button
-		if (GameImage.MENU_BACK.getImages() != null) {
-			Animation back = GameImage.MENU_BACK.getAnimation(120);
-			backButton = new MenuButton(back, back.getWidth() / 2f, displayContainer.height - (back.getHeight() / 2f));
-		} else {
-			Image back = GameImage.MENU_BACK.getImage();
-			backButton = new MenuButton(back, back.getWidth() / 2f, displayContainer.height - (back.getHeight() / 2f));
-		}
-		backButton.setHoverAnimationDuration(350);
-		backButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-		backButton.setHoverExpand(MenuButton.Expand.UP_RIGHT);
+	public static void revalidate() {
+		backButton = new BackButton(displayContainer);
 	}
 
 	/**
@@ -110,7 +104,7 @@ public class UI {
 	/**
 	 * Returns the 'menu-back' MenuButton.
 	 */
-	public static MenuButton getBackButton() { return backButton; }
+	public static BackButton getBackButton() { return backButton; }
 
 	/**
 	 * Draws a tab image and text centered at a location.

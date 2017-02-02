@@ -715,7 +715,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// back button
 		else
-			UI.getBackButton().draw();
+			UI.getBackButton().draw(g);
 
 		UI.draw(g);
 

@@ -350,6 +350,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Fonts.init();
 
 		eventBus.post(new ResolutionOrSkinChangedEvent());
+		UI.revalidate(); // TODO this shouldn't be here
 	}
 
 	public void resetCursor() {
