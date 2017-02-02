@@ -146,6 +146,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				destroyImages();
+				UI.revalidate(); // TODO this shouldn't be here
 			}
 		});
 
@@ -350,7 +351,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		Fonts.init();
 
 		eventBus.post(new ResolutionOrSkinChangedEvent());
-		UI.revalidate(); // TODO this shouldn't be here
 	}
 
 	public void resetCursor() {
