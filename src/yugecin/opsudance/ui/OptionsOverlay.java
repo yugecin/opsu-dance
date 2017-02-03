@@ -133,6 +133,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private int sliderSoundDelay;
 
+	private int sectionLineHeight;
+
 	private final TextField searchField;
 	private String lastSearchText;
 
@@ -172,6 +174,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		posSearchY = textChangeY + Fonts.MEDIUM.getLineHeight() * 2;
 		textSearchYOffset = Fonts.MEDIUM.getLineHeight() / 2;
 		optionStartY = posSearchY + Fonts.MEDIUM.getLineHeight() + Fonts.LARGE.getLineHeight();
+		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
 		if (active) {
 			width = finalWidth;
@@ -326,8 +329,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 					Fonts.MEDIUMBOLD.drawString(paddingTextLeft, lineStartY, section.name, COL_WHITE);
 				}
 			}
-			y += Fonts.LARGE.getLineHeight() * 1.5f;
-			maxScrollOffset += Fonts.LARGE.getLineHeight() * 1.5f;
+			y += sectionLineHeight;
+			maxScrollOffset += sectionLineHeight;
 			if (section.options == null) {
 				continue;
 			}
@@ -789,7 +792,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (section.filtered) {
 				continue;
 			}
-			mouseVirtualY -= Fonts.LARGE.getLineHeight() * 1.5f;
+			mouseVirtualY -= sectionLineHeight;
 			if (section.options == null) {
 				continue;
 			}
