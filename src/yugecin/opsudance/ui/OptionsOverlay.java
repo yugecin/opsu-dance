@@ -223,7 +223,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				menu.setChevronRightColor(COL_BG);
 				menu.setHighlightColor(COL_COMBOBOX_HOVER);
 				menu.setTextColor(COL_WHITE);
-				dropdownMenuPaddingY = (optionHeight - menu.getHeight()); // TODO why isn't this /2 ?
+				dropdownMenuPaddingY = (optionHeight - menu.getHeight()) / 2;
 				dropdownMenus.put(option, menu);
 			}
 		}
