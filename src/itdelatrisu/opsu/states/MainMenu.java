@@ -639,6 +639,10 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
+		if (super.mouseWheelMoved(newValue)) {
+			return true;
+		}
+
 		UI.changeVolume((newValue < 0) ? -1 : 1);
 		return true;
 	}

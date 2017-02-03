@@ -1238,11 +1238,6 @@ public class SongMenu extends ComplexOpsuState {
 
 		Input input = displayContainer.input;
 
-		if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT)) {
-			UI.changeVolume((newValue < 0) ? -1 : 1);
-			return true;
-		}
-
 		if (isInputBlocked()) {
 			return true;
 		}

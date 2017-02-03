@@ -20,6 +20,7 @@ package yugecin.opsudance.core.state;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
+import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
@@ -114,6 +115,10 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
+		if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
+			UI.changeVolume((delta < 0) ? -1 : 1);
+			return true;
+		}
 		return false;
 	}
 

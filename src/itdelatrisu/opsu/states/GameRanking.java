@@ -121,9 +121,6 @@ public class GameRanking extends BaseOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
-		if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
-			UI.changeVolume((newValue < 0) ? -1 : 1);
-		}
 		return true;
 	}
 

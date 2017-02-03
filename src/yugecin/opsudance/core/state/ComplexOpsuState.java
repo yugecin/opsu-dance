@@ -63,6 +63,9 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
+		if (super.mouseWheelMoved(delta)) {
+			return true;
+		}
 		for (OverlayOpsuState overlay : overlays) {
 			if (overlay.mouseWheelMoved(delta)) {
 				return true;

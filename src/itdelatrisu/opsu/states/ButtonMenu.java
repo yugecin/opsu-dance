@@ -79,13 +79,6 @@ public class ButtonMenu extends BaseOpsuState {
 			public void leave() {
 				Button.CANCEL.click();
 			}
-
-			@Override
-			public void mouseWheelMoved(int newValue) {
-				if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
-					super.mouseWheelMoved(newValue);
-				}
-			}
 		},
 		/** The initial beatmap management screen (for a "favorite" beatmap). */
 		BEATMAP_FAVORITE (new Button[] { Button.CLEAR_SCORES, Button.FAVORITE_REMOVE, Button.DELETE, Button.CANCEL }) {

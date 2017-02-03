@@ -847,9 +847,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
-		// change volume
-		if (displayContainer.input.isKeyDown(Input.KEY_LALT) || displayContainer.input.isKeyDown(Input.KEY_RALT)) {
-			UI.changeVolume((newValue < 0) ? -1 : 1);
+		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
 
