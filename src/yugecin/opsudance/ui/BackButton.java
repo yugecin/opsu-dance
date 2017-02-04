@@ -36,7 +36,7 @@ public class BackButton {
 		COLOR_DARKPINK = new Color(186, 19, 121);
 
 	/** Target duration, in ms, of the button animations. */
-	private static final int  ANIMATION_TIME = 500;
+	private static final int ANIMATION_TIME = 500;
 
 	/** How much time passed for the animations. */
 	private int animationTime;
@@ -81,8 +81,7 @@ public class BackButton {
 	private int realButtonWidth;
 
 	public BackButton(DisplayContainer container) {
-		//if (!GameImage.MENU_BACK.hasGameSkinImage()) {
-		if (GameImage.MENU_BACK.getImage() != null && GameImage.MENU_BACK.getImage().getWidth() < 2) {
+		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
 			backButton = null;
 			textWidth = Fonts.MEDIUM.getWidth("back");
 			paddingY = Fonts.MEDIUM.getHeight("back");
@@ -126,6 +125,10 @@ public class BackButton {
 		Float beatProgress = MusicController.getBeatProgress();
 		if (beatProgress == null) {
 			beatProgress = 0f;
+		} else if (beatProgress < 0.2f) {
+			beatProgress = AnimationEquation.IN_QUINT.calc(beatProgress * 5f);
+		} else {
+			beatProgress = 1f - AnimationEquation.OUT_QUAD.calc((beatProgress - 0.2f) * 1.25f);
 		}
 		int chevronSize = (int) (chevronBaseSize - (isHovered ? 6f : 3f) * beatProgress);
 

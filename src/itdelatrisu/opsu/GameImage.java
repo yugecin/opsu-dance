@@ -252,7 +252,7 @@ public enum GameImage {
 			return img.getScaledCopy((h * 0.3f) / img.getHeight());
 		}
 	},
-	MENU_BACK ("menu-back", "menu-back-%d", "png"),
+	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
 	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
@@ -600,6 +600,18 @@ public enum GameImage {
 		this.preload = preload;
 	}
 
+	/**
+	 * Constructor for an array of general images.
+	 * @param filename the image file name
+	 * @param filenameFormat the formatted file name string (for loading multiple images)
+	 * @param type the file types (separated by '|')
+	 * @param beatmapSkinnable whether or not the image is beatmap-skinnable
+	 * @param preload whether or not to preload the image
+	 */
+	GameImage(String filename, String filenameFormat, String type, boolean beatmapSkinnable, boolean preload) {
+		this(filename, type, beatmapSkinnable, preload);
+		this.filenameFormat = filenameFormat;
+	}
 	/**
 	 * Returns whether or not the image is beatmap-skinnable.
 	 * @return true if beatmap-skinnable
