@@ -248,7 +248,7 @@ public class Utils {
 		// create the screenshot directory
 		File dir = Options.getScreenshotDir();
 		if (!dir.isDirectory() && !dir.mkdir()) {
-			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", dir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", dir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 			return;
 		}
 
@@ -282,7 +282,7 @@ public class Utils {
 						}
 					}
 					ImageIO.write(image, Options.getScreenshotFormat(), file);
-					EventBus.instance.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+					EventBus.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 				} catch (Exception e) {
 					ErrorHandler.error("Failed to take a screenshot.", e).show();
 				}

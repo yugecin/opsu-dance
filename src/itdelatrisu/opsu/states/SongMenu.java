@@ -455,7 +455,7 @@ public class SongMenu extends ComplexOpsuState {
 				if (!songFolderChanged && kind != StandardWatchEventKinds.ENTRY_MODIFY) {
 					songFolderChanged = true;
 					if (displayContainer.isInState(SongMenu.class)) {
-						EventBus.instance.post(new BarNotificationEvent("Changed is Songs folder detected. Hit F5 to refresh."));
+						EventBus.post(new BarNotificationEvent("Changed is Songs folder detected. Hit F5 to refresh."));
 					}
 				}
 			}
@@ -961,7 +961,7 @@ public class SongMenu extends ComplexOpsuState {
 					setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 
 					if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
-						EventBus.instance.post(new BarNotificationEvent(group.getEmptyMessage()));
+						EventBus.post(new BarNotificationEvent(group.getEmptyMessage()));
 					}
 				}
 				return true;
@@ -1773,7 +1773,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (focusNode == null || beatmap != focusNode.getSelectedBeatmap()) {
-			EventBus.instance.post(new BarNotificationEvent("Unable to load the beatmap audio."));
+			EventBus.post(new BarNotificationEvent("Unable to load the beatmap audio."));
 			return;
 		}
 

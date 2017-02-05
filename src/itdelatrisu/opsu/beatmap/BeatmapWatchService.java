@@ -98,7 +98,7 @@ public class BeatmapWatchService {
 			ws.register(Options.getBeatmapDir().toPath());
 		} catch (IOException e) {
 			Log.error("Could not create watch service", e);
-			EventBus.instance.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));
 			return;
 		}
 
@@ -120,7 +120,7 @@ public class BeatmapWatchService {
 			ws = null;
 		} catch (IOException e) {
 			Log.error("An I/O exception occurred while closing the previous watch service.", e);
-			EventBus.instance.post(new BubbleNotificationEvent("An I/O exception occurred while closing the previous watch service.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent("An I/O exception occurred while closing the previous watch service.", BubbleNotificationEvent.COMMONCOLOR_RED));
 			ws = null;
 		}
 	}

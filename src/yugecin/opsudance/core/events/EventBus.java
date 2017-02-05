@@ -22,21 +22,16 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class EventBus {
 
-	@Deprecated
-	public static EventBus instance; // TODO get rid of this
-
-	private final List<Subscriber> subscribers;
-
-	public EventBus() {
-		subscribers = new LinkedList<>();
-		instance = this;
+	private EventBus() {
 	}
 
-	public <T> void subscribe(Class<T> eventType, EventListener<T> eventListener) {
+	private static final List<Subscriber> subscribers = new LinkedList<>();
+
+	public static <T> void subscribe(Class<T> eventType, EventListener<T> eventListener) {
 		subscribers.add(new Subscriber<>(eventType, eventListener));
 	}
 
-	public void post(Object event) {
+	public static void post(Object event) {
 		for (Subscriber s : subscribers) {
 			if (s.eventType.isInstance(event)) {
 				s.listener.onEvent(event);
@@ -44,7 +39,7 @@ public class EventBus {
 		}
 	}
 
-	private class Subscriber<T> {
+	private static class Subscriber<T> {
 
 		private final Class<T> eventType;
 		private final EventListener<T> listener;

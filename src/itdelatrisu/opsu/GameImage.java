@@ -729,7 +729,7 @@ public enum GameImage {
 
 		String err = String.format("Could not find default image '%s'.", filename);
 		Log.warn(err);
-		EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+		EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 	}
 
 	/**
@@ -788,7 +788,7 @@ public enum GameImage {
 							img = img.getScaledCopy(0.5f);
 						list.add(img);
 					} catch (SlickException e) {
-						EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
+						EventBus.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
 						break;
 					}
 				}
@@ -814,7 +814,7 @@ public enum GameImage {
 						img = img.getScaledCopy(0.5f);
 					return img;
 				} catch (SlickException e) {
-					EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", filename), BubbleNotificationEvent.COMMONCOLOR_RED));
+					EventBus.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", filename), BubbleNotificationEvent.COMMONCOLOR_RED));
 				}
 			}
 		}

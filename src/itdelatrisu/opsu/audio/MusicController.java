@@ -102,7 +102,7 @@ public class MusicController {
 		if (lastBeatmap == null || !beatmap.audioFilename.equals(lastBeatmap.audioFilename)) {
 			final File audioFile = beatmap.audioFilename;
 			if (!audioFile.isFile() && !ResourceLoader.resourceExists(audioFile.getPath())) {
-				EventBus.instance.post(new BarNotificationEvent(String.format("Could not find track '%s'.", audioFile.getName())));
+				EventBus.post(new BarNotificationEvent(String.format("Could not find track '%s'.", audioFile.getName())));
 				return;
 			}
 
@@ -157,7 +157,7 @@ public class MusicController {
 		} catch (Exception e) {
 			String err = String.format("Could not play track '%s'.", file.getName());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 

@@ -293,7 +293,7 @@ public class SkinLoader {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", skinFile.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 
 		return skin;

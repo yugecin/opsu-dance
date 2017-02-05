@@ -20,6 +20,7 @@ package yugecin.opsudance.states;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
@@ -74,7 +75,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		displayContainer.eventBus.post(new BubbleNotificationEvent("this is a bubble notification... bubbly bubbly bubbly linewraaaaaaaaaap", BubbleNotificationEvent.COMMONCOLOR_RED));
+		EventBus.post(new BubbleNotificationEvent("this is a bubble notification... bubbly bubbly bubbly linewraaaaaaaaaap", BubbleNotificationEvent.COMMONCOLOR_RED));
 		return false;
 	}
 
@@ -85,7 +86,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
-		displayContainer.eventBus.post(new BubbleNotificationEvent("Life is like a box of chocolates. It's all going to melt by the end of the day.\n-Emily", BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+		EventBus.post(new BubbleNotificationEvent("Life is like a box of chocolates. It's all going to melt by the end of the day.\n-Emily", BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 		return false;
 	}
 
@@ -96,7 +97,7 @@ public class EmptyRedState implements OpsuState {
 
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
-		displayContainer.eventBus.post(new BarNotificationEvent("this is a\nbar notification"));
+		EventBus.post(new BarNotificationEvent("this is a\nbar notification"));
 		return false;
 	}
 

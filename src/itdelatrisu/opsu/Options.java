@@ -689,7 +689,7 @@ public class Options {
 			public void clickListItem(int index) {
 				if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
 					// TODO remove this when #79 is fixed
-					EventBus.instance.post(new BarNotificationEvent("This mover is disabled in the storyboard right now"));
+					EventBus.post(new BarNotificationEvent("This mover is disabled in the storyboard right now"));
 					return;
 				}
 				Dancer.instance.setMoverFactoryIndex(index);
@@ -1343,7 +1343,7 @@ public class Options {
 	public static void setNextFPS(DisplayContainer displayContainer) {
 		GameOption.displayContainer = displayContainer; // TODO dirty shit
 		GameOption.TARGET_FPS.clickListItem((targetFPSindex + 1) % targetFPS.length);
-		EventBus.instance.post(new BarNotificationEvent(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString())));
+		EventBus.post(new BarNotificationEvent(String.format("Frame limiter: %s", GameOption.TARGET_FPS.getValueString())));
 	}
 
 	/**
@@ -1430,7 +1430,7 @@ public class Options {
 		try {
 			container.setDisplayMode(width, height, isFullscreen());
 		} catch (Exception e) {
-			container.eventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
 			Log.error("Failed to set display mode.", e);
 		}
 
@@ -1755,7 +1755,7 @@ public class Options {
 	 */
 	public static void toggleMouseDisabled() {
 		GameOption.DISABLE_MOUSE_BUTTONS.click();
-		EventBus.instance.post(new BarNotificationEvent((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
+		EventBus.post(new BarNotificationEvent((GameOption.DISABLE_MOUSE_BUTTONS.getBooleanValue()) ?
 			"Mouse buttons are disabled." : "Mouse buttons are enabled."));
 	}
 
@@ -1845,7 +1845,7 @@ public class Options {
 		// use default directory
 		beatmapDir = BEATMAP_DIR;
 		if (!beatmapDir.isDirectory() && !beatmapDir.mkdir())
-			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create beatmap directory at '%s'.", beatmapDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create beatmap directory at '%s'.", beatmapDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return beatmapDir;
 	}
 
@@ -1860,7 +1860,7 @@ public class Options {
 
 		oszDir = new File(DATA_DIR, "SongPacks/");
 		if (!oszDir.isDirectory() && !oszDir.mkdir())
-			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create song packs directory at '%s'.", oszDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create song packs directory at '%s'.", oszDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return oszDir;
 	}
 
@@ -1875,7 +1875,7 @@ public class Options {
 
 		replayImportDir = new File(DATA_DIR, "ReplayImport/");
 		if (!replayImportDir.isDirectory() && !replayImportDir.mkdir())
-			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create replay import directory at '%s'.", replayImportDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create replay import directory at '%s'.", replayImportDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return replayImportDir;
 	}
 
@@ -1925,14 +1925,14 @@ public class Options {
 		// use default directory
 		skinRootDir = SKIN_ROOT_DIR;
 		if (!skinRootDir.isDirectory() && !skinRootDir.mkdir())
-			EventBus.instance.post(new BubbleNotificationEvent(String.format("Failed to create skins directory at '%s'.", skinRootDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create skins directory at '%s'.", skinRootDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
 		return skinRootDir;
 	}
 
 	public static void reloadSkin() {
 		loadSkin();
 		SoundController.init();
-		EventBus.instance.post(new ResolutionOrSkinChangedEvent());
+		EventBus.post(new ResolutionOrSkinChangedEvent());
 	}
 
 	/**
@@ -2065,7 +2065,7 @@ public class Options {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 
@@ -2096,7 +2096,7 @@ public class Options {
 		} catch (IOException e) {
 			String err = String.format("Failed to write to file '%s'.", OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 }

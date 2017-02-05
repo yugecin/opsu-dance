@@ -186,7 +186,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
 		if (gameObjects[objectIndex].isSlider() && trackPosition > gameObjects[objectIndex].getTime() && trackPosition < gameObjects[objectIndex].getEndTime()) {
-			EventBus.instance.post(new BarNotificationEvent("Wait until the slider ended"));
+			EventBus.post(new BarNotificationEvent("Wait until the slider ended"));
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {

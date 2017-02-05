@@ -251,13 +251,13 @@ public class Updater {
 				@Override
 				public void completed() {
 					status = Status.UPDATE_DOWNLOADED;
-					EventBus.instance.post(new BarNotificationEvent("Update has finished downloading"));
+					EventBus.post(new BarNotificationEvent("Update has finished downloading"));
 				}
 
 				@Override
 				public void error() {
 					status = Status.CONNECTION_ERROR;
-					EventBus.instance.post(new BarNotificationEvent("Update failed due to a connection error."));
+					EventBus.post(new BarNotificationEvent("Update failed due to a connection error."));
 				}
 			});
 		}

@@ -280,7 +280,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				this.importedNode = BeatmapParser.parseDirectories(dirs);
 				if (importedNode != null) {
 					// send notification
-					EventBus.instance.post(new BarNotificationEvent((dirs.length == 1) ? "Imported 1 new song." :
+					EventBus.post(new BarNotificationEvent((dirs.length == 1) ? "Imported 1 new song." :
 							String.format("Imported %d new songs.", dirs.length)));
 				}
 			}
@@ -687,7 +687,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 											if (playing)
 												previewID = node.getID();
 										} catch (SlickException e) {
-											EventBus.instance.post(new BarNotificationEvent("Failed to load track preview. See log for details."));
+											EventBus.post(new BarNotificationEvent("Failed to load track preview. See log for details."));
 											Log.error(e);
 										}
 									}
@@ -710,7 +710,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 								if (!DownloadList.get().contains(node.getID())) {
 									node.createDownload(serverMenu.getSelectedItem());
 									if (node.getDownload() == null) {
-										EventBus.instance.post(new BarNotificationEvent("The download could not be started"));
+										EventBus.post(new BarNotificationEvent("The download could not be started"));
 									} else {
 										DownloadList.get().addNode(node);
 										node.getDownload().start();
@@ -952,7 +952,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		pageDir = Page.RESET;
 		previewID = -1;
 		if (barNotificationOnLoad != null) {
-			EventBus.instance.post(new BarNotificationEvent(barNotificationOnLoad));
+			EventBus.post(new BarNotificationEvent(barNotificationOnLoad));
 			barNotificationOnLoad = null;
 		}
 	}

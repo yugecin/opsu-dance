@@ -24,6 +24,7 @@ import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 
@@ -41,7 +42,7 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 
 	public BaseOpsuState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
-		displayContainer.eventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
+		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
 	}
 
 	protected void revalidate() {

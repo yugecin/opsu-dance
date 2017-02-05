@@ -22,6 +22,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.utils.FPSMeter;
@@ -44,7 +45,7 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 		this.displayContainer = displayContainer;
 		fpsMeter = new FPSMeter(10);
 		upsMeter = new FPSMeter(10);
-		displayContainer.eventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
+		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
 	}
 
 	public void update() {

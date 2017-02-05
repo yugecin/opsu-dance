@@ -49,13 +49,13 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	private int barHalfTargetHeight;
 	private int barHalfHeight;
 
-	public BarNotificationState(DisplayContainer displayContainer, EventBus eventBus) {
+	public BarNotificationState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
 		this.bgcol = new Color(Color.black);
 		this.textCol = new Color(Color.white);
 		this.timeShown = TOTAL_TIME;
-		eventBus.subscribe(BarNotificationEvent.class, this);
-		eventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
+		EventBus.subscribe(BarNotificationEvent.class, this);
+		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				if (timeShown >= TOTAL_TIME) {

@@ -275,7 +275,7 @@ public class Replay {
 		File dir = Options.getReplayDir();
 		if (!dir.isDirectory()) {
 			if (!dir.mkdir()) {
-				EventBus.instance.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
+				EventBus.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
 				return;
 			}
 		}

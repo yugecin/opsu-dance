@@ -216,7 +216,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(dir);
 		} catch (IOException e) {
-			EventBus.instance.post(new BubbleNotificationEvent("Could not delete song group", BubbleNotificationEvent.COLOR_ORANGE));
+			EventBus.post(new BubbleNotificationEvent("Could not delete song group", BubbleNotificationEvent.COLOR_ORANGE));
 		}
 		if (ws != null)
 			ws.resume();
@@ -271,7 +271,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(file);
 		} catch (IOException e) {
-			EventBus.instance.post(new BubbleNotificationEvent("Could not delete song", BubbleNotificationEvent.COLOR_ORANGE));
+			EventBus.post(new BubbleNotificationEvent("Could not delete song", BubbleNotificationEvent.COLOR_ORANGE));
 		}
 		if (ws != null)
 			ws.resume();

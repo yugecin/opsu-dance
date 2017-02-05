@@ -20,7 +20,6 @@ package yugecin.opsudance.core.inject;
 import itdelatrisu.opsu.states.*;
 import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
@@ -34,8 +33,6 @@ import yugecin.opsudance.states.EmptyState;
 public class OpsuDanceInjector extends Injector {
 
 	protected void configure() {
-		bind(EventBus.class).asEagerSingleton();
-
 		bind(PreStartupInitializer.class).asEagerSingleton();
 		bind(DisplayContainer.class).asEagerSingleton();
 

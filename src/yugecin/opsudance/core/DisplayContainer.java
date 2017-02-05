@@ -66,7 +66,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private static SGL GL = Renderer.get();
 
-	public final EventBus eventBus;
 	private final InstanceContainer instanceContainer;
 
 	private FpsRenderState fpsState;
@@ -117,9 +116,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final Cursor cursor;
 	public boolean drawCursor;
 
-	public DisplayContainer(InstanceContainer instanceContainer, EventBus eventBus) {
+	public DisplayContainer(InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
-		this.eventBus = eventBus;
 		this.cursor = new Cursor();
 		drawCursor = true;
 		instance = this;
@@ -143,7 +141,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			}
 		};
 
-		eventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
+		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				destroyImages();
@@ -291,13 +289,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			return true;
 		}
 		if (DownloadList.get().hasActiveDownloads()) {
-			eventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			EventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
-			eventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			EventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
@@ -321,7 +319,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			if (fullscreen) {
 				fullscreen = false;
 				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);
-				eventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
+				EventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
 			}
 		}
 
@@ -357,7 +355,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		GameImage.init(width, height);
 		Fonts.init();
 
-		eventBus.post(new ResolutionOrSkinChangedEvent());
+		EventBus.post(new ResolutionOrSkinChangedEvent());
 	}
 
 	public void resetCursor() {

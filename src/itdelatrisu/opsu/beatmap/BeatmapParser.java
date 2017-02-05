@@ -160,7 +160,7 @@ public class BeatmapParser {
 					beatmap = parseFile(file, dir, beatmaps, false);
 				} catch(Exception e) {
 					Log.error("could not parse beatmap " + file.getName() + ": " + e.getMessage());
-					EventBus.instance.post(new BubbleNotificationEvent("Could not parse beatmap " + file.getName(), BubbleNotificationEvent.COLOR_ORANGE));
+					EventBus.post(new BubbleNotificationEvent("Could not parse beatmap " + file.getName(), BubbleNotificationEvent.COLOR_ORANGE));
 				}
 
 				// add to parsed beatmap list
@@ -249,7 +249,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", map.getFile().getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		} catch (NoSuchAlgorithmException e) {
 			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
 
@@ -654,7 +654,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", file.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		} catch (NoSuchAlgorithmException e) {
 			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
 
@@ -737,7 +737,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 
@@ -817,7 +817,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", beatmap.getFile().getAbsolutePath());
 			Log.error(err, e);
-			EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 	}
 

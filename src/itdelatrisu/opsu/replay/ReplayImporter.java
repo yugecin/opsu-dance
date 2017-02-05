@@ -73,7 +73,7 @@ public class ReplayImporter {
 			if (!replayDir.mkdir()) {
 				String err = String.format("Failed to create replay directory '%s'.", replayDir.getAbsolutePath());
 				Log.error(err);
-				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+				EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 				return;
 			}
 		}
@@ -88,7 +88,7 @@ public class ReplayImporter {
 				moveToFailedDirectory(file);
 				String err = String.format("Failed to import replay '%s'. The replay file could not be parsed.", file.getName());
 				Log.error(err, e);
-				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+				EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 				continue;
 			}
 			Beatmap beatmap = BeatmapSetList.get().getBeatmapFromHash(r.beatmapHash);
@@ -107,7 +107,7 @@ public class ReplayImporter {
 				moveToFailedDirectory(file);
 				String err = String.format("Failed to import replay '%s'. The associated beatmap could not be found.", file.getName());
 				Log.error(err);
-				EventBus.instance.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+				EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
 			}
 		}
 

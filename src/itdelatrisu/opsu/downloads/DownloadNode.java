@@ -278,12 +278,12 @@ public class DownloadNode {
 		download.setListener(new DownloadListener() {
 			@Override
 			public void completed() {
-				EventBus.instance.post(new BarNotificationEvent(String.format("Download complete: %s", getTitle())));
+				EventBus.post(new BarNotificationEvent(String.format("Download complete: %s", getTitle())));
 			}
 
 			@Override
 			public void error() {
-				EventBus.instance.post(new BarNotificationEvent("Download failed due to a connection error."));
+				EventBus.post(new BarNotificationEvent("Download failed due to a connection error."));
 			}
 		});
 		this.download = download;
@@ -404,7 +404,7 @@ public class DownloadNode {
 	public void drawDownload(Graphics g, float position, int id, boolean hover) {
 		Download download = this.download;  // in case clearDownload() is called asynchronously
 		if (download == null) {
-			EventBus.instance.post(new BubbleNotificationEvent("Trying to draw download information for button without Download object", BubbleNotificationEvent.COLOR_ORANGE));
+			EventBus.post(new BubbleNotificationEvent("Trying to draw download information for button without Download object", BubbleNotificationEvent.COLOR_ORANGE));
 			return;
 		}
 

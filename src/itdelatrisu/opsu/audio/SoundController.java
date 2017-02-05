@@ -217,7 +217,7 @@ public class SoundController {
 		// menu and game sounds
 		for (SoundEffect s : SoundEffect.values()) {
 			if ((currentFileName = getSoundFileName(s.getFileName())) == null) {
-				EventBus.instance.post(new BubbleNotificationEvent("Could not find sound file " + s.getFileName(), BubbleNotificationEvent.COLOR_ORANGE));
+				EventBus.post(new BubbleNotificationEvent("Could not find sound file " + s.getFileName(), BubbleNotificationEvent.COLOR_ORANGE));
 				continue;
 			}
 			MultiClip newClip = loadClip(currentFileName, currentFileName.endsWith(".mp3"));
@@ -236,7 +236,7 @@ public class SoundController {
 			for (HitSound s : HitSound.values()) {
 				String filename = String.format("%s-%s", ss.getName(), s.getFileName());
 				if ((currentFileName = getSoundFileName(filename)) == null) {
-					EventBus.instance.post(new BubbleNotificationEvent("Could not find hit sound file " + filename, BubbleNotificationEvent.COLOR_ORANGE));
+					EventBus.post(new BubbleNotificationEvent("Could not find hit sound file " + filename, BubbleNotificationEvent.COLOR_ORANGE));
 					continue;
 				}
 				MultiClip newClip = loadClip(currentFileName, false);
@@ -392,7 +392,7 @@ public class SoundController {
 
 				@Override
 				public void error() {
-					EventBus.instance.post(new BarNotificationEvent("Failed to download track preview."));
+					EventBus.post(new BarNotificationEvent("Failed to download track preview."));
 				}
 			});
 			try {

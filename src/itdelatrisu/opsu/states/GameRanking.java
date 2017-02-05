@@ -166,13 +166,13 @@ public class GameRanking extends BaseOpsuState {
 					gameState.setRestart((data.isGameplay()) ? Game.Restart.REPLAY : Game.Restart.NEW);
 					returnToGame = true;
 				} catch (FileNotFoundException e) {
-					EventBus.instance.post(new BarNotificationEvent("Replay file not found."));
+					EventBus.post(new BarNotificationEvent("Replay file not found."));
 				} catch (IOException e) {
 					Log.error("Failed to load replay data.", e);
-					EventBus.instance.post(new BarNotificationEvent("Failed to load replay data. See log for details."));
+					EventBus.post(new BarNotificationEvent("Failed to load replay data. See log for details."));
 				}
 			} else
-				EventBus.instance.post(new BarNotificationEvent("Replay file not found."));
+				EventBus.post(new BarNotificationEvent("Replay file not found."));
 		}
 
 		// retry

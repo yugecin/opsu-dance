@@ -44,12 +44,12 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 	private int addAnimationTime;
 	private int addAnimationHeight;
 
-	public BubbleNotificationState(DisplayContainer displayContainer, EventBus eventBus) {
+	public BubbleNotificationState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
-		eventBus.subscribe(BubbleNotificationEvent.class, this);
-		eventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
+		EventBus.subscribe(BubbleNotificationEvent.class, this);
+		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				calculatePositions();

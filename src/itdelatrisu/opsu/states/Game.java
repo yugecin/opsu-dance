@@ -344,7 +344,7 @@ public class Game extends ComplexOpsuState {
 			gOffscreen.setBackground(Color.black);
 		} catch (SlickException e) {
 			Log.error("could not create offscreen graphics", e);
-			displayContainer.eventBus.post(new BubbleNotificationEvent("Exception while creating offscreen graphics. See logfile for details.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent("Exception while creating offscreen graphics. See logfile for details.", BubbleNotificationEvent.COMMONCOLOR_RED));
 		}
 
 		// initialize music position bar location
@@ -1184,7 +1184,7 @@ public class Game extends ComplexOpsuState {
 				int position = (pauseTime > -1) ? pauseTime : trackPosition;
 				if (Options.setCheckpoint(position / 1000)) {
 					SoundController.playSound(SoundEffect.MENUCLICK);
-					EventBus.instance.post(new BarNotificationEvent("Checkpoint saved."));
+					EventBus.post(new BarNotificationEvent("Checkpoint saved."));
 				}
 			}
 			break;
@@ -1196,7 +1196,7 @@ public class Game extends ComplexOpsuState {
 					break;  // invalid checkpoint
 				loadCheckpoint(checkpoint);
 				SoundController.playSound(SoundEffect.MENUHIT);
-				EventBus.instance.post(new BarNotificationEvent("Checkpoint loaded."));
+				EventBus.post(new BarNotificationEvent("Checkpoint loaded."));
 			}
 			break;
 		case Input.KEY_F:
@@ -1241,12 +1241,12 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_MINUS:
 			currentMapMusicOffset += 5;
-			EventBus.instance.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
+			EventBus.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
 			break;
 		}
 		if (key == Input.KEY_ADD || c == '+') {
 			currentMapMusicOffset -= 5;
-			EventBus.instance.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
+			EventBus.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
 		}
 
 		return true;
@@ -1466,7 +1466,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (beatmap == null || beatmap.objects == null) {
-			displayContainer.eventBus.post(new BubbleNotificationEvent("Game was running without a beatmap", BubbleNotificationEvent.COMMONCOLOR_RED));
+			EventBus.post(new BubbleNotificationEvent("Game was running without a beatmap", BubbleNotificationEvent.COMMONCOLOR_RED));
 			displayContainer.switchStateInstantly(SongMenu.class);
 		}
 
@@ -1568,7 +1568,7 @@ public class Game extends ComplexOpsuState {
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
 					Log.error(message, e);
-					displayContainer.eventBus.post(new BubbleNotificationEvent(message, BubbleNotificationEvent.COMMONCOLOR_RED));
+					EventBus.post(new BubbleNotificationEvent(message, BubbleNotificationEvent.COMMONCOLOR_RED));
 					gameObjects[i] = new DummyObject(hitObject);
 				}
 			}
@@ -2154,7 +2154,7 @@ public class Game extends ComplexOpsuState {
 			this.replay = null;
 		} else {
 			if (replay.frames == null) {
-				displayContainer.eventBus.post(new BubbleNotificationEvent("Attempting to set a replay with no frames.", BubbleNotificationEvent.COLOR_ORANGE));
+				EventBus.post(new BubbleNotificationEvent("Attempting to set a replay with no frames.", BubbleNotificationEvent.COLOR_ORANGE));
 				return;
 			}
 			this.isReplay = true;

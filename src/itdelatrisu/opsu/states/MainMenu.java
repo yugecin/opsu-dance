@@ -471,10 +471,10 @@ public class MainMenu extends BaseOpsuState {
 		UI.enter();
 		if (!enterNotification) {
 			if (Updater.get().getStatus() == Updater.Status.UPDATE_AVAILABLE) {
-				EventBus.instance.post(new BarNotificationEvent("An opsu! update is available."));
+				EventBus.post(new BarNotificationEvent("An opsu! update is available."));
 				enterNotification = true;
 			} else if (Updater.get().justUpdated()) {
-				EventBus.instance.post(new BarNotificationEvent("opsu! is now up to date!"));
+				EventBus.post(new BarNotificationEvent("opsu! is now up to date!"));
 				enterNotification = true;
 			}
 		}
@@ -537,15 +537,15 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
-				EventBus.instance.post(new BarNotificationEvent("Pause"));
+				EventBus.post(new BarNotificationEvent("Pause"));
 			} else if (!MusicController.isTrackLoading()) {
 				MusicController.resume();
-				EventBus.instance.post(new BarNotificationEvent("Play"));
+				EventBus.post(new BarNotificationEvent("Play"));
 			}
 			return true;
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
-			EventBus.instance.post(new BarNotificationEvent(">> Next"));
+			EventBus.post(new BarNotificationEvent(">> Next"));
 			return true;
 		} else if (musicPrevious.contains(x, y)) {
 			lastMeasureProgress = 0f;
@@ -555,7 +555,7 @@ public class MainMenu extends BaseOpsuState {
 					bgAlpha.setTime(0);
 			} else
 				MusicController.setPosition(0);
-			EventBus.instance.post(new BarNotificationEvent("<< Previous"));
+			EventBus.post(new BarNotificationEvent("<< Previous"));
 			return true;
 		}
 
@@ -571,10 +571,10 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Options.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.instance.post(new BarNotificationEvent("The repository web page could not be opened."));
+				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
 			}
 			return true;
 		}
@@ -583,10 +583,10 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Options.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.instance.post(new BarNotificationEvent("The repository web page could not be opened."));
+				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				displayContainer.eventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
 			}
 			return true;
 		}
