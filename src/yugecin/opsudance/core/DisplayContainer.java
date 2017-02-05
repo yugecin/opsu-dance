@@ -153,12 +153,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		});
 
 		this.nativeDisplayMode = Display.getDisplayMode();
-		setUPS(1000);
-		setFPS(60);
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
 		delta = 1;
 		renderDelta = 1;
+
+		Options.GameOption.displayContainer = this;
 	}
 
 	public void setUPS(int ups) {
@@ -172,6 +172,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void init(Class<? extends OpsuState> startingState) {
+		setUPS(Options.getTargetUPS());
+		setFPS(Options.getTargetFPS());
+
 		state = instanceContainer.provide(startingState);
 		state.enter();
 
@@ -191,6 +194,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			Music.poll(delta);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
+
+			fpsState.update();
 
 			state.update();
 			if (drawCursor) {

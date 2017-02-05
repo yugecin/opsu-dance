@@ -38,9 +38,10 @@ public class OptionsMenu {
 			GameOption.SCREEN_RESOLUTION,
 			GameOption.ALLOW_LARGER_RESOLUTIONS,
 			GameOption.FULLSCREEN,
-			// TODO d: UPS option
+			GameOption.TARGET_UPS,
 			GameOption.TARGET_FPS,
 			GameOption.SHOW_FPS,
+			GameOption.USE_FPS_DELTAS,
 			GameOption.SCREENSHOT_FORMAT,
 		}),
 		new OptionTab("SLIDER OPTIONS", new GameOption[]{

@@ -67,6 +67,7 @@ import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.utils.CachedVariable;
 
 /**
  * Handles all user options.
@@ -382,19 +383,38 @@ public class Options {
 			@Override
 			public void read(String s) { skinName = s; }
 		},
-		TARGET_FPS ("Frame Limiter", "FrameSync", "Higher values may cause high CPU usage.") {
+		TARGET_UPS ("target UPS", "targetUPS", "Higher values result in less input lag and smoother cursor trail, but may cause high CPU usage.", 480, 20, 1000) {
 			@Override
 			public String getValueString() {
-				return String.format((getTargetFPS() == 60) ? "%dfps (vsync)" : "%dfps", getTargetFPS());
+				return String.format("%dups", val);
 			}
 
 			@Override
-			public Object[] getListItems() {
-				String[] list = new String[targetFPS.length];
-				for (int i = 0; i < targetFPS.length; i++) {
-					list[i] = String.format(targetFPS[i] == 60 ? "%dfps (vsync)" : "%dfps", targetFPS[i]);
+			public void setValue(int value) {
+				super.setValue(value);
+				displayContainer.setUPS(value);
+			}
+		},
+		TARGET_FPS ("FPS limit", "FPSlimit", "Higher values may cause high CPU usage. A value higher than the UPS has no effect.") {
+			@Override
+			public String getValueString() {
+				return String.format("%dfps", getTargetFPS());
+			}
+
+			private CachedVariable<Object[]> $_getListItems = new CachedVariable<>(new CachedVariable.Getter<Object[]>() {
+				@Override
+				public Object[] get() {
+					String[] list = new String[targetFPS.length];
+					for (int i = 0; i < targetFPS.length; i++) {
+						list[i] = String.format("%dfps", targetFPS[i]);
+					}
+					return list;
 				}
-				return list;
+			});
+
+			@Override
+			public Object[] getListItems() {
+				return $_getListItems.get();
 			}
 
 			@Override
@@ -404,7 +424,9 @@ public class Options {
 			}
 
 			@Override
-			public String write() { return Integer.toString(targetFPS[targetFPSindex]); }
+			public String write() {
+				return Integer.toString(targetFPS[targetFPSindex]);
+			}
 
 			@Override
 			public void read(String s) {
@@ -417,7 +439,13 @@ public class Options {
 				}
 			}
 		},
-		SHOW_FPS ("Show FPS Counter", "FpsCounter", "Show an FPS counter in the bottom-right hand corner.", true),
+		SHOW_FPS ("Show FPS Counters", "FpsCounter", "Show FPS and UPS counters in the bottom-right hand corner.", true),
+		USE_FPS_DELTAS ("Use deltas for FPS counters", "FpsCounterDeltas", "Show time between updates instead of updates per second.", false) {
+			@Override
+			public boolean showCondition() {
+				return SHOW_FPS.bool;
+			}
+		},
 		SHOW_UNICODE ("Prefer Non-English Metadata", "ShowUnicode", "Where available, song titles will be shown in their native language.", false) {
 			@Override
 			public void click() {
@@ -1304,6 +1332,10 @@ public class Options {
 	 */
 	public static int getTargetFPS() { return targetFPS[targetFPSindex]; }
 
+	public static int getTargetUPS() {
+		return GameOption.TARGET_UPS.val;
+	}
+
 	/**
 	 * Sets the target frame rate to the next available option, and sends a
 	 * bar notification about the action.
@@ -1502,6 +1534,8 @@ public class Options {
 	 * @return true if enabled
 	 */
 	public static boolean isFPSCounterEnabled() { return GameOption.SHOW_FPS.getBooleanValue(); }
+
+	public static boolean useDeltasForFPSCounter() { return GameOption.USE_FPS_DELTAS.getBooleanValue(); }
 
 	/**
 	 * Returns whether or not hit lighting effects are enabled.

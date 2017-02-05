@@ -17,20 +17,24 @@
  */
 package yugecin.opsudance.core.state.specialstates;
 
+import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.utils.FPSMeter;
 
 public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEvent> {
-
-	private final DisplayContainer displayContainer;
 
 	private final static Color GREEN = new Color(171, 218, 25);
 	private final static Color ORANGE = new Color(255, 204, 34);
 	private final static Color DARKORANGE = new Color(255, 149, 24);
+
+	private final DisplayContainer displayContainer;
+	private final FPSMeter fpsMeter;
+	private final FPSMeter upsMeter;
 
 	private int x;
 	private int y;
@@ -38,21 +42,38 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 
 	public FpsRenderState(DisplayContainer displayContainer) {
 		this.displayContainer = displayContainer;
+		fpsMeter = new FPSMeter(10);
+		upsMeter = new FPSMeter(10);
 		displayContainer.eventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
 	}
 
+	public void update() {
+		upsMeter.update(displayContainer.delta);
+	}
+
 	public void render(Graphics g) {
+		fpsMeter.update(displayContainer.renderDelta);
+		if (!Options.isFPSCounterEnabled()) {
+			return;
+		}
 		int x = this.x;
-		int target = displayContainer.targetRenderInterval + (displayContainer.targetUpdateInterval % displayContainer.targetRenderInterval);
-		x = drawText(g, getColor(target, displayContainer.renderDelta), (1000 / displayContainer.renderDelta) + " fps", x, this.y);
-		drawText(g, getColor(displayContainer.targetUpdateInterval, displayContainer.delta), (1000 / displayContainer.delta) + " ups", x, this.y);
+		int fpsDeviation = displayContainer.delta % displayContainer.targetRenderInterval;
+		x = drawText(g, getColor((int) (Options.getTargetFPS() * 0.9f) - fpsDeviation, fpsMeter.getValue()), getText(fpsMeter.getValue(), "fps"), x, this.y);
+		drawText(g, getColor((int) (Options.getTargetUPS() * 0.9f), upsMeter.getValue()), getText(upsMeter.getValue(), "ups"), x, this.y);
+	}
+
+	private String getText(int value, String unit) {
+		if (Options.useDeltasForFPSCounter()) {
+			return String.format("%.2fms", 1000f / value);
+		}
+		return value + " " + unit;
 	}
 
 	private Color getColor(int targetValue, int realValue) {
-		if (realValue <= targetValue) {
+		if (realValue >= targetValue) {
 			return GREEN;
 		}
-		if (realValue <= targetValue * 1.15f) {
+		if (realValue >= targetValue * 0.85f) {
 			return ORANGE;
 		}
 		return DARKORANGE;
@@ -64,7 +85,7 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 	private int drawText(Graphics g, Color color, String text, int x, int y) {
 		int width = Fonts.SMALL.getWidth(text) + 10;
 		g.setColor(color);
-		g.fillRoundRect(x - width, y, width, singleHeight + 6, 2);
+		g.fillRoundRect(x - width, y, width, singleHeight + 6, 5, 25);
 		Fonts.SMALL.drawString(x - width + 3, y + 3, text, Color.black);
 		return x - width - 6;
 	}
