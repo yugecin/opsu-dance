@@ -31,7 +31,7 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
@@ -43,17 +43,13 @@ import yugecin.opsudance.core.state.BaseOpsuState;
  */
 public class GamePauseMenu extends BaseOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
+
+	@Inject
+	private Game gameState;
 
 	private MenuButton continueButton, retryButton, backButton;
-
-	private final Game gameState;
-
-	public GamePauseMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer, Game gameState) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
-		this.gameState = gameState;
-	}
 
 	@Override
 	public void render(Graphics g) {

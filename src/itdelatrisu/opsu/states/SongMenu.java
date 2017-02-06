@@ -70,6 +70,7 @@ import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
@@ -83,7 +84,8 @@ import yugecin.opsudance.ui.OptionsOverlay;
  */
 public class SongMenu extends ComplexOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	/** The max number of song buttons to be shown on each screen. */
 	public static final int MAX_SONG_BUTTONS = 6;
@@ -325,9 +327,8 @@ public class SongMenu extends ComplexOpsuState {
 
 	private final OptionsOverlay optionsOverlay;
 
-	public SongMenu(final DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
+	public SongMenu(DisplayContainer displayContainer) {
+		super();
 		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions);
 		overlays.add(optionsOverlay);
 	}

@@ -19,14 +19,13 @@ package yugecin.opsudance.core.state.transitions;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
 
 public abstract class FadeTransitionState extends TransitionState {
 
 	private final Color black;
 
-	public FadeTransitionState(DisplayContainer displayContainer) {
-		super(displayContainer);
+	public FadeTransitionState() {
+		super();
 		black = new Color(Color.black);
 	}
 

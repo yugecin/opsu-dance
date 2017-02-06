@@ -46,8 +46,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
@@ -61,7 +61,8 @@ import yugecin.opsudance.events.BubbleNotificationEvent;
  */
 public class MainMenu extends BaseOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	/** Idle time, in milliseconds, before returning the logo to its original position. */
 	private static final short LOGO_IDLE_DELAY = 10000;
@@ -125,11 +126,6 @@ public class MainMenu extends BaseOpsuState {
 
 	/** The star fountain. */
 	private StarFountain starFountain;
-
-	public MainMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
-	}
 
 	@Override
 	protected void revalidate() {

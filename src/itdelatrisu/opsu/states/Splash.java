@@ -38,7 +38,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
@@ -49,7 +49,8 @@ import yugecin.opsudance.core.state.BaseOpsuState;
  */
 public class Splash extends BaseOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	/** Minimum time, in milliseconds, to display the splash screen (and fade in the logo). */
 	private static final int MIN_SPLASH_TIME = 400;
@@ -74,11 +75,6 @@ public class Splash extends BaseOpsuState {
 
 	// game-related variables
 	private boolean init = false;
-
-	public Splash(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
-	}
 
 	@Override
 	protected void revalidate() {

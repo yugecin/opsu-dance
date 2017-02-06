@@ -15,13 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.core.state.transitions;
+package yugecin.opsudance.core.inject;
 
-public class FadeOutTransitionState extends FadeTransitionState {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-	@Override
-	protected float getMaskAlphaLevel(float fadeProgress) {
-		return fadeProgress;
-	}
-
+@Retention(RetentionPolicy.RUNTIME) public @interface Inject {
 }

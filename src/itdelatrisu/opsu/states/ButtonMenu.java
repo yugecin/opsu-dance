@@ -603,7 +603,7 @@ public class ButtonMenu extends BaseOpsuState {
 	private ScoreData scoreData;
 
 	public ButtonMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
+		super();
 		Button.displayContainer = MenuState.displayContainer = displayContainer;
 		Button.instanceContainer = MenuState.instanceContainer = instanceContainer;
 	}

@@ -17,13 +17,7 @@
  */
 package yugecin.opsudance.core.state.transitions;
 
-import yugecin.opsudance.core.DisplayContainer;
-
 public class FadeInTransitionState extends FadeTransitionState {
-
-	public FadeInTransitionState(DisplayContainer container) {
-		super(container);
-	}
 
 	@Override
 	protected float getMaskAlphaLevel(float fadeProgress) {

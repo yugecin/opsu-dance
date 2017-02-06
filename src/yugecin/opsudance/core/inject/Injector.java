@@ -18,6 +18,7 @@
 package yugecin.opsudance.core.inject;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -70,10 +71,34 @@ public abstract class Injector implements InstanceContainer, Binder {
 			params[i] = provide(parameterTypes[i]);
 		}
 		try {
-			return	(T) constructor.newInstance(params);
+			return	injectFields((T) constructor.newInstance(params), type);
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private <T> T injectFields(T object, Class<?> type) {
+		do {
+			for (Field f : type.getDeclaredFields()) {
+				if (f.getDeclaredAnnotation(Inject.class) == null) {
+					continue;
+				}
+				boolean accessible = f.isAccessible();
+				if (!accessible) {
+					f.setAccessible(true);
+				}
+				try {
+					f.set(object, provide(f.getType()));
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException(e);
+				}
+				if (!accessible) {
+					f.setAccessible(false);
+				}
+			}
+			type = type.getSuperclass();
+		} while (type != null);
+		return object;
 	}
 
 	public final <T> Binder<T> bind(Class<T> type) {

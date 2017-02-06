@@ -55,8 +55,8 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
@@ -69,7 +69,8 @@ import yugecin.opsudance.events.BarNotificationEvent;
  */
 public class DownloadsMenu extends ComplexOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 700;
@@ -287,11 +288,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 			DownloadList.get().clearDownloads(Download.Status.COMPLETE);
 		}
-	}
-
-	public DownloadsMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
 	}
 
 	@Override

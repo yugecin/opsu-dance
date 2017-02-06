@@ -17,13 +17,7 @@
  */
 package yugecin.opsudance.core.state.transitions;
 
-import yugecin.opsudance.core.DisplayContainer;
-
 public class EmptyTransitionState extends TransitionState {
-
-	public EmptyTransitionState(DisplayContainer displayContainer) {
-		super(displayContainer);
-	}
 
 	@Override
 	public void enter() {

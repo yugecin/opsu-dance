@@ -36,8 +36,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
@@ -51,7 +51,8 @@ import yugecin.opsudance.events.BarNotificationEvent;
  */
 public class GameRanking extends BaseOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	/** Associated GameData object. */
 	private GameData data;
@@ -61,12 +62,6 @@ public class GameRanking extends BaseOpsuState {
 
 	/** Button coordinates. */
 	private float retryY, replayY;
-
-	public GameRanking(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
-
-	}
 
 	@Override
 	public void revalidate() {

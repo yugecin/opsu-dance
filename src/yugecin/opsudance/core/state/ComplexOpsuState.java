@@ -19,7 +19,6 @@ package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.components.Component;
 
 import java.util.LinkedList;
@@ -31,8 +30,8 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 
 	private Component focusedComponent;
 
-	public ComplexOpsuState(DisplayContainer displayContainer) {
-		super(displayContainer);
+	public ComplexOpsuState() {
+		super();
 		this.components = new LinkedList<>();
 		this.overlays = new LinkedList<>();
 	}

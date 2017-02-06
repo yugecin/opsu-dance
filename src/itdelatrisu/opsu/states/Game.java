@@ -65,6 +65,7 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
@@ -82,7 +83,8 @@ import yugecin.opsudance.utils.GLHelper;
  */
 public class Game extends ComplexOpsuState {
 
-	private final InstanceContainer instanceContainer;
+	@Inject
+	private InstanceContainer instanceContainer;
 
 	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
@@ -321,9 +323,8 @@ public class Game extends ComplexOpsuState {
 
 	private boolean skippedToCheckpoint;
 
-	public Game(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super(displayContainer);
-		this.instanceContainer = instanceContainer;
+	public Game(DisplayContainer displayContainer) {
+		super();
 		mirrorCursor = new Cursor(true);
 		this.moveStoryboardOverlay = new MoveStoryboard(displayContainer);
 		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.storyboardOptions);
