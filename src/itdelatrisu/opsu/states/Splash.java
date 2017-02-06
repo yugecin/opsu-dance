@@ -20,17 +20,13 @@ package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
-import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.UI;
-import itdelatrisu.opsu.ui.animations.AnimatedValue;
-import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.io.File;
 
@@ -39,7 +35,6 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 /**
@@ -50,50 +45,77 @@ import yugecin.opsudance.core.state.BaseOpsuState;
 public class Splash extends BaseOpsuState {
 
 	@Inject
-	private InstanceContainer instanceContainer;
-
-	/** Minimum time, in milliseconds, to display the splash screen (and fade in the logo). */
-	private static final int MIN_SPLASH_TIME = 400;
+	private SongMenu songMenu;
 
 	/** Whether or not loading has completed. */
-	private boolean finished = false;
+	private boolean finished;
 
 	/** Loading thread. */
 	private Thread thread;
 
-	/** Number of times the 'Esc' key has been pressed. */
+	/** Number of times the escape key has been pressed, to exit. */
 	private int escapeCount = 0;
 
-	/** Whether the skin being loaded is a new skin (for program restarts). */
-	private boolean newSkin = false;
-
-	/** Whether the watch service is newly enabled (for program restarts). */
-	private boolean watchServiceChange = false;
-
-	/** Logo alpha level. */
-	private AnimatedValue logoAlpha;
-
-	// game-related variables
-	private boolean init = false;
+	/** Wether the loading progress was inited. */
+	private boolean inited;
 
 	@Override
 	protected void revalidate() {
 		super.revalidate();
 
-		// TODO d check if below is needed
-		// check if skin changed
-		if (Options.getSkin() != null)
-			this.newSkin = (Options.getSkin().getDirectory() != Options.getSkinDir());
-
-		// check if watch service newly enabled
-		this.watchServiceChange = Options.isWatchServiceEnabled() && BeatmapWatchService.get() == null;
-
-		// fade in logo
-		this.logoAlpha = new AnimatedValue(MIN_SPLASH_TIME, 0f, 1f, AnimationEquation.LINEAR);
-		GameImage.MENU_LOGO.getImage().setAlpha(0f);
-
 		// pre-revalidate some states to reduce lag between switching
-		instanceContainer.provide(SongMenu.class).revalidate();
+		songMenu.revalidate();
+
+		if (inited) {
+			return;
+		}
+
+		inited = true;
+		thread = new Thread() {
+			@Override
+			public void run() {
+				File beatmapDir = Options.getBeatmapDir();
+
+				// unpack all OSZ archives
+				OszUnpacker.unpackAllFiles(Options.getOSZDir(), beatmapDir);
+
+				// parse song directory
+				BeatmapParser.parseAllFiles(beatmapDir);
+
+				// import replays
+				ReplayImporter.importAllReplaysFromDir(Options.getReplayImportDir());
+
+				// load sounds
+				SoundController.init();
+
+				finished = true;
+				thread = null;
+			}
+		};
+		thread.start();
+	}
+
+	@Override
+	public void preRenderUpdate() {
+		// change states when loading complete
+		if (!finished) {
+			return;
+		}
+
+		// initialize song list
+		if (BeatmapSetList.get().size() == 0) {
+			MusicController.playThemeSong();
+			displayContainer.switchStateInstantly(MainMenu.class);
+			return;
+		}
+
+		BeatmapSetList.get().init();
+		if (Options.isThemeSongEnabled()) {
+			MusicController.playThemeSong();
+		} else {
+			songMenu.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+		}
+		displayContainer.switchStateInstantly(MainMenu.class);
 	}
 
 	@Override
@@ -103,92 +125,18 @@ public class Splash extends BaseOpsuState {
 		UI.drawLoadingProgress(g);
 	}
 
-	@Override
-	public void preRenderUpdate() {
-		if (!init) {
-			init = true;
-
-			// resources already loaded (from application restart)
-			if (BeatmapSetList.get() != null) {
-				if (newSkin || watchServiceChange) {  // need to reload resources
-					thread = new Thread() {
-						@Override
-						public void run() {
-							// reload beatmaps if watch service newly enabled
-							if (watchServiceChange)
-								BeatmapParser.parseAllFiles(Options.getBeatmapDir());
-
-							// reload sounds if skin changed
-							// TODO: only reload each sound if actually needed?
-							if (newSkin)
-								SoundController.init();
-
-							finished = true;
-							thread = null;
-						}
-					};
-					thread.start();
-				} else  // don't reload anything
-					finished = true;
-			}
-
-			// load all resources in a new thread
-			else {
-				thread = new Thread() {
-					@Override
-					public void run() {
-						File beatmapDir = Options.getBeatmapDir();
-
-						// unpack all OSZ archives
-						OszUnpacker.unpackAllFiles(Options.getOSZDir(), beatmapDir);
-
-						// parse song directory
-						BeatmapParser.parseAllFiles(beatmapDir);
-
-						// import replays
-						ReplayImporter.importAllReplaysFromDir(Options.getReplayImportDir());
-
-						// load sounds
-						SoundController.init();
-
-						finished = true;
-						thread = null;
-					}
-				};
-				thread.start();
-			}
-		}
-
-		// fade in logo
-		if (logoAlpha.update(displayContainer.renderDelta))
-			GameImage.MENU_LOGO.getImage().setAlpha(logoAlpha.getValue());
-
-		// change states when loading complete
-		if (finished && logoAlpha.getValue() >= 1f) {
-			// initialize song list
-			if (BeatmapSetList.get().size() > 0) {
-				BeatmapSetList.get().init();
-				if (Options.isThemeSongEnabled()) {
-					MusicController.playThemeSong();
-				} else {
-					instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-				}
-			} else {
-				MusicController.playThemeSong();
-			}
-			displayContainer.switchState(MainMenu.class);
-		}
-	}
 
 	@Override
 	public boolean onCloseRequest() {
-		if (thread != null && thread.isAlive()) {
-			thread.interrupt();
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				Log.warn("InterruptedException while waiting for splash thread to die", e);
-			}
+		if (thread == null || !thread.isAlive()) {
+			return true;
+		}
+
+		thread.interrupt();
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			Log.warn("InterruptedException while waiting for splash thread to die", e);
 		}
 		return true;
 	}
@@ -205,4 +153,5 @@ public class Splash extends BaseOpsuState {
 		}
 		return true;
 	}
+
 }
