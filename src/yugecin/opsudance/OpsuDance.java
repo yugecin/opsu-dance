@@ -27,7 +27,6 @@ import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.states.EmptyState;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +62,6 @@ public class OpsuDance {
 			initUpdater(args);
 			sout("database & updater initialized");
 
-			//container.init(EmptyState.class);
 			container.init(Splash.class);
 		} catch (Exception e) {
 			errorAndExit("startup failure", e);

@@ -27,8 +27,6 @@ import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.states.EmptyRedState;
-import yugecin.opsudance.states.EmptyState;
 
 public class OpsuDanceInjector extends Injector {
 
@@ -45,9 +43,6 @@ public class OpsuDanceInjector extends Injector {
 		bind(EmptyTransitionState.class).asEagerSingleton();
 		bind(FadeInTransitionState.class).asEagerSingleton();
 		bind(FadeOutTransitionState.class).asEagerSingleton();
-
-		bind(EmptyRedState.class).asEagerSingleton();
-		bind(EmptyState.class).asEagerSingleton();
 
 		bind(Splash.class).asEagerSingleton();
 		bind(MainMenu.class).asEagerSingleton();
