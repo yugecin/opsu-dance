@@ -33,7 +33,6 @@ import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
@@ -110,8 +109,12 @@ public class Slider extends GameObject {
 	/** The current tick time for the follow circle expanding animation. */
 	private int tickExpandTime = 0;
 
+	private int followExpandTime = 0;
+
 	/** The duration of the follow circle expanding animation on ticks. */
 	private static final int TICK_EXPAND_TIME = 200;
+	private static final int FOLLOW_EXPAND_TIME = 150;
+	private static final int FOLLOW_SHRINK_TIME = 100;
 
 	/** Container dimensions. */
 	private static int containerWidth, containerHeight;
@@ -366,9 +369,25 @@ public class Slider extends GameObject {
 			}
 
 			// follow circle
-			if (followCircleActive) {
+			if (followCircleActive || followExpandTime > 0) {
 				float followCircleScale = 1f + (tickExpandTime / (float) TICK_EXPAND_TIME) * 0.1f;
-				GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(followCircleScale).drawCentered(c.x, c.y);
+				float followAlpha = 1f;
+				if (followCircleActive && followExpandTime < FOLLOW_EXPAND_TIME) {
+					followExpandTime += DisplayContainer.instance.renderDelta;
+					followCircleScale *= 0.5f;
+					float progress = AnimationEquation.OUT_QUAD.calc((float) followExpandTime / FOLLOW_EXPAND_TIME);
+					followCircleScale = followCircleScale + followCircleScale * progress;
+					followAlpha = progress;
+				} else if (!followCircleActive) {
+					followExpandTime -= DisplayContainer.instance.renderDelta;
+					if (followExpandTime > FOLLOW_SHRINK_TIME) {
+						followExpandTime = FOLLOW_SHRINK_TIME;
+					}
+					float progress = 1f - AnimationEquation.IN_QUAD.calc((float) followExpandTime / FOLLOW_EXPAND_TIME);
+					followCircleScale *= progress;
+					followAlpha = progress;
+				}
+				GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(followCircleScale).setAlpha(followAlpha).drawCentered(c.x, c.y);
 
 				// "flashlight" mod: dim the screen
 				if (GameMod.FLASHLIGHT.isActive()) {
@@ -716,7 +735,10 @@ public class Slider extends GameObject {
 		double distance = Math.hypot(c.x - mouseX, c.y - mouseY);
 		if (((keyPressed || GameMod.RELAX.isActive()) && distance < followRadius) || isAutoMod) {
 			// mouse pressed and within follow circle
-			followCircleActive = true;
+			if (!followCircleActive) {
+				followCircleActive = true;
+				followExpandTime = 0;
+			}
 
 			// held during new repeat
 			if (isNewRepeat) {
