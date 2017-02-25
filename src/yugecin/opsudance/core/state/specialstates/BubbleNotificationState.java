@@ -222,13 +222,15 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 				float progress = (float) timeShown / BubbleNotificationState.IN_TIME;
 				this.x = finalX + (int) ((1 - AnimationEquation.OUT_BACK.calc(progress)) * width / 2);
 				textColor.a = borderColor.a = bgcol.a = progress;
+				bgcol.a = borderColor.a * 0.8f;
 				return;
 			}
 			x = Notification.finalX;
 			if (timeShown > BubbleNotificationState.DISPLAY_TIME) {
 				isFading = true;
 				float progress = (float) (timeShown - BubbleNotificationState.DISPLAY_TIME) / BubbleNotificationState.OUT_TIME;
-				textColor.a = borderColor.a = bgcol.a = 1f - progress;
+				textColor.a = borderColor.a = 1f - progress;
+				bgcol.a = borderColor.a * 0.8f;
 			}
 		}
 
