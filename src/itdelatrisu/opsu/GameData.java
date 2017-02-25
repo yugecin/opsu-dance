@@ -60,6 +60,8 @@ public class GameData {
 	/** Time, in milliseconds, for a hit circle to fade. */
 	public static final int HITCIRCLE_FADE_TIME = 300;
 
+	public static final int FOLLOWCIRCLE_FADE_TIME = HITCIRCLE_FADE_TIME / 2;
+
 	/** Duration, in milliseconds, of a combo pop effect. */
 	private static final int COMBO_POP_TIME = 250;
 
@@ -989,6 +991,17 @@ public class GameData {
 		    hitResult.hitResultType != HitObjectType.SLIDER_FIRST &&
 		    hitResult.hitResultType != HitObjectType.SLIDER_LAST) {
 			return;
+		}
+
+		// slider follow circle
+		if (hitResult.expand && (
+			hitResult.hitResultType == HitObjectType.SLIDER_FIRST || hitResult.hitResultType == HitObjectType.SLIDER_LAST)) {
+			float progress = AnimationEquation.OUT_CUBIC.calc((float) Utils.clamp(trackPosition - hitResult.time, 0, FOLLOWCIRCLE_FADE_TIME) / FOLLOWCIRCLE_FADE_TIME);
+			float scale = 1f - 0.2f * progress;
+			float alpha = 1f - progress;
+			Image fc = GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(scale);
+			fc.setAlpha(alpha);
+			fc.drawCentered(hitResult.x, hitResult.y);
 		}
 
 		// hit circles

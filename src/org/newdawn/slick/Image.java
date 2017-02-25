@@ -981,8 +981,9 @@ public class Image implements Renderable {
      * 
      * @param alpha The alpha value to use when rendering this image
      */
-    public void setAlpha(float alpha) {
+    public Image setAlpha(float alpha) {
     	this.alpha = alpha;
+        return this;
     }
     
     /**
