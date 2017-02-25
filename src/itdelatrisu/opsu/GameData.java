@@ -1025,6 +1025,8 @@ public class GameData {
 			scaledRepeat.rotate(ang);
 			scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
 			if (!Options.isDrawSliderEndCircles()) {
+				GameImage.HITCIRCLE.getImage().draw(-1000, -1000); // TODO this 'fixes' #114. Why? Get a better solution!
+				GameImage.HITCIRCLE_OVERLAY.getImage().draw(-1000, -1000);
 				return;
 			}
 		}
