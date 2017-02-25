@@ -51,10 +51,13 @@ import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.*;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -735,6 +738,15 @@ public class Game extends ComplexOpsuState {
 
 		UI.draw(g);
 
+		int i = 0;
+		g.setColor(new Color(0.2f, 0.2f, 0.2f));
+		g.fillRect(0, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
+		g.setColor(Color.black);
+		g.fillRect(ReplayPlayback.SQSIZE * 2, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
+		for (ReplayPlayback replayPlayback : replays) {
+			replayPlayback.render(displayContainer.renderDelta, g, i++, trackPosition);
+		}
+
 		super.render(g);
 	}
 
@@ -926,6 +938,7 @@ public class Game extends ComplexOpsuState {
 
 			// set mouse coordinates
 			autoMousePosition.set(autoPoint.x, autoPoint.y);
+			autoMousePosition.set(-100, -100);
 		}
 
 		if (isReplay) {
@@ -1444,6 +1457,7 @@ public class Game extends ComplexOpsuState {
 		return true;
 	}
 
+	private LinkedList<ReplayPlayback> replays;
 	@Override
 	public void enter() {
 		overlays.clear();
@@ -1456,6 +1470,29 @@ public class Game extends ComplexOpsuState {
 		}
 
 		super.enter();
+
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/opsud/");
+		File[] files = replaydir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.getName().endsWith(".osr");
+			}
+		});
+
+		replays = new LinkedList<>();
+		float hueshift = 360f / files.length;
+		float hue = 0;
+		for (File file : files) {
+			Replay r = new Replay(file);
+			try {
+				r.load();
+			} catch (IOException e) {
+				EventBus.post(new BubbleNotificationEvent("could not load replay " + file.getName(), BubbleNotificationEvent.COMMONCOLOR_RED));
+				continue;
+			}
+			replays.add(new ReplayPlayback(r, new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB())));
+			hue += hueshift;
+		}
 
 		if (isReplay || GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			displayContainer.drawCursor = false;

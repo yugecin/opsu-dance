@@ -485,7 +485,7 @@ public class Options {
 					screenshotFormatIndex = i;
 			}
 		},
-		CURSOR_SIZE ("Size", "CursorSize", "Change the cursor scale.", 100, 50, 200) {
+		CURSOR_SIZE ("Size", "CursorSize", "Change the cursor scale.", 100, 10, 200) {
 			@Override
 			public String getValueString() { return String.format("%.2fx", val / 100f); }
 

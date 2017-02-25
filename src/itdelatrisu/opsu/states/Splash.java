@@ -33,6 +33,7 @@ import java.io.File;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.state.BaseOpsuState;
@@ -70,6 +71,9 @@ public class Splash extends BaseOpsuState {
 			return;
 		}
 
+		System.out.println(
+			Renderer.get().getClass()
+		);
 		inited = true;
 		thread = new Thread() {
 			@Override
