@@ -976,6 +976,17 @@ public class GameData {
 				Colors.WHITE_FADE.a = oldWhiteAlpha;
 				hitResult.color.a = oldColorAlpha;
 			}
+
+			// slider follow circle
+			if (hitResult.expand) {
+				float progress = AnimationEquation.OUT_CUBIC.calc((float) Utils.clamp(trackPosition - hitResult.time, 0, FOLLOWCIRCLE_FADE_TIME) / FOLLOWCIRCLE_FADE_TIME);
+				float scale = 1f - 0.2f * progress;
+				float alpha = 1f - progress;
+				Image fc = GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(scale);
+				fc.setAlpha(alpha);
+				fc.drawCentered(hitResult.x, hitResult.y);
+			}
+
 			if (!Options.isDrawSliderEndCircles()) {
 				return;
 			}
@@ -991,17 +1002,6 @@ public class GameData {
 		    hitResult.hitResultType != HitObjectType.SLIDER_FIRST &&
 		    hitResult.hitResultType != HitObjectType.SLIDER_LAST) {
 			return;
-		}
-
-		// slider follow circle
-		if (hitResult.expand && (
-			hitResult.hitResultType == HitObjectType.SLIDER_FIRST || hitResult.hitResultType == HitObjectType.SLIDER_LAST)) {
-			float progress = AnimationEquation.OUT_CUBIC.calc((float) Utils.clamp(trackPosition - hitResult.time, 0, FOLLOWCIRCLE_FADE_TIME) / FOLLOWCIRCLE_FADE_TIME);
-			float scale = 1f - 0.2f * progress;
-			float alpha = 1f - progress;
-			Image fc = GameImage.SLIDER_FOLLOWCIRCLE.getImage().getScaledCopy(scale);
-			fc.setAlpha(alpha);
-			fc.drawCentered(hitResult.x, hitResult.y);
 		}
 
 		// hit circles
