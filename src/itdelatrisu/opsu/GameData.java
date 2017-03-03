@@ -972,7 +972,8 @@ public class GameData {
 				float oldWhiteAlpha = Colors.WHITE_FADE.a;
 				float oldColorAlpha = hitResult.color.a;
 				Colors.WHITE_FADE.a = hitResult.color.a = alpha;
-				hitResult.curve.draw(hitResult.color, Options.isMergingSliders() ? 1 : 0, hitResult.curve.getCurvePoints().length);
+				if (!Options.isMergingSliders()) // #issue-130
+					hitResult.curve.draw(hitResult.color, Options.isMergingSliders() ? 1 : 0, hitResult.curve.getCurvePoints().length);
 				Colors.WHITE_FADE.a = oldWhiteAlpha;
 				hitResult.color.a = oldColorAlpha;
 			}
