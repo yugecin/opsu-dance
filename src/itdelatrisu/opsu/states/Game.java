@@ -1653,6 +1653,9 @@ public class Game extends ComplexOpsuState {
 			SoundController.mute(false);
 
 			if (Options.isMergingSliders()) {
+				if (!Options.isShrinkingSliders()) {
+					knorkesliders = null; // workaround for issue-130
+				}
 				if (knorkesliders == null) {
 					// let's create knorkesliders
 					List<Vec2f> curvepoints = new ArrayList<>();
