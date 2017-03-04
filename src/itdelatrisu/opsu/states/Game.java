@@ -18,12 +18,7 @@
 
 package itdelatrisu.opsu.states;
 
-import itdelatrisu.opsu.GameData;
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.ScoreData;
-import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.audio.HitSound;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -34,7 +29,6 @@ import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
-import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
@@ -331,7 +325,7 @@ public class Game extends ComplexOpsuState {
 		super();
 		mirrorCursor = new Cursor(true);
 		this.moveStoryboardOverlay = new MoveStoryboard(displayContainer);
-		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.storyboardOptions);
+		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(displayContainer, moveStoryboardOverlay, optionsOverlay, this);
 		storyboardOverlay.show();
 		moveStoryboardOverlay.show();

@@ -18,13 +18,8 @@
 
 package itdelatrisu.opsu.states;
 
-import itdelatrisu.opsu.GameData;
+import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.GameData.Grade;
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.ScoreData;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MultiClip;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -329,7 +324,7 @@ public class SongMenu extends ComplexOpsuState {
 
 	public SongMenu(DisplayContainer displayContainer) {
 		super();
-		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions);
+		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
 		overlays.add(optionsOverlay);
 	}
 

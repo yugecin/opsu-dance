@@ -22,7 +22,7 @@ import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
-import itdelatrisu.opsu.states.OptionsMenu;
+import itdelatrisu.opsu.OptionGroups;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -56,7 +56,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	private final OptionsOverlay optionsOverlay;
 
 	static {
-		for (OptionTab tab : OptionsMenu.storyboardOptions) {
+		for (OptionTab tab : OptionGroups.storyboardOptions) {
 			optionList.addAll(Arrays.asList(tab.options));
 		}
 	}

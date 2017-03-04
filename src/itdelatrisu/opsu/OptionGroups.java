@@ -16,13 +16,13 @@
  * along with opsu!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package itdelatrisu.opsu.states;
+package itdelatrisu.opsu;
 
 import itdelatrisu.opsu.Options.GameOption;
 
 import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
-public class OptionsMenu {
+public class OptionGroups {
 
 	public static final OptionTab[] normalOptions = new OptionTab[] {
 		new OptionTab("GENERAL", null),
