@@ -582,6 +582,13 @@ public class Options {
 			}
 		},
 		DRAW_SLIDER_ENDCIRCLES ("Draw endcircles", "DrawSliderEndCircles", "Old slider style", false),
+		DANCING_CIRCLES ("Enable", "DancingHitcircles", "Make hitcircles dance to the beat", false),
+		DANCING_CIRCLES_MULTIPLIER ("Multiplier", "DancingHitcirclesMP", "Multiplier to expand the hitcircles when dancing to the beat", 50, 1, 200) {
+			@Override
+			public String getValueString() {
+				return String.format("%.1f%%", val / 10f);
+			}
+		},
 		SHOW_HIT_LIGHTING ("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true),
 		SHOW_HIT_ANIMATIONS ("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true),
 		SHOW_REVERSEARROW_ANIMATIONS ("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true),
@@ -1629,6 +1636,8 @@ public class Options {
 	public static boolean isMergingSliders() { return !isFallbackSliders() && GameOption.MERGING_SLIDERS.getBooleanValue(); }
 	public static int getMergingSlidersMirrorPool() { return GameOption.MERGING_SLIDERS_MIRROR_POOL.getIntegerValue(); }
 	public static boolean isDrawSliderEndCircles() { return GameOption.DRAW_SLIDER_ENDCIRCLES.getBooleanValue(); }
+	public static boolean isDancingHitCircles() { return GameOption.DANCING_CIRCLES.getBooleanValue(); }
+	public static float getDancingHitCirclesMultiplier() { return GameOption.DANCING_CIRCLES_MULTIPLIER.getIntegerValue() / 10f; }
 
 	/**
 	 * Returns the fixed circle size override, if any.

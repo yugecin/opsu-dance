@@ -1759,6 +1759,8 @@ public class Game extends ComplexOpsuState {
 	 * @param trackPosition the track position
 	 */
 	private void drawHitObjects(Graphics g, int trackPosition) {
+		gameObjectRenderer.initForFrame();
+
 		// draw result objects
 		if (!Options.isHideObjects()) {
 			data.drawHitResults(trackPosition);

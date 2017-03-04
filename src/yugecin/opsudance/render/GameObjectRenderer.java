@@ -21,8 +21,10 @@ import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
 import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.ui.Colors;
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
@@ -36,6 +38,7 @@ public class GameObjectRenderer {
 	private GameData gameData;
 
 	private float circleDiameter;
+	private int circleDiameterInt;
 
 	private Image hitcircle;
 	private Image hitcircleOverlay;
@@ -51,10 +54,10 @@ public class GameObjectRenderer {
 	public void initForGame(GameData gameData, float circleDiameter) {
 		this.gameData = gameData;
 		this.circleDiameter = circleDiameter * HitObject.getXMultiplier();  // convert from Osupixels (640x480)
-		int diameterInt = (int) this.circleDiameter;
-		GameImage.HITCIRCLE.setImage(GameImage.HITCIRCLE.getImage().getScaledCopy(diameterInt, diameterInt));
-		GameImage.HITCIRCLE_OVERLAY.setImage(GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(diameterInt, diameterInt));
-		GameImage.APPROACHCIRCLE.setImage(GameImage.APPROACHCIRCLE.getImage().getScaledCopy(diameterInt, diameterInt));
+		this.circleDiameterInt = (int) this.circleDiameter;
+		GameImage.HITCIRCLE.setImage(GameImage.HITCIRCLE.getImage().getScaledCopy(circleDiameterInt, circleDiameterInt));
+		GameImage.HITCIRCLE_OVERLAY.setImage(GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(circleDiameterInt, circleDiameterInt));
+		GameImage.APPROACHCIRCLE.setImage(GameImage.APPROACHCIRCLE.getImage().getScaledCopy(circleDiameterInt, circleDiameterInt));
 		hitcircle = GameImage.HITCIRCLE.getImage();
 		hitcircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
 		approachCircle = GameImage.APPROACHCIRCLE.getImage();
@@ -66,6 +69,19 @@ public class GameObjectRenderer {
 
 	public void setGameData(GameData gameData) {
 		this.gameData = gameData;
+	}
+
+	public void initForFrame() {
+		if (!Options.isDancingHitCircles()) {
+			return;
+		}
+		Float position = MusicController.getBeatProgress();
+		if (position == null) {
+			position = 0f;
+		}
+		int size = circleDiameterInt + (int) (circleDiameter * Options.getDancingHitCirclesMultiplier() / 100f * AnimationEquation.IN_OUT_QUAD.calc(position));
+		hitcircle = GameImage.HITCIRCLE.getImage().getScaledCopy(size, size);
+		hitcircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(size, size);
 	}
 
 	public void renderHitCircle(float x, float y, Color color, int comboNumber, float comboNumberAlpha) {

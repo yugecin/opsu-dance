@@ -52,6 +52,10 @@ public class OptionGroups {
 			//GameOption.MERGING_SLIDERS_MIRROR_POOL,
 			GameOption.DRAW_SLIDER_ENDCIRCLES,
 		}),
+		new OptionTab("DANCING HITCIRCLES", new GameOption[] {
+			GameOption.DANCING_CIRCLES,
+			GameOption.DANCING_CIRCLES_MULTIPLIER,
+		}),
 		new OptionTab("SKIN", null),
 		new OptionTab("SKIN", new GameOption[]{
 			GameOption.SKIN,
