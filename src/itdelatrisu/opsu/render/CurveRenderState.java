@@ -96,7 +96,7 @@ public class CurveRenderState {
 	 */
 	public static void shutdown() {
 		staticState.shutdown();
-		//FrameBufferCache.shutdown();
+		FrameBufferCache.shutdown();
 	}
 
 	/**
