@@ -20,5 +20,6 @@ package yugecin.opsudance.core.inject;
 public interface InstanceContainer {
 
 	<T> T provide(Class<T> type);
+	<T> T injectFields(T instance);
 
 }
