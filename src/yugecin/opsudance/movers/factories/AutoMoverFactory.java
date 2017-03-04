@@ -20,10 +20,10 @@ package yugecin.opsudance.movers.factories;
 import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
-import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.Pippi;
 import yugecin.opsudance.movers.*;
+import yugecin.opsudance.render.GameObjectRenderer;
 
 public class AutoMoverFactory implements MoverFactory {
 
@@ -43,7 +43,7 @@ public class AutoMoverFactory implements MoverFactory {
 
 		// stacked: circles if not too quick
 		int circle_stream = Options.isCircleStreams() ? 58: 85;
-		if (distance < Circle.diameter && ((dt > circle_stream && !Options.isOnlyCircleStacks()) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
+		if (distance < GameObjectRenderer.instance.getCircleDiameter() && ((dt > circle_stream && !Options.isOnlyCircleStacks()) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
 			return new CircleMover(start, end, dir);
 		}
 

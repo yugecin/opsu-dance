@@ -37,11 +37,20 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.render.GameObjectRenderer;
 
 /**
  * Data type representing a slider object.
  */
 public class Slider extends GameObject {
+
+	@Inject
+	private DisplayContainer displayContainer;
+
+	@Inject
+	private GameObjectRenderer gameObjectRenderer;
+
 	/** Slider ball frames. */
 	private static Image[] sliderBallImages;
 
@@ -53,9 +62,6 @@ public class Slider extends GameObject {
 
 	/** Follow circle radius. */
 	private static float followRadius;
-
-	/** The diameter of hit circles. */
-	private static float diameter;
 
 	/** The associated HitObject. */
 	private HitObject hitObject;
@@ -116,9 +122,6 @@ public class Slider extends GameObject {
 	private static final int FOLLOW_EXPAND_TIME = 150;
 	private static final int FOLLOW_SHRINK_TIME = 100;
 
-	/** Container dimensions. */
-	private static int containerWidth, containerHeight;
-
 	private int repeats;
 
 	private static Color curveColor = new Color(0, 0, 0, 20);
@@ -134,14 +137,9 @@ public class Slider extends GameObject {
 	 * @param circleDiameter the circle diameter
 	 * @param beatmap the associated beatmap
 	 */
-	public static void init(DisplayContainer displayContainer, float circleDiameter, Beatmap beatmap) {
-		containerWidth = displayContainer.width;
-		containerHeight = displayContainer.height;
-
-		diameter = circleDiameter * HitObject.getXMultiplier();  // convert from Osupixels (640x480)
-		int diameterInt = (int) diameter;
-
-		followRadius = diameter / 2 * 3f;
+	public static void init(float circleDiameter, Beatmap beatmap) {
+		followRadius = circleDiameter / 2 * 3f;
+		int diameterInt = (int) circleDiameter;
 
 		// slider ball
 		if (GameImage.SLIDER_BALL.hasBeatmapSkinImages() ||
@@ -219,8 +217,6 @@ public class Slider extends GameObject {
 		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
-		Image hitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
-		Image hitCircle = GameImage.HITCIRCLE.getImage();
 		Vec2f endPos = curve.pointAt(1);
 
 		float oldWhiteFadeAlpha = Colors.WHITE_FADE.a;
@@ -249,8 +245,8 @@ public class Slider extends GameObject {
 				circleColor.a = overlayColor.a = sliderAlpha * getCircleAlphaAfterRepeat(trackPosition, true);
 			}
 			Vec2f endCircPos = curve.pointAt(1f);
-			hitCircle.drawCentered(endCircPos.x, endCircPos.y, circleColor);
-			hitCircleOverlay.drawCentered(endCircPos.x, endCircPos.y, overlayColor);
+			gameObjectRenderer.renderHitCircleOnly(endCircPos.x, endCircPos.y, circleColor);
+			gameObjectRenderer.renderHitCircleOverlayOnly(endCircPos.x, endCircPos.y, overlayColor);
 		}
 
 		g.pushTransform();
@@ -268,9 +264,10 @@ public class Slider extends GameObject {
 
 		// start circle, only draw if ball still has to go there
 		if (!sliderClickedInitial || (Options.isDrawSliderEndCircles() && currentRepeats < repeatCount - (repeatCount % 2 == 1 ? 1 : 0))) {
-			hitCircle.drawCentered(x, y, firstCircleColor);
-			if (!overlayAboveNumber || sliderClickedInitial)
-				hitCircleOverlay.drawCentered(x, y, startCircleOverlayColor);
+			gameObjectRenderer.renderHitCircleOnly(x, y, firstCircleColor);
+			if (!overlayAboveNumber || sliderClickedInitial) {
+				gameObjectRenderer.renderHitCircleOverlayOnly(x, y, startCircleOverlayColor);
+			}
 		}
 
 		g.popTransform();
@@ -297,12 +294,11 @@ public class Slider extends GameObject {
 
 		// draw combo number and overlay if not initially clicked
 		if (!sliderClickedInitial) {
-			data.drawSymbolNumber(hitObject.getComboNumber(), x, y,
-				hitCircle.getWidth() * 0.40f / data.getDefaultSymbolImage(0).getHeight(), alpha);
+			gameObjectRenderer.renderComboNumberOnly(x, y, hitObject.getComboNumber(), alpha);
 
 			if (overlayAboveNumber) {
 				startCircleOverlayColor.a = sliderAlpha;
-				hitCircleOverlay.drawCentered(x, y, startCircleOverlayColor);
+				gameObjectRenderer.renderHitCircleOverlayOnly(x, y, startCircleOverlayColor);
 			}
 		}
 
@@ -340,7 +336,7 @@ public class Slider extends GameObject {
 				g.rotate(x, y, -180f);
 			}
 			if (!GameMod.HIDDEN.isActive() && Options.isDrawApproach()) {
-				GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
+				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
 			}
 			g.popTransform();
 		} else {
@@ -394,7 +390,7 @@ public class Slider extends GameObject {
 					float oldAlphaBlack = Colors.BLACK_ALPHA.a;
 					Colors.BLACK_ALPHA.a = 0.75f;
 					g.setColor(Colors.BLACK_ALPHA);
-					g.fillRect(0, 0, containerWidth, containerHeight);
+					g.fillRect(0, 0, displayContainer.width, displayContainer.height);
 					Colors.BLACK_ALPHA.a = oldAlphaBlack;
 				}
 			}
@@ -606,7 +602,7 @@ public class Slider extends GameObject {
 			return false;
 
 		double distance = Math.hypot(this.x - x, this.y - y);
-		if (distance < diameter / 2) {
+		if (distance < gameObjectRenderer.getCircleDiameter() / 2) {
 			int timeDiff = Math.abs(trackPosition - hitObject.getTime());
 			int[] hitResultOffset = game.getHitResultOffsets();
 

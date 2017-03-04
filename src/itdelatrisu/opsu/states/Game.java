@@ -73,6 +73,7 @@ import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
+import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
@@ -85,6 +86,9 @@ public class Game extends ComplexOpsuState {
 
 	@Inject
 	private InstanceContainer instanceContainer;
+
+	@Inject
+	private GameObjectRenderer gameObjectRenderer;
 
 	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
@@ -362,6 +366,7 @@ public class Game extends ComplexOpsuState {
 
 		// create the associated GameData object
 		data = new GameData(displayContainer.width, displayContainer.height);
+		gameObjectRenderer.setGameData(data);
 	}
 
 
@@ -1560,12 +1565,13 @@ public class Game extends ComplexOpsuState {
 				}
 
 				try {
-					if (hitObject.isCircle())
-						gameObjects[i] = new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
-					else if (hitObject.isSlider())
-						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
-					else if (hitObject.isSpinner())
+					if (hitObject.isCircle()) {
+						gameObjects[i] = instanceContainer.injectFields(new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd));
+					} else if (hitObject.isSlider()) {
+						gameObjects[i] = instanceContainer.injectFields(new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd));
+					} else if (hitObject.isSpinner()) {
 						gameObjects[i] = new Spinner(hitObject, this, data);
+					}
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
 					Log.error(message, e);
@@ -2036,8 +2042,8 @@ public class Game extends ComplexOpsuState {
 		HitObject.setStackOffset(diameter * STACK_OFFSET_MODIFIER);
 
 		// initialize objects
-		Circle.init(diameter);
-		Slider.init(displayContainer, diameter, beatmap);
+		gameObjectRenderer.initForGame(data, diameter);
+		Slider.init(gameObjectRenderer.getCircleDiameter(), beatmap);
 		Spinner.init(displayContainer, overallDifficulty);
 		Curve.init(displayContainer.width, displayContainer.height, diameter, (Options.isBeatmapSkinIgnored()) ?
 				Options.getSkin().getSliderBorderColor() : beatmap.getSliderBorderColor());
