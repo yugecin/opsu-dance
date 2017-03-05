@@ -20,7 +20,6 @@ package itdelatrisu.opsu.objects.curves;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.skins.Skin;
@@ -31,7 +30,6 @@ import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 
 /**
  * Representation of a curve.
@@ -43,7 +41,7 @@ public abstract class Curve {
 	protected static float CURVE_POINTS_SEPERATION = 2.5f;
 
 	/** The curve border color. */
-	private static Color borderColor;
+	protected static Color borderColor;
 
 	/** Whether mmsliders are supported. */
 	private static boolean mmsliderSupported = false;
@@ -58,7 +56,7 @@ public abstract class Curve {
 	protected float[] sliderX, sliderY;
 
 	/** Per-curve render-state used for the new style curve renders. */
-	private CurveRenderState renderState;
+	protected CurveRenderState renderState;
 
 	/** Points along the curve (set by inherited classes). */
 	public Vec2f[] curve;
@@ -150,14 +148,14 @@ public abstract class Curve {
 		// mmsliders
 		else {
 			if (renderState == null)
-				renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
+				renderState = new CurveRenderState(hitObject, curve, false);
 			renderState.draw(color, borderColor, from, to);
 		}
 	}
 
 	public void splice(int from, int to) {
 		if (renderState == null)
-			renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
+			renderState = new CurveRenderState(hitObject, curve, false);
 		renderState.splice(from, to);
 	}
 

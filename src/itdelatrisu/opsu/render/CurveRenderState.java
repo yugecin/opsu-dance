@@ -26,6 +26,7 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.LinkedList;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -68,6 +69,8 @@ public class CurveRenderState {
 
 	private int spliceFrom;
 	private int spliceTo;
+
+	protected LinkedList<Utils.Pair<Integer, Integer>> pointsToRender;
 
 	private final int mirrors;
 
@@ -136,6 +139,14 @@ public class CurveRenderState {
 		spliceTo = to * 2;
 		firstPointDrawn = -1; // force redraw
 		lastPointDrawn = -1; // force redraw
+	}
+
+	public void draw(Color color, Color borderColor, LinkedList<Utils.Pair<Integer, Integer>> pointsToRender) {
+		lastPointDrawn = -1;
+		firstPointDrawn = -1;
+		this.pointsToRender = pointsToRender;
+		draw(color, borderColor, 0, curve.length);
+		this.pointsToRender = null;
 	}
 
 	/**
@@ -348,7 +359,11 @@ public class CurveRenderState {
 			max = 1;
 		}
 		for (int i = 0; i < max; i++) {
-			renderCurve(from, to, i);
+			if (pointsToRender == null) {
+				renderCurve(from, to, i);
+			} else {
+				renderCurve(i);
+			}
 		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
@@ -367,6 +382,15 @@ public class CurveRenderState {
 			}
 			final int index = i + curve.length * 2 * mirror;
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		}
+	}
+
+	private void renderCurve(int mirror) {
+		for (Utils.Pair<Integer, Integer> point : pointsToRender) {
+			for (int i = point.first * 2; i < point.second * 2 - 1; ++i) {
+				final int index = i + curve.length * 2 * mirror;
+				GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+			}
 		}
 	}
 

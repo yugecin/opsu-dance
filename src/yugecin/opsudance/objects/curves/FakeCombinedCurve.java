@@ -17,15 +17,38 @@
  */
 package yugecin.opsudance.objects.curves;
 
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.objects.curves.Vec2f;
+import itdelatrisu.opsu.render.CurveRenderState;
+import org.newdawn.slick.Color;
+
+import java.util.LinkedList;
 
 public class FakeCombinedCurve extends Curve {
+
+	private LinkedList<Utils.Pair<Integer, Integer>> pointsToRender;
 
 	public FakeCombinedCurve(Vec2f[] points) {
 		super(new HitObject(0, 0, 0), false);
 		this.curve = points;
+		pointsToRender = new LinkedList<>();
+	}
+
+	public void initForFrame() {
+		pointsToRender.clear();
+	}
+
+	public void addRange(int from, int to) {
+		pointsToRender.add(new Utils.Pair<>(from, to));
+	}
+
+	@Override
+	public void draw(Color color) {
+		if (renderState == null)
+			renderState = new CurveRenderState(hitObject, curve, true);
+		renderState.draw(color, borderColor, pointsToRender);
 	}
 
 	@Override

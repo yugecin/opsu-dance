@@ -382,17 +382,6 @@ public class Game extends ComplexOpsuState {
 		if (objectIndex > 0) {
 			objectIndex--;
 		}
-		if (Options.isMergingSliders()) {
-			int obj = objectIndex;
-			while (obj < gameObjects.length) {
-				if (gameObjects[obj] instanceof Slider) {
-					slidercurveFrom = slidercurveTo = ((Slider) gameObjects[obj]).baseSliderFrom;
-					break;
-				}
-				obj++;
-			}
-			spliceSliderCurve(-1, -1);
-		}
 		Dancer.instance.setObjectIndex(objectIndex);
 		storyboardOverlay.updateIndex(objectIndex);
 		lastReplayTime = beatmap.objects[objectIndex].getTime();
@@ -1680,9 +1669,6 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		slidercurveFrom = 0;
-		slidercurveTo = 0;
-
 		Dancer.instance.setGameObjects(gameObjects);
 		storyboardOverlay.setGameObjects(gameObjects);
 		if (!skippedToCheckpoint) {
@@ -1738,19 +1724,8 @@ public class Game extends ComplexOpsuState {
 			GameMod.loadModState(previousMods);
 	}
 
-	private int slidercurveFrom;
-	private int slidercurveTo;
-
-	public void setSlidercurveFrom(int slidercurveFrom) {
-		this.slidercurveFrom = Math.max(slidercurveFrom, this.slidercurveFrom);
-	}
-
-	public void setSlidercurveTo(int slidercurveTo) {
-		this.slidercurveTo = Math.max(slidercurveTo, this.slidercurveTo);
-	}
-
-	public void spliceSliderCurve(int from, int to) {
-		this.knorkesliders.splice(from, to);
+	public void addMergedSliderPointsToRender(int from, int to) {
+		knorkesliders.addRange(from, to);
 	}
 
 	/**
@@ -1767,7 +1742,8 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (Options.isMergingSliders() && knorkesliders != null) {
-			knorkesliders.draw(Color.white, this.slidercurveFrom, this.slidercurveTo);
+			knorkesliders.draw(Color.white);
+			knorkesliders.initForFrame();
 			/*
 			if (Options.isMirror()) {
 				g.pushTransform();
