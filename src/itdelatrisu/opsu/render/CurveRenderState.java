@@ -26,7 +26,8 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.LinkedList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -70,7 +71,7 @@ public class CurveRenderState {
 	private int spliceFrom;
 	private int spliceTo;
 
-	protected LinkedList<Utils.Pair<Integer, Integer>> pointsToRender;
+	protected List<Integer> pointsToRender;
 
 	private final int mirrors;
 
@@ -141,7 +142,7 @@ public class CurveRenderState {
 		lastPointDrawn = -1; // force redraw
 	}
 
-	public void draw(Color color, Color borderColor, LinkedList<Utils.Pair<Integer, Integer>> pointsToRender) {
+	public void draw(Color color, Color borderColor, List<Integer> pointsToRender) {
 		lastPointDrawn = -1;
 		firstPointDrawn = -1;
 		this.pointsToRender = pointsToRender;
@@ -386,8 +387,9 @@ public class CurveRenderState {
 	}
 
 	private void renderCurve(int mirror) {
-		for (Utils.Pair<Integer, Integer> point : pointsToRender) {
-			for (int i = point.first * 2; i < point.second * 2 - 1; ++i) {
+		Iterator<Integer> iter = pointsToRender.iterator();
+		while (iter.hasNext()) {
+			for (int i = iter.next() * 2, end = iter.next() * 2 - 1; i < end; ++i) {
 				final int index = i + curve.length * 2 * mirror;
 				GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
 			}

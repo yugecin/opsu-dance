@@ -660,14 +660,4 @@ public class Utils {
 			(float) (Options.height / 2d + Math.sin(ang) * d)
 		};
 	}
-
-	public static class Pair<F, S> {
-		public F first;
-		public S second;
-		public Pair(F first, S second) {
-			this.first = first;
-			this.second = second;
-		}
-	}
-
 }
