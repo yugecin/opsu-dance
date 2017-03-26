@@ -17,10 +17,10 @@
  */
 package yugecin.opsudance.core.errorhandling;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
@@ -42,6 +42,7 @@ public class ErrorHandler {
 
 	private static ErrorHandler instance;
 
+	private final Configuration config;
 	private final DisplayContainer displayContainer;
 
 	private String customMessage;
@@ -54,8 +55,9 @@ public class ErrorHandler {
 	private boolean ignoreAndContinue;
 	private boolean allowTerminate;
 
-	public ErrorHandler(DisplayContainer displayContainer) {
+	public ErrorHandler(DisplayContainer displayContainer, Configuration config) {
 		this.displayContainer = displayContainer;
+		this.config = config;
 		instance = this;
 	}
 
@@ -164,7 +166,7 @@ public class ErrorHandler {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				try {
-					Desktop.getDesktop().open(Options.LOG_FILE);
+					Desktop.getDesktop().open(config.LOG_FILE);
 				} catch (IOException e) {
 					Log.warn("Could not open log file", e);
 					JOptionPane.showMessageDialog(null, "whoops could not open log file", "errorception", JOptionPane.ERROR_MESSAGE);
@@ -230,7 +232,7 @@ public class ErrorHandler {
 		} catch (UnsupportedEncodingException e) {
 			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
 		}
-		return URI.create(String.format(Options.ISSUES_URL, issueTitle, issueBody));
+		return URI.create(String.format(config.ISSUES_URL, issueTitle, issueBody));
 	}
 
 	private String truncateGithubIssueBody(String body) {

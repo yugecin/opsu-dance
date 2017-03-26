@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
@@ -28,14 +27,14 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.UI;
 
-import java.io.File;
-
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.state.BaseOpsuState;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * "Splash Screen" state.
@@ -46,6 +45,15 @@ public class Splash extends BaseOpsuState {
 
 	@Inject
 	private SongMenu songMenu;
+
+	@Inject
+	private ReplayImporter replayImporter;
+
+	@Inject
+	private OszUnpacker oszUnpacker;
+
+	@Inject
+	private BeatmapParser beatmapParser;
 
 	/** Whether or not loading has completed. */
 	private boolean finished;
@@ -74,18 +82,10 @@ public class Splash extends BaseOpsuState {
 		thread = new Thread() {
 			@Override
 			public void run() {
-				File beatmapDir = Options.getBeatmapDir();
+				oszUnpacker.unpackAll();
+				beatmapParser.parseAll();
+				replayImporter.importAll();
 
-				// unpack all OSZ archives
-				OszUnpacker.unpackAllFiles(Options.getOSZDir(), beatmapDir);
-
-				// parse song directory
-				BeatmapParser.parseAllFiles(beatmapDir);
-
-				// import replays
-				ReplayImporter.importAllReplaysFromDir(Options.getReplayImportDir());
-
-				// load sounds
 				SoundController.init();
 
 				finished = true;
@@ -104,14 +104,14 @@ public class Splash extends BaseOpsuState {
 
 		// initialize song list
 		if (BeatmapSetList.get().size() == 0) {
-			MusicController.playThemeSong();
+			MusicController.playThemeSong(config.themeBeatmap);
 			displayContainer.switchStateInstantly(MainMenu.class);
 			return;
 		}
 
 		BeatmapSetList.get().init();
-		if (Options.isThemeSongEnabled()) {
-			MusicController.playThemeSong();
+		if (OPTION_ENABLE_THEME_SONG.state) {
+			MusicController.playThemeSong(config.themeBeatmap);
 		} else {
 			songMenu.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 		}

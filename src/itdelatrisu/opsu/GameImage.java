@@ -32,7 +32,10 @@ import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Game images.
@@ -546,7 +549,7 @@ public enum GameImage {
 	 * and UI scale.
 	 */
 	private static String[] getSuffixes() {
-		return (Options.loadHDImages() && uiscale >= 1) ? SUFFIXES_HD : SUFFIXES_SD;
+		return (OPTION_LOAD_HD_IMAGES.state && uiscale >= 1) ? SUFFIXES_HD : SUFFIXES_SD;
 	}
 
 
@@ -687,11 +690,12 @@ public enum GameImage {
 	 * If the default image has already been loaded, this will do nothing.
 	 */
 	public void setDefaultImage() {
-		if (defaultImage != null || defaultImages != null || Options.getSkin() == null)
+		if (defaultImage != null || defaultImages != null || SkinService.skin == null) {
 			return;
+		}
 
 		// try to load skin images
-		File skinDir = Options.getSkin().getDirectory();
+		File skinDir = SkinService.skin.getDirectory();
 		if (filenameFormat != null) {
 			if (skinDir != null && ((defaultImages = loadImageArray(skinDir)) != null)) {
 				isSkinned = true;
@@ -739,15 +743,17 @@ public enum GameImage {
 	 * @return true if a new skin image is loaded, false otherwise
 	 */
 	public boolean setBeatmapSkinImage(File dir) {
-		if (dir == null)
+		if (dir == null) {
 			return false;
+		}
 
 		// destroy the existing images, if any
 		destroyBeatmapSkinImage();
 
 		// beatmap skins disabled
-		if (Options.isBeatmapSkinIgnored())
+		if (OPTION_IGNORE_BEATMAP_SKINS.state) {
 			return false;
+		}
 
 		// try to load multiple images
 		if ((skinImages = loadImageArray(dir)) != null) {

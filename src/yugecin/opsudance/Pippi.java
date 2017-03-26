@@ -17,10 +17,11 @@
  */
 package yugecin.opsudance;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import yugecin.opsudance.render.GameObjectRenderer;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class Pippi {
 
@@ -48,19 +49,19 @@ public class Pippi {
 	}
 
 	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
-		boolean slowSlider = Options.isCircleInSlowSliders() && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
+		boolean slowSlider = OPTION_DANCE_CIRLCE_IN_SLOW_SLIDERS.state && c.isSlider() && (((((Slider) c).pixelLength < 200 || c.getEndTime() - c.getTime() > 400)) || isCurrentLazySlider);
 		if (!slowSlider) {
-			slowSlider = Options.isCircleInLazySliders() && isCurrentLazySlider;
+			slowSlider = OPTION_DANCE_CIRLCE_IN_LAZY_SLIDERS.state && isCurrentLazySlider;
 		}
-		if ((!Options.isPippiEnabled() || c.isSpinner()) && !slowSlider) {
+		if ((!OPTION_PIPPI_ENABLE.state || c.isSpinner()) && !slowSlider) {
 			return;
 		}
 		if (currentdelta >= targetdelta && c != previous) {
 			currentdelta = 0;
 			if (c.isSlider() && c.getTime() < time) {
-				angle += Options.getPippiAngIncMultiplierSlider() / 1800d * Math.PI;
+				angle += OPTION_PIPPI_ANGLE_INC_MUL_SLIDER.val / 1800d * Math.PI;
 				if (!slowSlider) {
-					if (Options.isPippiFollowcircleExpand()) {
+					if (OPTION_PIPPI_SLIDER_FOLLOW_EXPAND.state) {
 						if (c.getEndTime() - time < 40 && pippirad > pippimaxrad) {
 							pippirad -= 5d;
 						} else if (time - c.getTime() > 10 && c.getEndTime() - c.getTime() > 600 && pippirad < pippimaxrad) {
@@ -69,10 +70,10 @@ public class Pippi {
 					}
 				}
 			} else if (!c.isSpinner()) {
-				if (Options.isPippiFollowcircleExpand() && pippirad != pippiminrad) {
+				if (OPTION_PIPPI_SLIDER_FOLLOW_EXPAND.state && pippirad != pippiminrad) {
 					pippirad = pippiminrad;
 				}
-				angle += Options.getPippiAngIncMultiplier() / 1800d * Math.PI;
+				angle += OPTION_PIPPI_ANGLE_INC_MUL.val / 1800d * Math.PI;
 			}
 			// don't inc on long movements
 			if (c.getTime() - time > 400) {
@@ -91,7 +92,7 @@ public class Pippi {
 	}
 
 	public static boolean shouldPreventWobblyStream(double distance) {
-		return Options.isPippiEnabled() && distance < GameObjectRenderer.instance.getCircleDiameter() * 0.93f && Options.isPippiPreventWobblyStreams();
+		return OPTION_PIPPI_ENABLE.state && distance < GameObjectRenderer.instance.getCircleDiameter() * 0.93f && OPTION_PIPPI_PREVENT_WOBBLY_STREAMS.state;
 	}
 
 }

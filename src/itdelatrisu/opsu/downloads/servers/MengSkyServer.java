@@ -30,11 +30,17 @@ import java.net.URLEncoder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 
 /**
  * Download server: http://osu.mengsky.net/
  */
 public class MengSkyServer extends DownloadServer {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
 	/** Server name. */
 	private static final String SERVER_NAME = "MengSky";
 
@@ -50,8 +56,9 @@ public class MengSkyServer extends DownloadServer {
 	/** Total result count from the last query. */
 	private int totalResults = -1;
 
-	/** Constructor. */
-	public MengSkyServer() {}
+	@Inject
+	public MengSkyServer() {
+	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -86,19 +93,18 @@ public class MengSkyServer extends DownloadServer {
 				// sometimes titleU is artistU instead of the proper title
 				if (titleU.equals(artistU) && !titleU.equals(title))
 					titleU = title;
-				nodes[i] = new DownloadNode(
+				nodes[i] = instanceContainer.injectFields(new DownloadNode(
 					item.getInt("id"), item.getString("syncedDateTime"),
 					title, titleU, artist, artistU, creator
-				);
+				));
 			}
 
 			// store total result count
 			int pageTotal = json.getInt("pageTotal");
-			int resultCount = nodes.length;
-			if (page == pageTotal)
-				resultCount = nodes.length + (pageTotal - 1) * PAGE_LIMIT;
-			else
-				resultCount = 1 + (pageTotal - 1) * PAGE_LIMIT;
+			int resultCount = 1 + (pageTotal - 1) * PAGE_LIMIT;
+			if (page == pageTotal) {
+				resultCount += nodes.length - 1;
+			}
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
 			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();

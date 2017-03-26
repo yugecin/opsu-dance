@@ -20,12 +20,14 @@ package itdelatrisu.opsu.beatmap;
 
 import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Node in an BeatmapSetList representing a beatmap set.
@@ -78,14 +80,14 @@ public class BeatmapSetNode {
 		Beatmap beatmap = beatmapSet.get(expanded ? beatmapIndex : 0);
 		bg.setAlpha(0.9f);
 		Color bgColor;
-		Color textColor = Options.getSkin().getSongSelectInactiveTextColor();
+		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
 
 		// get drawing parameters
 		if (expanded) {
 			x -= bg.getWidth() / 10f;
 			if (focus) {
 				bgColor = Color.white;
-				textColor = Options.getSkin().getSongSelectActiveTextColor();
+				textColor = SkinService.skin.getSongSelectActiveTextColor();
 			} else
 				bgColor = Colors.BLUE_BUTTON;
 		} else if (beatmapSet.isPlayed())
@@ -105,7 +107,7 @@ public class BeatmapSetNode {
 		}
 
 		// draw text
-		if (Options.useUnicodeMetadata()) {  // load glyphs
+		if (OPTION_SHOW_UNICODE.state) {
 			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
 			Fonts.loadGlyphs(Fonts.DEFAULT, beatmap.artistUnicode);
 		}

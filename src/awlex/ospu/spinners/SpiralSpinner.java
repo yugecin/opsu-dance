@@ -1,7 +1,7 @@
 package awlex.ospu.spinners;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
+import yugecin.opsudance.options.Options;
 import yugecin.opsudance.spinners.Spinner;
 
 /**

@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import itdelatrisu.opsu.Options;
+import static yugecin.opsudance.options.Options.*;
 
 public abstract class Spinner {
 
@@ -42,7 +42,7 @@ public abstract class Spinner {
 	}
 
 	public boolean waitForDelay() {
-		if (delay >= Options.getSpinnerDelay()) {
+		if (delay >= OPTION_DANCE_SPINNER_DELAY.val) {
 			delay = 0;
 			return true;
 		}

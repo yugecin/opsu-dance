@@ -17,12 +17,11 @@
  */
 package yugecin.opsudance.ui;
 
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Options.GameOption;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.states.Game;
-import itdelatrisu.opsu.OptionGroups;
+import yugecin.opsudance.options.Option;
+import yugecin.opsudance.options.OptionGroups;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -30,15 +29,17 @@ import org.newdawn.slick.Input;
 import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
+import yugecin.opsudance.options.OptionTab;
 import yugecin.opsudance.sbv2.MoveStoryboard;
-import yugecin.opsudance.ui.OptionsOverlay.OptionTab;
 
 import java.util.*;
+
+import static yugecin.opsudance.options.Options.*;
 
 @SuppressWarnings("unchecked")
 public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverlay.Listener {
 
-	private final static List<GameOption> optionList = new ArrayList<>();
+	private final static List<Option> optionList = new ArrayList<>();
 
 	private final DisplayContainer displayContainer;
 
@@ -47,7 +48,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	private int speed;
 	private GameObject[] gameObjects;
 	private HashMap[] optionsMap;
-	private HashMap<Options.GameOption, String> initialOptions;
+	private HashMap<Option, String> initialOptions;
 
 	private int index;
 
@@ -73,7 +74,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	@Override
 	public void onRender(Graphics g) {
-		if (!Options.isEnableSB() || hide) {
+		if (!OPTION_DANCE_ENABLE_SB.state || hide) {
 			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
@@ -86,8 +87,8 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 		if (index < optionsMap.length && optionsMap[index] != null) {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
-				Map.Entry<Options.GameOption, String> option = (Map.Entry<Options.GameOption, String>) o;
-				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().getName(), Color.cyan);
+				Map.Entry<Option, String> option = (Map.Entry<Option, String>) o;
+				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().name, Color.cyan);
 				Fonts.SMALL.drawString(displayContainer.width / 5, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
 				g.fillRect(0, 50 + i * lh + lh / 4, 10, 10);
 				i++;
@@ -177,7 +178,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 		if (optionsMap.length > 0) {
 			// copy all current settings in first obj map
 			optionsMap[0] = new HashMap<>();
-			for (Options.GameOption o : optionList) {
+			for (Option o : optionList) {
 				optionsMap[0].put(o, o.write());
 			}
 		}
@@ -210,7 +211,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 				continue;
 			}
 			for (Object o : options.entrySet()) {
-				Map.Entry<Options.GameOption, String> next = (Map.Entry<Options.GameOption, String>) o;
+				Map.Entry<Option, String> next = (Map.Entry<Option, String>) o;
 				next.getKey().read(next.getValue());
 				readOption(next.getKey());
 			}
@@ -227,7 +228,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 		int ypos = 50 + lh / 4;
 		for (Object o : optionsMap[index].entrySet()) {
 			if (y >= ypos && y <= ypos + 10) {
-				optionsMap[index].remove(((Map.Entry<Options.GameOption, String>) o).getKey());
+				optionsMap[index].remove(((Map.Entry<Option, String>) o).getKey());
 				if (optionsMap[index].size() == 0) {
 					optionsMap[index] = null;
 				}
@@ -246,7 +247,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	public void onEnter() {
 		// enter, save current settings
-		for (Options.GameOption o : optionList) {
+		for (Option o : optionList) {
 			initialOptions.put(o, o.write());
 		}
 		speed = 10;
@@ -254,7 +255,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	public void onLeave() {
 		// leave, revert the settings saved before entering
-		for (Options.GameOption o : optionList) {
+		for (Option o : optionList) {
 			if (initialOptions.containsKey(o)) {
 				o.read(initialOptions.get(o));
 				readOption(o);
@@ -263,10 +264,10 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	}
 
 	// needed for object color overrides...
-	private void readOption(Options.GameOption o) {
-		if (o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE
-			|| o == Options.GameOption.DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED
-			|| o == Options.GameOption.DANCE_RGB_OBJECT_INC) {
+	private void readOption(Option o) {
+		if (o == OPTION_DANCE_OBJECT_COLOR_OVERRIDE
+			|| o == OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED
+			|| o == OPTION_DANCE_RGB_OBJECT_INC) {
 			if (index < gameObjects.length) {
 				ObjectColorOverrides.hue = gameObjects[index].getHue();
 			}
@@ -284,7 +285,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	}
 
 	@Override
-	public void onSaveOption(GameOption option) {
+	public void onSaveOption(Option option) {
 		if (optionsMap[index] == null) {
 			optionsMap[index] = new HashMap<>();
 		}

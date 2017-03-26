@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance.core.state.specialstates;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -26,6 +25,8 @@ import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.utils.FPSMeter;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEvent> {
 
@@ -54,17 +55,17 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 
 	public void render(Graphics g) {
 		fpsMeter.update(displayContainer.renderDelta);
-		if (!Options.isFPSCounterEnabled()) {
+		if (!OPTION_SHOW_FPS.state) {
 			return;
 		}
 		int x = this.x;
 		int fpsDeviation = displayContainer.delta % displayContainer.targetRenderInterval;
-		x = drawText(g, getColor((int) (Options.getTargetFPS() * 0.9f) - fpsDeviation, fpsMeter.getValue()), getText(fpsMeter.getValue(), "fps"), x, this.y);
-		drawText(g, getColor((int) (Options.getTargetUPS() * 0.9f), upsMeter.getValue()), getText(upsMeter.getValue(), "ups"), x, this.y);
+		x = drawText(g, getColor((int) (targetFPS[targetFPSIndex] * 0.9f) - fpsDeviation, fpsMeter.getValue()), getText(fpsMeter.getValue(), "fps"), x, this.y);
+		drawText(g, getColor((int) (OPTION_TARGET_UPS.val * 0.9f), upsMeter.getValue()), getText(upsMeter.getValue(), "ups"), x, this.y);
 	}
 
 	private String getText(int value, String unit) {
-		if (Options.useDeltasForFPSCounter()) {
+		if (OPTION_USE_FPS_DELTAS.state) {
 			return String.format("%.2fms", 1000f / value);
 		}
 		return value + " " + unit;

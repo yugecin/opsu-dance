@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -54,6 +53,8 @@ import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 
+import static yugecin.opsudance.options.Options.*;
+
 /**
  * "Main Menu" state.
  * <p>
@@ -63,6 +64,9 @@ public class MainMenu extends BaseOpsuState {
 
 	@Inject
 	private InstanceContainer instanceContainer;
+
+	@Inject
+	private Updater updater;
 
 	/** Idle time, in milliseconds, before returning the logo to its original position. */
 	private static final short LOGO_IDLE_DELAY = 10000;
@@ -232,9 +236,9 @@ public class MainMenu extends BaseOpsuState {
 
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
-		if (Options.isDynamicBackgroundEnabled() &&
+		if (OPTION_DYNAMIC_BACKGROUND.state &&
 			beatmap != null && beatmap.drawBackground(width, height, bgAlpha.getValue(), true))
-				;
+			;
 		else {
 			Image bg = GameImage.MENU_BG.getImage();
 			bg.setAlpha(bgAlpha.getValue());
@@ -262,7 +266,7 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw logo (pulsing)
-		Color color = Options.isColorMainMenuLogo() ? Cursor.lastCursorColor : Color.white;
+		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
 		Float position = MusicController.getBeatProgress();
 		boolean renderPiece = position != null;
 		if (position == null) {
@@ -315,12 +319,13 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw update button
-		if (Updater.get().showButton()) {
-			Updater.Status status = Updater.get().getStatus();
-			if (status == Updater.Status.UPDATE_AVAILABLE || status == Updater.Status.UPDATE_DOWNLOADING)
+		if (updater.showButton()) {
+			Updater.Status status = updater.getStatus();
+			if (status == Updater.Status.UPDATE_AVAILABLE || status == Updater.Status.UPDATE_DOWNLOADING) {
 				updateButton.draw();
-			else if (status == Updater.Status.UPDATE_DOWNLOADED)
+			} else if (status == Updater.Status.UPDATE_DOWNLOADED) {
 				restartButton.draw();
+			}
 		}
 
 		// draw text
@@ -328,11 +333,11 @@ public class MainMenu extends BaseOpsuState {
 		g.setFont(Fonts.MEDIUM);
 		float lineHeight = Fonts.MEDIUM.getLineHeight() * 0.925f;
 		g.drawString(String.format("Loaded %d songs and %d beatmaps.",
-				BeatmapSetList.get().getMapSetCount(), BeatmapSetList.get().getMapCount()), marginX, topMarginY);
-		if (MusicController.isTrackLoading())
+			BeatmapSetList.get().getMapSetCount(), BeatmapSetList.get().getMapCount()), marginX, topMarginY);
+		if (MusicController.isTrackLoading()) {
 			g.drawString("Track loading...", marginX, topMarginY + lineHeight);
-		else if (MusicController.trackExists()) {
-			if (Options.useUnicodeMetadata()) {  // load glyphs
+		} else if (MusicController.trackExists()) {
+			if (OPTION_SHOW_UNICODE.state) {
 				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
 				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
 			}
@@ -365,7 +370,7 @@ public class MainMenu extends BaseOpsuState {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
 		}
-		if (Updater.get().showButton()) {
+		if (updater.showButton()) {
 			updateButton.autoHoverUpdate(delta, true);
 			restartButton.autoHoverUpdate(delta, false);
 		}
@@ -387,7 +392,7 @@ public class MainMenu extends BaseOpsuState {
 
 		// fade in background
 		Beatmap beatmap = MusicController.getBeatmap();
-		if (!(Options.isDynamicBackgroundEnabled() && beatmap != null && beatmap.isBackgroundLoading()))
+		if (!(OPTION_DYNAMIC_BACKGROUND.state && beatmap != null && beatmap.isBackgroundLoading()))
 			bgAlpha.update(delta);
 
 		// check measure progress
@@ -445,8 +450,8 @@ public class MainMenu extends BaseOpsuState {
 			UI.updateTooltip(delta, "Next track", false);
 		else if (musicPrevious.contains(mouseX, mouseY))
 			UI.updateTooltip(delta, "Previous track", false);
-		else if (Updater.get().showButton()) {
-			Updater.Status status = Updater.get().getStatus();
+		else if (updater.showButton()) {
+			Updater.Status status = updater.getStatus();
 			if (((status == Updater.Status.UPDATE_AVAILABLE || status == Updater.Status.UPDATE_DOWNLOADING) && updateButton.contains(mouseX, mouseY)) ||
 			    (status == Updater.Status.UPDATE_DOWNLOADED && restartButton.contains(mouseX, mouseY)))
 				UI.updateTooltip(delta, status.getDescription(), true);
@@ -466,10 +471,10 @@ public class MainMenu extends BaseOpsuState {
 
 		UI.enter();
 		if (!enterNotification) {
-			if (Updater.get().getStatus() == Updater.Status.UPDATE_AVAILABLE) {
+			if (updater.getStatus() == Updater.Status.UPDATE_AVAILABLE) {
 				EventBus.post(new BarNotificationEvent("An opsu! update is available."));
 				enterNotification = true;
-			} else if (Updater.get().justUpdated()) {
+			} else if (updater.justUpdated()) {
 				EventBus.post(new BarNotificationEvent("opsu! is now up to date!"));
 				enterNotification = true;
 			}
@@ -547,10 +552,12 @@ public class MainMenu extends BaseOpsuState {
 			lastMeasureProgress = 0f;
 			if (!previous.isEmpty()) {
 				instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
-				if (Options.isDynamicBackgroundEnabled())
+				if (OPTION_DYNAMIC_BACKGROUND.state) {
 					bgAlpha.setTime(0);
-			} else
+				}
+			} else {
 				MusicController.setPosition(0);
+			}
 			EventBus.post(new BarNotificationEvent("<< Previous"));
 			return true;
 		}
@@ -565,7 +572,7 @@ public class MainMenu extends BaseOpsuState {
 		// repository button actions
 		if (repoButton != null && repoButton.contains(x, y)) {
 			try {
-				Desktop.getDesktop().browse(Options.REPOSITORY_URI);
+				Desktop.getDesktop().browse(config.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
 				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
@@ -577,7 +584,7 @@ public class MainMenu extends BaseOpsuState {
 
 		if (danceRepoButton != null && danceRepoButton.contains(x, y)) {
 			try {
-				Desktop.getDesktop().browse(Options.DANCE_REPOSITORY_URI);
+				Desktop.getDesktop().browse(config.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
 				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
 			} catch (IOException e) {
@@ -588,11 +595,11 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// update button actions
-		if (Updater.get().showButton()) {
-			Updater.Status status = Updater.get().getStatus();
+		if (updater.showButton()) {
+			Updater.Status status = updater.getStatus();
 			if (updateButton.contains(x, y) && status == Updater.Status.UPDATE_AVAILABLE) {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				Updater.get().startDownload();
+				updater.startDownload();
 				updateButton.removeHoverEffects();
 				updateButton.setHoverAnimationDuration(800);
 				updateButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_QUAD);
@@ -600,7 +607,7 @@ public class MainMenu extends BaseOpsuState {
 				return true;
 			} else if (restartButton.contains(x, y) && status == Updater.Status.UPDATE_DOWNLOADED) {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				Updater.get().prepareUpdate();
+				updater.prepareUpdate();
 				displayContainer.exitRequested = true;
 				return true;
 			}
@@ -719,8 +726,9 @@ public class MainMenu extends BaseOpsuState {
 			if (!isTheme && !sameAudio)
 				previous.add(node.index);
 		}
-		if (Options.isDynamicBackgroundEnabled() && !sameAudio && !MusicController.isThemePlaying())
+		if (OPTION_DYNAMIC_BACKGROUND.state && !sameAudio && !MusicController.isThemePlaying()) {
 			bgAlpha.setTime(0);
+		}
 	}
 
 	/**

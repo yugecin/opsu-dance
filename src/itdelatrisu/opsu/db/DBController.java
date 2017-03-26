@@ -19,6 +19,7 @@
 package itdelatrisu.opsu.db;
 
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.options.Configuration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +35,7 @@ public class DBController {
 	/**
 	 * Initializes all databases.
 	 */
-	public static void init() {
+	public static void init(Configuration config) {
 		// load the sqlite-JDBC driver using the current class loader
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -43,8 +44,8 @@ public class DBController {
 		}
 
 		// initialize the databases
-		BeatmapDB.init();
-		ScoreDB.init();
+		BeatmapDB.init(config);
+		ScoreDB.init(config);
 	}
 
 	/**

@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.downloads;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.downloads.Download.DownloadListener;
@@ -35,13 +34,21 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Node containing song data and a Download object.
  */
 public class DownloadNode {
+
+	@Inject
+	private Configuration config;
+
 	/** The associated Download object. */
 	private Download download;
 
@@ -272,7 +279,7 @@ public class DownloadNode {
 		String url = server.getDownloadURL(beatmapSetID);
 		if (url == null)
 			return;
-		String path = String.format("%s%c%d", Options.getOSZDir(), File.separatorChar, beatmapSetID);
+		String path = String.format("%s%c%d", config.oszDir, File.separatorChar, beatmapSetID);
 		String rename = String.format("%d %s - %s.osz", beatmapSetID, artist, title);
 		Download download = new Download(url, path, rename);
 		download.setListener(new DownloadListener() {
@@ -287,8 +294,9 @@ public class DownloadNode {
 			}
 		});
 		this.download = download;
-		if (Options.useUnicodeMetadata())  // load glyphs
+		if (OPTION_SHOW_UNICODE.state) {
 			Fonts.loadGlyphs(Fonts.LARGE, getTitle());
+		}
 	}
 
 	/**
@@ -318,7 +326,7 @@ public class DownloadNode {
 	 * If configured, the Unicode string will be returned instead.
 	 */
 	public String getTitle() {
-		return (Options.useUnicodeMetadata() && titleUnicode != null && !titleUnicode.isEmpty()) ? titleUnicode : title;
+		return (OPTION_SHOW_UNICODE.state && titleUnicode != null && !titleUnicode.isEmpty()) ? titleUnicode : title;
 	}
 
 	/**
@@ -326,7 +334,7 @@ public class DownloadNode {
 	 * If configured, the Unicode string will be returned instead.
 	 */
 	public String getArtist() {
-		return (Options.useUnicodeMetadata() && artistUnicode != null && !artistUnicode.isEmpty()) ? artistUnicode : artist;
+		return (OPTION_SHOW_UNICODE.state && artistUnicode != null && !artistUnicode.isEmpty()) ? artistUnicode : artist;
 	}
 
 	/**
@@ -375,7 +383,7 @@ public class DownloadNode {
 
 		// text
 		// TODO: if the title/artist line is too long, shorten it (e.g. add "...") instead of just clipping
-		if (Options.useUnicodeMetadata()) {  // load glyphs
+		if (OPTION_SHOW_UNICODE.state) {
 			Fonts.loadGlyphs(Fonts.BOLD, getTitle());
 			Fonts.loadGlyphs(Fonts.BOLD, getArtist());
 		}

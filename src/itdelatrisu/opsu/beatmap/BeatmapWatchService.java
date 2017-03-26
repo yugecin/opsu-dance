@@ -18,8 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.Options;
-
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
@@ -42,7 +40,11 @@ import java.util.concurrent.Executors;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.options.Options.*;
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
@@ -88,14 +90,14 @@ public class BeatmapWatchService {
 	 * Creates a new watch service instance (overwriting any previous instance),
 	 * registers the beatmap directory, and starts processing events.
 	 */
-	public static void create() {
+	public static void create(InstanceContainer instanceContainer) {
 		// close the existing watch service
 		destroy();
 
 		// create a new watch service
 		try {
-			ws = new BeatmapWatchService();
-			ws.register(Options.getBeatmapDir().toPath());
+			ws = instanceContainer.provide(BeatmapWatchService.class);
+			ws.register(instanceContainer.provide(Configuration.class).beatmapDir.toPath());
 		} catch (IOException e) {
 			Log.error("Could not create watch service", e);
 			EventBus.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));
@@ -126,9 +128,14 @@ public class BeatmapWatchService {
 	}
 
 	/**
-	 * Returns the single instance of this class.
+	 * Returns the single instance of this class, or null if not enabled.
 	 */
-	public static BeatmapWatchService get() { return ws; }
+	public static BeatmapWatchService get() {
+		if (!OPTION_ENABLE_WATCH_SERVICE.state) {
+			return null;
+		}
+		return ws;
+	 }
 
 	/** Watch service listener interface. */
 	public interface BeatmapWatchServiceListener {

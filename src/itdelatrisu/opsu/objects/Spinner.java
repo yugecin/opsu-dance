@@ -22,7 +22,6 @@ import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.HitObjectType;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
@@ -32,10 +31,10 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.skinning.SkinService;
 
 /**
  * Data type representing a spinner object.
@@ -189,7 +188,7 @@ public class Spinner extends GameObject {
 		float alpha = Utils.clamp(1 - (float) timeDiff / fadeInTime, 0f, 1f);
 
 		// darken screen
-		if (Options.getSkin().isSpinnerFadePlayfield()) {
+		if (SkinService.skin.isSpinnerFadePlayfield()) {
 			float oldAlpha = Colors.BLACK_ALPHA.a;
 			if (timeDiff > 0)
 				Colors.BLACK_ALPHA.a *= alpha;

@@ -17,6 +17,10 @@
  */
 package yugecin.opsudance.core.inject;
 
+import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.OszUnpacker;
+import itdelatrisu.opsu.downloads.Updater;
+import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
 import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
@@ -27,11 +31,23 @@ import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
 import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
+import yugecin.opsudance.skinning.SkinService;
 
 public class OpsuDanceInjector extends Injector {
 
 	protected void configure() {
+		bind(Configuration.class).asEagerSingleton();
+
+		bind(OptionsService.class).asLazySingleton();
+		bind(ReplayImporter.class).asLazySingleton();
+		bind(OszUnpacker.class).asLazySingleton();
+		bind(BeatmapParser.class).asLazySingleton();
+		bind(Updater.class).asLazySingleton();
+		bind(SkinService.class).asEagerSingleton();
+
 		bind(PreStartupInitializer.class).asEagerSingleton();
 		bind(DisplayContainer.class).asEagerSingleton();
 

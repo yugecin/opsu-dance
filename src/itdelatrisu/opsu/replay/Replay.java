@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.replay;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
@@ -46,7 +45,9 @@ import org.newdawn.slick.util.Log;
 import lzma.streams.LzmaOutputStream;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Captures osu! replay data.
@@ -55,6 +56,10 @@ import yugecin.opsudance.events.BubbleNotificationEvent;
  * @author smoogipooo (https://github.com/smoogipooo/osu-Replay-API/)
  */
 public class Replay {
+
+	@Inject
+	public Configuration config;
+
 	/** The associated file. */
 	private File file;
 
@@ -272,16 +277,13 @@ public class Replay {
 	 */
 	public void save() {
 		// create replay directory
-		File dir = Options.getReplayDir();
-		if (!dir.isDirectory()) {
-			if (!dir.mkdir()) {
-				EventBus.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
-				return;
-			}
+		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
+			EventBus.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			return;
 		}
 
 		// write file in new thread
-		final File file = new File(dir, String.format("%s.osr", getReplayFilename()));
+		final File file = new File(config.replayDir, String.format("%s.osr", getReplayFilename()));
 		new Thread() {
 			@Override
 			public void run() {

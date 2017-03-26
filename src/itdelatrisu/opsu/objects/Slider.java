@@ -22,7 +22,6 @@ import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.HitObjectType;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
@@ -39,6 +38,9 @@ import yugecin.opsudance.Dancer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.render.GameObjectRenderer;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Data type representing a slider object.
@@ -214,7 +216,7 @@ public class Slider extends GameObject {
 		double fadeinScale = (timeDiff - approachTime + fadeInTime) / (double) fadeInTime;
 		float alpha = Utils.clamp(1 - (float) fadeinScale, 0, 1);
 		float decorationsAlpha = Utils.clamp(-2.0f * (float) fadeinScale, 0, 1);
-		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
+		boolean overlayAboveNumber = SkinService.skin.isHitCircleOverlayAboveNumber();
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 		Vec2f endPos = curve.pointAt(1);
@@ -232,11 +234,11 @@ public class Slider extends GameObject {
 		color.a = alpha;
 
 		// end circle (only draw if ball still has to go there)
-		if (Options.isDrawSliderEndCircles() && isCurveCompletelyDrawn && currentRepeats < repeatCount - (repeatCount % 2 == 0 ? 1 : 0)) {
+		if (OPTION_DRAW_SLIDER_ENDCIRCLES.state && isCurveCompletelyDrawn && currentRepeats < repeatCount - (repeatCount % 2 == 0 ? 1 : 0)) {
 			Color circleColor = new Color(color);
 			Color overlayColor = new Color(Colors.WHITE_FADE);
 			if (currentRepeats == 0) {
-				if (Options.isSliderSnaking()) {
+				if (OPTION_SNAKING_SLIDERS.state) {
 					// fade in end circle using decorationsAlpha when snaking sliders are enabled
 					circleColor.a = overlayColor.a = sliderAlpha * decorationsAlpha;
 				}
@@ -263,7 +265,7 @@ public class Slider extends GameObject {
 		}
 
 		// start circle, only draw if ball still has to go there
-		if (!sliderClickedInitial || (Options.isDrawSliderEndCircles() && currentRepeats < repeatCount - (repeatCount % 2 == 1 ? 1 : 0))) {
+		if (!sliderClickedInitial || (OPTION_DRAW_SLIDER_ENDCIRCLES.state && currentRepeats < repeatCount - (repeatCount % 2 == 1 ? 1 : 0))) {
 			gameObjectRenderer.renderHitCircleOnly(x, y, firstCircleColor);
 			if (!overlayAboveNumber || sliderClickedInitial) {
 				gameObjectRenderer.renderHitCircleOverlayOnly(x, y, startCircleOverlayColor);
@@ -310,7 +312,7 @@ public class Slider extends GameObject {
 				Image arrow = GameImage.REVERSEARROW.getImage();
 				arrow = arrow.getScaledCopy((float) (1 + 0.2d * ((trackPosition + sliderTime * tcurRepeat) % 292) / 292));
 				if (tcurRepeat == 0) {
-					arrow.setAlpha(Options.isSliderSnaking() ? decorationsAlpha : 1f);
+					arrow.setAlpha(OPTION_SNAKING_SLIDERS.state ? decorationsAlpha : 1f);
 				} else {
 					if (!sliderClickedInitial) {
 						continue;
@@ -335,7 +337,7 @@ public class Slider extends GameObject {
 			if (mirror) {
 				g.rotate(x, y, -180f);
 			}
-			if (!GameMod.HIDDEN.isActive() && Options.isDrawApproach()) {
+			if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
 			}
 			g.popTransform();
@@ -358,7 +360,7 @@ public class Slider extends GameObject {
 			Image sliderBallFrame = sliderBallImages[(int) (t * sliderTime * 60 / 1000) % sliderBallImages.length];
 			float angle = (float) (Math.atan2(c2.y - c.y, c2.x - c.x) * 180 / Math.PI);
 			sliderBallFrame.setRotation(angle);
-			if (Options.getSkin().isAllowSliderBallTint()) {
+			if (SkinService.skin.isAllowSliderBallTint()) {
 				sliderBallFrame.drawCentered(c.x, c.y, color);
 			} else {
 				sliderBallFrame.drawCentered(c.x, c.y);
@@ -455,17 +457,17 @@ public class Slider extends GameObject {
 	}
 
 	private boolean drawSliderTrack(int trackPosition, double snakingSliderProgress) {
-		double curveIntervalTo = Options.isSliderSnaking() ? snakingSliderProgress : 1d;
+		double curveIntervalTo = OPTION_SNAKING_SLIDERS.state ? snakingSliderProgress : 1d;
 		double curveIntervalFrom = 0d;
-		if (Options.isShrinkingSliders()) {
+		if (OPTION_SHRINKING_SLIDERS.state) {
 			double sliderprogress = (trackPosition - getTime() - ((double) sliderTime * (repeats - 1))) / (double) sliderTime;
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
 		int curvelen = curve.getCurvePoints().length;
-		if (Options.isMergingSliders()) {
-			if (Options.isShrinkingSliders() && curveIntervalFrom > 0) {
+		if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
+			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0) {
 				if (hitObject.getRepeatCount() % 2 == 0) {
 					game.addMergedSliderPointsToRender(baseSliderFrom, baseSliderFrom + (int) ((1d - curveIntervalFrom) * curvelen));
 				} else {
@@ -475,8 +477,8 @@ public class Slider extends GameObject {
 				game.addMergedSliderPointsToRender(baseSliderFrom, baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
 			}
 		} else {
-			if (Options.isShrinkingSliders() && curveIntervalFrom > 0 && repeats % 2 == 0) {
-				if (Options.isFallbackSliders()) {
+			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0 && repeats % 2 == 0) {
+				if (OPTION_FALLBACK_SLIDERS.state) {
 					curveIntervalTo = 1d - curveIntervalFrom;
 				} else {
 					curve.splice((int) ((1d - curveIntervalFrom) * curvelen), curvelen);
@@ -587,7 +589,7 @@ public class Slider extends GameObject {
 		data.sendHitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				cx, cy, color, comboEnd, hitObject, type, sliderHeldToEnd,
 				currentRepeats + 1, curve, sliderHeldToEnd);
-		if (Options.isMirror() && GameMod.AUTO.isActive()) {
+		if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 			float[] m = Utils.mirrorPoint(cx, cy);
 			data.sendHitResult(hitObject.getTime() + (int) sliderTimeTotal, result,
 				m[0], m[1], mirrorColor, comboEnd, hitObject, type, sliderHeldToEnd,

@@ -21,7 +21,6 @@ package itdelatrisu.opsu.objects;
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.HitObjectType;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
@@ -33,6 +32,8 @@ import org.newdawn.slick.Graphics;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.render.GameObjectRenderer;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Data type representing a circle object.
@@ -178,7 +179,7 @@ public class Circle extends GameObject {
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
 			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag
 				data.sendHitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Options.isMirror() && GameMod.AUTO.isActive()) {
+				if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.sendHitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}
@@ -193,7 +194,7 @@ public class Circle extends GameObject {
 		else if (isAutoMod) {
 			if (Math.abs(trackPosition - time) < hitResultOffset[GameData.HIT_300]) {
 				data.sendHitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Options.isMirror() && GameMod.AUTO.isActive()) {
+				if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.sendHitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}

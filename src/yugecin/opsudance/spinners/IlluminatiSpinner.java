@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import itdelatrisu.opsu.Options;
+import yugecin.opsudance.options.Options;
 
 public class IlluminatiSpinner extends Spinner {
 

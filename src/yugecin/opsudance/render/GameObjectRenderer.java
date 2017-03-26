@@ -20,7 +20,6 @@ package yugecin.opsudance.render;
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.ui.Colors;
@@ -29,6 +28,9 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class GameObjectRenderer {
 
@@ -72,21 +74,21 @@ public class GameObjectRenderer {
 	}
 
 	public void initForFrame() {
-		if (!Options.isDancingHitCircles()) {
+		if (!OPTION_DANCING_CIRCLES.state) {
 			return;
 		}
 		Float position = MusicController.getBeatProgress();
 		if (position == null) {
 			position = 0f;
 		}
-		int size = circleDiameterInt + (int) (circleDiameter * Options.getDancingHitCirclesMultiplier() / 100f * AnimationEquation.IN_OUT_QUAD.calc(position));
+		int size = circleDiameterInt + (int) (circleDiameter * OPTION_DANCING_CIRCLES_MULTIPLIER.val / 1000f * AnimationEquation.IN_OUT_QUAD.calc(position));
 		hitcircle = GameImage.HITCIRCLE.getImage().getScaledCopy(size, size);
 		hitcircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(size, size);
 	}
 
 	public void renderHitCircle(float x, float y, Color color, int comboNumber, float comboNumberAlpha) {
 		renderHitCircleOnly(x, y, color);
-		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
+		boolean overlayAboveNumber = SkinService.skin.isHitCircleOverlayAboveNumber();
 		if (!overlayAboveNumber) {
 			renderHitCircleOverlayOnly(x, y, Colors.WHITE_FADE);
 		}
@@ -111,7 +113,7 @@ public class GameObjectRenderer {
 	}
 
 	public void renderApproachCircle(float x, float y, Color color, float approachScale) {
-		if (!GameMod.HIDDEN.isActive() && Options.isDrawApproach()) {
+		if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 			approachCircle.getScaledCopy(approachScale).drawCentered(x, y, color);
 		}
 	}

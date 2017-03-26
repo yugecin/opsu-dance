@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
@@ -34,6 +33,8 @@ import org.newdawn.slick.Input;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * "Game Pause/Fail" state.
@@ -93,9 +94,9 @@ public class GamePauseMenu extends BaseOpsuState {
 
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
-			if (key == Options.getGameKeyLeft()) {
+			if (key == OPTION_KEY_LEFT.intval) {
 				mousePressed(Input.MOUSE_LEFT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
-			} else if (key == Options.getGameKeyRight()) {
+			} else if (key == OPTION_KEY_RIGHT.intval) {
 				mousePressed(Input.MOUSE_RIGHT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
 			}
 		}
@@ -166,7 +167,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			return true;
 		}
 
-		if (Options.isMouseWheelDisabled()) {
+		if (OPTION_DISABLE_MOUSE_WHEEL.state) {
 			return true;
 		}
 

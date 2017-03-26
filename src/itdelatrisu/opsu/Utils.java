@@ -18,17 +18,8 @@
 
 package itdelatrisu.opsu;
 
-import itdelatrisu.opsu.audio.MusicController;
-import itdelatrisu.opsu.audio.SoundController;
-import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Download;
-import itdelatrisu.opsu.downloads.DownloadNode;
-import itdelatrisu.opsu.replay.PlaybackSpeed;
-import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.UI;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,18 +32,13 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.jar.JarFile;
 
-import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -61,21 +47,15 @@ import javax.net.ssl.X509TrustManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Options;
 
 /**
  * Contains miscellaneous utilities.
@@ -104,32 +84,6 @@ public class Utils {
 		// TODO clean this up
 
 		// game settings
-		displayContainer.setFPS(Options.getTargetFPS()); // TODO move this elsewhere
-		MusicController.setMusicVolume(Options.getMusicVolume() * Options.getMasterVolume());
-
-		// load skin
-		Options.loadSkin();
-
-		// initialize game images
-		for (GameImage img : GameImage.values()) {
-			if (img.isPreload())
-				img.setDefaultImage();
-		}
-
-		// initialize game mods
-		GameMod.init(displayContainer.width, displayContainer.height);
-
-		// initialize playback buttons
-		PlaybackSpeed.init(displayContainer.width, displayContainer.height);
-
-		// initialize hit objects
-		HitObject.init(displayContainer.width, displayContainer.height);
-
-		// initialize download nodes
-		DownloadNode.init(displayContainer.width, displayContainer.height);
-
-		// initialize UI components
-		UI.init(displayContainer);
 	}
 
 	/**
@@ -240,55 +194,6 @@ public class Utils {
 		return true;
 	}
 
-	/**
-	 * Takes a screenshot.
-	 * @author http://wiki.lwjgl.org/index.php?title=Taking_Screen_Shots
-	 */
-	public static void takeScreenShot() {
-		// create the screenshot directory
-		File dir = Options.getScreenshotDir();
-		if (!dir.isDirectory() && !dir.mkdir()) {
-			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", dir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
-			return;
-		}
-
-		// create file name
-		SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		final String fileName = String.format("screenshot_%s.%s", date.format(new Date()), Options.getScreenshotFormat());
-		final File file = new File(dir, fileName);
-
-		SoundController.playSound(SoundEffect.SHUTTER);
-
-		// copy the screen to file
-		final int width = Display.getWidth();
-		final int height = Display.getHeight();
-		final int bpp = 3;  // assuming a 32-bit display with a byte each for red, green, blue, and alpha
-		final ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * bpp);
-		GL11.glReadBuffer(GL11.GL_FRONT);
-		GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-					for (int x = 0; x < width; x++) {
-						for (int y = 0; y < height; y++) {
-							int i = (x + (width * y)) * bpp;
-							int r = buffer.get(i) & 0xFF;
-							int g = buffer.get(i + 1) & 0xFF;
-							int b = buffer.get(i + 2) & 0xFF;
-							image.setRGB(x, height - (y + 1), (0xFF << 24) | (r << 16) | (g << 8) | b);
-						}
-					}
-					ImageIO.write(image, Options.getScreenshotFormat(), file);
-					EventBus.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
-				} catch (Exception e) {
-					ErrorHandler.error("Failed to take a screenshot.", e).show();
-				}
-			}
-		}.start();
-	}
 
 	/**
 	 * Returns a human-readable representation of a given number of bytes.
@@ -551,14 +456,6 @@ public class Utils {
 	}
 
 	/**
-	 * Returns the current working directory.
-	 * @return the directory
-	 */
-	public static File getWorkingDirectory() {
-		return Paths.get(".").toAbsolutePath().normalize().toFile();
-	}
-
-	/**
 	 * Parses the integer string argument as a boolean:
 	 * {@code 1} is {@code true}, and all other values are {@code false}.
 	 * @param s the {@code String} containing the boolean representation to be parsed
@@ -660,4 +557,20 @@ public class Utils {
 			(float) (Options.height / 2d + Math.sin(ang) * d)
 		};
 	}
+
+	/**
+	 * Returns the file extension of a file.
+	 * @param file the file name
+	 */
+	public static String getFileExtension(String file) {
+		int i = file.lastIndexOf('.');
+		return (i != -1) ? file.substring(i + 1).toLowerCase() : "";
+	}
+
+	public static boolean isValidGameKey(int key) {
+		return (key != Keyboard.KEY_ESCAPE && key != Keyboard.KEY_SPACE &&
+			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
+			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
+	}
+
 }

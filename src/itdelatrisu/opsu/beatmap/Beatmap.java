@@ -18,8 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.Options;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +27,8 @@ import java.util.Map;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Beatmap structure storing data parsed from OSU files.
@@ -264,7 +264,7 @@ public class Beatmap implements Comparable<Beatmap> {
 	 * @return the song title
 	 */
 	public String getTitle() {
-		return (Options.useUnicodeMetadata() && !titleUnicode.isEmpty()) ? titleUnicode : title;
+		return (OPTION_SHOW_UNICODE.state && !titleUnicode.isEmpty()) ? titleUnicode : title;
 	}
 
 	/**
@@ -273,25 +273,23 @@ public class Beatmap implements Comparable<Beatmap> {
 	 * @return the song artist
 	 */
 	public String getArtist() {
-		return (Options.useUnicodeMetadata() && !artistUnicode.isEmpty()) ? artistUnicode : artist;
+		return (OPTION_SHOW_UNICODE.state && !artistUnicode.isEmpty()) ? artistUnicode : artist;
 	}
 
 	/**
 	 * Returns the list of combo colors (max 8).
-	 * If the beatmap does not provide colors, the skin colors will be returned instead.
-	 * @return the combo colors
+	 * @return the combo colors, or null if this beatmap does not have combo colors specified.
 	 */
 	public Color[] getComboColors() {
-		return (combo != null) ? combo : Options.getSkin().getComboColors();
+		return combo;
 	}
 
 	/**
 	 * Returns the slider border color.
-	 * If the beatmap does not provide a color, the skin color will be returned instead.
-	 * @return the slider border color
+	 * @return the slider border color, or null if this beatmap does not have a slider border color specified.
 	 */
 	public Color getSliderBorderColor() {
-		return (sliderBorder != null) ? sliderBorder : Options.getSkin().getSliderBorderColor();
+		return sliderBorder;
 	}
 
 	/**

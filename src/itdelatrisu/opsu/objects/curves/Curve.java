@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.objects.curves;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.skins.Skin;
@@ -30,6 +29,9 @@ import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Representation of a curve.
@@ -101,11 +103,10 @@ public abstract class Curve {
 
 		ContextCapabilities capabilities = GLContext.getCapabilities();
 		mmsliderSupported = capabilities.OpenGL30;
-		if (mmsliderSupported)
+		if (mmsliderSupported) {
 			CurveRenderState.init(width, height, circleDiameter);
-		else {
-			if (Options.getSkin().getSliderStyle() != Skin.STYLE_PEPPYSLIDER)
-				Log.warn("New slider style requires OpenGL 3.0.");
+		} else if (SkinService.skin.getSliderStyle() != Skin.STYLE_PEPPYSLIDER) {
+			Log.warn("New slider style requires OpenGL 3.0.");
 		}
 	}
 
@@ -132,8 +133,8 @@ public abstract class Curve {
 		if (curve == null)
 			return;
 
-		// peppysliders
-		if (Options.isFallbackSliders() || Options.getSkin().getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
+		if (OPTION_FALLBACK_SLIDERS.state || SkinService.skin.getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
+			// peppysliders
 			Image hitCircle = GameImage.HITCIRCLE.getImage();
 			Image hitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
 			for (int i = from; i < to; i++)
@@ -143,10 +144,8 @@ public abstract class Curve {
 			for (int i = from; i < to; i++)
 				hitCircle.drawCentered(curve[i].x, curve[i].y, fallbackSliderColor);
 			fallbackSliderColor.a = a;
-		}
-
-		// mmsliders
-		else {
+		} else {
+			// mmsliders
 			if (renderState == null)
 				renderState = new CurveRenderState(hitObject, curve, false);
 			renderState.draw(color, borderColor, from, to);

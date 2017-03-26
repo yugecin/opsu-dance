@@ -18,7 +18,6 @@
 package itdelatrisu.opsu.render;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
@@ -39,6 +38,8 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.render.GameObjectRenderer;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Hold the temporary render state that needs to be restored again after the new
@@ -112,7 +113,7 @@ public class CurveRenderState {
 		this.hitObject = hitObject;
 		this.curve = curve;
 		if (isKnorkeSlider) {
-			this.mirrors = Options.getMergingSlidersMirrorPool();
+			this.mirrors = OPTION_MERGING_SLIDERS_MIRROR_POOL.val;
 		} else {
 			this.mirrors = 1;
 		}
@@ -356,7 +357,7 @@ public class CurveRenderState {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 		int max = mirrors;
-		if (!Options.isMirror()) {
+		if (!OPTION_DANCE_MIRROR.state) {
 			max = 1;
 		}
 		for (int i = 0; i < max; i++) {

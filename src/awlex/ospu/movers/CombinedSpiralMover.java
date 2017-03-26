@@ -1,11 +1,11 @@
 package awlex.ospu.movers;
 
 import awlex.ospu.FakeGameObject;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
+import yugecin.opsudance.options.Options;
 
 /**
  * Created by Alex Wieser on 09.10.2016.

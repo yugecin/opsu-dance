@@ -19,9 +19,7 @@
 package itdelatrisu.opsu.ui;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
-import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.awt.Point;
@@ -29,6 +27,9 @@ import java.util.LinkedList;
 
 import org.newdawn.slick.*;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Updates and draws the cursor.
@@ -66,9 +67,6 @@ public class Cursor {
 
 	private boolean isMirrored;
 
-	/**
-	 * Constructor.
-	 */
 	public Cursor() {
 		this(false);
 	}
@@ -83,19 +81,20 @@ public class Cursor {
 	 * @param mousePressed whether or not the mouse button is pressed
 	 */
 	public void draw(boolean mousePressed) {
-		if (Options.isCursorDisabled())
+		if (OPTION_DISABLE_CURSOR.state) {
 			return;
+		}
 
 		// determine correct cursor image
 		Image cursor, cursorMiddle = null, cursorTrail;
 		boolean beatmapSkinned = GameImage.CURSOR.hasBeatmapSkinImage();
 		boolean hasMiddle;
-		Skin skin = Options.getSkin();
 		if (beatmapSkinned) {
 			newStyle = true;  // osu! currently treats all beatmap cursors as new-style cursors
 			hasMiddle = GameImage.CURSOR_MIDDLE.hasBeatmapSkinImage();
-		} else
-			newStyle = hasMiddle = Options.isNewCursorEnabled();
+		} else {
+			newStyle = hasMiddle = OPTION_NEW_CURSOR.state;
+		}
 		if (beatmapSkinned || newStyle) {
 			cursor = GameImage.CURSOR.getImage();
 			cursorTrail = GameImage.CURSOR_TRAIL.getImage();
@@ -108,7 +107,7 @@ public class Cursor {
 
 		// scale cursor
 		float cursorScaleAnimated = 1f;
-		if (skin.isCursorExpanded()) {
+		if (SkinService.skin.isCursorExpanded()) {
 			if (lastCursorPressState != mousePressed) {
 				lastCursorPressState = mousePressed;
 				lastCursorPressTime = System.currentTimeMillis();
@@ -118,7 +117,7 @@ public class Cursor {
 					Utils.clamp(System.currentTimeMillis() - lastCursorPressTime, 0, CURSOR_SCALE_TIME) / CURSOR_SCALE_TIME);
 			cursorScaleAnimated = 1f + ((mousePressed) ? cursorScaleChange : CURSOR_SCALE_CHANGE - cursorScaleChange);
 		}
-		float cursorScale = cursorScaleAnimated * Options.getCursorScale();
+		float cursorScale = cursorScaleAnimated * OPTION_CURSOR_SIZE.val / 100f;
 		if (cursorScale != 1f) {
 			cursor = cursor.getScaledCopy(cursorScale);
 			cursorTrail = cursorTrail.getScaledCopy(cursorScale);
@@ -135,7 +134,7 @@ public class Cursor {
 		float alpha = 0f;
 		float t = 2f / trail.size();
 		int cursorTrailWidth = cursorTrail.getWidth(), cursorTrailHeight = cursorTrail.getHeight();
-		float cursorTrailRotation = (skin.isCursorTrailRotated()) ? cursorAngle : 0;
+		float cursorTrailRotation = (SkinService.skin.isCursorTrailRotated()) ? cursorAngle : 0;
 		cursorTrail.startUse();
 		for (Point p : trail) {
 			alpha += t;
@@ -150,11 +149,13 @@ public class Cursor {
 		cursorTrail.endUse();
 
 		// draw the other components
-		if (newStyle && skin.isCursorRotated())
+		if (newStyle && SkinService.skin.isCursorRotated()) {
 			cursor.setRotation(cursorAngle);
-		cursor.drawCentered(lastPosition.x, lastPosition.y, Options.isCursorOnlyColorTrail() ? Color.white : filter);
-		if (hasMiddle)
-			cursorMiddle.drawCentered(lastPosition.x, lastPosition.y, Options.isCursorOnlyColorTrail() ? Color.white : filter);
+		}
+		cursor.drawCentered(lastPosition.x, lastPosition.y, OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state ? Color.white : filter);
+		if (hasMiddle) {
+			cursorMiddle.drawCentered(lastPosition.x, lastPosition.y, OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state ? Color.white : filter);
+		}
 	}
 
 	/**
@@ -183,7 +184,7 @@ public class Cursor {
 				removeCount = trail.size() - max;
 		}
 
-		int cursortraillength = Options.getCursorTrailOverride();
+		int cursortraillength = OPTION_DANCE_CURSOR_TRAIL_OVERRIDE.val;
 		if (cursortraillength > 20) {
 			removeCount = trail.size() - cursortraillength;
 		}

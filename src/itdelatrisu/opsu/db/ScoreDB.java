@@ -18,10 +18,10 @@
 
 package itdelatrisu.opsu.db;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.options.Configuration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,9 +83,9 @@ public class ScoreDB {
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init() {
+	public static void init(Configuration config) {
 		// create a database connection
-		connection = DBController.createConnection(Options.SCORE_DB.getPath());
+		connection = DBController.createConnection(config.SCORE_DB.getPath());
 		if (connection == null)
 			return;
 

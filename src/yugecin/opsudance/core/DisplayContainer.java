@@ -17,15 +17,15 @@
  */
 package yugecin.opsudance.core;
 
-import itdelatrisu.opsu.GameData;
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.DownloadList;
+import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
+import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
@@ -42,6 +42,7 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.events.EventListener;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
@@ -50,11 +51,14 @@ import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
 
 import static yugecin.opsudance.core.Entrypoint.sout;
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * based on org.newdawn.slick.AppGameContainer
@@ -63,6 +67,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	@Deprecated
 	public static DisplayContainer instance; // TODO d remove this
+
+	@Inject
+	private SkinService skinService;
+
+	@Inject
+	private Configuration config;
 
 	private static SGL GL = Renderer.get();
 
@@ -116,6 +126,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final Cursor cursor;
 	public boolean drawCursor;
 
+	@Inject
 	public DisplayContainer(InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
 		this.cursor = new Cursor();
@@ -145,8 +156,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			@Override
 			public void onEvent(ResolutionOrSkinChangedEvent event) {
 				destroyImages();
-				Utils.init(DisplayContainer.this); // TODO this shouldn't be here
-				UI.revalidate(); // TODO this shouldn't be here
+				reinit();
 			}
 		});
 
@@ -155,8 +165,29 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		lastFrame = getTime();
 		delta = 1;
 		renderDelta = 1;
+	}
 
-		Options.GameOption.displayContainer = this;
+	private void reinit() {
+		// this used to be in Utils.init
+		// TODO find a better place for this?
+		setFPS(targetFPS[targetFPSIndex]);
+		MusicController.setMusicVolume(OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f);
+
+		skinService.loadSkin();
+
+		// initialize game images
+		for (GameImage img : GameImage.values()) {
+			if (img.isPreload()) {
+				img.setDefaultImage();
+			}
+		}
+
+		// TODO clean this up
+		GameMod.init(width, height);
+		PlaybackSpeed.init(width, height);
+		HitObject.init(width, height);
+		DownloadNode.init(width, height);
+		UI.init(this);
 	}
 
 	public void setUPS(int ups) {
@@ -170,8 +201,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	}
 
 	public void init(Class<? extends OpsuState> startingState) {
-		setUPS(Options.getTargetUPS());
-		setFPS(Options.getTargetFPS());
+		setUPS(OPTION_TARGET_UPS.val);
+		setFPS(targetFPS[targetFPSIndex]);
 
 		state = instanceContainer.provide(startingState);
 		state.enter();
@@ -245,7 +276,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
-		Options.setDisplayMode(this);
+		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
 		initGL();
@@ -303,6 +334,38 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		return true;
 	}
 
+	public void updateDisplayMode(String resolutionString) {
+		int screenWidth = nativeDisplayMode.getWidth();
+		int screenHeight = nativeDisplayMode.getHeight();
+
+		int width = screenWidth;
+		int height = screenHeight;
+		if (resolutionString.matches("^[0-9]+x[0-9]+$")) {
+			String[] res = resolutionString.split("x");
+			width = Integer.parseInt(res[0]);
+			height = Integer.parseInt(res[1]);
+		}
+
+		// check for larger-than-screen dimensions
+		if (!OPTION_ALLOW_LARGER_RESOLUTIONS.state && (screenWidth < width || screenHeight < height)) {
+			width = 800;
+			height = 600;
+		}
+
+		try {
+			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
+		} catch (Exception e) {
+			EventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
+			Log.error("Failed to set display mode.", e);
+		}
+
+		if (OPTION_FULLSCREEN.state) {
+			// set borderless window if dimensions match screen size
+			boolean borderless = (screenWidth == width && screenHeight == height);
+			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
+		}
+	}
+
 	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {
 		if (this.width == width && this.height == height) {
 			Display.setFullscreen(fullscreen);
@@ -353,9 +416,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		sout("GL ready");
 
 		GameImage.init(width, height);
-		Fonts.init();
+		Fonts.init(config);
 
-		EventBus.post(new ResolutionOrSkinChangedEvent());
+		EventBus.post(new ResolutionOrSkinChangedEvent(null, width, height));
 	}
 
 	public void resetCursor() {

@@ -36,6 +36,8 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 
 /**
  * Download server: http://loli.al/
@@ -43,6 +45,10 @@ import yugecin.opsudance.core.errorhandling.ErrorHandler;
  * <i>This server went offline in August 2015.</i>
  */
 public class OsuMirrorServer extends DownloadServer {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
 	/** Server name. */
 	private static final String SERVER_NAME = "osu!Mirror";
 
@@ -67,8 +73,9 @@ public class OsuMirrorServer extends DownloadServer {
 	/** Lookup table from beatmap set ID -> server download ID. */
 	private HashMap<Integer, Integer> idTable = new HashMap<Integer, Integer>();
 
-	/** Constructor. */
-	public OsuMirrorServer() {}
+	@Inject
+	public OsuMirrorServer() {
+	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -106,12 +113,12 @@ public class OsuMirrorServer extends DownloadServer {
 				JSONObject item = arr.getJSONObject(i);
 				int beatmapSetID = item.getInt("OSUSetid");
 				int serverID = item.getInt("id");
-				nodes[i] = new DownloadNode(
+				nodes[i] = instanceContainer.injectFields(new DownloadNode(
 					beatmapSetID, formatDate(item.getString("ModifyDate")),
 					item.getString("Title"), null,
 					item.getString("Artist"), null,
 					item.getString("Mapper")
-				);
+				));
 				idTable.put(beatmapSetID, serverID);
 				if (serverID > maxServerID)
 					maxServerID = serverID;

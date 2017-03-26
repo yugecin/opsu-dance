@@ -17,17 +17,18 @@
  */
 package yugecin.opsudance.movers.factories;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.movers.CubicBezierMover;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.QuadraticBezierMover;
 
+import static yugecin.opsudance.options.Options.*;
+
 public class QuadraticBezierMoverFactory implements MoverFactory {
 
 	@Override
 	public Mover create(GameObject start, GameObject end, int dir) {
-		if (Options.isQuadBezCubicEnabled() && end.isSlider()) {
+		if (OPTION_DANCE_QUAD_BEZ_USE_CUBIC_ON_SLIDERS.state && end.isSlider()) {
 			return new CubicBezierMover(start, end, dir);
 		}
 		return new QuadraticBezierMover(start, end, dir);

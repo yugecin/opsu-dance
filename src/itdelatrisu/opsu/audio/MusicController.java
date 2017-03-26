@@ -18,9 +18,8 @@
 
 package itdelatrisu.opsu.audio;
 
-import itdelatrisu.opsu.Options;
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.states.Game;
 
@@ -49,6 +48,8 @@ import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Controller for all music.
@@ -109,7 +110,7 @@ public class MusicController {
 			reset();
 			System.gc();
 
-			switch (BeatmapParser.getExtension(beatmap.audioFilename.getName())) {
+			switch (Utils.getFileExtension(beatmap.audioFilename.getName())) {
 			case "ogg":
 			case "mp3":
 				trackLoader = new Thread() {
@@ -168,7 +169,7 @@ public class MusicController {
 	 */
 	public static void playAt(final int position, final boolean loop) {
 		if (trackExists()) {
-			setVolume(Options.getMusicVolume() * Options.getMasterVolume());
+			setVolume(OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f);
 			trackEnded = false;
 			pauseTime = 0f;
 			resetTimingPoint();
@@ -348,9 +349,9 @@ public class MusicController {
 	 */
 	public static int getPosition() {
 		if (isPlaying())
-			return (int) (player.getPosition() * 1000 + Options.getMusicOffset() + Game.currentMapMusicOffset);
+			return (int) (player.getPosition() * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset);
 		else if (isPaused())
-			return Math.max((int) (pauseTime * 1000 + Options.getMusicOffset() + Game.currentMapMusicOffset), 0);
+			return Math.max((int) (pauseTime * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset), 0);
 		else
 			return 0;
 	}
@@ -443,13 +444,9 @@ public class MusicController {
 			playAt((preview) ? lastBeatmap.previewTime : 0, false);
 	}
 
-	/**
-	 * Plays the theme song.
-	 */
-	public static void playThemeSong() {
-		Beatmap beatmap = Options.getThemeBeatmap();
-		if (beatmap != null) {
-			play(beatmap, false, false);
+	public static void playThemeSong(Beatmap themeBeatmap) {
+		if (themeBeatmap != null) {
+			play(themeBeatmap, false, false);
 			themePlaying = true;
 		}
 	}
@@ -470,7 +467,7 @@ public class MusicController {
 	 * @param multiplier the volume multiplier when the track is dimmed
 	 */
 	public static void toggleTrackDimmed(float multiplier) {
-		float volume = Options.getMusicVolume() * Options.getMasterVolume();
+		float volume = OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f;
 		dimLevel = (isTrackDimmed()) ? 1f : multiplier;
 		trackDimmed = !trackDimmed;
 		setVolume(volume);
