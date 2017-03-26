@@ -371,13 +371,13 @@ public class Slider extends GameObject {
 				float followCircleScale = 1f + (tickExpandTime / (float) TICK_EXPAND_TIME) * 0.1f;
 				float followAlpha = 1f;
 				if (followCircleActive && followExpandTime < FOLLOW_EXPAND_TIME) {
-					followExpandTime += DisplayContainer.instance.renderDelta;
+					followExpandTime += displayContainer.renderDelta;
 					followCircleScale *= 0.5f;
 					float progress = AnimationEquation.OUT_QUAD.calc((float) followExpandTime / FOLLOW_EXPAND_TIME);
 					followCircleScale = followCircleScale + followCircleScale * progress;
 					followAlpha = progress;
 				} else if (!followCircleActive) {
-					followExpandTime -= DisplayContainer.instance.renderDelta;
+					followExpandTime -= displayContainer.renderDelta;
 					if (followExpandTime > FOLLOW_SHRINK_TIME) {
 						followExpandTime = FOLLOW_SHRINK_TIME;
 					}

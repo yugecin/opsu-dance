@@ -65,9 +65,6 @@ import static yugecin.opsudance.options.Options.*;
  */
 public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
 
-	@Deprecated
-	public static DisplayContainer instance; // TODO d remove this
-
 	@Inject
 	private SkinService skinService;
 
@@ -131,7 +128,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		this.instanceContainer = instanceContainer;
 		this.cursor = new Cursor();
 		drawCursor = true;
-		instance = this;
 
 		outTransitionListener = new TransitionFinishedListener() {
 			@Override
