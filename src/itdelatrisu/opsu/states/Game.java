@@ -1471,7 +1471,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/opsud/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/raize/");
 		File[] files = replaydir.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
@@ -1493,6 +1493,13 @@ public class Game extends ComplexOpsuState {
 			replays.add(new ReplayPlayback(r, new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB())));
 			hue += hueshift;
 		}
+
+		replays.sort(new Comparator<ReplayPlayback>() {
+			@Override
+			public int compare(ReplayPlayback o1, ReplayPlayback o2) {
+				return Integer.compare(o2.replay.score, o1.replay.score);
+			}
+		});
 
 		if (isReplay || GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			displayContainer.drawCursor = false;
