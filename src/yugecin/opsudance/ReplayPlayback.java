@@ -32,8 +32,8 @@ public class ReplayPlayback {
 	public ReplayFrame currentFrame;
 	public ReplayFrame nextFrame;
 	private int frameIndex;
-	private Color color;
-	private Cursor cursor;
+	public Color color;
+	public Cursor cursor;
 	private int keydelay[];
 	public static final int SQSIZE = 15;
 	private boolean hr;
@@ -111,7 +111,7 @@ public class ReplayPlayback {
 		ypos *= (SQSIZE + 5);
 		for (int i = 0; i < 4; i++) {
 			if (keydelay[i] > 0) {
-				g.fillRect(SQSIZE * i, ypos, SQSIZE, SQSIZE);
+				g.fillRect(SQSIZE * i, ypos + 5, SQSIZE, SQSIZE);
 			}
 			keydelay[i] -= renderdelta;
 		}

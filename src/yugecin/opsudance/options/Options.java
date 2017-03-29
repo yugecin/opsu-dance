@@ -358,7 +358,7 @@ public class Options {
 		}
 	};
 
-	public static final NumericOption OPTION_CURSOR_SIZE = new NumericOption("Size", "CursorSize", "Change the cursor scale.", 100, 50, 200) {
+	public static final NumericOption OPTION_CURSOR_SIZE = new NumericOption("Size", "CursorSize", "Change the cursor scale.", 100, 10, 200) {
 		@Override
 		public String getValueString () {
 			return String.format("%.2fx", val / 100f);

@@ -1503,6 +1503,14 @@ public class Game extends ComplexOpsuState {
 			}
 		});
 
+		hue = 0;
+		for (ReplayPlayback r : replays) {
+			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
+			r.color = c;
+			r.cursor = new Cursor(c);
+			hue += hueshift;
+		}
+
 		if (isReplay || GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 			displayContainer.drawCursor = false;
 		}
