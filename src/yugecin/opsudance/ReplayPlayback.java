@@ -126,7 +126,7 @@ public class ReplayPlayback {
 
 	private void processKeys() {
 		int keys = currentFrame.getKeys();
-		int KEY_DELAY = 50;
+		int KEY_DELAY = 10;
 		if ((keys & 5) == 5) {
 			keydelay[0] = KEY_DELAY;
 		}

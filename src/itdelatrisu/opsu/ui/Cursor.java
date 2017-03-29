@@ -149,7 +149,7 @@ public class Cursor {
 		cursorTrail.startUse();
 		for (Point p : trail) {
 			alpha += t;
-			cursorTrail.setImageColor(filter.r, filter.g, filter.b, alpha * 0.2f);
+			cursorTrail.setImageColor(filter.r, filter.g, filter.b, alpha * 0.12f);
 			cursorTrail.drawEmbedded(
 					p.x - (cursorTrailWidth / 2f), p.y - (cursorTrailHeight / 2f),
 					cursorTrailWidth, cursorTrailHeight, cursorTrailRotation);
