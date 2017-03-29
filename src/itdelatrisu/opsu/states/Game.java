@@ -1492,7 +1492,7 @@ public class Game extends ComplexOpsuState {
 				EventBus.post(new BubbleNotificationEvent("could not load replay " + file.getName(), BubbleNotificationEvent.COMMONCOLOR_RED));
 				continue;
 			}
-			replays.add(new ReplayPlayback(r, new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB())));
+			replays.add(new ReplayPlayback(displayContainer, r, new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB())));
 			hue += hueshift;
 		}
 

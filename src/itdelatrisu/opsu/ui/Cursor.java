@@ -67,6 +67,8 @@ public class Cursor {
 
 	private boolean isMirrored;
 
+	private Color filter;
+
 	public Cursor() {
 		this(false);
 	}
@@ -74,6 +76,11 @@ public class Cursor {
 	public Cursor(boolean isMirrored) {
 		resetLocations(0, 0);
 		this.isMirrored = isMirrored;
+	}
+
+	public Cursor(Color filter) {
+		this(false);
+		this.filter = filter;
 	}
 
 	/**
@@ -130,6 +137,10 @@ public class Cursor {
 			lastCursorColor = filter = Dancer.cursorColorOverride.getColor();
 		}
 
+		if (this.filter != null) {
+			filter = this.filter;
+		}
+
 		// draw a fading trail
 		float alpha = 0f;
 		float t = 2f / trail.size();
@@ -138,7 +149,7 @@ public class Cursor {
 		cursorTrail.startUse();
 		for (Point p : trail) {
 			alpha += t;
-			cursorTrail.setImageColor(filter.r, filter.g, filter.b, alpha);
+			cursorTrail.setImageColor(filter.r, filter.g, filter.b, alpha * 0.2f);
 			cursorTrail.drawEmbedded(
 					p.x - (cursorTrailWidth / 2f), p.y - (cursorTrailHeight / 2f),
 					cursorTrailWidth, cursorTrailHeight, cursorTrailRotation);

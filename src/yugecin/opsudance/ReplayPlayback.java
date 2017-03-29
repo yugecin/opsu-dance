@@ -27,6 +27,7 @@ import yugecin.opsudance.core.DisplayContainer;
 
 public class ReplayPlayback {
 
+	private final DisplayContainer container;
 	public final Replay replay;
 	public ReplayFrame currentFrame;
 	public ReplayFrame nextFrame;
@@ -38,7 +39,8 @@ public class ReplayPlayback {
 	private boolean hr;
 	private String player;
 
-	public ReplayPlayback(Replay replay, Color color) {
+	public ReplayPlayback(DisplayContainer container, Replay replay, Color color) {
+		this.container = container;
 		this.replay = replay;
 		resetFrameIndex();
 		this.color = color;
@@ -116,7 +118,7 @@ public class ReplayPlayback {
 		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
 		int y = currentFrame.getScaledY();
 		if (hr) {
-			y = DisplayContainer.instance.height - y;
+			y = container.height - y;
 		}
 		cursor.setCursorPosition(renderdelta, currentFrame.getScaledX(), y);
 		cursor.draw(false);
