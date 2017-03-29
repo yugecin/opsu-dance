@@ -106,7 +106,7 @@ public class ReplayPlayback {
 		}
 		processKeys();
 		g.setColor(color);
-		ypos *= SQSIZE;
+		ypos *= (SQSIZE + 5);
 		for (int i = 0; i < 4; i++) {
 			if (keydelay[i] > 0) {
 				g.fillRect(SQSIZE * i, ypos, SQSIZE, SQSIZE);
