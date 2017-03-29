@@ -42,12 +42,25 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Holds game data and renders all related elements.
  */
 public class GameData {
+
+	@Inject
+	private Configuration config;
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
 	/** Delta multiplier for steady HP drain. */
 	public static final float HP_DRAIN_MULTIPLIER = 1 / 200f;
 
@@ -383,7 +396,7 @@ public class GameData {
 		hitResultCount[HIT_100K] = s.katu;
 		hitResultCount[HIT_MISS] = s.miss;
 		this.replay = (s.replayString == null) ? null :
-			new Replay(new File(Options.getReplayDir(), String.format("%s.osr", s.replayString)));
+			instanceContainer.injectFields(new Replay(new File(config.replayDir, String.format("%s.osr", s.replayString))));
 
 		loadImages();
 	}
@@ -515,7 +528,7 @@ public class GameData {
 		if (digitWidth <= 1f) {
 			return;
 		}
-		digitWidth = (digitWidth - Options.getSkin().getHitCircleFontOverlap()) * scale;
+		digitWidth = (digitWidth - SkinService.skin.getHitCircleFontOverlap()) * scale;
 		float cx = x + ((length - 1) * (digitWidth / 2));
 
 		for (int i = 0; i < length; i++) {
@@ -544,7 +557,7 @@ public class GameData {
 				Image digit = getScoreSymbolImage(c[i]);
 				if (scale != 1.0f)
 					digit = digit.getScaledCopy(scale);
-				cx -= digit.getWidth() + Options.getSkin().getScoreFontOverlap();
+				cx -= digit.getWidth() + SkinService.skin.getScoreFontOverlap();
 				digit.setAlpha(alpha);
 				digit.draw(cx, y);
 				digit.setAlpha(1f);
@@ -557,7 +570,7 @@ public class GameData {
 				digit.setAlpha(alpha);
 				digit.draw(cx, y);
 				digit.setAlpha(1f);
-				cx += digit.getWidth() - Options.getSkin().getScoreFontOverlap();
+				cx += digit.getWidth() - SkinService.skin.getScoreFontOverlap();
 			}
 		}
 	}
@@ -679,7 +692,7 @@ public class GameData {
 		}
 
 		// hit error bar
-		if (Options.isHitErrorBarEnabled() && !hitErrorList.isEmpty()) {
+		if (OPTION_SHOW_HIT_ERROR_BAR.state && !hitErrorList.isEmpty()) {
 			// fade out with last tick
 			float hitErrorAlpha = 1f;
 			Color white = new Color(Color.white);
@@ -914,10 +927,8 @@ public class GameData {
 					spinnerOsu.setAlpha(hitResult.alpha);
 					spinnerOsu.drawCentered(width / 2, height / 4);
 					spinnerOsu.setAlpha(1f);
-				}
-
-				// hit lighting
-				else if (Options.isHitLightingEnabled() && !hitResult.hideResult && hitResult.result != HIT_MISS &&
+				} else if (OPTION_SHOW_HIT_LIGHTING.state && !hitResult.hideResult && hitResult.result != HIT_MISS &&
+					// hit lighting
 					hitResult.result != HIT_SLIDER30 && hitResult.result != HIT_SLIDER10) {
 					// TODO: add particle system
 					Image lighting = GameImage.LIGHTING.getImage();
@@ -965,14 +976,14 @@ public class GameData {
 	private void drawHitAnimations(HitObjectResult hitResult, int trackPosition) {
 		// fade out slider curve
 		if (hitResult.result != HIT_SLIDER_REPEAT && hitResult.result != HIT_SLIDER_REPEAT_M && hitResult.curve != null) {
-			if (!Options.isShrinkingSliders()) {
+			if (!OPTION_SHRINKING_SLIDERS.state) {
 				float progress = AnimationEquation.OUT_CUBIC.calc(
 					(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
 				float alpha = 1f - progress;
 				float oldWhiteAlpha = Colors.WHITE_FADE.a;
 				float oldColorAlpha = hitResult.color.a;
 				Colors.WHITE_FADE.a = hitResult.color.a = alpha;
-				hitResult.curve.draw(hitResult.color);
+				hitResult.curve.draw(hitResult.color, (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) ? 1 : 0, hitResult.curve.getCurvePoints().length);
 				Colors.WHITE_FADE.a = oldWhiteAlpha;
 				hitResult.color.a = oldColorAlpha;
 			}
@@ -987,7 +998,7 @@ public class GameData {
 				fc.drawCentered(hitResult.x, hitResult.y);
 			}
 
-			if (!Options.isDrawSliderEndCircles()) {
+			if (!OPTION_DRAW_SLIDER_ENDCIRCLES.state) {
 				return;
 			}
 		}
@@ -1024,7 +1035,7 @@ public class GameData {
 			}
 			scaledRepeat.rotate(ang);
 			scaledRepeat.drawCentered(hitResult.x, hitResult.y, hitResult.color);
-			if (!Options.isDrawSliderEndCircles()) {
+			if (!OPTION_DRAW_SLIDER_ENDCIRCLES.state) {
 				GameImage.HITCIRCLE.getImage().draw(-1000, -1000); // TODO this 'fixes' #114. Why? Get a better solution!
 				GameImage.HITCIRCLE_OVERLAY.getImage().draw(-1000, -1000);
 				return;
@@ -1186,7 +1197,7 @@ public class GameData {
 		}
 
 		// combo burst
-		if (comboBurstIndex > -1 && Options.isComboBurstEnabled()) {
+		if (comboBurstIndex > -1 && OPTION_SHOW_COMBO_BURSTS.state) {
 			int leftX  = 0;
 			int rightX = width - comboBurstImages[comboBurstIndex].getWidth();
 			if (comboBurstX < leftX) {
@@ -1210,7 +1221,7 @@ public class GameData {
 			comboPopTime = COMBO_POP_TIME;
 
 		// hit error bar
-		if (Options.isHitErrorBarEnabled()) {
+		if (OPTION_SHOW_HIT_ERROR_BAR.state) {
 			int trackPosition = MusicController.getPosition();
 			Iterator<HitErrorInfo> iter = hitErrorList.iterator();
 			while (iter.hasNext()) {
@@ -1237,21 +1248,22 @@ public class GameData {
 			comboMax = combo;
 
 		// combo bursts (at 30, 60, 100+50x)
-		if (Options.isComboBurstEnabled() &&
-			(combo == 30 || combo == 60 || (combo >= 100 && combo % 50 == 0))) {
-			if (Options.getSkin().isComboBurstRandom())
+		if (OPTION_SHOW_COMBO_BURSTS.state && (combo == 30 || combo == 60 || (combo >= 100 && combo % 50 == 0))) {
+			if (SkinService.skin.isComboBurstRandom()) {
 				comboBurstIndex = (int) (Math.random() * comboBurstImages.length);
-			else {
-				if (combo == 30)
+			} else {
+				if (combo == 30) {
 					comboBurstIndex = 0;
-				else
+				} else {
 					comboBurstIndex = (comboBurstIndex + 1) % comboBurstImages.length;
+				}
 			}
 			comboBurstAlpha = 0.8f;
-			if ((comboBurstIndex % 2) == 0)
+			if ((comboBurstIndex % 2) == 0) {
 				comboBurstX = width;
-			else
+			} else {
 				comboBurstX = comboBurstImages[0].getWidth() * -1;
+			}
 		}
 	}
 
@@ -1277,7 +1289,7 @@ public class GameData {
 	 */
 	public void sendSliderRepeatResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
 		hitResultList.add(new HitObjectResult(time, HIT_SLIDER_REPEAT, x, y, color, type, curve, true, true));
-		if (!Options.isMirror()) {
+		if (!OPTION_DANCE_MIRROR.state) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
@@ -1294,7 +1306,7 @@ public class GameData {
 	 */
 	public void sendSliderStartResult(int time, float x, float y, Color color, Color mirrorColor, boolean expand) {
 		hitResultList.add(new HitObjectResult(time, HIT_ANIMATION_RESULT, x, y, color, HitObjectType.CIRCLE, null, expand, true));
-		if (!Options.isMirror()) {
+		if (!OPTION_DANCE_MIRROR.state) {
 			return;
 		}
 		float[] m = Utils.mirrorPoint(x, y);
@@ -1338,10 +1350,9 @@ public class GameData {
 			score += hitValue;
 			incrementComboStreak();
 
-			if (!Options.isPerfectHitBurstEnabled())
-				;  // hide perfect hit results
-			else
+			if (OPTION_SHOW_PERFECT_HIT.state) {
 				hitResultList.add(new HitObjectResult(time, result, x, y, null, HitObjectType.SLIDERTICK, null, false, false));
+			}
 		}
 		fullObjectCount++;
 	}
@@ -1527,7 +1538,7 @@ public class GameData {
 		if (hitResult == HIT_MISS && (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive()))
 			return;  // "relax" and "autopilot" mods: hide misses
 
-		boolean hideResult = (hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K) && !Options.isPerfectHitBurstEnabled();
+		boolean hideResult = (hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K) && !OPTION_SHOW_PERFECT_HIT.state;
 		hitResultList.add(new HitObjectResult(time, hitResult, x, y, color, hitResultType, curve, expand, hideResult));
 	}
 

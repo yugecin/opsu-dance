@@ -18,10 +18,8 @@
 
 package itdelatrisu.opsu.downloads;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.Download.DownloadListener;
-import itdelatrisu.opsu.ui.UI;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,22 +37,26 @@ import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Handles automatic program updates.
  */
 public class Updater {
-	/** The single instance of this class. */
-	private static Updater updater = new Updater();
+
+	@Inject
+	private Configuration config;
+
+	private static Updater updater;
+
+	public static Updater get() {
+		return updater;
+	}
 
 	/** The exit confirmation message. */
 	public static final String EXIT_CONFIRMATION = "An opsu! update is being downloaded.\nAre you sure you want to quit opsu!?";
-
-	/**
-	 * Returns the single instance of this class.
-	 */
-	public static Updater get() { return updater; }
 
 	/** Updater status. */
 	public enum Status {
@@ -117,11 +119,10 @@ public class Updater {
 		return currentVersion.getMajorVersion() + "." + currentVersion.getMinorVersion() + "." + currentVersion.getIncrementalVersion();
 	}
 
-	/**
-	 * Constructor.
-	 */
-	private Updater() {
+	@Inject
+	public Updater() {
 		status = Status.INITIAL;
+		updater = this;
 	}
 
 	/**
@@ -144,7 +145,7 @@ public class Updater {
 			Date date = null;
 			try {
 				Properties props = new Properties();
-				props.load(ResourceLoader.getResourceAsStream(Options.VERSION_FILE));
+				props.load(ResourceLoader.getResourceAsStream(config.VERSION_FILE));
 				String build = props.getProperty("build.date");
 				if (build == null || build.equals("${timestamp}") || build.equals("${maven.build.timestamp}"))
 					date = new Date();
@@ -206,23 +207,23 @@ public class Updater {
 	 * @throws IOException if an I/O exception occurs
 	 */
 	public void checkForUpdates() throws IOException {
-		if (status != Status.INITIAL || Options.USE_XDG)
+		if (status != Status.INITIAL || config.USE_XDG)
 			return;
 
 		status = Status.CHECKING;
 
 		// get current version
 		Properties props = new Properties();
-		props.load(ResourceLoader.getResourceAsStream(Options.VERSION_FILE));
+		props.load(ResourceLoader.getResourceAsStream(config.VERSION_FILE));
 		if ((currentVersion = getVersion(props)) == null)
 			return;
 
 		// get latest version
 		String s = null;
 		try {
-			s = Utils.readDataFromUrl(new URL(Options.VERSION_REMOTE));
+			s = Utils.readDataFromUrl(new URL(config.VERSION_REMOTE));
 		} catch (UnknownHostException e) {
-			Log.warn(String.format("Check for updates failed. Please check your internet connection, or your connection to %s.", Options.VERSION_REMOTE));
+			Log.warn(String.format("Check for updates failed. Please check your internet connection, or your connection to %s.", config.VERSION_REMOTE));
 		}
 		if (s == null) {
 			status = Status.CONNECTION_ERROR;

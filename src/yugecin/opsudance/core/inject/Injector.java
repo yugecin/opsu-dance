@@ -101,6 +101,11 @@ public abstract class Injector implements InstanceContainer, Binder {
 		return object;
 	}
 
+	@Override
+	public <T> T injectFields(T obj) {
+		return injectFields(obj, obj.getClass());
+	}
+
 	public final <T> Binder<T> bind(Class<T> type) {
 		lastType = type;
 		return this;

@@ -22,10 +22,8 @@ import awlex.ospu.movers.factories.SpiralMoverFactory;
 import awlex.ospu.polymover.factory.ArcFactory;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
 import awlex.ospu.spinners.SpiralSpinner;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
-import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
@@ -37,9 +35,12 @@ import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.SliderMoverController;
+import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.spinners.*;
 
 import java.awt.*;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class Dancer {
 
@@ -193,12 +194,12 @@ public class Dancer {
 			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
-			if (c.isSlider() && Options.isLazySliders() && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= Circle.diameter * 0.8f) {
+			if (c.isSlider() && OPTION_DANCE_LAZY_SLIDERS.state && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
 				Slider s = (Slider) c;
 				Vec2f mid = s.getCurve().pointAt(1f);
-				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
+				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
 					mid = s.getCurve().pointAt(0.5f);
-					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= Circle.diameter * 0.8f) {
+					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
 						isCurrentLazySlider = true;
 					}
 				}
@@ -250,8 +251,8 @@ public class Dancer {
 			}
 		}
 		Pippi.dance(time, c, isCurrentLazySlider);
-		x = Utils.clamp(x, 10, Options.width - 10);
-		y = Utils.clamp(y, 10, Options.height - 10);
+		x = Utils.clamp(x, 10, width - 10);
+		y = Utils.clamp(y, 10, height - 10);
 	}
 
 	private void createNewMover() {

@@ -20,9 +20,7 @@ package itdelatrisu.opsu.objects;
 
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.HitObjectType;
-import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
@@ -30,16 +28,20 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 
 import org.newdawn.slick.Color;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.render.GameObjectRenderer;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Data type representing a circle object.
  */
 public class Circle extends GameObject {
-	/** The diameter of hit circles. */
-	public static float diameter;
+
+	@Inject
+	private GameObjectRenderer gameObjectRenderer;
 
 	/** The associated HitObject. */
 	private HitObject hitObject;
@@ -61,18 +63,6 @@ public class Circle extends GameObject {
 	private boolean comboEnd;
 
 	private int comboColorIndex;
-
-	/**
-	 * Initializes the Circle data type with map modifiers, images, and dimensions.
-	 * @param circleDiameter the circle diameter
-	 */
-	public static void init(float circleDiameter) {
-		diameter = circleDiameter * HitObject.getXMultiplier();  // convert from Osupixels (640x480)
-		int diameterInt = (int) diameter;
-		GameImage.HITCIRCLE.setImage(GameImage.HITCIRCLE.getImage().getScaledCopy(diameterInt, diameterInt));
-		GameImage.HITCIRCLE_OVERLAY.setImage(GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(diameterInt, diameterInt));
-		GameImage.APPROACHCIRCLE.setImage(GameImage.APPROACHCIRCLE.getImage().getScaledCopy(diameterInt, diameterInt));
-	}
 
 	/**
 	 * Constructor.
@@ -129,16 +119,10 @@ public class Circle extends GameObject {
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 
-		if (timeDiff >= 0 && !GameMod.HIDDEN.isActive() && Options.isDrawApproach())
-			GameImage.APPROACHCIRCLE.getImage().getScaledCopy(approachScale).drawCentered(x, y, color);
-		GameImage.HITCIRCLE.getImage().drawCentered(x, y, color);
-		boolean overlayAboveNumber = Options.getSkin().isHitCircleOverlayAboveNumber();
-		if (!overlayAboveNumber)
-			GameImage.HITCIRCLE_OVERLAY.getImage().drawCentered(x, y, Colors.WHITE_FADE);
-		data.drawSymbolNumber(hitObject.getComboNumber(), x, y,
-				GameImage.HITCIRCLE.getImage().getWidth() * 0.40f / data.getDefaultSymbolImage(0).getHeight(), alpha);
-		if (overlayAboveNumber)
-			GameImage.HITCIRCLE_OVERLAY.getImage().drawCentered(x, y, Colors.WHITE_FADE);
+		if (timeDiff >= 0) {
+			gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
+		}
+		gameObjectRenderer.renderHitCircle(x, y, color, hitObject.getComboNumber(), alpha);
 
 		Colors.WHITE_FADE.a = oldAlpha;
 
@@ -172,7 +156,7 @@ public class Circle extends GameObject {
 	@Override
 	public boolean mousePressed(int x, int y, int trackPosition) {
 		double distance = Math.hypot(this.x - x, this.y - y);
-		if (distance < diameter / 2) {
+		if (distance < gameObjectRenderer.getCircleDiameter() / 2) {
 			int timeDiff = trackPosition - hitObject.getTime();
 			int result = hitResult(timeDiff);
 
@@ -195,7 +179,7 @@ public class Circle extends GameObject {
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
 			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag
 				data.sendHitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Options.isMirror() && GameMod.AUTO.isActive()) {
+				if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.sendHitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}
@@ -210,7 +194,7 @@ public class Circle extends GameObject {
 		else if (isAutoMod) {
 			if (Math.abs(trackPosition - time) < hitResultOffset[GameData.HIT_300]) {
 				data.sendHitResult(time, GameData.HIT_300, x, y, color, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false);
-				if (Options.isMirror() && GameMod.AUTO.isActive()) {
+				if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 					float[] m = Utils.mirrorPoint(x, y);
 					data.sendHitResult(time, GameData.HIT_300, m[0], m[1], mirrorColor, comboEnd, hitObject, HitObjectType.CIRCLE, true, 0, null, false, false);
 				}

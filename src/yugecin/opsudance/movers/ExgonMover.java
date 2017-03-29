@@ -17,10 +17,12 @@
  */
 package yugecin.opsudance.movers;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.GameObject;
+import yugecin.opsudance.options.Options;
 
 import java.util.Random;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class ExgonMover extends Mover {
 
@@ -30,15 +32,15 @@ public class ExgonMover extends Mover {
 
 	public ExgonMover(GameObject start, GameObject end, int dir) {
 		super(start, end, dir);
-		nextTime = start.getEndTime() + Options.getExgonDelay();
+		nextTime = start.getEndTime() + OPTION_DANCE_EXGON_DELAY.val;
 		pos = new double[] { start.end.x, start.end.y };
 	}
 
 	@Override
 	public double[] getPointAt(int time) {
 		if (time > nextTime) {
-			nextTime = time + Options.getExgonDelay();
-			if (time > getEnd().getEndTime() - Options.getExgonDelay()) {
+			nextTime = time + OPTION_DANCE_EXGON_DELAY.val;
+			if (time > getEnd().getEndTime() - OPTION_DANCE_EXGON_DELAY.val) {
 				pos[0] = endX;
 				pos[1] = endY;
 			} else {

@@ -4,11 +4,11 @@ package awlex.ospu;
  * Created by Awlex on 10.10.2016.
  */
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import yugecin.opsudance.options.Options;
 
 /**
  * This class is just a dummy {@link GameObject} to place in the middle of 2 GameObjects.

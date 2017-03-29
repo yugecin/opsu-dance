@@ -18,8 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.Options;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -29,20 +27,27 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Unpacker for OSZ (ZIP) archives.
  */
 public class OszUnpacker {
+
+	@Inject
+	private Configuration config;
+
 	/** The index of the current file being unpacked. */
-	private static int fileIndex = -1;
+	private int fileIndex = -1;
 
 	/** The total number of files to unpack. */
-	private static File[] files;
+	private File[] files;
 
-	// This class should not be instantiated.
-	private OszUnpacker() {}
+	@Inject
+	public OszUnpacker() {
+	}
 
 	/**
 	 * Invokes the unpacker for each OSZ archive in a root directory.
@@ -51,11 +56,11 @@ public class OszUnpacker {
 	 * @return an array containing the new (unpacked) directories, or null
 	 *         if no OSZs found
 	 */
-	public static File[] unpackAllFiles(File root, File dest) {
+	public File[] unpackAll() {
 		List<File> dirs = new ArrayList<File>();
 
 		// find all OSZ files
-		files = root.listFiles(new FilenameFilter() {
+		files = config.oszDir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.toLowerCase().endsWith(".osz");
@@ -67,13 +72,13 @@ public class OszUnpacker {
 		}
 
 		// unpack OSZs
-		BeatmapWatchService ws = (Options.isWatchServiceEnabled()) ? BeatmapWatchService.get() : null;
+		BeatmapWatchService ws = BeatmapWatchService.get();
 		if (ws != null)
 			ws.pause();
 		for (File file : files) {
 			fileIndex++;
 			String dirName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-			File songDir = new File(dest, dirName);
+			File songDir = new File(config.beatmapDir, dirName);
 			if (!songDir.isDirectory()) {
 				songDir.mkdir();
 				unzip(file, songDir);
@@ -94,7 +99,7 @@ public class OszUnpacker {
 	 * @param file the ZIP archive
 	 * @param dest the destination directory
 	 */
-	private static void unzip(File file, File dest) {
+	private void unzip(File file, File dest) {
 		try {
 			ZipFile zipFile = new ZipFile(file);
 			zipFile.extractAll(dest.getAbsolutePath());
@@ -108,7 +113,7 @@ public class OszUnpacker {
 	/**
 	 * Returns the name of the current file being unpacked, or null if none.
 	 */
-	public static String getCurrentFileName() {
+	public String getCurrentFileName() {
 		if (files == null || fileIndex == -1)
 			return null;
 
@@ -119,10 +124,11 @@ public class OszUnpacker {
 	 * Returns the progress of file unpacking, or -1 if not unpacking.
 	 * @return the completion percent [0, 100] or -1
 	 */
-	public static int getUnpackerProgress() {
+	public int getUnpackerProgress() {
 		if (files == null || fileIndex == -1)
 			return -1;
 
 		return (fileIndex + 1) * 100 / files.length;
 	}
+
 }

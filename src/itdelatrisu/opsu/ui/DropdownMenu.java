@@ -93,8 +93,9 @@ public class DropdownMenu<E> extends Component {
 	 * @throws IllegalArgumentException if {@code index} is negative or greater than or equal to size
 	 */
 	public void setSelectedIndex(int index) {
-		if (index < 0 || index >= items.length)
+		if (index < 0 || items.length <= index) {
 			throw new IllegalArgumentException();
+		}
 		this.selectedItemIndex = index;
 	}
 
@@ -252,7 +253,7 @@ public class DropdownMenu<E> extends Component {
 			return;
 		}
 		this.expanded = (idx == -1) && !expanded;
-		if (idx >= 0 && selectedItemIndex != idx) {
+		if (0 <= idx && idx < items.length && selectedItemIndex != idx) {
 			this.selectedItemIndex = idx;
 			itemSelected(idx, items[selectedItemIndex]);
 		}

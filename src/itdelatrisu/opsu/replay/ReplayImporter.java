@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.replay;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.db.ScoreDB;
@@ -31,32 +30,42 @@ import java.nio.file.StandardCopyOption;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Importer for replay files.
  */
 public class ReplayImporter {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
+	@Inject
+	private Configuration config;
+
 	/** The subdirectory (within the replay import directory) to move replays that could not be imported. */
-	private static final String FAILED_IMPORT_DIR = "failed";
+	private final String FAILED_IMPORT_DIR = "failed";
 
 	/** The index of the current file being imported. */
-	private static int fileIndex = -1;
+	private int fileIndex = -1;
 
 	/** The total number of replays to import. */
-	private static File[] files;
+	private File[] files;
 
-	// This class should not be instantiated.
-	private ReplayImporter() {}
+	@Inject
+	public ReplayImporter() {
+	}
 
 	/**
-	 * Invokes the importer for each OSR file in a directory, adding the replay
+	 * Invokes the importer for each OSR file in the replay import dir, adding the replay
 	 * to the score database and moving the file into the replay directory.
-	 * @param dir the directory
 	 */
-	public static void importAllReplaysFromDir(File dir) {
+	public void importAll() {
 		// find all OSR files
-		files = dir.listFiles(new FilenameFilter() {
+		files = config.replayImportDir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.toLowerCase().endsWith(".osr");
@@ -68,20 +77,17 @@ public class ReplayImporter {
 		}
 
 		// get replay directory
-		File replayDir = Options.getReplayDir();
-		if (!replayDir.isDirectory()) {
-			if (!replayDir.mkdir()) {
-				String err = String.format("Failed to create replay directory '%s'.", replayDir.getAbsolutePath());
-				Log.error(err);
-				EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
-				return;
-			}
+		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
+			String err = String.format("Failed to create replay directory '%s'.", config.replayDir.getAbsolutePath());
+			Log.error(err);
+			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			return;
 		}
 
 		// import OSRs
 		for (File file : files) {
 			fileIndex++;
-			Replay r = new Replay(file);
+			Replay r = instanceContainer.injectFields(new Replay(file));
 			try {
 				r.loadHeader();
 			} catch (IOException e) {
@@ -97,11 +103,11 @@ public class ReplayImporter {
 				ScoreDB.addScore(r.getScoreData(beatmap));
 
 				// move to replay directory
-				File moveToFile = new File(replayDir, String.format("%s.osr", r.getReplayFilename()));
+				File moveToFile = new File(config.replayDir, String.format("%s.osr", r.getReplayFilename()));
 				try {
 					Files.move(file.toPath(), moveToFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					Log.warn(String.format("Failed to move replay '%s' to the replay directory '%s'.", file, replayDir), e);
+					Log.warn(String.format("Failed to move replay '%s' to the replay directory '%s'.", file, config.replayDir), e);
 				}
 			} else {
 				moveToFailedDirectory(file);
@@ -119,8 +125,8 @@ public class ReplayImporter {
 	 * Moves a replay file into the failed import directory.
 	 * @param file the file to move
 	 */
-	private static void moveToFailedDirectory(File file) {
-		File dir = new File(Options.getReplayImportDir(), FAILED_IMPORT_DIR);
+	private void moveToFailedDirectory(File file) {
+		File dir = new File(config.replayImportDir, FAILED_IMPORT_DIR);
 		dir.mkdir();
 		File moveToFile = new File(dir, file.getName());
 		try {
@@ -133,7 +139,7 @@ public class ReplayImporter {
 	/**
 	 * Returns the name of the current file being imported, or null if none.
 	 */
-	public static String getCurrentFileName() {
+	public String getCurrentFileName() {
 		if (files == null || fileIndex == -1)
 			return null;
 
@@ -144,10 +150,11 @@ public class ReplayImporter {
 	 * Returns the progress of replay importing, or -1 if not importing.
 	 * @return the completion percent [0, 100] or -1
 	 */
-	public static int getLoadingProgress() {
+	public int getLoadingProgress() {
 		if (files == null || fileIndex == -1)
 			return -1;
 
 		return (fileIndex + 1) * 100 / files.length;
 	}
+
 }

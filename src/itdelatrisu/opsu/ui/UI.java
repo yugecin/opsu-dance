@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.ui;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
@@ -28,13 +27,13 @@ import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.ui.BackButton;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Draws common UI components.
@@ -70,9 +69,6 @@ public class UI {
 	 */
 	public static void init(DisplayContainer displayContainer) {
 		UI.displayContainer = displayContainer;
-	}
-
-	public static void revalidate() {
 		backButton = new BackButton(displayContainer);
 	}
 
@@ -151,7 +147,7 @@ public class UI {
 
 		img.drawCentered(displayContainer.width - img.getWidth() / 2f + xOffset, displayContainer.height / 2f);
 		float barHeight = img.getHeight() * 0.9f;
-		float volume = Options.getMasterVolume();
+		float volume = OPTION_MASTER_VOLUME.val / 100f;
 		g.setColor(Color.white);
 		g.fillRoundRect(
 				displayContainer.width - (img.getWidth() * 0.368f) + xOffset,
@@ -179,7 +175,8 @@ public class UI {
 	 */
 	public static void changeVolume(int units) {
 		final float UNIT_OFFSET = 0.05f;
-		Options.setMasterVolume(Utils.clamp(Options.getMasterVolume() + (UNIT_OFFSET * units), 0f, 1f));
+		float volume = Utils.clamp(OPTION_MASTER_VOLUME.val / 100f + (UNIT_OFFSET * units), 0f, 1f);
+		OPTION_MASTER_VOLUME.setValue((int) (volume * 100f));
 		if (volumeDisplay == -1)
 			volumeDisplay = 0;
 		else if (volumeDisplay >= VOLUME_DISPLAY_TIME / 10)
@@ -196,6 +193,9 @@ public class UI {
 		int progress;
 
 		// determine current action
+		//
+		/*
+		TODO
 		if ((file = OszUnpacker.getCurrentFileName()) != null) {
 			text = "Unpacking new beatmaps...";
 			progress = OszUnpacker.getUnpackerProgress();
@@ -211,12 +211,17 @@ public class UI {
 			progress = SoundController.getLoadingProgress();
 		} else
 			return;
+		*/
+
+		if (true) {
+			return; // TODO
+		}
 
 		// draw loading info
 		float marginX = displayContainer.width * 0.02f, marginY = displayContainer.height * 0.02f;
 		float lineY = displayContainer.height - marginY;
 		int lineOffsetY = Fonts.MEDIUM.getLineHeight();
-		if (Options.isLoadVerbose()) {
+		if (OPTION_LOAD_VERBOSE.state) {
 			// verbose: display percentages and file names
 			Fonts.MEDIUM.drawString(
 					marginX, lineY - (lineOffsetY * 2),

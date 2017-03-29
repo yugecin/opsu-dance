@@ -18,12 +18,10 @@
 
 package itdelatrisu.opsu.audio;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.HitSound.SampleSet;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.Download.DownloadListener;
-import itdelatrisu.opsu.ui.UI;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +42,10 @@ import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Controller for all (non-music) sound components.
@@ -190,7 +192,7 @@ public class SoundController {
 	 */
 	private static String getSoundFileName(String filename) {
 		String wav = String.format("%s.wav", filename), mp3 = String.format("%s.mp3", filename);
-		File skinDir = Options.getSkin().getDirectory();
+		File skinDir = SkinService.skin.getDirectory();
 		if (skinDir != null) {
 			File skinWAV = new File(skinDir, wav), skinMP3 = new File(skinDir, mp3);
 			if (skinWAV.isFile())
@@ -209,8 +211,9 @@ public class SoundController {
 	 * Loads all sound files.
 	 */
 	public static void init() {
-		if (Options.isSoundDisabled())
+		if (OPTION_DISABLE_SOUNDS.state) {
 			return;
+		}
 
 		currentFileIndex = 0;
 
@@ -290,7 +293,7 @@ public class SoundController {
 	 * @param s the sound effect
 	 */
 	public static void playSound(SoundComponent s) {
-		playClip(s.getClip(), Options.getEffectVolume() * Options.getMasterVolume(), null);
+		playClip(s.getClip(), OPTION_EFFECT_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f, null);
 	}
 
 	/**
@@ -303,16 +306,16 @@ public class SoundController {
 		if (hitSound < 0)
 			return;
 
-		if (Options.getSampleVolumeOverride() > 0) {
-			sampleVolumeMultiplier = Options.getSampleVolumeOverride();
+		if (OPTION_SAMPLE_VOLUME_OVERRIDE.val > 0) {
+			sampleVolumeMultiplier = OPTION_SAMPLE_VOLUME_OVERRIDE.val / 100f;
 		}
 
-		float volume = Options.getHitSoundVolume() * sampleVolumeMultiplier * Options.getMasterVolume();
+		float volume = OPTION_HITSOUND_VOLUME.val / 100f * sampleVolumeMultiplier * OPTION_MASTER_VOLUME.val / 100f;
 		if (volume == 0f)
 			return;
 
 		// play all sounds
-		if (hitSound == HitObject.SOUND_NORMAL || Options.getSkin().isLayeredHitSounds()) {
+		if (hitSound == HitObject.SOUND_NORMAL || SkinService.skin.isLayeredHitSounds()) {
 			HitSound.setSampleSet(sampleSet);
 			playClip(HitSound.NORMAL.getClip(), volume, null);
 		}
@@ -333,7 +336,7 @@ public class SoundController {
 	 * @param s the hit sound
 	 */
 	public static void playHitSound(SoundComponent s) {
-		playClip(s.getClip(), Options.getHitSoundVolume() * sampleVolumeMultiplier * Options.getMasterVolume(), null);
+		playClip(s.getClip(), OPTION_HITSOUND_VOLUME.val / 100f * sampleVolumeMultiplier * OPTION_MASTER_VOLUME.val / 100f, null);
 	}
 
 	/**
@@ -370,15 +373,16 @@ public class SoundController {
 	 * @return true if playing, false otherwise
 	 * @throws SlickException if any error occurred
 	 */
-	public static synchronized boolean playTrack(String url, String name, boolean isMP3, LineListener listener)
+	public static synchronized boolean playTrack(Configuration config, String url, String name, boolean isMP3, LineListener listener)
 		throws SlickException {
 		// stop previous track
 		stopTrack();
 
 		// download new track
-		File dir = Options.TEMP_DIR;
-		if (!dir.isDirectory())
+		File dir = config.TEMP_DIR;
+		if (!dir.isDirectory()) {
 			dir.mkdir();
+		}
 		String filename = String.format("%s.%s", name, isMP3 ? "mp3" : "wav");
 		final File downloadFile = new File(dir, filename);
 		boolean complete;
@@ -406,7 +410,7 @@ public class SoundController {
 			try {
 				AudioInputStream audioIn = AudioSystem.getAudioInputStream(downloadFile);
 				currentTrack = loadClip(filename, audioIn, isMP3);
-				playClip(currentTrack, Options.getMusicVolume() * Options.getMasterVolume(), listener);
+				playClip(currentTrack, OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f, listener);
 				return true;
 			} catch (Exception e) {
 				throw new SlickException(String.format("Failed to load clip '%s'.", url));

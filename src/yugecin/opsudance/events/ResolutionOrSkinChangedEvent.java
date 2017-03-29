@@ -19,4 +19,14 @@ package yugecin.opsudance.events;
 
 public class ResolutionOrSkinChangedEvent {
 
+	public final String skin;
+	public final int width;
+	public final int height;
+
+	public ResolutionOrSkinChangedEvent(String skin, int width, int height) {
+		this.skin = skin;
+		this.width = width;
+		this.height = height;
+	}
+
 }

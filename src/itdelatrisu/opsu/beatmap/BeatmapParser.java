@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.io.MD5InputStreamWrapper;
@@ -36,55 +35,69 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Parser for beatmaps.
  */
 public class BeatmapParser {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
+	@Inject
+	private Configuration config;
+
 	/** The string lookup database. */
 	private static HashMap<String, String> stringdb = new HashMap<String, String>();
 
 	/** The expected pattern for beatmap directories, used to find beatmap set IDs. */
-	private static final String DIR_MSID_PATTERN = "^\\d+ .*";
+	private final String DIR_MSID_PATTERN = "^\\d+ .*";
 
 	/** The current file being parsed. */
-	private static File currentFile;
+	private File currentFile;
 
 	/** The current directory number while parsing. */
-	private static int currentDirectoryIndex = -1;
+	private int currentDirectoryIndex = -1;
 
 	/** The total number of directories to parse. */
-	private static int totalDirectories = -1;
+	private int totalDirectories = -1;
 
 	/** Parser statuses. */
 	public enum Status { NONE, PARSING, CACHE, INSERTING };
 
 	/** The current status. */
-	private static Status status = Status.NONE;
+	private Status status = Status.NONE;
 
 	/** If no Provider supports a MessageDigestSpi implementation for the MD5 algorithm. */
-	private static boolean hasNoMD5Algorithm = false;
+	private boolean hasNoMD5Algorithm = false;
 
-	// This class should not be instantiated.
-	private BeatmapParser() {}
+	@Inject
+	public BeatmapParser() {
+	}
 
 	/**
 	 * Invokes parser for each OSU file in a root directory and
 	 * adds the beatmaps to a new BeatmapSetList.
 	 * @param root the root directory (search has depth 1)
 	 */
-	public static void parseAllFiles(File root) {
+	public void parseAll() {
 		// create a new BeatmapSetList
 		BeatmapSetList.create();
 
 		// create a new watch service
-		if (Options.isWatchServiceEnabled())
-			BeatmapWatchService.create();
+		if (OPTION_ENABLE_WATCH_SERVICE.state) {
+			BeatmapWatchService.create(instanceContainer);
+		}
 
 		// parse all directories
-		parseDirectories(root.listFiles());
+		parseDirectories(config.beatmapDir.listFiles());
 	}
 
 	/**
@@ -93,7 +106,7 @@ public class BeatmapParser {
 	 * @param dirs the array of directories to parse
 	 * @return the last BeatmapSetNode parsed, or null if none
 	 */
-	public static BeatmapSetNode parseDirectories(File[] dirs) {
+	public BeatmapSetNode parseDirectories(File[] dirs) {
 		if (dirs == null)
 			return null;
 
@@ -111,7 +124,7 @@ public class BeatmapParser {
 		List<Beatmap> parsedBeatmaps = new LinkedList<Beatmap>();  // loaded from parser
 
 		// watch service
-		BeatmapWatchService ws = (Options.isWatchServiceEnabled()) ? BeatmapWatchService.get() : null;
+		BeatmapWatchService ws = BeatmapWatchService.get();
 
 		// parse directories
 		BeatmapSetNode lastNode = null;
@@ -215,7 +228,7 @@ public class BeatmapParser {
 		return lastNode;
 	}
 
-	public static void parseOnlyTimingPoints(Beatmap map) {
+	public void parseOnlyTimingPoints(Beatmap map) {
 		if (map == null || map.getFile() == null || !map.getFile().exists()) {
 			return;
 		}
@@ -259,7 +272,7 @@ public class BeatmapParser {
 		}
 	}
 
-	private static void parseSectionTimingPoints(Beatmap beatmap, String line) {
+	private void parseSectionTimingPoints(Beatmap beatmap, String line) {
 		TimingPoint timingPoint = new TimingPoint(line);
 		if(!timingPoint.isInherited()) {
 			int bpm = Math.round(60000 / timingPoint.getBeatLength());
@@ -282,7 +295,7 @@ public class BeatmapParser {
 	 * @param parseObjects if true, hit objects will be fully parsed now
 	 * @return the new beatmap
 	 */
-	private static Beatmap parseFile(File file, File dir, ArrayList<Beatmap> beatmaps, boolean parseObjects) {
+	private Beatmap parseFile(File file, File dir, ArrayList<Beatmap> beatmaps, boolean parseObjects) {
 		Beatmap beatmap = new Beatmap(file);
 		beatmap.timingPoints = new ArrayList<TimingPoint>();
 
@@ -523,7 +536,7 @@ public class BeatmapParser {
 						switch (tokens[0]) {
 						case "0":  // background
 							tokens[2] = tokens[2].replaceAll("^\"|\"$", "");
-							String ext = BeatmapParser.getExtension(tokens[2]);
+							String ext = Utils.getFileExtension(tokens[2]);
 							if (ext.equals("jpg") || ext.equals("png"))
 								beatmap.bg = new File(dir, getDBString(tokens[2]));
 							break;
@@ -767,6 +780,9 @@ public class BeatmapParser {
 
 			// combo info
 			Color[] combo = beatmap.getComboColors();
+			if (combo == null) {
+				combo = SkinService.skin.getComboColors();
+			}
 			int comboIndex = 0;   // color index
 			int comboNumber = 1;  // combo number
 
@@ -832,7 +848,7 @@ public class BeatmapParser {
 	 * Splits line into two strings: tag, value.
 	 * If no ':' character is present, null will be returned.
 	 */
-	private static String[] tokenize(String line) {
+	private String[] tokenize(String line) {
 		int index = line.indexOf(':');
 		if (index == -1) {
 			Log.debug(String.format("Failed to tokenize line: '%s'.", line));
@@ -846,18 +862,9 @@ public class BeatmapParser {
 	}
 
 	/**
-	 * Returns the file extension of a file.
-	 * @param file the file name
-	 */
-	public static String getExtension(String file) {
-		int i = file.lastIndexOf('.');
-		return (i != -1) ? file.substring(i + 1).toLowerCase() : "";
-	}
-
-	/**
 	 * Returns the name of the current file being parsed, or null if none.
 	 */
-	public static String getCurrentFileName() {
+	public String getCurrentFileName() {
 		if (status == Status.PARSING)
 			return (currentFile != null) ? currentFile.getName() : null;
 		else
@@ -868,7 +875,7 @@ public class BeatmapParser {
 	 * Returns the progress of file parsing, or -1 if not parsing.
 	 * @return the completion percent [0, 100] or -1
 	 */
-	public static int getParserProgress() {
+	public int getParserProgress() {
 		if (currentDirectoryIndex == -1 || totalDirectories == -1)
 			return -1;
 
@@ -878,7 +885,9 @@ public class BeatmapParser {
 	/**
 	 * Returns the current parser status.
 	 */
-	public static Status getStatus() { return status; }
+	public Status getStatus() {
+		return status;
+	}
 
 	/**
 	 * Returns the String object in the database for the given String.
@@ -894,4 +903,5 @@ public class BeatmapParser {
 		} else
 			return DBString;
 	}
+
 }

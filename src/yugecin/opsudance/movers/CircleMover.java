@@ -17,9 +17,9 @@
  */
 package yugecin.opsudance.movers;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
+import yugecin.opsudance.options.Options;
 
 public class CircleMover extends Mover {
 

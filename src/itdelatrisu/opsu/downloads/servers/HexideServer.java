@@ -30,6 +30,8 @@ import java.net.URLEncoder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 
 /**
  * Download server: https://osu.hexide.com/
@@ -37,6 +39,10 @@ import yugecin.opsudance.core.errorhandling.ErrorHandler;
  * <i>This server went offline in 2016.</i>
  */
 public class HexideServer extends DownloadServer {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
 	/** Server name. */
 	private static final String SERVER_NAME = "Hexide";
 
@@ -58,8 +64,9 @@ public class HexideServer extends DownloadServer {
 	/** Total result count from the last query. */
 	private int totalResults = -1;
 
-	/** Constructor. */
-	public HexideServer() {}
+	@Inject
+	public HexideServer() {
+	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -117,10 +124,10 @@ public class HexideServer extends DownloadServer {
 						artist = creator = "?";
 					}
 				}
-				nodes[i] = new DownloadNode(
+				nodes[i] = instanceContainer.injectFields(new DownloadNode(
 					item.getInt("ranked_id"), item.getString("date"),
 					title, null, artist, null, creator
-				);
+				));
 			}
 
 			// store total result count

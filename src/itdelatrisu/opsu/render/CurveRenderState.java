@@ -18,15 +18,15 @@
 package itdelatrisu.opsu.render;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
-import itdelatrisu.opsu.objects.Circle;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Iterator;
+import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -37,6 +37,9 @@ import org.lwjgl.opengl.GL20;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.render.GameObjectRenderer;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Hold the temporary render state that needs to be restored again after the new
@@ -69,6 +72,8 @@ public class CurveRenderState {
 	private int spliceFrom;
 	private int spliceTo;
 
+	protected List<Integer> pointsToRender;
+
 	private final int mirrors;
 
 	/**
@@ -96,7 +101,7 @@ public class CurveRenderState {
 	 */
 	public static void shutdown() {
 		staticState.shutdown();
-		//FrameBufferCache.shutdown();
+		FrameBufferCache.shutdown();
 	}
 
 	/**
@@ -108,7 +113,7 @@ public class CurveRenderState {
 		this.hitObject = hitObject;
 		this.curve = curve;
 		if (isKnorkeSlider) {
-			this.mirrors = Options.getMergingSlidersMirrorPool();
+			this.mirrors = OPTION_MERGING_SLIDERS_MIRROR_POOL.val;
 		} else {
 			this.mirrors = 1;
 		}
@@ -136,6 +141,14 @@ public class CurveRenderState {
 		spliceTo = to * 2;
 		firstPointDrawn = -1; // force redraw
 		lastPointDrawn = -1; // force redraw
+	}
+
+	public void draw(Color color, Color borderColor, List<Integer> pointsToRender) {
+		lastPointDrawn = -1;
+		firstPointDrawn = -1;
+		this.pointsToRender = pointsToRender;
+		draw(color, borderColor, 0, curve.length);
+		this.pointsToRender = null;
 	}
 
 	/**
@@ -303,7 +316,7 @@ public class CurveRenderState {
 				double diff_x = x - last_x;
 				double diff_y = y - last_y;
 				float dist = Utils.distance(x, y, last_x, last_y);
-				if (dist < Circle.diameter / 8) {
+				if (dist < GameObjectRenderer.instance.getCircleDiameter() / 8) {
 					x = (float) (x - diff_x / 2);
 					y = (float) (y - diff_y / 2);
 				} else {
@@ -344,11 +357,15 @@ public class CurveRenderState {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 		int max = mirrors;
-		if (!Options.isMirror()) {
+		if (!OPTION_DANCE_MIRROR.state) {
 			max = 1;
 		}
 		for (int i = 0; i < max; i++) {
-			renderCurve(from, to, i);
+			if (pointsToRender == null) {
+				renderCurve(from, to, i);
+			} else {
+				renderCurve(i);
+			}
 		}
 		GL11.glFlush();
 		GL20.glDisableVertexAttribArray(staticState.texCoordLoc);
@@ -367,6 +384,16 @@ public class CurveRenderState {
 			}
 			final int index = i + curve.length * 2 * mirror;
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+		}
+	}
+
+	private void renderCurve(int mirror) {
+		Iterator<Integer> iter = pointsToRender.iterator();
+		while (iter.hasNext()) {
+			for (int i = iter.next() * 2, end = iter.next() * 2 - 1; i < end; ++i) {
+				final int index = i + curve.length * 2 * mirror;
+				GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, index * (NewCurveStyleState.DIVIDES + 2), NewCurveStyleState.DIVIDES + 2);
+			}
 		}
 	}
 

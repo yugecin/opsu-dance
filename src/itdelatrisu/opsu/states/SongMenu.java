@@ -18,13 +18,8 @@
 
 package itdelatrisu.opsu.states;
 
-import itdelatrisu.opsu.GameData;
+import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.GameData.Grade;
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.GameMod;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.ScoreData;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MultiClip;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -74,7 +69,11 @@ import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * "Song Selection" state.
@@ -86,6 +85,15 @@ public class SongMenu extends ComplexOpsuState {
 
 	@Inject
 	private InstanceContainer instanceContainer;
+
+	@Inject
+	private Configuration config;
+
+	@Inject
+	private OszUnpacker oszUnpacker;
+
+	@Inject
+	private BeatmapParser beatmapParser;
 
 	/** The max number of song buttons to be shown on each screen. */
 	public static final int MAX_SONG_BUTTONS = 6;
@@ -236,18 +244,11 @@ public class SongMenu extends ComplexOpsuState {
 
 		/** Reloads all beatmaps. */
 		private void reloadBeatmaps() {
-			File beatmapDir = Options.getBeatmapDir();
-
 			if (fullReload) {
-				// clear the beatmap cache
 				BeatmapDB.clearDatabase();
-
-				// invoke unpacker
-				OszUnpacker.unpackAllFiles(Options.getOSZDir(), beatmapDir);
+				oszUnpacker.unpackAll();
 			}
-
-			// invoke parser
-			BeatmapParser.parseAllFiles(beatmapDir);
+			beatmapParser.parseAll();
 		}
 	}
 
@@ -329,7 +330,7 @@ public class SongMenu extends ComplexOpsuState {
 
 	public SongMenu(DisplayContainer displayContainer) {
 		super();
-		optionsOverlay = new OptionsOverlay(displayContainer, OptionsMenu.normalOptions);
+		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
 		overlays.add(optionsOverlay);
 	}
 
@@ -599,7 +600,7 @@ public class SongMenu extends ComplexOpsuState {
 			// song info text
 			if (songInfo == null) {
 				songInfo = focusNode.getInfo();
-				if (Options.useUnicodeMetadata()) {  // load glyphs
+				if (OPTION_SHOW_UNICODE.state) {
 					Beatmap beatmap = focusNode.getBeatmapSet().get(0);
 					Fonts.loadGlyphs(Fonts.LARGE, beatmap.titleUnicode);
 					Fonts.loadGlyphs(Fonts.LARGE, beatmap.artistUnicode);
@@ -740,7 +741,7 @@ public class SongMenu extends ComplexOpsuState {
 				// initialize song list
 				setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 			} else
-				MusicController.playThemeSong();
+				MusicController.playThemeSong(config.themeBeatmap);
 			reloadThread = null;
 		}
 		int mouseX = displayContainer.mouseX;
@@ -1028,7 +1029,7 @@ public class SongMenu extends ComplexOpsuState {
 					SoundController.playSound(SoundEffect.MENUHIT);
 					if (button != Input.MOUSE_RIGHT_BUTTON) {
 						// view score
-						instanceContainer.provide(GameRanking.class).setGameData(new GameData(focusScores[rank], displayContainer.width, displayContainer.height));
+						instanceContainer.provide(GameRanking.class).setGameData(instanceContainer.injectFields(new GameData(focusScores[rank], displayContainer.width, displayContainer.height)));
 						displayContainer.switchState(GameRanking.class);
 					} else {
 						// score management

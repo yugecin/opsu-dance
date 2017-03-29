@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
@@ -60,6 +59,7 @@ import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Downloads menu.
@@ -72,6 +72,15 @@ public class DownloadsMenu extends ComplexOpsuState {
 	@Inject
 	private InstanceContainer instanceContainer;
 
+	@Inject
+	private Configuration config;
+
+	@Inject
+	private OszUnpacker oszUnpacker;
+
+	@Inject
+	private BeatmapParser beatmapParser;
+
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 700;
 
@@ -82,12 +91,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 	private static final int MIN_REQUEST_INTERVAL = 300;
 
 	/** Available beatmap download servers. */
-	private static final DownloadServer[] SERVERS = {
-		new BloodcatServer(),
-		new YaSOnlineServer(),
-		new MnetworkServer(),
-		new MengSkyServer()
-	};
+	private final DownloadServer[] SERVERS;
 
 	/** The current list of search results. */
 	private DownloadNode[] resultList;
@@ -276,9 +280,9 @@ public class DownloadsMenu extends ComplexOpsuState {
 		/** Imports all packed beatmaps. */
 		private void importBeatmaps() {
 			// invoke unpacker and parser
-			File[] dirs = OszUnpacker.unpackAllFiles(Options.getOSZDir(), Options.getBeatmapDir());
+			File[] dirs = oszUnpacker.unpackAll();
 			if (dirs != null && dirs.length > 0) {
-				this.importedNode = BeatmapParser.parseDirectories(dirs);
+				this.importedNode = beatmapParser.parseDirectories(dirs);
 				if (importedNode != null) {
 					// send notification
 					EventBus.post(new BarNotificationEvent((dirs.length == 1) ? "Imported 1 new song." :
@@ -288,6 +292,16 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 			DownloadList.get().clearDownloads(Download.Status.COMPLETE);
 		}
+	}
+
+	@Inject
+	public DownloadsMenu(InstanceContainer instanceContainer) {
+		SERVERS = new DownloadServer[] {
+			instanceContainer.provide(BloodcatServer.class),
+			instanceContainer.provide(YaSOnlineServer.class),
+			instanceContainer.provide(MnetworkServer.class),
+			instanceContainer.provide(MengSkyServer.class),
+		};
 	}
 
 	@Override
@@ -665,6 +679,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 										try {
 											previewID = -1;
 											boolean playing = SoundController.playTrack(
+												config,
 												url,
 												Integer.toString(node.getID()),
 												true,

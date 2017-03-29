@@ -17,8 +17,6 @@
  */
 package yugecin.opsudance.core.state;
 
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Graphics;
@@ -27,14 +25,25 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.skinning.SkinService;
 
 import java.io.StringWriter;
+
+import static yugecin.opsudance.options.Options.*;
 
 public abstract class BaseOpsuState implements OpsuState, EventListener<ResolutionOrSkinChangedEvent> {
 
 	@Inject
 	protected DisplayContainer displayContainer;
+
+	@Inject
+	protected Configuration config;
+
+	@Inject
+	protected SkinService skinService;
 
 	/**
 	 * state is dirty when resolution or skin changed but hasn't rendered yet
@@ -97,20 +106,21 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 	@Override
 	public boolean keyReleased(int key, char c) {
 		if (key == Input.KEY_F7) {
-			Options.setNextFPS(displayContainer);
+			OPTION_TARGET_FPS.clickListItem((targetFPSIndex + 1) % targetFPS.length);
+			EventBus.post(new BarNotificationEvent(String.format("Frame limiter: %s", OPTION_TARGET_FPS.getValueString())));
 			return true;
 		}
 		if (key == Input.KEY_F10) {
-			Options.toggleMouseDisabled();
+			OPTION_DISABLE_MOUSE_BUTTONS.toggle();
 			return true;
 		}
 		if (key == Input.KEY_F12) {
-			Utils.takeScreenShot();
+			config.takeScreenShot();
 			return true;
 		}
 		Input input = displayContainer.input;
 		if (key == Input.KEY_S && input.isKeyDown(Input.KEY_LMENU) && input.isKeyDown(Input.KEY_LSHIFT) &&input.isKeyDown(Input.KEY_LCONTROL) && !displayContainer.isInState(Game.class)) {
-			Options.reloadSkin();
+			skinService.reloadSkin();
 		}
 		return false;
 	}

@@ -19,8 +19,6 @@
 package itdelatrisu.opsu.objects.curves;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.skins.Skin;
@@ -31,7 +29,9 @@ import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.objects.curves.FakeCombinedCurve;
+import yugecin.opsudance.skinning.SkinService;
+
+import static yugecin.opsudance.options.Options.*;
 
 /**
  * Representation of a curve.
@@ -43,7 +43,7 @@ public abstract class Curve {
 	protected static float CURVE_POINTS_SEPERATION = 2.5f;
 
 	/** The curve border color. */
-	private static Color borderColor;
+	protected static Color borderColor;
 
 	/** Whether mmsliders are supported. */
 	private static boolean mmsliderSupported = false;
@@ -58,7 +58,7 @@ public abstract class Curve {
 	protected float[] sliderX, sliderY;
 
 	/** Per-curve render-state used for the new style curve renders. */
-	private CurveRenderState renderState;
+	protected CurveRenderState renderState;
 
 	/** Points along the curve (set by inherited classes). */
 	public Vec2f[] curve;
@@ -103,11 +103,10 @@ public abstract class Curve {
 
 		ContextCapabilities capabilities = GLContext.getCapabilities();
 		mmsliderSupported = capabilities.OpenGL30;
-		if (mmsliderSupported)
+		if (mmsliderSupported) {
 			CurveRenderState.init(width, height, circleDiameter);
-		else {
-			if (Options.getSkin().getSliderStyle() != Skin.STYLE_PEPPYSLIDER)
-				Log.warn("New slider style requires OpenGL 3.0.");
+		} else if (SkinService.skin.getSliderStyle() != Skin.STYLE_PEPPYSLIDER) {
+			Log.warn("New slider style requires OpenGL 3.0.");
 		}
 	}
 
@@ -134,8 +133,8 @@ public abstract class Curve {
 		if (curve == null)
 			return;
 
-		// peppysliders
-		if (Options.isFallbackSliders() || Options.getSkin().getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
+		if (OPTION_FALLBACK_SLIDERS.state || SkinService.skin.getSliderStyle() == Skin.STYLE_PEPPYSLIDER || !mmsliderSupported) {
+			// peppysliders
 			Image hitCircle = GameImage.HITCIRCLE.getImage();
 			Image hitCircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
 			for (int i = from; i < to; i++)
@@ -145,19 +144,17 @@ public abstract class Curve {
 			for (int i = from; i < to; i++)
 				hitCircle.drawCentered(curve[i].x, curve[i].y, fallbackSliderColor);
 			fallbackSliderColor.a = a;
-		}
-
-		// mmsliders
-		else {
+		} else {
+			// mmsliders
 			if (renderState == null)
-				renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
+				renderState = new CurveRenderState(hitObject, curve, false);
 			renderState.draw(color, borderColor, from, to);
 		}
 	}
 
 	public void splice(int from, int to) {
 		if (renderState == null)
-			renderState = new CurveRenderState(hitObject, curve, this instanceof FakeCombinedCurve);
+			renderState = new CurveRenderState(hitObject, curve, false);
 		renderState.splice(from, to);
 	}
 

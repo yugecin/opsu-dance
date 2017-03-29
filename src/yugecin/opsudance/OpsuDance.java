@@ -17,7 +17,6 @@
  */
 package yugecin.opsudance;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
@@ -27,6 +26,9 @@ import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.options.OptionsService;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,18 +37,29 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import static yugecin.opsudance.core.Entrypoint.sout;
+import static yugecin.opsudance.options.Options.*;
 
 /*
  * loosely based on itdelatrisu.opsu.Opsu
  */
 public class OpsuDance {
 
-	private final DisplayContainer container;
+	@Inject
+	private DisplayContainer container;
+
+	@Inject
+	private OptionsService optionsService;
+
+	@Inject
+	private Configuration config;
+
+	@Inject
+	private Updater updater;
 
 	private ServerSocket singleInstanceSocket;
 
-	public OpsuDance(DisplayContainer container) {
-		this.container = container;
+	@Inject
+	public OpsuDance() {
 	}
 
 	public void start(String[] args) {
@@ -54,7 +67,7 @@ public class OpsuDance {
 			sout("initialized");
 
 			checkRunningDirectory();
-			Options.parseOptions();
+			optionsService.loadOptions();
 			ensureSingleInstance();
 			sout("prechecks done and options parsed");
 
@@ -70,12 +83,12 @@ public class OpsuDance {
 		while (rungame());
 		container.teardownAL();
 
-		Options.saveOptions();
+		optionsService.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
-		Utils.deleteDirectory(Options.TEMP_DIR);
-		if (!Options.isWatchServiceEnabled()) {
+		Utils.deleteDirectory(config.TEMP_DIR);
+		if (!OPTION_ENABLE_WATCH_SERVICE.state) {
 			BeatmapWatchService.destroy();
 		}
 	}
@@ -101,7 +114,7 @@ public class OpsuDance {
 
 	private void initDatabase() {
 		try {
-			DBController.init();
+			DBController.init(config);
 		} catch (UnsatisfiedLinkError e) {
 			errorAndExit("Could not initialize database.", e);
 		}
@@ -109,18 +122,19 @@ public class OpsuDance {
 
 	private void initUpdater(String[] args) {
 		// check if just updated
-		if (args.length >= 2)
-			Updater.get().setUpdateInfo(args[0], args[1]);
+		if (args.length >= 2) {
+			updater.setUpdateInfo(args[0], args[1]);
+		}
 
 		// check for updates
-		if (Options.isUpdaterDisabled()) {
+		if (OPTION_DISABLE_UPDATER.state) {
 			return;
 		}
 		new Thread() {
 			@Override
 			public void run() {
 				try {
-					Updater.get().checkForUpdates();
+					updater.checkForUpdates();
 				} catch (IOException e) {
 					Log.warn("updatecheck failed.", e);
 				}
@@ -143,18 +157,18 @@ public class OpsuDance {
 	}
 
 	private void ensureSingleInstance() {
-		if (Options.noSingleInstance()) {
+		if (OPTION_NOSINGLEINSTANCE.state) {
 			return;
 		}
 		try {
-			singleInstanceSocket = new ServerSocket(Options.getPort(), 1, InetAddress.getLocalHost());
+			singleInstanceSocket = new ServerSocket(OPTION_PORT.val, 1, InetAddress.getLocalHost());
 		} catch (UnknownHostException e) {
 			// shouldn't happen
 		} catch (IOException e) {
 			errorAndExit(String.format(
 					"Could not launch. Either opsu! is already running or a different program uses port %d.\n" +
 					"You can change the port opsu! uses by editing the 'Port' field in the .opsu.cfg configuration file.\n" +
-					"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", Options.getPort()), e);
+					"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", OPTION_PORT.val), e);
 		}
 	}
 

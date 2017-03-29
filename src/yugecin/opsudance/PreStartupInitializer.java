@@ -18,10 +18,11 @@
 package yugecin.opsudance;
 
 import itdelatrisu.opsu.NativeLoader;
-import itdelatrisu.opsu.Options;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.options.Configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,11 @@ import java.lang.reflect.Field;
 
 public class PreStartupInitializer {
 
-	public PreStartupInitializer() {
+	private final Configuration config;
+
+	@Inject
+	public PreStartupInitializer(Configuration config) {
+		this.config = config;
 		loadNatives();
 		setResourcePath();
 	}
@@ -52,7 +57,7 @@ public class PreStartupInitializer {
 	}
 
 	private File loadNativesUsingOptionsPath() {
-		File nativeDir = Options.NATIVE_DIR;
+		File nativeDir = config.NATIVE_DIR;
 		try {
 			new NativeLoader(nativeDir).loadNatives();
 		} catch (IOException e) {

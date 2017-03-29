@@ -21,6 +21,8 @@ package itdelatrisu.opsu.downloads.servers;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.downloads.DownloadNode;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.inject.Inject;
+import yugecin.opsudance.core.inject.InstanceContainer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,6 +38,10 @@ import java.util.regex.Pattern;
  * Download server: http://osu.uu.gl/
  */
 public class MnetworkServer extends DownloadServer {
+
+	@Inject
+	private InstanceContainer instanceContainer;
+
 	/** Server name. */
 	private static final String SERVER_NAME = "Mnetwork";
 
@@ -51,8 +57,9 @@ public class MnetworkServer extends DownloadServer {
 	/** Beatmap pattern. */
 	private Pattern BEATMAP_PATTERN = Pattern.compile("^(\\d+) ([^-]+) - (.+)\\.osz$");
 
-	/** Constructor. */
-	public MnetworkServer() {}
+	@Inject
+	public MnetworkServer() {
+	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -112,7 +119,7 @@ public class MnetworkServer extends DownloadServer {
 				if (!m.matches())
 					continue;
 
-				nodeList.add(new DownloadNode(Integer.parseInt(m.group(1)), date, m.group(3), null, m.group(2), null, ""));
+				nodeList.add(instanceContainer.injectFields(new DownloadNode(Integer.parseInt(m.group(1)), date, m.group(3), null, m.group(2), null, "")));
 			}
 
 			nodes = nodeList.toArray(new DownloadNode[nodeList.size()]);

@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.db;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 
@@ -35,11 +34,13 @@ import java.util.Map;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.options.Configuration;
 
 /**
  * Handles connections and queries with the cached beatmap database.
  */
 public class BeatmapDB {
+
 	/**
 	 * Current database version.
 	 * This value should be changed whenever the database format changes.
@@ -91,12 +92,16 @@ public class BeatmapDB {
 	// This class should not be instantiated.
 	private BeatmapDB() {}
 
+	private static Configuration config; // TODO
+
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init() {
+	public static void init(Configuration config) {
+		BeatmapDB.config = config;
+
 		// create a database connection
-		connection = DBController.createConnection(Options.BEATMAP_DB.getPath());
+		connection = DBController.createConnection(config.BEATMAP_DB.getPath());
 		if (connection == null)
 			return;
 

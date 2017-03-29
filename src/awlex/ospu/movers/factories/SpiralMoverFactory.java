@@ -1,6 +1,5 @@
 package awlex.ospu.movers.factories;
 
-import itdelatrisu.opsu.Options;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 import awlex.ospu.movers.CentralSpiralMover;
@@ -8,6 +7,7 @@ import awlex.ospu.movers.CombinedSpiralMover;
 import yugecin.opsudance.movers.Mover;
 import awlex.ospu.movers.SpiralToMover;
 import yugecin.opsudance.movers.factories.MoverFactory;
+import yugecin.opsudance.options.Options;
 
 /**
  * Created by Alex Wieser on 09.10.2016.

@@ -18,9 +18,6 @@
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.Options;
-import itdelatrisu.opsu.Options.GameOption;
-import itdelatrisu.opsu.Options.GameOption.OptionType;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
@@ -30,10 +27,13 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
+import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+
+import static yugecin.opsudance.options.Options.*;
 
 public class OptionsOverlay extends OverlayOpsuState {
 
@@ -84,14 +84,14 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private OptionTab[] sections;
 
-	private GameOption hoverOption;
-	private GameOption selectedOption;
+	private Option hoverOption;
+	private Option selectedOption;
 
 	private int sliderOptionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
 
-	private final HashMap<GameOption, DropdownMenu<Object>> dropdownMenus;
+	private final HashMap<ListOption, DropdownMenu<Object>> dropdownMenus;
 	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
 	private int dropdownMenuPaddingY;
 	private DropdownMenu<Object> openDropdownMenu;
@@ -195,15 +195,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (section.options == null) {
 				continue;
 			}
-			for (final GameOption option : section.options) {
-				Object[] items = option.getListItems();
-				if (items == null) {
+			for (final Option option : section.options) {
+				if (!(option instanceof ListOption)) {
 					continue;
 				}
+				final ListOption listOption = (ListOption) option;
+				Object[] items = listOption.getListItems();
 				DropdownMenu<Object> menu = new DropdownMenu<Object>(displayContainer, items, 0, 0, 0) {
 					@Override
 					public void itemSelected(int index, Object item) {
-						option.clickListItem(index);
+						listOption.clickListItem(index);
 						openDropdownMenu = null;
 					}
 				};
@@ -224,7 +225,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				menu.setHighlightColor(COL_COMBOBOX_HOVER);
 				menu.setTextColor(COL_WHITE);
 				dropdownMenuPaddingY = (optionHeight - menu.getHeight()) / 2;
-				dropdownMenus.put(option, menu);
+				dropdownMenus.put(listOption, menu);
 			}
 		}
 
@@ -301,8 +302,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private void renderTooltip(Graphics g) {
 		if (hoverOption != null) {
-			String tip = hoverOption.getDescription();
-			if (hoverOption.getType() == OptionType.NUMERIC) {
+			String tip = hoverOption.description;
+			if (hoverOption instanceof NumericOption) {
 				tip = "(" + hoverOption.getValueString() + ") " + tip;
 			}
 			UI.updateTooltip(displayContainer.renderDelta, tip, true);
@@ -336,7 +337,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 			int lineHeight = (int) (Fonts.LARGE.getLineHeight() * 0.9f);
 			for (int optionIndex = 0; optionIndex < section.options.length; optionIndex++) {
-				GameOption option = section.options[optionIndex];
+				Option option = section.options[optionIndex];
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
@@ -368,7 +369,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (sections[sectionIndex].options == null) {
 				continue;
 			}
-			for (GameOption option : sections[sectionIndex].options) {
+			for (Option option : sections[sectionIndex].options) {
 				if (option.showCondition() && !option.isFiltered()) {
 					maxScrollOffset += optionHeight;
 				}
@@ -384,24 +385,22 @@ public class OptionsOverlay extends OverlayOpsuState {
 		scrollHandler.setMinMax(0, maxScrollOffset);
 	}
 
-	private void renderOption(Graphics g, GameOption option, int y) {
-		OptionType type = option.getType();
-		Object[] listItems = option.getListItems();
-		if (listItems != null) {
-			renderListOption(g, option, y);
-		} else if (type == OptionType.BOOLEAN) {
-			renderCheckOption(option, y);
-		} else if (type == OptionType.NUMERIC) {
-			renderSliderOption(g, option, y);
-		} else {
-			renderGenericOption(option, y);
+	private void renderOption(Graphics g, Option option, int y) {
+		if (option instanceof ListOption) {
+			renderListOption(g, (ListOption) option, y);
+		} else if (option instanceof ToggleOption) {
+			renderCheckOption((ToggleOption) option, y);
+		} else if (option instanceof NumericOption) {
+			renderSliderOption(g, (NumericOption) option, y);
+		} else if (option instanceof GenericOption) {
+			renderGenericOption((GenericOption) option, y);
 		}
 	}
 
-	private void renderListOption(Graphics g, GameOption option, int y) {
+	private void renderListOption(Graphics g, ListOption option, int y) {
 		// draw option name
-		int nameWith = Fonts.MEDIUM.getWidth(option.getName());
-		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.getName(), COL_WHITE);
+		int nameWith = Fonts.MEDIUM.getWidth(option.name);
+		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
 		nameWith += 15;
 		int comboboxStartX = optionStartX + nameWith;
 		int comboboxWidth = optionWidth - nameWith;
@@ -424,19 +423,19 @@ public class OptionsOverlay extends OverlayOpsuState {
 		dropdown.render(g);
 	}
 
-	private void renderCheckOption(GameOption option, int y) {
-		if (option.getBooleanValue()) {
+	private void renderCheckOption(ToggleOption option, int y) {
+		if (option.state) {
 			checkOnImg.draw(optionStartX, y + controlImagePadding, COL_PINK);
 		} else {
 			checkOffImg.draw(optionStartX, y + controlImagePadding, COL_PINK);
 		}
-		Fonts.MEDIUM.drawString(optionStartX + 30, y + optionTextOffsetY, option.getName(), COL_WHITE);
+		Fonts.MEDIUM.drawString(optionStartX + 30, y + optionTextOffsetY, option.name, COL_WHITE);
 	}
 
-	private void renderSliderOption(Graphics g, GameOption option, int y) {
+	private void renderSliderOption(Graphics g, NumericOption option, int y) {
 		final int padding = 10;
-		int nameLen = Fonts.MEDIUM.getWidth(option.getName());
-		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.getName(), COL_WHITE);
+		int nameLen = Fonts.MEDIUM.getWidth(option.name);
+		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
 		int sliderLen = optionWidth - nameLen - padding;
 		if (sliderLen <= 1) {
 			return;
@@ -453,7 +452,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		}
 
-		float sliderValue = (float) (option.getIntegerValue() - option.getMinValue()) / (option.getMaxValue() - option.getMinValue());
+		float sliderValue = (float) (option.val - option.min) / (option.max - option.min);
 		float sliderBallPos = sliderStartX + (int) ((sliderLen - controlImageSize) * sliderValue);
 
 		g.setLineWidth(3f);
@@ -471,10 +470,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 	}
 
-	private void renderGenericOption(GameOption option, int y) {
+	private void renderGenericOption(GenericOption option, int y) {
 		String value = option.getValueString();
 		int valueLen = Fonts.MEDIUM.getWidth(value);
-		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.getName(), COL_WHITE);
+		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
 		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y + optionTextOffsetY, value, COL_BLUE);
 	}
 
@@ -556,9 +555,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		updateIndicatorAlpha();
 		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
-			int sliderValue = hoverOption.getIntegerValue();
+			int sliderValue = ((NumericOption) hoverOption).val;
 			updateSliderOption();
-			if (hoverOption.getIntegerValue() - sliderValue != 0 && sliderSoundDelay <= 0) {
+			if (((NumericOption) hoverOption).val - sliderValue != 0 && sliderSoundDelay <= 0) {
 				sliderSoundDelay = 90;
 				SoundController.playSound(SoundEffect.MENUHIT);
 			}
@@ -634,7 +633,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		mousePressY = y;
 		selectedOption = hoverOption;
 
-		if (hoverOption != null && hoverOption.getType() == OptionType.NUMERIC) {
+		if (hoverOption != null && hoverOption instanceof NumericOption) {
 			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
 				updateSliderOption();
@@ -678,16 +677,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 
 		if (hoverOption != null) {
-			if (hoverOption.getType() == OptionType.BOOLEAN) {
-				hoverOption.click();
+			if (hoverOption instanceof ToggleOption) {
+				((ToggleOption) hoverOption).toggle();
 				if (listener != null) {
 					listener.onSaveOption(hoverOption);
 				}
 				SoundController.playSound(SoundEffect.MENUHIT);
 				return true;
-			} else if (hoverOption == GameOption.KEY_LEFT) {
+			} else if (hoverOption == OPTION_KEY_LEFT) {
 				keyEntryLeft = true;
-			} else if (hoverOption == GameOption.KEY_RIGHT) {
+			} else if (hoverOption == OPTION_KEY_RIGHT) {
 				keyEntryLeft = true;
 			}
 		}
@@ -724,13 +723,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 	@Override
 	public boolean onKeyPressed(int key, char c) {
 		if (keyEntryRight) {
-			Options.setGameKeyRight(key);
+			if (Utils.isValidGameKey(key)) {
+				OPTION_KEY_RIGHT.intval = key;
+			}
 			keyEntryRight = false;
 			return true;
 		}
 
 		if (keyEntryLeft) {
-			Options.setGameKeyLeft(key);
+			if (Utils.isValidGameKey(key)) {
+				OPTION_KEY_LEFT.intval = key;
+			}
 			keyEntryLeft = false;
 			return true;
 		}
@@ -767,10 +770,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void updateSliderOption() {
-		int min = hoverOption.getMinValue();
-		int max = hoverOption.getMaxValue();
-		int value = min + Math.round((float) (max - min) * (displayContainer.mouseX - sliderOptionStartX) / (sliderOptionLength));
-		hoverOption.setValue(Utils.clamp(value, min, max));
+		NumericOption o = (NumericOption) hoverOption;
+		int value = o.min + Math.round((float) (o.max - o.min) * (displayContainer.mouseX - sliderOptionStartX) / (sliderOptionLength));
+		o.setValue(Utils.clamp(value, o.min, o.max));
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
@@ -797,7 +799,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				continue;
 			}
 			for (int optionIndex = 0; optionIndex < section.options.length; optionIndex++) {
-				GameOption option = section.options[optionIndex];
+				Option option = section.options[optionIndex];
 				if (option.isFiltered() || !option.showCondition()) {
 					continue;
 				}
@@ -824,7 +826,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (section.options == null) {
 				continue;
 			}
-			for (GameOption opt : section.options) {
+			for (Option opt : section.options) {
 				opt.filter(null);
 			}
 		}
@@ -844,7 +846,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				continue;
 			}
 			section.filtered = true;
-			for (GameOption option : section.options) {
+			for (Option option : section.options) {
 				if (lastBigSectionMatches || sectionMatches) {
 					section.filtered = false;
 					option.filter(null);
@@ -859,24 +861,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		updateHoverOption(prevMouseX, prevMouseY);
 	}
 
-	public static class OptionTab {
-
-		public final String name;
-		public final GameOption[] options;
-		private boolean filtered;
-
-		public OptionTab(String name, GameOption[] options) {
-			this.name = name;
-			this.options = options;
-		}
-
-	}
-
 	public interface Listener {
-
 		void onLeaveOptionsMenu();
-		void onSaveOption(GameOption option);
-
+		void onSaveOption(Option option);
 	}
 
 }
