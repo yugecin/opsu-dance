@@ -1,5 +1,6 @@
 # opsu!dance
 [example video](https://www.youtube.com/watch?v=tqZqn7nx8N0)  
+[another one](https://www.youtube.com/watch?v=T2AiGn2xOQo)  
   
 Originally started as a fork of [opsu!](https://github.com/itdelatrisu/opsu) with cursordance stuff. I made a cursordancing bot in C# for osu!, and by adding it into this clone, it allows me to do even more stuff with it. This way I can also provide this client to other players so they can play with it too, as I will not give my bot to people because I don't want to endorse cheating in any way.
 
