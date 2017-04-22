@@ -53,6 +53,8 @@ import static yugecin.opsudance.options.Options.*;
 
 public class Configuration {
 
+	public static Configuration instance;
+
 	public final boolean USE_XDG;
 	public final File CONFIG_DIR;
 	public final File DATA_DIR;
@@ -87,6 +89,8 @@ public class Configuration {
 
 	@Inject
 	public Configuration() {
+		instance = this;
+
 		USE_XDG = areXDGDirectoriesEnabled();
 
 		CONFIG_DIR = getXDGBaseDir("XDG_CONFIG_HOME", ".config");
