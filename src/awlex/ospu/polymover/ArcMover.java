@@ -28,15 +28,16 @@ public class ArcMover implements PolyMover {
 		xm = m.get(1, 0) * 0.5;
 		ym = m.get(2, 0) * 0.5;
 		r = sqrt(pow(xm, 2) + pow(ym, 2) - m.get(0, 0));
-		alpha = (atan2(p1.end.y - ym, p1.end.x - xm) + 360) % 360;
-		beta = (atan2(middle.start.y - ym, middle.start.x - xm) + 360) % 360;
+		alpha = (atan2(p1.end.y - ym, p1.end.x - xm) + 2 * PI) % (2 * PI);
+		beta = (atan2(middle.start.y - ym, middle.start.x - xm) + 2 * PI) % (2 * PI);
+		gamma = (atan2(p2.start.y - ym, p2.start.x - xm) + 2 * PI) % (2 * PI);
 
 		// Fix angles
-		if (beta - alpha > 180) {
-			beta -= 360;
+		if (beta - alpha > PI) {
+			beta -= 2 * PI;
 		}
-		if (gamma - beta > 180) {
-			gamma -= 180;
+		if (gamma - beta > PI) {
+			gamma -= 2 * PI;
 		}
 	}
 
