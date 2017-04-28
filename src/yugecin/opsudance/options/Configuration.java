@@ -174,7 +174,7 @@ public class Configuration {
 	}
 
 	private File loadDirectory(File dir, File defaultDir, String kind) {
-		if (dir.exists() && dir.isDirectory()) {
+		if (dir != null && dir.exists() && dir.isDirectory()) {
 			return dir;
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {

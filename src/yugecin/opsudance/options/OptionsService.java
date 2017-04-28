@@ -50,6 +50,7 @@ public class OptionsService {
 	public void loadOptions() {
 		// if no config file, use default settings
 		if (!config.OPTIONS_FILE.isFile()) {
+			config.loadDirectories();
 			saveOptions();
 			return;
 		}
