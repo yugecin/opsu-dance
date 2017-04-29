@@ -336,7 +336,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 		int width = screenWidth;
 		int height = screenHeight;
-		if (resolutionString.matches("^[0-9]+x[0-9]+$")) {
+		if (resolutionString != null && resolutionString.matches("^[0-9]+x[0-9]+$")) {
 			String[] res = resolutionString.split("x");
 			width = Integer.parseInt(res[0]);
 			height = Integer.parseInt(res[1]);
