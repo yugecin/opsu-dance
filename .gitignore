@@ -30,3 +30,6 @@ build/
 
 Thumbs.db
 /target
+/out/
+/libs/
+/mvnlibs/

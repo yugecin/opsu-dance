@@ -1,0 +1,151 @@
+<project name="opsu!dance" default="hi" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<property name="dir.src" value="${basedir}/src" />
+	<property name="dir.lib" value="${basedir}/lib" />
+	<property name="dir.mvnlibs" value="${basedir}/mvnlibs" />
+	<property name="dir.ivylibs" value="${basedir}/ivylibs" />
+	<property name="dir.res" value="${basedir}/res" />
+	<property name="dir.out" value="${basedir}/bin" />
+
+	<property name="lang.src" value="1.7" />
+	<property name="lang.target" value="1.7" />
+	<property name="version" value="0.5.0-SNAPSHOT" />
+
+	<property name="main" value="yugecin.opsudance.core.Entrypoint" />
+
+	<tstamp>
+		<format property="timestamp" pattern="yyyy-MM-dd HH:mm" />
+	</tstamp>
+
+	<target name="hi">
+		<echo>
+ant clean      --> clean the ant working dir
+ant cleanlib   --> clean the lib folder
+ant ivyresolve --> resolve dependencies using ivy
+ant mvnresolve --> resolve dependencies using mvn
+ant compile    --> compile the code
+ant run        --> prepare to run and run
+ant jar        --> package a jar
+
+resolve dependencies first
+(using either mvnresolve or ivyresolve),
+then run (code is compiled automatically when you run)
+		</echo>
+	</target>
+
+	<target name="clean" description="--> clean the ant working dir">
+		<delete dir="${dir.out}" />
+	</target>
+
+	<target name="cleanlib" description="--> clean the lib folder">
+		<delete dir="${dir.lib}" />
+		<delete dir="${dir.mvnlibs}" />
+		<delete dir="${dir.ivylibs}" />
+	</target>
+
+	<target name="ivyresolve" depends="cleanlib" description="--> resolve dependencies using ivy">
+		<ivy:retrieve pattern="${dir.ivylibs}/[artifact]-[revision](-[classifier]).[ext]" />
+		<move file="${dir.ivylibs}" tofile="${dir.lib}" />
+	</target>
+
+	<target name="mvnresolve" depends="cleanlib" description="--> resolve dependencies using mvn">
+		<condition property="shellexecutable" value="cmd">
+			<os family="windows" />
+		</condition>
+		<condition property="shellcmdarg" value="/c">
+			<os family="windows" />
+		</condition>
+		<!-- properties are immutable, the following 2 lines won't do anything if os is windows -->
+		<property name="shellexecutable" value="sh" />
+		<property name="shellcmdarg" value="-c" />
+
+		<exec executable="${shellexecutable}">
+			<arg value="${shellcmdarg}" />
+			<arg value="mvn" />
+			<arg value="initialize" />
+		</exec>
+
+		<move file="${dir.mvnlibs}" tofile="${dir.lib}" />
+	</target>
+
+	<target name="compile" description="--> compile sources">
+		<mkdir dir="${dir.out}/classes" />
+
+		<javac
+			srcdir="${dir.src}"
+			destdir="${dir.out}/classes"
+			includes="**/*.java"
+			source="${lang.src}"
+			target="${lang.target}"
+			includeantruntime="false"
+			classpathref="classpath.base" />
+
+		<copy todir="${dir.out}/classes">
+			<fileset dir="${dir.res}" excludes="version,*.pdn" />
+		</copy>
+
+		<copy todir="${dir.out}/classes">
+			<filterchain>
+				<expandproperties />
+			</filterchain>
+			<fileset dir="${dir.res}" includes="version" />
+		</copy>
+	</target>
+
+	<target name="run" depends="compile" description="--> run opsu!dance">
+		<mkdir dir="${dir.out}/Natives" />
+
+		<unzip dest="${dir.out}/Natives">
+			<fileset dir="${dir.lib}" includes="**/lwjgl-*-natives-*.jar" />
+		</unzip>
+
+		<java
+			fork="true"
+			dir="${dir.out}"
+			failonerror="false"
+			classpathref="classpath.run"
+			classname="${main}" />
+	</target>
+
+	<target name="jar" depends="compile" description="--> package a jar">
+		<property name="jarfile" value="${dir.out}/opsu-dance-${version}.jar" />
+		<delete file="${jarfile}" />
+
+		<jar jarfile="${dir.out}/lib.jar" roundup="false">
+			<zipgroupfileset dir="${dir.lib}" />
+		</jar>
+
+		<jar destfile="${jarfile}" duplicate="fail">
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0" />
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${main}" />
+			</manifest>
+			<fileset dir="${dir.out}/classes" />
+			<zipfileset src="${dir.out}/lib.jar">
+				<exclude name="META-INF/**" />
+				<exclude name="org/newdawn/slick/GameContainer.*" />
+				<exclude name="org/newdawn/slick/Image.*" />
+				<exclude name="org/newdawn/slick/Music.*" />
+				<exclude name="org/newdawn/slick/Input.*" />
+				<exclude name="org/newdawn/slick/Input$NullOutputStream.*" />
+				<exclude name="org/newdawn/slick/gui/TextField.*" />
+				<exclude name="org/newdawn/slick/openal/AudioInputStream*" />
+				<exclude name="org/newdawn/slick/openal/OpenALStreamPlayer*" />
+				<exclude name="org/newdawn/slick/openal/SoundStore*" />
+			</zipfileset>
+		</jar>
+
+		<delete file="${dir.out}/lib.jar" />
+	</target>
+
+	<path id="classpath.base">
+		<fileset dir="${dir.lib}" includes="**/*.jar" />
+	</path>
+
+	<path id="classpath.run">
+		<pathelement path="${dir.out}/classes" />
+		<fileset dir="${dir.lib}" includes="**/*.jar" />
+	</path>
+
+</project>
