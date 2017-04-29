@@ -2,7 +2,7 @@
 
 **Table of contents**
 
-* [What](#What) - [Why](#Why) - [Downloads](#Downloads) - [Running](#Running) - [Building a JAR](#Building-a-JAR) - [Credits](#Credits) - [License](#License)
+* [What](#What) - [Why](#why) - [Downloads](#downloads) - [Running](#running) - [Building a JAR](#building-a-JAR) - [Credits](#credits) - [License](#license)
 
 What
 ----
