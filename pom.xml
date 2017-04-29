@@ -193,19 +193,14 @@
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
-			<artifactId>jlayer</artifactId>
-			<version>1.0.1-1</version>
+			<artifactId>mp3spi</artifactId>
+			<version>1.9.5.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.soundlibs</groupId>
-			<artifactId>mp3spi</artifactId>
-			<version>1.9.5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>
