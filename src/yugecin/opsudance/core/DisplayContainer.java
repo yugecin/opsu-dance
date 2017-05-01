@@ -349,17 +349,16 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			height = 600;
 		}
 
+		if (!OPTION_FULLSCREEN.state) {
+			boolean borderless = (screenWidth == width && screenHeight == height);
+			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
+		}
+
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
 			EventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
 			Log.error("Failed to set display mode.", e);
-		}
-
-		if (OPTION_FULLSCREEN.state) {
-			// set borderless window if dimensions match screen size
-			boolean borderless = (screenWidth == width && screenHeight == height);
-			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
 		}
 	}
 
