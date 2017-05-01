@@ -287,7 +287,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		final Object[] resolutions = OPTION_SCREEN_RESOLUTION.getListItems();
 		final String nativeRes = width + "x" + height;
 		resolutions[0] = nativeRes;
-		OPTION_SCREEN_RESOLUTION.getListItems()[0] = width + "x" + height;
 		for (int i = 0; i < resolutions.length; i++) {
 			if (nativeRes.equals(resolutions[i].toString())) {
 				resolutions[i] = resolutions[i] + " (borderless)";
