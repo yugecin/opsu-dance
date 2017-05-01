@@ -272,6 +272,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
+		OPTION_SCREEN_RESOLUTION.getListItems()[0] = nativeDisplayMode.getWidth() + "x" + nativeDisplayMode.getHeight();
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });

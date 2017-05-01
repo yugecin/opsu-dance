@@ -146,7 +146,7 @@ public class Options {
 	public static final ToggleOption OPTION_NOSINGLEINSTANCE = new ToggleOption("-", "NoSingleInstance", "-", false);
 
 	// in-game options
-	public static final Option OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
+	public static final ListOption OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
 		private final String[] resolutions = {
 			null,
 			"800x600",
@@ -188,7 +188,6 @@ public class Options {
 
 		@Override
 		public void read (String s){
-			resolutions[0] = displayContainer.nativeDisplayMode.getWidth() + "x" + displayContainer.nativeDisplayMode.getHeight();
 			try {
 				idx = Integer.parseInt(s);
 			} catch (Exception ignored) {
