@@ -272,7 +272,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		width = height = -1;
 		Input.disableControllers();
 		Display.setTitle("opsu!dance");
-		OPTION_SCREEN_RESOLUTION.getListItems()[0] = nativeDisplayMode.getWidth() + "x" + nativeDisplayMode.getHeight();
+		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
@@ -280,6 +280,20 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 		GLHelper.hideNativeCursor();
+	}
+
+	// TODO: move this elsewhere
+	private void setupResolutionOptionlist(int width, int height) {
+		final Object[] resolutions = OPTION_SCREEN_RESOLUTION.getListItems();
+		final String nativeRes = width + "x" + height;
+		resolutions[0] = nativeRes;
+		OPTION_SCREEN_RESOLUTION.getListItems()[0] = width + "x" + height;
+		for (int i = 0; i < resolutions.length; i++) {
+			if (nativeRes.equals(resolutions[i].toString())) {
+				resolutions[i] = resolutions[i] + " (borderless)";
+			}
+		}
+
 	}
 
 	public void teardown() {
@@ -335,9 +349,14 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		int screenWidth = nativeDisplayMode.getWidth();
 		int screenHeight = nativeDisplayMode.getHeight();
 
+		int eos = resolutionString.indexOf(' ');
+		if (eos > -1) {
+			resolutionString = resolutionString.substring(0, eos);
+		}
+
 		int width = screenWidth;
 		int height = screenHeight;
-		if (resolutionString != null && resolutionString.matches("^[0-9]+x[0-9]+$")) {
+		if (resolutionString.matches("^[0-9]+x[0-9]+$")) {
 			String[] res = resolutionString.split("x");
 			width = Integer.parseInt(res[0]);
 			height = Integer.parseInt(res[1]);
