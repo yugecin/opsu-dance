@@ -62,8 +62,6 @@ import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
-import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
@@ -766,7 +764,7 @@ public class Game extends ComplexOpsuState {
 
 			// focus lost: go back to pause screen
 			else if (!Display.isActive()) {
-				displayContainer.switchStateNow(GamePauseMenu.class);
+				displayContainer.switchState(GamePauseMenu.class);
 				pausePulse = 0f;
 			}
 
@@ -1050,7 +1048,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateNow(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(GamePauseMenu.class);
 		}
 
 		// drain health
@@ -1077,7 +1075,7 @@ public class Game extends ComplexOpsuState {
 					rotations = new IdentityHashMap<>();
 					SoundController.playSound(SoundEffect.FAIL);
 
-					displayContainer.switchState(GamePauseMenu.class, FadeOutTransitionState.class, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, FadeInTransitionState.class, 300);
+					displayContainer.switchState(GamePauseMenu.class, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, 300);
 				}
 			}
 		}
@@ -1158,7 +1156,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateNow(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(GamePauseMenu.class);
 			break;
 		case Input.KEY_SPACE:
 			// skip intro
@@ -1311,7 +1309,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateNow(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(GamePauseMenu.class);
 			return true;
 		}
 

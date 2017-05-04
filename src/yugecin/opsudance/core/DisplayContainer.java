@@ -48,7 +48,6 @@ import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
-import yugecin.opsudance.core.state.transitions.*;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.options.Configuration;
@@ -78,12 +77,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	private FpsRenderState fpsState;
 	private BarNotificationState barNotifState;
 	private BubbleNotificationState bubNotifState;
-
-	private TransitionState outTransitionState;
-	private TransitionState inTransitionState;
-
-	private final TransitionFinishedListener outTransitionListener;
-	private final TransitionFinishedListener inTransitionListener;
 
 	private OpsuState state;
 
@@ -123,30 +116,51 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final Cursor cursor;
 	public boolean drawCursor;
 
+	class Transition {
+		int in;
+		int out;
+		int total;
+		int progress = -1;
+		OpsuState nextstate;
+		Color OVERLAY = new Color(Color.black);
+
+		public void update() {
+			if (progress == -1) {
+				return;
+			}
+			progress += delta;
+			if (progress > out && nextstate != null) {
+				switchStateInstantly(nextstate);
+				nextstate = null;
+			}
+			if (progress > total) {
+				progress = -1;
+			}
+		}
+
+		public void render(Graphics graphics) {
+			if (progress == -1) {
+				return;
+			}
+			int relprogress = progress;
+			int reltotal = out;
+			if (progress > out) {
+				reltotal = in;
+				relprogress = total - progress;
+			}
+			OVERLAY.a = (float) relprogress / reltotal;
+			graphics.setColor(OVERLAY);
+			graphics.fillRect(0, 0, width, height);
+		}
+	}
+
+	private final Transition transition = new Transition();
+
 	@Inject
 	public DisplayContainer(InstanceContainer instanceContainer) {
 		this.instanceContainer = instanceContainer;
 		this.cursor = new Cursor();
 		drawCursor = true;
-
-		outTransitionListener = new TransitionFinishedListener() {
-			@Override
-			public void onFinish() {
-				state.leave();
-				outTransitionState.getApplicableState().leave();
-				state = inTransitionState;
-				state.enter();
-				inTransitionState.getApplicableState().enter();
-			}
-		};
-
-		inTransitionListener = new TransitionFinishedListener() {
-			@Override
-			public void onFinish() {
-				state.leave();
-				state = inTransitionState.getApplicableState();
-			}
-		};
 
 		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
 			@Override
@@ -220,6 +234,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
 
+			transition.update();
 			fpsState.update();
 
 			state.update();
@@ -257,6 +272,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 					cursor.draw(input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
 				}
 				UI.drawTooltip(graphics);
+
+				transition.render(graphics);
 
 				timeSinceLastRender = 0;
 
@@ -454,16 +471,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
 		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
-		if (isTransitioning()) {
-			dump.append("doing a transition\n");
-			dump.append("using out transition ").append(outTransitionState.getClass().getSimpleName()).append('\n');
-			dump.append("using in  transition ").append(inTransitionState.getClass().getSimpleName()).append('\n');
-			if (state == inTransitionState) {
-				dump.append("currently doing the in transition\n");
-			} else {
-				dump.append("currently doing the out transition\n");
-			}
-		}
 		state.writeErrorDump(dump);
 	}
 
@@ -471,32 +478,37 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		return state.isInstance(state);
 	}
 
-	public boolean isTransitioning() {
-		return state instanceof TransitionState;
-	}
-
-	public void switchState(Class<? extends OpsuState> newState) {
-		switchState(newState, FadeOutTransitionState.class, 200, FadeInTransitionState.class, 300);
-	}
-
-	public void switchStateNow(Class<? extends OpsuState> newState) {
-		switchState(newState, EmptyTransitionState.class, 0, FadeInTransitionState.class, 300);
-	}
-
-	public void switchStateInstantly(Class<? extends OpsuState> newState) {
-		state.leave();
-		state = instanceContainer.provide(newState);
-		state.enter();
-	}
-
-	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
-		if (isTransitioning()) {
+	public void switchState(Class<? extends OpsuState> newState, int outtime, int intime) {
+		if (transition.progress != -1) {
 			return;
 		}
-		outTransitionState = instanceContainer.provide(outTransition).set(state, outTime, outTransitionListener);
-		inTransitionState = instanceContainer.provide(inTransition).set(instanceContainer.provide(newState), inTime, inTransitionListener);
-		state = outTransitionState;
-		state.enter();
+		// TODO remove this v
+		OpsuState _newstate = instanceContainer.provide(newState);
+		if (outtime == 0) {
+			switchStateInstantly(_newstate);
+			_newstate = null;
+		}
+		transition.nextstate = _newstate;
+		transition.total = transition.in = intime;
+		transition.out = outtime;
+		transition.total += outtime;
+		transition.progress = 0;
+	}
+
+	@Deprecated // TODO instcontainer
+	public void switchState(Class<? extends OpsuState> state) {
+		switchState(state, 200, 300);
+	}
+
+	@Deprecated // TODO instcontainer
+	public void switchStateInstantly(Class<? extends OpsuState> state) {
+		switchStateInstantly(instanceContainer.provide(state));
+	}
+
+	public void switchStateInstantly(OpsuState state) {
+		this.state.leave();
+		this.state = state;
+		this.state.enter();
 	}
 
 	/*
