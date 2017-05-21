@@ -24,27 +24,19 @@ import org.newdawn.slick.util.ClasspathLocation;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
-import yugecin.opsudance.options.Configuration;
 
 import java.io.File;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 /**
  * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
  */
 public class SkinService {
 
-	@Inject
-	private Configuration config;
-
 	public String[] availableSkinDirectories;
 	public String usedSkinName = "Default";
 	public static Skin skin;
-
-	@Inject
-	public SkinService() {
-	}
 
 	public void reloadSkin() {
 		loadSkin();

@@ -45,9 +45,9 @@ import org.newdawn.slick.util.Log;
 import lzma.streams.LzmaOutputStream;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Captures osu! replay data.
@@ -56,9 +56,6 @@ import yugecin.opsudance.options.Configuration;
  * @author smoogipooo (https://github.com/smoogipooo/osu-Replay-API/)
  */
 public class Replay {
-
-	@Inject
-	public Configuration config;
 
 	/** The associated file. */
 	private File file;

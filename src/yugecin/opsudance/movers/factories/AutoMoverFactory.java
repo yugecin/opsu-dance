@@ -22,9 +22,8 @@ import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.Pippi;
 import yugecin.opsudance.movers.*;
-import yugecin.opsudance.options.Options;
-import yugecin.opsudance.render.GameObjectRenderer;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class AutoMoverFactory implements MoverFactory {
@@ -45,7 +44,7 @@ public class AutoMoverFactory implements MoverFactory {
 
 		// stacked: circles if not too quick
 		int circle_stream = OPTION_DANCE_CIRCLE_STREAMS.state ? 58: 85;
-		if (distance < GameObjectRenderer.instance.getCircleDiameter() && ((dt > circle_stream && !OPTION_DANCE_ONLY_CIRCLE_STACKS.state) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
+		if (distance < gameObjectRenderer.circleDiameter && ((dt > circle_stream && !OPTION_DANCE_ONLY_CIRCLE_STACKS.state) || distance < HitObject.getStackOffset() * 5.2f)) { // TODO get the correct multiplier for stackoffsets
 			return new CircleMover(start, end, dir);
 		}
 
@@ -103,7 +102,8 @@ public class AutoMoverFactory implements MoverFactory {
 	}
 
 	private boolean checkBounds( double[] pos ) {
-		return 0 < pos[0] && pos[0] < Options.width - Options.width / 8 && 0 < pos[1] && pos[1] < Options.height - Options.height / 8;
+		return 0 < pos[0] && pos[0] < displayContainer.width - displayContainer.width / 8 &&
+			0 < pos[1] && pos[1] < displayContainer.height - displayContainer.height / 8;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2017 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,40 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.spinners;
+package yugecin.opsudance.core;
 
-import static yugecin.opsudance.core.InstanceContainer.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class DonutSpinner extends Spinner {
-
-	private int ang = 0;
-
-	private double[] point = new double[2];
-
-	@Override
-	public void init()
-	{
-		ang = 0;
-	}
-
-	@Override
-	public double[] getPoint()
-	{
-		if (waitForDelay()) {
-			ang += 15;
-		}
-
-		double rad = displayContainer.width / 4.0f;
-
-		point[0] = displayContainer.width / 2.0f + rad * Math.sin(ang);
-		point[1] = displayContainer.height / 2.0f - rad * Math.cos(ang);
-
-		return point;
-	}
-
-	@Override
-	public String toString() {
-		return "Donut";
-	}
-
-}
+@Retention(RetentionPolicy.SOURCE) public @interface NotNull {}

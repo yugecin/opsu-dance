@@ -23,7 +23,6 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
-import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
@@ -46,7 +45,7 @@ public class OpsuDanceInjector extends Injector {
 		bind(Updater.class).asLazySingleton();
 		bind(SkinService.class).asEagerSingleton();
 
-		bind(PreStartupInitializer.class).asEagerSingleton();
+		//bind(PreStartupInitializer.class).asEagerSingleton();
 		bind(DisplayContainer.class).asEagerSingleton();
 
 		bind(ErrorHandler.class).asEagerSingleton();

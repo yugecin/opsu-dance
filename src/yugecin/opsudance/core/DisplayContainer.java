@@ -42,21 +42,18 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
-import yugecin.opsudance.options.Configuration;
-import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
 
 import static yugecin.opsudance.core.Entrypoint.sout;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -64,15 +61,7 @@ import static yugecin.opsudance.options.Options.*;
  */
 public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
 
-	@Inject
-	private SkinService skinService;
-
-	@Inject
-	private Configuration config;
-
 	private static SGL GL = Renderer.get();
-
-	private final InstanceContainer instanceContainer;
 
 	private FpsRenderState fpsState;
 	private BarNotificationState barNotifState;
@@ -156,9 +145,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	private final Transition transition = new Transition();
 
-	@Inject
-	public DisplayContainer(InstanceContainer instanceContainer) {
-		this.instanceContainer = instanceContainer;
+	public DisplayContainer() {
 		this.cursor = new Cursor();
 		drawCursor = true;
 
@@ -183,7 +170,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		setFPS(targetFPS[targetFPSIndex]);
 		MusicController.setMusicVolume(OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f);
 
-		skinService.loadSkin();
+		skinservice.loadSkin();
 
 		// initialize game images
 		for (GameImage img : GameImage.values()) {
@@ -210,16 +197,16 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		targetRenderInterval = 1000 / targetRendersPerSecond;
 	}
 
-	public void init(Class<? extends OpsuState> startingState) {
+	public void init(OpsuState startingState) {
 		setUPS(OPTION_TARGET_UPS.val);
 		setFPS(targetFPS[targetFPSIndex]);
 
-		state = instanceContainer.provide(startingState);
+		state = startingState;
 		state.enter();
 
-		fpsState = instanceContainer.provide(FpsRenderState.class);
-		bubNotifState = instanceContainer.provide(BubbleNotificationState.class);
-		barNotifState = instanceContainer.provide(BarNotificationState.class);
+		fpsState = new FpsRenderState();
+		bubNotifState = new BubbleNotificationState();
+		barNotifState = new BarNotificationState();
 	}
 
 
@@ -352,7 +339,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
-		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
+		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
 			EventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
@@ -447,7 +434,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		sout("GL ready");
 
 		GameImage.init(width, height);
-		Fonts.init(config);
+		Fonts.init();
 
 		EventBus.post(new ResolutionOrSkinChangedEvent(null, width, height));
 	}
@@ -478,31 +465,23 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		return state.isInstance(state);
 	}
 
-	public void switchState(Class<? extends OpsuState> newState, int outtime, int intime) {
+	public void switchState(OpsuState state) {
+		switchState(state, 200, 300);
+	}
+
+	public void switchState(OpsuState newstate, int outtime, int intime) {
 		if (transition.progress != -1) {
 			return;
 		}
-		// TODO remove this v
-		OpsuState _newstate = instanceContainer.provide(newState);
 		if (outtime == 0) {
-			switchStateInstantly(_newstate);
-			_newstate = null;
+			switchStateInstantly(newstate);
+			newstate = null;
 		}
-		transition.nextstate = _newstate;
+		transition.nextstate = newstate;
 		transition.total = transition.in = intime;
 		transition.out = outtime;
 		transition.total += outtime;
 		transition.progress = 0;
-	}
-
-	@Deprecated // TODO instcontainer
-	public void switchState(Class<? extends OpsuState> state) {
-		switchState(state, 200, 300);
-	}
-
-	@Deprecated // TODO instcontainer
-	public void switchStateInstantly(Class<? extends OpsuState> state) {
-		switchStateInstantly(instanceContainer.provide(state));
 	}
 
 	public void switchStateInstantly(OpsuState state) {

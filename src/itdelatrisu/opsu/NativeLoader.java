@@ -18,14 +18,18 @@
 
 package itdelatrisu.opsu;
 
+import org.newdawn.slick.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Native loader, based on the JarSplice launcher.
@@ -33,38 +37,55 @@ import java.util.jar.JarFile;
  * @author http://ninjacave.com
  */
 public class NativeLoader {
-	/** The directory to unpack natives to. */
-	private final File nativeDir;
 
-	/**
-	 * Constructor.
-	 * @param dir the directory to unpack natives to
-	 */
-	public NativeLoader(File dir) {
-		nativeDir = dir;
+	public static void loadNatives() {
+		try {
+			unpackNatives();
+		} catch (IOException e) {
+			String msg = String.format("Could not unpack native(s): %s", e.getMessage());
+			throw new RuntimeException(msg, e);
+		}
+
+		String nativepath = config.NATIVE_DIR.getAbsolutePath();
+		System.setProperty("org.lwjgl.librarypath", nativepath);
+		System.setProperty("java.library.path", nativepath);
+
+		try {
+			// Workaround for "java.library.path" property being read-only.
+			// http://stackoverflow.com/a/24988095
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
+			fieldSysPath.set(null, null);
+		} catch (Exception e) {
+			Log.warn("Failed to set 'sys_paths' field.", e);
+		}
 	}
 
 	/**
 	 * Unpacks natives for the current operating system to the natives directory.
 	 * @throws IOException if an I/O exception occurs
 	 */
-	public void loadNatives() throws IOException {
-		if (!nativeDir.exists())
-			nativeDir.mkdir();
-
-		JarFile jarFile = Utils.getJarFile();
-		if (jarFile == null)
+	public static void unpackNatives() throws IOException {
+		if (env.jarfile == null) {
 			return;
+		}
 
-		Enumeration<JarEntry> entries = jarFile.entries();
+		if (!config.NATIVE_DIR.exists() && !config.NATIVE_DIR.mkdir()) {
+			String msg = String.format("Could not create folder '%s'",
+				config.NATIVE_DIR.getAbsolutePath());
+			throw new RuntimeException(msg);
+		}
+
+
+		Enumeration<JarEntry> entries = env.jarfile.entries();
 		while (entries.hasMoreElements()) {
 			JarEntry e = entries.nextElement();
 			if (e == null)
 				break;
 
-			File f = new File(nativeDir, e.getName());
+			File f = new File(config.NATIVE_DIR, e.getName());
 			if (isNativeFile(e.getName()) && !e.isDirectory() && e.getName().indexOf('/') == -1 && !f.exists()) {
-				InputStream in = jarFile.getInputStream(jarFile.getEntry(e.getName()));
+				InputStream in = env.jarfile.getInputStream(env.jarfile.getEntry(e.getName()));
 				OutputStream out = new FileOutputStream(f);
 
 				byte[] buffer = new byte[65536];
@@ -77,7 +98,7 @@ public class NativeLoader {
 			}
 		}
 
-		jarFile.close();
+		env.jarfile.close();
 	}
 
 	/**
@@ -85,7 +106,7 @@ public class NativeLoader {
 	 * @param entryName the file name
 	 * @return true if the file is a native that should be loaded, false otherwise
 	 */
-	private boolean isNativeFile(String entryName) {
+	private static boolean isNativeFile(String entryName) {
 		String osName = System.getProperty("os.name");
 		String name = entryName.toLowerCase();
 
@@ -101,4 +122,5 @@ public class NativeLoader {
 		}
 		return false;
 	}
+
 }

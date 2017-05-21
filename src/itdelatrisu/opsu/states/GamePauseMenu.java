@@ -30,10 +30,9 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -43,12 +42,6 @@ import static yugecin.opsudance.options.Options.*;
  * or return to the song menu from this state.
  */
 public class GamePauseMenu extends BaseOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Game gameState;
 
 	private MenuButton continueButton, retryButton, backButton;
 
@@ -105,20 +98,20 @@ public class GamePauseMenu extends BaseOpsuState {
 			// 'esc' will normally unpause, but will return to song menu if health is zero
 			if (gameState.getRestart() == Game.Restart.LOSE) {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				instanceContainer.provide(SongMenu.class).resetGameDataOnLoad();
+				songMenuState.resetGameDataOnLoad();
 				MusicController.playAt(MusicController.getBeatmap().previewTime, true);
-				displayContainer.switchState(SongMenu.class);
+				displayContainer.switchState(songMenuState);
 			} else {
 				SoundController.playSound(SoundEffect.MENUBACK);
 				gameState.setRestart(Game.Restart.FALSE);
-				displayContainer.switchState(Game.class);
+				displayContainer.switchState(gameState);
 			}
 			return true;
 		}
 
 		if (key == Input.KEY_R && (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL))) {
 			gameState.setRestart(Game.Restart.MANUAL);
-			displayContainer.switchState(Game.class);
+			displayContainer.switchState(gameState);
 			return true;
 		}
 
@@ -139,14 +132,14 @@ public class GamePauseMenu extends BaseOpsuState {
 		if (continueButton.contains(x, y) && !loseState) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			gameState.setRestart(Game.Restart.FALSE);
-			displayContainer.switchState(Game.class);
+			displayContainer.switchState(gameState);
 		} else if (retryButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
 			gameState.setRestart(Game.Restart.MANUAL);
-			displayContainer.switchState(Game.class);
+			displayContainer.switchState(gameState);
 		} else if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			instanceContainer.provide(SongMenu.class).resetGameDataOnLoad();
+			songMenuState.resetGameDataOnLoad();
 			if (loseState)
 				MusicController.playAt(MusicController.getBeatmap().previewTime, true);
 			else
@@ -155,7 +148,7 @@ public class GamePauseMenu extends BaseOpsuState {
 				displayContainer.resetCursor();
 			}
 			MusicController.setPitch(1.0f);
-			displayContainer.switchState(SongMenu.class);
+			displayContainer.switchState(songMenuState);
 		}
 
 		return true;
@@ -188,10 +181,9 @@ public class GamePauseMenu extends BaseOpsuState {
 
 	@Override
 	public boolean onCloseRequest() {
-		SongMenu songmenu = instanceContainer.provide(SongMenu.class);
-		songmenu.resetTrackOnLoad();
-		songmenu.resetGameDataOnLoad();
-		displayContainer.switchState(SongMenu.class);
+		songMenuState.resetTrackOnLoad();
+		songMenuState.resetGameDataOnLoad();
+		displayContainer.switchState(songMenuState);
 		return false;
 	}
 

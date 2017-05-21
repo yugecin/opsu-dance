@@ -35,23 +35,15 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
  * Data type representing a slider object.
  */
 public class Slider extends GameObject {
-
-	@Inject
-	private DisplayContainer displayContainer;
-
-	@Inject
-	private GameObjectRenderer gameObjectRenderer;
 
 	/** Slider ball frames. */
 	private static Image[] sliderBallImages;
@@ -605,7 +597,7 @@ public class Slider extends GameObject {
 			return false;
 
 		double distance = Math.hypot(this.x - x, this.y - y);
-		if (distance < gameObjectRenderer.getCircleDiameter() / 2) {
+		if (distance < gameObjectRenderer.circleDiameter / 2) {
 			int timeDiff = Math.abs(trackPosition - hitObject.getTime());
 			int[] hitResultOffset = game.getHitResultOffsets();
 

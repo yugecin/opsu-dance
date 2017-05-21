@@ -30,18 +30,14 @@ import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.Dancer;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.render.GameObjectRenderer;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
  * Data type representing a circle object.
  */
 public class Circle extends GameObject {
-
-	@Inject
-	private GameObjectRenderer gameObjectRenderer;
 
 	/** The associated HitObject. */
 	private HitObject hitObject;
@@ -156,7 +152,7 @@ public class Circle extends GameObject {
 	@Override
 	public boolean mousePressed(int x, int y, int trackPosition) {
 		double distance = Math.hypot(this.x - x, this.y - y);
-		if (distance < gameObjectRenderer.getCircleDiameter() / 2) {
+		if (distance < gameObjectRenderer.circleDiameter / 2) {
 			int timeDiff = trackPosition - hitObject.getTime();
 			int result = hitResult(timeDiff);
 

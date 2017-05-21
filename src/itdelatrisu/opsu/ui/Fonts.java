@@ -34,7 +34,7 @@ import org.newdawn.slick.font.effects.ColorEffect;
 import org.newdawn.slick.font.effects.Effect;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.core.Constants;
 
 /**
  * Fonts used for drawing.
@@ -54,9 +54,9 @@ public class Fonts {
 	 * @throws FontFormatException if any font stream data does not contain the required font tables
 	 * @throws IOException if a font stream cannot be completely read
 	 */
-	public static void init(Configuration config) throws SlickException, FontFormatException, IOException {
+	public static void init() throws SlickException, FontFormatException, IOException {
 		float fontBase = 12f * GameImage.getUIscale();
-		Font javaFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(config.FONT_NAME));
+		Font javaFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(Constants.FONT_NAME));
 		Font font = javaFont.deriveFont(Font.PLAIN, (int) (fontBase * 4 / 3));
 		DEFAULT = new UnicodeFont(font);
 		BOLD = new UnicodeFont(font.deriveFont(Font.BOLD));

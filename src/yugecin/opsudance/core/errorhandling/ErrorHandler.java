@@ -19,6 +19,7 @@ package yugecin.opsudance.core.errorhandling;
 
 import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
+import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.utils.MiscUtils;
@@ -232,7 +233,7 @@ public class ErrorHandler {
 		} catch (UnsupportedEncodingException e) {
 			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
 		}
-		return URI.create(String.format(config.ISSUES_URL, issueTitle, issueBody));
+		return URI.create(String.format(Constants.ISSUES_URL, issueTitle, issueBody));
 	}
 
 	private String truncateGithubIssueBody(String body) {

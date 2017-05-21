@@ -37,8 +37,8 @@ import org.lwjgl.opengl.GL20;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.render.GameObjectRenderer;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -316,7 +316,7 @@ public class CurveRenderState {
 				double diff_x = x - last_x;
 				double diff_y = y - last_y;
 				float dist = Utils.distance(x, y, last_x, last_y);
-				if (dist < GameObjectRenderer.instance.getCircleDiameter() / 8) {
+				if (dist < gameObjectRenderer.circleDiameter / 8) {
 					x = (float) (x - diff_x / 2);
 					y = (float) (y - diff_y / 2);
 				} else {

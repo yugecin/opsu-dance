@@ -40,6 +40,7 @@ import yugecin.opsudance.spinners.*;
 
 import java.awt.*;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class Dancer {
@@ -194,12 +195,12 @@ public class Dancer {
 			}
 			isCurrentLazySlider = false;
 			// detect lazy sliders, should work pretty good
-			if (c.isSlider() && OPTION_DANCE_LAZY_SLIDERS.state && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
+			if (c.isSlider() && OPTION_DANCE_LAZY_SLIDERS.state && Utils.distance(c.start.x, c.start.y, c.end.x, c.end.y) <= gameObjectRenderer.circleDiameter * 0.8f) {
 				Slider s = (Slider) c;
 				Vec2f mid = s.getCurve().pointAt(1f);
-				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
+				if (s.getRepeats() == 1 || Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= gameObjectRenderer.circleDiameter * 0.8f) {
 					mid = s.getCurve().pointAt(0.5f);
-					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= GameObjectRenderer.instance.getCircleDiameter() * 0.8f) {
+					if (Utils.distance(c.start.x, c.start.y, mid.x, mid.y) <= gameObjectRenderer.circleDiameter * 0.8f) {
 						isCurrentLazySlider = true;
 					}
 				}
@@ -251,8 +252,8 @@ public class Dancer {
 			}
 		}
 		Pippi.dance(time, c, isCurrentLazySlider);
-		x = Utils.clamp(x, 10, width - 10);
-		y = Utils.clamp(y, 10, height - 10);
+		x = Utils.clamp(x, 10, displayContainer.width - 10);
+		y = Utils.clamp(y, 10, displayContainer.height - 10);
 	}
 
 	private void createNewMover() {

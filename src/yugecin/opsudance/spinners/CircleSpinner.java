@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class CircleSpinner extends Spinner {
 
@@ -26,22 +26,20 @@ public class CircleSpinner extends Spinner {
 	private double[] point = new double[2];
 
 	@Override
-	public void init()
-	{
+	public void init() {
 		ang = 0;
 	}
 
 	@Override
-	public double[] getPoint()
-	{
+	public double[] getPoint() {
 		if (waitForDelay()) {
 			ang += 15;
 		}
 
-		double rad = Options.width / 4.0f;
+		double rad = displayContainer.width / 4.0f;
 
-		point[0] = Options.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
-		point[1] = Options.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
+		point[0] = displayContainer.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
+		point[1] = displayContainer.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
 
 		return point;
 	}

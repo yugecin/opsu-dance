@@ -17,18 +17,18 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class FivePointStarSpinner extends Spinner {
 
 	@Override
 	public void init() {
 		double[][] points = new double[10][];
-		double midx = Options.width / 2d;
-		double midy = Options.height / 2d;
+		double midx = displayContainer.width / 2d;
+		double midy = displayContainer.height / 2d;
 		double angleIncRads = Math.PI * 36d / 180d;
 		double ang = -Math.PI / 2d;
-		double maxrad = Options.width / 4d;
+		double maxrad = displayContainer.width / 4d;
 		double minrad = maxrad / 3d;
 		for (int i = 0; i < 10; i++) {
 			double rad = maxrad;

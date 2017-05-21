@@ -57,17 +57,13 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.BubbleNotificationEvent;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.options.Options;
-import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.OptionsOverlay;
@@ -75,20 +71,12 @@ import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.utils.GLHelper;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * "Game" state.
  */
 public class Game extends ComplexOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private GameObjectRenderer gameObjectRenderer;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
@@ -327,7 +315,7 @@ public class Game extends ComplexOpsuState {
 
 	private boolean skippedToCheckpoint;
 
-	public Game(DisplayContainer displayContainer) {
+	public Game() {
 		super();
 		mirrorCursor = new Cursor(true);
 		this.moveStoryboardOverlay = new MoveStoryboard(displayContainer);
@@ -365,8 +353,7 @@ public class Game extends ComplexOpsuState {
 		scoreboardStarStream.setDurationSpread(700, 100);
 
 		// create the associated GameData object
-		data = instanceContainer.injectFields(new GameData(displayContainer.width, displayContainer.height));
-		gameObjectRenderer.setGameData(data);
+		gameObjectRenderer.gameData = data = new GameData();
 	}
 
 
@@ -764,7 +751,7 @@ public class Game extends ComplexOpsuState {
 
 			// focus lost: go back to pause screen
 			else if (!Display.isActive()) {
-				displayContainer.switchState(GamePauseMenu.class);
+				displayContainer.switchState(pauseState);
 				pausePulse = 0f;
 			}
 
@@ -881,7 +868,7 @@ public class Game extends ComplexOpsuState {
 				onCloseRequest();
 			} else {
 				// go to ranking screen
-				displayContainer.switchState(GameRanking.class);
+				displayContainer.switchState(gameRankingState);
 			}
 		}
 	}
@@ -927,11 +914,11 @@ public class Game extends ComplexOpsuState {
 		} else if (GameMod.AUTO.isActive()) {
 			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
 			if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
-				double dx = autoMousePosition.x - Options.width / 2d;
-				double dy = autoMousePosition.y - Options.height / 2d;
+				double dx = autoMousePosition.x - displayContainer.width / 2d;
+				double dy = autoMousePosition.y - displayContainer.height / 2d;
 				double d = Math.sqrt(dx * dx + dy * dy);
 				double a = Math.atan2(dy, dx) + Math.PI;
-				mirrorCursor.setCursorPosition(displayContainer.delta, (int) (Math.cos(a) * d + Options.width / 2), (int) (Math.sin(a) * d + Options.height / 2));
+				mirrorCursor.setCursorPosition(displayContainer.delta, (int) (Math.cos(a) * d + displayContainer.width / 2), (int) (Math.sin(a) * d + displayContainer.height / 2));
 			}
 		} else if (GameMod.AUTOPILOT.isActive()) {
 			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
@@ -962,7 +949,7 @@ public class Game extends ComplexOpsuState {
 			// save score and replay
 			if (!checkpointLoaded) {
 				boolean unranked = (GameMod.AUTO.isActive() || GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive());
-				instanceContainer.provide(GameRanking.class).setGameData(data);
+				gameRankingState.setGameData(data);
 				if (isReplay)
 					data.setReplay(replay);
 				else if (replayFrames != null) {
@@ -1048,7 +1035,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateInstantly(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(pauseState);
 		}
 
 		// drain health
@@ -1075,7 +1062,7 @@ public class Game extends ComplexOpsuState {
 					rotations = new IdentityHashMap<>();
 					SoundController.playSound(SoundEffect.FAIL);
 
-					displayContainer.switchState(GamePauseMenu.class, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, 300);
+					displayContainer.switchState(pauseState, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, 300);
 				}
 			}
 		}
@@ -1108,8 +1095,8 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean onCloseRequest() {
-		instanceContainer.provide(SongMenu.class).resetGameDataOnLoad();
-		displayContainer.switchState(SongMenu.class);
+		songMenuState.resetGameDataOnLoad();
+		displayContainer.switchState(songMenuState);
 		return false;
 	}
 
@@ -1156,7 +1143,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateInstantly(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(pauseState);
 			break;
 		case Input.KEY_SPACE:
 			// skip intro
@@ -1309,7 +1296,7 @@ public class Game extends ComplexOpsuState {
 			if (MusicController.isPlaying() || isLeadIn()) {
 				pauseTime = trackPosition;
 			}
-			displayContainer.switchStateInstantly(GamePauseMenu.class);
+			displayContainer.switchStateInstantly(pauseState);
 			return true;
 		}
 
@@ -1468,7 +1455,7 @@ public class Game extends ComplexOpsuState {
 
 		if (beatmap == null || beatmap.objects == null) {
 			EventBus.post(new BubbleNotificationEvent("Game was running without a beatmap", BubbleNotificationEvent.COMMONCOLOR_RED));
-			displayContainer.switchStateInstantly(SongMenu.class);
+			displayContainer.switchStateInstantly(songMenuState);
 		}
 
 		Dancer.instance.reset();
@@ -1565,9 +1552,9 @@ public class Game extends ComplexOpsuState {
 
 				try {
 					if (hitObject.isCircle()) {
-						gameObjects[i] = instanceContainer.injectFields(new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd));
+						gameObjects[i] = new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
 					} else if (hitObject.isSlider()) {
-						gameObjects[i] = instanceContainer.injectFields(new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd));
+						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
 					} else if (hitObject.isSpinner()) {
 						gameObjects[i] = new Spinner(hitObject, this, data);
 					}
@@ -1855,7 +1842,7 @@ public class Game extends ComplexOpsuState {
 					gameObj.draw(g, trackPosition, false);
 					if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive() && idx < mirrorTo && idx >= mirrorFrom) {
 						g.pushTransform();
-						g.rotate(Options.width / 2f, Options.height / 2f, 180f);
+						g.rotate(displayContainer.width / 2f, displayContainer.height / 2f, 180f);
 						gameObj.draw(g, trackPosition, true);
 						g.popTransform();
 					}
@@ -1999,7 +1986,7 @@ public class Game extends ComplexOpsuState {
 		skipButton.setHoverExpand(1.1f, MenuButton.Expand.UP_LEFT);
 
 		// load other images...
-		instanceContainer.provide(GamePauseMenu.class).loadImages();
+		pauseState.loadImages();
 		data.loadImages();
 	}
 
@@ -2036,7 +2023,7 @@ public class Game extends ComplexOpsuState {
 
 		// initialize objects
 		gameObjectRenderer.initForGame(data, diameter);
-		Slider.init(gameObjectRenderer.getCircleDiameter(), beatmap);
+		Slider.init(gameObjectRenderer.circleDiameter, beatmap);
 		Spinner.init(displayContainer, overallDifficulty);
 		Color sliderBorderColor = SkinService.skin.getSliderBorderColor();
 		if (!OPTION_IGNORE_BEATMAP_SKINS.state && beatmap.getSliderBorderColor() != null) {

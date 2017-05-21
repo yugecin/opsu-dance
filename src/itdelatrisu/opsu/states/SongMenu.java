@@ -63,16 +63,13 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -82,18 +79,6 @@ import static yugecin.opsudance.options.Options.*;
  * manage beatmaps, or change game options from this state.
  */
 public class SongMenu extends ComplexOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private OszUnpacker oszUnpacker;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	/** The max number of song buttons to be shown on each screen. */
 	public static final int MAX_SONG_BUTTONS = 6;
@@ -246,7 +231,7 @@ public class SongMenu extends ComplexOpsuState {
 		private void reloadBeatmaps() {
 			if (fullReload) {
 				BeatmapDB.clearDatabase();
-				oszUnpacker.unpackAll();
+				oszunpacker.unpackAll();
 			}
 			beatmapParser.parseAll();
 		}
@@ -328,7 +313,7 @@ public class SongMenu extends ComplexOpsuState {
 
 	private final OptionsOverlay optionsOverlay;
 
-	public SongMenu(DisplayContainer displayContainer) {
+	public SongMenu() {
 		super();
 		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
 		overlays.add(optionsOverlay);
@@ -761,8 +746,8 @@ public class SongMenu extends ComplexOpsuState {
 				if (focusNode != null) {
 					MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-					instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-					displayContainer.switchState(ButtonMenu.class);
+					buttonState.setMenuState(state, focusNode);
+					displayContainer.switchState(buttonState);
 				}
 				return;
 			}
@@ -922,7 +907,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(MainMenu.class);
+			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
@@ -1029,12 +1014,12 @@ public class SongMenu extends ComplexOpsuState {
 					SoundController.playSound(SoundEffect.MENUHIT);
 					if (button != Input.MOUSE_RIGHT_BUTTON) {
 						// view score
-						instanceContainer.provide(GameRanking.class).setGameData(instanceContainer.injectFields(new GameData(focusScores[rank], displayContainer.width, displayContainer.height)));
-						displayContainer.switchState(GameRanking.class);
+						gameRankingState.setGameData(new GameData(focusScores[rank]));
+						displayContainer.switchState(gameRankingState);
 					} else {
 						// score management
-						instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.SCORE, focusScores[rank]);
-						displayContainer.switchState(ButtonMenu.class);
+						buttonState.setMenuState(MenuState.SCORE, focusScores[rank]);
+						displayContainer.switchState(buttonState);
 					}
 					return true;
 				}
@@ -1070,13 +1055,13 @@ public class SongMenu extends ComplexOpsuState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(MainMenu.class);
+				displayContainer.switchState(mainmenuState);
 			}
 			return true;
 		case Input.KEY_F1:
 			SoundController.playSound(SoundEffect.MENUHIT);
-			instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.MODS);
-			displayContainer.switchState(ButtonMenu.class);
+			buttonState.setMenuState(MenuState.MODS);
+			displayContainer.switchState(buttonState);
 			return true;
 		case Input.KEY_F2:
 			if (focusNode == null)
@@ -1104,16 +1089,16 @@ public class SongMenu extends ComplexOpsuState {
 			SoundController.playSound(SoundEffect.MENUHIT);
 			MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 				MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-			instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-			displayContainer.switchState(ButtonMenu.class);
+			buttonState.setMenuState(state, focusNode);
+			displayContainer.switchState(buttonState);
 			return true;
 		case Input.KEY_F5:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (songFolderChanged)
 				reloadBeatmaps(false);
 			else {
-				instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.RELOAD);
-				displayContainer.switchState(ButtonMenu.class);
+				buttonState.setMenuState(MenuState.RELOAD);
+				displayContainer.switchState(buttonState);
 			}
 			return true;
 		case Input.KEY_DELETE:
@@ -1123,8 +1108,8 @@ public class SongMenu extends ComplexOpsuState {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				MenuState ms = (focusNode.beatmapIndex == -1 || focusNode.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, focusNode);
-				displayContainer.switchState(ButtonMenu.class);
+				buttonState.setMenuState(ms, focusNode);
+				displayContainer.switchState(buttonState);
 			}
 			return true;
 		case Input.KEY_ENTER:
@@ -1310,7 +1295,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// reset game data
 		if (resetGame) {
-			instanceContainer.provide(Game.class).resetGameData();
+			gameState.resetGameData();
 
 			// destroy extra Clips
 			MultiClip.destroyExtraClips();
@@ -1787,10 +1772,9 @@ public class SongMenu extends ComplexOpsuState {
 
 		SoundController.playSound(SoundEffect.MENUHIT);
 		MultiClip.destroyExtraClips();
-		Game gameState = instanceContainer.provide(Game.class);
 		gameState.loadBeatmap(beatmap);
 		gameState.setRestart(Game.Restart.NEW);
 		gameState.setReplay(null);
-		displayContainer.switchState(Game.class);
+		displayContainer.switchState(gameState);
 	}
 }

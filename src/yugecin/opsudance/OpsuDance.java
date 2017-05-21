@@ -21,22 +21,16 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
-import itdelatrisu.opsu.downloads.Updater;
-import itdelatrisu.opsu.states.Splash;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.options.Configuration;
-import yugecin.opsudance.options.OptionsService;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import static yugecin.opsudance.core.Entrypoint.sout;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /*
@@ -44,30 +38,13 @@ import static yugecin.opsudance.options.Options.*;
  */
 public class OpsuDance {
 
-	@Inject
-	private DisplayContainer container;
-
-	@Inject
-	private OptionsService optionsService;
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private Updater updater;
-
 	private ServerSocket singleInstanceSocket;
-
-	@Inject
-	public OpsuDance() {
-	}
 
 	public void start(String[] args) {
 		try {
 			sout("initialized");
 
-			checkRunningDirectory();
-			optionsService.loadOptions();
+			optionservice.loadOptions();
 			ensureSingleInstance();
 			sout("prechecks done and options parsed");
 
@@ -75,15 +52,15 @@ public class OpsuDance {
 			initUpdater(args);
 			sout("database & updater initialized");
 
-			container.init(Splash.class);
+			displayContainer.init(splashState);
 		} catch (Exception e) {
 			errorAndExit("startup failure", e);
 		}
 
 		while (rungame());
-		container.teardownAL();
+		displayContainer.teardownAL();
 
-		optionsService.saveOptions();
+		optionservice.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
 		DownloadList.get().cancelAllDownloads();
@@ -95,20 +72,20 @@ public class OpsuDance {
 
 	private boolean rungame() {
 		try {
-			container.setup();
-			container.resume();
+			displayContainer.setup();
+			displayContainer.resume();
 		} catch (Exception e) {
 			ErrorHandler.error("could not initialize GL", e).allowTerminate().preventContinue().show();
 			return false;
 		}
 		Exception caughtException = null;
 		try {
-			container.run();
+			displayContainer.run();
 		} catch (Exception e) {
 			caughtException = e;
 		}
-		container.teardown();
-		container.pause();
+		displayContainer.teardown();
+		displayContainer.pause();
 		return caughtException != null && ErrorHandler.error("update/render error", caughtException).allowTerminate().show().shouldIgnoreAndContinue();
 	}
 
@@ -140,20 +117,6 @@ public class OpsuDance {
 				}
 			}
 		}.start();
-	}
-
-	private void checkRunningDirectory() {
-		if (!Utils.isJarRunning()) {
-			return;
-		}
-		File runningDir = Utils.getRunningDirectory();
-		if (runningDir == null) {
-			return;
-		}
-		if (runningDir.getAbsolutePath().indexOf('!') == -1) {
-			return;
-		}
-		errorAndExit("Cannot run from a path that contains a '!'. Please move or rename the jar and try again.");
 	}
 
 	private void ensureSingleInstance() {

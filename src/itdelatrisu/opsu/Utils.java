@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu;
 
+import com.sun.istack.internal.Nullable;
 import itdelatrisu.opsu.downloads.Download;
 
 import java.io.BufferedInputStream;
@@ -30,14 +31,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.jar.JarFile;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -55,7 +54,8 @@ import org.newdawn.slick.util.Log;
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.options.Options;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Contains miscellaneous utilities.
@@ -419,43 +419,6 @@ public class Utils {
 	}
 
 	/**
-	 * Returns whether or not the application is running within a JAR.
-	 * @return true if JAR, false if file
-	 */
-	public static boolean isJarRunning() {
-		return Utils.class.getResource(String.format("%s.class", Utils.class.getSimpleName())).toString().startsWith("jar:");
-	}
-
-	/**
-	 * Returns the JarFile for the application.
-	 * @return the JAR file, or null if it could not be determined
-	 */
-	public static JarFile getJarFile() {
-		if (!isJarRunning())
-			return null;
-
-		try {
-			return new JarFile(new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI()), false);
-		} catch (URISyntaxException | IOException e) {
-			Log.error("Could not determine the JAR file.", e);
-			return null;
-		}
-	}
-
-	/**
-	 * Returns the directory where the application is being run.
-	 * @return the directory, or null if it could not be determined
-	 */
-	public static File getRunningDirectory() {
-		try {
-			return new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-		} catch (URISyntaxException e) {
-			Log.error("Could not get the running directory.", e);
-			return null;
-		}
-	}
-
-	/**
 	 * Parses the integer string argument as a boolean:
 	 * {@code 1} is {@code true}, and all other values are {@code false}.
 	 * @param s the {@code String} containing the boolean representation to be parsed
@@ -470,8 +433,9 @@ public class Utils {
 	 * most recent update to the working directory (e.g. fetch or successful push).
 	 * @return the 40-character SHA-1 hash, or null if it could not be determined
 	 */
+	@Nullable
 	public static String getGitHash() {
-		if (isJarRunning())
+		if (env.isJarRunning)
 			return null;
 		File f = new File(".git/refs/remotes/origin/master");
 		if (!f.isFile())
@@ -517,10 +481,10 @@ public class Utils {
 	}
 
 	public static int getQuadrant(double x, double y) {
-		if (x < Options.width / 2d) {
-			return y < Options.height / 2d ? 2 : 3;
+		if (x < displayContainer.width / 2d) {
+			return y < displayContainer.height / 2d ? 2 : 3;
 		}
-		return y < Options.height / 2d ? 1 : 4;
+		return y < displayContainer.height / 2d ? 1 : 4;
 	}
 
 	/*
@@ -537,24 +501,24 @@ public class Utils {
 	*/
 
 	public static float[] mirrorPoint(float x, float y) {
-		double dx = x - Options.width / 2d;
-		double dy = y - Options.height / 2d;
+		double dx = x - displayContainer.width / 2d;
+		double dy = y - displayContainer.height / 2d;
 		double ang = Math.atan2(dy, dx);
 		double d = -Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (Options.width / 2d + Math.cos(ang) * d),
-			(float) (Options.height / 2d + Math.sin(ang) * d)
+			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
+			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
 		};
 	}
 
 	public static float[] mirrorPoint(float x, float y, float degrees) {
-		double dx = x - Options.width / 2d;
-		double dy = y - Options.height / 2d;
+		double dx = x - displayContainer.width / 2d;
+		double dy = y - displayContainer.height / 2d;
 		double ang = Math.atan2(dy, dx) + (degrees * Math.PI / 180d);
 		double d = Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (Options.width / 2d + Math.cos(ang) * d),
-			(float) (Options.height / 2d + Math.sin(ang) * d)
+			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
+			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
 		};
 	}
 

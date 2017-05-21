@@ -30,21 +30,14 @@ import java.nio.file.StandardCopyOption;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Importer for replay files.
  */
 public class ReplayImporter {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
 
 	/** The subdirectory (within the replay import directory) to move replays that could not be imported. */
 	private final String FAILED_IMPORT_DIR = "failed";
@@ -54,10 +47,6 @@ public class ReplayImporter {
 
 	/** The total number of replays to import. */
 	private File[] files;
-
-	@Inject
-	public ReplayImporter() {
-	}
 
 	/**
 	 * Invokes the importer for each OSR file in the replay import dir, adding the replay
@@ -87,7 +76,7 @@ public class ReplayImporter {
 		// import OSRs
 		for (File file : files) {
 			fileIndex++;
-			Replay r = instanceContainer.injectFields(new Replay(file));
+			Replay r = new Replay(file);
 			try {
 				r.loadHeader();
 			} catch (IOException e) {

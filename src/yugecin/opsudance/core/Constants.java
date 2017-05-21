@@ -15,28 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.utils;
+package yugecin.opsudance.core;
 
-import org.newdawn.slick.util.Log;
-import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.Constants;
+import java.net.URI;
 
-import java.io.IOException;
-import java.util.Properties;
+public class Constants {
 
-public class MiscUtils {
-
-	public static final CachedVariable<Properties> buildProperties = new CachedVariable<>(new CachedVariable.Getter<Properties>() {
-		@Override
-		public Properties get() {
-			Properties props = new Properties();
-			try {
-				props.load(ResourceLoader.getResourceAsStream(Constants.VERSION_FILE));
-			} catch (IOException e) {
-				Log.error("Could not read version file", e);
-			}
-			return props;
-		}
-	});
+	public static final String PROJECT_NAME = "opsu!dance";
+	public static final String FONT_NAME = "DroidSansFallback.ttf";
+	public static final String VERSION_FILE = "version";
+	public static final URI REPOSITORY_URI = URI.create("https://github.com/itdelatrisu/opsu");
+	public static final URI DANCE_REPOSITORY_URI = URI.create("https://github.com/yugecin/opsu-dance");
+	public static final String ISSUES_URL = "https://github.com/yugecin/opsu-dance/issues/new?title=%s&body=%s";
+	public static final String VERSION_REMOTE = "https://raw.githubusercontent.com/yugecin/opsu-dance/master/version";
 
 }

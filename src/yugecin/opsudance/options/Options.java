@@ -29,39 +29,22 @@ import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
-import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.CachedVariable;
 import yugecin.opsudance.utils.CachedVariable.Getter;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
  */
 public class Options {
-
-	// TODO remove this?
-	public static int width;
-	public static int height;
-
-	static {
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				if (event.width > 0) {
-					width = event.width;
-					height = event.height;
-				}
-			}
-		});
-	}
 
 	// internal options (not displayed in-game)
 	public static final Option OPTION_BEATMAP_DIRECTORY = new Option("BeatmapDirectory") {
@@ -204,37 +187,31 @@ public class Options {
 	public static final ToggleOption OPTION_ALLOW_LARGER_RESOLUTIONS = new ToggleOption("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false);
 	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false);
 	public static final ListOption OPTION_SKIN = new ListOption("Skin", "Skin", "Change how the game looks.") {
-		private CachedVariable<SkinService> skinService = new CachedVariable<>(new Getter<SkinService>() {
-			@Override
-			public SkinService get() {
-				return instanceContainer.provide(SkinService.class);
-			}
-		});
 
 		@Override
 		public String getValueString () {
-			return skinService.get().usedSkinName;
+			return skinservice.usedSkinName;
 		}
 
 		@Override
 		public Object[] getListItems () {
-			return skinService.get().availableSkinDirectories;
+			return skinservice.availableSkinDirectories;
 		}
 
 		@Override
 		public void clickListItem(int index){
-			skinService.get().usedSkinName = skinService.get().availableSkinDirectories[index];
-			skinService.get().reloadSkin();
+			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
+			skinservice.reloadSkin();
 		}
 
 		@Override
 		public void read (String s){
-			skinService.get().usedSkinName = s;
+			skinservice.usedSkinName = s;
 		}
 
 		@Override
 		public String write() {
-			return skinService.get().usedSkinName;
+			return skinservice.usedSkinName;
 		}
 	};
 

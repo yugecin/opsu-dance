@@ -34,16 +34,11 @@ import java.util.List;
 
 import org.json.JSONObject;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 
 /**
  * Download server: http://osu.yas-online.net/
  */
 public class YaSOnlineServer extends DownloadServer {
-
-	@Inject
-	public InstanceContainer instanceContainer;
 
 	/** Server name. */
 	private static final String SERVER_NAME = "YaS Online";
@@ -71,10 +66,6 @@ public class YaSOnlineServer extends DownloadServer {
 
 	/** Max server download ID seen (for approximating total pages). */
 	private int maxServerID = 0;
-
-	@Inject
-	public YaSOnlineServer() {
-	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -183,7 +174,7 @@ public class YaSOnlineServer extends DownloadServer {
 				if (serverID > maxServerID)
 					maxServerID = serverID;
 
-				nodeList.add(instanceContainer.injectFields(new DownloadNode(item.getInt("mapid"), date, title, null, artist, null, "")));
+				nodeList.add(new DownloadNode(item.getInt("mapid"), date, title, null, artist, null, ""));
 			}
 			nodes = nodeList.toArray(new DownloadNode[nodeList.size()]);
 

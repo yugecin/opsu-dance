@@ -40,10 +40,9 @@ import java.util.concurrent.Executors;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /*
@@ -83,6 +82,7 @@ import static yugecin.opsudance.options.Options.*;
  * @author The Java Tutorials (http://docs.oracle.com/javase/tutorial/essential/io/examples/WatchDir.java) (base)
  */
 public class BeatmapWatchService {
+
 	/** Beatmap watcher service instance. */
 	private static BeatmapWatchService ws;
 
@@ -90,14 +90,14 @@ public class BeatmapWatchService {
 	 * Creates a new watch service instance (overwriting any previous instance),
 	 * registers the beatmap directory, and starts processing events.
 	 */
-	public static void create(InstanceContainer instanceContainer) {
+	public static void create() {
 		// close the existing watch service
 		destroy();
 
 		// create a new watch service
 		try {
-			ws = instanceContainer.provide(BeatmapWatchService.class);
-			ws.register(instanceContainer.provide(Configuration.class).beatmapDir.toPath());
+			ws = new BeatmapWatchService();
+			ws.register(config.beatmapDir.toPath());
 		} catch (IOException e) {
 			Log.error("Could not create watch service", e);
 			EventBus.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));

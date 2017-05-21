@@ -37,10 +37,10 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * "Game Ranking" (score card) state.
@@ -50,9 +50,6 @@ import yugecin.opsudance.events.BarNotificationEvent;
  * </ul>
  */
 public class GameRanking extends BaseOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
 
 	/** Associated GameData object. */
 	private GameData data;
@@ -149,7 +146,6 @@ public class GameRanking extends BaseOpsuState {
 		}
 
 		// replay
-		Game gameState = instanceContainer.provide(Game.class);
 		boolean returnToGame = false;
 		boolean replayButtonPressed = replayButton.contains(x, y);
 		if (replayButtonPressed && !(data.isGameplay() && GameMod.AUTO.isActive())) {
@@ -183,7 +179,7 @@ public class GameRanking extends BaseOpsuState {
 			Beatmap beatmap = MusicController.getBeatmap();
 			gameState.loadBeatmap(beatmap);
 			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(Game.class);
+			displayContainer.switchState(gameState);
 		}
 		return true;
 	}
@@ -217,12 +213,11 @@ public class GameRanking extends BaseOpsuState {
 
 	@Override
 	public boolean onCloseRequest() {
-		SongMenu songmenu = instanceContainer.provide(SongMenu.class);
 		if (data != null && data.isGameplay()) {
-			songmenu.resetTrackOnLoad();
+			songMenuState.resetTrackOnLoad();
 		}
-		songmenu.resetGameDataOnLoad();
-		displayContainer.switchState(SongMenu.class);
+		songMenuState.resetGameDataOnLoad();
+		displayContainer.switchState(songMenuState);
 		return false;
 	}
 
@@ -232,25 +227,24 @@ public class GameRanking extends BaseOpsuState {
 	private void returnToSongMenu() {
 		SoundController.muteSoundComponent();
 		SoundController.playSound(SoundEffect.MENUBACK);
-		SongMenu songMenu = instanceContainer.provide(SongMenu.class);
 		if (data.isGameplay()) {
-			songMenu.resetTrackOnLoad();
+			songMenuState.resetTrackOnLoad();
 		}
-		songMenu.resetGameDataOnLoad();
+		songMenuState.resetGameDataOnLoad();
 		if (displayContainer.cursor.isBeatmapSkinned()) {
 			displayContainer.resetCursor();
 		}
-		displayContainer.switchState(SongMenu.class);
+		displayContainer.switchState(songMenuState);
 	}
 
 	/**
 	 * Sets the associated GameData object.
 	 * @param data the GameData
 	 */
-	public void setGameData(GameData data) { this.data = data; }
+	public void setGameData(GameData data) { this.data = data; } // TODO why is this unused
 
 	/**
 	 * Returns the current GameData object (usually null unless state active).
 	 */
-	public GameData getGameData() { return data; }
+	public GameData getGameData() { return data; } // TODO why is this unused
 }

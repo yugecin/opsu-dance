@@ -21,29 +21,17 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
-import yugecin.opsudance.options.Configuration;
-import yugecin.opsudance.skinning.SkinService;
 
 import java.io.StringWriter;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public abstract class BaseOpsuState implements OpsuState, EventListener<ResolutionOrSkinChangedEvent> {
-
-	@Inject
-	protected DisplayContainer displayContainer;
-
-	@Inject
-	protected Configuration config;
-
-	@Inject
-	protected SkinService skinService;
 
 	/**
 	 * state is dirty when resolution or skin changed but hasn't rendered yet
@@ -120,7 +108,7 @@ public abstract class BaseOpsuState implements OpsuState, EventListener<Resoluti
 		}
 		Input input = displayContainer.input;
 		if (key == Input.KEY_S && input.isKeyDown(Input.KEY_LMENU) && input.isKeyDown(Input.KEY_LSHIFT) &&input.isKeyDown(Input.KEY_LCONTROL) && !displayContainer.isInState(Game.class)) {
-			skinService.reloadSkin();
+			skinservice.reloadSkin();
 		}
 		return false;
 	}

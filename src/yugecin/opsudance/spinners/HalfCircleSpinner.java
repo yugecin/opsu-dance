@@ -19,6 +19,8 @@ package yugecin.opsudance.spinners;
 
 import yugecin.opsudance.options.Options;
 
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+
 public class HalfCircleSpinner extends Spinner {
 
 	private int ang = 0;
@@ -45,8 +47,8 @@ public class HalfCircleSpinner extends Spinner {
 			skipang += 359;
 		}
 
-		point[0] = Options.width / 2.0d + Options.height / 2 * 0.8d * Math.cos(ang/180d*Math.PI);
-		point[1] = Options.height / 2.0d + Options.height / 2 * 0.8d * Math.sin(ang/180d*Math.PI);
+		point[0] = displayContainer.width / 2.0d + displayContainer.height / 2 * 0.8d * Math.cos(ang/180d*Math.PI);
+		point[1] = displayContainer.height / 2.0d + displayContainer.height / 2 * 0.8d * Math.sin(ang/180d*Math.PI);
 
 		return point;
 	}

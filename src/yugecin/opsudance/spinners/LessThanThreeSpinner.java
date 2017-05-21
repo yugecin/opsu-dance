@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class LessThanThreeSpinner extends Spinner {
 
@@ -38,8 +38,8 @@ public class LessThanThreeSpinner extends Spinner {
 		if( angle > 360 ) angle = 0;
 		double theta = angle / 180d * Math.PI;
 		double[] pos = new double[] {
-			Options.width / 2d,
-			Options.height / 2d
+			displayContainer.width / 2d,
+			displayContainer.height / 2d
 		};
 
 		double r = 2 - 2 * Math.sin( theta ) + Math.sin( theta ) * Math.sqrt( Math.abs( Math.cos( theta ) ) ) / ( Math.sin( theta ) + 1.4 );

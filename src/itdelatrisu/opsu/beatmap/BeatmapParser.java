@@ -35,24 +35,16 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
  * Parser for beatmaps.
  */
 public class BeatmapParser {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
 
 	/** The string lookup database. */
 	private static HashMap<String, String> stringdb = new HashMap<String, String>();
@@ -78,14 +70,9 @@ public class BeatmapParser {
 	/** If no Provider supports a MessageDigestSpi implementation for the MD5 algorithm. */
 	private boolean hasNoMD5Algorithm = false;
 
-	@Inject
-	public BeatmapParser() {
-	}
-
 	/**
 	 * Invokes parser for each OSU file in a root directory and
 	 * adds the beatmaps to a new BeatmapSetList.
-	 * @param root the root directory (search has depth 1)
 	 */
 	public void parseAll() {
 		// create a new BeatmapSetList
@@ -93,7 +80,7 @@ public class BeatmapParser {
 
 		// create a new watch service
 		if (OPTION_ENABLE_WATCH_SERVICE.state) {
-			BeatmapWatchService.create(instanceContainer);
+			BeatmapWatchService.create();
 		}
 
 		// parse all directories

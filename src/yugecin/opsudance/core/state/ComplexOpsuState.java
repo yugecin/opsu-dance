@@ -23,6 +23,8 @@ import yugecin.opsudance.core.components.Component;
 
 import java.util.LinkedList;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 public abstract class ComplexOpsuState extends BaseOpsuState {
 
 	protected final LinkedList<Component> components;

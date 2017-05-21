@@ -19,9 +19,9 @@ package yugecin.opsudance;
 
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
-import yugecin.opsudance.render.GameObjectRenderer;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class Pippi {
 
@@ -38,14 +38,14 @@ public class Pippi {
 
 	public static void setRadiusPercent(int radiusPercent) {
 		Pippi.radiusPercent = radiusPercent;
-		pippiminrad = pippirad = (GameObjectRenderer.instance.getCircleDiameter() / 2d - 10d) * radiusPercent / 100d;
+		pippiminrad = pippirad = (gameObjectRenderer.circleDiameter / 2d - 10d) * radiusPercent / 100d;
 	}
 
 	public static void reset() {
 		angle = 0;
 		currentdelta = 0;
 		setRadiusPercent(radiusPercent);
-		pippimaxrad = GameObjectRenderer.instance.getCircleDiameter() - 10d;
+		pippimaxrad = gameObjectRenderer.circleDiameter - 10d;
 	}
 
 	public static void dance(int time, GameObject c, boolean isCurrentLazySlider) {
@@ -92,7 +92,7 @@ public class Pippi {
 	}
 
 	public static boolean shouldPreventWobblyStream(double distance) {
-		return OPTION_PIPPI_ENABLE.state && distance < GameObjectRenderer.instance.getCircleDiameter() * 0.93f && OPTION_PIPPI_PREVENT_WOBBLY_STREAMS.state;
+		return OPTION_PIPPI_ENABLE.state && distance < gameObjectRenderer.circleDiameter * 0.93f && OPTION_PIPPI_PREVENT_WOBBLY_STREAMS.state;
 	}
 
 }

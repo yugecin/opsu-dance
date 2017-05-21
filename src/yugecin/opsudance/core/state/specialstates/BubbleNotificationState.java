@@ -21,7 +21,6 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.BubbleNotificationEvent;
@@ -31,6 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+
 public class BubbleNotificationState implements EventListener<BubbleNotificationEvent> {
 
 	public static final int IN_TIME = 633;
@@ -38,14 +39,12 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 	public static final int OUT_TIME = 433;
 	public static final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
-	private final DisplayContainer displayContainer;
 	private final LinkedList<Notification> bubbles;
 
 	private int addAnimationTime;
 	private int addAnimationHeight;
 
-	public BubbleNotificationState(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
+	public BubbleNotificationState() {
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
 		EventBus.subscribe(BubbleNotificationEvent.class, this);

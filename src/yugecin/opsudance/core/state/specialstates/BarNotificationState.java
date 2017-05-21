@@ -21,13 +21,14 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.events.BarNotificationEvent;
 import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
 
 import java.util.List;
+
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
 public class BarNotificationState implements EventListener<BarNotificationEvent> {
 
@@ -36,7 +37,6 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	private final int OUT_TIME = 200;
 	private final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
-	private final DisplayContainer displayContainer;
 	private final Color bgcol;
 	private final Color textCol;
 
@@ -49,8 +49,7 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	private int barHalfTargetHeight;
 	private int barHalfHeight;
 
-	public BarNotificationState(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
+	public BarNotificationState() {
 		this.bgcol = new Color(Color.black);
 		this.textCol = new Color(Color.white);
 		this.timeShown = TOTAL_TIME;

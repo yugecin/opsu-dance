@@ -17,17 +17,16 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class IlluminatiSpinner extends Spinner {
 
 	@Override
-	public void init()
-	{
+	public void init() {
 		init( new double[][] {
-			new double[] { Options.width / 2d - 120, Options.height / 2d + 80 },
-			new double[] { Options.width / 2d, Options.height / 2d - 160 },
-			new double[] { Options.width / 2d + 120, Options.height / 2d + 80 }
+			new double[] { displayContainer.width / 2d - 120, displayContainer.height / 2d + 80 },
+			new double[] { displayContainer.width / 2d, displayContainer.height / 2d - 160 },
+			new double[] { displayContainer.width / 2d + 120, displayContainer.height / 2d + 80 }
 		} );
 	}
 

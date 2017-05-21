@@ -24,7 +24,6 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
-import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
@@ -42,24 +41,16 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
-import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Holds game data and renders all related elements.
  */
 public class GameData {
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private InstanceContainer instanceContainer;
 
 	/** Delta multiplier for steady HP drain. */
 	public static final float HP_DRAIN_MULTIPLIER = 1 / 200f;
@@ -354,17 +345,10 @@ public class GameData {
 	/** Whether this object is used for gameplay (true) or score viewing (false). */
 	private boolean isGameplay;
 
-	/** Container dimensions. */
-	private int width, height;
-
 	/**
 	 * Constructor for gameplay.
-	 * @param width container width
-	 * @param height container height
 	 */
-	public GameData(int width, int height) {
-		this.width = width;
-		this.height = height;
+	public GameData() {
 		this.isGameplay = true;
 
 		clear();
@@ -375,12 +359,8 @@ public class GameData {
 	 * This will initialize all parameters and images needed for the
 	 * {@link #drawRankingElements(Graphics, Beatmap)} method.
 	 * @param s the ScoreData object
-	 * @param width container width
-	 * @param height container height
 	 */
-	public GameData(ScoreData s, int width, int height) {
-		this.width = width;
-		this.height = height;
+	public GameData(ScoreData s) {
 		this.isGameplay = false;
 
 		this.scoreData = s;
@@ -395,8 +375,9 @@ public class GameData {
 		hitResultCount[HIT_300K] = 0;
 		hitResultCount[HIT_100K] = s.katu;
 		hitResultCount[HIT_MISS] = s.miss;
-		this.replay = (s.replayString == null) ? null :
-			instanceContainer.injectFields(new Replay(new File(config.replayDir, String.format("%s.osr", s.replayString))));
+		if (s.replayString != null) {
+			this.replay = new Replay(new File(config.replayDir, s.replayString + ".osr"));
+		}
 
 		loadImages();
 	}
@@ -622,6 +603,8 @@ public class GameData {
 	 */
 	@SuppressWarnings("deprecation")
 	public void drawGameElements(Graphics g, boolean breakPeriod, boolean firstObject, float alpha) {
+		int width = displayContainer.width;
+		int height = displayContainer.height;
 		boolean relaxAutoPilot = (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive());
 		int margin = (int) (width * 0.008f);
 		float uiScale = GameImage.getUIscale();
@@ -813,6 +796,9 @@ public class GameData {
 	 * @param beatmap the beatmap
 	 */
 	public void drawRankingElements(Graphics g, Beatmap beatmap) {
+		int width = displayContainer.width;
+		int height = displayContainer.height;
+
 		// TODO Version 2 skins
 		float rankingHeight = 75;
 		float scoreTextScale = 1.0f;
@@ -925,7 +911,7 @@ public class GameData {
 				if (hitResult.hitResultType == HitObjectType.SPINNER && hitResult.result != HIT_MISS) {
 					Image spinnerOsu = GameImage.SPINNER_OSU.getImage();
 					spinnerOsu.setAlpha(hitResult.alpha);
-					spinnerOsu.drawCentered(width / 2, height / 4);
+					spinnerOsu.drawCentered(displayContainer.width / 2, displayContainer.height / 4);
 					spinnerOsu.setAlpha(1f);
 				} else if (OPTION_SHOW_HIT_LIGHTING.state && !hitResult.hideResult && hitResult.result != HIT_MISS &&
 					// hit lighting
@@ -1199,7 +1185,7 @@ public class GameData {
 		// combo burst
 		if (comboBurstIndex > -1 && OPTION_SHOW_COMBO_BURSTS.state) {
 			int leftX  = 0;
-			int rightX = width - comboBurstImages[comboBurstIndex].getWidth();
+			int rightX = displayContainer.width - comboBurstImages[comboBurstIndex].getWidth();
 			if (comboBurstX < leftX) {
 				comboBurstX += (delta / 2f) * GameImage.getUIscale();
 				if (comboBurstX > leftX)
@@ -1260,7 +1246,7 @@ public class GameData {
 			}
 			comboBurstAlpha = 0.8f;
 			if ((comboBurstIndex % 2) == 0) {
-				comboBurstX = width;
+				comboBurstX = displayContainer.width;
 			} else {
 				comboBurstX = comboBurstImages[0].getWidth() * -1;
 			}
@@ -1603,7 +1589,7 @@ public class GameData {
 
 		replay = new Replay();
 		replay.mode = Beatmap.MODE_OSU;
-		replay.version = Updater.get().getBuildDate();
+		replay.version = updater.getBuildDate();
 		replay.beatmapHash = (beatmap == null) ? "" : beatmap.md5Hash;
 		replay.playerName = "";  // TODO
 		replay.replayHash = Long.toString(System.currentTimeMillis());  // TODO

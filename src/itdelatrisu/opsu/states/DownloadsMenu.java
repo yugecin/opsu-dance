@@ -22,10 +22,8 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.DownloadNode;
@@ -55,11 +53,10 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Downloads menu.
@@ -68,18 +65,6 @@ import yugecin.opsudance.options.Configuration;
  * from this state.
  */
 public class DownloadsMenu extends ComplexOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private OszUnpacker oszUnpacker;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 700;
@@ -275,12 +260,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 			} finally {
 				finished = true;
 			}
-		};
+		}
 
 		/** Imports all packed beatmaps. */
 		private void importBeatmaps() {
 			// invoke unpacker and parser
-			File[] dirs = oszUnpacker.unpackAll();
+			File[] dirs = oszunpacker.unpackAll();
 			if (dirs != null && dirs.length > 0) {
 				this.importedNode = beatmapParser.parseDirectories(dirs);
 				if (importedNode != null) {
@@ -294,13 +279,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 	}
 
-	@Inject
-	public DownloadsMenu(InstanceContainer instanceContainer) {
+	public DownloadsMenu() {
 		SERVERS = new DownloadServer[] {
-			instanceContainer.provide(BloodcatServer.class),
-			instanceContainer.provide(YaSOnlineServer.class),
-			instanceContainer.provide(MnetworkServer.class),
-			instanceContainer.provide(MengSkyServer.class),
+			new BloodcatServer(),
+			new YaSOnlineServer(),
+			new MnetworkServer(),
+			new MengSkyServer(),
 		};
 	}
 
@@ -555,7 +539,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.
-				instanceContainer.provide(SongMenu.class).setFocus(importedNode, -1, true, true);
+				songMenuState.setFocus(importedNode, -1, true, true);
 			}
 			importThread = null;
 		}
@@ -633,7 +617,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// back
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(MainMenu.class);
+			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
@@ -918,7 +902,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(MainMenu.class);
+				displayContainer.switchState(mainmenuState);
 			}
 			return true;
 		case Input.KEY_ENTER:

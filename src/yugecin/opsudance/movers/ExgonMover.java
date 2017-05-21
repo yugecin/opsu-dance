@@ -18,11 +18,11 @@
 package yugecin.opsudance.movers;
 
 import itdelatrisu.opsu.objects.GameObject;
-import yugecin.opsudance.options.Options;
 
 import java.util.Random;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class ExgonMover extends Mover {
 
@@ -44,8 +44,8 @@ public class ExgonMover extends Mover {
 				pos[0] = endX;
 				pos[1] = endY;
 			} else {
-				pos[0] = randgen.nextInt(Options.width);
-				pos[1] = randgen.nextInt(Options.height);
+				pos[0] = randgen.nextInt(displayContainer.width);
+				pos[1] = randgen.nextInt(displayContainer.height);
 			}
 		}
 		return pos;
