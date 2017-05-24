@@ -21,14 +21,7 @@ package itdelatrisu.opsu;
 import com.sun.istack.internal.Nullable;
 import itdelatrisu.opsu.downloads.Download;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -37,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.jar.JarFile;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -53,6 +47,7 @@ import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.NotNull;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -535,6 +530,21 @@ public class Utils {
 		return (key != Keyboard.KEY_ESCAPE && key != Keyboard.KEY_SPACE &&
 			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
 			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
+	}
+
+	public static void unpackFromJar(@NotNull JarFile jarfile, @NotNull File unpackedFile,
+			@NotNull String filename) throws IOException {
+		InputStream in = jarfile.getInputStream(jarfile.getEntry(filename));
+		OutputStream out = new FileOutputStream(unpackedFile);
+
+		byte[] buffer = new byte[65536];
+		int bufferSize;
+		while ((bufferSize = in.read(buffer, 0, buffer.length)) != -1) {
+			out.write(buffer, 0, bufferSize);
+		}
+
+		in.close();
+		out.close();
 	}
 
 }

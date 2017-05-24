@@ -29,8 +29,14 @@ import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.utils.ManifestWrapper;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
+import static yugecin.opsudance.utils.SyntacticSugar.closeAndSwallow;
 
 public class InstanceContainer {
 
@@ -60,9 +66,22 @@ public class InstanceContainer {
 	public static void kickstart() {
 		updater = new Updater();
 		env = new Environment();
-		config = new Configuration();
 
-		NativeLoader.loadNatives();
+		JarFile jarfile = getJarfile();
+		ManifestWrapper manifest = new ManifestWrapper(getJarManifest(jarfile));
+		config = new Configuration(manifest);
+		if (jarfile != null) {
+			try {
+				NativeLoader.loadNatives(jarfile, manifest);
+			} catch (IOException e) {
+				String msg = String.format("Could not unpack native(s): %s", e.getMessage());
+				throw new RuntimeException(msg, e);
+			} finally {
+				closeAndSwallow(jarfile);
+			}
+		}
+		NativeLoader.setNativePath();
+
 		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
 
 		optionservice = new OptionsService();
@@ -84,6 +103,33 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 		pauseState = new GamePauseMenu();
+	}
+
+	@Nullable
+	private static JarFile getJarfile() {
+		if (env.jarfile == null) {
+			return null;
+		}
+		try {
+			return new JarFile(env.jarfile);
+		} catch (IOException e) {
+			String msg = String.format("Cannot read from jarfile (%s): %s", env.jarfile.getAbsolutePath(),
+				e.getMessage());
+			throw new RuntimeException(msg, e);
+		}
+	}
+
+	@Nullable
+	private static Manifest getJarManifest(@Nullable JarFile jarfile) {
+		if (jarfile == null) {
+			return null;
+		}
+		try {
+			return jarfile.getManifest();
+		} catch (IOException e) {
+			String msg = String.format("Cannot read manifest from jarfile: %s", e.getMessage());
+			throw new RuntimeException(msg, e);
+		}
 	}
 
 }

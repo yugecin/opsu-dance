@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.options;
 
+import com.sun.istack.internal.Nullable;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
@@ -30,17 +31,15 @@ import org.lwjgl.opengl.GL11;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.utils.ManifestWrapper;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,8 +73,8 @@ public class Configuration {
 	public File replayImportDir;
 	public File skinRootDir;
 
-	public Configuration() {
-		USE_XDG = areXDGDirectoriesEnabled();
+	public Configuration(ManifestWrapper jarmanifest) {
+		USE_XDG = jarmanifest.valueOrDefault(null, "Use-XDG", "").equalsIgnoreCase("true");
 
 		CONFIG_DIR = getXDGBaseDir("XDG_CONFIG_HOME", ".config");
 		DATA_DIR = getXDGBaseDir("XDG_DATA_HOME", ".local/share");
@@ -174,23 +173,6 @@ public class Configuration {
 		}
 
 		return loadDirectory(dir, defaultDir, kind);
-	}
-
-	private boolean areXDGDirectoriesEnabled() {
-		if (env.jarfile == null) {
-			return false;
-		}
-		try {
-			Manifest manifest = env.jarfile.getManifest();
-			if (manifest == null) {
-				return false;
-			}
-			Attributes attributes = manifest.getMainAttributes();
-			String value = attributes.getValue("Use-XDG");
-			return (value != null && value.equalsIgnoreCase("true"));
-		} catch (IOException e) {
-			return false;
-		}
 	}
 
 	/**

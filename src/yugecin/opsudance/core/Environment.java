@@ -18,9 +18,7 @@
 package yugecin.opsudance.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.jar.JarFile;
 
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
 
@@ -28,7 +26,7 @@ public class Environment {
 
 	public final boolean isJarRunning;
 	public final File workingdir;
-	public final JarFile jarfile;
+	public final File jarfile;
 
 	public Environment() {
 		Class thiz = Environment.class;
@@ -38,7 +36,7 @@ public class Environment {
 			this.workingdir = Paths.get(".").toAbsolutePath().normalize().toFile();
 			this.jarfile = null;
 		} else {
-			String wdir = thisClassLocation.substring(6); // remove the jar://
+			String wdir = thisClassLocation.substring(9); // remove jar:file:
 			String separator = "!/";
 			int separatorIdx = wdir.indexOf(separator);
 			int lastSeparatorIdx = wdir.lastIndexOf(separator);
@@ -47,15 +45,8 @@ public class Environment {
 					PROJECT_NAME, thisClassLocation.substring(0, lastSeparatorIdx));
 				throw new RuntimeException(msg);
 			}
-			File jar = new File(wdir.substring(0, separatorIdx));
-			this.workingdir = jar.getParentFile();
-			try {
-				this.jarfile = new JarFile(jar);
-			} catch (IOException e) {
-				String msg = String.format("Cannot read from jarfile (%s): %s", jar.getAbsolutePath(),
-					e.getMessage());
-				throw new RuntimeException(msg, e);
-			}
+			this.jarfile = new File(wdir.substring(0, separatorIdx));
+			this.workingdir = jarfile.getParentFile();
 		}
 	}
 
