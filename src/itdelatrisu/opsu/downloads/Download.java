@@ -92,7 +92,7 @@ public class Download {
 	private String localPath;
 
 	/** The local path to rename the file to when finished. */
-	private String rename;
+	private String renamedFileName;
 
 	/** The download URL. */
 	private URL url;
@@ -137,9 +137,9 @@ public class Download {
 	 * Constructor.
 	 * @param remoteURL the download URL
 	 * @param localPath the path to save the download
-	 * @param rename the file name to rename the download to when complete
+	 * @param renamedFileName the file name to rename the download to when complete
 	 */
-	public Download(String remoteURL, String localPath, String rename) {
+	public Download(String remoteURL, String localPath, String renamedFileName) {
 		try {
 			this.url = new URL(remoteURL);
 		} catch (MalformedURLException e) {
@@ -148,7 +148,9 @@ public class Download {
 			return;
 		}
 		this.localPath = localPath;
-		this.rename = Utils.cleanFileName(rename, '-');
+		if (renamedFileName != null) {
+			this.renamedFileName = Utils.cleanFileName(renamedFileName, '-');
+		}
 	}
 
 	/**
@@ -159,7 +161,7 @@ public class Download {
 	/**
 	 * Returns the local path to save the download (after renamed).
 	 */
-	public String getLocalPath() { return (rename != null) ? rename : localPath; }
+	public String getLocalPath() { return (renamedFileName != null) ? renamedFileName : localPath; }
 
 	/**
 	 * Sets the download listener.
@@ -263,9 +265,9 @@ public class Download {
 						status = Status.COMPLETE;
 						rbc.close();
 						fos.close();
-						if (rename != null) {
+						if (renamedFileName != null) {
 							Path source = new File(localPath).toPath();
-							Files.move(source, source.resolveSibling(rename), StandardCopyOption.REPLACE_EXISTING);
+							Files.move(source, source.resolveSibling(renamedFileName), StandardCopyOption.REPLACE_EXISTING);
 						}
 						if (listener != null)
 							listener.completed();

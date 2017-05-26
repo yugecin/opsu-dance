@@ -27,7 +27,6 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.jar.JarFile;
 
@@ -45,7 +44,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.NotNull;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
@@ -56,30 +54,6 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  * Contains miscellaneous utilities.
  */
 public class Utils {
-	/**
-	 * List of illegal filename characters.
-	 * @see #cleanFileName(String, char)
-	 */
-	private final static int[] illegalChars = {
-		34, 60, 62, 124, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-		11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-		24, 25, 26, 27, 28, 29, 30, 31, 58, 42, 63, 92, 47
-	};
-	static {
-		Arrays.sort(illegalChars);
-	}
-
-	// This class should not be instantiated.
-	private Utils() {}
-
-	/**
-	 * Initializes game settings and class data.
-	 */
-	public static void init(DisplayContainer displayContainer) {
-		// TODO clean this up
-
-		// game settings
-	}
 
 	/**
 	 * Draws an animation based on its center.
@@ -205,26 +179,31 @@ public class Utils {
 	}
 
 	/**
-	 * Cleans a file name.
-	 * @param badFileName the original name string
-	 * @param replace the character to replace illegal characters with (or 0 if none)
-	 * @return the cleaned file name
-	 * @author Sarel Botha (http://stackoverflow.com/a/5626340)
+	 * Changes bad characters to the replacement char given.
+	 * Bad characters:
+	 * non-printable (0-31)
+	 * " (34) * (42) / (47) : (58)
+	 * < (60) > (62) ? (63) \ (92)
+	 * DEL (124)
 	 */
-	public static String cleanFileName(String badFileName, char replace) {
-		if (badFileName == null)
-			return null;
-
-		boolean doReplace = (replace > 0 && Arrays.binarySearch(illegalChars, replace) < 0);
-		StringBuilder cleanName = new StringBuilder();
-		for (int i = 0, n = badFileName.length(); i < n; i++) {
-			int c = badFileName.charAt(i);
-			if (Arrays.binarySearch(illegalChars, c) < 0)
-				cleanName.append((char) c);
-			else if (doReplace)
-				cleanName.append(replace);
+	public static String cleanFileName(@NotNull String badFileName, char replacement) {
+		char[] chars = badFileName.toCharArray();
+		long additionalBadChars =
+			1L << (34 - 32)|
+			1L << (42 - 32)|
+			1L << (47 - 32)|
+			1L << (58 - 32)|
+			1L << (60 - 32)|
+			1L << (62 - 32)|
+			1L << (63 - 32)|
+			1L << (92 - 32);
+		for (int i = 0; i < chars.length; i++) {
+			char c = chars[i];
+			if (c < 32 || c == 124 || (c < 93 && 0 != (additionalBadChars & (1L << (c - 32))))) {
+				chars[i] = replacement;
+			}
 		}
-		return cleanName.toString();
+		return new String(chars);
 	}
 
 	/**
