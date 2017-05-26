@@ -61,8 +61,7 @@ then run (code is compiled automatically when you run)
 
 		<exec executable="${shellexecutable}">
 			<arg value="${shellcmdarg}" />
-			<arg value="mvn" />
-			<arg value="initialize" />
+			<arg value="mvn initialize" />
 		</exec>
 
 		<move file="${dir.mvnlibs}" tofile="${dir.lib}" />

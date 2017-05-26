@@ -29,7 +29,8 @@
 build/
 
 Thumbs.db
+.DS_STORE
 /target
 /out/
-/libs/
+/lib/
 /mvnlibs/
