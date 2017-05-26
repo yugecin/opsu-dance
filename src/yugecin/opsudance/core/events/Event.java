@@ -17,38 +17,37 @@
  */
 package yugecin.opsudance.core.events;
 
-import java.util.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.LinkedList;
 
 @SuppressWarnings("unchecked")
-public class EventBus {
+public class Event<T> {
 
-	private EventBus() {
+	private final Class<T> type;
+	private final LinkedList<T> listeners;
+
+	public Event(Class<T> type) {
+		this.type = type;
+		this.listeners = new LinkedList<>();
 	}
 
-	private static final List<Subscriber> subscribers = new LinkedList<>();
-
-	public static <T> void subscribe(Class<T> eventType, EventListener<T> eventListener) {
-		subscribers.add(new Subscriber<>(eventType, eventListener));
+	public void addListener(T listener) {
+		this.listeners.add(listener);
 	}
 
-	public static void post(Object event) {
-		for (Subscriber s : subscribers) {
-			if (s.eventType.isInstance(event)) {
-				s.listener.onEvent(event);
-			}
-		}
-	}
-
-	private static class Subscriber<T> {
-
-		private final Class<T> eventType;
-		private final EventListener<T> listener;
-
-		private Subscriber(Class<T> eventType, EventListener<T> listener) {
-			this.eventType = eventType;
-			this.listener = listener;
-		}
-
+	public T make() {
+		return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type},
+			new InvocationHandler() {
+				@Override
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					for (T listener : listeners) {
+						method.invoke(listener, args);
+					}
+					return null;
+				}
+			});
 	}
 
 }

@@ -24,7 +24,6 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.db.BeatmapDB;
@@ -57,13 +56,11 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
-import yugecin.opsudance.options.Options;
 import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.OptionsOverlay;
@@ -337,7 +334,9 @@ public class Game extends ComplexOpsuState {
 			gOffscreen.setBackground(Color.black);
 		} catch (SlickException e) {
 			Log.error("could not create offscreen graphics", e);
-			EventBus.post(new BubbleNotificationEvent("Exception while creating offscreen graphics. See logfile for details.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(
+				"Exception while creating offscreen graphics. See logfile for details.",
+				BubNotifListener.COMMONCOLOR_RED);
 		}
 
 		// initialize music position bar location
@@ -1172,7 +1171,7 @@ public class Game extends ComplexOpsuState {
 				if (0 <= time && time < 3600) {
 					OPTION_CHECKPOINT.setValue(time);
 					SoundController.playSound(SoundEffect.MENUCLICK);
-					EventBus.post(new BarNotificationEvent("Checkpoint saved."));
+					BarNotifListener.EVENT.make().onBarNotif("Checkpoint saved.");
 				}
 			}
 			break;
@@ -1184,7 +1183,7 @@ public class Game extends ComplexOpsuState {
 					break;  // invalid checkpoint
 				loadCheckpoint(checkpoint);
 				SoundController.playSound(SoundEffect.MENUHIT);
-				EventBus.post(new BarNotificationEvent("Checkpoint loaded."));
+				BarNotifListener.EVENT.make().onBarNotif("Checkpoint loaded.");
 			}
 			break;
 		case Input.KEY_F:
@@ -1227,12 +1226,12 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_MINUS:
 			currentMapMusicOffset += 5;
-			EventBus.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
+			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
 			break;
 		}
 		if (key == Input.KEY_ADD || c == '+') {
 			currentMapMusicOffset -= 5;
-			EventBus.post(new BarNotificationEvent("Current map offset: " + currentMapMusicOffset));
+			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
 		}
 
 		return true;
@@ -1454,7 +1453,8 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (beatmap == null || beatmap.objects == null) {
-			EventBus.post(new BubbleNotificationEvent("Game was running without a beatmap", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Game was running without a beatmap",
+				BubNotifListener.COMMONCOLOR_RED);
 			displayContainer.switchStateInstantly(songMenuState);
 		}
 
@@ -1561,7 +1561,8 @@ public class Game extends ComplexOpsuState {
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
 					Log.error(message, e);
-					EventBus.post(new BubbleNotificationEvent(message, BubbleNotificationEvent.COMMONCOLOR_RED));
+					BubNotifListener.EVENT.make().onBubNotif(message,
+						BubNotifListener.COMMONCOLOR_RED);
 					gameObjects[i] = new DummyObject(hitObject);
 				}
 			}
@@ -2147,7 +2148,8 @@ public class Game extends ComplexOpsuState {
 			this.replay = null;
 		} else {
 			if (replay.frames == null) {
-				EventBus.post(new BubbleNotificationEvent("Attempting to set a replay with no frames.", BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif("Attempting to set a replay with no frames.",
+					BubNotifListener.COLOR_ORANGE);
 				return;
 			}
 			this.isReplay = true;

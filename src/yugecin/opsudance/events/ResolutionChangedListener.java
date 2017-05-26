@@ -17,22 +17,12 @@
  */
 package yugecin.opsudance.events;
 
-import org.newdawn.slick.Color;
+import yugecin.opsudance.core.events.Event;
 
-public class BubbleNotificationEvent {
+public interface ResolutionChangedListener {
 
-	public static final Color COMMONCOLOR_GREEN = new Color(98, 131, 59);
-	public static final Color COMMONCOLOR_WHITE = new Color(220, 220, 220);
-	public static final Color COMMONCOLOR_PURPLE = new Color(94, 46, 149);
-	public static final Color COMMONCOLOR_RED = new Color(141, 49, 16);
-	public static final Color COLOR_ORANGE = new Color(138, 72, 51);
+	Event<ResolutionChangedListener> EVENT = new Event<>(ResolutionChangedListener.class);
 
-	public final String message;
-	public final Color borderColor;
-
-	public BubbleNotificationEvent(String message, Color borderColor) {
-		this.message = message;
-		this.borderColor = borderColor;
-	}
+	void onResolutionChanged(int w, int h);
 
 }

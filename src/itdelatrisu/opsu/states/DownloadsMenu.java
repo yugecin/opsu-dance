@@ -52,9 +52,8 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -266,16 +265,20 @@ public class DownloadsMenu extends ComplexOpsuState {
 		private void importBeatmaps() {
 			// invoke unpacker and parser
 			File[] dirs = oszunpacker.unpackAll();
-			if (dirs != null && dirs.length > 0) {
-				this.importedNode = beatmapParser.parseDirectories(dirs);
-				if (importedNode != null) {
-					// send notification
-					EventBus.post(new BarNotificationEvent((dirs.length == 1) ? "Imported 1 new song." :
-							String.format("Imported %d new songs.", dirs.length)));
-				}
-			}
+			this.importedNode = beatmapParser.parseDirectories(dirs);
 
 			DownloadList.get().clearDownloads(Download.Status.COMPLETE);
+
+			if (this.importedNode == null) {
+				return;
+			}
+			String msg;
+			if (dirs.length == 1) {
+				msg = "Imported 1 new song.";
+			} else {
+				msg = String.format("Imported %d new songs.", dirs.length);
+			}
+			BarNotifListener.EVENT.make().onBarNotif(msg);
 		}
 	}
 
@@ -682,7 +685,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 											if (playing)
 												previewID = node.getID();
 										} catch (SlickException e) {
-											EventBus.post(new BarNotificationEvent("Failed to load track preview. See log for details."));
+											BarNotifListener.EVENT.make().onBarNotif("Failed to load track preview. See log for details.");
 											Log.error(e);
 										}
 									}
@@ -705,7 +708,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 								if (!DownloadList.get().contains(node.getID())) {
 									node.createDownload(serverMenu.getSelectedItem());
 									if (node.getDownload() == null) {
-										EventBus.post(new BarNotificationEvent("The download could not be started"));
+										BarNotifListener.EVENT.make().onBarNotif("The download could not be started");
 									} else {
 										DownloadList.get().addNode(node);
 										node.getDownload().start();
@@ -947,7 +950,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		pageDir = Page.RESET;
 		previewID = -1;
 		if (barNotificationOnLoad != null) {
-			EventBus.post(new BarNotificationEvent(barNotificationOnLoad));
+			BarNotifListener.EVENT.make().onBarNotif(barNotificationOnLoad);
 			barNotificationOnLoad = null;
 		}
 	}

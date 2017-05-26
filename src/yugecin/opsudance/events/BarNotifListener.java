@@ -17,12 +17,12 @@
  */
 package yugecin.opsudance.events;
 
-public class BarNotificationEvent {
+import yugecin.opsudance.core.events.Event;
 
-	public final String message;
+public interface BarNotifListener {
 
-	public BarNotificationEvent(String message) {
-		this.message = message;
-	}
+	Event<BarNotifListener> EVENT = new Event<>(BarNotifListener.class);
+
+	void onBarNotif(String message);
 
 }

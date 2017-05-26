@@ -28,8 +28,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.utils.ManifestWrapper;
 
 import javax.imageio.ImageIO;
@@ -154,7 +153,7 @@ public class Configuration {
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {
 			String msg = String.format("Failed to create %s directory at '%s'.", kind, defaultDir.getAbsolutePath());
-			EventBus.post(new BubbleNotificationEvent(msg, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(msg, BubNotifListener.COMMONCOLOR_RED);
 		}
 		return defaultDir;
 	}
@@ -213,7 +212,10 @@ public class Configuration {
 		// TODO: get a decent place for this
 		// create the screenshot directory
 		if (!screenshotDir.isDirectory() && !screenshotDir.mkdir()) {
-			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", screenshotDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(
+				String.format( "Failed to create screenshot directory at '%s'.",
+					screenshotDir.getAbsolutePath()),
+				BubNotifListener.COMMONCOLOR_RED);
 			return;
 		}
 
@@ -247,7 +249,8 @@ public class Configuration {
 						}
 					}
 					ImageIO.write(image, OPTION_SCREENSHOT_FORMAT.getValueString().toLowerCase(), file);
-					EventBus.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
+						BubNotifListener.COMMONCOLOR_PURPLE);
 				} catch (Exception e) {
 					ErrorHandler.error("Failed to take a screenshot.", e).show();
 				}

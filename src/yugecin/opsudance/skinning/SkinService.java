@@ -23,8 +23,7 @@ import itdelatrisu.opsu.skins.SkinLoader;
 import org.newdawn.slick.util.ClasspathLocation;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.SkinChangedListener;
 
 import java.io.File;
 
@@ -41,7 +40,7 @@ public class SkinService {
 	public void reloadSkin() {
 		loadSkin();
 		SoundController.init();
-		EventBus.post(new ResolutionOrSkinChangedEvent(usedSkinName, -1, -1));
+		SkinChangedListener.EVENT.make().onSkinChanged(usedSkinName);
 	}
 
 	/**

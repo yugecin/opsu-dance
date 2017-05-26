@@ -35,8 +35,7 @@ import java.nio.file.StandardCopyOption;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 
 /**
  * File download.
@@ -219,7 +218,7 @@ public class Download {
 							else if (redirectCount > MAX_REDIRECTS)
 								error = String.format("Download for URL '%s' is attempting too many redirects (over %d).", base.toString(), MAX_REDIRECTS);
 							if (error != null) {
-								EventBus.post(new BubbleNotificationEvent(error, BubbleNotificationEvent.COLOR_ORANGE));
+								BubNotifListener.EVENT.make().onBubNotif(error, BubNotifListener.COLOR_ORANGE);
 								throw new IOException();
 							}
 

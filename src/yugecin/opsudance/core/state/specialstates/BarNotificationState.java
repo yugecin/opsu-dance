@@ -21,16 +21,14 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.ResolutionChangedListener;
 
 import java.util.List;
 
 import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
-public class BarNotificationState implements EventListener<BarNotificationEvent> {
+public class BarNotificationState implements BarNotifListener, ResolutionChangedListener {
 
 	private final int IN_TIME = 200;
 	private final int DISPLAY_TIME = 5700 + IN_TIME;
@@ -53,16 +51,8 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 		this.bgcol = new Color(Color.black);
 		this.textCol = new Color(Color.white);
 		this.timeShown = TOTAL_TIME;
-		EventBus.subscribe(BarNotificationEvent.class, this);
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				if (timeShown >= TOTAL_TIME) {
-					return;
-				}
-				calculatePosition();
-			}
-		});
+		BarNotifListener.EVENT.addListener(this);
+		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
@@ -107,10 +97,18 @@ public class BarNotificationState implements EventListener<BarNotificationEvent>
 	}
 
 	@Override
-	public void onEvent(BarNotificationEvent event) {
-		this.message = event.message;
+	public void onBarNotif(String message) {
+		this.message = message;
 		calculatePosition();
 		timeShown = 0;
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		if (timeShown >= TOTAL_TIME) {
+			return;
+		}
+		calculatePosition();
 	}
 
 }

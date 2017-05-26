@@ -45,9 +45,8 @@ import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 
 import static yugecin.opsudance.options.Options.*;
 
@@ -103,7 +102,8 @@ public class MusicController {
 		if (lastBeatmap == null || !beatmap.audioFilename.equals(lastBeatmap.audioFilename)) {
 			final File audioFile = beatmap.audioFilename;
 			if (!audioFile.isFile() && !ResourceLoader.resourceExists(audioFile.getPath())) {
-				EventBus.post(new BarNotificationEvent(String.format("Could not find track '%s'.", audioFile.getName())));
+				BarNotifListener.EVENT.make().onBarNotif(String.format("Could not find track '%s'.",
+					audioFile.getName()));
 				return;
 			}
 
@@ -158,7 +158,7 @@ public class MusicController {
 		} catch (Exception e) {
 			String err = String.format("Could not play track '%s'.", file.getName());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
 		}
 	}
 

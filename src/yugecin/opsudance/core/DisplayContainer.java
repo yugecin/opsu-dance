@@ -39,15 +39,14 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
-import yugecin.opsudance.core.events.EventListener;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
-import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
-import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.BubNotifListener;
+import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -59,13 +58,13 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
+public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener, ResolutionChangedListener, SkinChangedListener {
 
 	private static SGL GL = Renderer.get();
 
 	private FpsRenderState fpsState;
 	private BarNotificationState barNotifState;
-	private BubbleNotificationState bubNotifState;
+	private BubNotifState bubNotifState;
 
 	private OpsuState state;
 
@@ -149,19 +148,26 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		this.cursor = new Cursor();
 		drawCursor = true;
 
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				destroyImages();
-				reinit();
-			}
-		});
+		ResolutionChangedListener.EVENT.addListener(this);
+		SkinChangedListener.EVENT.addListener(this);
 
 		this.nativeDisplayMode = Display.getDisplayMode();
 		targetBackgroundRenderInterval = 41; // ~24 fps
 		lastFrame = getTime();
 		delta = 1;
 		renderDelta = 1;
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		destroyImages();
+		reinit();
+	}
+
+	@Override
+	public void onSkinChanged(String stringName) {
+		destroyImages();
+		reinit();
 	}
 
 	private void reinit() {
@@ -205,7 +211,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		state.enter();
 
 		fpsState = new FpsRenderState();
-		bubNotifState = new BubbleNotificationState();
+		bubNotifState = new BubNotifState();
 		barNotifState = new BarNotificationState();
 	}
 
@@ -334,13 +340,15 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			return true;
 		}
 		if (DownloadList.get().hasActiveDownloads()) {
-			EventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			BubNotifListener.EVENT.make().onBubNotif(DownloadList.EXIT_CONFIRMATION,
+				BubNotifListener.COMMONCOLOR_RED);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
-			EventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			BubNotifListener.EVENT.make().onBubNotif(Updater.EXIT_CONFIRMATION,
+				BubNotifListener.COMMONCOLOR_PURPLE);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
@@ -379,7 +387,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
-			EventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Failed to change resolution",
+				BubNotifListener.COMMONCOLOR_RED);
 			Log.error("Failed to set display mode.", e);
 		}
 	}
@@ -399,8 +408,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			displayMode = new DisplayMode(width, height);
 			if (fullscreen) {
 				fullscreen = false;
-				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);
-				EventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
+				String msg = String.format("Fullscreen mode is not supported for %sx%s", width, height);
+				Log.warn(msg);
+				BubNotifListener.EVENT.make().onBubNotif(msg, BubNotifListener.COLOR_ORANGE);
 			}
 		}
 
@@ -436,7 +446,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		GameImage.init(width, height);
 		Fonts.init();
 
-		EventBus.post(new ResolutionOrSkinChangedEvent(null, width, height));
+		ResolutionChangedListener.EVENT.make().onResolutionChanged(width, height);
 	}
 
 	public void resetCursor() {

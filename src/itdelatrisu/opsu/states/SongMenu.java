@@ -35,7 +35,6 @@ import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService.BeatmapWatchServiceListener;
 import itdelatrisu.opsu.beatmap.LRUCache;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
@@ -63,9 +62,8 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
 
@@ -439,12 +437,15 @@ public class SongMenu extends ComplexOpsuState {
 		BeatmapWatchService.addListener(new BeatmapWatchServiceListener() {
 			@Override
 			public void eventReceived(Kind<?> kind, Path child) {
-				if (!songFolderChanged && kind != StandardWatchEventKinds.ENTRY_MODIFY) {
-					songFolderChanged = true;
-					if (displayContainer.isInState(SongMenu.class)) {
-						EventBus.post(new BarNotificationEvent("Changed is Songs folder detected. Hit F5 to refresh."));
-					}
+				if (songFolderChanged || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+					return;
 				}
+				songFolderChanged = true;
+				if (!displayContainer.isInState(SongMenu.class)) {
+					return;
+				}
+				BarNotifListener.EVENT.make().onBarNotif(
+					"Changed is Songs folder detected. Hit F5 to refresh.");
 			}
 		});
 
@@ -929,30 +930,32 @@ public class SongMenu extends ComplexOpsuState {
 
 		// group tabs
 		for (BeatmapGroup group : BeatmapGroup.values()) {
-			if (group.contains(x, y)) {
-				if (group != BeatmapGroup.current()) {
-					BeatmapGroup.set(group);
-					SoundController.playSound(SoundEffect.MENUCLICK);
-					startNode = focusNode = null;
-					oldFocusNode = null;
-					randomStack = new Stack<SongNode>();
-					songInfo = null;
-					scoreMap = null;
-					focusScores = null;
-					searchTextField.setText("");
-					searchTimer = SEARCH_DELAY;
-					searchTransitionTimer = SEARCH_TRANSITION_TIME;
-					searchResultString = null;
-					BeatmapSetList.get().reset();
-					BeatmapSetList.get().init();
-					setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-
-					if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
-						EventBus.post(new BarNotificationEvent(group.getEmptyMessage()));
-					}
-				}
+			if (!group.contains(x, y)) {
+				continue;
+			}
+			if (group == BeatmapGroup.current()) {
 				return true;
 			}
+			BeatmapGroup.set(group);
+			SoundController.playSound(SoundEffect.MENUCLICK);
+			startNode = focusNode = null;
+			oldFocusNode = null;
+			randomStack = new Stack<SongNode>();
+			songInfo = null;
+			scoreMap = null;
+			focusScores = null;
+			searchTextField.setText("");
+			searchTimer = SEARCH_DELAY;
+			searchTransitionTimer = SEARCH_TRANSITION_TIME;
+			searchResultString = null;
+			BeatmapSetList.get().reset();
+			BeatmapSetList.get().init();
+			setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+
+			if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
+				BarNotifListener.EVENT.make().onBarNotif(group.getEmptyMessage());
+			}
+			return true;
 		}
 
 		if (focusNode == null) {
@@ -1760,7 +1763,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (focusNode == null || beatmap != focusNode.getSelectedBeatmap()) {
-			EventBus.post(new BarNotificationEvent("Unable to load the beatmap audio."));
+			BarNotifListener.EVENT.make().onBarNotif("Unable to load the beatmap audio.");
 			return;
 		}
 

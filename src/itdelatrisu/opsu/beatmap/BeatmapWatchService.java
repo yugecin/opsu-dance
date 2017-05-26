@@ -39,8 +39,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -100,7 +100,8 @@ public class BeatmapWatchService {
 			ws.register(config.beatmapDir.toPath());
 		} catch (IOException e) {
 			Log.error("Could not create watch service", e);
-			EventBus.post(new BubbleNotificationEvent("Could not create watch service", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Could not create watch service",
+				BubNotifListener.COMMONCOLOR_RED);
 			return;
 		}
 
@@ -121,8 +122,9 @@ public class BeatmapWatchService {
 			ws.service.shutdownNow();
 			ws = null;
 		} catch (IOException e) {
-			Log.error("An I/O exception occurred while closing the previous watch service.", e);
-			EventBus.post(new BubbleNotificationEvent("An I/O exception occurred while closing the previous watch service.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			String msg = "An I/O exception occurred while closing the previous watch service.";
+			Log.error(msg, e);
+			BarNotifListener.EVENT.make().onBarNotif(msg);
 			ws = null;
 		}
 	}
@@ -137,7 +139,10 @@ public class BeatmapWatchService {
 		return ws;
 	 }
 
-	/** Watch service listener interface. */
+	/**
+	* Watch service listener interface.
+	* TODO: replace by event system?
+	*/
 	public interface BeatmapWatchServiceListener {
 		/**
 		 * Indication that an event was received.

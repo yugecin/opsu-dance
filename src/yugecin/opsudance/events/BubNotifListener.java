@@ -15,10 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
-package yugecin.opsudance.core.events;
+package yugecin.opsudance.events;
 
-public interface EventListener<T> {
+import org.newdawn.slick.Color;
+import yugecin.opsudance.core.events.Event;
 
-	void onEvent(T event);
+@SuppressWarnings({"UnnecessaryInterfaceModifier", "unused"})
+public interface BubNotifListener {
+
+	Event<BubNotifListener> EVENT = new Event<>(BubNotifListener.class);
+
+	public static final Color COMMONCOLOR_GREEN = new Color(98, 131, 59);
+	public static final Color COMMONCOLOR_WHITE = new Color(220, 220, 220);
+	public static final Color COMMONCOLOR_PURPLE = new Color(94, 46, 149);
+	public static final Color COMMONCOLOR_RED = new Color(141, 49, 16);
+	public static final Color COLOR_ORANGE = new Color(138, 72, 51);
+
+	void onBubNotif(String message, Color borderColor);
 
 }

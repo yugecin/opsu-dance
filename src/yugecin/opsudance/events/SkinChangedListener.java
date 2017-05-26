@@ -17,16 +17,12 @@
  */
 package yugecin.opsudance.events;
 
-public class ResolutionOrSkinChangedEvent {
+import yugecin.opsudance.core.events.Event;
 
-	public final String skin;
-	public final int width;
-	public final int height;
+public interface SkinChangedListener {
 
-	public ResolutionOrSkinChangedEvent(String skin, int width, int height) {
-		this.skin = skin;
-		this.width = width;
-		this.height = height;
-	}
+	Event<SkinChangedListener> EVENT = new Event<>(SkinChangedListener.class);
+
+	void onSkinChanged(String stringName);
 
 }

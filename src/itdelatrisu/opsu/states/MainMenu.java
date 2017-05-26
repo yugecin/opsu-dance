@@ -46,11 +46,10 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -466,12 +465,11 @@ public class MainMenu extends BaseOpsuState {
 		UI.enter();
 		if (!enterNotification) {
 			if (updater.getStatus() == Updater.Status.UPDATE_AVAILABLE) {
-				EventBus.post(new BarNotificationEvent("An opsu! update is available."));
-				enterNotification = true;
+				BarNotifListener.EVENT.make().onBarNotif("An opsu! update is available.");
 			} else if (updater.justUpdated()) {
-				EventBus.post(new BarNotificationEvent("opsu! is now up to date!"));
-				enterNotification = true;
+				BarNotifListener.EVENT.make().onBarNotif("opsu! is now up to date!");
 			}
+			enterNotification = true;
 		}
 
 		// reset measure info
@@ -532,15 +530,15 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
-				EventBus.post(new BarNotificationEvent("Pause"));
+				BarNotifListener.EVENT.make().onBarNotif("Pause");
 			} else if (!MusicController.isTrackLoading()) {
 				MusicController.resume();
-				EventBus.post(new BarNotificationEvent("Play"));
+				BarNotifListener.EVENT.make().onBarNotif("Play");
 			}
 			return true;
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
-			EventBus.post(new BarNotificationEvent(">> Next"));
+			BarNotifListener.EVENT.make().onBarNotif(">> Next");
 			return true;
 		} else if (musicPrevious.contains(x, y)) {
 			lastMeasureProgress = 0f;
@@ -552,7 +550,7 @@ public class MainMenu extends BaseOpsuState {
 			} else {
 				MusicController.setPosition(0);
 			}
-			EventBus.post(new BarNotificationEvent("<< Previous"));
+			BarNotifListener.EVENT.make().onBarNotif("<< Previous");
 			return true;
 		}
 
@@ -568,10 +566,12 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Constants.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
+				BarNotifListener.EVENT.make().onBarNotif(
+					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo",
+					BubNotifListener.COLOR_ORANGE);
 			}
 			return true;
 		}
@@ -580,10 +580,12 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Constants.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
+				BarNotifListener.EVENT.make().onBarNotif(
+					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo",
+					BubNotifListener.COLOR_ORANGE);
 			}
 			return true;
 		}

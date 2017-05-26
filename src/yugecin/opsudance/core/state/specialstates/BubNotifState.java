@@ -21,10 +21,9 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.BubNotifListener;
+import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.ListIterator;
 
 import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
-public class BubbleNotificationState implements EventListener<BubbleNotificationEvent> {
+public class BubNotifState implements BubNotifListener, ResolutionChangedListener, SkinChangedListener {
 
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
@@ -44,16 +43,10 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 	private int addAnimationTime;
 	private int addAnimationHeight;
 
-	public BubbleNotificationState() {
+	public BubNotifState() {
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
-		EventBus.subscribe(BubbleNotificationEvent.class, this);
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				calculatePositions();
-			}
-		});
+		BubNotifListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
@@ -129,9 +122,9 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 	}
 
 	@Override
-	public void onEvent(BubbleNotificationEvent event) {
+	public void onBubNotif(String message, Color borderColor) {
 		finishAddAnimation();
-		Notification newBubble = new Notification(event.message, event.borderColor);
+		Notification newBubble = new Notification(message, borderColor);
 		bubbles.add(0, newBubble);
 		addAnimationTime = 0;
 		addAnimationHeight = newBubble.height + Notification.paddingY;
@@ -141,6 +134,16 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 			Notification next = iter.next();
 			next.baseY = next.y;
 		}
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		calculatePositions();
+	}
+
+	@Override
+	public void onSkinChanged(String stringName) {
+		calculatePositions();
 	}
 
 	private static class Notification {
@@ -204,7 +207,7 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 				Fonts.SMALLBOLD.drawString(x + fontPaddingX, y, line, textColor);
 				y += lineHeight;
 			}
-			return timeShown > BubbleNotificationState.TOTAL_TIME;
+			return timeShown > BubNotifState.TOTAL_TIME;
 		}
 
 		private void processAnimations(boolean mouseHovered, int delta) {
@@ -217,17 +220,17 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 			borderColor.r = targetBorderColor.r + (0.977f - targetBorderColor.r) * hoverProgress;
 			borderColor.g = targetBorderColor.g + (0.977f - targetBorderColor.g) * hoverProgress;
 			borderColor.b = targetBorderColor.b + (0.977f - targetBorderColor.b) * hoverProgress;
-			if (timeShown < BubbleNotificationState.IN_TIME) {
-				float progress = (float) timeShown / BubbleNotificationState.IN_TIME;
+			if (timeShown < BubNotifState.IN_TIME) {
+				float progress = (float) timeShown / BubNotifState.IN_TIME;
 				this.x = finalX + (int) ((1 - AnimationEquation.OUT_BACK.calc(progress)) * width / 2);
 				textColor.a = borderColor.a = bgcol.a = progress;
 				bgcol.a = borderColor.a * 0.8f;
 				return;
 			}
 			x = Notification.finalX;
-			if (timeShown > BubbleNotificationState.DISPLAY_TIME) {
+			if (timeShown > BubNotifState.DISPLAY_TIME) {
 				isFading = true;
-				float progress = (float) (timeShown - BubbleNotificationState.DISPLAY_TIME) / BubbleNotificationState.OUT_TIME;
+				float progress = (float) (timeShown - BubNotifState.DISPLAY_TIME) / BubNotifState.OUT_TIME;
 				textColor.a = borderColor.a = 1f - progress;
 				bgcol.a = borderColor.a * 0.8f;
 			}
@@ -235,7 +238,7 @@ public class BubbleNotificationState implements EventListener<BubbleNotification
 
 		private boolean mouseReleased(int x, int y) {
 			if (!isFading && isMouseHovered(x, y)) {
-				timeShown = BubbleNotificationState.DISPLAY_TIME;
+				timeShown = BubNotifState.DISPLAY_TIME;
 				return true;
 			}
 			return false;

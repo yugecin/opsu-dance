@@ -18,8 +18,7 @@
 package yugecin.opsudance.options;
 
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -80,7 +79,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to read option file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
 		}
 		config.loadDirectories();
 	}
@@ -109,7 +108,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to write to file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
 		}
 	}
 

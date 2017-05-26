@@ -33,9 +33,8 @@ import java.io.File;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -281,12 +280,14 @@ public class DownloadNode {
 		download.setListener(new DownloadListener() {
 			@Override
 			public void completed() {
-				EventBus.post(new BarNotificationEvent(String.format("Download complete: %s", getTitle())));
+				BarNotifListener.EVENT.make().onBarNotif(
+					String.format("Download complete: %s", getTitle()));
 			}
 
 			@Override
 			public void error() {
-				EventBus.post(new BarNotificationEvent("Download failed due to a connection error."));
+				BarNotifListener.EVENT.make().onBarNotif(
+					"Download failed due to a connection error.");
 			}
 		});
 		this.download = download;
@@ -408,7 +409,9 @@ public class DownloadNode {
 	public void drawDownload(Graphics g, float position, int id, boolean hover) {
 		Download download = this.download;  // in case clearDownload() is called asynchronously
 		if (download == null) {
-			EventBus.post(new BubbleNotificationEvent("Trying to draw download information for button without Download object", BubbleNotificationEvent.COLOR_ORANGE));
+			BubNotifListener.EVENT.make().onBubNotif(
+				"Trying to draw download information for button without Download object",
+				BubNotifListener.COLOR_ORANGE);
 			return;
 		}
 

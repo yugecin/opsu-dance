@@ -44,8 +44,7 @@ import org.newdawn.slick.util.Log;
 
 import lzma.streams.LzmaOutputStream;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -275,7 +274,7 @@ public class Replay {
 	public void save() {
 		// create replay directory
 		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
-			EventBus.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Failed to create replay directory", BubNotifListener.COMMONCOLOR_RED);
 			return;
 		}
 

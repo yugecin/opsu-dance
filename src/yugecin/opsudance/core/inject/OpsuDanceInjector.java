@@ -25,7 +25,7 @@ import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
-import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.options.Configuration;
@@ -52,7 +52,7 @@ public class OpsuDanceInjector extends Injector {
 
 		bind(FpsRenderState.class).asEagerSingleton();
 		bind(BarNotificationState.class).asEagerSingleton();
-		bind(BubbleNotificationState.class).asEagerSingleton();
+		bind(BubNotifState.class).asEagerSingleton();
 
 		bind(GameObjectRenderer.class).asEagerSingleton();
 
