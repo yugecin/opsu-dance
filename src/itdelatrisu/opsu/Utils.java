@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu;
 
-import com.sun.istack.internal.Nullable;
 import itdelatrisu.opsu.downloads.Download;
 
 import java.io.*;
@@ -48,6 +47,7 @@ import org.newdawn.slick.util.Log;
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.NotNull;
+import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
