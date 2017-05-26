@@ -34,9 +34,10 @@ import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Rectangle;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.components.ActionListener;
 import yugecin.opsudance.core.components.Component;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * A single text field supporting text entry
@@ -48,8 +49,6 @@ public class TextField extends Component {
 	private static final int INITIAL_KEY_REPEAT_INTERVAL = 400;
 	private static final int KEY_REPEAT_INTERVAL = 50;
 
-	private final DisplayContainer displayContainer;
-	
 	private String value = "";
 	private Font font;
 	private int maxCharacter = 10000;
@@ -65,8 +64,7 @@ public class TextField extends Component {
 
 	private ActionListener listener;
 
-	public TextField(DisplayContainer displayContainer, Font font, int x, int y, int width, int height) {
-		this.displayContainer = displayContainer;
+	public TextField(Font font, int x, int y, int width, int height) {
 		this.font = font;
 		this.x = x;
 		this.y = y;
@@ -97,7 +95,7 @@ public class TextField extends Component {
 
 	public void render(Graphics g) {
 		if (lastKey != -1) {
-			if (displayContainer.input.isKeyDown(lastKey)) {
+			if (input.isKeyDown(lastKey)) {
 				if (repeatTimer < System.currentTimeMillis()) {
 					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
 					keyPressed(lastKey, lastChar);
@@ -173,7 +171,7 @@ public class TextField extends Component {
 		if (key != -1)
 		{
 			if ((key == Input.KEY_V) &&
-			   ((displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) || (displayContainer.input.isKeyDown(Input.KEY_RCONTROL)))) {
+			   ((input.isKeyDown(Input.KEY_LCONTROL)) || (input.isKeyDown(Input.KEY_RCONTROL)))) {
 				String text = Sys.getClipboard();
 				if (text != null) {
 					doPaste(text);
@@ -208,7 +206,7 @@ public class TextField extends Component {
 			}
 		*/ } else if (key == Input.KEY_BACK) {
 			if ((cursorPos > 0) && (value.length() > 0)) {
-				if (displayContainer.input.isKeyDown(Input.KEY_LCONTROL) || displayContainer.input.isKeyDown(Input.KEY_RCONTROL)) {
+				if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
 					int sp = 0;
 					boolean startSpace = Character.isWhitespace(value.charAt(cursorPos - 1));
 					boolean charSeen = false;

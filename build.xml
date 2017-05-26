@@ -131,6 +131,9 @@ then run (code is compiled automatically when you run)
 				<exclude name="org/newdawn/slick/Music.*" />
 				<exclude name="org/newdawn/slick/Input.*" />
 				<exclude name="org/newdawn/slick/Input$NullOutputStream.*" />
+				<exclude name="org/newdawn/slick/MouseListener.*" />
+				<exclude name="org/newdawn/slick/KeyListener.*" />
+				<exclude name="org/newdawn/slick/InputListener.*" />
 				<exclude name="org/newdawn/slick/gui/TextField.*" />
 				<exclude name="org/newdawn/slick/openal/AudioInputStream*" />
 				<exclude name="org/newdawn/slick/openal/OpenALStreamPlayer*" />

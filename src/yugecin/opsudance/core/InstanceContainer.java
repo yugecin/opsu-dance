@@ -23,6 +23,7 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.options.Configuration;
@@ -51,6 +52,7 @@ public class InstanceContainer {
 	public static Updater updater;
 
 	public static DisplayContainer displayContainer;
+	public static Input input;
 
 	public static GameObjectRenderer gameObjectRenderer;
 

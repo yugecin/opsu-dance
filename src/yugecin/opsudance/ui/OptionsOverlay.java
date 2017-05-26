@@ -146,7 +146,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		dropdownMenus = new HashMap<>();
 		visibleDropdownMenus = new LinkedList<>();
 
-		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
+		searchField = new TextField(null, 0, 0, 0, 0);
 		searchField.setMaxLength(20);
 
 		scrollHandler = new KineticScrolling();

@@ -109,7 +109,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_R && (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL))) {
+		if (key == Input.KEY_R && (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL))) {
 			gameState.setRestart(Game.Restart.MANUAL);
 			displayContainer.switchState(gameState);
 			return true;

@@ -21,6 +21,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.MouseListener;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
@@ -29,9 +30,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BubNotifState implements BubNotifListener, ResolutionChangedListener, SkinChangedListener {
+public class BubNotifState implements MouseListener, BubNotifListener, ResolutionChangedListener, SkinChangedListener {
 
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
@@ -69,18 +70,6 @@ public class BubNotifState implements BubNotifListener, ResolutionChangedListene
 			}
 			animateUp = true;
 		} while (iter.hasNext());
-	}
-
-	public boolean mouseReleased(int x, int y) {
-		if (x < Notification.finalX) {
-			return false;
-		}
-		for (Notification bubble : bubbles) {
-			if (bubble.mouseReleased(x, y)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void calculatePositions() {
@@ -144,6 +133,34 @@ public class BubNotifState implements BubNotifListener, ResolutionChangedListene
 	@Override
 	public void onSkinChanged(String stringName) {
 		calculatePositions();
+	}
+
+	@Override
+	public boolean mouseWheelMoved(int delta) {
+		return false;
+	}
+
+	@Override
+	public boolean mousePressed(int button, int x, int y) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseReleased(int button, int x, int y) {
+		if (x < Notification.finalX) {
+			return false;
+		}
+		for (Notification bubble : bubbles) {
+			if (bubble.mouseReleased(x, y)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		return false;
 	}
 
 	private static class Notification {

@@ -306,7 +306,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// search
 		searchTimer = SEARCH_DELAY;
 		searchResultString = "Loading data from server...";
-		search = new TextField(displayContainer, Fonts.DEFAULT, baseX, searchY, searchWidth, Fonts.MEDIUM.getLineHeight()) {
+		search = new TextField(Fonts.DEFAULT, baseX, searchY, searchWidth, Fonts.MEDIUM.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;

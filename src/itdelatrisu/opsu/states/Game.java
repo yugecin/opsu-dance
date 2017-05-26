@@ -1150,7 +1150,7 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_R:
 			// restart
-			if (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
 				if (trackPosition < beatmap.objects[0].getTime()) {
 					retries--;  // don't count this retry (cancel out later increment)
 				}
@@ -1161,7 +1161,7 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_S:
 			// save checkpoint
-			if (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
 				if (isLeadIn()) {
 					break;
 				}
@@ -1177,7 +1177,7 @@ public class Game extends ComplexOpsuState {
 			break;
 		case Input.KEY_L:
 			// load checkpoint
-			if (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
 				int checkpoint = OPTION_CHECKPOINT.val * 1000;
 				if (checkpoint == 0 || checkpoint > beatmap.endTime)
 					break;  // invalid checkpoint
@@ -1396,7 +1396,7 @@ public class Game extends ComplexOpsuState {
 			keys = ReplayFrame.KEY_K2;
 		}
 		if (keys != ReplayFrame.KEY_NONE) {
-			gameKeyReleased(keys, displayContainer.input.getMouseX(), displayContainer.input.getMouseY(), MusicController.getPosition());
+			gameKeyReleased(keys, input.getMouseX(), input.getMouseY(), MusicController.getPosition());
 		}
 
 		return true;

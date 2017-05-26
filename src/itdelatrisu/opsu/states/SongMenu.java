@@ -389,7 +389,7 @@ public class SongMenu extends ComplexOpsuState {
 		// search
 		int textFieldX = (int) (displayContainer.width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
 		int textFieldY = (int) (headerY + Fonts.BOLD.getLineHeight() / 2);
-		searchTextField = new TextField(displayContainer, Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
+		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;
@@ -1042,8 +1042,6 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		Input input = displayContainer.input;
-
 		switch (key) {
 		case Input.KEY_ESCAPE:
 			if (reloadThread != null) {
@@ -1204,9 +1202,9 @@ public class SongMenu extends ComplexOpsuState {
 
 		// check mouse button (right click scrolls faster on songs)
 		int multiplier;
-		if (displayContainer.input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+		if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
 			multiplier = 10;
-		} else if (displayContainer.input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+		} else if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			multiplier = 1;
 		} else {
 			return false;
@@ -1225,8 +1223,6 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
-
-		Input input = displayContainer.input;
 
 		if (isInputBlocked()) {
 			return true;
@@ -1768,7 +1764,7 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// turn on "auto" mod if holding "ctrl" key
-		if (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) {
+		if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
 			if (!GameMod.AUTO.isActive())
 				GameMod.AUTO.toggle(true);
 		}

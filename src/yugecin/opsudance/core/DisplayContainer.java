@@ -59,7 +59,7 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener, ResolutionChangedListener, SkinChangedListener {
+public class DisplayContainer implements ErrorDumpable, ResolutionChangedListener, SkinChangedListener {
 
 	private static SGL GL = Renderer.get();
 
@@ -72,7 +72,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
-	public Input input;
 
 	public int width;
 	public int height;
@@ -208,12 +207,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		setUPS(OPTION_TARGET_UPS.val);
 		setFPS(targetFPS[targetFPSIndex]);
 
-		state = startingState;
-		state.enter();
-
 		fpsState = new FpsRenderState();
 		bubNotifState = new BubNotifState();
 		barNotifState = new BarNotificationState();
+
+		state = startingState;
+		state.enter();
 	}
 
 
@@ -281,7 +280,6 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public void setup() throws Exception {
 		width = height = -1;
-		Input.disableControllers();
 		Display.setTitle("opsu!dance");
 		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
@@ -434,10 +432,12 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		input = new Input(height);
-		input.enableKeyRepeat();
-		input.addKeyListener(this);
-		input.addMouseListener(this);
+		if (input == null) {
+			input = new Input(height);
+			input.enableKeyRepeat();
+			input.addListener(new GlobalInputListener());
+			input.addMouseListener(bubNotifState);
+		}
 
 		sout("GL ready");
 
@@ -469,6 +469,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		state.writeErrorDump(dump);
 	}
 
+	// TODO change this
 	public boolean isInState(Class<? extends OpsuState> state) {
 		return state.isInstance(state);
 	}
@@ -494,65 +495,10 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public void switchStateInstantly(OpsuState state) {
 		this.state.leave();
+		input.removeListener(this.state);
 		this.state = state;
 		this.state.enter();
+		input.addListener(this.state);
 	}
-
-	/*
-	 * input events below, see org.newdawn.slick.KeyListener & org.newdawn.slick.MouseListener
-	 */
-
-	@Override
-	public void keyPressed(int key, char c) {
-		state.keyPressed(key, c);
-	}
-
-	@Override
-	public void keyReleased(int key, char c) {
-		state.keyReleased(key, c);
-	}
-
-	@Override
-	public void mouseWheelMoved(int change) {
-		state.mouseWheelMoved(change);
-	}
-
-	@Override
-	public void mouseClicked(int button, int x, int y, int clickCount) { }
-
-	@Override
-	public void mousePressed(int button, int x, int y) {
-		state.mousePressed(button, x, y);
-	}
-
-	@Override
-	public void mouseReleased(int button, int x, int y) {
-		if (bubNotifState.mouseReleased(x, y)) {
-			return;
-		}
-		state.mouseReleased(button, x, y);
-	}
-
-	@Override
-	public void mouseMoved(int oldx, int oldy, int newx, int newy) { }
-
-	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		state.mouseDragged(oldx, oldy, newx, newy);
-	}
-
-	@Override
-	public void setInput(Input input) { }
-
-	@Override
-	public boolean isAcceptingInput() {
-		return true;
-	}
-
-	@Override
-	public void inputEnded() { }
-
-	@Override
-	public void inputStarted() { }
 
 }
