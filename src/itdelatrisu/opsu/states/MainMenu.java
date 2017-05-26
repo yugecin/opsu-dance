@@ -570,8 +570,7 @@ public class MainMenu extends BaseOpsuState {
 					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo",
-					BubNotifListener.COLOR_ORANGE);
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
 			}
 			return true;
 		}
@@ -584,8 +583,7 @@ public class MainMenu extends BaseOpsuState {
 					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo",
-					BubNotifListener.COLOR_ORANGE);
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
 			}
 			return true;
 		}

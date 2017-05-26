@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.options;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.events.BubNotifListener;
 
@@ -79,7 +80,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to read option file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 		config.loadDirectories();
 	}
@@ -108,7 +109,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to write to file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 	}
 

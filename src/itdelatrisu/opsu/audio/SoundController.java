@@ -36,6 +36,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
@@ -220,8 +221,7 @@ public class SoundController {
 		for (SoundEffect s : SoundEffect.values()) {
 			if ((currentFileName = getSoundFileName(s.getFileName())) == null) {
 				BubNotifListener.EVENT.make().onBubNotif(
-					"Could not find sound file " + s.getFileName(),
-					BubNotifListener.COLOR_ORANGE);
+					"Could not find sound file " + s.getFileName(), Colors.BUB_ORANGE);
 				continue;
 			}
 			MultiClip newClip = loadClip(currentFileName, currentFileName.endsWith(".mp3"));
@@ -241,8 +241,7 @@ public class SoundController {
 				String filename = String.format("%s-%s", ss.getName(), s.getFileName());
 				if ((currentFileName = getSoundFileName(filename)) == null) {
 					BubNotifListener.EVENT.make().onBubNotif(
-						"Could not find hit sound file " + filename,
-						BubNotifListener.COLOR_ORANGE);
+						"Could not find hit sound file " + filename, Colors.BUB_ORANGE);
 					continue;
 				}
 				MultiClip newClip = loadClip(currentFileName, false);

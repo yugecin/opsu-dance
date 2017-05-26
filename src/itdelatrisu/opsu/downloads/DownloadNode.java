@@ -411,7 +411,7 @@ public class DownloadNode {
 		if (download == null) {
 			BubNotifListener.EVENT.make().onBubNotif(
 				"Trying to draw download information for button without Download object",
-				BubNotifListener.COLOR_ORANGE);
+				Colors.BUB_ORANGE);
 			return;
 		}
 

@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu;
 
+import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 
 import java.io.File;
@@ -732,7 +733,7 @@ public enum GameImage {
 
 		String err = String.format("Could not find default image '%s'.", filename);
 		Log.warn(err);
-		BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
+		BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 	}
 
 	/**
@@ -796,8 +797,7 @@ public enum GameImage {
 					list.add(img);
 				} catch (SlickException e) {
 					BubNotifListener.EVENT.make().onBubNotif(
-						String.format("Failed to set image '%s'.", name),
-						BubNotifListener.COMMONCOLOR_RED);
+						String.format("Failed to set image '%s'.", name), Colors.BUB_RED);
 					break;
 				}
 			}
@@ -825,8 +825,7 @@ public enum GameImage {
 				return img;
 			} catch (SlickException e) {
 				BubNotifListener.EVENT.make().onBubNotif(
-					String.format("Failed to set image '%s'.", filename),
-					BubNotifListener.COMMONCOLOR_RED);
+					String.format("Failed to set image '%s'.", filename), Colors.BUB_RED);
 			}
 		}
 		return null;

@@ -336,7 +336,7 @@ public class Game extends ComplexOpsuState {
 			Log.error("could not create offscreen graphics", e);
 			BubNotifListener.EVENT.make().onBubNotif(
 				"Exception while creating offscreen graphics. See logfile for details.",
-				BubNotifListener.COMMONCOLOR_RED);
+				Colors.BUB_RED);
 		}
 
 		// initialize music position bar location
@@ -1453,8 +1453,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (beatmap == null || beatmap.objects == null) {
-			BubNotifListener.EVENT.make().onBubNotif("Game was running without a beatmap",
-				BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif("Game was running without a beatmap", Colors.BUB_RED);
 			displayContainer.switchStateInstantly(songMenuState);
 		}
 
@@ -1561,8 +1560,7 @@ public class Game extends ComplexOpsuState {
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
 					Log.error(message, e);
-					BubNotifListener.EVENT.make().onBubNotif(message,
-						BubNotifListener.COMMONCOLOR_RED);
+					BubNotifListener.EVENT.make().onBubNotif(message, Colors.BUB_RED);
 					gameObjects[i] = new DummyObject(hitObject);
 				}
 			}
@@ -2149,7 +2147,7 @@ public class Game extends ComplexOpsuState {
 		} else {
 			if (replay.frames == null) {
 				BubNotifListener.EVENT.make().onBubNotif("Attempting to set a replay with no frames.",
-					BubNotifListener.COLOR_ORANGE);
+					Colors.BUB_ORANGE);
 				return;
 			}
 			this.isReplay = true;

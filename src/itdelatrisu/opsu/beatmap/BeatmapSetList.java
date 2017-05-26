@@ -21,6 +21,7 @@ package itdelatrisu.opsu.beatmap;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.db.BeatmapDB;
+import itdelatrisu.opsu.ui.Colors;
 import yugecin.opsudance.events.BubNotifListener;
 
 import java.io.File;
@@ -214,8 +215,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(dir);
 		} catch (IOException e) {
-			BubNotifListener.EVENT.make().onBubNotif("Could not delete song group",
-				BubNotifListener.COLOR_ORANGE);
+			BubNotifListener.EVENT.make().onBubNotif("Could not delete song group", Colors.BUB_ORANGE);
 		}
 		if (ws != null)
 			ws.resume();
@@ -271,7 +271,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(file);
 		} catch (IOException e) {
-			BubNotifListener.EVENT.make().onBubNotif("Could not delete song", BubNotifListener.COLOR_ORANGE);
+			BubNotifListener.EVENT.make().onBubNotif("Could not delete song", Colors.BUB_ORANGE);
 		}
 		if (ws != null)
 			ws.resume();

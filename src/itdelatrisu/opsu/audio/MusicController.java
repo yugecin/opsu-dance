@@ -33,6 +33,7 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -158,7 +159,7 @@ public class MusicController {
 		} catch (Exception e) {
 			String err = String.format("Could not play track '%s'.", file.getName());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 	}
 

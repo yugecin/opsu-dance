@@ -26,6 +26,7 @@ import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
+import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
@@ -340,15 +341,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			return true;
 		}
 		if (DownloadList.get().hasActiveDownloads()) {
-			BubNotifListener.EVENT.make().onBubNotif(DownloadList.EXIT_CONFIRMATION,
-				BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(DownloadList.EXIT_CONFIRMATION, Colors.BUB_RED);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
-			BubNotifListener.EVENT.make().onBubNotif(Updater.EXIT_CONFIRMATION,
-				BubNotifListener.COMMONCOLOR_PURPLE);
+			BubNotifListener.EVENT.make().onBubNotif(Updater.EXIT_CONFIRMATION, Colors.BUB_PURPLE);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
@@ -387,8 +386,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
-			BubNotifListener.EVENT.make().onBubNotif("Failed to change resolution",
-				BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif("Failed to change resolution", Colors.BUB_RED);
 			Log.error("Failed to set display mode.", e);
 		}
 	}
@@ -410,7 +408,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 				fullscreen = false;
 				String msg = String.format("Fullscreen mode is not supported for %sx%s", width, height);
 				Log.warn(msg);
-				BubNotifListener.EVENT.make().onBubNotif(msg, BubNotifListener.COLOR_ORANGE);
+				BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_ORANGE);
 			}
 		}
 

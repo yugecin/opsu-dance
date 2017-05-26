@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import itdelatrisu.opsu.ui.Colors;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.newdawn.slick.util.Log;
@@ -96,7 +97,7 @@ public class OszUnpacker {
 		} catch (ZipException e) {
 			String err = String.format("Failed to unzip file %s to dest %s.", file.getAbsolutePath(), dest.getAbsolutePath());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 	}
 

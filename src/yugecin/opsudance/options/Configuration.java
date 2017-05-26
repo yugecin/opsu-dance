@@ -24,6 +24,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
+import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -153,7 +154,7 @@ public class Configuration {
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {
 			String msg = String.format("Failed to create %s directory at '%s'.", kind, defaultDir.getAbsolutePath());
-			BubNotifListener.EVENT.make().onBubNotif(msg, BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_RED);
 		}
 		return defaultDir;
 	}
@@ -214,8 +215,7 @@ public class Configuration {
 		if (!screenshotDir.isDirectory() && !screenshotDir.mkdir()) {
 			BubNotifListener.EVENT.make().onBubNotif(
 				String.format( "Failed to create screenshot directory at '%s'.",
-					screenshotDir.getAbsolutePath()),
-				BubNotifListener.COMMONCOLOR_RED);
+					screenshotDir.getAbsolutePath()), Colors.BUB_RED);
 			return;
 		}
 
@@ -250,7 +250,7 @@ public class Configuration {
 					}
 					ImageIO.write(image, OPTION_SCREENSHOT_FORMAT.getValueString().toLowerCase(), file);
 					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
-						BubNotifListener.COMMONCOLOR_PURPLE);
+						Colors.BUB_PURPLE);
 				} catch (Exception e) {
 					ErrorHandler.error("Failed to take a screenshot.", e).show();
 				}

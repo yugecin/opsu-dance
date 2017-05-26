@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Nullable;
@@ -888,7 +889,7 @@ public class BeatmapParser {
 	private static void logAndShowErrorNotification(Exception e, String message, Object... formatArgs) {
 		message = String.format(message, formatArgs);
 		Log.error(message, e);
-		BubNotifListener.EVENT.make().onBubNotif(message, BubNotifListener.COMMONCOLOR_RED);
+		BubNotifListener.EVENT.make().onBubNotif(message, Colors.BUB_RED);
 	}
 
 }

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.newdawn.slick.util.Log;
 
@@ -274,7 +275,7 @@ public class Replay {
 	public void save() {
 		// create replay directory
 		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
-			BubNotifListener.EVENT.make().onBubNotif("Failed to create replay directory", BubNotifListener.COMMONCOLOR_RED);
+			BubNotifListener.EVENT.make().onBubNotif("Failed to create replay directory", Colors.BUB_RED);
 			return;
 		}
 
