@@ -35,10 +35,10 @@ import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Nullable;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -250,7 +250,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			logAndShowErrorNotification(e, "Failed to read file '%s'.", map.getFile().getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
+			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -653,7 +653,7 @@ public class BeatmapParser {
 		} catch (IOException e) {
 			logAndShowErrorNotification(e, "Failed to read file '%s'.", file.getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			ErrorHandler.error("Failed to get MD5 hash stream.", e).show();
+			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -811,8 +811,9 @@ public class BeatmapParser {
 
 			// check that all objects were parsed
 			if (objectIndex != beatmap.objects.length)
-				ErrorHandler.error(String.format("Parsed %d objects for beatmap '%s', %d objects expected.",
-						objectIndex, beatmap.toString(), beatmap.objects.length), new Exception("no")).show();
+				explode(String.format("Parsed %d objects for beatmap '%s', %d objects expected.",
+					objectIndex, beatmap.toString(), beatmap.objects.length), new Exception("no"),
+					DEFAULT_OPTIONS);
 		} catch (IOException e) {
 			logAndShowErrorNotification(e, "Failed to read file '%s'.",
 				beatmap.getFile().getAbsolutePath());

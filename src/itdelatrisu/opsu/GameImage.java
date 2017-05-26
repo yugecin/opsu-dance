@@ -869,7 +869,8 @@ public enum GameImage {
 				skinImages = null;
 			}
 		} catch (SlickException e) {
-			ErrorHandler.error(String.format("Failed to destroy beatmap skin images for '%s'.", this.name()), e).show();
+			String msg = String.format("Failed to destroy beatmap skin images for '%s'.", this.name());
+			ErrorHandler.explode(msg, e, ErrorHandler.DEFAULT_OPTIONS);
 		}
 	}
 

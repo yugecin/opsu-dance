@@ -1,7 +1,5 @@
 package itdelatrisu.opsu.audio;
 
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,6 +11,8 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Extension of Clip that allows playing multiple copies of a Clip simultaneously.
@@ -194,7 +194,8 @@ public class MultiClip {
 			try {
 				audioIn.close();
 			} catch (IOException e) {
-				ErrorHandler.error(String.format("Could not close AudioInputStream for MultiClip %s.", name), e).show();
+				explode(String.format("Could not close AudioInputStream for MultiClip %s.", name), e,
+					DEFAULT_OPTIONS);
 			}
 		}
 	}

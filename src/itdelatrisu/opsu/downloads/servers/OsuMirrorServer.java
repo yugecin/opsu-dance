@@ -35,7 +35,8 @@ import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://loli.al/
@@ -121,7 +122,7 @@ public class OsuMirrorServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		}
 		return nodes;
 	}

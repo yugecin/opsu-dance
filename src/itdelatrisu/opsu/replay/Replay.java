@@ -44,9 +44,9 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.newdawn.slick.util.Log;
 
 import lzma.streams.LzmaOutputStream;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BubNotifListener;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -344,7 +344,7 @@ public class Replay {
 							compressedOut.write(bytes);
 						} catch (IOException e) {
 							// possible OOM: https://github.com/jponge/lzma-java/issues/9
-							ErrorHandler.error("LZMA compression failed (possible out-of-memory error).", e).show();
+							explode("LZMA compression failed (possible out-of-memory error).", e, DEFAULT_OPTIONS);
 						}
 						compressedOut.close();
 						bout.close();
@@ -358,7 +358,7 @@ public class Replay {
 
 					writer.close();
 				} catch (IOException e) {
-					ErrorHandler.error("Could not save replay data.", e).show();
+					explode("Could not save replay data.", e, DEFAULT_OPTIONS);
 				}
 			}
 		}.start();

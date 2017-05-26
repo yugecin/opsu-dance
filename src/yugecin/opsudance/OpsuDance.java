@@ -22,13 +22,13 @@ import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -75,7 +75,7 @@ public class OpsuDance {
 			displayContainer.setup();
 			displayContainer.resume();
 		} catch (Exception e) {
-			ErrorHandler.error("could not initialize GL", e).allowTerminate().preventContinue().show();
+			explode("could not initialize GL", e, ALLOW_TERMINATE | PREVENT_CONTINUE);
 			return false;
 		}
 		Exception caughtException = null;
@@ -86,12 +86,12 @@ public class OpsuDance {
 		}
 		displayContainer.teardown();
 		displayContainer.pause();
-		return caughtException != null && ErrorHandler.error("update/render error", caughtException).allowTerminate().show().shouldIgnoreAndContinue();
+		return caughtException != null && explode("update/render error", caughtException, ALLOW_TERMINATE);
 	}
 
 	private void initDatabase() {
 		try {
-			DBController.init(config);
+			DBController.init();
 		} catch (UnsatisfiedLinkError e) {
 			errorAndExit("Could not initialize database.", e);
 		}
@@ -146,13 +146,8 @@ public class OpsuDance {
 		}
 	}
 
-	private void errorAndExit(String errstr) {
-		ErrorHandler.error(errstr, new Throwable()).allowTerminate().preventContinue().show();
-		System.exit(1);
-	}
-
 	private void errorAndExit(String errstr, Throwable cause) {
-		ErrorHandler.error(errstr, cause).preventContinue().show();
+		explode(errstr, cause, PREVENT_CONTINUE);
 		System.exit(1);
 	}
 

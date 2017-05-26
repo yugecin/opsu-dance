@@ -45,10 +45,10 @@ import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.BubNotifListener;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -576,7 +576,7 @@ public class MusicController {
 
 			player = null;
 		} catch (Exception e) {
-			ErrorHandler.error("Failed to destroy OpenAL.", e).show();
+			explode("Failed to destroy OpenAL.", e, DEFAULT_OPTIONS);
 		}
 	}
 

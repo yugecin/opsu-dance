@@ -33,7 +33,8 @@ import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://bloodcat.com/osu/
@@ -95,7 +96,7 @@ public class BloodcatServer extends DownloadServer {
 				resultCount++;
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		}
 		return nodes;
 	}

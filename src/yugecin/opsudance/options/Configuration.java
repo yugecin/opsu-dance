@@ -28,7 +28,7 @@ import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import org.newdawn.slick.util.Log;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.utils.ManifestWrapper;
 
@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -201,7 +202,8 @@ public class Configuration {
 		}
 		File dir = new File(rootPath, "opsu");
 		if (!dir.isDirectory() && !dir.mkdir()) {
-			ErrorHandler.error(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath), new Exception("empty")).preventReport().show();
+			explode(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath),
+				new Exception("empty"), PREVENT_REPORT);
 		}
 		return dir;
 	}
@@ -252,7 +254,10 @@ public class Configuration {
 					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
 						Colors.BUB_PURPLE);
 				} catch (Exception e) {
-					ErrorHandler.error("Failed to take a screenshot.", e).show();
+					Log.error("Could not take screenshot", e);
+					BubNotifListener.EVENT.make().onBubNotif(
+						"Failed to take a screenshot. See log file for details",
+						Colors.BUB_PURPLE);
 				}
 			}
 		}.start();

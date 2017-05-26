@@ -466,6 +466,10 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
 		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
+		if (state == null) {
+			dump.append("state is null!\n");
+			return;
+		}
 		state.writeErrorDump(dump);
 	}
 

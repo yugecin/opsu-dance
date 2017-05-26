@@ -39,12 +39,12 @@ import javax.sound.sampled.LineUnavailableException;
 import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -104,7 +104,7 @@ public class SoundController {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
 			return loadClip(ref, audioIn, isMP3);
 		} catch (Exception e) {
-			ErrorHandler.error(String.format("Failed to load file '%s'.", ref), e).show();
+			explode(String.format("Failed to load file '%s'.", ref), e, DEFAULT_OPTIONS);
 			return null;
 		}
 	}
@@ -285,7 +285,7 @@ public class SoundController {
 			try {
 				clip.start(volume, listener);
 			} catch (LineUnavailableException e) {
-				ErrorHandler.error(String.format("Could not start a clip '%s'.", clip.getName()), e).show();
+				explode(String.format("Could not start a clip '%s'.", clip.getName()), e, DEFAULT_OPTIONS);
 			}
 		}
 	}

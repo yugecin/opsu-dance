@@ -35,8 +35,9 @@ import java.nio.file.StandardCopyOption;
 
 import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BubNotifListener;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * File download.
@@ -144,7 +145,7 @@ public class Download {
 			this.url = new URL(remoteURL);
 		} catch (MalformedURLException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error(String.format("Bad download URL: '%s'", remoteURL), e).show();
+			explode(String.format("Bad download URL: '%s'", remoteURL), e, DEFAULT_OPTIONS);
 			return;
 		}
 		this.localPath = localPath;
@@ -421,7 +422,7 @@ public class Download {
 			}
 		} catch (IOException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error("Failed to cancel download.", e).show();
+			explode("Failed to cancel download.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

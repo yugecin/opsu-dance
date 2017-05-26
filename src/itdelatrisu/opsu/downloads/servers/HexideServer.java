@@ -29,7 +29,8 @@ import java.net.URLEncoder;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: https://osu.hexide.com/
@@ -126,7 +127,7 @@ public class HexideServer extends DownloadServer {
 			// all results at once; this approach just gets pagination correct.
 			this.totalResults = arr.length() + resultIndex;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		}
 		return nodes;
 	}

@@ -36,9 +36,9 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.Constants;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.events.BarNotifListener;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -291,7 +291,7 @@ public class Updater {
 			pb.start();
 		} catch (IOException e) {
 			status = Status.INTERNAL_ERROR;
-			ErrorHandler.error("Failed to start new process.", e).show();
+			explode("Failed to start new process.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

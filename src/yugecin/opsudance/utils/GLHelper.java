@@ -28,10 +28,11 @@ import org.newdawn.slick.opengl.LoadableImageData;
 import org.newdawn.slick.opengl.TGAImageData;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 public class GLHelper {
 
@@ -96,7 +97,7 @@ public class GLHelper {
 			IntBuffer tmp = BufferUtils.createIntBuffer(min * min);
 			Mouse.setNativeCursor(new Cursor(min, min, min / 2, min / 2, 1, tmp, null));
 		} catch (LWJGLException e) {
-			ErrorHandler.error("Cannot hide native cursor", e).show();
+			explode("Cannot hide native cursor", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -104,7 +105,7 @@ public class GLHelper {
 		try {
 			Mouse.setNativeCursor(null);
 		} catch (LWJGLException e) {
-			ErrorHandler.error("Cannot show native cursor", e).show();
+			explode("Cannot show native cursor", e, DEFAULT_OPTIONS);
 		}
 	}
 

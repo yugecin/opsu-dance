@@ -18,12 +18,11 @@
 
 package itdelatrisu.opsu.db;
 
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.options.Configuration;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Database controller.
@@ -35,17 +34,17 @@ public class DBController {
 	/**
 	 * Initializes all databases.
 	 */
-	public static void init(Configuration config) {
+	public static void init() {
 		// load the sqlite-JDBC driver using the current class loader
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			ErrorHandler.error("Could not load sqlite-JDBC driver.", e).show();
+			explode("Could not load sqlite-JDBC driver.", e, DEFAULT_OPTIONS);
 		}
 
 		// initialize the databases
-		BeatmapDB.init(config);
-		ScoreDB.init(config);
+		BeatmapDB.init();
+		ScoreDB.init();
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class DBController {
 			return DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
 		} catch (SQLException e) {
 			// if the error message is "out of memory", it probably means no database file is found
-			ErrorHandler.error(String.format("Could not connect to database: '%s'.", path), e).show();
+			explode(String.format("Could not connect to database: '%s'.", path), e, DEFAULT_OPTIONS);
 			return null;
 		}
 	}

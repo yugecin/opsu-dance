@@ -46,9 +46,8 @@ import org.newdawn.slick.util.Log;
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.NotNull;
 import yugecin.opsudance.core.Nullable;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -313,7 +312,7 @@ public class Utils {
 			try {
 				json = new JSONObject(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON object.", e).show();
+				explode("Failed to create JSON object.", e, DEFAULT_OPTIONS);
 			}
 		}
 		return json;
@@ -332,7 +331,7 @@ public class Utils {
 			try {
 				json = new JSONArray(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON array.", e).show();
+				explode("Failed to create JSON array.", e, DEFAULT_OPTIONS);
 			}
 		}
 		return json;
@@ -374,7 +373,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			ErrorHandler.error("Failed to calculate MD5 hash.", e).show();
+			explode("Failed to calculate MD5 hash.", e, DEFAULT_OPTIONS);
 		}
 		return null;
 	}

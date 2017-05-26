@@ -20,8 +20,6 @@ package yugecin.opsudance.core.errorhandling;
 import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
@@ -36,80 +34,52 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * based on itdelatrisu.opsu.ErrorHandler
  */
 public class ErrorHandler {
 
-	private static ErrorHandler instance;
+	public final static int DEFAULT_OPTIONS = 0;
+	public final static int PREVENT_CONTINUE = 1;
+	public final static int PREVENT_REPORT = 2;
+	public final static int ALLOW_TERMINATE = 4;
 
-	private final Configuration config;
-	private final DisplayContainer displayContainer;
-
-	private String customMessage;
-	private Throwable cause;
-	private String errorDump;
-	private String messageBody;
-
-	private boolean preventContinue;
-	private boolean preventReport;
-	private boolean ignoreAndContinue;
-	private boolean allowTerminate;
-
-	public ErrorHandler(DisplayContainer displayContainer, Configuration config) {
-		this.displayContainer = displayContainer;
-		this.config = config;
-		instance = this;
-	}
-
-	private ErrorHandler init(String customMessage, Throwable cause) {
-		this.customMessage = customMessage;
-		this.cause = cause;
-
+	public static boolean explode(String customMessage, Throwable cause, int flags) {
 		StringWriter dump = new StringWriter();
-		try {
-			displayContainer.writeErrorDump(dump);
-		} catch (Exception e) {
-			dump
-				.append("### ")
-				.append(e.getClass().getSimpleName())
-				.append(" while creating errordump");
-			e.printStackTrace(new PrintWriter(dump));
+		if (displayContainer == null) {
+			dump.append("displayContainer is null!\n");
+		} else {
+			try {
+				displayContainer.writeErrorDump(dump);
+			} catch (Exception e) {
+				dump
+					.append("### ")
+					.append(e.getClass().getSimpleName())
+					.append(" while creating errordump");
+				e.printStackTrace(new PrintWriter(dump));
+			}
 		}
-		errorDump = dump.toString();
+		String errorDump = dump.toString();
 
 		dump = new StringWriter();
 		dump.append(customMessage).append("\n");
 		cause.printStackTrace(new PrintWriter(dump));
 		dump.append("\n").append(errorDump);
-		messageBody = dump.toString();
+		String messageBody = dump.toString();
 
 		Log.error("====== start unhandled exception dump");
 		Log.error(messageBody);
 		Log.error("====== end unhandled exception dump");
-		return this;
+
+		int result = show(messageBody, customMessage, cause, errorDump, flags);
+
+		return (flags & ALLOW_TERMINATE) == 0 || result == 1;
 	}
 
-	public static ErrorHandler error(String message, Throwable cause) {
-		return instance.init(message, cause);
-	}
-
-	public ErrorHandler preventReport() {
-		preventReport = true;
-		return this;
-	}
-
-	public ErrorHandler allowTerminate() {
-		allowTerminate = true;
-		return this;
-	}
-
-	public ErrorHandler preventContinue() {
-		preventContinue = true;
-		return this;
-	}
-
-	public ErrorHandler show() {
+	private static int show(final String messageBody, final String customMessage, final Throwable cause,
+		       final String errorDump, final int flags) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
@@ -119,7 +89,7 @@ public class ErrorHandler {
 		String title = "opsu!dance error - " + customMessage;
 
 		String messageText = "opsu!dance has encountered an error.";
-		if (!preventReport) {
+		if ((flags & PREVENT_REPORT) == 0) {
 			messageText += " Please report this!";
 		}
 		JLabel message = new JLabel(messageText);
@@ -133,12 +103,27 @@ public class ErrorHandler {
 		textArea.setWrapStyleWord(true);
 		textArea.setText(messageBody);
 
-		Object[] messageComponents = new Object[] { message, new JScrollPane(textArea), createViewLogButton(), createReportButton() };
+		ActionListener reportAction = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				try {
+					URI url = createGithubIssueUrl(customMessage, cause, errorDump);
+					Desktop.getDesktop().browse(url);
+				} catch (IOException e) {
+					Log.warn("Could not open browser to report issue", e);
+					JOptionPane.showMessageDialog(null, "whoops could not launch a browser",
+						"errorception", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+
+		Object[] messageComponents = new Object[] { message, new JScrollPane(textArea), createViewLogButton(),
+			createReportButton(flags, reportAction) };
 
 		String[] buttons;
-		if (!allowTerminate && !preventContinue) {
+		if ((flags & (ALLOW_TERMINATE | PREVENT_CONTINUE)) == 0) {
 			buttons = new String[] { "Ignore & continue" };
-		} else if (preventContinue) {
+		} else if ((flags & PREVENT_CONTINUE) == 0) {
 			buttons = new String[] { "Terminate" };
 		} else {
 			buttons = new String[] { "Terminate", "Ignore & continue" };
@@ -148,52 +133,46 @@ public class ErrorHandler {
 		frame.setUndecorated(true);
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-		int result = JOptionPane.showOptionDialog(frame,
-			                                        messageComponents,
-			                                        title,
-			                                        JOptionPane.DEFAULT_OPTION,
-			                                        JOptionPane.ERROR_MESSAGE,
-			                                        null,
-			                                        buttons,
-			                                        buttons[buttons.length - 1]);
-		ignoreAndContinue = !allowTerminate || result == 1;
+		int result = JOptionPane.showOptionDialog(frame, messageComponents, title, JOptionPane.DEFAULT_OPTION,
+			JOptionPane.ERROR_MESSAGE, null, buttons, buttons[buttons.length - 1]);
 		frame.dispose();
 
-		return this;
+		return result;
 	}
 
-	private JComponent createViewLogButton() {
+	private static JComponent createViewLogButton() {
 		return createButton("View log", Desktop.Action.OPEN, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				try {
-					Desktop.getDesktop().open(config.LOG_FILE);
-				} catch (IOException e) {
-					Log.warn("Could not open log file", e);
-					JOptionPane.showMessageDialog(null, "whoops could not open log file", "errorception", JOptionPane.ERROR_MESSAGE);
-				}
+				openLogfile();
 			}
 		});
 	}
 
-	private JComponent createReportButton() {
-		if (preventReport) {
+	private static void openLogfile() {
+		if (config == null) {
+			JOptionPane.showMessageDialog(null,
+				"Cannot open logfile, check your opsu! installation folder for .opsu.cfg",
+				"errorception", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		try {
+			Desktop.getDesktop().open(config.LOG_FILE);
+		} catch (IOException e) {
+			Log.warn("Could not open log file", e);
+			JOptionPane.showMessageDialog(null, "whoops could not open log file",
+				"errorception", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private static JComponent createReportButton(int flags, ActionListener reportAction) {
+		if ((flags & PREVENT_REPORT) > 0) {
 			return new JLabel();
 		}
-		return createButton("Report error", Desktop.Action.BROWSE, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				try {
-					Desktop.getDesktop().browse(createGithubIssueUrl());
-				} catch (IOException e) {
-					Log.warn("Could not open browser to report issue", e);
-					JOptionPane.showMessageDialog(null, "whoops could not launch a browser", "errorception", JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
+		return createButton("Report error", Desktop.Action.BROWSE, reportAction);
 	}
 
-	private JButton createButton(String buttonText, Desktop.Action action, ActionListener listener) {
+	private static JButton createButton(String buttonText, Desktop.Action action, ActionListener listener) {
 		JButton button = new JButton(buttonText);
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(action)) {
 			button.addActionListener(listener);
@@ -203,7 +182,7 @@ public class ErrorHandler {
 		return button;
 	}
 
-	private URI createGithubIssueUrl() {
+	private static URI createGithubIssueUrl(String customMessage, Throwable cause, String errorDump) {
 		StringWriter dump = new StringWriter();
 
 		dump.append(customMessage).append("\n");
@@ -228,7 +207,8 @@ public class ErrorHandler {
 		String issueTitle = "";
 		String issueBody = "";
 		try {
-			issueTitle = URLEncoder.encode("*** Unhandled " + cause.getClass().getSimpleName() + " " + customMessage, "UTF-8");
+			issueTitle = URLEncoder.encode("*** Unhandled " + cause.getClass().getSimpleName() + " " +
+				customMessage, "UTF-8");
 			issueBody = URLEncoder.encode(truncateGithubIssueBody(dump.toString()), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
@@ -236,16 +216,12 @@ public class ErrorHandler {
 		return URI.create(String.format(Constants.ISSUES_URL, issueTitle, issueBody));
 	}
 
-	private String truncateGithubIssueBody(String body) {
+	private static String truncateGithubIssueBody(String body) {
 		if (body.replaceAll("[^a-zA-Z+-]", "").length() < 1750) {
 			return body;
 		}
 		Log.warn("error dump too long to fit into github issue url, truncating");
 		return body.substring(0, 1640) + "** TRUNCATED **\n```";
-	}
-
-	public boolean shouldIgnoreAndContinue() {
-		return ignoreAndContinue;
 	}
 
 }

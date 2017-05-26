@@ -33,8 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.options.Configuration;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Handles connections and queries with the cached beatmap database.
@@ -89,17 +90,10 @@ public class BeatmapDB {
 	/** Current size of beatmap cache table. */
 	private static int cacheSize = -1;
 
-	// This class should not be instantiated.
-	private BeatmapDB() {}
-
-	private static Configuration config; // TODO
-
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init(Configuration config) {
-		BeatmapDB.config = config;
-
+	public static void init() {
 		// create a database connection
 		connection = DBController.createConnection(config.BEATMAP_DB.getPath());
 		if (connection == null)
@@ -115,7 +109,7 @@ public class BeatmapDB {
 		try {
 			updateSizeStmt = connection.prepareStatement("REPLACE INTO info (key, value) VALUES ('size', ?)");
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to prepare beatmap statements.", e).show();
+			explode("Failed to prepare beatmap statements.", e, DEFAULT_OPTIONS);
 		}
 
 		// retrieve the cache size
@@ -137,7 +131,7 @@ public class BeatmapDB {
 			updatePlayStatsStmt = connection.prepareStatement("UPDATE beatmaps SET playCount = ?, lastPlayed = ? WHERE dir = ? AND file = ?");
 			setFavoriteStmt = connection.prepareStatement("UPDATE beatmaps SET favorite = ? WHERE dir = ? AND file = ?");
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to prepare beatmap statements.", e).show();
+			explode("Failed to prepare beatmap statements.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -175,7 +169,7 @@ public class BeatmapDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', '%s')", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			ErrorHandler.error("Coudl not create beatmap database.", e).show();
+			explode("Could not create beatmap database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -227,7 +221,7 @@ public class BeatmapDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to update beatmap database.", e).show();
+			explode("Failed to update beatmap database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -245,7 +239,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			ErrorHandler.error("Could not get beatmap cache size.", e).show();
+			explode("Could not get beatmap cache size.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -260,7 +254,7 @@ public class BeatmapDB {
 			updateSizeStmt.setString(1, Integer.toString(Math.max(cacheSize, 0)));
 			updateSizeStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error("Could not update beatmap cache size.", e).show();
+			explode("Could not update beatmap cache size.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -278,7 +272,7 @@ public class BeatmapDB {
 			cacheSize = 0;
 			updateCacheSize();
 		} catch (SQLException e) {
-			ErrorHandler.error("Could not drop beatmap database.", e).show();
+			explode("Could not drop beatmap database.", e, DEFAULT_OPTIONS);
 		}
 		createDatabase();
 	}
@@ -296,7 +290,7 @@ public class BeatmapDB {
 			cacheSize += insertStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to add beatmap to database.", e).show();
+			explode("Failed to add beatmap to database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -349,7 +343,7 @@ public class BeatmapDB {
 			// update cache size
 			updateCacheSize();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to add beatmaps to database.", e).show();
+			explode("Failed to add beatmaps to database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -437,7 +431,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to load Beatmap from database.", e).show();
+			explode("Failed to load Beatmap from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -500,7 +494,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to load beatmaps from database.", e).show();
+			explode("Failed to load beatmaps from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -601,7 +595,7 @@ public class BeatmapDB {
 			rs.close();
 			return map;
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to get last modified map from database.", e).show();
+			explode("Failed to get last modified map from database.", e, DEFAULT_OPTIONS);
 			return null;
 		}
 	}
@@ -621,7 +615,7 @@ public class BeatmapDB {
 			cacheSize -= deleteMapStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to delete beatmap entry from database.", e).show();
+			explode("Failed to delete beatmap entry from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -638,7 +632,7 @@ public class BeatmapDB {
 			cacheSize -= deleteGroupStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to delete beatmap group entry from database.", e).show();
+			explode("Failed to delete beatmap group entry from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -656,8 +650,8 @@ public class BeatmapDB {
 			setStarsStmt.setString(3, beatmap.getFile().getName());
 			setStarsStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error(String.format("Failed to save star rating '%.4f' for beatmap '%s' in database.",
-					beatmap.starRating, beatmap.toString()), e).show();
+			explode(String.format("Failed to save star rating '%.4f' for beatmap '%s' in database.",
+					beatmap.starRating, beatmap.toString()), e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -676,8 +670,8 @@ public class BeatmapDB {
 			updatePlayStatsStmt.setString(4, beatmap.getFile().getName());
 			updatePlayStatsStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error(String.format("Failed to update play statistics for beatmap '%s' in database.",
-					beatmap.toString()), e).show();
+			explode(String.format("Failed to update play statistics for beatmap '%s' in database.",
+					beatmap.toString()), e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -695,8 +689,8 @@ public class BeatmapDB {
 			setFavoriteStmt.setString(3, beatmap.getFile().getName());
 			setFavoriteStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error(String.format("Failed to update favorite status for beatmap '%s' in database.",
-					beatmap.toString()), e).show();
+			explode(String.format("Failed to update favorite status for beatmap '%s' in database.",
+					beatmap.toString()), e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -716,7 +710,7 @@ public class BeatmapDB {
 			connection.close();
 			connection = null;
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to close beatmap database.", e).show();
+			explode("Failed to close beatmap database.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

@@ -33,7 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://osu.yas-online.net/
@@ -112,7 +113,8 @@ public class YaSOnlineServer extends DownloadServer {
 			String downloadLink = item.getString("downloadLink");
 			return String.format(DOWNLOAD_FETCH_URL, downloadLink);
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e).show();
+			explode(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e,
+				DEFAULT_OPTIONS);
 			return null;
 		} finally {
 			Utils.setSSLCertValidation(true);
@@ -184,7 +186,7 @@ public class YaSOnlineServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		} finally {
 			Utils.setSSLCertValidation(true);
 		}
