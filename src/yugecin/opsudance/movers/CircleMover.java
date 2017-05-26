@@ -33,12 +33,12 @@ public class CircleMover extends Mover {
 	public CircleMover(GameObject start, GameObject end, int dir) {
 		super(start, end, dir);
 		if (startX - endX == 0 && startY - endY == 0) {
-			int quadr = Utils.getQuadrant(startX, startY);
+			int quadr = Utils.getRegion(startX, startY);
 			switch (quadr) {
-				case 1: ang = 135d / 180d * Math.PI; break;
+				case 3: ang = 135d / 180d * Math.PI; break;
 				case 2: ang = 45d / 180d * Math.PI; break;
-				case 3: ang = -45d / 180d * Math.PI; break;
-				case 4: ang = -135d / 180d * Math.PI; break;
+				case 0: ang = -45d / 180d * Math.PI; break;
+				case 1: ang = -135d / 180d * Math.PI; break;
 			}
 		} else {
 			ang = Math.atan2(startY - endY, startX - endX);

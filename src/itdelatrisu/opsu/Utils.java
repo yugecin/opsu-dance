@@ -475,11 +475,20 @@ public class Utils {
 		} catch (Exception e) {}
 	}
 
-	public static int getQuadrant(double x, double y) {
-		if (x < displayContainer.width / 2d) {
-			return y < displayContainer.height / 2d ? 2 : 3;
-		}
-		return y < displayContainer.height / 2d ? 1 : 4;
+	/**
+	 * Gets the region where the given point is in.
+	 * First bit is set if x > half
+	 * Second bit is set if y > half
+	 *
+	 * 2 | 3
+	 * --+--
+	 * 0 | 1
+	 */
+	public static int getRegion(double x, double y) {
+		int q = 0;
+		if (y < displayContainer.height / 2d) q = 2;
+		if (x < displayContainer.width / 2d) q |= 1;
+		return q;
 	}
 
 	/*
