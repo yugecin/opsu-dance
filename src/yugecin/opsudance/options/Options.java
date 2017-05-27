@@ -23,7 +23,6 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.input.Keyboard;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
@@ -46,77 +45,79 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 public class Options {
 
 	// internal options (not displayed in-game)
-	public static final Option OPTION_BEATMAP_DIRECTORY = new Option("BeatmapDirectory") {
-		@Override
-		public String write() {
-			return config.BEATMAP_DIR.getAbsolutePath();
-		}
+	static {
+		new Option("BeatmapDirectory") {
+			@Override
+			public String write() {
+				return config.BEATMAP_DIR.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.beatmapDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.beatmapDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_OSZ_DIRECTORY = new Option("OSZDirectory") {
-		@Override
-		public String write() {
-			return config.oszDir.getAbsolutePath();
-		}
+		new Option("OSZDirectory") {
+			@Override
+			public String write() {
+				return config.oszDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.oszDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.oszDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_SCREENSHOT_DIRECTORY = new Option("ScreenshotDirectory") {
-		@Override
-		public String write() {
-			return config.screenshotDir.getAbsolutePath();
-		}
+		new Option("ScreenshotDirectory") {
+			@Override
+			public String write() {
+				return config.screenshotDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.screenshotDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.screenshotDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_REPLAY_DIRECTORY = new Option("ReplayDirectory") {
-		@Override
-		public String write() {
-			return config.replayDir.getAbsolutePath();
-		}
+		new Option("ReplayDirectory") {
+			@Override
+			public String write() {
+				return config.replayDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.replayDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.replayDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_REPLAY_IMPORT_DIRECTORY = new Option("ReplayImportDirectory") {
-		@Override
-		public String write() {
-			return config.replayImportDir.getAbsolutePath();
-		}
+		new Option("ReplayImportDirectory") {
+			@Override
+			public String write() {
+				return config.replayImportDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.replayImportDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.replayImportDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_SKIN_DIRECTORY = new Option("SkinDirectory") {
-		@Override
-		public String write() {
-			return config.skinRootDir.getAbsolutePath();
-		}
+		new Option("SkinDirectory") {
+			@Override
+			public String write() {
+				return config.skinRootDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.skinRootDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.skinRootDir = new File(s);
+			}
+		};
+	}
 
 	public static final NumericOption OPTION_PORT = new NumericOption("-", "Port", "-", 49250, 1024, 65535) {
 		@Override
