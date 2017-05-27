@@ -480,7 +480,6 @@ public class Options {
 
 	public static final ToggleOption OPTION_SHOW_HIT_LIGHTING = new ToggleOption("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true);
 	public static final ToggleOption OPTION_SHOW_HIT_ANIMATIONS = new ToggleOption("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true);
-	public static final ToggleOption OPTION_SHOW_REVERSEARROW_ANIMATIONS = new ToggleOption("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true);
 	public static final ToggleOption OPTION_SHOW_COMBO_BURSTS = new ToggleOption("Show Combo Bursts", "ComboBurst", "A character image is displayed at combo milestones.", true);
 	public static final ToggleOption OPTION_SHOW_PERFECT_HIT = new ToggleOption("Show Perfect Hits", "PerfectHit", "Whether to show perfect hit result bursts (300s, slider ticks).", true);
 	public static final ToggleOption OPTION_SHOW_FOLLOW_POINTS = new ToggleOption("Show Follow Points", "FollowPoints", "Whether to show follow points between hit objects.", true);
