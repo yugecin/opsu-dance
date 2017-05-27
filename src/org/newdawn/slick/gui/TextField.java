@@ -32,11 +32,11 @@ import org.lwjgl.Sys;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Rectangle;
 import yugecin.opsudance.core.components.ActionListener;
 import yugecin.opsudance.core.components.Component;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -95,7 +95,7 @@ public class TextField extends Component {
 
 	public void render(Graphics g) {
 		if (lastKey != -1) {
-			if (input.isKeyDown(lastKey)) {
+			if (isKeyDown(lastKey)) {
 				if (repeatTimer < System.currentTimeMillis()) {
 					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
 					keyPressed(lastKey, lastChar);
@@ -168,10 +168,8 @@ public class TextField extends Component {
 	}
 
 	public void keyPressed(int key, char c) {
-		if (key != -1)
-		{
-			if ((key == Input.KEY_V) &&
-			   ((input.isKeyDown(Input.KEY_LCONTROL)) || (input.isKeyDown(Input.KEY_RCONTROL)))) {
+		if (key != -1) {
+			if (key == KEY_V && input.isControlDown()) {
 				String text = Sys.getClipboard();
 				if (text != null) {
 					doPaste(text);
@@ -188,7 +186,7 @@ public class TextField extends Component {
 		}
 		lastChar = c;
 
-		if (key == Input.KEY_LEFT) { /*
+		if (key == KEY_LEFT) { /*
 			if (cursorPos > 0) {
 				cursorPos--;
 			}
@@ -196,7 +194,7 @@ public class TextField extends Component {
 			if (consume) {
 				container.getInput().consumeEvent();
 			}
-		*/ } else if (key == Input.KEY_RIGHT) { /*
+		*/ } else if (key == KEY_RIGHT) { /*
 			if (cursorPos < value.length()) {
 				cursorPos++;
 			}
@@ -204,9 +202,9 @@ public class TextField extends Component {
 			if (consume) {
 				container.getInput().consumeEvent();
 			}
-		*/ } else if (key == Input.KEY_BACK) {
+		*/ } else if (key == KEY_BACK) {
 			if ((cursorPos > 0) && (value.length() > 0)) {
-				if (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL)) {
+				if (input.isControlDown()) {
 					int sp = 0;
 					boolean startSpace = Character.isWhitespace(value.charAt(cursorPos - 1));
 					boolean charSeen = false;
@@ -238,7 +236,7 @@ public class TextField extends Component {
 					cursorPos--;
 				}
 			}
-		} else if (key == Input.KEY_DELETE) {
+		} else if (key == KEY_DELETE) {
 			if (value.length() > cursorPos) {
 				value = value.substring(0,cursorPos) + value.substring(cursorPos+1);
 			}
@@ -250,7 +248,7 @@ public class TextField extends Component {
 				value = value.substring(0, cursorPos) + c;
 			}
 			cursorPos++;
-		} else if (key == Input.KEY_RETURN) {
+		} else if (key == KEY_RETURN) {
 			if (listener != null) {
 				listener.onAction();
 			}

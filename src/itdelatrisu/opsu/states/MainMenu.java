@@ -51,6 +51,7 @@ import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.BubNotifListener;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -651,8 +652,8 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
-		case Input.KEY_Q:
+		case KEY_ESCAPE:
+		case KEY_Q:
 			if (logoTimer > 0) {
 				logoState = LogoState.CLOSING;
 				logoClose.setTime(0);
@@ -662,7 +663,7 @@ public class MainMenu extends BaseOpsuState {
 			buttonState.setMenuState(MenuState.EXIT);
 			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_P:
+		case KEY_P:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
 				logoState = LogoState.OPENING;
@@ -673,17 +674,17 @@ public class MainMenu extends BaseOpsuState {
 			} else
 				enterSongMenu();
 			return true;
-		case Input.KEY_D:
+		case KEY_D:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			displayContainer.switchState(downloadState);
 			return true;
-		case Input.KEY_R:
+		case KEY_R:
 			nextTrack(true);
 			return true;
-		case Input.KEY_UP:
+		case KEY_UP:
 			UI.changeVolume(1);
 			return true;
-		case Input.KEY_DOWN:
+		case KEY_DOWN:
 			UI.changeVolume(-1);
 			return true;
 		}

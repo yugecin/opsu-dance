@@ -393,7 +393,7 @@ public class Options {
 	};
 
 	public static final ToggleOption OPTION_DISABLE_SOUNDS = new ToggleOption("Disable All Sound Effects", "DisableSound", "May resolve Linux sound driver issues.  Requires a restart.", (System.getProperty("os.name").toLowerCase().contains("linux")));
-	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Input.KEY_Z, null, false) {
+	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z, null, false) {
 		@Override
 		public String getValueString () {
 			return Keyboard.getKeyName(intval);
@@ -408,12 +408,12 @@ public class Options {
 		public void read(String s){
 			intval = Keyboard.getKeyIndex(s);
 			if (intval == Keyboard.KEY_NONE) {
-				intval = Input.KEY_Y;
+				intval = Keyboard.KEY_Y;
 			}
 		}
 	};
 
-	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Input.KEY_X, null, false) {
+	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X, null, false) {
 		@Override
 		public String getValueString () {
 			return Keyboard.getKeyName(intval);
@@ -428,7 +428,7 @@ public class Options {
 		public void read(String s){
 			intval = Keyboard.getKeyIndex(s);
 			if (intval == Keyboard.KEY_NONE) {
-				intval = Input.KEY_X;
+				intval = Keyboard.KEY_X;
 			}
 		}
 	};

@@ -32,6 +32,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -94,7 +95,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			}
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == KEY_ESCAPE) {
 			// 'esc' will normally unpause, but will return to song menu if health is zero
 			if (gameState.getRestart() == Game.Restart.LOSE) {
 				SoundController.playSound(SoundEffect.MENUBACK);
@@ -109,7 +110,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_R && (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL))) {
+		if (key == KEY_R && input.isControlDown()) {
 			gameState.setRestart(Game.Restart.MANUAL);
 			displayContainer.switchState(gameState);
 			return true;

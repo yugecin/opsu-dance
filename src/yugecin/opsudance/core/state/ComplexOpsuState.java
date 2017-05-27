@@ -17,8 +17,8 @@
  */
 package yugecin.opsudance.core.state;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import yugecin.opsudance.core.components.Component;
 
 import java.util.LinkedList;
@@ -165,7 +165,7 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 			}
 		}
 		if (focusedComponent != null) {
-			if (key == Input.KEY_ESCAPE) {
+			if (key == Keyboard.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);
 				focusedComponent = null;
 				return true;
@@ -184,7 +184,7 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 			}
 		}
 		if (focusedComponent != null) {
-			if (key == Input.KEY_ESCAPE) {
+			if (key == Keyboard.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);
 				focusedComponent = null;
 				return true;

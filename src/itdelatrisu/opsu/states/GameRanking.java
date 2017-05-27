@@ -32,6 +32,7 @@ import itdelatrisu.opsu.ui.UI;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
@@ -121,7 +122,7 @@ public class GameRanking extends BaseOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			returnToSongMenu();
 		}
 		return true;

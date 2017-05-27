@@ -23,6 +23,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
@@ -738,7 +739,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			if (openDropdownMenu != null) {
 				openDropdownMenu.keyPressed(key, c);
 				return true;

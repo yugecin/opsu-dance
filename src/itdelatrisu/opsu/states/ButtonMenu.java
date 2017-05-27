@@ -35,6 +35,7 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -650,7 +651,7 @@ public class ButtonMenu extends BaseOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			menuState.leave();
 			return true;
 		}

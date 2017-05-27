@@ -24,6 +24,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.ui.UI;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -128,7 +129,7 @@ public class Splash extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		if (key != Input.KEY_ESCAPE) {
+		if (key != Keyboard.KEY_ESCAPE) {
 			return false;
 		}
 		if (++escapeCount >= 3) {

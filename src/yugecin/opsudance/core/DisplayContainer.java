@@ -31,6 +31,7 @@ import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
 import org.lwjgl.Sys;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -262,7 +263,8 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 
 				cursor.updateAngle(renderDelta);
 				if (drawCursor) {
-					cursor.draw(input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
+					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
+						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));
 				}
 				UI.drawTooltip(graphics);
 

@@ -55,6 +55,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.util.Map;
 import java.util.Stack;
 
+import org.lwjgl.input.Mouse;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -67,6 +68,7 @@ import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -914,13 +916,13 @@ public class SongMenu extends ComplexOpsuState {
 
 		// selection buttons
 		if (selectModsButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F1, '\0');
+			this.keyPressed(KEY_F1, '\0');
 			return true;
 		} else if (selectRandomButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F2, '\0');
+			this.keyPressed(KEY_F2, '\0');
 			return true;
 		} else if (selectMapOptionsButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F3, '\0');
+			this.keyPressed(KEY_F3, '\0');
 			return true;
 		} else if (selectOptionsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
@@ -1038,12 +1040,12 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// block input
-		if ((reloadThread != null && key != Input.KEY_ESCAPE) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
+		if ((reloadThread != null && key != KEY_ESCAPE) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
 			return true;
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
+		case KEY_ESCAPE:
 			if (reloadThread != null) {
 				// beatmap reloading: stop parsing beatmaps by sending interrupt to BeatmapParser
 				reloadThread.interrupt();
@@ -1059,16 +1061,16 @@ public class SongMenu extends ComplexOpsuState {
 				displayContainer.switchState(mainmenuState);
 			}
 			return true;
-		case Input.KEY_F1:
+		case KEY_F1:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			buttonState.setMenuState(MenuState.MODS);
 			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_F2:
+		case KEY_F2:
 			if (focusNode == null)
 				break;
 			SoundController.playSound(SoundEffect.MENUHIT);
-			if (input.isKeyDown(Input.KEY_RSHIFT) || input.isKeyDown(Input.KEY_LSHIFT)) {
+			if (isKeyDown(KEY_RSHIFT) || isKeyDown(KEY_LSHIFT)) {
 				// shift key: previous random track
 				SongNode prev;
 				if (randomStack.isEmpty() || (prev = randomStack.pop()) == null)
@@ -1084,7 +1086,7 @@ public class SongMenu extends ComplexOpsuState {
 				setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 			}
 			return true;
-		case Input.KEY_F3:
+		case KEY_F3:
 			if (focusNode == null)
 				break;
 			SoundController.playSound(SoundEffect.MENUHIT);
@@ -1093,7 +1095,7 @@ public class SongMenu extends ComplexOpsuState {
 			buttonState.setMenuState(state, focusNode);
 			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_F5:
+		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (songFolderChanged)
 				reloadBeatmaps(false);
@@ -1102,10 +1104,10 @@ public class SongMenu extends ComplexOpsuState {
 				displayContainer.switchState(buttonState);
 			}
 			return true;
-		case Input.KEY_DELETE:
+		case KEY_DELETE:
 			if (focusNode == null)
 				break;
-			if (input.isKeyDown(Input.KEY_RSHIFT) || input.isKeyDown(Input.KEY_LSHIFT)) {
+			if (isKeyDown(KEY_RSHIFT) || isKeyDown(KEY_LSHIFT)) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				MenuState ms = (focusNode.beatmapIndex == -1 || focusNode.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
@@ -1113,18 +1115,18 @@ public class SongMenu extends ComplexOpsuState {
 				displayContainer.switchState(buttonState);
 			}
 			return true;
-		case Input.KEY_ENTER:
+		case KEY_RETURN:
 			if (focusNode == null)
 				break;
 			startGame();
 			return true;
-		case Input.KEY_DOWN:
+		case KEY_DOWN:
 			changeIndex(1);
 			return true;
-		case Input.KEY_UP:
+		case KEY_UP:
 			changeIndex(-1);
 			return true;
-		case Input.KEY_RIGHT:
+		case KEY_RIGHT:
 			if (focusNode == null)
 				break;
 			BeatmapSetNode next = focusNode.next;
@@ -1140,7 +1142,7 @@ public class SongMenu extends ComplexOpsuState {
 				}
 			}
 			return true;
-		case Input.KEY_LEFT:
+		case KEY_LEFT:
 			if (focusNode == null)
 				break;
 			BeatmapSetNode prev = focusNode.prev;
@@ -1156,25 +1158,25 @@ public class SongMenu extends ComplexOpsuState {
 				}
 			}
 			return true;
-		case Input.KEY_NEXT:
+		case KEY_NEXT:
 			changeIndex(MAX_SONG_BUTTONS);
 			return true;
-		case Input.KEY_PRIOR:
+		case KEY_PRIOR:
 			changeIndex(-MAX_SONG_BUTTONS);
 			return true;
 		}
-		if (key == Input.KEY_O && (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL))) {
+		if (key == KEY_O && input.isControlDown()) {
 			optionsOverlay.show();
 			return true;
 		}
 		// wait for user to finish typing
 		// TODO: accept all characters (current conditions are from TextField class)
-		if ((c > 31 && c < 127) || key == Input.KEY_BACK) {
+		if ((c > 31 && c < 127) || key == KEY_BACK) {
 			searchTimer = 0;
 			searchTextField.keyPressed(key, c);
 			int textLength = searchTextField.getText().length();
 			if (lastSearchTextLength != textLength) {
-				if (key == Input.KEY_BACK) {
+				if (key == KEY_BACK) {
 					if (textLength == 0)
 						searchTransitionTimer = 0;
 				} else if (textLength == 1)
@@ -1202,9 +1204,9 @@ public class SongMenu extends ComplexOpsuState {
 
 		// check mouse button (right click scrolls faster on songs)
 		int multiplier;
-		if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+		if (Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
 			multiplier = 10;
-		} else if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+		} else if (Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			multiplier = 1;
 		} else {
 			return false;
@@ -1764,9 +1766,8 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// turn on "auto" mod if holding "ctrl" key
-		if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
-			if (!GameMod.AUTO.isActive())
-				GameMod.AUTO.toggle(true);
+		if (input.isControlDown() && !GameMod.AUTO.isActive()) {
+			GameMod.AUTO.toggle(true);
 		}
 
 		SoundController.playSound(SoundEffect.MENUHIT);

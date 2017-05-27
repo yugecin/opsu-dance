@@ -67,6 +67,7 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.utils.GLHelper;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -1127,7 +1128,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
+		case KEY_ESCAPE:
 			// "auto" mod or watching replay: go back to song menu
 			if (GameMod.AUTO.isActive() || isReplay) {
 				onCloseRequest();
@@ -1144,13 +1145,13 @@ public class Game extends ComplexOpsuState {
 			}
 			displayContainer.switchStateInstantly(pauseState);
 			break;
-		case Input.KEY_SPACE:
+		case KEY_SPACE:
 			// skip intro
 			skipIntro();
 			break;
-		case Input.KEY_R:
+		case KEY_R:
 			// restart
-			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isControlDown()) {
 				if (trackPosition < beatmap.objects[0].getTime()) {
 					retries--;  // don't count this retry (cancel out later increment)
 				}
@@ -1159,9 +1160,9 @@ public class Game extends ComplexOpsuState {
 				skipIntro();
 			}
 			break;
-		case Input.KEY_S:
+		case KEY_S:
 			// save checkpoint
-			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isControlDown()) {
 				if (isLeadIn()) {
 					break;
 				}
@@ -1175,9 +1176,9 @@ public class Game extends ComplexOpsuState {
 				}
 			}
 			break;
-		case Input.KEY_L:
+		case KEY_L:
 			// load checkpoint
-			if (input.isKeyDown(Input.KEY_RCONTROL) || input.isKeyDown(Input.KEY_LCONTROL)) {
+			if (input.isControlDown()) {
 				int checkpoint = OPTION_CHECKPOINT.val * 1000;
 				if (checkpoint == 0 || checkpoint > beatmap.endTime)
 					break;  // invalid checkpoint
@@ -1186,25 +1187,25 @@ public class Game extends ComplexOpsuState {
 				BarNotifListener.EVENT.make().onBarNotif("Checkpoint loaded.");
 			}
 			break;
-		case Input.KEY_F:
+		case KEY_F:
 			// change playback speed
 			if (isReplay || GameMod.AUTO.isActive()) {
 				playbackSpeed = playbackSpeed.next();
 				MusicController.setPitch(GameMod.getSpeedMultiplier() * playbackSpeed.getModifier());
 			}
 			break;
-		case Input.KEY_UP:
+		case KEY_UP:
 			UI.changeVolume(1);
 			break;
-		case Input.KEY_DOWN:
+		case KEY_DOWN:
 			UI.changeVolume(-1);
 			break;
-		case Input.KEY_TAB:
+		case KEY_TAB:
 			if (!OPTION_DANCE_HIDE_UI.state) {
 				scoreboardVisible = !scoreboardVisible;
 			}
 			break;
-		case Input.KEY_M:
+		case KEY_M:
 			if (OPTION_DANCE_MIRROR.state) {
 				mirrorTo = objectIndex;
 			} else {
@@ -1214,7 +1215,7 @@ public class Game extends ComplexOpsuState {
 			}
 			OPTION_DANCE_MIRROR.toggle();
 			break;
-		case Input.KEY_P:
+		case KEY_P:
 			if (OPTION_DANCE_MIRROR.state) {
 				mirrorTo = objectIndex;
 			} else {
@@ -1224,12 +1225,12 @@ public class Game extends ComplexOpsuState {
 			}
 			OPTION_DANCE_MIRROR.toggle();
 			break;
-		case Input.KEY_MINUS:
+		case KEY_MINUS:
 			currentMapMusicOffset += 5;
 			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
 			break;
 		}
-		if (key == Input.KEY_ADD || c == '+') {
+		if (key == KEY_ADD || c == '+') {
 			currentMapMusicOffset -= 5;
 			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
 		}

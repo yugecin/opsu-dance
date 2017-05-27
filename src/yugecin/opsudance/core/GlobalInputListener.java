@@ -23,6 +23,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.InputListener;
 import yugecin.opsudance.events.BarNotifListener;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -35,22 +36,22 @@ public class GlobalInputListener implements InputListener {
 
 	@Override
 	public boolean keyReleased(int key, char c) {
-		if (key == Input.KEY_F7) {
+		if (key == KEY_F7) {
 			OPTION_TARGET_FPS.clickListItem((targetFPSIndex + 1) % targetFPS.length);
 			BarNotifListener.EVENT.make().onBarNotif(String.format("Frame limiter: %s",
 				OPTION_TARGET_FPS.getValueString()));
 			return true;
 		}
-		if (key == Input.KEY_F10) {
+		if (key == KEY_F10) {
 			OPTION_DISABLE_MOUSE_BUTTONS.toggle();
 			return true;
 		}
-		if (key == Input.KEY_F12) {
+		if (key == KEY_F12) {
 			config.takeScreenShot();
 			return true;
 		}
-		if (key == Input.KEY_S && input.isKeyDown(Input.KEY_LMENU) && input.isKeyDown(Input.KEY_LSHIFT) &&
-				input.isKeyDown(Input.KEY_LCONTROL) && !displayContainer.isInState(Game.class)) {
+		if (key == KEY_S && isKeyDown(KEY_LMENU) && isKeyDown(KEY_LSHIFT) &&
+				input.isControlDown() && !displayContainer.isInState(Game.class)) {
 			skinservice.reloadSkin();
 		}
 		return false;
@@ -58,7 +59,7 @@ public class GlobalInputListener implements InputListener {
 
 	@Override
 	public boolean mouseWheelMoved(int delta) {
-		if (input.isKeyDown(Input.KEY_LALT) || input.isKeyDown(Input.KEY_RALT)) {
+		if (isKeyDown(Input.KEY_LALT) || isKeyDown(Input.KEY_RALT)) {
 			UI.changeVolume((delta < 0) ? -1 : 1);
 			return true;
 		}

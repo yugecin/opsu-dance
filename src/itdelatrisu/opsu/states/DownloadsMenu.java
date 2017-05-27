@@ -55,6 +55,7 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.events.BarNotifListener;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -888,12 +889,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// block input during beatmap importing
-		if (importThread != null && key != Input.KEY_ESCAPE) {
+		if (importThread != null && key != KEY_ESCAPE) {
 			return true;
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
+		case KEY_ESCAPE:
 			if (importThread != null) {
 				// beatmap importing: stop parsing beatmaps by sending interrupt to BeatmapParser
 				importThread.interrupt();
@@ -908,13 +909,13 @@ public class DownloadsMenu extends ComplexOpsuState {
 				displayContainer.switchState(mainmenuState);
 			}
 			return true;
-		case Input.KEY_ENTER:
+		case KEY_RETURN:
 			if (!search.getText().isEmpty()) {
 				pageDir = Page.RESET;
 				resetSearchTimer();
 			}
 			return true;
-		case Input.KEY_F5:
+		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			lastQuery = null;
 			pageDir = Page.CURRENT;
@@ -924,7 +925,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			return true;
 		}
 		// wait for user to finish typing
-		if (Character.isLetterOrDigit(c) || key == Input.KEY_BACK) {
+		if (Character.isLetterOrDigit(c) || key == KEY_BACK) {
 			search.keyPressed(key, c);
 			searchTimer = 0;
 			pageDir = Page.RESET;
