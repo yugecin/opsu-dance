@@ -778,15 +778,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
 
-		if (openDropdownMenu != null) {
-			openDropdownMenu.mouseReleased(button);
-			updateHoverOption(x, y);
-			return true;
-		} else {
-			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
-				menu.mouseReleased(button);
-				if (menu.isOpen()) {
-					return true;
+		if (x > navWidth) {
+			if (openDropdownMenu != null) {
+				openDropdownMenu.mouseReleased(button);
+				updateHoverOption(x, y);
+				return true;
+			} else {
+				for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+					menu.mouseReleased(button);
+					if (menu.isOpen()) {
+						return true;
+					}
 				}
 			}
 		}
