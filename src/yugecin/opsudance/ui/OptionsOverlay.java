@@ -641,6 +641,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		} else if (navHoverTime > 0) {
 			navHoverTime -= delta;
 		}
+		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
 
 		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
