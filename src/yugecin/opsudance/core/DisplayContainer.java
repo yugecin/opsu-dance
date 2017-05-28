@@ -273,6 +273,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 				timeSinceLastRender = 0;
 
 				Display.update(false);
+				GL11.glFlush();
 			}
 
 			Display.processMessages();
