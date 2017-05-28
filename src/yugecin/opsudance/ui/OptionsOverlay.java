@@ -925,8 +925,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		// active section is the one that is visible in the top half of the screen
 		activeSection = sections[0];
 		int virtualY = optionStartY;
-		for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
-			OptionTab section = sections[sectionIndex];
+		for (OptionTab section : sections) {
 			if (section.filtered) {
 				continue;
 			}
@@ -949,6 +948,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void updateHoverOption(int mouseX, int mouseY) {
+		if (mouseX < navWidth) {
+			hoverOption = null;
+			return;
+		}
 		if (openDropdownMenu != null || keyEntryLeft || keyEntryRight) {
 			return;
 		}
@@ -977,7 +980,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 					continue;
 				}
 				if (mouseVirtualY <= optionHeight) {
-					if (mouseX > navWidth && mouseVirtualY >= 0) {
+					if (mouseVirtualY >= 0) {
 						int indicatorPos = scrollHandler.getIntPosition() + mouseY - mouseVirtualY;
 						if (indicatorPos != this.indicatorPos + indicatorOffsetToNextPos) {
 							this.indicatorPos += indicatorOffsetToNextPos; // finish the current moving animation
