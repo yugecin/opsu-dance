@@ -513,7 +513,6 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
-		//BubNotifListener.EVENT.make().onBubNotif("hi", Colors.BUB_ORANGE);
 		// check mouse button
 		if (button == Input.MOUSE_MIDDLE_BUTTON)
 			return false;

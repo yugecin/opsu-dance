@@ -24,7 +24,6 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.MouseListener;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
-import yugecin.opsudance.events.SkinChangedListener;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.ListIterator;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BubNotifState implements MouseListener, BubNotifListener, ResolutionChangedListener, SkinChangedListener {
+public class BubNotifState implements MouseListener, BubNotifListener, ResolutionChangedListener {
 
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
@@ -48,6 +47,7 @@ public class BubNotifState implements MouseListener, BubNotifListener, Resolutio
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
 		BubNotifListener.EVENT.addListener(this);
+		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
@@ -73,7 +73,8 @@ public class BubNotifState implements MouseListener, BubNotifListener, Resolutio
 	}
 
 	private void calculatePositions() {
-		Notification.width = (int) (displayContainer.width * 0.1703125f);
+		// if width is 0, attempting to wrap it will result in infinite loop
+		Notification.width = Math.max(50, (int) (displayContainer.width * 0.1703125f));
 		Notification.baseLine = (int) (displayContainer.height * 0.9645f);
 		Notification.paddingY = (int) (displayContainer.height * 0.0144f);
 		Notification.finalX = displayContainer.width - Notification.width - (int) (displayContainer.width * 0.01);
@@ -127,11 +128,6 @@ public class BubNotifState implements MouseListener, BubNotifListener, Resolutio
 
 	@Override
 	public void onResolutionChanged(int w, int h) {
-		calculatePositions();
-	}
-
-	@Override
-	public void onSkinChanged(String stringName) {
 		calculatePositions();
 	}
 
