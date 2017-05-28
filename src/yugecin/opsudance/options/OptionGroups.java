@@ -18,12 +18,14 @@
 
 package yugecin.opsudance.options;
 
+import itdelatrisu.opsu.GameImage;
+
 import static yugecin.opsudance.options.Options.*;
 
 public class OptionGroups {
 
 	public static final OptionTab[] normalOptions = new OptionTab[] {
-		new OptionTab("GENERAL", null),
+		new OptionTab("General", GameImage.SEARCH),
 		new OptionTab("GENERAL", new Option[]{
 			OPTION_DISABLE_UPDATER,
 			OPTION_ENABLE_WATCH_SERVICE
@@ -31,7 +33,7 @@ public class OptionGroups {
 		new OptionTab("LANGUAGE", new Option[]{
 			OPTION_SHOW_UNICODE,
 		}),
-		new OptionTab("GRAPHICS", null),
+		new OptionTab("Graphics", GameImage.SEARCH),
 		new OptionTab("RENDERER", new Option[] {
 			OPTION_SCREEN_RESOLUTION,
 			OPTION_ALLOW_LARGER_RESOLUTIONS,
@@ -54,7 +56,7 @@ public class OptionGroups {
 			OPTION_DANCING_CIRCLES,
 			OPTION_DANCING_CIRCLES_MULTIPLIER,
 		}),
-		new OptionTab("SKIN", null),
+		new OptionTab("Skin", GameImage.SEARCH),
 		new OptionTab("SKIN", new Option[]{
 			OPTION_SKIN,
 			OPTION_IGNORE_BEATMAP_SKINS,
@@ -69,7 +71,7 @@ public class OptionGroups {
 			OPTION_DISABLE_CURSOR
 			// TODO use combo colour as tint for slider ball option
 		}),
-		new OptionTab("AUDIO", null),
+		new OptionTab("Audio", GameImage.SEARCH),
 		new OptionTab("VOLUME", new Option[]{
 			OPTION_MASTER_VOLUME,
 			OPTION_MUSIC_VOLUME,
@@ -82,7 +84,7 @@ public class OptionGroups {
 			OPTION_DISABLE_SOUNDS,
 			OPTION_ENABLE_THEME_SONG
 		}),
-		new OptionTab("GAMEPLAY", null),
+		new OptionTab("Gameplay", GameImage.SEARCH),
 		new OptionTab("GENERAL", new Option[] {
 			OPTION_BACKGROUND_DIM,
 			OPTION_FORCE_DEFAULT_PLAYFIELD,
@@ -96,7 +98,7 @@ public class OptionGroups {
 			OPTION_MAP_END_DELAY,
 			OPTION_EPILEPSY_WARNING,
 		}),
-		new OptionTab("INPUT", null),
+		new OptionTab("Input", GameImage.SEARCH),
 		new OptionTab("KEY MAPPING", new Option[]{
 			OPTION_KEY_LEFT,
 			OPTION_KEY_RIGHT,
@@ -105,7 +107,7 @@ public class OptionGroups {
 			OPTION_DISABLE_MOUSE_WHEEL,
 			OPTION_DISABLE_MOUSE_BUTTONS,
 		}),
-		new OptionTab("CUSTOM", null),
+		new OptionTab("Custom", GameImage.SEARCH),
 		new OptionTab("DIFFICULTY", new Option[]{
 			OPTION_FIXED_CS,
 			OPTION_FIXED_HP,
@@ -116,7 +118,7 @@ public class OptionGroups {
 			OPTION_CHECKPOINT,
 			OPTION_REPLAY_SEEKING,
 		}),
-		new OptionTab("DANCE", null),
+		new OptionTab("Dance", GameImage.SEARCH),
 		new OptionTab("MOVER", new Option[]{
 			OPTION_DANCE_MOVER,
 			OPTION_DANCE_EXGON_DELAY,
@@ -143,7 +145,7 @@ public class OptionGroups {
 		new OptionTab("MIRROR", new Option[] {
 			OPTION_DANCE_MIRROR,
 		}),
-		new OptionTab("ADVANCED DISPLAY", null),
+		new OptionTab("Advanced Display", GameImage.SEARCH),
 		new OptionTab("OBJECTS", new Option[]{
 			OPTION_DANCE_DRAW_APPROACH,
 			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
@@ -163,7 +165,7 @@ public class OptionGroups {
 			OPTION_DANCE_REMOVE_BG,
 			OPTION_DANCE_ENABLE_SB,
 		}),
-		new OptionTab ("PIPPI", null),
+		new OptionTab ("Pippi", GameImage.SEARCH),
 		new OptionTab ("GENERAL", new Option[]{
 			OPTION_PIPPI_ENABLE,
 			OPTION_PIPPI_RADIUS_PERCENT,

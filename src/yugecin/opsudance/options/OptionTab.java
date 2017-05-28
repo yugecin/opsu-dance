@@ -17,15 +17,25 @@
  */
 package yugecin.opsudance.options;
 
+import itdelatrisu.opsu.GameImage;
+
 public class OptionTab {
 
 	public final String name;
 	public final Option[] options;
+	public final GameImage icon;
 	public boolean filtered;
+
+	public OptionTab(String name, GameImage icon) {
+		this.name = name;
+		this.icon = icon;
+		this.options = null;
+	}
 
 	public OptionTab(String name, Option[] options) {
 		this.name = name;
 		this.options = options;
+		this.icon = null;
 	}
 
 }

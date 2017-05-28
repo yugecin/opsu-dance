@@ -465,6 +465,10 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 
+	public boolean isWidescreen() {
+		return width * 1000 / height == 1777; // 16:9
+	}
+
 	@Override
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
