@@ -20,6 +20,7 @@ The images included in opsu! belong to their respective authors.
 * sherrie__fay
 * kouyang
 * teinecthel
+* Font Awesome by Dave Gandy - http://fontawesome.io
 
 Projects
 --------
