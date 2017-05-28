@@ -83,6 +83,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 	/** Selected option indicator hide animation time past. */
 	private int indicatorHideAnimationTime;
 
+	private float showHideProgress;
+
 	private Listener listener;
 
 	private Image sliderBallImg;
@@ -717,15 +719,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (indicatorHideAnimationTime > INDICATORHIDEANIMATIONTIME) {
 					indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME;
 				}
-				float progress = AnimationEquation.IN_CUBIC.calc((float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME);
-				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA;
+				float progress = AnimationEquation.IN_CUBIC.calc((float) indicatorHideAnimationTime /
+					INDICATORHIDEANIMATIONTIME);
+				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA * showHideProgress;
 			}
 		} else if (indicatorHideAnimationTime > 0) {
 			indicatorHideAnimationTime -= displayContainer.renderDelta * 3;
 			if (indicatorHideAnimationTime < 0) {
 				indicatorHideAnimationTime = 0;
 			}
-			COL_INDICATOR.a = (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) * INDICATOR_ALPHA;
+			COL_INDICATOR.a = (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) *
+				INDICATOR_ALPHA * showHideProgress;
 		}
 	}
 
@@ -733,42 +737,41 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
 			width = targetWidth;
+			showHideProgress = 1f;
 			return;
 		}
 		optionWidth = width - optionStartX - paddingRight;
 
-		// if acceptInput is false, it means that we're currently hiding ourselves
-		float progress;
 		// navigation elemenst fade out with a different animation
 		float navProgress;
+		// if acceptInput is false, it means that we're currently hiding ourselves
 		if (acceptInput) {
 			animationtime += delta;
 			if (animationtime >= SHOWANIMATIONTIME) {
 				animationtime = SHOWANIMATIONTIME;
 			}
-			progress = (float) animationtime / SHOWANIMATIONTIME;
-			navProgress = Utils.clamp(progress * 10f, 0f, 1f);
-			progress = AnimationEquation.OUT_EXPO.calc(progress);
+			showHideProgress = (float) animationtime / SHOWANIMATIONTIME;
+			navProgress = Utils.clamp(showHideProgress * 10f, 0f, 1f);
+			showHideProgress = AnimationEquation.OUT_EXPO.calc(showHideProgress);
 		} else {
 			animationtime -= delta;
 			if (animationtime < 0) {
 				animationtime = 0;
 			}
-			progress = (float) animationtime / hideAnimationTime;
-			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(progress);
-			progress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(progress);
+			showHideProgress = (float) animationtime / hideAnimationTime;
+			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
+			showHideProgress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(showHideProgress);
 		}
-		width = navButtonSize + (int) (progress * (targetWidth - navButtonSize));
+		width = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
 		COL_NAV_FILTERED.a = COL_NAV_INACTIVE.a = COL_NAV_FILTERED_HOVERED.a = COL_NAV_INDICATOR.a =
 			COL_NAV_WHITE.a = COL_NAV_BG.a = navProgress;
-		COL_BG.a = BG_ALPHA * progress;
-		COL_WHITE.a = progress;
-		COL_PINK.a = progress;
-		COL_CYAN.a = progress;
-		COL_GREY.a = progress * LINEALPHA;
-		COL_BLUE.a = progress;
-		COL_COMBOBOX_HOVER.a = progress;
-		COL_INDICATOR.a = progress * (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) * INDICATOR_ALPHA;
+		COL_BG.a = BG_ALPHA * showHideProgress;
+		COL_WHITE.a = showHideProgress;
+		COL_PINK.a = showHideProgress;
+		COL_CYAN.a = showHideProgress;
+		COL_GREY.a = showHideProgress * LINEALPHA;
+		COL_BLUE.a = showHideProgress;
+		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
 	@Override
