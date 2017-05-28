@@ -106,13 +106,13 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private DropdownMenu<Object> openDropdownMenu;
 	private int openDropdownVirtualY;
 
-	private int finalWidth;
+	private int targetWidth;
 	private int width;
 	private int height;
 
 	private int navButtonSize;
 	private int navStartY;
-	private int navExpadedWidth;
+	private int navTargetWidth;
 	private int navWidth;
 	private int navHoverTime;
 	private int navIndicatorSize;
@@ -177,7 +177,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	public void revalidate() {
 		super.revalidate();
 
-		finalWidth = Math.max((int) (displayContainer.width * 0.36f), 340); // 0.321f
+		targetWidth = Math.max((int) (displayContainer.width * 0.36f), 340); // 0.321f
 		height = displayContainer.height;
 
 		// calculate positions
@@ -185,7 +185,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		// non-widescreen ratio is not accurate
 		navButtonSize = (int) (displayContainer.width * navIconWidthRatio);
 		navIndicatorSize = navButtonSize / 10;
-		navExpadedWidth = (int) (finalWidth * 0.45f) - navButtonSize;
+		navTargetWidth = (int) (targetWidth * 0.45f) - navButtonSize;
 		paddingRight = (int) (displayContainer.width * 0.009375f); // not so accurate
 		paddingLeft = navButtonSize + (int) (displayContainer.width * 0.0180f); // not so accurate
 		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625f); // not so accurate
@@ -198,7 +198,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
 		if (active) {
-			width = finalWidth;
+			width = targetWidth;
 			optionWidth = width - optionStartX - paddingRight;
 		}
 
@@ -303,19 +303,19 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void renderNavigation(Graphics g) {
 		navWidth = navButtonSize;
 		if (navHoverTime >= 600) {
-			navWidth += navExpadedWidth;
+			navWidth += navTargetWidth;
 		} else if (navHoverTime > 300) {
 			AnimationEquation anim = AnimationEquation.IN_EXPO;
 			if (displayContainer.mouseX < navWidth) {
 				anim = AnimationEquation.OUT_EXPO;
 			}
 			float progress = anim.calc((navHoverTime - 300f) / 300f);
-			navWidth += (int) (progress * navExpadedWidth);
+			navWidth += (int) (progress * navTargetWidth);
 		}
 
 		g.setClip(0, 0, navWidth, height);
 		g.setColor(COL_NAV_BG);
-		g.fillRect(0, 0, navWidth, displayContainer.height);
+		g.fillRect(0, 0, navWidth, height);
 		int y = navStartY;
 		float iconSize = navButtonSize / 2.5f;
 		float iconPadding = iconSize * 0.75f;
@@ -703,7 +703,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateShowHideAnimation(int delta) {
 		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
-			width = finalWidth;
+			width = targetWidth;
 			return;
 		}
 		optionWidth = width - optionStartX - paddingRight;
@@ -729,7 +729,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(progress);
 			progress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(progress);
 		}
-		width = navButtonSize + (int) (progress * (finalWidth - navButtonSize));
+		width = navButtonSize + (int) (progress * (targetWidth - navButtonSize));
 		COL_NAV_FILTERED.a = COL_NAV_INACTIVE.a = COL_NAV_FILTERED_HOVERED.a = COL_NAV_INDICATOR.a =
 			COL_NAV_WHITE.a = COL_NAV_BG.a = navProgress;
 		COL_BG.a = BG_ALPHA * progress;
@@ -797,7 +797,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (x > finalWidth) {
+		if (x > targetWidth) {
 			return false;
 		}
 
