@@ -606,7 +606,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		int mouseY = displayContainer.mouseY;
 		int delta = displayContainer.renderDelta;
 
+		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
+		boolean scrollPositionChanged = prevscrollpos != scrollHandler.getIntPosition();
 
 		if (openDropdownMenu == null) {
 			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
@@ -634,7 +636,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navHoverTime -= delta;
 		}
 
-		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
+		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
 			return;
 		}
@@ -855,7 +857,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (!isAdjustingSlider) {
 			scrollHandler.scrollOffset(-delta);
 		}
-		updateHoverOption(prevMouseX, prevMouseY);
 		return true;
 	}
 
