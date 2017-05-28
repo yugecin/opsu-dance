@@ -78,6 +78,10 @@ public class Option {
 		return filtered;
 	}
 
+	public void setFiltered(boolean flag) {
+		this.filtered = flag;
+	}
+
 	/**
 	 * Check if this option should be filtered (= not shown) because it does not
 	 * match the search string.

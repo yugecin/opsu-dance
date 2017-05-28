@@ -33,6 +33,7 @@ import yugecin.opsudance.utils.FontUtil;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import static yugecin.opsudance.options.Options.*;
 
@@ -153,6 +154,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private final TextField searchField;
 	private String lastSearchText;
+	private int invalidSearchImgRotation;
+	private int invalidSearchTextRotation;
+	private int invalidSearchAnimationProgress;
+	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 
 	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] sections) {
 		this.displayContainer = displayContainer;
@@ -575,13 +580,32 @@ public class OptionsOverlay extends OverlayOpsuState {
 			g.setColor(COL_BG);
 			g.fillRect(navButtonSize, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
 		}
+		Color searchCol = COL_WHITE;
+		float invalidProgress = 0f;
+		if (invalidSearchAnimationProgress > 0) {
+			invalidProgress = 1f - (float) invalidSearchAnimationProgress / INVALID_SEARCH_ANIMATION_TIME;
+			searchCol = new Color(0f, 0f, 0f, searchCol.a);
+			searchCol.r = COL_PINK.r + (1f - COL_PINK.r) * invalidProgress;
+			searchCol.g = COL_PINK.g + (1f - COL_PINK.g) * invalidProgress;
+			searchCol.b = COL_PINK.b + (1f - COL_PINK.b) * invalidProgress;
+			invalidProgress = 1f - invalidProgress;
+		}
 		String searchText = "Type to search!";
 		if (lastSearchText.length() > 0) {
 			searchText = lastSearchText;
 		}
-		FontUtil.drawCentered(Fonts.LARGE, width, navButtonSize, ypos, searchText, COL_WHITE);
-		int imgPosX = navButtonSize + (width - Fonts.LARGE.getWidth(searchText)) / 2 - searchImg.getWidth() - 10;
-		searchImg.draw(imgPosX, ypos + Fonts.LARGE.getLineHeight() * 0.25f, COL_WHITE);
+		int textWidth = width - navButtonSize;
+		if (invalidSearchAnimationProgress > 0) {
+			g.rotate(navButtonSize + textWidth / 2, ypos, invalidProgress * invalidSearchTextRotation);
+		}
+		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize, ypos, searchText, searchCol);
+		g.resetTransform();
+		int imgPosX = navButtonSize + (textWidth - Fonts.LARGE.getWidth(searchText)) / 2 - searchImg.getWidth() - 10;
+		if (invalidSearchAnimationProgress > 0) {
+			g.rotate(imgPosX + searchImg.getWidth() / 2, ypos, invalidProgress * invalidSearchImgRotation);
+		}
+		searchImg.draw(imgPosX, ypos + Fonts.LARGE.getLineHeight() * 0.25f, searchCol);
+		g.resetTransform();
 	}
 
 	@Override
@@ -622,6 +646,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		} else {
 			openDropdownMenu.updateHover(mouseX, mouseY);
+		}
+
+		if (invalidSearchAnimationProgress > 0) {
+			invalidSearchAnimationProgress -= delta;
 		}
 
 		updateShowHideAnimation(delta);
@@ -906,8 +934,23 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		searchField.keyPressed(key, c);
 		if (!searchField.getText().equals(lastSearchText)) {
-			lastSearchText = searchField.getText().toLowerCase();
-			updateSearch();
+			String newSearchText = searchField.getText().toLowerCase();
+			if (!hasSearchResults(newSearchText)) {
+				searchField.setText(lastSearchText);
+				invalidSearchAnimationProgress = INVALID_SEARCH_ANIMATION_TIME;
+				Random rand = new Random();
+				invalidSearchImgRotation = 10 + rand.nextInt(10);
+				invalidSearchTextRotation = 10 + rand.nextInt(10);
+				if (rand.nextBoolean()) {
+					invalidSearchImgRotation = -invalidSearchImgRotation;
+				}
+				if (rand.nextBoolean()) {
+					invalidSearchTextRotation = -invalidSearchTextRotation;
+				}
+			} else {
+				lastSearchText = newSearchText;
+				updateSearch();
+			}
 		}
 
 		return true;
@@ -1041,6 +1084,27 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
+		updateActiveSection();
+	}
+
+	private boolean hasSearchResults(String searchText) {
+		for (OptionTab section : sections) {
+			if (section.name.toLowerCase().contains(searchText)) {
+				return true;
+			}
+			if (section.options == null) {
+				continue;
+			}
+			for (Option option : section.options) {
+				boolean wasFiltered = option.isFiltered();
+				boolean isFiltered = option.filter(searchText);
+				option.setFiltered(wasFiltered);
+				if (!isFiltered) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public interface Listener {
