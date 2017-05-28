@@ -401,9 +401,14 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 			int lineStartY = (int) (y + Fonts.LARGE.getLineHeight() * 0.6f);
 			if (section.options == null) {
+				float previousAlpha = COL_CYAN.a;
+				if (section != activeSection) {
+					COL_CYAN.a *= 0.2f;
+				}
 				FontUtil.drawRightAligned(Fonts.XLARGE, width, -paddingRight,
 					(int) (y + Fonts.XLARGE.getLineHeight() * 0.3f), section.name.toUpperCase(),
 					COL_CYAN);
+				COL_CYAN.a = previousAlpha;
 			} else {
 				Fonts.MEDIUMBOLD.drawString(paddingTextLeft, lineStartY, section.name, COL_WHITE);
 			}
