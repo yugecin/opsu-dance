@@ -1088,6 +1088,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
 		updateActiveSection();
+		if (openDropdownMenu != null) {
+			openDropdownMenu.reset();
+			openDropdownMenu = null;
+		}
 	}
 
 	private boolean hasSearchResults(String searchText) {
