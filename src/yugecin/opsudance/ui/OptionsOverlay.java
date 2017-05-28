@@ -418,7 +418,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight || (openDropdownMenu != null && openDropdownMenu.equals(dropdownMenus.get(option)))) {
+				if (y > -optionHeight || (option instanceof ListOption && openDropdownMenu != null
+						&& openDropdownMenu.equals(dropdownMenus.get(option)))) {
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
