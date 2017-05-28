@@ -148,7 +148,9 @@ public class Input {
 	 * @param listener The listener to be notified
 	 */
 	public void addKeyListener(KeyListener listener) {
-		keyListeners.add(listener);
+		if (!keyListeners.contains(listener)) {
+			keyListeners.add(listener);
+		}
 	}
 	
 	/**
@@ -157,7 +159,9 @@ public class Input {
 	 * @param listener The listener to be notified
 	 */
 	public void addMouseListener(MouseListener listener) {
-		mouseListeners.add(listener);
+		if (!mouseListeners.contains(listener)) {
+			mouseListeners.add(listener);
+		}
 	}
 	
 	/**

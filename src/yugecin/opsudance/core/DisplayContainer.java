@@ -440,6 +440,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 			input.addListener(new GlobalInputListener());
 			input.addMouseListener(bubNotifState);
 		}
+		input.addListener(state);
 
 		sout("GL ready");
 
