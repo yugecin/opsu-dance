@@ -467,7 +467,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 	}
 
 	public boolean isWidescreen() {
-		return width * 1000 / height == 1777; // 16:9
+		return width * 1000 / height > 1500; // 1777 = 16:9, 1333 = 4:3
 	}
 
 	@Override

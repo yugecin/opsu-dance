@@ -184,11 +184,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 	public void revalidate() {
 		super.revalidate();
 
-		targetWidth = Math.max((int) (displayContainer.width * 0.36f), 340); // 0.321f
+		boolean isWidescreen = displayContainer.isWidescreen();
+		targetWidth = (int) (displayContainer.width * (isWidescreen ? 0.4f : 0.5f));
 		height = displayContainer.height;
 
 		// calculate positions
-		float navIconWidthRatio = displayContainer.isWidescreen() ? 0.046875f : 0.065f;
+		float navIconWidthRatio = isWidescreen ? 0.046875f : 0.065f;
 		// non-widescreen ratio is not accurate
 		navButtonSize = (int) (displayContainer.width * navIconWidthRatio);
 		navIndicatorSize = navButtonSize / 10;
@@ -869,6 +870,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 					}
 				}
 			}
+			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
 			scrollHandler.scrollToPosition(sectionPosition);
 		}
 
