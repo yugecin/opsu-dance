@@ -1069,9 +1069,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (section.options == null) {
 				lastBigSectionMatches = sectionMatches;
 				lastBigSection = section;
-				if (!lastBigSectionMatches) {
-					section.filtered = true;
-				}
+				section.filtered = !lastBigSectionMatches;
 				continue;
 			}
 			section.filtered = true;
