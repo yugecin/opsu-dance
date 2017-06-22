@@ -41,11 +41,13 @@ import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.NotNull;
 import yugecin.opsudance.core.Nullable;
+import yugecin.opsudance.options.Options;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -152,15 +154,12 @@ public class Utils {
 	 * @return true if pressed
 	 */
 	public static boolean isGameKeyPressed() {
-		/*
-		boolean mouseDown = !Options.isMouseDisabled() && (
-				input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) ||
-				input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
-		return (mouseDown ||
-				input.isKeyDown(Options.getGameKeyLeft()) ||
-				input.isKeyDown(Options.getGameKeyRight()));
-				*/
-		return true;
+		return
+			input.isKeyPressed(Options.OPTION_KEY_LEFT.intval) ||
+			input.isKeyPressed(Options.OPTION_KEY_RIGHT.intval) ||
+			(!Options.OPTION_DISABLE_MOUSE_BUTTONS.state && (
+				input.isMousePressed(Input.MOUSE_LEFT_BUTTON) ||
+				input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)));
 	}
 
 

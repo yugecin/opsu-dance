@@ -707,10 +707,10 @@ public class Game extends ComplexOpsuState {
 			displayContainer.cursor.draw(replayKeyPressed);
 		} else if (GameMod.AUTO.isActive()) {
 			displayContainer.cursor.draw(autoMousePressed);
-			if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
+			if (OPTION_DANCE_MIRROR.state) {
 				mirrorCursor.draw(autoMousePressed);
 			}
-		} else if (GameMod.AUTOPILOT.isActive()) {
+		} else {
 			displayContainer.cursor.draw(Utils.isGameKeyPressed());
 		}
 
@@ -922,6 +922,8 @@ public class Game extends ComplexOpsuState {
 			}
 		} else if (GameMod.AUTOPILOT.isActive()) {
 			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+		} else {
+			displayContainer.cursor.setCursorPosition(displayContainer.delta, displayContainer.mouseX, displayContainer.mouseY);
 		}
 	}
 
@@ -1444,9 +1446,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		if (isReplay || GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
-			displayContainer.drawCursor = false;
-		}
+		displayContainer.drawCursor = false;
 
 		isInGame = true;
 		if (!skippedToCheckpoint) {
