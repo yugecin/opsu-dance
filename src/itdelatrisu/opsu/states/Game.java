@@ -748,13 +748,6 @@ public class Game extends ComplexOpsuState {
 				if (!isLeadIn())
 					MusicController.resume();
 			}
-
-			// focus lost: go back to pause screen
-			else if (!Display.isActive()) {
-				displayContainer.switchState(pauseState);
-				pausePulse = 0f;
-			}
-
 			// advance pulse animation
 			else {
 				pausePulse += delta / 750f;
