@@ -847,7 +847,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			} else if (hoverOption == OPTION_KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (hoverOption == OPTION_KEY_RIGHT) {
-				keyEntryLeft = true;
+				keyEntryRight = true;
 			}
 		}
 
