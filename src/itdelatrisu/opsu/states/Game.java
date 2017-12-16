@@ -60,6 +60,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
@@ -1453,7 +1454,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/raize/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/image/");
 		File[] files = replaydir.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
@@ -1469,7 +1470,7 @@ public class Game extends ComplexOpsuState {
 			try {
 				r.load();
 			} catch (IOException e) {
-				EventBus.post(new BubbleNotificationEvent("could not load replay " + file.getName(), BubbleNotificationEvent.COMMONCOLOR_RED));
+				BubNotifListener.EVENT.make().onBubNotif("could not load replay " + file.getName(), Colors.BUB_RED);
 				continue;
 			}
 			replays.add(new ReplayPlayback(displayContainer, r, new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB())));
