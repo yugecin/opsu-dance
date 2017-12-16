@@ -21,20 +21,18 @@ package itdelatrisu.opsu.states;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
-import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
-import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.UI;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -43,18 +41,6 @@ import static yugecin.opsudance.options.Options.*;
  * Loads game resources and enters "Main Menu" state.
  */
 public class Splash extends BaseOpsuState {
-
-	@Inject
-	private SongMenu songMenu;
-
-	@Inject
-	private ReplayImporter replayImporter;
-
-	@Inject
-	private OszUnpacker oszUnpacker;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	/** Whether or not loading has completed. */
 	private boolean finished;
@@ -73,7 +59,7 @@ public class Splash extends BaseOpsuState {
 		super.revalidate();
 
 		// pre-revalidate some states to reduce lag between switching
-		songMenu.revalidate();
+		songMenuState.revalidate();
 
 		if (inited) {
 			return;
@@ -86,7 +72,7 @@ public class Splash extends BaseOpsuState {
 		thread = new Thread() {
 			@Override
 			public void run() {
-				oszUnpacker.unpackAll();
+				oszunpacker.unpackAll();
 				beatmapParser.parseAll();
 				replayImporter.importAll();
 
@@ -109,7 +95,7 @@ public class Splash extends BaseOpsuState {
 		// initialize song list
 		if (BeatmapSetList.get().size() == 0) {
 			MusicController.playThemeSong(config.themeBeatmap);
-			displayContainer.switchStateInstantly(MainMenu.class);
+			displayContainer.switchStateInstantly(mainmenuState);
 			return;
 		}
 
@@ -117,9 +103,9 @@ public class Splash extends BaseOpsuState {
 		if (OPTION_ENABLE_THEME_SONG.state) {
 			MusicController.playThemeSong(config.themeBeatmap);
 		} else {
-			songMenu.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+			songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 		}
-		displayContainer.switchStateInstantly(MainMenu.class);
+		displayContainer.switchStateInstantly(mainmenuState);
 	}
 
 	@Override
@@ -147,7 +133,7 @@ public class Splash extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		if (key != Input.KEY_ESCAPE) {
+		if (key != Keyboard.KEY_ESCAPE) {
 			return false;
 		}
 		if (++escapeCount >= 3) {

@@ -20,22 +20,13 @@ package itdelatrisu.opsu;
 
 import itdelatrisu.opsu.downloads.Download;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.jar.JarFile;
 
@@ -50,41 +41,21 @@ import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
+import yugecin.opsudance.core.NotNull;
+import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.options.Options;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Contains miscellaneous utilities.
  */
 public class Utils {
-	/**
-	 * List of illegal filename characters.
-	 * @see #cleanFileName(String, char)
-	 */
-	private final static int[] illegalChars = {
-		34, 60, 62, 124, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-		11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-		24, 25, 26, 27, 28, 29, 30, 31, 58, 42, 63, 92, 47
-	};
-	static {
-		Arrays.sort(illegalChars);
-	}
-
-	// This class should not be instantiated.
-	private Utils() {}
-
-	/**
-	 * Initializes game settings and class data.
-	 */
-	public static void init(DisplayContainer displayContainer) {
-		// TODO clean this up
-
-		// game settings
-	}
 
 	/**
 	 * Draws an animation based on its center.
@@ -183,15 +154,12 @@ public class Utils {
 	 * @return true if pressed
 	 */
 	public static boolean isGameKeyPressed() {
-		/*
-		boolean mouseDown = !Options.isMouseDisabled() && (
-				input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) ||
-				input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
-		return (mouseDown ||
-				input.isKeyDown(Options.getGameKeyLeft()) ||
-				input.isKeyDown(Options.getGameKeyRight()));
-				*/
-		return true;
+		return
+			input.isKeyPressed(Options.OPTION_KEY_LEFT.intval) ||
+			input.isKeyPressed(Options.OPTION_KEY_RIGHT.intval) ||
+			(!Options.OPTION_DISABLE_MOUSE_BUTTONS.state && (
+				input.isMousePressed(Input.MOUSE_LEFT_BUTTON) ||
+				input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)));
 	}
 
 
@@ -210,26 +178,31 @@ public class Utils {
 	}
 
 	/**
-	 * Cleans a file name.
-	 * @param badFileName the original name string
-	 * @param replace the character to replace illegal characters with (or 0 if none)
-	 * @return the cleaned file name
-	 * @author Sarel Botha (http://stackoverflow.com/a/5626340)
+	 * Changes bad characters to the replacement char given.
+	 * Bad characters:
+	 * non-printable (0-31)
+	 * " (34) * (42) / (47) : (58)
+	 * < (60) > (62) ? (63) \ (92)
+	 * DEL (124)
 	 */
-	public static String cleanFileName(String badFileName, char replace) {
-		if (badFileName == null)
-			return null;
-
-		boolean doReplace = (replace > 0 && Arrays.binarySearch(illegalChars, replace) < 0);
-		StringBuilder cleanName = new StringBuilder();
-		for (int i = 0, n = badFileName.length(); i < n; i++) {
-			int c = badFileName.charAt(i);
-			if (Arrays.binarySearch(illegalChars, c) < 0)
-				cleanName.append((char) c);
-			else if (doReplace)
-				cleanName.append(replace);
+	public static String cleanFileName(@NotNull String badFileName, char replacement) {
+		char[] chars = badFileName.toCharArray();
+		long additionalBadChars =
+			1L << (34 - 32)|
+			1L << (42 - 32)|
+			1L << (47 - 32)|
+			1L << (58 - 32)|
+			1L << (60 - 32)|
+			1L << (62 - 32)|
+			1L << (63 - 32)|
+			1L << (92 - 32);
+		for (int i = 0; i < chars.length; i++) {
+			char c = chars[i];
+			if (c < 32 || c == 124 || (c < 93 && 0 != (additionalBadChars & (1L << (c - 32))))) {
+				chars[i] = replacement;
+			}
 		}
-		return cleanName.toString();
+		return new String(chars);
 	}
 
 	/**
@@ -338,7 +311,7 @@ public class Utils {
 			try {
 				json = new JSONObject(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON object.", e).show();
+				explode("Failed to create JSON object.", e, DEFAULT_OPTIONS);
 			}
 		}
 		return json;
@@ -357,7 +330,7 @@ public class Utils {
 			try {
 				json = new JSONArray(s);
 			} catch (JSONException e) {
-				ErrorHandler.error("Failed to create JSON array.", e).show();
+				explode("Failed to create JSON array.", e, DEFAULT_OPTIONS);
 			}
 		}
 		return json;
@@ -399,7 +372,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			ErrorHandler.error("Failed to calculate MD5 hash.", e).show();
+			explode("Failed to calculate MD5 hash.", e, DEFAULT_OPTIONS);
 		}
 		return null;
 	}
@@ -419,43 +392,6 @@ public class Utils {
 	}
 
 	/**
-	 * Returns whether or not the application is running within a JAR.
-	 * @return true if JAR, false if file
-	 */
-	public static boolean isJarRunning() {
-		return Utils.class.getResource(String.format("%s.class", Utils.class.getSimpleName())).toString().startsWith("jar:");
-	}
-
-	/**
-	 * Returns the JarFile for the application.
-	 * @return the JAR file, or null if it could not be determined
-	 */
-	public static JarFile getJarFile() {
-		if (!isJarRunning())
-			return null;
-
-		try {
-			return new JarFile(new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI()), false);
-		} catch (URISyntaxException | IOException e) {
-			Log.error("Could not determine the JAR file.", e);
-			return null;
-		}
-	}
-
-	/**
-	 * Returns the directory where the application is being run.
-	 * @return the directory, or null if it could not be determined
-	 */
-	public static File getRunningDirectory() {
-		try {
-			return new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-		} catch (URISyntaxException e) {
-			Log.error("Could not get the running directory.", e);
-			return null;
-		}
-	}
-
-	/**
 	 * Parses the integer string argument as a boolean:
 	 * {@code 1} is {@code true}, and all other values are {@code false}.
 	 * @param s the {@code String} containing the boolean representation to be parsed
@@ -470,8 +406,9 @@ public class Utils {
 	 * most recent update to the working directory (e.g. fetch or successful push).
 	 * @return the 40-character SHA-1 hash, or null if it could not be determined
 	 */
+	@Nullable
 	public static String getGitHash() {
-		if (isJarRunning())
+		if (env.isJarRunning)
 			return null;
 		File f = new File(".git/refs/remotes/origin/master");
 		if (!f.isFile())
@@ -516,11 +453,20 @@ public class Utils {
 		} catch (Exception e) {}
 	}
 
-	public static int getQuadrant(double x, double y) {
-		if (x < Options.width / 2d) {
-			return y < Options.height / 2d ? 2 : 3;
-		}
-		return y < Options.height / 2d ? 1 : 4;
+	/**
+	 * Gets the region where the given point is in.
+	 * First bit is set if x > half
+	 * Second bit is set if y > half
+	 *
+	 * 2 | 3
+	 * --+--
+	 * 0 | 1
+	 */
+	public static int getRegion(double x, double y) {
+		int q = 0;
+		if (y < displayContainer.height / 2d) q = 2;
+		if (x < displayContainer.width / 2d) q |= 1;
+		return q;
 	}
 
 	/*
@@ -537,24 +483,24 @@ public class Utils {
 	*/
 
 	public static float[] mirrorPoint(float x, float y) {
-		double dx = x - Options.width / 2d;
-		double dy = y - Options.height / 2d;
+		double dx = x - displayContainer.width / 2d;
+		double dy = y - displayContainer.height / 2d;
 		double ang = Math.atan2(dy, dx);
 		double d = -Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (Options.width / 2d + Math.cos(ang) * d),
-			(float) (Options.height / 2d + Math.sin(ang) * d)
+			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
+			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
 		};
 	}
 
 	public static float[] mirrorPoint(float x, float y, float degrees) {
-		double dx = x - Options.width / 2d;
-		double dy = y - Options.height / 2d;
+		double dx = x - displayContainer.width / 2d;
+		double dy = y - displayContainer.height / 2d;
 		double ang = Math.atan2(dy, dx) + (degrees * Math.PI / 180d);
 		double d = Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (Options.width / 2d + Math.cos(ang) * d),
-			(float) (Options.height / 2d + Math.sin(ang) * d)
+			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
+			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
 		};
 	}
 
@@ -571,6 +517,21 @@ public class Utils {
 		return (key != Keyboard.KEY_ESCAPE && key != Keyboard.KEY_SPACE &&
 			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
 			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
+	}
+
+	public static void unpackFromJar(@NotNull JarFile jarfile, @NotNull File unpackedFile,
+			@NotNull String filename) throws IOException {
+		InputStream in = jarfile.getInputStream(jarfile.getEntry(filename));
+		OutputStream out = new FileOutputStream(unpackedFile);
+
+		byte[] buffer = new byte[65536];
+		int bufferSize;
+		while ((bufferSize = in.read(buffer, 0, buffer.length)) != -1) {
+			out.write(buffer, 0, bufferSize);
+		}
+
+		in.close();
+		out.close();
 	}
 
 }

@@ -20,8 +20,6 @@ package itdelatrisu.opsu.db;
 
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.beatmap.Beatmap;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.options.Configuration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,6 +33,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Handles connections and queries with the scores database.
@@ -77,13 +78,10 @@ public class ScoreDB {
 	/** Score deletion statement. */
 	private static PreparedStatement deleteSongStmt, deleteScoreStmt;
 
-	// This class should not be instantiated.
-	private ScoreDB() {}
-
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init(Configuration config) {
+	public static void init() {
 		// create a database connection
 		connection = DBController.createConnection(config.SCORE_DB.getPath());
 		if (connection == null)
@@ -124,7 +122,7 @@ public class ScoreDB {
 				// TODO: extra playerName checks not needed if name is guaranteed not null
 			);
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to prepare score statements.", e).show();
+			explode("Failed to prepare score statements.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -157,7 +155,7 @@ public class ScoreDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', %d)", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			ErrorHandler.error("Could not create score database.", e).show();
+			explode("Could not create score database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -209,7 +207,7 @@ public class ScoreDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to update score database.", e).show();
+			explode("Failed to update score database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -227,7 +225,7 @@ public class ScoreDB {
 			insertStmt.setString(19, data.playerName);
 			insertStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to save score to database.", e).show();
+			explode("Failed to save score to database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -247,7 +245,7 @@ public class ScoreDB {
 			deleteScoreStmt.setString(21, data.playerName);
 			deleteScoreStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to delete score from database.", e).show();
+			explode("Failed to delete score from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -267,7 +265,7 @@ public class ScoreDB {
 			deleteSongStmt.setString(5, beatmap.version);
 			deleteSongStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to delete scores from database.", e).show();
+			explode("Failed to delete scores from database.", e, DEFAULT_OPTIONS);
 		}
 	}
 
@@ -335,7 +333,7 @@ public class ScoreDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to read scores from database.", e).show();
+			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
 			return null;
 		}
 		return getSortedArray(list);
@@ -377,7 +375,7 @@ public class ScoreDB {
 				map.put(version, getSortedArray(list));
 			rs.close();
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to read scores from database.", e).show();
+			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
 			return null;
 		}
 		return map;
@@ -406,7 +404,7 @@ public class ScoreDB {
 			connection.close();
 			connection = null;
 		} catch (SQLException e) {
-			ErrorHandler.error("Failed to close score database.", e).show();
+			explode("Failed to close score database.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

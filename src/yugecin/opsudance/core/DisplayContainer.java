@@ -26,10 +26,12 @@ import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
+import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
 import org.lwjgl.Sys;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -39,58 +41,38 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
-import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
-import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
-import yugecin.opsudance.core.state.transitions.*;
-import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
-import yugecin.opsudance.options.Configuration;
-import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.events.BubNotifListener;
+import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
 
 import static yugecin.opsudance.core.Entrypoint.sout;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListener {
-
-	@Inject
-	private SkinService skinService;
-
-	@Inject
-	private Configuration config;
+public class DisplayContainer implements ErrorDumpable, ResolutionChangedListener, SkinChangedListener {
 
 	private static SGL GL = Renderer.get();
 
-	private final InstanceContainer instanceContainer;
-
 	private FpsRenderState fpsState;
 	private BarNotificationState barNotifState;
-	private BubbleNotificationState bubNotifState;
-
-	private TransitionState outTransitionState;
-	private TransitionState inTransitionState;
-
-	private final TransitionFinishedListener outTransitionListener;
-	private final TransitionFinishedListener inTransitionListener;
+	private BubNotifState bubNotifState;
 
 	private OpsuState state;
 
 	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
-	public Input input;
 
 	public int width;
 	public int height;
@@ -123,38 +105,52 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public final Cursor cursor;
 	public boolean drawCursor;
 
-	@Inject
-	public DisplayContainer(InstanceContainer instanceContainer) {
-		this.instanceContainer = instanceContainer;
+	class Transition {
+		int in;
+		int out;
+		int total;
+		int progress = -1;
+		OpsuState nextstate;
+		Color OVERLAY = new Color(Color.black);
+
+		public void update() {
+			if (progress == -1) {
+				return;
+			}
+			progress += delta;
+			if (progress > out && nextstate != null) {
+				switchStateInstantly(nextstate);
+				nextstate = null;
+			}
+			if (progress > total) {
+				progress = -1;
+			}
+		}
+
+		public void render(Graphics graphics) {
+			if (progress == -1) {
+				return;
+			}
+			int relprogress = progress;
+			int reltotal = out;
+			if (progress > out) {
+				reltotal = in;
+				relprogress = total - progress;
+			}
+			OVERLAY.a = (float) relprogress / reltotal;
+			graphics.setColor(OVERLAY);
+			graphics.fillRect(0, 0, width, height);
+		}
+	}
+
+	private final Transition transition = new Transition();
+
+	public DisplayContainer() {
 		this.cursor = new Cursor();
 		drawCursor = true;
 
-		outTransitionListener = new TransitionFinishedListener() {
-			@Override
-			public void onFinish() {
-				state.leave();
-				outTransitionState.getApplicableState().leave();
-				state = inTransitionState;
-				state.enter();
-				inTransitionState.getApplicableState().enter();
-			}
-		};
-
-		inTransitionListener = new TransitionFinishedListener() {
-			@Override
-			public void onFinish() {
-				state.leave();
-				state = inTransitionState.getApplicableState();
-			}
-		};
-
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				destroyImages();
-				reinit();
-			}
-		});
+		ResolutionChangedListener.EVENT.addListener(this);
+		SkinChangedListener.EVENT.addListener(this);
 
 		this.nativeDisplayMode = Display.getDisplayMode();
 		targetBackgroundRenderInterval = 41; // ~24 fps
@@ -163,13 +159,25 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		renderDelta = 1;
 	}
 
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		destroyImages();
+		reinit();
+	}
+
+	@Override
+	public void onSkinChanged(String stringName) {
+		destroyImages();
+		reinit();
+	}
+
 	private void reinit() {
 		// this used to be in Utils.init
 		// TODO find a better place for this?
 		setFPS(targetFPS[targetFPSIndex]);
 		MusicController.setMusicVolume(OPTION_MUSIC_VOLUME.val / 100f * OPTION_MASTER_VOLUME.val / 100f);
 
-		skinService.loadSkin();
+		skinservice.loadSkin();
 
 		// initialize game images
 		for (GameImage img : GameImage.values()) {
@@ -196,16 +204,16 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		targetRenderInterval = 1000 / targetRendersPerSecond;
 	}
 
-	public void init(Class<? extends OpsuState> startingState) {
+	public void init(OpsuState startingState) {
 		setUPS(OPTION_TARGET_UPS.val);
 		setFPS(targetFPS[targetFPSIndex]);
 
-		state = instanceContainer.provide(startingState);
-		state.enter();
+		fpsState = new FpsRenderState();
+		bubNotifState = new BubNotifState();
+		barNotifState = new BarNotificationState();
 
-		fpsState = instanceContainer.provide(FpsRenderState.class);
-		bubNotifState = instanceContainer.provide(BubbleNotificationState.class);
-		barNotifState = instanceContainer.provide(BarNotificationState.class);
+		state = startingState;
+		state.enter();
 	}
 
 
@@ -220,6 +228,7 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
 
+			transition.update();
 			fpsState.update();
 
 			state.update();
@@ -254,13 +263,17 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 				cursor.updateAngle(renderDelta);
 				if (drawCursor) {
-					cursor.draw(input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) || input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON));
+					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
+						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));
 				}
 				UI.drawTooltip(graphics);
+
+				transition.render(graphics);
 
 				timeSinceLastRender = 0;
 
 				Display.update(false);
+				GL11.glFlush();
 			}
 
 			Display.processMessages();
@@ -270,8 +283,8 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 
 	public void setup() throws Exception {
 		width = height = -1;
-		Input.disableControllers();
 		Display.setTitle("opsu!dance");
+		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
@@ -279,6 +292,19 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 		GLHelper.hideNativeCursor();
+	}
+
+	// TODO: move this elsewhere
+	private void setupResolutionOptionlist(int width, int height) {
+		final Object[] resolutions = OPTION_SCREEN_RESOLUTION.getListItems();
+		final String nativeRes = width + "x" + height;
+		resolutions[0] = nativeRes;
+		for (int i = 0; i < resolutions.length; i++) {
+			if (nativeRes.equals(resolutions[i].toString())) {
+				resolutions[i] = resolutions[i] + " (borderless)";
+			}
+		}
+
 	}
 
 	public void teardown() {
@@ -316,13 +342,13 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			return true;
 		}
 		if (DownloadList.get().hasActiveDownloads()) {
-			EventBus.post(new BubbleNotificationEvent(DownloadList.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+			BubNotifListener.EVENT.make().onBubNotif(DownloadList.EXIT_CONFIRMATION, Colors.BUB_RED);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
-		if (Updater.get().getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
-			EventBus.post(new BubbleNotificationEvent(Updater.EXIT_CONFIRMATION, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
+			BubNotifListener.EVENT.make().onBubNotif(Updater.EXIT_CONFIRMATION, Colors.BUB_PURPLE);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
@@ -333,6 +359,11 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 	public void updateDisplayMode(String resolutionString) {
 		int screenWidth = nativeDisplayMode.getWidth();
 		int screenHeight = nativeDisplayMode.getHeight();
+
+		int eos = resolutionString.indexOf(' ');
+		if (eos > -1) {
+			resolutionString = resolutionString.substring(0, eos);
+		}
 
 		int width = screenWidth;
 		int height = screenHeight;
@@ -348,17 +379,16 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			height = 600;
 		}
 
+		if (!OPTION_FULLSCREEN.state) {
+			boolean borderless = (screenWidth == width && screenHeight == height);
+			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
+		}
+
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
-			EventBus.post(new BubbleNotificationEvent("Failed to change resolution", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Failed to change resolution", Colors.BUB_RED);
 			Log.error("Failed to set display mode.", e);
-		}
-
-		if (OPTION_FULLSCREEN.state) {
-			// set borderless window if dimensions match screen size
-			boolean borderless = (screenWidth == width && screenHeight == height);
-			System.setProperty("org.lwjgl.opengl.Window.undecorated", Boolean.toString(borderless));
 		}
 	}
 
@@ -377,8 +407,9 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 			displayMode = new DisplayMode(width, height);
 			if (fullscreen) {
 				fullscreen = false;
-				Log.warn("could not find fullscreen displaymode for " + width + "x" + height);
-				EventBus.post(new BubbleNotificationEvent("Fullscreen mode is not supported for " + width + "x" + height, BubbleNotificationEvent.COLOR_ORANGE));
+				String msg = String.format("Fullscreen mode is not supported for %sx%s", width, height);
+				Log.warn(msg);
+				BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_ORANGE);
 			}
 		}
 
@@ -404,17 +435,20 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		input = new Input(height);
-		input.enableKeyRepeat();
-		input.addKeyListener(this);
-		input.addMouseListener(this);
+		if (input == null) {
+			input = new Input(height);
+			input.enableKeyRepeat();
+			input.addListener(new GlobalInputListener());
+			input.addMouseListener(bubNotifState);
+		}
+		input.addListener(state);
 
 		sout("GL ready");
 
 		GameImage.init(width, height);
-		Fonts.init(config);
+		Fonts.init();
 
-		EventBus.post(new ResolutionOrSkinChangedEvent(null, width, height));
+		ResolutionChangedListener.EVENT.make().onResolutionChanged(width, height);
 	}
 
 	public void resetCursor() {
@@ -432,110 +466,51 @@ public class DisplayContainer implements ErrorDumpable, KeyListener, MouseListen
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 
+	public boolean isWidescreen() {
+		return width * 1000 / height > 1500; // 1777 = 16:9, 1333 = 4:3
+	}
+
 	@Override
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
 		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
-		if (isTransitioning()) {
-			dump.append("doing a transition\n");
-			dump.append("using out transition ").append(outTransitionState.getClass().getSimpleName()).append('\n');
-			dump.append("using in  transition ").append(inTransitionState.getClass().getSimpleName()).append('\n');
-			if (state == inTransitionState) {
-				dump.append("currently doing the in transition\n");
-			} else {
-				dump.append("currently doing the out transition\n");
-			}
+		if (state == null) {
+			dump.append("state is null!\n");
+			return;
 		}
 		state.writeErrorDump(dump);
 	}
 
+	// TODO change this
 	public boolean isInState(Class<? extends OpsuState> state) {
 		return state.isInstance(state);
 	}
 
-	public boolean isTransitioning() {
-		return state instanceof TransitionState;
+	public void switchState(OpsuState state) {
+		switchState(state, 200, 300);
 	}
 
-	public void switchState(Class<? extends OpsuState> newState) {
-		switchState(newState, FadeOutTransitionState.class, 200, FadeInTransitionState.class, 300);
-	}
-
-	public void switchStateNow(Class<? extends OpsuState> newState) {
-		switchState(newState, EmptyTransitionState.class, 0, FadeInTransitionState.class, 300);
-	}
-
-	public void switchStateInstantly(Class<? extends OpsuState> newState) {
-		state.leave();
-		state = instanceContainer.provide(newState);
-		state.enter();
-	}
-
-	public void switchState(Class<? extends OpsuState> newState, Class<? extends TransitionState> outTransition, int outTime, Class<? extends TransitionState> inTransition, int inTime) {
-		if (isTransitioning()) {
+	public void switchState(OpsuState newstate, int outtime, int intime) {
+		if (transition.progress != -1) {
 			return;
 		}
-		outTransitionState = instanceContainer.provide(outTransition).set(state, outTime, outTransitionListener);
-		inTransitionState = instanceContainer.provide(inTransition).set(instanceContainer.provide(newState), inTime, inTransitionListener);
-		state = outTransitionState;
-		state.enter();
-	}
-
-	/*
-	 * input events below, see org.newdawn.slick.KeyListener & org.newdawn.slick.MouseListener
-	 */
-
-	@Override
-	public void keyPressed(int key, char c) {
-		state.keyPressed(key, c);
-	}
-
-	@Override
-	public void keyReleased(int key, char c) {
-		state.keyReleased(key, c);
-	}
-
-	@Override
-	public void mouseWheelMoved(int change) {
-		state.mouseWheelMoved(change);
-	}
-
-	@Override
-	public void mouseClicked(int button, int x, int y, int clickCount) { }
-
-	@Override
-	public void mousePressed(int button, int x, int y) {
-		state.mousePressed(button, x, y);
-	}
-
-	@Override
-	public void mouseReleased(int button, int x, int y) {
-		if (bubNotifState.mouseReleased(x, y)) {
-			return;
+		if (outtime == 0) {
+			switchStateInstantly(newstate);
+			newstate = null;
 		}
-		state.mouseReleased(button, x, y);
+		transition.nextstate = newstate;
+		transition.total = transition.in = intime;
+		transition.out = outtime;
+		transition.total += outtime;
+		transition.progress = 0;
 	}
 
-	@Override
-	public void mouseMoved(int oldx, int oldy, int newx, int newy) { }
-
-	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {
-		state.mouseDragged(oldx, oldy, newx, newy);
+	public void switchStateInstantly(OpsuState state) {
+		this.state.leave();
+		input.removeListener(this.state);
+		this.state = state;
+		this.state.enter();
+		input.addListener(this.state);
 	}
-
-	@Override
-	public void setInput(Input input) { }
-
-	@Override
-	public boolean isAcceptingInput() {
-		return true;
-	}
-
-	@Override
-	public void inputEnded() { }
-
-	@Override
-	public void inputStarted() { }
 
 }

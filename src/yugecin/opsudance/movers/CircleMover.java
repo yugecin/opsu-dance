@@ -19,7 +19,8 @@ package yugecin.opsudance.movers;
 
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
-import yugecin.opsudance.options.Options;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class CircleMover extends Mover {
 
@@ -32,12 +33,12 @@ public class CircleMover extends Mover {
 	public CircleMover(GameObject start, GameObject end, int dir) {
 		super(start, end, dir);
 		if (startX - endX == 0 && startY - endY == 0) {
-			int quadr = Utils.getQuadrant(startX, startY);
+			int quadr = Utils.getRegion(startX, startY);
 			switch (quadr) {
-				case 1: ang = 135d / 180d * Math.PI; break;
+				case 3: ang = 135d / 180d * Math.PI; break;
 				case 2: ang = 45d / 180d * Math.PI; break;
-				case 3: ang = -45d / 180d * Math.PI; break;
-				case 4: ang = -135d / 180d * Math.PI; break;
+				case 0: ang = -45d / 180d * Math.PI; break;
+				case 1: ang = -135d / 180d * Math.PI; break;
 			}
 		} else {
 			ang = Math.atan2(startY - endY, startX - endX);
@@ -63,7 +64,7 @@ public class CircleMover extends Mover {
 				double a = ang + SOME_CONSTANT * t;
 				pos[0] = (startX + (endX - startX) * t) - middlexoffset - Math.cos(a) * radius;
 				pos[1] = (startY + (endY - startY) * t) - middleyoffset - Math.sin(a) * radius;
-				if (pos[0] < 0 || Options.width < pos[0] || pos[1] < 0 || Options.height < pos[1]) {
+				if (pos[0] < 0 || displayContainer.width < pos[0] || pos[1] < 0 || displayContainer.height < pos[1]) {
 					pass = false;
 					break;
 				}

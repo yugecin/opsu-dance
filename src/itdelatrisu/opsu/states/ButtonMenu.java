@@ -35,13 +35,14 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Generic button menu state.
@@ -68,7 +69,7 @@ public class ButtonMenu extends BaseOpsuState {
 		BEATMAP (new Button[] { Button.CLEAR_SCORES, Button.FAVORITE_ADD, Button.DELETE, Button.CANCEL }) {
 			@Override
 			public String[] getTitle() {
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				BeatmapSetNode node = buttonState.getNode();
 				String beatmapString = (node != null) ? BeatmapSetList.get().getBaseNode(node.index).toString() : "";
 				return new String[] { beatmapString, "What do you want to do with this beatmap?" };
 			}
@@ -99,7 +100,7 @@ public class ButtonMenu extends BaseOpsuState {
 		BEATMAP_DELETE_SELECT (new Button[] { Button.DELETE_GROUP, Button.DELETE_SONG, Button.CANCEL_DELETE }) {
 			@Override
 			public String[] getTitle() {
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				BeatmapSetNode node = buttonState.getNode();
 				String beatmapString = (node != null) ? node.toString() : "";
 				return new String[] { String.format("Are you sure you wish to delete '%s' from disk?", beatmapString) };
 			}
@@ -179,7 +180,7 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			protected float getBaseY(DisplayContainer displayContainer) {
+			protected float getBaseY() {
 				return displayContainer.height * 2f / 3;
 			}
 
@@ -268,9 +269,6 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 		};
 
-		public static DisplayContainer displayContainer;
-		public static InstanceContainer instanceContainer;
-
 		/** The buttons in the state. */
 		private final Button[] buttons;
 
@@ -299,7 +297,7 @@ public class ButtonMenu extends BaseOpsuState {
 		 */
 		public void revalidate(Image button, Image buttonL, Image buttonR) {
 			float center = displayContainer.width / 2;
-			float baseY = getBaseY(displayContainer);
+			float baseY = getBaseY();
 			float offsetY = button.getHeight() * 1.25f;
 
 			menuButtons = new MenuButton[buttons.length];
@@ -314,7 +312,7 @@ public class ButtonMenu extends BaseOpsuState {
 		/**
 		 * Returns the base Y coordinate for the buttons.
 		 */
-		protected float getBaseY(DisplayContainer displayContainer) {
+		protected float getBaseY() {
 			float baseY = displayContainer.height * 0.2f;
 			baseY += ((getTitle().length - 1) * Fonts.LARGE.getLineHeight());
 			return baseY;
@@ -437,62 +435,62 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(MainMenu.class);
+				displayContainer.switchState(mainmenuState);
 			}
 		},
 		CLEAR_SCORES ("Clear local scores", Color.magenta) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP, node);
-				displayContainer.switchState(SongMenu.class);
+				BeatmapSetNode node = buttonState.getNode();
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP, node);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		FAVORITE_ADD ("Add to Favorites", Color.blue) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				BeatmapSetNode node = buttonState.getNode();
 				node.getBeatmapSet().setFavorite(true);
-				displayContainer.switchState(SongMenu.class);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		FAVORITE_REMOVE ("Remove from Favorites", Color.blue) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				BeatmapSetNode node = buttonState.getNode();
 				node.getBeatmapSet().setFavorite(false);
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
-				displayContainer.switchState(SongMenu.class);
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		DELETE ("Delete...", Color.red) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
+				BeatmapSetNode node = buttonState.getNode();
 				MenuState ms = (node.beatmapIndex == -1 || node.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, node);
-				displayContainer.switchState(ButtonMenu.class);
+				buttonState.setMenuState(ms, node);
+				displayContainer.switchState(buttonState);
 			}
 		},
 		CANCEL ("Cancel", Color.gray) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(SongMenu.class);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		DELETE_CONFIRM ("Yes, delete this beatmap!", Color.red) {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, node);
-				displayContainer.switchState(SongMenu.class);
+				BeatmapSetNode node = buttonState.getNode();
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, node);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		DELETE_GROUP ("Yes, delete all difficulties!", Color.red) {
@@ -505,9 +503,9 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = instanceContainer.provide(ButtonMenu.class).getNode();
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, node);
-				displayContainer.switchState(SongMenu.class);
+				BeatmapSetNode node = buttonState.getNode();
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, node);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		CANCEL_DELETE ("Nooooo! I didn't mean to!", Color.gray) {
@@ -520,8 +518,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.RELOAD);
-				displayContainer.switchState(SongMenu.class);
+				songMenuState.doStateActionOnLoad(MenuState.RELOAD);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		RELOAD_CANCEL ("Cancel", Color.red) {
@@ -534,9 +532,9 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				ScoreData scoreData = instanceContainer.provide(ButtonMenu.class).getScoreData();
-				instanceContainer.provide(SongMenu.class).doStateActionOnLoad(MenuState.SCORE, scoreData);
-				displayContainer.switchState(SongMenu.class);
+				ScoreData scoreData = buttonState.getScoreData();
+				songMenuState.doStateActionOnLoad(MenuState.SCORE, scoreData);
+				displayContainer.switchState(songMenuState);
 			}
 		},
 		CLOSE ("Close", Color.gray) {
@@ -555,9 +553,6 @@ public class ButtonMenu extends BaseOpsuState {
 				}
 			}
 		};
-
-		public static DisplayContainer displayContainer;
-		public static InstanceContainer instanceContainer;
 
 		/** The text to show on the button. */
 		private final String text;
@@ -599,12 +594,6 @@ public class ButtonMenu extends BaseOpsuState {
 
 	/** The score data to process in the state. */
 	private ScoreData scoreData;
-
-	public ButtonMenu(DisplayContainer displayContainer, InstanceContainer instanceContainer) {
-		super();
-		Button.displayContainer = MenuState.displayContainer = displayContainer;
-		Button.instanceContainer = MenuState.instanceContainer = instanceContainer;
-	}
 
 	@Override
 	public void revalidate() {
@@ -662,7 +651,7 @@ public class ButtonMenu extends BaseOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			menuState.leave();
 			return true;
 		}

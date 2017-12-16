@@ -33,17 +33,13 @@ import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://bloodcat.com/osu/
  */
 public class BloodcatServer extends DownloadServer {
-
-	@Inject
-	public InstanceContainer instanceContainer;
 
 	/** Server name. */
 	private static final String SERVER_NAME = "Bloodcat";
@@ -59,10 +55,6 @@ public class BloodcatServer extends DownloadServer {
 
 	/** Total result count from the last query. */
 	private int totalResults = -1;
-
-	@Inject
-	public BloodcatServer() {
-	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -89,12 +81,12 @@ public class BloodcatServer extends DownloadServer {
 			nodes = new DownloadNode[arr.length()];
 			for (int i = 0; i < nodes.length; i++) {
 				JSONObject item = arr.getJSONObject(i);
-				nodes[i] = instanceContainer.injectFields(new DownloadNode(
+				nodes[i] = new DownloadNode(
 					item.getInt("id"), formatDate(item.getString("synced")),  //"date"
 					item.getString("title"), item.isNull("titleU") ? null : item.getString("titleU"),  //"titleUnicode"
 					item.getString("artist"), item.isNull("artistU") ? null : item.getString("artistU"),  //"artistUnicode"
 					item.getString("creator")
-				));
+				);
 			}
 
 			// store total result count
@@ -104,7 +96,7 @@ public class BloodcatServer extends DownloadServer {
 				resultCount++;
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		}
 		return nodes;
 	}

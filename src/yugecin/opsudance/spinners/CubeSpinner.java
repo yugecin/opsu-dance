@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
 public class CubeSpinner extends Spinner {
 
@@ -90,10 +90,10 @@ public class CubeSpinner extends Spinner {
 		x *= 3.0d / ( z + 3.0d + 5.0d + 0.5 );
 		y *= 3.0d / ( z + 3.0d + 5.0d + 0.5 );
 
-		double scale = Options.width / (3.0f + 0.5f * Math.cos(size / 180f * Math.PI));
+		double scale = displayContainer.width / (3.0f + 0.5f * Math.cos(size / 180f * Math.PI));
 		//double scale = Options.width / (3.0f + -1f * ((float)(Options.s.ElapsedMilliseconds % Options.beatTimeMs)/(float)Options.beatTimeMs));
-		point[0] = (int) ( Options.width / 2.0f + scale * x );
-		point[1] = (int) ( Options.height / 2.0f - scale * y );
+		point[0] = (int) ( displayContainer.width / 2.0f + scale * x );
+		point[1] = (int) ( displayContainer.height / 2.0f - scale * y );
 
 		return point;
 	}

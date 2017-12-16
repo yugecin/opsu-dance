@@ -27,39 +27,40 @@ import java.util.Collections;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
+
+import static org.lwjgl.input.Keyboard.*;
 
 /**
  * Game mods.
  */
 public enum GameMod {
-	EASY          (Category.EASY, 0, GameImage.MOD_EASY, "EZ", 2, Input.KEY_Q, 0.5f,
+	EASY          (Category.EASY, 0, GameImage.MOD_EASY, "EZ", 2, KEY_Q, 0.5f,
 	              "Easy", "Reduces overall difficulty - larger circles, more forgiving HP drain, less accuracy required."),
-	NO_FAIL       (Category.EASY, 1, GameImage.MOD_NO_FAIL, "NF", 1, Input.KEY_W, 0.5f,
+	NO_FAIL       (Category.EASY, 1, GameImage.MOD_NO_FAIL, "NF", 1, KEY_W, 0.5f,
 	              "NoFail", "You can't fail.  No matter what."),
-	HALF_TIME     (Category.EASY, 2, GameImage.MOD_HALF_TIME, "HT", 256, Input.KEY_E, 0.3f,
+	HALF_TIME     (Category.EASY, 2, GameImage.MOD_HALF_TIME, "HT", 256, KEY_E, 0.3f,
 	              "HalfTime", "Less zoom."),
-	HARD_ROCK     (Category.HARD, 0, GameImage.MOD_HARD_ROCK, "HR", 16, Input.KEY_A, 1.06f,
+	HARD_ROCK     (Category.HARD, 0, GameImage.MOD_HARD_ROCK, "HR", 16, KEY_A, 1.06f,
 	              "HardRock", "Everything just got a bit harder..."),
-	SUDDEN_DEATH  (Category.HARD, 1, GameImage.MOD_SUDDEN_DEATH, "SD", 32, Input.KEY_S, 1f,
+	SUDDEN_DEATH  (Category.HARD, 1, GameImage.MOD_SUDDEN_DEATH, "SD", 32, KEY_S, 1f,
 	              "SuddenDeath", "Miss a note and fail."),
 //	PERFECT       (Category.HARD, 1, GameImage.MOD_PERFECT, "PF", 64, Input.KEY_S, 1f,
 //	              "Perfect", "SS or quit."),
-	DOUBLE_TIME   (Category.HARD, 2, GameImage.MOD_DOUBLE_TIME, "DT", 64, Input.KEY_D, 1.12f,
+	DOUBLE_TIME   (Category.HARD, 2, GameImage.MOD_DOUBLE_TIME, "DT", 64, KEY_D, 1.12f,
 	              "DoubleTime", "Zoooooooooom."),
 //	NIGHTCORE     (Category.HARD, 2, GameImage.MOD_NIGHTCORE, "NT", 64, Input.KEY_D, 1.12f,
 //	              "Nightcore", "uguuuuuuuu"),
-	HIDDEN        (Category.HARD, 3, GameImage.MOD_HIDDEN, "HD", 8, Input.KEY_F, 1.06f,
+	HIDDEN        (Category.HARD, 3, GameImage.MOD_HIDDEN, "HD", 8, KEY_F, 1.06f,
 	              "Hidden", "Play with no approach circles and fading notes for a slight score advantage."),
-	FLASHLIGHT    (Category.HARD, 4, GameImage.MOD_FLASHLIGHT, "FL", 1024, Input.KEY_G, 1.12f,
+	FLASHLIGHT    (Category.HARD, 4, GameImage.MOD_FLASHLIGHT, "FL", 1024, KEY_G, 1.12f,
 	              "Flashlight", "Restricted view area."),
-	RELAX         (Category.SPECIAL, 0, GameImage.MOD_RELAX, "RL", 128, Input.KEY_Z, 0f,
+	RELAX         (Category.SPECIAL, 0, GameImage.MOD_RELAX, "RL", 128, KEY_Z, 0f,
 	              "Relax", "You don't need to click.\nGive your clicking/tapping finger a break from the heat of things.\n**UNRANKED**"),
-	AUTOPILOT     (Category.SPECIAL, 1, GameImage.MOD_AUTOPILOT, "AP", 8192, Input.KEY_X, 0f,
+	AUTOPILOT     (Category.SPECIAL, 1, GameImage.MOD_AUTOPILOT, "AP", 8192, KEY_X, 0f,
 	              "Relax2", "Automatic cursor movement - just follow the rhythm.\n**UNRANKED**"),
-	SPUN_OUT      (Category.SPECIAL, 2, GameImage.MOD_SPUN_OUT, "SO", 4096, Input.KEY_C, 0.9f,
+	SPUN_OUT      (Category.SPECIAL, 2, GameImage.MOD_SPUN_OUT, "SO", 4096, KEY_C, 0.9f,
 	              "SpunOut", "Spinners will be automatically completed."),
-	AUTO          (Category.SPECIAL, 3, GameImage.MOD_AUTO, "", 2048, Input.KEY_V, 1f,
+	AUTO          (Category.SPECIAL, 3, GameImage.MOD_AUTO, "", 2048, KEY_V, 1f,
 	              "Autoplay", "Watch a perfect automated play through the song.");
 
 	/** Mod categories. */

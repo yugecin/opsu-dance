@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class DonutSpinner extends Spinner {
 
@@ -38,10 +38,10 @@ public class DonutSpinner extends Spinner {
 			ang += 15;
 		}
 
-		double rad = Options.width / 4.0f;
+		double rad = displayContainer.width / 4.0f;
 
-		point[0] = Options.width / 2.0f + rad * Math.sin(ang);
-		point[1] = Options.height / 2.0f - rad * Math.cos(ang);
+		point[0] = displayContainer.width / 2.0f + rad * Math.sin(ang);
+		point[1] = displayContainer.height / 2.0f - rad * Math.cos(ang);
 
 		return point;
 	}

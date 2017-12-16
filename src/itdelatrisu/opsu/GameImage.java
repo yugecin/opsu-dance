@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu;
 
+import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 
 import java.io.File;
@@ -30,8 +31,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
@@ -249,6 +249,16 @@ public enum GameImage {
 	CONTROL_SLIDER_BALL ("control-sliderball", "png", false, false),
 	CONTROL_CHECK_ON ("control-check-on", "png", false, false),
 	CONTROL_CHECK_OFF ("control-check-off", "png", false, false),
+	MENU_NAV_AUDIO ("menu-nav-audio", "png", false, false),
+	MENU_NAV_CUSTOM ("menu-nav-custom", "png", false, false),
+	MENU_NAV_GAMEPLAY ("menu-nav-gameplay", "png", false, false),
+	MENU_NAV_GENERAL ("menu-nav-general", "png", false, false),
+	MENU_NAV_GRAPHICS ("menu-nav-graphics", "png", false, false),
+	MENU_NAV_INPUT ("menu-nav-input", "png", false, false),
+	MENU_NAV_SKIN ("menu-nav-skin", "png", false, false),
+	MENU_NAV_ADVANCED ("menu-nav-advanced", "png", false, false),
+	MENU_NAV_DANCE ("menu-nav-dance", "png", false, false),
+	MENU_NAV_PIPPI ("menu-nav-pippi", "png", false, false),
 	VOLUME ("volume-bg", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
@@ -733,7 +743,7 @@ public enum GameImage {
 
 		String err = String.format("Could not find default image '%s'.", filename);
 		Log.warn(err);
-		EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+		BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 	}
 
 	/**
@@ -776,31 +786,33 @@ public enum GameImage {
 	 * @return an array of the loaded images, or null if not found
 	 */
 	private Image[] loadImageArray(File dir) {
-		if (filenameFormat != null) {
-			for (String suffix : getSuffixes()) {
-				List<Image> list = new ArrayList<Image>();
-				int i = 0;
-				while (true) {
-					// look for next image
-					String filenameFormatted = String.format(filenameFormat + suffix, i++);
-					String name = getImageFileName(filenameFormatted, dir, type, true);
-					if (name == null)
-						break;
+		if (filenameFormat == null) {
+			return null;
+		}
+		for (String suffix : getSuffixes()) {
+			List<Image> list = new ArrayList<Image>();
+			int i = 0;
+			while (true) {
+				// look for next image
+				String filenameFormatted = String.format(filenameFormat + suffix, i++);
+				String name = getImageFileName(filenameFormatted, dir, type, true);
+				if (name == null)
+					break;
 
-					// add image to list
-					try {
-						Image img = new Image(name);
-						if (suffix.equals(HD_SUFFIX))
-							img = img.getScaledCopy(0.5f);
-						list.add(img);
-					} catch (SlickException e) {
-						EventBus.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", name), BubbleNotificationEvent.COMMONCOLOR_RED));
-						break;
-					}
+				// add image to list
+				try {
+					Image img = new Image(name);
+					if (suffix.equals(HD_SUFFIX))
+						img = img.getScaledCopy(0.5f);
+					list.add(img);
+				} catch (SlickException e) {
+					BubNotifListener.EVENT.make().onBubNotif(
+						String.format("Failed to set image '%s'.", name), Colors.BUB_RED);
+					break;
 				}
-				if (!list.isEmpty())
-					return list.toArray(new Image[list.size()]);
 			}
+			if (!list.isEmpty())
+				return list.toArray(new Image[list.size()]);
 		}
 		return null;
 	}
@@ -813,15 +825,17 @@ public enum GameImage {
 	private Image loadImageSingle(File dir) {
 		for (String suffix : getSuffixes()) {
 			String name = getImageFileName(filename + suffix, dir, type, true);
-			if (name != null) {
-				try {
-					Image img = new Image(name);
-					if (suffix.equals(HD_SUFFIX))
-						img = img.getScaledCopy(0.5f);
-					return img;
-				} catch (SlickException e) {
-					EventBus.post(new BubbleNotificationEvent(String.format("Failed to set image '%s'.", filename), BubbleNotificationEvent.COMMONCOLOR_RED));
-				}
+			if (name == null) {
+				continue;
+			}
+			try {
+				Image img = new Image(name);
+				if (suffix.equals(HD_SUFFIX))
+					img = img.getScaledCopy(0.5f);
+				return img;
+			} catch (SlickException e) {
+				BubNotifListener.EVENT.make().onBubNotif(
+					String.format("Failed to set image '%s'.", filename), Colors.BUB_RED);
 			}
 		}
 		return null;
@@ -865,7 +879,8 @@ public enum GameImage {
 				skinImages = null;
 			}
 		} catch (SlickException e) {
-			ErrorHandler.error(String.format("Failed to destroy beatmap skin images for '%s'.", this.name()), e).show();
+			String msg = String.format("Failed to destroy beatmap skin images for '%s'.", this.name());
+			ErrorHandler.explode(msg, e, ErrorHandler.DEFAULT_OPTIONS);
 		}
 	}
 

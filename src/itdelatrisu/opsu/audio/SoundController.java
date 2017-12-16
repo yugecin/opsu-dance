@@ -36,15 +36,15 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -104,7 +104,7 @@ public class SoundController {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
 			return loadClip(ref, audioIn, isMP3);
 		} catch (Exception e) {
-			ErrorHandler.error(String.format("Failed to load file '%s'.", ref), e).show();
+			explode(String.format("Failed to load file '%s'.", ref), e, DEFAULT_OPTIONS);
 			return null;
 		}
 	}
@@ -220,7 +220,8 @@ public class SoundController {
 		// menu and game sounds
 		for (SoundEffect s : SoundEffect.values()) {
 			if ((currentFileName = getSoundFileName(s.getFileName())) == null) {
-				EventBus.post(new BubbleNotificationEvent("Could not find sound file " + s.getFileName(), BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif(
+					"Could not find sound file " + s.getFileName(), Colors.BUB_ORANGE);
 				continue;
 			}
 			MultiClip newClip = loadClip(currentFileName, currentFileName.endsWith(".mp3"));
@@ -239,7 +240,8 @@ public class SoundController {
 			for (HitSound s : HitSound.values()) {
 				String filename = String.format("%s-%s", ss.getName(), s.getFileName());
 				if ((currentFileName = getSoundFileName(filename)) == null) {
-					EventBus.post(new BubbleNotificationEvent("Could not find hit sound file " + filename, BubbleNotificationEvent.COLOR_ORANGE));
+					BubNotifListener.EVENT.make().onBubNotif(
+						"Could not find hit sound file " + filename, Colors.BUB_ORANGE);
 					continue;
 				}
 				MultiClip newClip = loadClip(currentFileName, false);
@@ -283,7 +285,7 @@ public class SoundController {
 			try {
 				clip.start(volume, listener);
 			} catch (LineUnavailableException e) {
-				ErrorHandler.error(String.format("Could not start a clip '%s'.", clip.getName()), e).show();
+				explode(String.format("Could not start a clip '%s'.", clip.getName()), e, DEFAULT_OPTIONS);
 			}
 		}
 	}
@@ -396,7 +398,8 @@ public class SoundController {
 
 				@Override
 				public void error() {
-					EventBus.post(new BarNotificationEvent("Failed to download track preview."));
+					BarNotifListener.EVENT.make().onBarNotif(
+						"Failed to download track preview");
 				}
 			});
 			try {

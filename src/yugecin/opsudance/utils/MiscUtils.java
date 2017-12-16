@@ -17,9 +17,9 @@
  */
 package yugecin.opsudance.utils;
 
-import itdelatrisu.opsu.Options;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
+import yugecin.opsudance.core.Constants;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -31,7 +31,7 @@ public class MiscUtils {
 		public Properties get() {
 			Properties props = new Properties();
 			try {
-				props.load(ResourceLoader.getResourceAsStream(Options.VERSION_FILE));
+				props.load(ResourceLoader.getResourceAsStream(Constants.VERSION_FILE));
 			} catch (IOException e) {
 				Log.error("Could not read version file", e);
 			}

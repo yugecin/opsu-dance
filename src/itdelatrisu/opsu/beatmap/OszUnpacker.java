@@ -23,21 +23,18 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import itdelatrisu.opsu.ui.Colors;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.events.BubNotifListener;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Unpacker for OSZ (ZIP) archives.
  */
 public class OszUnpacker {
-
-	@Inject
-	private Configuration config;
 
 	/** The index of the current file being unpacked. */
 	private int fileIndex = -1;
@@ -45,14 +42,8 @@ public class OszUnpacker {
 	/** The total number of files to unpack. */
 	private File[] files;
 
-	@Inject
-	public OszUnpacker() {
-	}
-
 	/**
 	 * Invokes the unpacker for each OSZ archive in a root directory.
-	 * @param root the root directory
-	 * @param dest the destination directory
 	 * @return an array containing the new (unpacked) directories, or null
 	 *         if no OSZs found
 	 */
@@ -106,7 +97,7 @@ public class OszUnpacker {
 		} catch (ZipException e) {
 			String err = String.format("Failed to unzip file %s to dest %s.", file.getAbsolutePath(), dest.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 	}
 

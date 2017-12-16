@@ -35,7 +35,6 @@ import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService.BeatmapWatchServiceListener;
 import itdelatrisu.opsu.beatmap.LRUCache;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
@@ -56,6 +55,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.util.Map;
 import java.util.Stack;
 
+import org.lwjgl.input.Mouse;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -63,16 +63,13 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
 
+import static org.lwjgl.input.Keyboard.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -82,18 +79,6 @@ import static yugecin.opsudance.options.Options.*;
  * manage beatmaps, or change game options from this state.
  */
 public class SongMenu extends ComplexOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private OszUnpacker oszUnpacker;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	/** The max number of song buttons to be shown on each screen. */
 	public static final int MAX_SONG_BUTTONS = 6;
@@ -246,7 +231,7 @@ public class SongMenu extends ComplexOpsuState {
 		private void reloadBeatmaps() {
 			if (fullReload) {
 				BeatmapDB.clearDatabase();
-				oszUnpacker.unpackAll();
+				oszunpacker.unpackAll();
 			}
 			beatmapParser.parseAll();
 		}
@@ -328,7 +313,7 @@ public class SongMenu extends ComplexOpsuState {
 
 	private final OptionsOverlay optionsOverlay;
 
-	public SongMenu(DisplayContainer displayContainer) {
+	public SongMenu() {
 		super();
 		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
 		overlays.add(optionsOverlay);
@@ -406,7 +391,7 @@ public class SongMenu extends ComplexOpsuState {
 		// search
 		int textFieldX = (int) (displayContainer.width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
 		int textFieldY = (int) (headerY + Fonts.BOLD.getLineHeight() / 2);
-		searchTextField = new TextField(displayContainer, Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
+		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;
@@ -454,12 +439,15 @@ public class SongMenu extends ComplexOpsuState {
 		BeatmapWatchService.addListener(new BeatmapWatchServiceListener() {
 			@Override
 			public void eventReceived(Kind<?> kind, Path child) {
-				if (!songFolderChanged && kind != StandardWatchEventKinds.ENTRY_MODIFY) {
-					songFolderChanged = true;
-					if (displayContainer.isInState(SongMenu.class)) {
-						EventBus.post(new BarNotificationEvent("Changed is Songs folder detected. Hit F5 to refresh."));
-					}
+				if (songFolderChanged || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+					return;
 				}
+				songFolderChanged = true;
+				if (!displayContainer.isInState(SongMenu.class)) {
+					return;
+				}
+				BarNotifListener.EVENT.make().onBarNotif(
+					"Changed is Songs folder detected. Hit F5 to refresh.");
 			}
 		});
 
@@ -761,8 +749,8 @@ public class SongMenu extends ComplexOpsuState {
 				if (focusNode != null) {
 					MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-					instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-					displayContainer.switchState(ButtonMenu.class);
+					buttonState.setMenuState(state, focusNode);
+					displayContainer.switchState(buttonState);
 				}
 				return;
 			}
@@ -922,19 +910,19 @@ public class SongMenu extends ComplexOpsuState {
 
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(MainMenu.class);
+			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
 		// selection buttons
 		if (selectModsButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F1, '\0');
+			this.keyPressed(KEY_F1, '\0');
 			return true;
 		} else if (selectRandomButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F2, '\0');
+			this.keyPressed(KEY_F2, '\0');
 			return true;
 		} else if (selectMapOptionsButton.contains(x, y)) {
-			this.keyPressed(Input.KEY_F3, '\0');
+			this.keyPressed(KEY_F3, '\0');
 			return true;
 		} else if (selectOptionsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
@@ -944,30 +932,32 @@ public class SongMenu extends ComplexOpsuState {
 
 		// group tabs
 		for (BeatmapGroup group : BeatmapGroup.values()) {
-			if (group.contains(x, y)) {
-				if (group != BeatmapGroup.current()) {
-					BeatmapGroup.set(group);
-					SoundController.playSound(SoundEffect.MENUCLICK);
-					startNode = focusNode = null;
-					oldFocusNode = null;
-					randomStack = new Stack<SongNode>();
-					songInfo = null;
-					scoreMap = null;
-					focusScores = null;
-					searchTextField.setText("");
-					searchTimer = SEARCH_DELAY;
-					searchTransitionTimer = SEARCH_TRANSITION_TIME;
-					searchResultString = null;
-					BeatmapSetList.get().reset();
-					BeatmapSetList.get().init();
-					setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-
-					if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
-						EventBus.post(new BarNotificationEvent(group.getEmptyMessage()));
-					}
-				}
+			if (!group.contains(x, y)) {
+				continue;
+			}
+			if (group == BeatmapGroup.current()) {
 				return true;
 			}
+			BeatmapGroup.set(group);
+			SoundController.playSound(SoundEffect.MENUCLICK);
+			startNode = focusNode = null;
+			oldFocusNode = null;
+			randomStack = new Stack<SongNode>();
+			songInfo = null;
+			scoreMap = null;
+			focusScores = null;
+			searchTextField.setText("");
+			searchTimer = SEARCH_DELAY;
+			searchTransitionTimer = SEARCH_TRANSITION_TIME;
+			searchResultString = null;
+			BeatmapSetList.get().reset();
+			BeatmapSetList.get().init();
+			setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+
+			if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
+				BarNotifListener.EVENT.make().onBarNotif(group.getEmptyMessage());
+			}
+			return true;
 		}
 
 		if (focusNode == null) {
@@ -1029,12 +1019,12 @@ public class SongMenu extends ComplexOpsuState {
 					SoundController.playSound(SoundEffect.MENUHIT);
 					if (button != Input.MOUSE_RIGHT_BUTTON) {
 						// view score
-						instanceContainer.provide(GameRanking.class).setGameData(instanceContainer.injectFields(new GameData(focusScores[rank], displayContainer.width, displayContainer.height)));
-						displayContainer.switchState(GameRanking.class);
+						gameRankingState.setGameData(new GameData(focusScores[rank]));
+						displayContainer.switchState(gameRankingState);
 					} else {
 						// score management
-						instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.SCORE, focusScores[rank]);
-						displayContainer.switchState(ButtonMenu.class);
+						buttonState.setMenuState(MenuState.SCORE, focusScores[rank]);
+						displayContainer.switchState(buttonState);
 					}
 					return true;
 				}
@@ -1050,14 +1040,12 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// block input
-		if ((reloadThread != null && key != Input.KEY_ESCAPE) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
+		if ((reloadThread != null && key != KEY_ESCAPE) || beatmapMenuTimer > -1 || isScrollingToFocusNode) {
 			return true;
 		}
 
-		Input input = displayContainer.input;
-
 		switch (key) {
-		case Input.KEY_ESCAPE:
+		case KEY_ESCAPE:
 			if (reloadThread != null) {
 				// beatmap reloading: stop parsing beatmaps by sending interrupt to BeatmapParser
 				reloadThread.interrupt();
@@ -1070,19 +1058,19 @@ public class SongMenu extends ComplexOpsuState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(MainMenu.class);
+				displayContainer.switchState(mainmenuState);
 			}
 			return true;
-		case Input.KEY_F1:
+		case KEY_F1:
 			SoundController.playSound(SoundEffect.MENUHIT);
-			instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.MODS);
-			displayContainer.switchState(ButtonMenu.class);
+			buttonState.setMenuState(MenuState.MODS);
+			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_F2:
+		case KEY_F2:
 			if (focusNode == null)
 				break;
 			SoundController.playSound(SoundEffect.MENUHIT);
-			if (input.isKeyDown(Input.KEY_RSHIFT) || input.isKeyDown(Input.KEY_LSHIFT)) {
+			if (isKeyDown(KEY_RSHIFT) || isKeyDown(KEY_LSHIFT)) {
 				// shift key: previous random track
 				SongNode prev;
 				if (randomStack.isEmpty() || (prev = randomStack.pop()) == null)
@@ -1098,47 +1086,47 @@ public class SongMenu extends ComplexOpsuState {
 				setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 			}
 			return true;
-		case Input.KEY_F3:
+		case KEY_F3:
 			if (focusNode == null)
 				break;
 			SoundController.playSound(SoundEffect.MENUHIT);
 			MenuState state = focusNode.getBeatmapSet().isFavorite() ?
 				MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-			instanceContainer.provide(ButtonMenu.class).setMenuState(state, focusNode);
-			displayContainer.switchState(ButtonMenu.class);
+			buttonState.setMenuState(state, focusNode);
+			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_F5:
+		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (songFolderChanged)
 				reloadBeatmaps(false);
 			else {
-				instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.RELOAD);
-				displayContainer.switchState(ButtonMenu.class);
+				buttonState.setMenuState(MenuState.RELOAD);
+				displayContainer.switchState(buttonState);
 			}
 			return true;
-		case Input.KEY_DELETE:
+		case KEY_DELETE:
 			if (focusNode == null)
 				break;
-			if (input.isKeyDown(Input.KEY_RSHIFT) || input.isKeyDown(Input.KEY_LSHIFT)) {
+			if (isKeyDown(KEY_RSHIFT) || isKeyDown(KEY_LSHIFT)) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				MenuState ms = (focusNode.beatmapIndex == -1 || focusNode.getBeatmapSet().size() == 1) ?
 						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				instanceContainer.provide(ButtonMenu.class).setMenuState(ms, focusNode);
-				displayContainer.switchState(ButtonMenu.class);
+				buttonState.setMenuState(ms, focusNode);
+				displayContainer.switchState(buttonState);
 			}
 			return true;
-		case Input.KEY_ENTER:
+		case KEY_RETURN:
 			if (focusNode == null)
 				break;
 			startGame();
 			return true;
-		case Input.KEY_DOWN:
+		case KEY_DOWN:
 			changeIndex(1);
 			return true;
-		case Input.KEY_UP:
+		case KEY_UP:
 			changeIndex(-1);
 			return true;
-		case Input.KEY_RIGHT:
+		case KEY_RIGHT:
 			if (focusNode == null)
 				break;
 			BeatmapSetNode next = focusNode.next;
@@ -1154,7 +1142,7 @@ public class SongMenu extends ComplexOpsuState {
 				}
 			}
 			return true;
-		case Input.KEY_LEFT:
+		case KEY_LEFT:
 			if (focusNode == null)
 				break;
 			BeatmapSetNode prev = focusNode.prev;
@@ -1170,25 +1158,25 @@ public class SongMenu extends ComplexOpsuState {
 				}
 			}
 			return true;
-		case Input.KEY_NEXT:
+		case KEY_NEXT:
 			changeIndex(MAX_SONG_BUTTONS);
 			return true;
-		case Input.KEY_PRIOR:
+		case KEY_PRIOR:
 			changeIndex(-MAX_SONG_BUTTONS);
 			return true;
 		}
-		if (key == Input.KEY_O && (input.isKeyDown(Input.KEY_LCONTROL) || input.isKeyDown(Input.KEY_RCONTROL))) {
+		if (key == KEY_O && input.isControlDown()) {
 			optionsOverlay.show();
 			return true;
 		}
 		// wait for user to finish typing
 		// TODO: accept all characters (current conditions are from TextField class)
-		if ((c > 31 && c < 127) || key == Input.KEY_BACK) {
+		if ((c > 31 && c < 127) || key == KEY_BACK) {
 			searchTimer = 0;
 			searchTextField.keyPressed(key, c);
 			int textLength = searchTextField.getText().length();
 			if (lastSearchTextLength != textLength) {
-				if (key == Input.KEY_BACK) {
+				if (key == KEY_BACK) {
 					if (textLength == 0)
 						searchTransitionTimer = 0;
 				} else if (textLength == 1)
@@ -1216,9 +1204,9 @@ public class SongMenu extends ComplexOpsuState {
 
 		// check mouse button (right click scrolls faster on songs)
 		int multiplier;
-		if (displayContainer.input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+		if (Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
 			multiplier = 10;
-		} else if (displayContainer.input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+		} else if (Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			multiplier = 1;
 		} else {
 			return false;
@@ -1237,8 +1225,6 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
-
-		Input input = displayContainer.input;
 
 		if (isInputBlocked()) {
 			return true;
@@ -1310,7 +1296,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// reset game data
 		if (resetGame) {
-			instanceContainer.provide(Game.class).resetGameData();
+			gameState.resetGameData();
 
 			// destroy extra Clips
 			MultiClip.destroyExtraClips();
@@ -1775,22 +1761,20 @@ public class SongMenu extends ComplexOpsuState {
 
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (focusNode == null || beatmap != focusNode.getSelectedBeatmap()) {
-			EventBus.post(new BarNotificationEvent("Unable to load the beatmap audio."));
+			BarNotifListener.EVENT.make().onBarNotif("Unable to load the beatmap audio.");
 			return;
 		}
 
 		// turn on "auto" mod if holding "ctrl" key
-		if (displayContainer.input.isKeyDown(Input.KEY_RCONTROL) || displayContainer.input.isKeyDown(Input.KEY_LCONTROL)) {
-			if (!GameMod.AUTO.isActive())
-				GameMod.AUTO.toggle(true);
+		if (input.isControlDown() && !GameMod.AUTO.isActive()) {
+			GameMod.AUTO.toggle(true);
 		}
 
 		SoundController.playSound(SoundEffect.MENUHIT);
 		MultiClip.destroyExtraClips();
-		Game gameState = instanceContainer.provide(Game.class);
 		gameState.loadBeatmap(beatmap);
 		gameState.setRestart(Game.Restart.NEW);
 		gameState.setReplay(null);
-		displayContainer.switchState(Game.class);
+		displayContainer.switchState(gameState);
 	}
 }

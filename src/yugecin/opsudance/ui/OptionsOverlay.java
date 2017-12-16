@@ -23,6 +23,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.DisplayContainer;
@@ -32,6 +33,7 @@ import yugecin.opsudance.utils.FontUtil;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import static yugecin.opsudance.options.Options.*;
 
@@ -48,6 +50,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private static final Color COL_GREY = new Color(55, 55, 57);
 	private static final Color COL_BLUE = new Color(Colors.BLUE_BACKGROUND);
 	private static final Color COL_COMBOBOX_HOVER = new Color(185, 19, 121);
+	private static final Color COL_NAV_BG = new Color(COL_BG);
+	private static final Color COL_NAV_INDICATOR = new Color(COL_PINK);
+	private static final Color COL_NAV_WHITE = new Color(COL_WHITE);
+	private static final Color COL_NAV_FILTERED = new Color(37, 37, 37);
+	private static final Color COL_NAV_INACTIVE = new Color(153, 153, 153);
+	private static final Color COL_NAV_FILTERED_HOVERED = new Color(58, 58, 58);
 
 	private static final float INDICATOR_ALPHA = 0.8f;
 	private static final Color COL_INDICATOR = new Color(Color.black);
@@ -75,6 +83,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 	/** Selected option indicator hide animation time past. */
 	private int indicatorHideAnimationTime;
 
+	private float showHideProgress;
+
 	private Listener listener;
 
 	private Image sliderBallImg;
@@ -83,6 +93,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private Image searchImg;
 
 	private OptionTab[] sections;
+	private OptionTab activeSection;
+	private OptionTab hoveredNavigationEntry;
 
 	private Option hoverOption;
 	private Option selectedOption;
@@ -97,9 +109,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private DropdownMenu<Object> openDropdownMenu;
 	private int openDropdownVirtualY;
 
-	private int finalWidth;
+	private int targetWidth;
 	private int width;
 	private int height;
+
+	private int navButtonSize;
+	private int navStartY;
+	private int navTargetWidth;
+	private int navWidth;
+	private int navHoverTime;
+	private int navIndicatorSize;
 
 	private int optionWidth;
 	private int optionStartX;
@@ -137,6 +156,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private final TextField searchField;
 	private String lastSearchText;
+	private int invalidSearchImgRotation;
+	private int invalidSearchTextRotation;
+	private int invalidSearchAnimationProgress;
+	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 
 	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] sections) {
 		this.displayContainer = displayContainer;
@@ -146,7 +169,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		dropdownMenus = new HashMap<>();
 		visibleDropdownMenus = new LinkedList<>();
 
-		searchField = new TextField(displayContainer, null, 0, 0, 0, 0);
+		searchField = new TextField(null, 0, 0, 0, 0);
 		searchField.setMaxLength(20);
 
 		scrollHandler = new KineticScrolling();
@@ -161,12 +184,18 @@ public class OptionsOverlay extends OverlayOpsuState {
 	public void revalidate() {
 		super.revalidate();
 
-		finalWidth = Math.max((int) (displayContainer.width * 0.36f), 340); // 0.321f
+		boolean isWidescreen = displayContainer.isWidescreen();
+		targetWidth = (int) (displayContainer.width * (isWidescreen ? 0.4f : 0.5f));
 		height = displayContainer.height;
 
 		// calculate positions
+		float navIconWidthRatio = isWidescreen ? 0.046875f : 0.065f;
+		// non-widescreen ratio is not accurate
+		navButtonSize = (int) (displayContainer.width * navIconWidthRatio);
+		navIndicatorSize = navButtonSize / 10;
+		navTargetWidth = (int) (targetWidth * 0.45f) - navButtonSize;
 		paddingRight = (int) (displayContainer.width * 0.009375f); // not so accurate
-		paddingLeft = (int) (displayContainer.width * 0.0180f); // not so accurate
+		paddingLeft = navButtonSize + (int) (displayContainer.width * 0.0180f); // not so accurate
 		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625f); // not so accurate
 		optionStartX = paddingTextLeft;
 		textOptionsY = Fonts.LARGE.getLineHeight() * 2;
@@ -177,7 +206,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
 		if (active) {
-			width = finalWidth;
+			width = targetWidth;
 			optionWidth = width - optionStartX - paddingRight;
 		}
 
@@ -190,9 +219,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(controlImageSize, controlImageSize);
 		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(controlImageSize, controlImageSize);
 
+		int navTotalHeight = 0;
 		dropdownMenus.clear();
 		for (OptionTab section : sections) {
 			if (section.options == null) {
+				navTotalHeight += navButtonSize;
 				continue;
 			}
 			for (final Option option : section.options) {
@@ -228,6 +259,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				dropdownMenus.put(listOption, menu);
 			}
 		}
+		navStartY = (height - navTotalHeight) / 2;
 
 		int searchImgSize = (int) (Fonts.LARGE.getLineHeight() * 0.75f);
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
@@ -235,11 +267,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	@Override
 	public void onRender(Graphics g) {
-		g.setClip(0, 0, width, height);
+		g.setClip(navButtonSize, 0, width - navButtonSize, height);
 
 		// bg
 		g.setColor(COL_BG);
-		g.fillRect(0, 0, width, height);
+		g.fillRect(navButtonSize, 0, width, height);
 
 		// title
 		renderTitle();
@@ -262,6 +294,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.fillRect(width - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
 		g.clearClip();
 
+		renderNavigation(g);
+
 		// UI
 		UI.getBackButton().draw(g);
 
@@ -272,6 +306,57 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (keyEntryLeft || keyEntryRight) {
 			renderKeyEntry(g);
 		}
+	}
+
+	private void renderNavigation(Graphics g) {
+		navWidth = navButtonSize;
+		if (navHoverTime >= 600) {
+			navWidth += navTargetWidth;
+		} else if (navHoverTime > 300) {
+			AnimationEquation anim = AnimationEquation.IN_EXPO;
+			if (displayContainer.mouseX < navWidth) {
+				anim = AnimationEquation.OUT_EXPO;
+			}
+			float progress = anim.calc((navHoverTime - 300f) / 300f);
+			navWidth += (int) (progress * navTargetWidth);
+		}
+
+		g.setClip(0, 0, navWidth, height);
+		g.setColor(COL_NAV_BG);
+		g.fillRect(0, 0, navWidth, height);
+		int y = navStartY;
+		float iconSize = navButtonSize / 2.5f;
+		float iconPadding = iconSize * 0.75f;
+		int fontOffsetX = navButtonSize + navIndicatorSize;
+		int fontOffsetY = (navButtonSize - Fonts.MEDIUM.getLineHeight()) / 2;
+		for (OptionTab section : sections) {
+			if (section.icon == null) {
+				continue;
+			}
+			Color iconCol = COL_NAV_INACTIVE;
+			Color fontCol = COL_NAV_WHITE;
+			if (section == activeSection) {
+				iconCol = COL_NAV_WHITE;
+				g.fillRect(0, y, navWidth, navButtonSize);
+				g.setColor(COL_NAV_INDICATOR);
+				g.fillRect(navWidth - navIndicatorSize, y, navIndicatorSize, navButtonSize);
+			} else if (section == hoveredNavigationEntry) {
+				iconCol = COL_NAV_WHITE;
+			}
+			if (section.filtered) {
+				iconCol = fontCol = COL_NAV_FILTERED;
+				if (section == hoveredNavigationEntry) {
+					iconCol = COL_NAV_FILTERED_HOVERED;
+				}
+			}
+			section.icon.getImage().draw(iconPadding, y + iconPadding, iconSize, iconSize, iconCol);
+			if (navHoverTime > 0) {
+				Fonts.MEDIUM.drawString(fontOffsetX, y + fontOffsetY, section.name, fontCol);
+			}
+			y += navButtonSize;
+		}
+
+		g.clearClip();
 	}
 
 	private void renderIndicator(Graphics g) {
@@ -288,7 +373,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
 			}
 		}
-		g.fillRect(0, indicatorPos - scrollHandler.getPosition(), width, optionHeight);
+		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), width, optionHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
@@ -323,12 +408,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 				continue;
 			}
 			int lineStartY = (int) (y + Fonts.LARGE.getLineHeight() * 0.6f);
-			if (render) {
-				if (section.options == null) {
-					FontUtil.drawRightAligned(Fonts.XLARGE, width, -paddingRight, (int) (y + Fonts.XLARGE.getLineHeight() * 0.3f), section.name, COL_CYAN);
-				} else {
-					Fonts.MEDIUMBOLD.drawString(paddingTextLeft, lineStartY, section.name, COL_WHITE);
+			if (section.options == null) {
+				float previousAlpha = COL_CYAN.a;
+				if (section != activeSection) {
+					COL_CYAN.a *= 0.2f;
 				}
+				FontUtil.drawRightAligned(Fonts.XLARGE, width, -paddingRight,
+					(int) (y + Fonts.XLARGE.getLineHeight() * 0.3f), section.name.toUpperCase(),
+					COL_CYAN);
+				COL_CYAN.a = previousAlpha;
+			} else {
+				Fonts.MEDIUMBOLD.drawString(paddingTextLeft, lineStartY, section.name, COL_WHITE);
 			}
 			y += sectionLineHeight;
 			maxScrollOffset += sectionLineHeight;
@@ -341,7 +431,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight || (openDropdownMenu != null && openDropdownMenu.equals(dropdownMenus.get(option)))) {
+				if (y > -optionHeight || (option instanceof ListOption && openDropdownMenu != null
+						&& openDropdownMenu.equals(dropdownMenus.get(option)))) {
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
@@ -478,8 +569,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderTitle() {
-		FontUtil.drawCentered(Fonts.LARGE, width, 0, textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
-		FontUtil.drawCentered(Fonts.MEDIUM, width, 0, textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
+		int textWidth = width - navButtonSize;
+		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize,
+			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
 	}
 
 	private void renderSearch(Graphics g) {
@@ -487,15 +581,34 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
-			g.fillRect(0, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+			g.fillRect(navButtonSize, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+		}
+		Color searchCol = COL_WHITE;
+		float invalidProgress = 0f;
+		if (invalidSearchAnimationProgress > 0) {
+			invalidProgress = 1f - (float) invalidSearchAnimationProgress / INVALID_SEARCH_ANIMATION_TIME;
+			searchCol = new Color(0f, 0f, 0f, searchCol.a);
+			searchCol.r = COL_PINK.r + (1f - COL_PINK.r) * invalidProgress;
+			searchCol.g = COL_PINK.g + (1f - COL_PINK.g) * invalidProgress;
+			searchCol.b = COL_PINK.b + (1f - COL_PINK.b) * invalidProgress;
+			invalidProgress = 1f - invalidProgress;
 		}
 		String searchText = "Type to search!";
 		if (lastSearchText.length() > 0) {
 			searchText = lastSearchText;
 		}
-		FontUtil.drawCentered(Fonts.LARGE, width, 0, ypos, searchText, COL_WHITE);
-		int imgPosX = (width - Fonts.LARGE.getWidth(searchText)) / 2 - searchImg.getWidth() - 10;
-		searchImg.draw(imgPosX, ypos + Fonts.LARGE.getLineHeight() * 0.25f, COL_WHITE);
+		int textWidth = width - navButtonSize;
+		if (invalidSearchAnimationProgress > 0) {
+			g.rotate(navButtonSize + textWidth / 2, ypos, invalidProgress * invalidSearchTextRotation);
+		}
+		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize, ypos, searchText, searchCol);
+		g.resetTransform();
+		int imgPosX = navButtonSize + (textWidth - Fonts.LARGE.getWidth(searchText)) / 2 - searchImg.getWidth() - 10;
+		if (invalidSearchAnimationProgress > 0) {
+			g.rotate(imgPosX + searchImg.getWidth() / 2, ypos, invalidProgress * invalidSearchImgRotation);
+		}
+		searchImg.draw(imgPosX, ypos + Fonts.LARGE.getLineHeight() * 0.25f, searchCol);
+		g.resetTransform();
 	}
 
 	@Override
@@ -509,6 +622,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	@Override
 	public void show() {
+		navHoverTime = 0;
 		indicatorPos = -optionHeight;
 		indicatorOffsetToNextPos = 0;
 		indicatorMoveAnimationTime = 0;
@@ -525,7 +639,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		int mouseY = displayContainer.mouseY;
 		int delta = displayContainer.renderDelta;
 
+		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
+		boolean scrollPositionChanged = prevscrollpos != scrollHandler.getIntPosition();
 
 		if (openDropdownMenu == null) {
 			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
@@ -533,6 +649,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 			}
 		} else {
 			openDropdownMenu.updateHover(mouseX, mouseY);
+		}
+
+		if (invalidSearchAnimationProgress > 0) {
+			invalidSearchAnimationProgress -= delta;
 		}
 
 		updateShowHideAnimation(delta);
@@ -545,10 +665,21 @@ public class OptionsOverlay extends OverlayOpsuState {
 			sliderSoundDelay -= delta;
 		}
 
-		if (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0) {
+		if (mouseX < navWidth) {
+			if (navHoverTime < 600) {
+				navHoverTime += delta;
+			}
+		} else if (navHoverTime > 0) {
+			navHoverTime -= delta;
+		}
+		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
+
+		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
 			return;
 		}
+		updateActiveSection();
+		updateHoverNavigation(mouseX, mouseY);
 		prevMouseX = mouseX;
 		prevMouseY = mouseY;
 		updateHoverOption(mouseX, mouseY);
@@ -564,6 +695,24 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 	}
 
+	private void updateHoverNavigation(int mouseX, int mouseY) {
+		hoveredNavigationEntry = null;
+		if (mouseX >= navWidth) {
+			return;
+		}
+		int y = navStartY;
+		for (OptionTab section : sections) {
+			if (section.options != null) {
+				continue;
+			}
+			int nextY = y + navButtonSize;
+			if (y <= mouseY && mouseY < nextY) {
+				hoveredNavigationEntry = section;
+			}
+			y = nextY;
+		}
+	}
+
 	private void updateIndicatorAlpha() {
 		if (hoverOption == null) {
 			if (indicatorHideAnimationTime < INDICATORHIDEANIMATIONTIME) {
@@ -571,50 +720,59 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (indicatorHideAnimationTime > INDICATORHIDEANIMATIONTIME) {
 					indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME;
 				}
-				float progress = AnimationEquation.IN_CUBIC.calc((float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME);
-				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA;
+				float progress = AnimationEquation.IN_CUBIC.calc((float) indicatorHideAnimationTime /
+					INDICATORHIDEANIMATIONTIME);
+				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA * showHideProgress;
 			}
 		} else if (indicatorHideAnimationTime > 0) {
 			indicatorHideAnimationTime -= displayContainer.renderDelta * 3;
 			if (indicatorHideAnimationTime < 0) {
 				indicatorHideAnimationTime = 0;
 			}
-			COL_INDICATOR.a = (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) * INDICATOR_ALPHA;
+			COL_INDICATOR.a = (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) *
+				INDICATOR_ALPHA * showHideProgress;
 		}
 	}
 
 	private void updateShowHideAnimation(int delta) {
 		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
-			width = finalWidth;
+			width = targetWidth;
+			showHideProgress = 1f;
 			return;
 		}
 		optionWidth = width - optionStartX - paddingRight;
 
+		// navigation elemenst fade out with a different animation
+		float navProgress;
 		// if acceptInput is false, it means that we're currently hiding ourselves
-		float progress;
 		if (acceptInput) {
 			animationtime += delta;
 			if (animationtime >= SHOWANIMATIONTIME) {
 				animationtime = SHOWANIMATIONTIME;
 			}
-			progress = AnimationEquation.OUT_EXPO.calc((float) animationtime / SHOWANIMATIONTIME);
+			showHideProgress = (float) animationtime / SHOWANIMATIONTIME;
+			navProgress = Utils.clamp(showHideProgress * 10f, 0f, 1f);
+			showHideProgress = AnimationEquation.OUT_EXPO.calc(showHideProgress);
 		} else {
 			animationtime -= delta;
 			if (animationtime < 0) {
 				animationtime = 0;
 			}
-			progress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc((float) animationtime / hideAnimationTime);
+			showHideProgress = (float) animationtime / hideAnimationTime;
+			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
+			showHideProgress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(showHideProgress);
 		}
-		width = (int) (progress * finalWidth);
-		COL_BG.a = BG_ALPHA * progress;
-		COL_WHITE.a = progress;
-		COL_PINK.a = progress;
-		COL_CYAN.a = progress;
-		COL_GREY.a = progress * LINEALPHA;
-		COL_BLUE.a = progress;
-		COL_COMBOBOX_HOVER.a = progress;
-		COL_INDICATOR.a = progress * (1f - (float) indicatorHideAnimationTime / INDICATORHIDEANIMATIONTIME) * INDICATOR_ALPHA;
+		width = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
+		COL_NAV_FILTERED.a = COL_NAV_INACTIVE.a = COL_NAV_FILTERED_HOVERED.a = COL_NAV_INDICATOR.a =
+			COL_NAV_WHITE.a = COL_NAV_BG.a = navProgress;
+		COL_BG.a = BG_ALPHA * showHideProgress;
+		COL_WHITE.a = showHideProgress;
+		COL_PINK.a = showHideProgress;
+		COL_CYAN.a = showHideProgress;
+		COL_GREY.a = showHideProgress * LINEALPHA;
+		COL_BLUE.a = showHideProgress;
+		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
 	@Override
@@ -652,15 +810,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
 
-		if (openDropdownMenu != null) {
-			openDropdownMenu.mouseReleased(button);
-			updateHoverOption(x, y);
-			return true;
-		} else {
-			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
-				menu.mouseReleased(button);
-				if (menu.isOpen()) {
-					return true;
+		if (x > navWidth) {
+			if (openDropdownMenu != null) {
+				openDropdownMenu.mouseReleased(button);
+				updateHoverOption(x, y);
+				return true;
+			} else {
+				for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+					menu.mouseReleased(button);
+					if (menu.isOpen()) {
+						return true;
+					}
 				}
 			}
 		}
@@ -672,7 +832,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (x > finalWidth) {
+		if (x > targetWidth) {
 			return false;
 		}
 
@@ -687,8 +847,31 @@ public class OptionsOverlay extends OverlayOpsuState {
 			} else if (hoverOption == OPTION_KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (hoverOption == OPTION_KEY_RIGHT) {
-				keyEntryLeft = true;
+				keyEntryRight = true;
 			}
+		}
+
+		if (hoveredNavigationEntry != null && !hoveredNavigationEntry.filtered) {
+			int sectionPosition = 0;
+			for (OptionTab section : sections) {
+				if (section == hoveredNavigationEntry) {
+					break;
+				}
+				if (section.filtered) {
+					continue;
+				}
+				sectionPosition += sectionLineHeight;
+				if (section.options == null) {
+					continue;
+				}
+				for (Option option : section.options) {
+					if (!option.isFiltered() && option.showCondition()) {
+						sectionPosition += optionHeight;
+					}
+				}
+			}
+			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
+			scrollHandler.scrollToPosition(sectionPosition);
 		}
 
 		if (UI.getBackButton().contains(x, y)){
@@ -716,7 +899,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (!isAdjustingSlider) {
 			scrollHandler.scrollOffset(-delta);
 		}
-		updateHoverOption(prevMouseX, prevMouseY);
 		return true;
 	}
 
@@ -738,7 +920,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			if (openDropdownMenu != null) {
 				openDropdownMenu.keyPressed(key, c);
 				return true;
@@ -757,8 +939,23 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		searchField.keyPressed(key, c);
 		if (!searchField.getText().equals(lastSearchText)) {
-			lastSearchText = searchField.getText().toLowerCase();
-			updateSearch();
+			String newSearchText = searchField.getText().toLowerCase();
+			if (!hasSearchResults(newSearchText)) {
+				searchField.setText(lastSearchText);
+				invalidSearchAnimationProgress = INVALID_SEARCH_ANIMATION_TIME;
+				Random rand = new Random();
+				invalidSearchImgRotation = 10 + rand.nextInt(10);
+				invalidSearchTextRotation = 10 + rand.nextInt(10);
+				if (rand.nextBoolean()) {
+					invalidSearchImgRotation = -invalidSearchImgRotation;
+				}
+				if (rand.nextBoolean()) {
+					invalidSearchTextRotation = -invalidSearchTextRotation;
+				}
+			} else {
+				lastSearchText = newSearchText;
+				updateSearch();
+			}
 		}
 
 		return true;
@@ -775,7 +972,37 @@ public class OptionsOverlay extends OverlayOpsuState {
 		o.setValue(Utils.clamp(value, o.min, o.max));
 	}
 
+	private void updateActiveSection() {
+		// active section is the one that is visible in the top half of the screen
+		activeSection = sections[0];
+		int virtualY = optionStartY;
+		for (OptionTab section : sections) {
+			if (section.filtered) {
+				continue;
+			}
+			virtualY += sectionLineHeight;
+			if (virtualY > scrollHandler.getPosition() + height / 2) {
+				return;
+			}
+			if (section.options == null) {
+				activeSection = section;
+				continue;
+			}
+			for (int optionIndex = 0; optionIndex < section.options.length; optionIndex++) {
+				Option option = section.options[optionIndex];
+				if (option.isFiltered() || !option.showCondition()) {
+					continue;
+				}
+				virtualY += optionHeight;
+			}
+		}
+	}
+
 	private void updateHoverOption(int mouseX, int mouseY) {
+		if (mouseX < navWidth) {
+			hoverOption = null;
+			return;
+		}
 		if (openDropdownMenu != null || keyEntryLeft || keyEntryRight) {
 			return;
 		}
@@ -842,7 +1069,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (section.options == null) {
 				lastBigSectionMatches = sectionMatches;
 				lastBigSection = section;
-				section.filtered = true;
+				section.filtered = !lastBigSectionMatches;
 				continue;
 			}
 			section.filtered = true;
@@ -854,11 +1081,37 @@ public class OptionsOverlay extends OverlayOpsuState {
 				}
 				if (!option.filter(lastSearchText)) {
 					section.filtered = false;
+					//noinspection ConstantConditions
 					lastBigSection.filtered = false;
 				}
 			}
 		}
 		updateHoverOption(prevMouseX, prevMouseY);
+		updateActiveSection();
+		if (openDropdownMenu != null) {
+			openDropdownMenu.reset();
+			openDropdownMenu = null;
+		}
+	}
+
+	private boolean hasSearchResults(String searchText) {
+		for (OptionTab section : sections) {
+			if (section.name.toLowerCase().contains(searchText)) {
+				return true;
+			}
+			if (section.options == null) {
+				continue;
+			}
+			for (Option option : section.options) {
+				boolean wasFiltered = option.isFiltered();
+				boolean isFiltered = option.filter(searchText);
+				option.setFiltered(wasFiltered);
+				if (!isFiltered) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public interface Listener {

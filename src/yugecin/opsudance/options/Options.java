@@ -23,118 +23,101 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.input.Keyboard;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
-import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.CachedVariable;
 import yugecin.opsudance.utils.CachedVariable.Getter;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
  */
 public class Options {
 
-	// TODO remove this?
-	public static int width;
-	public static int height;
-
-	static {
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, new EventListener<ResolutionOrSkinChangedEvent>() {
-			@Override
-			public void onEvent(ResolutionOrSkinChangedEvent event) {
-				if (event.width > 0) {
-					width = event.width;
-					height = event.height;
-				}
-			}
-		});
-	}
-
 	// internal options (not displayed in-game)
-	public static final Option OPTION_BEATMAP_DIRECTORY = new Option("BeatmapDirectory") {
-		@Override
-		public String write() {
-			return config.BEATMAP_DIR.getAbsolutePath();
-		}
+	static {
+		new Option("BeatmapDirectory") {
+			@Override
+			public String write() {
+				return config.BEATMAP_DIR.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.beatmapDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.beatmapDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_OSZ_DIRECTORY = new Option("OSZDirectory") {
-		@Override
-		public String write() {
-			return config.oszDir.getAbsolutePath();
-		}
+		new Option("OSZDirectory") {
+			@Override
+			public String write() {
+				return config.oszDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.oszDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.oszDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_SCREENSHOT_DIRECTORY = new Option("ScreenshotDirectory") {
-		@Override
-		public String write() {
-			return config.screenshotDir.getAbsolutePath();
-		}
+		new Option("ScreenshotDirectory") {
+			@Override
+			public String write() {
+				return config.screenshotDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.screenshotDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.screenshotDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_REPLAY_DIRECTORY = new Option("ReplayDirectory") {
-		@Override
-		public String write() {
-			return config.replayDir.getAbsolutePath();
-		}
+		new Option("ReplayDirectory") {
+			@Override
+			public String write() {
+				return config.replayDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.replayDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.replayDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_REPLAY_IMPORT_DIRECTORY = new Option("ReplayImportDirectory") {
-		@Override
-		public String write() {
-			return config.replayImportDir.getAbsolutePath();
-		}
+		new Option("ReplayImportDirectory") {
+			@Override
+			public String write() {
+				return config.replayImportDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.replayImportDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.replayImportDir = new File(s);
+			}
+		};
 
-	public static final Option OPTION_SKIN_DIRECTORY = new Option("SkinDirectory") {
-		@Override
-		public String write() {
-			return config.skinRootDir.getAbsolutePath();
-		}
+		new Option("SkinDirectory") {
+			@Override
+			public String write() {
+				return config.skinRootDir.getAbsolutePath();
+			}
 
-		@Override
-		public void read(String s) {
-			config.skinRootDir = new File(s);
-		}
-	};
+			@Override
+			public void read(String s) {
+				config.skinRootDir = new File(s);
+			}
+		};
+	}
 
 	public static final NumericOption OPTION_PORT = new NumericOption("-", "Port", "-", 49250, 1024, 65535) {
 		@Override
@@ -146,7 +129,7 @@ public class Options {
 	public static final ToggleOption OPTION_NOSINGLEINSTANCE = new ToggleOption("-", "NoSingleInstance", "-", false);
 
 	// in-game options
-	public static final Option OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
+	public static final ListOption OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
 		private final String[] resolutions = {
 			null,
 			"800x600",
@@ -188,7 +171,6 @@ public class Options {
 
 		@Override
 		public void read (String s){
-			resolutions[0] = displayContainer.nativeDisplayMode.getWidth() + "x" + displayContainer.nativeDisplayMode.getHeight();
 			try {
 				idx = Integer.parseInt(s);
 			} catch (Exception ignored) {
@@ -205,37 +187,31 @@ public class Options {
 	public static final ToggleOption OPTION_ALLOW_LARGER_RESOLUTIONS = new ToggleOption("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false);
 	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false);
 	public static final ListOption OPTION_SKIN = new ListOption("Skin", "Skin", "Change how the game looks.") {
-		private CachedVariable<SkinService> skinService = new CachedVariable<>(new Getter<SkinService>() {
-			@Override
-			public SkinService get() {
-				return instanceContainer.provide(SkinService.class);
-			}
-		});
 
 		@Override
 		public String getValueString () {
-			return skinService.get().usedSkinName;
+			return skinservice.usedSkinName;
 		}
 
 		@Override
 		public Object[] getListItems () {
-			return skinService.get().availableSkinDirectories;
+			return skinservice.availableSkinDirectories;
 		}
 
 		@Override
 		public void clickListItem(int index){
-			skinService.get().usedSkinName = skinService.get().availableSkinDirectories[index];
-			skinService.get().reloadSkin();
+			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
+			skinservice.reloadSkin();
 		}
 
 		@Override
 		public void read (String s){
-			skinService.get().usedSkinName = s;
+			skinservice.usedSkinName = s;
 		}
 
 		@Override
 		public String write() {
-			return skinService.get().usedSkinName;
+			return skinservice.usedSkinName;
 		}
 	};
 
@@ -418,7 +394,7 @@ public class Options {
 	};
 
 	public static final ToggleOption OPTION_DISABLE_SOUNDS = new ToggleOption("Disable All Sound Effects", "DisableSound", "May resolve Linux sound driver issues.  Requires a restart.", (System.getProperty("os.name").toLowerCase().contains("linux")));
-	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Input.KEY_Z, null, false) {
+	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z, null, false) {
 		@Override
 		public String getValueString () {
 			return Keyboard.getKeyName(intval);
@@ -433,12 +409,12 @@ public class Options {
 		public void read(String s){
 			intval = Keyboard.getKeyIndex(s);
 			if (intval == Keyboard.KEY_NONE) {
-				intval = Input.KEY_Y;
+				intval = Keyboard.KEY_Y;
 			}
 		}
 	};
 
-	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Input.KEY_X, null, false) {
+	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X, null, false) {
 		@Override
 		public String getValueString () {
 			return Keyboard.getKeyName(intval);
@@ -453,7 +429,7 @@ public class Options {
 		public void read(String s){
 			intval = Keyboard.getKeyIndex(s);
 			if (intval == Keyboard.KEY_NONE) {
-				intval = Input.KEY_X;
+				intval = Keyboard.KEY_X;
 			}
 		}
 	};
@@ -463,7 +439,8 @@ public class Options {
 	public static final ToggleOption OPTION_DISABLE_MOUSE_BUTTONS = new ToggleOption("Disable mouse buttons in play mode", "MouseDisableButtons", "This option will disable all mouse buttons. Specifically for people who use their keyboard to click.", false) {
 		@Override
 		public void toggle() {
-			EventBus.post(new BarNotificationEvent(state ? "Mouse buttons are disabled." : "Mouse buttons are enabled."));
+			BarNotifListener.EVENT.make().onBarNotif(state ?
+				"Mouse buttons are disabled." : "Mouse buttons are enabled.");
 		}
 	};
 	public static final ToggleOption OPTION_DISABLE_CURSOR = new ToggleOption("Disable Cursor", "DisableCursor", "Hide the cursor sprite.", false);
@@ -503,7 +480,6 @@ public class Options {
 
 	public static final ToggleOption OPTION_SHOW_HIT_LIGHTING = new ToggleOption("Show Hit Lighting", "HitLighting", "Adds an effect behind hit explosions.", true);
 	public static final ToggleOption OPTION_SHOW_HIT_ANIMATIONS = new ToggleOption("Show Hit Animations", "HitAnimations", "Fade out circles and curves.", true);
-	public static final ToggleOption OPTION_SHOW_REVERSEARROW_ANIMATIONS = new ToggleOption("Show reverse arrow animations", "ReverseArrowAnimations", "Fade out reverse arrows after passing.", true);
 	public static final ToggleOption OPTION_SHOW_COMBO_BURSTS = new ToggleOption("Show Combo Bursts", "ComboBurst", "A character image is displayed at combo milestones.", true);
 	public static final ToggleOption OPTION_SHOW_PERFECT_HIT = new ToggleOption("Show Perfect Hits", "PerfectHit", "Whether to show perfect hit result bursts (300s, slider ticks).", true);
 	public static final ToggleOption OPTION_SHOW_FOLLOW_POINTS = new ToggleOption("Show Follow Points", "FollowPoints", "Whether to show follow points between hit objects.", true);
@@ -632,7 +608,7 @@ public class Options {
 		public void clickListItem(int index){
 			if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
 				// TODO remove this when #79 is fixed
-				EventBus.post(new BarNotificationEvent("This mover is disabled in the storyboard right now"));
+				BarNotifListener.EVENT.make().onBarNotif("This mover is disabled in the storyboard right now");
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);

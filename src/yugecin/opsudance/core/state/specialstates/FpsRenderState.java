@@ -20,21 +20,18 @@ package yugecin.opsudance.core.state.specialstates;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.events.EventListener;
-import yugecin.opsudance.events.ResolutionOrSkinChangedEvent;
+import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.utils.FPSMeter;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
-public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEvent> {
+public class FpsRenderState implements ResolutionChangedListener {
 
 	private final static Color GREEN = new Color(171, 218, 25);
 	private final static Color ORANGE = new Color(255, 204, 34);
 	private final static Color DARKORANGE = new Color(255, 149, 24);
 
-	private final DisplayContainer displayContainer;
 	private final FPSMeter fpsMeter;
 	private final FPSMeter upsMeter;
 
@@ -42,11 +39,10 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 	private int y;
 	private int singleHeight;
 
-	public FpsRenderState(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
+	public FpsRenderState() {
 		fpsMeter = new FPSMeter(10);
 		upsMeter = new FPSMeter(10);
-		EventBus.subscribe(ResolutionOrSkinChangedEvent.class, this);
+		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void update() {
@@ -93,7 +89,7 @@ public class FpsRenderState implements EventListener<ResolutionOrSkinChangedEven
 	}
 
 	@Override
-	public void onEvent(ResolutionOrSkinChangedEvent event) {
+	public void onResolutionChanged(int w, int h) {
 		singleHeight = Fonts.SMALL.getLineHeight();
 		x = displayContainer.width - 3;
 		y = displayContainer.height - 3 - singleHeight - 10;

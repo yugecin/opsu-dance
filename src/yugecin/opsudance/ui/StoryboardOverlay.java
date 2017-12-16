@@ -25,7 +25,6 @@ import yugecin.opsudance.options.OptionGroups;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
@@ -34,6 +33,7 @@ import yugecin.opsudance.sbv2.MoveStoryboard;
 
 import java.util.*;
 
+import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 
 @SuppressWarnings("unchecked")
@@ -108,7 +108,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	@Override
 	public boolean onKeyPressed(int key, char c) {
-		if (key == Input.KEY_C) {
+		if (key == KEY_C) {
 			if (speed > 0) {
 				speed -= 1;
 			}
@@ -117,24 +117,24 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 			} else {
 				MusicController.setPitch(speed / 10f);
 			}
-		} else if (key == Input.KEY_V && speed < 21) {
+		} else if (key == KEY_V && speed < 21) {
 			if (speed == 0) {
 				MusicController.resume();
 			}
 			speed += 1;
 			MusicController.setPitch(speed / 10f);
-		} else if (key == Input.KEY_H) {
+		} else if (key == KEY_H) {
 			hide = !hide;
-		} else if (key == Input.KEY_N) {
+		} else if (key == KEY_N) {
 			optionsOverlay.show();
 			if (speed != 0) {
 				MusicController.pause();
 			}
-		} else if (key == Input.KEY_J && index > 0) {
+		} else if (key == KEY_J && index > 0) {
 			index--;
 			goBackOneSBIndex();
 			setMusicPosition();
-		} else if (key == Input.KEY_K && index < gameObjects.length - 1) {
+		} else if (key == KEY_K && index < gameObjects.length - 1) {
 			index++;
 			updateIndex(index);
 			setMusicPosition();

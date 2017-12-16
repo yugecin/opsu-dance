@@ -35,25 +35,16 @@ import java.util.Properties;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.events.BarNotifListener;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Handles automatic program updates.
  */
 public class Updater {
-
-	@Inject
-	private Configuration config;
-
-	private static Updater updater;
-
-	public static Updater get() {
-		return updater;
-	}
 
 	/** The exit confirmation message. */
 	public static final String EXIT_CONFIRMATION = "An opsu! update is being downloaded.\nAre you sure you want to quit opsu!?";
@@ -95,7 +86,7 @@ public class Updater {
 		 * Returns the status description.
 		 */
 		public String getDescription() { return description; }
-	};
+	}
 
 	/** The current updater status. */
 	private Status status;
@@ -119,10 +110,8 @@ public class Updater {
 		return currentVersion.getMajorVersion() + "." + currentVersion.getMinorVersion() + "." + currentVersion.getIncrementalVersion();
 	}
 
-	@Inject
 	public Updater() {
 		status = Status.INITIAL;
-		updater = this;
 	}
 
 	/**
@@ -145,7 +134,7 @@ public class Updater {
 			Date date = null;
 			try {
 				Properties props = new Properties();
-				props.load(ResourceLoader.getResourceAsStream(config.VERSION_FILE));
+				props.load(ResourceLoader.getResourceAsStream(Constants.VERSION_FILE));
 				String build = props.getProperty("build.date");
 				if (build == null || build.equals("${timestamp}") || build.equals("${maven.build.timestamp}"))
 					date = new Date();
@@ -214,16 +203,16 @@ public class Updater {
 
 		// get current version
 		Properties props = new Properties();
-		props.load(ResourceLoader.getResourceAsStream(config.VERSION_FILE));
+		props.load(ResourceLoader.getResourceAsStream(Constants.VERSION_FILE));
 		if ((currentVersion = getVersion(props)) == null)
 			return;
 
 		// get latest version
 		String s = null;
 		try {
-			s = Utils.readDataFromUrl(new URL(config.VERSION_REMOTE));
+			s = Utils.readDataFromUrl(new URL(Constants.VERSION_REMOTE));
 		} catch (UnknownHostException e) {
-			Log.warn(String.format("Check for updates failed. Please check your internet connection, or your connection to %s.", config.VERSION_REMOTE));
+			Log.warn(String.format("Check for updates failed. Please check your internet connection, or your connection to %s.", Constants.VERSION_REMOTE));
 		}
 		if (s == null) {
 			status = Status.CONNECTION_ERROR;
@@ -252,13 +241,14 @@ public class Updater {
 				@Override
 				public void completed() {
 					status = Status.UPDATE_DOWNLOADED;
-					EventBus.post(new BarNotificationEvent("Update has finished downloading"));
+					BarNotifListener.EVENT.make().onBarNotif("Update has finished downloading");
 				}
 
 				@Override
 				public void error() {
 					status = Status.CONNECTION_ERROR;
-					EventBus.post(new BarNotificationEvent("Update failed due to a connection error."));
+					BarNotifListener.EVENT.make().onBarNotif(
+						"Update failed due to a connection error.");
 				}
 			});
 		}
@@ -301,7 +291,7 @@ public class Updater {
 			pb.start();
 		} catch (IOException e) {
 			status = Status.INTERNAL_ERROR;
-			ErrorHandler.error("Failed to start new process.", e).show();
+			explode("Failed to start new process.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

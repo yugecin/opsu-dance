@@ -18,9 +18,10 @@
 package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.InputListener;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 
-public interface OpsuState extends ErrorDumpable {
+public interface OpsuState extends ErrorDumpable, InputListener {
 
 	void update();
 	void preRenderUpdate();
@@ -32,35 +33,5 @@ public interface OpsuState extends ErrorDumpable {
 	 * @return true if closing is allowed
 	 */
 	boolean onCloseRequest();
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean keyPressed(int key, char c);
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean keyReleased(int key, char c);
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean mouseWheelMoved(int delta);
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean mousePressed(int button, int x, int y);
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean mouseReleased(int button, int x, int y);
-
-	/**
-	 * @return false to stop event bubbling
-	 */
-	boolean mouseDragged(int oldx, int oldy, int newx, int newy);
 
 }

@@ -29,17 +29,13 @@ import java.net.URLEncoder;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://osu.mengsky.net/
  */
 public class MengSkyServer extends DownloadServer {
-
-	@Inject
-	private InstanceContainer instanceContainer;
 
 	/** Server name. */
 	private static final String SERVER_NAME = "MengSky";
@@ -55,10 +51,6 @@ public class MengSkyServer extends DownloadServer {
 
 	/** Total result count from the last query. */
 	private int totalResults = -1;
-
-	@Inject
-	public MengSkyServer() {
-	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -93,10 +85,10 @@ public class MengSkyServer extends DownloadServer {
 				// sometimes titleU is artistU instead of the proper title
 				if (titleU.equals(artistU) && !titleU.equals(title))
 					titleU = title;
-				nodes[i] = instanceContainer.injectFields(new DownloadNode(
+				nodes[i] = new DownloadNode(
 					item.getInt("id"), item.getString("syncedDateTime"),
 					title, titleU, artist, artistU, creator
-				));
+				);
 			}
 
 			// store total result count
@@ -107,7 +99,7 @@ public class MengSkyServer extends DownloadServer {
 			}
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		}
 		return nodes;
 	}

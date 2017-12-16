@@ -29,10 +29,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 
 /**
  * Loads skin configuration files.
@@ -293,7 +293,7 @@ public class SkinLoader {
 		} catch (IOException e) {
 			String err = String.format("Failed to read file '%s'.", skinFile.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 
 		return skin;

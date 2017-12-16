@@ -1,10 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>yugecin</groupId>
 	<artifactId>opsu-dance</artifactId>
 	<version>0.5.0-SNAPSHOT</version>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version>${project.version}</version>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -20,6 +24,7 @@
 				<excludes>
 					<exclude>**/Thumbs.db</exclude>
 					<exclude>**/version</exclude>
+					<exclude>**.pdn</exclude>
 				</excludes>
 			</resource>
 			<resource>
@@ -33,11 +38,38 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/mvnlibs</directory>
+							<followSymlinks>true</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/mvnlibs</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
@@ -74,6 +106,7 @@
 								<classpath />
 								<argument>${mainClassName}</argument>
 							</arguments>
+							<workingDirectory>${project.build.outputDirectory}/../</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -92,10 +125,21 @@
 								<exclude>org/newdawn/slick/Music.*</exclude>
 								<exclude>org/newdawn/slick/Input.*</exclude>
 								<exclude>org/newdawn/slick/Input$NullOutputStream.*</exclude>
+								<exclude>org/newdawn/slick/MouseListener.*</exclude>
+								<exclude>org/newdawn/slick/KeyListener.*</exclude>
+								<exclude>org/newdawn/slick/InputListener.*</exclude>
 								<exclude>org/newdawn/slick/gui/TextField.*</exclude>
 								<exclude>org/newdawn/slick/openal/AudioInputStream*</exclude>
 								<exclude>org/newdawn/slick/openal/OpenALStreamPlayer*</exclude>
 								<exclude>org/newdawn/slick/openal/SoundStore*</exclude>
+							</excludes>
+						</filter>
+						<filter>
+							<!-- sqlite contains sources for some reason -->
+							<artifact>*:sqlite-jdbc</artifact>
+							<excludes>
+								<exclude>**/*.java</exclude>
+								<exclude>**/*.c</exclude>
 							</excludes>
 						</filter>
 					</filters>
@@ -104,6 +148,9 @@
 							<manifestEntries>
 								<Main-Class>${mainClassName}</Main-Class>
 								<Use-XDG>${XDG}</Use-XDG>
+								<WinNatives>OpenAL32.dll,OpenAL64.dll,lwjgl.dll,lwjgl64.dll</WinNatives>
+								<NixNatives>liblwjgl.so,liblwjgl64.so,libopenal.so,libopenal64.so</NixNatives>
+								<MacNatives>liblwjgl.dylib,openal.dylib</MacNatives>
 							</manifestEntries>
 						</transformer>
 					</transformers>
@@ -142,6 +189,10 @@
 					<groupId>org.lwjgl.lwjgl</groupId>
 					<artifactId>lwjgl</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.jnlp</groupId>
+					<artifactId>jnlp-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -156,18 +207,14 @@
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
-			<artifactId>jlayer</artifactId>
-			<version>1.0.1-1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>mp3spi</artifactId>
-			<version>1.9.5-1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.soundlibs</groupId>
-			<artifactId>tritonus-share</artifactId>
-			<version>0.3.7-2</version>
+			<version>1.9.5.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>
@@ -209,10 +256,11 @@
 			<artifactId>lzma-java</artifactId>
 			<version>1.3</version>
 		</dependency>
-        <dependency>
-            <groupId>gov.nist.math</groupId>
-            <artifactId>jama</artifactId>
-            <version>1.0.3</version>
-        </dependency>
+		<dependency>
+			<groupId>gov.nist.math</groupId>
+			<artifactId>jama</artifactId>
+			<version>1.0.3</version>
+		</dependency>
 	</dependencies>
+
 </project>

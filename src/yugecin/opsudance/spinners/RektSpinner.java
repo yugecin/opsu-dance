@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class RektSpinner extends Spinner {
 
@@ -25,11 +25,11 @@ public class RektSpinner extends Spinner {
 	public void init() {
 		init(new double[][] {
 			{ 10, 10 },
-			{ Options.width / 2d, 10 },
-			{ Options.width - 10, 10 },
-			{ Options.width - 10, Options.height - 10 },
-			{ Options.width / 2d, Options.height - 10 },
-			{ 10, Options.height - 10 }
+			{ displayContainer.width / 2d, 10 },
+			{ displayContainer.width - 10, 10 },
+			{ displayContainer.width - 10, displayContainer.height - 10 },
+			{ displayContainer.width / 2d, displayContainer.height - 10 },
+			{ 10, displayContainer.height - 10 }
 		});
 	}
 

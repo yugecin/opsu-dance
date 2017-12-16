@@ -39,15 +39,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.newdawn.slick.util.Log;
 
 import lzma.streams.LzmaOutputStream;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.events.BubbleNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.events.BubNotifListener;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Captures osu! replay data.
@@ -56,9 +56,6 @@ import yugecin.opsudance.options.Configuration;
  * @author smoogipooo (https://github.com/smoogipooo/osu-Replay-API/)
  */
 public class Replay {
-
-	@Inject
-	public Configuration config;
 
 	/** The associated file. */
 	private File file;
@@ -278,7 +275,7 @@ public class Replay {
 	public void save() {
 		// create replay directory
 		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
-			EventBus.post(new BubbleNotificationEvent("Failed to create replay directory.", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Failed to create replay directory", Colors.BUB_RED);
 			return;
 		}
 
@@ -347,7 +344,7 @@ public class Replay {
 							compressedOut.write(bytes);
 						} catch (IOException e) {
 							// possible OOM: https://github.com/jponge/lzma-java/issues/9
-							ErrorHandler.error("LZMA compression failed (possible out-of-memory error).", e).show();
+							explode("LZMA compression failed (possible out-of-memory error).", e, DEFAULT_OPTIONS);
 						}
 						compressedOut.close();
 						bout.close();
@@ -361,7 +358,7 @@ public class Replay {
 
 					writer.close();
 				} catch (IOException e) {
-					ErrorHandler.error("Could not save replay data.", e).show();
+					explode("Could not save replay data.", e, DEFAULT_OPTIONS);
 				}
 			}
 		}.start();

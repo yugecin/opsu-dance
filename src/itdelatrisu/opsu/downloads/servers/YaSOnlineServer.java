@@ -33,17 +33,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * Download server: http://osu.yas-online.net/
  */
 public class YaSOnlineServer extends DownloadServer {
-
-	@Inject
-	public InstanceContainer instanceContainer;
 
 	/** Server name. */
 	private static final String SERVER_NAME = "YaS Online";
@@ -71,10 +67,6 @@ public class YaSOnlineServer extends DownloadServer {
 
 	/** Max server download ID seen (for approximating total pages). */
 	private int maxServerID = 0;
-
-	@Inject
-	public YaSOnlineServer() {
-	}
 
 	@Override
 	public String getName() { return SERVER_NAME; }
@@ -121,7 +113,8 @@ public class YaSOnlineServer extends DownloadServer {
 			String downloadLink = item.getString("downloadLink");
 			return String.format(DOWNLOAD_FETCH_URL, downloadLink);
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e).show();
+			explode(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e,
+				DEFAULT_OPTIONS);
 			return null;
 		} finally {
 			Utils.setSSLCertValidation(true);
@@ -183,7 +176,7 @@ public class YaSOnlineServer extends DownloadServer {
 				if (serverID > maxServerID)
 					maxServerID = serverID;
 
-				nodeList.add(instanceContainer.injectFields(new DownloadNode(item.getInt("mapid"), date, title, null, artist, null, "")));
+				nodeList.add(new DownloadNode(item.getInt("mapid"), date, title, null, artist, null, ""));
 			}
 			nodes = nodeList.toArray(new DownloadNode[nodeList.size()]);
 
@@ -193,7 +186,7 @@ public class YaSOnlineServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			ErrorHandler.error(String.format("Problem loading result list for query '%s'.", query), e).show();
+			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
 		} finally {
 			Utils.setSSLCertValidation(true);
 		}

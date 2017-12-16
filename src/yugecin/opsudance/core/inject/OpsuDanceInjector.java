@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+ *
  * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
  */
 package yugecin.opsudance.core.inject;
@@ -22,14 +23,10 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
-import yugecin.opsudance.PreStartupInitializer;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
-import yugecin.opsudance.core.state.specialstates.BubbleNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
-import yugecin.opsudance.core.state.transitions.EmptyTransitionState;
-import yugecin.opsudance.core.state.transitions.FadeInTransitionState;
-import yugecin.opsudance.core.state.transitions.FadeOutTransitionState;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.options.OptionsService;
@@ -48,18 +45,14 @@ public class OpsuDanceInjector extends Injector {
 		bind(Updater.class).asLazySingleton();
 		bind(SkinService.class).asEagerSingleton();
 
-		bind(PreStartupInitializer.class).asEagerSingleton();
+		//bind(PreStartupInitializer.class).asEagerSingleton();
 		bind(DisplayContainer.class).asEagerSingleton();
 
 		bind(ErrorHandler.class).asEagerSingleton();
 
 		bind(FpsRenderState.class).asEagerSingleton();
 		bind(BarNotificationState.class).asEagerSingleton();
-		bind(BubbleNotificationState.class).asEagerSingleton();
-
-		bind(EmptyTransitionState.class).asEagerSingleton();
-		bind(FadeInTransitionState.class).asEagerSingleton();
-		bind(FadeOutTransitionState.class).asEagerSingleton();
+		bind(BubNotifState.class).asEagerSingleton();
 
 		bind(GameObjectRenderer.class).asEagerSingleton();
 

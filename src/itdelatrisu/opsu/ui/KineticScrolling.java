@@ -47,7 +47,7 @@ public class KineticScrolling {
 	private float totalDelta;
 
 	/** The maximum and minimum value the position can reach. */
-	private float max = Float.MAX_VALUE, min = -Float.MAX_VALUE;
+	public float max = Float.MAX_VALUE, min = -Float.MAX_VALUE;
 
 	/** Whether the mouse is currently pressed or not. */
 	private boolean pressed = false;

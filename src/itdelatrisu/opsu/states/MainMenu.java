@@ -45,14 +45,14 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
+import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BarNotifListener;
+import yugecin.opsudance.events.BubNotifListener;
 
+import static org.lwjgl.input.Keyboard.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -61,12 +61,6 @@ import static yugecin.opsudance.options.Options.*;
  * Players are able to enter the song menu or downloads menu from this state.
  */
 public class MainMenu extends BaseOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Updater updater;
 
 	/** Idle time, in milliseconds, before returning the logo to its original position. */
 	private static final short LOGO_IDLE_DELAY = 10000;
@@ -472,12 +466,11 @@ public class MainMenu extends BaseOpsuState {
 		UI.enter();
 		if (!enterNotification) {
 			if (updater.getStatus() == Updater.Status.UPDATE_AVAILABLE) {
-				EventBus.post(new BarNotificationEvent("An opsu! update is available."));
-				enterNotification = true;
+				BarNotifListener.EVENT.make().onBarNotif("An opsu! update is available.");
 			} else if (updater.justUpdated()) {
-				EventBus.post(new BarNotificationEvent("opsu! is now up to date!"));
-				enterNotification = true;
+				BarNotifListener.EVENT.make().onBarNotif("opsu! is now up to date!");
 			}
+			enterNotification = true;
 		}
 
 		// reset measure info
@@ -538,58 +531,60 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
-				EventBus.post(new BarNotificationEvent("Pause"));
+				BarNotifListener.EVENT.make().onBarNotif("Pause");
 			} else if (!MusicController.isTrackLoading()) {
 				MusicController.resume();
-				EventBus.post(new BarNotificationEvent("Play"));
+				BarNotifListener.EVENT.make().onBarNotif("Play");
 			}
 			return true;
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
-			EventBus.post(new BarNotificationEvent(">> Next"));
+			BarNotifListener.EVENT.make().onBarNotif(">> Next");
 			return true;
 		} else if (musicPrevious.contains(x, y)) {
 			lastMeasureProgress = 0f;
 			if (!previous.isEmpty()) {
-				instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
+				songMenuState.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
 				if (OPTION_DYNAMIC_BACKGROUND.state) {
 					bgAlpha.setTime(0);
 				}
 			} else {
 				MusicController.setPosition(0);
 			}
-			EventBus.post(new BarNotificationEvent("<< Previous"));
+			BarNotifListener.EVENT.make().onBarNotif("<< Previous");
 			return true;
 		}
 
 		// downloads button actions
 		if (downloadsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(DownloadsMenu.class);
+			displayContainer.switchState(downloadState);
 			return true;
 		}
 
 		// repository button actions
 		if (repoButton != null && repoButton.contains(x, y)) {
 			try {
-				Desktop.getDesktop().browse(config.REPOSITORY_URI);
+				Desktop.getDesktop().browse(Constants.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
+				BarNotifListener.EVENT.make().onBarNotif(
+					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
 			}
 			return true;
 		}
 
 		if (danceRepoButton != null && danceRepoButton.contains(x, y)) {
 			try {
-				Desktop.getDesktop().browse(config.DANCE_REPOSITORY_URI);
+				Desktop.getDesktop().browse(Constants.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				EventBus.post(new BarNotificationEvent("The repository web page could not be opened."));
+				BarNotifListener.EVENT.make().onBarNotif(
+					"The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				EventBus.post(new BubbleNotificationEvent("Could not browse to repo", BubbleNotificationEvent.COLOR_ORANGE));
+				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
 			}
 			return true;
 		}
@@ -657,18 +652,18 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
-		case Input.KEY_Q:
+		case KEY_ESCAPE:
+		case KEY_Q:
 			if (logoTimer > 0) {
 				logoState = LogoState.CLOSING;
 				logoClose.setTime(0);
 				logoTimer = 0;
 				break;
 			}
-			instanceContainer.provide(ButtonMenu.class).setMenuState(MenuState.EXIT);
-			displayContainer.switchState(ButtonMenu.class);
+			buttonState.setMenuState(MenuState.EXIT);
+			displayContainer.switchState(buttonState);
 			return true;
-		case Input.KEY_P:
+		case KEY_P:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
 				logoState = LogoState.OPENING;
@@ -679,17 +674,17 @@ public class MainMenu extends BaseOpsuState {
 			} else
 				enterSongMenu();
 			return true;
-		case Input.KEY_D:
+		case KEY_D:
 			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(DownloadsMenu.class);
+			displayContainer.switchState(downloadState);
 			return true;
-		case Input.KEY_R:
+		case KEY_R:
 			nextTrack(true);
 			return true;
-		case Input.KEY_UP:
+		case KEY_UP:
 			UI.changeVolume(1);
 			return true;
-		case Input.KEY_DOWN:
+		case KEY_DOWN:
 			UI.changeVolume(-1);
 			return true;
 		}
@@ -719,7 +714,7 @@ public class MainMenu extends BaseOpsuState {
 			MusicController.playAt(0, false);
 			return;
 		}
-		BeatmapSetNode node = instanceContainer.provide(SongMenu.class).setFocus(BeatmapSetList.get().getRandomNode(), -1, true, false);
+		BeatmapSetNode node = songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, false);
 		boolean sameAudio = false;
 		if (node != null) {
 			sameAudio = MusicController.getBeatmap().audioFilename.equals(node.getBeatmapSet().get(0).audioFilename);
@@ -735,10 +730,10 @@ public class MainMenu extends BaseOpsuState {
 	 * Enters the song menu, or the downloads menu if no beatmaps are loaded.
 	 */
 	private void enterSongMenu() {
-		Class<? extends OpsuState> state = SongMenu.class;
+		OpsuState state = songMenuState;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
-			instanceContainer.provide(DownloadsMenu.class).notifyOnLoad("Download some beatmaps to get started!");
-			state = DownloadsMenu.class;
+			downloadState.notifyOnLoad("Download some beatmaps to get started!");
+			state = downloadState;
 		}
 		displayContainer.switchState(state);
 	}

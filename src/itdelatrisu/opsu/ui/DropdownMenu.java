@@ -22,6 +22,7 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
@@ -82,7 +83,7 @@ public class DropdownMenu<E> extends Component {
 
 	@Override
 	public void keyPressed(int key, char c) {
-		if (key == Input.KEY_ESCAPE) {
+		if (key == Keyboard.KEY_ESCAPE) {
 			this.expanded = false;
 		}
 	}

@@ -17,21 +17,9 @@
  */
 package yugecin.opsudance.options;
 
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.inject.InstanceContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class Option {
-
-	// keep a reference to the instancecontainer so that not every option instance needs to be injected
-	protected static InstanceContainer instanceContainer;
-	// caching some commonly used classes
-	protected static Configuration config;
-	protected static DisplayContainer displayContainer;
-	public static void setInstanceContainer(InstanceContainer instanceContainer) {
-		Option.instanceContainer = instanceContainer;
-		Option.config = instanceContainer.provide(Configuration.class);
-		Option.displayContainer = instanceContainer.provide(DisplayContainer.class);
-	}
 
 	public final String name;
 	public final String configurationName;
@@ -54,7 +42,7 @@ public class Option {
 		this.name = name;
 		this.configurationName = configurationName;
 		this.description = description;
-		OptionsService.registerOption(this);
+		optionservice.registerOption(this);
 	}
 
 	/**
@@ -88,6 +76,10 @@ public class Option {
 		}
 		filtered = !name.toLowerCase().contains(searchString) && !description.toLowerCase().contains(searchString);
 		return filtered;
+	}
+
+	public void setFiltered(boolean flag) {
+		this.filtered = flag;
 	}
 
 	/**

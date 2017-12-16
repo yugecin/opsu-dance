@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BeamSpinner extends Spinner {
 
@@ -26,16 +26,14 @@ public class BeamSpinner extends Spinner {
 	private int index;
 
 	@Override
-	public void init()
-	{
+	public void init() {
 		ang = 0;
 		index = 0;
 		point = new double[2];
 	}
 
 	@Override
-	public double[] getPoint()
-	{
+	public double[] getPoint() {
 		if (!waitForDelay()) {
 			return point;
 		}
@@ -43,26 +41,19 @@ public class BeamSpinner extends Spinner {
 		index = ++index % 4;
 		final int MOD = 60;
 
-		point[0] = Options.width / 2d;
-		point[1] = Options.height / 2d;
+		point[0] = displayContainer.width / 2d;
+		point[1] = displayContainer.height / 2d;
 
-		if( index == 0 )
-		{
+		if( index == 0 ) {
 			add( MOD, 90 );
 			add( MOD, 180 );
-		}
-		else if( index == 1 )
-		{
+		} else if( index == 1 ) {
 			add( MOD, 90 );
-			add( Options.height / 2 * 0.8d, 0 );
-		}
-		else if( index == 2 )
-		{
+			add( displayContainer.height / 2 * 0.8d, 0 );
+		} else if( index == 2 ) {
 			add( MOD, -90 );
-			add( Options.height / 2 * 0.8d, 0 );
-		}
-		else if( index == 3 )
-		{
+			add( displayContainer.height / 2 * 0.8d, 0 );
+		} else if( index == 3 ) {
 			add( MOD, -90 );
 			add( MOD, 180 );
 			ang += 0.3;
@@ -71,8 +62,7 @@ public class BeamSpinner extends Spinner {
 		return point;
 	}
 
-	private void add( double rad, double ang )
-	{
+	private void add( double rad, double ang ) {
 		point[0] += rad * Math.cos( (this.ang + ang) / 180d * Math.PI);
 		point[1] -= rad * Math.sin( (this.ang + ang) / 180d * Math.PI);
 	}

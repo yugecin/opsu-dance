@@ -19,7 +19,11 @@ package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.downloads.Updater;
 import yugecin.opsudance.OpsuDance;
-import yugecin.opsudance.core.inject.OpsuDanceInjector;
+
+import javax.swing.*;
+
+import static yugecin.opsudance.core.Constants.PROJECT_NAME;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class Entrypoint {
 
@@ -27,10 +31,18 @@ public class Entrypoint {
 
 	public static void main(String[] args) {
 		sout("launched");
-		(new OpsuDanceInjector()).provide(OpsuDance.class).start(args);
 
-		if (Updater.get().getStatus() == Updater.Status.UPDATE_FINAL) {
-			Updater.get().runUpdate();
+		try {
+			InstanceContainer.kickstart();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Cannot start " + PROJECT_NAME, JOptionPane.ERROR_MESSAGE);
+			// TODO replace with errorhandler
+		}
+
+		new OpsuDance().start(args);
+
+		if (updater.getStatus() == Updater.Status.UPDATE_FINAL) {
+			updater.runUpdate();
 		}
 	}
 
@@ -39,7 +51,7 @@ public class Entrypoint {
 	}
 
 	public static void sout(String message) {
-		System.out.println(String.format("[%7d] %s", runtime(), message));
+		System.out.println(String.format("[%8d] %s", runtime(), message));
 	}
 
 }

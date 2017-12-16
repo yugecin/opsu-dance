@@ -5,7 +5,8 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 import yugecin.opsudance.movers.Mover;
 import yugecin.opsudance.movers.factories.AutoMoverFactory;
-import yugecin.opsudance.options.Options;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Created by Alex Wieser on 09.10.2016.
@@ -130,6 +131,6 @@ public class CombinedSpiralMover extends Mover {
     }
 
     private boolean checkBounds(double[] pos) {
-        return 0 < pos[0] && pos[0] < Options.width && 0 < pos[1] && pos[1] < Options.height;
+        return 0 < pos[0] && pos[0] < displayContainer.width && 0 < pos[1] && pos[1] < displayContainer.height;
     }
 }

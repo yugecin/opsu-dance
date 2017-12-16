@@ -20,36 +20,31 @@ package yugecin.opsudance.options;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinReg;
-import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
+import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import org.newdawn.slick.util.Log;
+import yugecin.opsudance.events.BubNotifListener;
+import yugecin.opsudance.utils.ManifestWrapper;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class Configuration {
 
@@ -67,13 +62,6 @@ public class Configuration {
 	public final File LOG_FILE;
 	public final File OPTIONS_FILE;
 
-	public final String FONT_NAME;
-	public final String VERSION_FILE;
-	public final URI REPOSITORY_URI;
-	public final URI DANCE_REPOSITORY_URI;
-	public final String ISSUES_URL;
-	public final String VERSION_REMOTE;
-
 	public final File osuInstallationDirectory;
 
 	public final Beatmap themeBeatmap;
@@ -85,9 +73,8 @@ public class Configuration {
 	public File replayImportDir;
 	public File skinRootDir;
 
-	@Inject
-	public Configuration() {
-		USE_XDG = areXDGDirectoriesEnabled();
+	public Configuration(ManifestWrapper jarmanifest) {
+		USE_XDG = jarmanifest.valueOrDefault(null, "Use-XDG", "").equalsIgnoreCase("true");
 
 		CONFIG_DIR = getXDGBaseDir("XDG_CONFIG_HOME", ".config");
 		DATA_DIR = getXDGBaseDir("XDG_DATA_HOME", ".local/share");
@@ -103,13 +90,6 @@ public class Configuration {
 		LOG_FILE = new File(CONFIG_DIR, ".opsu.log");
 		OPTIONS_FILE = new File(CONFIG_DIR, ".opsu.cfg");
 
-		FONT_NAME = "DroidSansFallback.ttf";
-		VERSION_FILE = "version";
-		REPOSITORY_URI = URI.create("https://github.com/itdelatrisu/opsu");
-		DANCE_REPOSITORY_URI = URI.create("https://github.com/yugecin/opsu-dance");
-		ISSUES_URL = "https://github.com/yugecin/opsu-dance/issues/new?title=%s&body=%s";
-		VERSION_REMOTE = "https://raw.githubusercontent.com/yugecin/opsu-dance/master/version";
-
 		osuInstallationDirectory = loadOsuInstallationDirectory();
 
 		themeBeatmap = createThemeBeatmap();
@@ -117,14 +97,14 @@ public class Configuration {
 
 	private Beatmap createThemeBeatmap() {
 		try {
-			String[] tokens = {"theme.mp3", "Rainbows", "Kevin MacLeod", "219350"};
+			String[] tokens = {"theme.ogg", "On the Bach", "Jingle Punks", "66000"};
 			Beatmap beatmap = new Beatmap(null);
 			beatmap.audioFilename = new File(tokens[0]);
 			beatmap.title = tokens[1];
 			beatmap.artist = tokens[2];
 			beatmap.endTime = Integer.parseInt(tokens[3]);
 			beatmap.timingPoints = new ArrayList<>(1);
-			beatmap.timingPoints.add(new TimingPoint("1080,545.454545454545,4,1,0,100,0,0"));
+			beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
 			return beatmap;
 		} catch (Exception e) {
 			return null;
@@ -170,12 +150,12 @@ public class Configuration {
 	}
 
 	private File loadDirectory(File dir, File defaultDir, String kind) {
-		if (dir.exists() && dir.isDirectory()) {
+		if (dir != null && dir.exists() && dir.isDirectory()) {
 			return dir;
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {
 			String msg = String.format("Failed to create %s directory at '%s'.", kind, defaultDir.getAbsolutePath());
-			EventBus.post(new BubbleNotificationEvent(msg, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_RED);
 		}
 		return defaultDir;
 	}
@@ -195,49 +175,24 @@ public class Configuration {
 		return loadDirectory(dir, defaultDir, kind);
 	}
 
-	private boolean areXDGDirectoriesEnabled() {
-		JarFile jarFile = Utils.getJarFile();
-		if (jarFile == null) {
-			return false;
-		}
-		try {
-			Manifest manifest = jarFile.getManifest();
-			if (manifest == null) {
-				return false;
-			}
-			Attributes attributes = manifest.getMainAttributes();
-			String value = attributes.getValue("Use-XDG");
-			return (value != null && value.equalsIgnoreCase("true"));
-		} catch (IOException e) {
-			return false;
-		}
-	}
-
 	/**
 	 * Returns the directory based on the XDG base directory specification for
 	 * Unix-like operating systems, only if the "XDG" flag is enabled.
-	 * @param env the environment variable to check (XDG_*_*)
+	 * @param envvar the environment variable to check (XDG_*_*)
 	 * @param fallback the fallback directory relative to ~home
 	 * @return the XDG base directory, or the working directory if unavailable
 	 */
-	private File getXDGBaseDir(String env, String fallback) {
-		File workingdir;
-		if (Utils.isJarRunning()) {
-			workingdir = Utils.getRunningDirectory().getParentFile();
-		} else {
-			workingdir = Paths.get(".").toAbsolutePath().normalize().toFile();
-		}
-
+	private File getXDGBaseDir(String envvar, String fallback) {
 		if (!USE_XDG) {
-			return workingdir;
+			return env.workingdir;
 		}
 
 		String OS = System.getProperty("os.name").toLowerCase();
 		if (OS.indexOf("nix") == -1 && OS.indexOf("nux") == -1 && OS.indexOf("aix") == -1){
-			return workingdir;
+			return env.workingdir;
 		}
 
-		String rootPath = System.getenv(env);
+		String rootPath = System.getenv(envvar);
 		if (rootPath == null) {
 			String home = System.getProperty("user.home");
 			if (home == null) {
@@ -247,7 +202,8 @@ public class Configuration {
 		}
 		File dir = new File(rootPath, "opsu");
 		if (!dir.isDirectory() && !dir.mkdir()) {
-			ErrorHandler.error(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath), new Exception("empty")).preventReport().show();
+			explode(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath),
+				new Exception("empty"), PREVENT_REPORT);
 		}
 		return dir;
 	}
@@ -259,7 +215,9 @@ public class Configuration {
 		// TODO: get a decent place for this
 		// create the screenshot directory
 		if (!screenshotDir.isDirectory() && !screenshotDir.mkdir()) {
-			EventBus.post(new BubbleNotificationEvent(String.format("Failed to create screenshot directory at '%s'.", screenshotDir.getAbsolutePath()), BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(
+				String.format( "Failed to create screenshot directory at '%s'.",
+					screenshotDir.getAbsolutePath()), Colors.BUB_RED);
 			return;
 		}
 
@@ -293,9 +251,13 @@ public class Configuration {
 						}
 					}
 					ImageIO.write(image, OPTION_SCREENSHOT_FORMAT.getValueString().toLowerCase(), file);
-					EventBus.post(new BubbleNotificationEvent("Created " + fileName, BubbleNotificationEvent.COMMONCOLOR_PURPLE));
+					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
+						Colors.BUB_PURPLE);
 				} catch (Exception e) {
-					ErrorHandler.error("Failed to take a screenshot.", e).show();
+					Log.error("Could not take screenshot", e);
+					BubNotifListener.EVENT.make().onBubNotif(
+						"Failed to take a screenshot. See log file for details",
+						Colors.BUB_PURPLE);
 				}
 			}
 		}.start();

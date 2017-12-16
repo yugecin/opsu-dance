@@ -33,10 +33,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
+
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
  * File download.
@@ -92,7 +93,7 @@ public class Download {
 	private String localPath;
 
 	/** The local path to rename the file to when finished. */
-	private String rename;
+	private String renamedFileName;
 
 	/** The download URL. */
 	private URL url;
@@ -137,18 +138,20 @@ public class Download {
 	 * Constructor.
 	 * @param remoteURL the download URL
 	 * @param localPath the path to save the download
-	 * @param rename the file name to rename the download to when complete
+	 * @param renamedFileName the file name to rename the download to when complete
 	 */
-	public Download(String remoteURL, String localPath, String rename) {
+	public Download(String remoteURL, String localPath, String renamedFileName) {
 		try {
 			this.url = new URL(remoteURL);
 		} catch (MalformedURLException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error(String.format("Bad download URL: '%s'", remoteURL), e).show();
+			explode(String.format("Bad download URL: '%s'", remoteURL), e, DEFAULT_OPTIONS);
 			return;
 		}
 		this.localPath = localPath;
-		this.rename = Utils.cleanFileName(rename, '-');
+		if (renamedFileName != null) {
+			this.renamedFileName = Utils.cleanFileName(renamedFileName, '-');
+		}
 	}
 
 	/**
@@ -159,7 +162,7 @@ public class Download {
 	/**
 	 * Returns the local path to save the download (after renamed).
 	 */
-	public String getLocalPath() { return (rename != null) ? rename : localPath; }
+	public String getLocalPath() { return (renamedFileName != null) ? renamedFileName : localPath; }
 
 	/**
 	 * Sets the download listener.
@@ -217,7 +220,7 @@ public class Download {
 							else if (redirectCount > MAX_REDIRECTS)
 								error = String.format("Download for URL '%s' is attempting too many redirects (over %d).", base.toString(), MAX_REDIRECTS);
 							if (error != null) {
-								EventBus.post(new BubbleNotificationEvent(error, BubbleNotificationEvent.COLOR_ORANGE));
+								BubNotifListener.EVENT.make().onBubNotif(error, Colors.BUB_ORANGE);
 								throw new IOException();
 							}
 
@@ -263,9 +266,9 @@ public class Download {
 						status = Status.COMPLETE;
 						rbc.close();
 						fos.close();
-						if (rename != null) {
+						if (renamedFileName != null) {
 							Path source = new File(localPath).toPath();
-							Files.move(source, source.resolveSibling(rename), StandardCopyOption.REPLACE_EXISTING);
+							Files.move(source, source.resolveSibling(renamedFileName), StandardCopyOption.REPLACE_EXISTING);
 						}
 						if (listener != null)
 							listener.completed();
@@ -419,7 +422,7 @@ public class Download {
 			}
 		} catch (IOException e) {
 			this.status = Status.ERROR;
-			ErrorHandler.error("Failed to cancel download.", e).show();
+			explode("Failed to cancel download.", e, DEFAULT_OPTIONS);
 		}
 	}
 }

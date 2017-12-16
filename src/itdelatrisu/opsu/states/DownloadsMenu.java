@@ -22,10 +22,8 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.DownloadNode;
@@ -54,12 +52,11 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotificationEvent;
-import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.events.BarNotifListener;
+
+import static org.lwjgl.input.Keyboard.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Downloads menu.
@@ -68,18 +65,6 @@ import yugecin.opsudance.options.Configuration;
  * from this state.
  */
 public class DownloadsMenu extends ComplexOpsuState {
-
-	@Inject
-	private InstanceContainer instanceContainer;
-
-	@Inject
-	private Configuration config;
-
-	@Inject
-	private OszUnpacker oszUnpacker;
-
-	@Inject
-	private BeatmapParser beatmapParser;
 
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 700;
@@ -275,32 +260,35 @@ public class DownloadsMenu extends ComplexOpsuState {
 			} finally {
 				finished = true;
 			}
-		};
+		}
 
 		/** Imports all packed beatmaps. */
 		private void importBeatmaps() {
 			// invoke unpacker and parser
-			File[] dirs = oszUnpacker.unpackAll();
-			if (dirs != null && dirs.length > 0) {
-				this.importedNode = beatmapParser.parseDirectories(dirs);
-				if (importedNode != null) {
-					// send notification
-					EventBus.post(new BarNotificationEvent((dirs.length == 1) ? "Imported 1 new song." :
-							String.format("Imported %d new songs.", dirs.length)));
-				}
-			}
+			File[] dirs = oszunpacker.unpackAll();
+			this.importedNode = beatmapParser.parseDirectories(dirs);
 
 			DownloadList.get().clearDownloads(Download.Status.COMPLETE);
+
+			if (this.importedNode == null) {
+				return;
+			}
+			String msg;
+			if (dirs.length == 1) {
+				msg = "Imported 1 new song.";
+			} else {
+				msg = String.format("Imported %d new songs.", dirs.length);
+			}
+			BarNotifListener.EVENT.make().onBarNotif(msg);
 		}
 	}
 
-	@Inject
-	public DownloadsMenu(InstanceContainer instanceContainer) {
+	public DownloadsMenu() {
 		SERVERS = new DownloadServer[] {
-			instanceContainer.provide(BloodcatServer.class),
-			instanceContainer.provide(YaSOnlineServer.class),
-			instanceContainer.provide(MnetworkServer.class),
-			instanceContainer.provide(MengSkyServer.class),
+			new BloodcatServer(),
+			new YaSOnlineServer(),
+			new MnetworkServer(),
+			new MengSkyServer(),
 		};
 	}
 
@@ -319,7 +307,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// search
 		searchTimer = SEARCH_DELAY;
 		searchResultString = "Loading data from server...";
-		search = new TextField(displayContainer, Fonts.DEFAULT, baseX, searchY, searchWidth, Fonts.MEDIUM.getLineHeight()) {
+		search = new TextField(Fonts.DEFAULT, baseX, searchY, searchWidth, Fonts.MEDIUM.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;
@@ -555,7 +543,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.
-				instanceContainer.provide(SongMenu.class).setFocus(importedNode, -1, true, true);
+				songMenuState.setFocus(importedNode, -1, true, true);
 			}
 			importThread = null;
 		}
@@ -633,7 +621,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// back
 		if (UI.getBackButton().contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(MainMenu.class);
+			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
@@ -698,7 +686,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 											if (playing)
 												previewID = node.getID();
 										} catch (SlickException e) {
-											EventBus.post(new BarNotificationEvent("Failed to load track preview. See log for details."));
+											BarNotifListener.EVENT.make().onBarNotif("Failed to load track preview. See log for details.");
 											Log.error(e);
 										}
 									}
@@ -721,7 +709,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 								if (!DownloadList.get().contains(node.getID())) {
 									node.createDownload(serverMenu.getSelectedItem());
 									if (node.getDownload() == null) {
-										EventBus.post(new BarNotificationEvent("The download could not be started"));
+										BarNotifListener.EVENT.make().onBarNotif("The download could not be started");
 									} else {
 										DownloadList.get().addNode(node);
 										node.getDownload().start();
@@ -901,12 +889,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// block input during beatmap importing
-		if (importThread != null && key != Input.KEY_ESCAPE) {
+		if (importThread != null && key != KEY_ESCAPE) {
 			return true;
 		}
 
 		switch (key) {
-		case Input.KEY_ESCAPE:
+		case KEY_ESCAPE:
 			if (importThread != null) {
 				// beatmap importing: stop parsing beatmaps by sending interrupt to BeatmapParser
 				importThread.interrupt();
@@ -918,16 +906,16 @@ public class DownloadsMenu extends ComplexOpsuState {
 			} else {
 				// return to main menu
 				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(MainMenu.class);
+				displayContainer.switchState(mainmenuState);
 			}
 			return true;
-		case Input.KEY_ENTER:
+		case KEY_RETURN:
 			if (!search.getText().isEmpty()) {
 				pageDir = Page.RESET;
 				resetSearchTimer();
 			}
 			return true;
-		case Input.KEY_F5:
+		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			lastQuery = null;
 			pageDir = Page.CURRENT;
@@ -937,7 +925,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			return true;
 		}
 		// wait for user to finish typing
-		if (Character.isLetterOrDigit(c) || key == Input.KEY_BACK) {
+		if (Character.isLetterOrDigit(c) || key == KEY_BACK) {
 			search.keyPressed(key, c);
 			searchTimer = 0;
 			pageDir = Page.RESET;
@@ -963,7 +951,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		pageDir = Page.RESET;
 		previewID = -1;
 		if (barNotificationOnLoad != null) {
-			EventBus.post(new BarNotificationEvent(barNotificationOnLoad));
+			BarNotifListener.EVENT.make().onBarNotif(barNotificationOnLoad);
 			barNotificationOnLoad = null;
 		}
 	}

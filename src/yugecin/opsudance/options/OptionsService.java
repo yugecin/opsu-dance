@@ -17,39 +17,37 @@
  */
 package yugecin.opsudance.options;
 
+import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.core.inject.Inject;
-import yugecin.opsudance.core.inject.InstanceContainer;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import yugecin.opsudance.events.BubNotifListener;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
- * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
+ * @author itdelatrisu (https://github.com/itdelatrisu)
+ * most functions are copied from itdelatrisu.opsu.Options.java
  */
 public class OptionsService {
 
-	@Inject
-	private Configuration config;
+	public final HashMap<String, Option> optionMap;
 
-	public static final HashMap<String, Option> optionMap = new HashMap<>();
-
-	@Inject
-	public OptionsService(InstanceContainer instanceContainer) {
-		Option.setInstanceContainer(instanceContainer);
+	public OptionsService() {
+		optionMap = new HashMap<>();
 	}
 
-	public static void registerOption(Option option) {
+	public void registerOption(Option option) {
 		optionMap.put(option.configurationName, option);
 	}
 
 	public void loadOptions() {
 		// if no config file, use default settings
 		if (!config.OPTIONS_FILE.isFile()) {
+			config.loadDirectories();
 			saveOptions();
 			return;
 		}
@@ -82,7 +80,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to read option file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 		config.loadDirectories();
 	}
@@ -111,7 +109,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to write to file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			EventBus.post(new BubbleNotificationEvent(err, BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
 		}
 	}
 

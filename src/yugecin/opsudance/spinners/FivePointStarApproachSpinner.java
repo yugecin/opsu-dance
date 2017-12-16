@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class FivePointStarApproachSpinner extends Spinner {
 
@@ -39,12 +39,12 @@ public class FivePointStarApproachSpinner extends Spinner {
 			odd = !odd;
 		}
 
-		double rad = Options.width / 4.0f * (1d - Spinner.PROGRESS);
+		double rad = displayContainer.width / 4.0f * (1d - Spinner.PROGRESS);
 		if (!odd) {
 			rad /= 3d;
 		}
-		point[0] = Options.width / 2d + Math.cos(ang) * rad;
-		point[1] = Options.height / 2d + Math.sin(ang) * rad;
+		point[0] = displayContainer.width / 2d + Math.cos(ang) * rad;
+		point[1] = displayContainer.height / 2d + Math.sin(ang) * rad;
 		return point;
 	}
 

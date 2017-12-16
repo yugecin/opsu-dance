@@ -26,32 +26,20 @@ import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.inject.Inject;
 import yugecin.opsudance.skinning.SkinService;
 
 import static yugecin.opsudance.options.Options.*;
 
 public class GameObjectRenderer {
 
-	@Inject
-	private DisplayContainer displayContainer;
+	public GameData gameData;
 
-	private GameData gameData;
-
-	private float circleDiameter;
-	private int circleDiameterInt;
+	public float circleDiameter;
+	public int circleDiameterInt;
 
 	private Image hitcircle;
 	private Image hitcircleOverlay;
 	private Image approachCircle;
-
-	@Deprecated
-	public static GameObjectRenderer instance;
-
-	public GameObjectRenderer() {
-		instance = this; // TODO get rid of this
-	}
 
 	public void initForGame(GameData gameData, float circleDiameter) {
 		this.gameData = gameData;
@@ -63,14 +51,6 @@ public class GameObjectRenderer {
 		hitcircle = GameImage.HITCIRCLE.getImage();
 		hitcircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage();
 		approachCircle = GameImage.APPROACHCIRCLE.getImage();
-	}
-
-	public float getCircleDiameter() {
-		return circleDiameter;
-	}
-
-	public void setGameData(GameData gameData) {
-		this.gameData = gameData;
 	}
 
 	public void initForFrame() {

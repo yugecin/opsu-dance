@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class ApproachCircleSpinner extends Spinner {
 
@@ -38,10 +38,10 @@ public class ApproachCircleSpinner extends Spinner {
 			ang += 15;
 		}
 
-		double rad = Options.width / 4.0f * (1d - Spinner.PROGRESS);
+		double rad = displayContainer.width / 4.0f * (1d - Spinner.PROGRESS);
 
-		point[0] = Options.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
-		point[1] = Options.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
+		point[0] = displayContainer.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
+		point[1] = displayContainer.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
 
 		return point;
 	}

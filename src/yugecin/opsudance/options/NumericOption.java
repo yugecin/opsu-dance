@@ -18,8 +18,8 @@
 package yugecin.opsudance.options;
 
 import itdelatrisu.opsu.Utils;
-import yugecin.opsudance.core.events.EventBus;
-import yugecin.opsudance.events.BubbleNotificationEvent;
+import itdelatrisu.opsu.ui.Colors;
+import yugecin.opsudance.events.BubNotifListener;
 
 public class NumericOption extends Option {
 
@@ -53,7 +53,8 @@ public class NumericOption extends Option {
 		try {
 			val = Utils.clamp(Integer.parseInt(s), min, max);
 		} catch (Exception ignored) {
-			EventBus.post(new BubbleNotificationEvent("Failed to parse " + configurationName + " option", BubbleNotificationEvent.COMMONCOLOR_RED));
+			BubNotifListener.EVENT.make().onBubNotif("Failed to parse " + configurationName + " option",
+				Colors.BUB_RED);
 		}
 	}
 
