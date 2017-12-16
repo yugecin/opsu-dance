@@ -97,14 +97,14 @@ public class Configuration {
 
 	private Beatmap createThemeBeatmap() {
 		try {
-			String[] tokens = {"theme.mp3", "Rainbows", "Kevin MacLeod", "219350"};
+			String[] tokens = {"theme.ogg", "On the Bach", "Jingle Punks", "66000"};
 			Beatmap beatmap = new Beatmap(null);
 			beatmap.audioFilename = new File(tokens[0]);
 			beatmap.title = tokens[1];
 			beatmap.artist = tokens[2];
 			beatmap.endTime = Integer.parseInt(tokens[3]);
 			beatmap.timingPoints = new ArrayList<>(1);
-			beatmap.timingPoints.add(new TimingPoint("1080,545.454545454545,4,1,0,100,0,0"));
+			beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
 			return beatmap;
 		} catch (Exception e) {
 			return null;
