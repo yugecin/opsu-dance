@@ -22,8 +22,6 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
-import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -34,6 +32,7 @@ import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.ui.BackButton;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Draws common UI components.
@@ -193,29 +192,21 @@ public class UI {
 		int progress;
 
 		// determine current action
-		//
-		/*
-		TODO
-		if ((file = OszUnpacker.getCurrentFileName()) != null) {
+		if ((file = oszunpacker.getCurrentFileName()) != null) {
 			text = "Unpacking new beatmaps...";
-			progress = OszUnpacker.getUnpackerProgress();
-		} else if ((file = BeatmapParser.getCurrentFileName()) != null) {
-			text = (BeatmapParser.getStatus() == BeatmapParser.Status.INSERTING) ?
+			progress = oszunpacker.getUnpackerProgress();
+		} else if ((file = beatmapParser.getCurrentFileName()) != null) {
+			text = (beatmapParser.getStatus() == BeatmapParser.Status.INSERTING) ?
 					"Updating database..." : "Loading beatmaps...";
-			progress = BeatmapParser.getParserProgress();
-		} else if ((file = ReplayImporter.getCurrentFileName()) != null) {
+			progress = beatmapParser.getParserProgress();
+		} else if ((file = replayImporter.getCurrentFileName()) != null) {
 			text = "Importing replays...";
-			progress = ReplayImporter.getLoadingProgress();
+			progress = replayImporter.getLoadingProgress();
 		} else if ((file = SoundController.getCurrentFileName()) != null) {
 			text = "Loading sounds...";
 			progress = SoundController.getLoadingProgress();
 		} else
 			return;
-		*/
-
-		if (true) {
-			return; // TODO
-		}
 
 		// draw loading info
 		float marginX = displayContainer.width * 0.02f, marginY = displayContainer.height * 0.02f;
