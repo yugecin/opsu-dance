@@ -26,6 +26,7 @@ import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
+import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -138,6 +139,35 @@ public class ReplayPlayback {
 		}
 	}
 
+	private int HITIMAGETIMEREXPAND = 200;
+	private int HITIMAGETIMERFADESTART = 500;
+	private int HITIMAGETIMERFADEEND = 700;
+	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
+	private void showHitImage(int renderdelta, int ypos) {
+		if (hitImage == null) {
+			return;
+		}
+
+		hitImageTimer += renderdelta;
+		if (hitImageTimer > HITIMAGETIMERFADEEND) {
+			hitImage = null;
+			return;
+		}
+
+		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
+		Color color = new Color(1f, 1f, 1f, 1f);
+		if (hitImageTimer > HITIMAGETIMERFADESTART) {
+			color.a = (HITIMAGETIMERFADEEND - hitImageTimer) / HITIMAGETIMERFADEDELTA;
+		}
+		float scale = 1f;
+		float offset = 0f;
+		if (hitImageTimer < HITIMAGETIMEREXPAND) {
+			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
+			offset = (SQSIZE + 5f) / 2f * (1f - scale);
+		}
+		hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE + offset, ypos + offset, scale, color);
+	}
+
 	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, int ypos, int time) {
 		if (objectIndex >= gameObjects.length) {
 			return;
@@ -171,11 +201,8 @@ public class ReplayPlayback {
 			}
 			keydelay[i] -= renderdelta;
 		}
-		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player + " " + this.objectIndex, color);
-		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
-		if (hitImage != null) {
-			hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE * 2, ypos);
-		}
+		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
+		showHitImage(renderdelta, ypos);
 		int y = currentFrame.getScaledY();
 		if (hr) {
 			y = container.height - y;
@@ -233,12 +260,12 @@ public class ReplayPlayback {
 		@Override
 		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
 			if ((result == HIT_300)) {
-				//return;
+				return;
 			}
 
 			if (result < hitResults.length) {
 				hitImageTimer = 0;
-				hitImage = hitResults[result].getScaledCopy(SQSIZE, SQSIZE);
+				hitImage = hitResults[result].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 			}
 		}
 
