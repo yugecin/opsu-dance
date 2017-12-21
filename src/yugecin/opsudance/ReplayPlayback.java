@@ -45,11 +45,12 @@ public class ReplayPlayback {
 	private boolean hr;
 	private String player;
 
-	private GameObject[] gameObjects;
+	public GameObject[] gameObjects;
 	private int objectIndex = 0;
 	private int lastkeys = 0;
 	private Image hitImage;
 	private int hitImageTimer = 0;
+	public GData gdata = new GData();
 
 	public ReplayPlayback(DisplayContainer container, Replay replay, Color color) {
 		this.container = container;
@@ -101,10 +102,6 @@ public class ReplayPlayback {
 		this.player = replay.playerName + this.player;
 	}
 
-	public void setGameObjects(GameObject[] gameObjects) {
-		this.gameObjects = gameObjects;
-	}
-
 	public void resetFrameIndex() {
 		frameIndex = 0;
 		currentFrame = replay.frames[frameIndex++];
@@ -114,12 +111,6 @@ public class ReplayPlayback {
 	private void sendKeys(Beatmap beatmap, int trackPosition) {
 		if (objectIndex >= gameObjects.length)  // nothing to do here
 			return;
-
-		int deltakeys = (currentFrame.getKeys() & ~this.lastkeys);
-		if (deltakeys == ReplayFrame.KEY_NONE) {
-			return;
-		}
-		this.lastkeys = currentFrame.getKeys();
 
 		HitObject hitObject = beatmap.objects[objectIndex];
 
@@ -154,8 +145,17 @@ public class ReplayPlayback {
 
 		while (nextFrame != null && nextFrame.getTime() < time) {
 			currentFrame = nextFrame;
+
+			int keys = currentFrame.getKeys();
+			int deltaKeys = (keys & ~lastkeys);  // keys that turned on
+			if (deltaKeys != ReplayFrame.KEY_NONE) { // send a key press
+				sendKeys(beatmap, currentFrame.getTime());
+			} else if (keys == lastkeys) {
+				update(time, beatmap, hitResultOffset, currentFrame.getTimeDiff());
+			}
+			lastkeys = keys;
+
 			processKeys();
-			sendKeys(beatmap, time);
 			frameIndex++;
 			if (frameIndex >= replay.frames.length) {
 				nextFrame = null;
@@ -163,9 +163,6 @@ public class ReplayPlayback {
 			}
 			nextFrame = replay.frames[frameIndex];
 		}
-		processKeys();
-		sendKeys(beatmap, time);
-		update(time, beatmap, hitResultOffset, renderdelta);
 		g.setColor(color);
 		ypos *= (SQSIZE + 5);
 		for (int i = 0; i < 4; i++) {
@@ -177,7 +174,7 @@ public class ReplayPlayback {
 		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player + " " + this.objectIndex, color);
 		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
 		if (hitImage != null) {
-			hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE * 2, ypos + SQSIZE / 2);
+			hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE * 2, ypos);
 		}
 		int y = currentFrame.getScaledY();
 		if (hr) {
@@ -204,13 +201,11 @@ public class ReplayPlayback {
 		}
 	}
 
-	private GData _data;
 	public class GData extends GameData {
 
 		public GData() {
 			super();
 			this.loadImages();
-			_data = this;
 		}
 
 		@Override
@@ -237,20 +232,13 @@ public class ReplayPlayback {
 
 		@Override
 		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
-			int hitResult = HIT_300;
-
-			if (handleResult) {
-				hitResult = handleHitResult(time, result, x, y, color, end, hitObject,
-					hitResultType, repeat, (curve != null && !sliderHeldToEnd));
+			if ((result == HIT_300)) {
+				//return;
 			}
 
-			if ((hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K)) {
-				return;
-			}
-
-			if (hitResult < hitResults.length) {
+			if (result < hitResults.length) {
 				hitImageTimer = 0;
-				hitImage = hitResults[hitResult].getScaledCopy(SQSIZE, SQSIZE);
+				hitImage = hitResults[result].getScaledCopy(SQSIZE, SQSIZE);
 			}
 		}
 

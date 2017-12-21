@@ -85,7 +85,9 @@ public class Circle extends GameObject {
 
 	@Override
 	public GameObject clone(GameData data) {
-		return new Circle(hitObject, game, data, comboColorIndex, comboEnd);
+		Circle c = new Circle(hitObject, game, data, comboColorIndex, comboEnd);
+		c.isreplay = true;
+		return c;
 	}
 
 	@Override
@@ -170,12 +172,13 @@ public class Circle extends GameObject {
 		return false;
 	}
 
+	private boolean isreplay;
 	@Override
 	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition) {
 		int time = hitObject.getTime();
 
 		int[] hitResultOffset = game.getHitResultOffsets();
-		boolean isAutoMod = GameMod.AUTO.isActive();
+		boolean isAutoMod = !isreplay && GameMod.AUTO.isActive();
 
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
 			if (isAutoMod) {// "auto" mod: catch any missed notes due to lag

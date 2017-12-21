@@ -191,7 +191,9 @@ public class Slider extends GameObject {
 
 	@Override
 	public GameObject clone(GameData data) {
-		return new Slider(hitObject, game, data, comboColorIndex, comboEnd);
+		Slider s = new Slider(hitObject, game, data, comboColorIndex, comboEnd);
+		s.isreplay = true;
+		return s;
 	}
 
 	@Override
@@ -627,11 +629,12 @@ public class Slider extends GameObject {
 		return false;
 	}
 
+	boolean isreplay;
 	@Override
 	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition) {
 		int repeatCount = hitObject.getRepeatCount();
 		int[] hitResultOffset = game.getHitResultOffsets();
-		boolean isAutoMod = GameMod.AUTO.isActive();
+		boolean isAutoMod = !isreplay && GameMod.AUTO.isActive();
 
 		if (!sliderClickedInitial) {
 			int time = hitObject.getTime();
