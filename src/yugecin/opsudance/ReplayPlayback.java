@@ -52,6 +52,9 @@ public class ReplayPlayback {
 	private Image hitImage;
 	private int hitImageTimer = 0;
 	public GData gdata = new GData();
+	private boolean missed;
+
+	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
 	public ReplayPlayback(DisplayContainer container, Replay replay, Color color) {
 		this.container = container;
@@ -149,14 +152,14 @@ public class ReplayPlayback {
 		}
 
 		hitImageTimer += renderdelta;
-		if (hitImageTimer > HITIMAGETIMERFADEEND) {
+		if (!missed && hitImageTimer > HITIMAGETIMERFADEEND) {
 			hitImage = null;
 			return;
 		}
 
 		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
 		Color color = new Color(1f, 1f, 1f, 1f);
-		if (hitImageTimer > HITIMAGETIMERFADESTART) {
+		if (!missed && hitImageTimer > HITIMAGETIMERFADESTART) {
 			color.a = (HITIMAGETIMERFADEEND - hitImageTimer) / HITIMAGETIMERFADEDELTA;
 		}
 		float scale = 1f;
@@ -193,16 +196,21 @@ public class ReplayPlayback {
 			}
 			nextFrame = replay.frames[frameIndex];
 		}
-		g.setColor(color);
 		ypos *= (SQSIZE + 5);
-		for (int i = 0; i < 4; i++) {
-			if (keydelay[i] > 0) {
-				g.fillRect(SQSIZE * i, ypos + 5, SQSIZE, SQSIZE);
+		g.setColor(color);
+		if (!missed) {
+			for (int i = 0; i < 4; i++) {
+				if (keydelay[i] > 0) {
+					g.fillRect(SQSIZE * i, ypos + 5, SQSIZE, SQSIZE);
+				}
+				keydelay[i] -= renderdelta;
 			}
-			keydelay[i] -= renderdelta;
 		}
 		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
 		showHitImage(renderdelta, ypos);
+		if (missed) {
+			return;
+		}
 		int y = currentFrame.getScaledY();
 		if (hr) {
 			y = container.height - y;
@@ -259,8 +267,13 @@ public class ReplayPlayback {
 
 		@Override
 		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
-			if ((result == HIT_300)) {
+			if (missed || result == HIT_300) {
 				return;
+			}
+
+			if (result == HIT_MISS) {
+				missed = true;
+				ReplayPlayback.this.color = missedColor;
 			}
 
 			if (result < hitResults.length) {
