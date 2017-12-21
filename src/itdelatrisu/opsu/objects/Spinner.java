@@ -174,6 +174,11 @@ public class Spinner extends GameObject {
 	}
 
 	@Override
+	public GameObject clone(GameData data) {
+		return new Spinner(hitObject, game, data);
+	}
+
+	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		if (mirror) {
 			return;

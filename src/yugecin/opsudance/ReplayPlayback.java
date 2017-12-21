@@ -17,12 +17,18 @@
  */
 package yugecin.opsudance;
 
+import itdelatrisu.opsu.GameData;
+import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.HitObject;
+import itdelatrisu.opsu.objects.GameObject;
+import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
 
 public class ReplayPlayback {
@@ -38,6 +44,12 @@ public class ReplayPlayback {
 	public static final int SQSIZE = 15;
 	private boolean hr;
 	private String player;
+
+	private GameObject[] gameObjects;
+	private int objectIndex = 0;
+	private int lastkeys = 0;
+	private Image hitImage;
+	private int hitImageTimer = 0;
 
 	public ReplayPlayback(DisplayContainer container, Replay replay, Color color) {
 		this.container = container;
@@ -89,16 +101,61 @@ public class ReplayPlayback {
 		this.player = replay.playerName + this.player;
 	}
 
+	public void setGameObjects(GameObject[] gameObjects) {
+		this.gameObjects = gameObjects;
+	}
+
 	public void resetFrameIndex() {
 		frameIndex = 0;
 		currentFrame = replay.frames[frameIndex++];
 		nextFrame = replay.frames[frameIndex];
 	}
 
-	public void render(int renderdelta, Graphics g, int ypos, int time) {
+	private void sendKeys(Beatmap beatmap, int trackPosition) {
+		if (objectIndex >= gameObjects.length)  // nothing to do here
+			return;
+
+		int deltakeys = (currentFrame.getKeys() & ~this.lastkeys);
+		if (deltakeys == ReplayFrame.KEY_NONE) {
+			return;
+		}
+		this.lastkeys = currentFrame.getKeys();
+
+		HitObject hitObject = beatmap.objects[objectIndex];
+
+		// circles
+		if (hitObject.isCircle() && gameObjects[objectIndex].mousePressed(currentFrame.getScaledX(), currentFrame.getScaledY(), trackPosition))
+			objectIndex++;  // circle hit
+
+			// sliders
+		else if (hitObject.isSlider())
+			gameObjects[objectIndex].mousePressed(currentFrame.getScaledX(), currentFrame.getScaledY(), trackPosition);
+	}
+
+	private void update(int trackPosition, Beatmap beatmap, int[] hitResultOffset, int delta) {
+		boolean keyPressed = currentFrame.getKeys() != ReplayFrame.KEY_NONE;
+		while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
+			// check if we've already passed the next object's start time
+			boolean overlap = (objectIndex + 1 < gameObjects.length &&
+				trackPosition > beatmap.objects[objectIndex + 1].getTime() - hitResultOffset[GameData.HIT_50]);
+
+			// update hit object and check completion status
+			if (gameObjects[objectIndex].update(overlap, delta, currentFrame.getScaledX(), currentFrame.getScaledY(), keyPressed, trackPosition)) {
+				objectIndex++;  // done, so increment object index
+			} else
+				break;
+		}
+	}
+
+	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, int ypos, int time) {
+		if (objectIndex >= gameObjects.length) {
+			return;
+		}
+
 		while (nextFrame != null && nextFrame.getTime() < time) {
 			currentFrame = nextFrame;
 			processKeys();
+			sendKeys(beatmap, time);
 			frameIndex++;
 			if (frameIndex >= replay.frames.length) {
 				nextFrame = null;
@@ -107,6 +164,8 @@ public class ReplayPlayback {
 			nextFrame = replay.frames[frameIndex];
 		}
 		processKeys();
+		sendKeys(beatmap, time);
+		update(time, beatmap, hitResultOffset, renderdelta);
 		g.setColor(color);
 		ypos *= (SQSIZE + 5);
 		for (int i = 0; i < 4; i++) {
@@ -115,7 +174,11 @@ public class ReplayPlayback {
 			}
 			keydelay[i] -= renderdelta;
 		}
-		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
+		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player + " " + this.objectIndex, color);
+		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
+		if (hitImage != null) {
+			hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE * 2, ypos + SQSIZE / 2);
+		}
 		int y = currentFrame.getScaledY();
 		if (hr) {
 			y = container.height - y;
@@ -138,6 +201,62 @@ public class ReplayPlayback {
 		}
 		if ((keys ^ 10) == 8) {
 			keydelay[3] = KEY_DELAY;
+		}
+	}
+
+	private GData _data;
+	public class GData extends GameData {
+
+		public GData() {
+			super();
+			this.loadImages();
+			_data = this;
+		}
+
+		@Override
+		public void sendSliderRepeatResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
+			// ?
+		}
+
+		@Override
+		public void sendSliderStartResult(int time, float x, float y, Color color, Color mirrorColor, boolean expand) {
+			// ?
+		}
+
+		@Override
+		public void sendSliderTickResult(int time, int result, float x, float y, HitObject hitObject, int repeat) {
+			if (result == HIT_MISS) {
+
+			}
+		}
+
+		@Override
+		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
+			sendHitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
+		}
+
+		@Override
+		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
+			int hitResult = HIT_300;
+
+			if (handleResult) {
+				hitResult = handleHitResult(time, result, x, y, color, end, hitObject,
+					hitResultType, repeat, (curve != null && !sliderHeldToEnd));
+			}
+
+			if ((hitResult == HIT_300 || hitResult == HIT_300G || hitResult == HIT_300K)) {
+				return;
+			}
+
+			if (hitResult < hitResults.length) {
+				hitImageTimer = 0;
+				hitImage = hitResults[hitResult].getScaledCopy(SQSIZE, SQSIZE);
+			}
+		}
+
+		@Override
+		public void addHitError(int time, int x, int y, int timeDiff) {
+			//?
 		}
 	}
 

@@ -170,7 +170,7 @@ public class GameData {
 		HIT_ANIMATION_RESULT = 12;  // not a hit result
 
 	/** Hit result-related images (indexed by HIT_* constants to HIT_MAX). */
-	private Image[] hitResults;
+	protected Image[] hitResults;
 
 	/** Counts of each hit result so far (indexed by HIT_* constants to HIT_MAX). */
 	private int[] hitResultCount;
@@ -1409,7 +1409,7 @@ public class GameData {
 	 * @param noIncrementCombo if the combo should not be incremented by this result
 	 * @return the actual hit result (HIT_* constants)
 	 */
-	private int handleHitResult(int time, int result, float x, float y, Color color, boolean end,
+	protected int handleHitResult(int time, int result, float x, float y, Color color, boolean end,
 			HitObject hitObject, HitObjectType hitResultType, int repeat, boolean noIncrementCombo) {
 		// update health, score, and combo streak based on hit result
 		int hitValue = 0;

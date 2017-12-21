@@ -190,6 +190,11 @@ public class Slider extends GameObject {
 	}
 
 	@Override
+	public GameObject clone(GameData data) {
+		return new Slider(hitObject, game, data, comboColorIndex, comboEnd);
+	}
+
+	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		if (trackPosition > getEndTime()) {
 			return;

@@ -84,6 +84,11 @@ public class Circle extends GameObject {
 	}
 
 	@Override
+	public GameObject clone(GameData data) {
+		return new Circle(hitObject, game, data, comboColorIndex, comboEnd);
+	}
+
+	@Override
 	public void draw(Graphics g, int trackPosition, boolean mirror) {
 		Color orig = color;
 		if (mirror) {

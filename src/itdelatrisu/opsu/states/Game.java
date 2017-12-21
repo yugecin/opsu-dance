@@ -726,7 +726,7 @@ public class Game extends ComplexOpsuState {
 		g.setColor(Color.black);
 		g.fillRect(ReplayPlayback.SQSIZE * 2, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
 		for (ReplayPlayback replayPlayback : replays) {
-			replayPlayback.render(displayContainer.renderDelta, g, i++, trackPosition);
+			replayPlayback.render(beatmap, hitResultOffset, displayContainer.renderDelta, g, i++, trackPosition);
 		}
 
 		super.render(g);
@@ -1716,6 +1716,14 @@ public class Game extends ComplexOpsuState {
 					}
 				}
 			}
+		}
+
+		for (ReplayPlayback replayPlayback : replays) {
+			GameObject[] objs = new GameObject[gameObjects.length];
+			for (int i = 0; i < objs.length; i++) {
+				objs[i] = gameObjects[i].clone(replayPlayback.new GData());
+			}
+			replayPlayback.setGameObjects(objs);
 		}
 
 		Dancer.instance.setGameObjects(gameObjects);

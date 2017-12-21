@@ -4,6 +4,7 @@ package awlex.ospu;
  * Created by Awlex on 10.10.2016.
  */
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
@@ -33,6 +34,15 @@ public class FakeGameObject extends GameObject {
         this.end = new Vec2f();
         this.start.x = this.end.x = (start.end.x + end.start.x) / 2;
         this.start.y = this.end.y = (start.end.y + end.start.y) / 2;
+    }
+
+    @Override
+    public GameObject clone(GameData a) {
+        FakeGameObject o = new FakeGameObject();
+        o.halfTime = this.halfTime;
+        o.start = this.start;
+        o.end = this.end;
+        return o;
     }
 
     @Override

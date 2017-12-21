@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu.objects;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
@@ -29,7 +30,7 @@ import org.newdawn.slick.Graphics;
  */
 public class DummyObject extends GameObject {
 	/** The associated HitObject. */
-	private HitObject hitObject;
+	public final HitObject hitObject;
 
 	/** The scaled starting x, y coordinates. */
 	private float x, y;
@@ -47,6 +48,11 @@ public class DummyObject extends GameObject {
 		this.hitObject = new HitObject("0,0,0,1,0,0:0:0:0:");
 		updatePosition();
 		updateStartEndPositions(0);
+	}
+
+	@Override
+	public GameObject clone(GameData a) {
+		return new DummyObject(this.hitObject);
 	}
 
 	@Override

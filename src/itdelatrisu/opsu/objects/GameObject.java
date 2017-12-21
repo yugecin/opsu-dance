@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu.objects;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import org.newdawn.slick.Color;
@@ -113,5 +114,7 @@ public abstract class GameObject {
 	public float getHue() {
 		return hue;
 	}
+
+	public abstract GameObject clone(GameData data);
 
 }
