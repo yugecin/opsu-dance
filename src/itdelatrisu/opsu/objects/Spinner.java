@@ -176,8 +176,8 @@ public class Spinner extends GameObject {
 
 	@Override
 	public GameObject clone(GameData data) {
-		return new DummyObject(hitObject);
-		//return new Spinner(hitObject, game, data);
+		//return new DummyObject(hitObject);
+		return new Spinner(hitObject, game, data);
 	}
 
 	@Override
