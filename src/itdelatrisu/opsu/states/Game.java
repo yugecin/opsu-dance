@@ -721,10 +721,10 @@ public class Game extends ComplexOpsuState {
 		UI.draw(g);
 
 		int i = 0;
-		g.setColor(new Color(0.2f, 0.2f, 0.2f));
-		g.fillRect(0, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
-		g.setColor(Color.black);
-		g.fillRect(ReplayPlayback.SQSIZE * 2, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
+		//g.setColor(new Color(0.2f, 0.2f, 0.2f));
+		//g.fillRect(0, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
+		//g.setColor(Color.black);
+		//g.fillRect(ReplayPlayback.SQSIZE * 2, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
 		for (ReplayPlayback replayPlayback : replays) {
 			replayPlayback.render(beatmap, hitResultOffset, displayContainer.renderDelta, g, i++, trackPosition);
 		}
