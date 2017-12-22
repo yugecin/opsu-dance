@@ -45,6 +45,9 @@ public class ReplayPlayback {
 	public static final int SQSIZE = 15;
 	private boolean hr;
 	private String player;
+	private String mods;
+	private int playerwidth;
+	private int textwidth;
 
 	public GameObject[] gameObjects;
 	private int objectIndex = 0;
@@ -65,45 +68,48 @@ public class ReplayPlayback {
 		//cursorcolor.a = 0.5f;
 		cursor = new Cursor(cursorcolor);
 		keydelay = new int[4];
-		this.player = "";
+		this.player = replay.playerName;
+		this.textwidth = Fonts.SMALLBOLD.getWidth(this.player);
+		this.playerwidth = this.textwidth;
+		this.mods = "";
 		if ((replay.mods & 0x1) > 0) {
-			this.player += "NF";
+			this.mods += "NF";
 		}
 		if ((replay.mods & 0x2) > 0) {
-			this.player += "EZ";
+			this.mods += "EZ";
 		}
 		if ((replay.mods & 0x8) > 0 && (replay.mods & 0x200) == 0) {
-			this.player += "HD";
+			this.mods += "HD";
 		}
 		if ((replay.mods & 0x10) > 0) {
-			this.player += "HR";
+			this.mods += "HR";
 			hr = true;
 		}
 		if ((replay.mods & 0x20) > 0) {
-			this.player += "SD";
+			this.mods += "SD";
 		}
 		if ((replay.mods & 0x40) > 0) {
-			this.player += "DT";
+			this.mods += "DT";
 		}
 		if ((replay.mods & 0x80) > 0) {
-			this.player += "RL";
+			this.mods += "RL";
 		}
 		if ((replay.mods & 0x100) > 0) {
-			this.player += "HT";
+			this.mods += "HT";
 		}
 		if ((replay.mods & 0x200) > 0) {
-			this.player += "NC";
+			this.mods += "NC";
 		}
 		if ((replay.mods & 0x400) > 0) {
-			this.player += "FL";
+			this.mods += "FL";
 		}
 		if ((replay.mods & 0x4000) > 0) {
-			this.player += "PF";
+			this.mods += "PF";
 		}
-		if (this.player.length() > 0) {
-			this.player = " +" + this.player;
+		if (this.mods.length() > 0) {
+			this.mods = " +" + this.mods;
+			this.textwidth += Fonts.SMALLBOLD.getWidth(this.mods);
 		}
-		this.player = replay.playerName + this.player;
 	}
 
 	public void resetFrameIndex() {
@@ -158,7 +164,6 @@ public class ReplayPlayback {
 			return;
 		}
 
-		int namewidth = Fonts.SMALLBOLD.getWidth(this.player);
 		Color color = new Color(1f, 1f, 1f, 1f);
 		if (!missed && hitImageTimer > HITIMAGETIMERFADESTART) {
 			color.a = (HITIMAGETIMERFADEEND - hitImageTimer) / HITIMAGETIMERFADEDELTA;
@@ -176,7 +181,7 @@ public class ReplayPlayback {
 			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
 			offset = (SQSIZE + 5f) / 2f * (1f - scale);
 		}
-		hitImage.draw(SQSIZE * 5 + namewidth + SQSIZE + offset, ypos + offset, scale, color);
+		hitImage.draw(SQSIZE * 5 + textwidth + SQSIZE + offset, ypos + offset, scale, color);
 	}
 
 	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, int ypos, int time) {
@@ -216,6 +221,9 @@ public class ReplayPlayback {
 			}
 		}
 		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
+		if (!this.mods.isEmpty()) {
+			Fonts.SMALLBOLD.drawString(SQSIZE * 5 + playerwidth, ypos, this.mods, new Color(1f, 1f, 1f, color.a));
+		}
 		showHitImage(renderdelta, ypos);
 		if (missed) {
 			return;
