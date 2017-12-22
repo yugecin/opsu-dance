@@ -204,6 +204,7 @@ public class ReplayPlayback {
 			}
 			nextFrame = replay.frames[frameIndex];
 		}
+		processKeys();
 		ypos *= (SQSIZE + 5);
 		g.setColor(color);
 		if (!missed) {
