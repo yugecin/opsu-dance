@@ -43,6 +43,7 @@ public class ReplayPlayback {
 	public Cursor cursor;
 	private int keydelay[];
 	public static final int SQSIZE = 15;
+	public static final int UNITHEIGHT = SQSIZE + 5;
 	private boolean hr;
 	private String player;
 	private String mods;
@@ -152,8 +153,9 @@ public class ReplayPlayback {
 	private int HITIMAGETIMERFADESTART = 500;
 	private int HITIMAGETIMERFADEEND = 700;
 	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
-	private int HITIMAGEDEADFADE = 15000;
-	private void showHitImage(int renderdelta, int ypos) {
+	private int HITIMAGEDEADFADE = 10000;
+	private float SHRINKTIME = 500f;
+	private void showHitImage(int renderdelta, float ypos) {
 		if (hitImage == null) {
 			return;
 		}
@@ -172,19 +174,29 @@ public class ReplayPlayback {
 			if (hitImageTimer > HITIMAGEDEADFADE) {
 				this.color.a = color.a = 0f;
 			} else {
-				this.color.a = color.a = 1f - (float) hitImageTimer / HITIMAGEDEADFADE;
+				this.color.a = color.a = 1f - AnimationEquation.IN_CIRC.calc((float) hitImageTimer / HITIMAGEDEADFADE);
 			}
 		}
 		float scale = 1f;
 		float offset = 0f;
 		if (hitImageTimer < HITIMAGETIMEREXPAND) {
 			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
-			offset = (SQSIZE + 5f) / 2f * (1f - scale);
+			offset = UNITHEIGHT / 2f * (1f - scale);
 		}
 		hitImage.draw(SQSIZE * 5 + textwidth + SQSIZE + offset, ypos + offset, scale, color);
 	}
 
-	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, int ypos, int time) {
+	public float getHeight() {
+		if (hitImageTimer < HITIMAGEDEADFADE) {
+			return UNITHEIGHT;
+		}
+		if (hitImageTimer >= HITIMAGEDEADFADE + SHRINKTIME) {
+			return 0f;
+		}
+		return UNITHEIGHT * (1f - AnimationEquation.OUT_QUART.calc((hitImageTimer - HITIMAGEDEADFADE) / SHRINKTIME));
+	}
+
+	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, float ypos, int time) {
 		if (objectIndex >= gameObjects.length) {
 			return;
 		}
@@ -210,7 +222,6 @@ public class ReplayPlayback {
 			nextFrame = replay.frames[frameIndex];
 		}
 		processKeys();
-		ypos *= (SQSIZE + 5);
 		g.setColor(color);
 		if (!missed) {
 			for (int i = 0; i < 4; i++) {

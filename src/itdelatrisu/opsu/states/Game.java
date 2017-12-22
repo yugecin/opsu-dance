@@ -720,13 +720,21 @@ public class Game extends ComplexOpsuState {
 
 		UI.draw(g);
 
-		int i = 0;
 		//g.setColor(new Color(0.2f, 0.2f, 0.2f));
 		//g.fillRect(0, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
 		//g.setColor(Color.black);
 		//g.fillRect(ReplayPlayback.SQSIZE * 2, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
+		float totalHeight = 0f;
 		for (ReplayPlayback replayPlayback : replays) {
-			replayPlayback.render(beatmap, hitResultOffset, displayContainer.renderDelta, g, i++, trackPosition);
+			totalHeight += replayPlayback.getHeight();
+		}
+		float ypos = (displayContainer.height - totalHeight) / 2 - ReplayPlayback.UNITHEIGHT;
+		for (ReplayPlayback replayPlayback : replays) {
+			float h = replayPlayback.getHeight();
+			ypos += h;
+			//if (h > 0f) {
+				replayPlayback.render(beatmap, hitResultOffset, displayContainer.renderDelta, g, ypos, trackPosition);
+			//}
 		}
 
 		super.render(g);
