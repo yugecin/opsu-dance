@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu.objects;
 
+import awlex.ospu.FakeGameObject;
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.GameData.HitObjectType;
 import itdelatrisu.opsu.GameImage;
@@ -175,7 +176,8 @@ public class Spinner extends GameObject {
 
 	@Override
 	public GameObject clone(GameData data) {
-		return new Spinner(hitObject, game, data);
+		return new DummyObject(hitObject);
+		//return new Spinner(hitObject, game, data);
 	}
 
 	@Override
