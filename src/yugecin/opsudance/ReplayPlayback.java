@@ -146,6 +146,7 @@ public class ReplayPlayback {
 	private int HITIMAGETIMERFADESTART = 500;
 	private int HITIMAGETIMERFADEEND = 700;
 	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
+	private int HITIMAGEDEADFADE = 15000;
 	private void showHitImage(int renderdelta, int ypos) {
 		if (hitImage == null) {
 			return;
@@ -161,6 +162,13 @@ public class ReplayPlayback {
 		Color color = new Color(1f, 1f, 1f, 1f);
 		if (!missed && hitImageTimer > HITIMAGETIMERFADESTART) {
 			color.a = (HITIMAGETIMERFADEEND - hitImageTimer) / HITIMAGETIMERFADEDELTA;
+		}
+		if (missed) {
+			if (hitImageTimer > HITIMAGEDEADFADE) {
+				this.color.a = color.a = 0f;
+			} else {
+				this.color.a = color.a = 1f - (float) hitImageTimer / HITIMAGEDEADFADE;
+			}
 		}
 		float scale = 1f;
 		float offset = 0f;
@@ -284,7 +292,7 @@ public class ReplayPlayback {
 				if (!missed) {
 					result = HIT_50;
 				} else {
-					ReplayPlayback.this.color = missedColor;
+					ReplayPlayback.this.color = new Color(missedColor);
 				}
 			}
 
