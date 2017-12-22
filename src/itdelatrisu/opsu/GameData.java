@@ -1227,7 +1227,7 @@ public class GameData {
 	/**
 	 * Increases the combo streak by one.
 	 */
-	private void incrementComboStreak() {
+	protected void incrementComboStreak() {
 		combo++;
 		comboPopTime = 0;
 		if (combo > comboMax)

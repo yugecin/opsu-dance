@@ -255,8 +255,8 @@ public class ReplayPlayback {
 
 		@Override
 		public void sendSliderTickResult(int time, int result, float x, float y, HitObject hitObject, int repeat) {
-			if (result == HIT_MISS) {
-
+			if (result == HIT_SLIDER30 || result == HIT_SLIDER10) {
+				incrementComboStreak();
 			}
 		}
 
@@ -267,13 +267,25 @@ public class ReplayPlayback {
 
 		@Override
 		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
+			if (curve == null || sliderHeldToEnd) {
+				incrementComboStreak();
+			}
+
 			if (missed || result == HIT_300) {
 				return;
 			}
 
+			missed = this.getComboStreak() > replay.combo;
+			if (missed) {
+				result = HIT_MISS;
+			}
+
 			if (result == HIT_MISS) {
-				missed = true;
-				ReplayPlayback.this.color = missedColor;
+				if (!missed) {
+					result = HIT_50;
+				} else {
+					ReplayPlayback.this.color = missedColor;
+				}
 			}
 
 			if (result < hitResults.length) {
