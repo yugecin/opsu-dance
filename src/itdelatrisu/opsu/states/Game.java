@@ -1463,6 +1463,14 @@ public class Game extends ComplexOpsuState {
 		super.enter();
 
 		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/image/");
+		if (!replaydir.exists()) {
+			BubNotifListener.EVENT.make().onBubNotif(String.format(
+				"replay folder '%s' does not exist", replaydir.getAbsolutePath()
+			), Colors.BUB_RED);
+			displayContainer.switchStateInstantly(songMenuState);
+			return;
+		}
+
 		File[] files = replaydir.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
