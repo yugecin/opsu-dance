@@ -35,6 +35,8 @@ import java.util.LinkedList;
 
 public class ReplayPlayback {
 
+	private static final boolean HIDEMOUSEBTNS = true;
+
 	private final DisplayContainer container;
 	private final HitData hitdata;
 	public final Replay replay;
@@ -253,7 +255,7 @@ public class ReplayPlayback {
 			}
 		}
 		Color fadecolor = new Color(1f, 1f, 1f, color.a);
-		int xpos = SQSIZE * 5;
+		int xpos = SQSIZE * (HIDEMOUSEBTNS ? 3 : 5);
 		Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
 		xpos += ACCMAXWIDTH;
 		if (gradeImage != null) {
