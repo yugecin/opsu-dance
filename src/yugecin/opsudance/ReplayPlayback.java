@@ -305,6 +305,7 @@ public class ReplayPlayback {
 		LinkedList<Integer> time100 = new LinkedList();
 		LinkedList<Integer> time50 = new LinkedList();
 		LinkedList<AccData> acc = new LinkedList();
+		LinkedList<ComboData> combo = new LinkedList();
 
 		public HitData(File file) {
 			try (InputStream in = new FileInputStream(file)) {
@@ -324,7 +325,7 @@ public class ReplayPlayback {
 					}
 					byte[] _time = { time[3], time[2], time[1], time[0] };
 					lasttime = ByteBuffer.wrap(_time).getInt();
-					lasttime -= 50;
+					lasttime += 200;
 					int type = in.read();
 					if (type == -1) {
 						throw new RuntimeException();
@@ -354,6 +355,7 @@ public class ReplayPlayback {
 						break;
 					case 12:
 						int c = ByteBuffer.wrap(_time).getInt();
+						combo.add(new ComboData(lasttime, c));
 						if (c < lastcombo) {
 							combobreaktime = lasttime;
 						} else {
@@ -411,6 +413,15 @@ public class ReplayPlayback {
 		public AccData(int time, float acc) {
 			this.time = time;
 			this.acc = acc;
+		}
+	}
+
+	public static class ComboData {
+		public int time;
+		public int combo;
+		public ComboData(int time, int combo) {
+			this.time = time;
+			this.combo = combo;
 		}
 	}
 
