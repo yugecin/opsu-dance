@@ -157,7 +157,7 @@ public class ReplayPlayback {
 			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
 			offset = UNITHEIGHT / 2f * (1f - scale);
 		}
-		hitImage.draw(xpos + offset, ypos + offset, scale, color);
+		hitImage.draw(xpos + offset, 2f + ypos + offset, scale, color);
 	}
 
 	public float getHeight() {
