@@ -254,18 +254,17 @@ public class ReplayPlayback {
 				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 			}
 		}
-		Color fadecolor = new Color(1f, 1f, 1f, color.a);
 		int xpos = SQSIZE * (HIDEMOUSEBTNS ? 3 : 5);
 		Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
 		xpos += ACCMAXWIDTH;
-		if (gradeImage != null) {
-			gradeImage.draw(xpos, ypos, fadecolor);
+		if (!missed && gradeImage != null) {
+			gradeImage.draw(xpos, ypos);
 		}
 		xpos += SQSIZE + 10;
 		Fonts.SMALLBOLD.drawString(xpos, ypos, this.player, color);
 		xpos += playerwidth;
 		if (!this.mods.isEmpty()) {
-			Fonts.SMALLBOLD.drawString(xpos, ypos, this.mods, fadecolor);
+			Fonts.SMALLBOLD.drawString(xpos, ypos, this.mods, new Color(1f, 1f, 1f, color.a));
 			xpos += modwidth;
 		}
 		xpos += 10;
