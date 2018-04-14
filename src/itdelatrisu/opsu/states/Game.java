@@ -1462,7 +1462,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/image/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/furioso/");
 		if (!replaydir.exists()) {
 			BubNotifListener.EVENT.make().onBubNotif(String.format(
 				"replay folder '%s' does not exist", replaydir.getAbsolutePath()
@@ -1482,6 +1482,11 @@ public class Game extends ComplexOpsuState {
 		float hueshift = 360f / files.length + 18f;
 		float hue = 0;
 		for (File file : files) {
+			final String datafilename = file.getName().substring(0, file.getName().length() - 3) + "ope";
+			final File hitdatafile = new File(file.getParentFile(), datafilename);
+			if (!hitdatafile.exists()) {
+				continue;
+			}
 			Replay r = new Replay(file);
 			try {
 				r.load();
@@ -1490,7 +1495,8 @@ public class Game extends ComplexOpsuState {
 				continue;
 			}
 			Color color = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
-			replays.add(new ReplayPlayback(displayContainer, r, color));
+			final ReplayPlayback.HitData hitdata = new ReplayPlayback.HitData(hitdatafile);
+			replays.add(new ReplayPlayback(displayContainer, r, hitdata, color));
 			hue += hueshift;
 		}
 

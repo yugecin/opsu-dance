@@ -31,10 +31,17 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.Entrypoint;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ReplayPlayback {
 
 	private final DisplayContainer container;
+	private final HitData hitdata;
 	public final Replay replay;
 	public ReplayFrame currentFrame;
 	public ReplayFrame nextFrame;
@@ -60,9 +67,10 @@ public class ReplayPlayback {
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
-	public ReplayPlayback(DisplayContainer container, Replay replay, Color color) {
+	public ReplayPlayback(DisplayContainer container, Replay replay, HitData hitdata, Color color) {
 		this.container = container;
 		this.replay = replay;
+		this.hitdata = hitdata;
 		resetFrameIndex();
 		this.color = color;
 		Color cursorcolor = new Color(color);
@@ -197,6 +205,7 @@ public class ReplayPlayback {
 	}
 
 	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, float ypos, int time) {
+		/*
 		if (objectIndex >= gameObjects.length) {
 			return;
 		}
@@ -222,6 +231,7 @@ public class ReplayPlayback {
 			nextFrame = replay.frames[frameIndex];
 		}
 		processKeys();
+		*/
 		g.setColor(color);
 		if (!missed) {
 			for (int i = 0; i < 4; i++) {
@@ -325,6 +335,116 @@ public class ReplayPlayback {
 		@Override
 		public void addHitError(int time, int x, int y, int timeDiff) {
 			//?
+		}
+	}
+
+	public static class HitData {
+
+		int combobreaktime = -1;
+		LinkedList<Integer> time100 = new LinkedList();
+		LinkedList<Integer> time50 = new LinkedList();
+		LinkedList<AccData> acc = new LinkedList();
+
+		public HitData(File file) {
+			try (InputStream in = new FileInputStream(file)) {
+				int lasttime = -1;
+				int lastcombo = 0;
+				int last100 = 0;
+				int last50 = 0;
+				while (true) {
+					byte[] time = new byte[4];
+					int rd = in.read(time);
+					if (rd == 0) {
+						break;
+					}
+					if (rd != 4) {
+						throw new RuntimeException();
+					}
+					byte[] _time = { time[3], time[2], time[1], time[0] };
+					lasttime = ByteBuffer.wrap(_time).getInt();
+					int type = in.read();
+					if (type == -1) {
+						throw new RuntimeException();
+					}
+					if (in.read(time) != 4) {
+						throw new RuntimeException();
+					}
+					_time = new byte[] { time[3], time[2], time[1], time[0] };
+					switch (type) {
+					case 1:
+						int this100 = ByteBuffer.wrap(_time).getInt();
+						spread(time100, lasttime, this100 - last100);
+						last100 = this100;
+						break;
+					case 3:
+						break;
+					case 5:
+						int this50 = ByteBuffer.wrap(_time).getInt();
+						spread(time50, lasttime, this50 - last50);
+						last50 = this50;
+						break;
+					case 10:
+						acc.add(new AccData(lasttime, ByteBuffer.wrap(_time).getFloat()));
+						break;
+					case 12:
+						int c = ByteBuffer.wrap(_time).getInt();
+						if (c < lastcombo) {
+							combobreaktime = lasttime;
+						} else {
+							lastcombo = c;
+						}
+						break;
+					default:
+						throw new RuntimeException();
+					}
+					if (combobreaktime != -1) {
+						break;
+					}
+				}
+				if (combobreaktime == -1) {
+					combobreaktime = lasttime;
+				}
+				if (combobreaktime == -1) {
+					throw new RuntimeException("nodata");
+				}
+				Entrypoint.sout(String.format(
+					"%s combobreak at %d, lastcombo %d lastacc %f",
+					file.getName(),
+					combobreaktime,
+					lastcombo,
+					acc.getLast().acc
+				));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private void spread(LinkedList<Integer> list, int time, int d) {
+			if (list.isEmpty() || d <= 1) {
+				list.add(time);
+				return;
+			}
+
+			int dtime = time - list.getLast();
+			int inc = dtime / d;
+			int ttime = list.getLast();
+			for (int i = 0; i < d; i++) {
+				ttime += inc;
+				if (i == d - 1) {
+					ttime = time;
+				}
+				list.add(ttime);
+			}
+		}
+
+	}
+
+	public static class AccData {
+		public int time;
+		public float acc;
+		public AccData(int time, float acc) {
+			this.time = time;
+			this.acc = acc;
 		}
 	}
 
