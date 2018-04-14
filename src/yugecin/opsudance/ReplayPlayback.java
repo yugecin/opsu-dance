@@ -55,9 +55,13 @@ public class ReplayPlayback {
 	private int currentAccWidth;
 	private final int ACCMAXWIDTH;
 
+	private int c300, c100, c50;
+
 	private Image hitImage;
 	private int hitImageTimer = 0;
 	private boolean missed;
+
+	private Image gradeImage;
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
@@ -115,12 +119,29 @@ public class ReplayPlayback {
 			this.mods = " +" + this.mods;
 			this.modwidth = Fonts.SMALLBOLD.getWidth(this.mods);
 		}
+		updateGradeImage();
 	}
 
 	public void resetFrameIndex() {
 		frameIndex = 0;
 		currentFrame = replay.frames[frameIndex++];
 		nextFrame = replay.frames[frameIndex];
+	}
+
+	private void updateGradeImage() {
+		if (missed) {
+			gradeImage = null;
+			return;
+		}
+
+		boolean silver = (replay.mods & 0x408) > 0 && (replay.mods & 0x200) == 0;
+		GameData.Grade grade = GameData.getGrade(c300, c100, c50, 0, silver);
+
+		if (grade == GameData.Grade.NULL) {
+			gradeImage = null;
+			return;
+		}
+		gradeImage = grade.getSmallImage().getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 	}
 
 	private int HITIMAGETIMEREXPAND = 200;
@@ -192,21 +213,36 @@ public class ReplayPlayback {
 				keydelay[i] -= renderdelta;
 			}
 
+			boolean hitschanged = false;
 			while (!hitdata.acc.isEmpty() && hitdata.acc.getFirst().time <= time) {
 				currentAcc = String.format("%.2f%%", hitdata.acc.removeFirst().acc).replace('.', ',');
 				currentAccWidth = Fonts.SMALLBOLD.getWidth(currentAcc);
+			}
+
+			while (!hitdata.time300.isEmpty() && hitdata.time300.getFirst() <= time) {
+				hitdata.time300.removeFirst();
+				c300++;
+				hitschanged = true;
 			}
 
 			while (!hitdata.time100.isEmpty() && hitdata.time100.getFirst() <= time) {
 				hitdata.time100.removeFirst();
 				hitImageTimer = 0;
 				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				c100++;
+				hitschanged = true;
 			}
 
 			while (!hitdata.time50.isEmpty() && hitdata.time50.getFirst() <= time) {
 				hitdata.time50.removeFirst();
 				hitImageTimer = 0;
 				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				c50++;
+				hitschanged = true;
+			}
+
+			if (hitschanged) {
+				updateGradeImage();
 			}
 
 			if (time >= hitdata.combobreaktime) {
@@ -216,13 +252,18 @@ public class ReplayPlayback {
 				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 			}
 		}
+		Color fadecolor = new Color(1f, 1f, 1f, color.a);
 		int xpos = SQSIZE * 5;
 		Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
 		xpos += ACCMAXWIDTH;
+		if (gradeImage != null) {
+			gradeImage.draw(xpos, ypos, fadecolor);
+		}
+		xpos += SQSIZE + 10;
 		Fonts.SMALLBOLD.drawString(xpos, ypos, this.player, color);
 		xpos += playerwidth;
 		if (!this.mods.isEmpty()) {
-			Fonts.SMALLBOLD.drawString(xpos, ypos, this.mods, new Color(1f, 1f, 1f, color.a));
+			Fonts.SMALLBOLD.drawString(xpos, ypos, this.mods, fadecolor);
 			xpos += modwidth;
 		}
 		xpos += 10;
@@ -258,6 +299,7 @@ public class ReplayPlayback {
 	public static class HitData {
 
 		int combobreaktime = -1;
+		LinkedList<Integer> time300 = new LinkedList();
 		LinkedList<Integer> time100 = new LinkedList();
 		LinkedList<Integer> time50 = new LinkedList();
 		LinkedList<AccData> acc = new LinkedList();
@@ -266,6 +308,7 @@ public class ReplayPlayback {
 			try (InputStream in = new FileInputStream(file)) {
 				int lasttime = -1;
 				int lastcombo = 0;
+				int last300 = 0;
 				int last100 = 0;
 				int last50 = 0;
 				while (true) {
@@ -294,6 +337,9 @@ public class ReplayPlayback {
 						last100 = this100;
 						break;
 					case 3:
+						int this300 = ByteBuffer.wrap(_time).getInt();
+						spread(time300, lasttime, this300 - last300);
+						last300 = this300;
 						break;
 					case 5:
 						int this50 = ByteBuffer.wrap(_time).getInt();
