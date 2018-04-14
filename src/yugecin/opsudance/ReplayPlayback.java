@@ -322,6 +322,7 @@ public class ReplayPlayback {
 					}
 					byte[] _time = { time[3], time[2], time[1], time[0] };
 					lasttime = ByteBuffer.wrap(_time).getInt();
+					lasttime -= 50;
 					int type = in.read();
 					if (type == -1) {
 						throw new RuntimeException();
