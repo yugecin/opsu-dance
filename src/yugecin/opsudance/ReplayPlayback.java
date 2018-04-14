@@ -150,7 +150,7 @@ public class ReplayPlayback {
 	private int HITIMAGETIMERFADESTART = 500;
 	private int HITIMAGETIMERFADEEND = 700;
 	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
-	private int HITIMAGEDEADFADE = 10000;
+	private int HITIMAGEDEADFADE = 4000;
 	private float SHRINKTIME = 500f;
 	private void showHitImage(int renderdelta, int xpos, float ypos) {
 		if (hitImage == null) {
