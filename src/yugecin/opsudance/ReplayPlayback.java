@@ -33,6 +33,10 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
+import static itdelatrisu.opsu.GameData.*;
+import static itdelatrisu.opsu.Utils.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+
 public class ReplayPlayback {
 
 	private static final boolean HIDEMOUSEBTNS = true;
@@ -44,6 +48,7 @@ public class ReplayPlayback {
 	public ReplayFrame nextFrame;
 	private int frameIndex;
 	public Color color;
+	public Color originalcolor;
 	public Cursor cursor;
 	private int keydelay[];
 	public static final int SQSIZE = 15;
@@ -56,6 +61,7 @@ public class ReplayPlayback {
 	private String currentAcc;
 	private int currentAccWidth;
 	private final int ACCMAXWIDTH;
+	private float failposx, failposy;
 
 	private int c300, c100, c50;
 
@@ -73,6 +79,7 @@ public class ReplayPlayback {
 		this.hitdata = hitdata;
 		resetFrameIndex();
 		this.color = color;
+		this.originalcolor = new Color(color);
 		Color cursorcolor = new Color(color);
 		//cursorcolor.a = 0.5f;
 		cursor = new Cursor(cursorcolor);
@@ -248,6 +255,13 @@ public class ReplayPlayback {
 			}
 
 			if (time >= hitdata.combobreaktime) {
+				if (!missed) {
+					failposx = currentFrame.getScaledX();
+					failposy = currentFrame.getScaledY();
+					if (hr) {
+						failposy = container.height - failposy;
+					}
+				}
 				missed = true;
 				color = new Color(missedColor);
 				hitImageTimer = 0;
@@ -270,6 +284,16 @@ public class ReplayPlayback {
 		xpos += 10;
 		showHitImage(renderdelta, xpos, ypos);
 		if (missed) {
+			if (hitImageTimer < HITIMAGEDEADFADE) {
+				float progress = (float) hitImageTimer / HITIMAGEDEADFADE;
+				float failposy = this.failposy + 50f * OUT_QUART.calc(progress);
+				Color col = new Color(originalcolor);
+				col.a = 1f - IN_QUAD.calc(clamp(progress * 2f, 0f, 1f));
+				Fonts.SMALLBOLD.drawString(failposx - playerwidth / 2, failposy, player, col);
+				Color failimgcol = new Color(1f, 1f, 1f, col.a);
+				Image failimg = hitResults[HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				failimg.draw(failposx + playerwidth / 2 + 5, failposy + 2f, failimgcol);
+			}
 			return;
 		}
 		int y = currentFrame.getScaledY();
