@@ -18,10 +18,6 @@
 package yugecin.opsudance;
 
 import itdelatrisu.opsu.GameData;
-import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.beatmap.HitObject;
-import itdelatrisu.opsu.objects.GameObject;
-import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.Cursor;
@@ -36,7 +32,6 @@ import yugecin.opsudance.core.Entrypoint;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
-import java.util.List;
 
 public class ReplayPlayback {
 
@@ -55,14 +50,13 @@ public class ReplayPlayback {
 	private String player;
 	private String mods;
 	private int playerwidth;
-	private int textwidth;
+	private int modwidth;
+	private String currentAcc;
+	private int currentAccWidth;
+	private final int ACCMAXWIDTH;
 
-	public GameObject[] gameObjects;
-	private int objectIndex = 0;
-	private int lastkeys = 0;
 	private Image hitImage;
 	private int hitImageTimer = 0;
-	public GData gdata = new GData();
 	private boolean missed;
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
@@ -78,9 +72,11 @@ public class ReplayPlayback {
 		cursor = new Cursor(cursorcolor);
 		keydelay = new int[4];
 		this.player = replay.playerName;
-		this.textwidth = Fonts.SMALLBOLD.getWidth(this.player);
-		this.playerwidth = this.textwidth;
+		this.playerwidth = Fonts.SMALLBOLD.getWidth(this.player);
 		this.mods = "";
+		this.currentAcc = "100,00%";
+		this.currentAccWidth = Fonts.SMALLBOLD.getWidth(currentAcc);
+		this.ACCMAXWIDTH = currentAccWidth + 10;
 		if ((replay.mods & 0x1) > 0) {
 			this.mods += "NF";
 		}
@@ -117,7 +113,7 @@ public class ReplayPlayback {
 		}
 		if (this.mods.length() > 0) {
 			this.mods = " +" + this.mods;
-			this.textwidth += Fonts.SMALLBOLD.getWidth(this.mods);
+			this.modwidth = Fonts.SMALLBOLD.getWidth(this.mods);
 		}
 	}
 
@@ -127,43 +123,13 @@ public class ReplayPlayback {
 		nextFrame = replay.frames[frameIndex];
 	}
 
-	private void sendKeys(Beatmap beatmap, int trackPosition) {
-		if (objectIndex >= gameObjects.length)  // nothing to do here
-			return;
-
-		HitObject hitObject = beatmap.objects[objectIndex];
-
-		// circles
-		if (hitObject.isCircle() && gameObjects[objectIndex].mousePressed(currentFrame.getScaledX(), currentFrame.getScaledY(), trackPosition))
-			objectIndex++;  // circle hit
-
-			// sliders
-		else if (hitObject.isSlider())
-			gameObjects[objectIndex].mousePressed(currentFrame.getScaledX(), currentFrame.getScaledY(), trackPosition);
-	}
-
-	private void update(int trackPosition, Beatmap beatmap, int[] hitResultOffset, int delta) {
-		boolean keyPressed = currentFrame.getKeys() != ReplayFrame.KEY_NONE;
-		while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
-			// check if we've already passed the next object's start time
-			boolean overlap = (objectIndex + 1 < gameObjects.length &&
-				trackPosition > beatmap.objects[objectIndex + 1].getTime() - hitResultOffset[GameData.HIT_50]);
-
-			// update hit object and check completion status
-			if (gameObjects[objectIndex].update(overlap, delta, currentFrame.getScaledX(), currentFrame.getScaledY(), keyPressed, trackPosition)) {
-				objectIndex++;  // done, so increment object index
-			} else
-				break;
-		}
-	}
-
 	private int HITIMAGETIMEREXPAND = 200;
 	private int HITIMAGETIMERFADESTART = 500;
 	private int HITIMAGETIMERFADEEND = 700;
 	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
 	private int HITIMAGEDEADFADE = 10000;
 	private float SHRINKTIME = 500f;
-	private void showHitImage(int renderdelta, float ypos) {
+	private void showHitImage(int renderdelta, int xpos, float ypos) {
 		if (hitImage == null) {
 			return;
 		}
@@ -191,7 +157,7 @@ public class ReplayPlayback {
 			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
 			offset = UNITHEIGHT / 2f * (1f - scale);
 		}
-		hitImage.draw(SQSIZE * 5 + textwidth + SQSIZE + offset, ypos + offset, scale, color);
+		hitImage.draw(xpos + offset, ypos + offset, scale, color);
 	}
 
 	public float getHeight() {
@@ -204,24 +170,10 @@ public class ReplayPlayback {
 		return UNITHEIGHT * (1f - AnimationEquation.OUT_QUART.calc((hitImageTimer - HITIMAGEDEADFADE) / SHRINKTIME));
 	}
 
-	public void render(Beatmap beatmap, int[] hitResultOffset, int renderdelta, Graphics g, float ypos, int time) {
-		/*
-		if (objectIndex >= gameObjects.length) {
-			return;
-		}
+	public void render(int renderdelta, Graphics g, float ypos, int time) {
 
 		while (nextFrame != null && nextFrame.getTime() < time) {
 			currentFrame = nextFrame;
-
-			int keys = currentFrame.getKeys();
-			int deltaKeys = (keys & ~lastkeys);  // keys that turned on
-			if (deltaKeys != ReplayFrame.KEY_NONE) { // send a key press
-				sendKeys(beatmap, currentFrame.getTime());
-			} else if (keys == lastkeys) {
-				update(time, beatmap, hitResultOffset, currentFrame.getTimeDiff());
-			}
-			lastkeys = keys;
-
 			processKeys();
 			frameIndex++;
 			if (frameIndex >= replay.frames.length) {
@@ -231,7 +183,6 @@ public class ReplayPlayback {
 			nextFrame = replay.frames[frameIndex];
 		}
 		processKeys();
-		*/
 		g.setColor(color);
 		if (!missed) {
 			for (int i = 0; i < 4; i++) {
@@ -240,12 +191,42 @@ public class ReplayPlayback {
 				}
 				keydelay[i] -= renderdelta;
 			}
+
+			while (!hitdata.acc.isEmpty() && hitdata.acc.getFirst().time <= time) {
+				currentAcc = String.format("%.2f%%", hitdata.acc.removeFirst().acc).replace('.', ',');
+				currentAccWidth = Fonts.SMALLBOLD.getWidth(currentAcc);
+			}
+
+			while (!hitdata.time100.isEmpty() && hitdata.time100.getFirst() <= time) {
+				hitdata.time100.removeFirst();
+				hitImageTimer = 0;
+				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+			}
+
+			while (!hitdata.time50.isEmpty() && hitdata.time50.getFirst() <= time) {
+				hitdata.time50.removeFirst();
+				hitImageTimer = 0;
+				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+			}
+
+			if (time >= hitdata.combobreaktime) {
+				missed = true;
+				color = new Color(missedColor);
+				hitImageTimer = 0;
+				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+			}
 		}
-		Fonts.SMALLBOLD.drawString(SQSIZE * 5, ypos, this.player, color);
+		int xpos = SQSIZE * 5;
+		Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
+		xpos += ACCMAXWIDTH;
+		Fonts.SMALLBOLD.drawString(xpos, ypos, this.player, color);
+		xpos += playerwidth;
 		if (!this.mods.isEmpty()) {
-			Fonts.SMALLBOLD.drawString(SQSIZE * 5 + playerwidth, ypos, this.mods, new Color(1f, 1f, 1f, color.a));
+			Fonts.SMALLBOLD.drawString(xpos, ypos, this.mods, new Color(1f, 1f, 1f, color.a));
+			xpos += modwidth;
 		}
-		showHitImage(renderdelta, ypos);
+		xpos += 10;
+		showHitImage(renderdelta, xpos, ypos);
 		if (missed) {
 			return;
 		}
@@ -271,70 +252,6 @@ public class ReplayPlayback {
 		}
 		if ((keys ^ 10) == 8) {
 			keydelay[3] = KEY_DELAY;
-		}
-	}
-
-	public class GData extends GameData {
-
-		public GData() {
-			super();
-			this.loadImages();
-		}
-
-		@Override
-		public void sendSliderRepeatResult(int time, float x, float y, Color color, Curve curve, HitObjectType type) {
-			// ?
-		}
-
-		@Override
-		public void sendSliderStartResult(int time, float x, float y, Color color, Color mirrorColor, boolean expand) {
-			// ?
-		}
-
-		@Override
-		public void sendSliderTickResult(int time, int result, float x, float y, HitObject hitObject, int repeat) {
-			if (result == HIT_SLIDER30 || result == HIT_SLIDER10) {
-				incrementComboStreak();
-			}
-		}
-
-		@Override
-		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd) {
-			sendHitResult(time, result, x, y, color, end, hitObject, hitResultType, expand, repeat, curve, sliderHeldToEnd, true);
-		}
-
-		@Override
-		public void sendHitResult(int time, int result, float x, float y, Color color, boolean end, HitObject hitObject, HitObjectType hitResultType, boolean expand, int repeat, Curve curve, boolean sliderHeldToEnd, boolean handleResult) {
-			if (curve == null || sliderHeldToEnd) {
-				incrementComboStreak();
-			}
-
-			if (missed || result == HIT_300) {
-				return;
-			}
-
-			missed = this.getComboStreak() > replay.combo;
-			if (missed) {
-				result = HIT_MISS;
-			}
-
-			if (result == HIT_MISS) {
-				if (!missed) {
-					result = HIT_50;
-				} else {
-					ReplayPlayback.this.color = new Color(missedColor);
-				}
-			}
-
-			if (result < hitResults.length) {
-				hitImageTimer = 0;
-				hitImage = hitResults[result].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
-			}
-		}
-
-		@Override
-		public void addHitError(int time, int x, int y, int timeDiff) {
-			//?
 		}
 	}
 

@@ -733,7 +733,7 @@ public class Game extends ComplexOpsuState {
 			float h = replayPlayback.getHeight();
 			ypos += h;
 			//if (h > 0f) {
-				replayPlayback.render(beatmap, hitResultOffset, displayContainer.renderDelta, g, ypos, trackPosition);
+				replayPlayback.render(displayContainer.renderDelta, g, ypos, trackPosition);
 			//}
 		}
 
@@ -1581,9 +1581,6 @@ public class Game extends ComplexOpsuState {
 			}
 
 			gameObjects = new GameObject[beatmap.objects.length];
-			for (ReplayPlayback replayPlayback : replays) {
-				replayPlayback.gameObjects = new GameObject[gameObjects.length];
-			}
 			playbackSpeed = PlaybackSpeed.NORMAL;
 
 			// reset game data
@@ -1629,9 +1626,6 @@ public class Game extends ComplexOpsuState {
 						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
 					} else if (hitObject.isSpinner()) {
 						gameObjects[i] = new Spinner(hitObject, this, data);
-					}
-					for (ReplayPlayback replayPlayback : replays) {
-						replayPlayback.gameObjects[i] = gameObjects[i].clone(replayPlayback.gdata);
 					}
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());

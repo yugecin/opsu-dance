@@ -170,7 +170,7 @@ public class GameData {
 		HIT_ANIMATION_RESULT = 12;  // not a hit result
 
 	/** Hit result-related images (indexed by HIT_* constants to HIT_MAX). */
-	protected Image[] hitResults;
+	public static Image[] hitResults;
 
 	/** Counts of each hit result so far (indexed by HIT_* constants to HIT_MAX). */
 	private int[] hitResultCount;
