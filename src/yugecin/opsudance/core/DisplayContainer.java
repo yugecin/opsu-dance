@@ -101,45 +101,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	
 	private final List<ResolutionChangedListener> resolutionChangedListeners;
 
-	class Transition {
-		int in;
-		int out;
-		int total;
-		int progress = -1;
-		OpsuState nextstate;
-		Color OVERLAY = new Color(Color.black);
-
-		public void update() {
-			if (progress == -1) {
-				return;
-			}
-			progress += delta;
-			if (progress > out && nextstate != null) {
-				switchStateInstantly(nextstate);
-				nextstate = null;
-			}
-			if (progress > total) {
-				progress = -1;
-			}
-		}
-
-		public void render(Graphics graphics) {
-			if (progress == -1) {
-				return;
-			}
-			int relprogress = progress;
-			int reltotal = out;
-			if (progress > out) {
-				reltotal = in;
-				relprogress = total - progress;
-			}
-			OVERLAY.a = (float) relprogress / reltotal;
-			graphics.setColor(OVERLAY);
-			graphics.fillRect(0, 0, width, height);
-		}
-	}
-
-	private final Transition transition = new Transition();
+	private int tIn;
+	private int tOut;
+	private int tProgress = -1;
+	private OpsuState tNextState;
+	private final Color tOVERLAY = new Color(Color.black);
 
 	public DisplayContainer()
 	{
@@ -220,7 +186,17 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
 
-			transition.update();
+			// state transition
+			if (tProgress != -1) {
+				tProgress += delta;
+				if (tProgress > tOut && tNextState != null) {
+					switchStateInstantly(tNextState);
+					tNextState = null;
+				}
+				if (tProgress > tIn + tOut) {
+					tProgress = -1;
+				}
+			}
 			fpsDisplay.update();
 
 			state.update();
@@ -260,7 +236,16 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				}
 				UI.drawTooltip(graphics);
 
-				transition.render(graphics);
+				// transition
+				if (tProgress != -1) {
+					if (tProgress > tOut) {
+						tOVERLAY.a = 1f - (tProgress - tOut) / (float) tIn;
+					} else {
+						tOVERLAY.a = tProgress / (float) tOut;
+					}
+					graphics.setColor(tOVERLAY);
+					graphics.fillRect(0, 0, width, height);
+				}
 
 				timeSinceLastRender = 0;
 
@@ -491,18 +476,17 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void switchState(OpsuState newstate, int outtime, int intime) {
-		if (transition.progress != -1) {
+		if (tProgress != -1) {
 			return;
 		}
 		if (outtime == 0) {
 			switchStateInstantly(newstate);
 			newstate = null;
 		}
-		transition.nextstate = newstate;
-		transition.total = transition.in = intime;
-		transition.out = outtime;
-		transition.total += outtime;
-		transition.progress = 0;
+		tNextState = newstate;
+		tIn = intime;
+		tOut = outtime;
+		tProgress = 0;
 	}
 
 	public void switchStateInstantly(OpsuState state) {
