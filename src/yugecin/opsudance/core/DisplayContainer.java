@@ -472,7 +472,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void switchState(OpsuState state) {
-		switchState(state, 200, 300);
+		switchState(state, 150, 250);
 	}
 
 	public void switchState(OpsuState newstate, int outtime, int intime) {
