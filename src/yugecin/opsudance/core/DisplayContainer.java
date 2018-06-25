@@ -476,17 +476,28 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void switchState(OpsuState newstate, int outtime, int intime) {
-		if (tProgress != -1) {
+		if (tProgress != -1 && tProgress <= tOut) {
 			return;
 		}
+
 		if (outtime == 0) {
 			switchStateInstantly(newstate);
 			newstate = null;
+		} else {
+			input.removeListener(this.state);
 		}
+
+		if (tProgress == -1) {
+			tProgress = 0;
+		} else {
+			// we were in a transition (out state), so start from the time
+			// that was already spent transitioning in
+			tProgress = (int) (((1f - (tProgress - tOut) / (float) tIn)) * outtime);
+		}
+
 		tNextState = newstate;
 		tIn = intime;
 		tOut = outtime;
-		tProgress = 0;
 	}
 
 	public void switchStateInstantly(OpsuState state) {
