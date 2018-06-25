@@ -33,9 +33,8 @@ import java.io.File;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -280,14 +279,12 @@ public class DownloadNode {
 		download.setListener(new DownloadListener() {
 			@Override
 			public void completed() {
-				BarNotifListener.EVENT.make().onBarNotif(
-					String.format("Download complete: %s", getTitle()));
+				barNotifs.sendf("Download complete: %s", getTitle());
 			}
 
 			@Override
 			public void error() {
-				BarNotifListener.EVENT.make().onBarNotif(
-					"Download failed due to a connection error.");
+				barNotifs.send("Download failed due to a connection error.");
 			}
 		});
 		this.download = download;
@@ -409,9 +406,10 @@ public class DownloadNode {
 	public void drawDownload(Graphics g, float position, int id, boolean hover) {
 		Download download = this.download;  // in case clearDownload() is called asynchronously
 		if (download == null) {
-			BubNotifListener.EVENT.make().onBubNotif(
-				"Trying to draw download information for button without Download object",
-				Colors.BUB_ORANGE);
+			bubNotifs.send(
+				BUB_ORANGE,
+				"Trying to draw download information for button without Download object"
+			);
 			return;
 		}
 

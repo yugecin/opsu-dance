@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 
 import java.io.StringWriter;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListener {
 
 	/**
@@ -31,7 +33,7 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListe
 	private boolean isCurrentState;
 
 	public BaseOpsuState() {
-		ResolutionChangedListener.EVENT.addListener(this);
+		displayContainer.addResolutionChangedListener(this);
 	}
 
 	protected void revalidate() {

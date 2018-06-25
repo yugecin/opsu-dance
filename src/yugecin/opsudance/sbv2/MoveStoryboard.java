@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
 import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
@@ -34,6 +33,8 @@ import yugecin.opsudance.ui.SimpleButton;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class MoveStoryboard extends OverlayOpsuState{
 
@@ -185,7 +186,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
 		if (gameObjects[objectIndex].isSlider() && trackPosition > gameObjects[objectIndex].getTime() && trackPosition < gameObjects[objectIndex].getEndTime()) {
-			BarNotifListener.EVENT.make().onBarNotif("Wait until the slider ended");
+			barNotifs.send("Wait until the slider ended");
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {

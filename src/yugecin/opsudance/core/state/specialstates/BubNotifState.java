@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.MouseListener;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
 
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BubNotifState implements MouseListener, BubNotifListener, ResolutionChangedListener {
+public class BubNotifState implements MouseListener, ResolutionChangedListener {
 
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
@@ -46,8 +46,6 @@ public class BubNotifState implements MouseListener, BubNotifListener, Resolutio
 	public BubNotifState() {
 		this.bubbles = new LinkedList<>();
 		this.addAnimationTime = IN_TIME;
-		BubNotifListener.EVENT.addListener(this);
-		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
@@ -111,8 +109,12 @@ public class BubNotifState implements MouseListener, BubNotifListener, Resolutio
 		addAnimationTime = IN_TIME;
 	}
 
-	@Override
-	public void onBubNotif(String message, Color borderColor) {
+	@SuppressWarnings("resource")
+	public void sendf(Color borderColor, String format, Object... args) {
+		this.send(borderColor, new Formatter().format(format, args).toString());
+	}
+
+	public void send(Color borderColor, String message) {
 		finishAddAnimation();
 		Notification newBubble = new Notification(message, borderColor);
 		bubbles.add(0, newBubble);

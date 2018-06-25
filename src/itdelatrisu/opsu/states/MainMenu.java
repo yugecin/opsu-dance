@@ -48,9 +48,8 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -466,9 +465,9 @@ public class MainMenu extends BaseOpsuState {
 		UI.enter();
 		if (!enterNotification) {
 			if (updater.getStatus() == Updater.Status.UPDATE_AVAILABLE) {
-				BarNotifListener.EVENT.make().onBarNotif("An opsu! update is available.");
+				barNotifs.send("An opsu! update is available.");
 			} else if (updater.justUpdated()) {
-				BarNotifListener.EVENT.make().onBarNotif("opsu! is now up to date!");
+				barNotifs.send("opsu! is now up to date!");
 			}
 			enterNotification = true;
 		}
@@ -531,15 +530,15 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
-				BarNotifListener.EVENT.make().onBarNotif("Pause");
+				barNotifs.send("Pause");
 			} else if (!MusicController.isTrackLoading()) {
 				MusicController.resume();
-				BarNotifListener.EVENT.make().onBarNotif("Play");
+				barNotifs.send("Play");
 			}
 			return true;
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
-			BarNotifListener.EVENT.make().onBarNotif(">> Next");
+			barNotifs.send(">> Next");
 			return true;
 		} else if (musicPrevious.contains(x, y)) {
 			lastMeasureProgress = 0f;
@@ -551,7 +550,7 @@ public class MainMenu extends BaseOpsuState {
 			} else {
 				MusicController.setPosition(0);
 			}
-			BarNotifListener.EVENT.make().onBarNotif("<< Previous");
+			barNotifs.send("<< Previous");
 			return true;
 		}
 
@@ -567,11 +566,10 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Constants.REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				BarNotifListener.EVENT.make().onBarNotif(
-					"The repository web page could not be opened.");
+				barNotifs.send("The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
+				bubNotifs.send(BUB_ORANGE, "Could not browse to repo");
 			}
 			return true;
 		}
@@ -580,11 +578,10 @@ public class MainMenu extends BaseOpsuState {
 			try {
 				Desktop.getDesktop().browse(Constants.DANCE_REPOSITORY_URI);
 			} catch (UnsupportedOperationException e) {
-				BarNotifListener.EVENT.make().onBarNotif(
-					"The repository web page could not be opened.");
+				barNotifs.send("The repository web page could not be opened.");
 			} catch (IOException e) {
 				Log.error("could not browse to repo", e);
-				BubNotifListener.EVENT.make().onBubNotif("Could not browse to repo", Colors.BUB_ORANGE);
+				bubNotifs.send(BUB_ORANGE, "Could not browse to repo");
 			}
 			return true;
 		}

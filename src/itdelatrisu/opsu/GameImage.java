@@ -31,10 +31,11 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
+import static itdelatrisu.opsu.ui.Colors.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -743,7 +744,7 @@ public enum GameImage {
 
 		String err = String.format("Could not find default image '%s'.", filename);
 		Log.warn(err);
-		BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+		bubNotifs.send(BUB_RED, err);
 	}
 
 	/**
@@ -806,8 +807,7 @@ public enum GameImage {
 						img = img.getScaledCopy(0.5f);
 					list.add(img);
 				} catch (SlickException e) {
-					BubNotifListener.EVENT.make().onBubNotif(
-						String.format("Failed to set image '%s'.", name), Colors.BUB_RED);
+					bubNotifs.sendf(BUB_RED, "Failed to set image '%s'.", name);
 					break;
 				}
 			}
@@ -834,8 +834,7 @@ public enum GameImage {
 					img = img.getScaledCopy(0.5f);
 				return img;
 			} catch (SlickException e) {
-				BubNotifListener.EVENT.make().onBubNotif(
-					String.format("Failed to set image '%s'.", filename), Colors.BUB_RED);
+				bubNotifs.sendf(BUB_RED, "Failed to set image '%s'.", filename);
 			}
 		}
 		return null;

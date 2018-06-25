@@ -28,10 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -69,7 +68,7 @@ public class ReplayImporter {
 		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
 			String err = String.format("Failed to create replay directory '%s'.", config.replayDir.getAbsolutePath());
 			Log.error(err);
-			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, err);
 			return;
 		}
 
@@ -83,7 +82,7 @@ public class ReplayImporter {
 				moveToFailedDirectory(file);
 				String err = String.format("Failed to import replay '%s'. The replay file could not be parsed.", file.getName());
 				Log.error(err, e);
-				BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+				bubNotifs.send(BUB_RED, err);
 				continue;
 			}
 			Beatmap beatmap = BeatmapSetList.get().getBeatmapFromHash(r.beatmapHash);
@@ -102,7 +101,7 @@ public class ReplayImporter {
 				moveToFailedDirectory(file);
 				String err = String.format("Failed to import replay '%s'. The associated beatmap could not be found.", file.getName());
 				Log.error(err);
-				BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+				bubNotifs.send(BUB_RED, err);
 			}
 		}
 

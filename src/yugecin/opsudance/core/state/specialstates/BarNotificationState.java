@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,14 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
 
+import java.util.Formatter;
 import java.util.List;
 
 import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 
-public class BarNotificationState implements BarNotifListener, ResolutionChangedListener {
+public class BarNotificationState implements ResolutionChangedListener {
 
 	private final int IN_TIME = 200;
 	private final int DISPLAY_TIME = 5700 + IN_TIME;
@@ -51,8 +51,6 @@ public class BarNotificationState implements BarNotifListener, ResolutionChanged
 		this.bgcol = new Color(Color.black);
 		this.textCol = new Color(Color.white);
 		this.timeShown = TOTAL_TIME;
-		BarNotifListener.EVENT.addListener(this);
-		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
@@ -95,9 +93,13 @@ public class BarNotificationState implements BarNotifListener, ResolutionChanged
 		textY = (displayContainer.height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
 		barHalfTargetHeight = textHeight / 2;
 	}
+	
+	@SuppressWarnings("resource")
+	public void sendf(String format, Object... args) {
+		this.send(new Formatter().format(format, args).toString());
+	}
 
-	@Override
-	public void onBarNotif(String message) {
+	public void send(String message) {
 		this.message = message;
 		calculatePosition();
 		timeShown = 0;

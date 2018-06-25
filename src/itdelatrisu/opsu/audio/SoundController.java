@@ -36,15 +36,14 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.skinning.SkinService;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -220,8 +219,8 @@ public class SoundController {
 		// menu and game sounds
 		for (SoundEffect s : SoundEffect.values()) {
 			if ((currentFileName = getSoundFileName(s.getFileName())) == null) {
-				BubNotifListener.EVENT.make().onBubNotif(
-					"Could not find sound file " + s.getFileName(), Colors.BUB_ORANGE);
+				final String name = s.getFileName();
+				bubNotifs.send(BUB_ORANGE, "Could not find sound file " + name);
 				continue;
 			}
 			MultiClip newClip = loadClip(currentFileName, currentFileName.endsWith(".mp3"));
@@ -240,8 +239,10 @@ public class SoundController {
 			for (HitSound s : HitSound.values()) {
 				String filename = String.format("%s-%s", ss.getName(), s.getFileName());
 				if ((currentFileName = getSoundFileName(filename)) == null) {
-					BubNotifListener.EVENT.make().onBubNotif(
-						"Could not find hit sound file " + filename, Colors.BUB_ORANGE);
+					bubNotifs.send(
+						BUB_ORANGE,
+						"Could not find hit sound file " + filename
+					);
 					continue;
 				}
 				MultiClip newClip = loadClip(currentFileName, false);
@@ -398,8 +399,7 @@ public class SoundController {
 
 				@Override
 				public void error() {
-					BarNotifListener.EVENT.make().onBarNotif(
-						"Failed to download track preview");
+					barNotifs.send("Failed to download track preview");
 				}
 			});
 			try {

@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,10 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
-import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.utils.ManifestWrapper;
 
 import javax.imageio.ImageIO;
@@ -42,6 +40,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -155,7 +154,7 @@ public class Configuration {
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {
 			String msg = String.format("Failed to create %s directory at '%s'.", kind, defaultDir.getAbsolutePath());
-			BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, msg);
 		}
 		return defaultDir;
 	}
@@ -215,9 +214,11 @@ public class Configuration {
 		// TODO: get a decent place for this
 		// create the screenshot directory
 		if (!screenshotDir.isDirectory() && !screenshotDir.mkdir()) {
-			BubNotifListener.EVENT.make().onBubNotif(
-				String.format( "Failed to create screenshot directory at '%s'.",
-					screenshotDir.getAbsolutePath()), Colors.BUB_RED);
+			bubNotifs.sendf(
+				BUB_RED,
+				"Failed to create screenshot directory at '%s'.",
+				screenshotDir.getAbsolutePath()
+			);
 			return;
 		}
 
@@ -251,13 +252,13 @@ public class Configuration {
 						}
 					}
 					ImageIO.write(image, OPTION_SCREENSHOT_FORMAT.getValueString().toLowerCase(), file);
-					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
-						Colors.BUB_PURPLE);
+					bubNotifs.send(BUB_PURPLE, "Created " + fileName);
 				} catch (Exception e) {
 					Log.error("Could not take screenshot", e);
-					BubNotifListener.EVENT.make().onBubNotif(
-						"Failed to take a screenshot. See log file for details",
-						Colors.BUB_PURPLE);
+					bubNotifs.send(
+						BUB_PURPLE,
+						"Failed to take a screenshot. See log file for details"
+					);
 				}
 			}
 		}.start();

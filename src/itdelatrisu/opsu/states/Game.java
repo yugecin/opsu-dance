@@ -57,8 +57,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.sbv2.MoveStoryboard;
@@ -67,6 +65,7 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.utils.GLHelper;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -335,9 +334,10 @@ public class Game extends ComplexOpsuState {
 			gOffscreen.setBackground(Color.black);
 		} catch (SlickException e) {
 			Log.error("could not create offscreen graphics", e);
-			BubNotifListener.EVENT.make().onBubNotif(
-				"Exception while creating offscreen graphics. See logfile for details.",
-				Colors.BUB_RED);
+			bubNotifs.send(
+				BUB_RED,
+				"Exception while creating offscreen graphics. See logfile for details."
+			);
 		}
 
 		// initialize music position bar location
@@ -1167,7 +1167,7 @@ public class Game extends ComplexOpsuState {
 				if (0 <= time && time < 3600) {
 					OPTION_CHECKPOINT.setValue(time);
 					SoundController.playSound(SoundEffect.MENUCLICK);
-					BarNotifListener.EVENT.make().onBarNotif("Checkpoint saved.");
+					barNotifs.send("Checkpoint saved.");
 				}
 			}
 			break;
@@ -1179,7 +1179,7 @@ public class Game extends ComplexOpsuState {
 					break;  // invalid checkpoint
 				loadCheckpoint(checkpoint);
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BarNotifListener.EVENT.make().onBarNotif("Checkpoint loaded.");
+				barNotifs.send("Checkpoint loaded.");
 			}
 			break;
 		case KEY_F:
@@ -1222,12 +1222,12 @@ public class Game extends ComplexOpsuState {
 			break;
 		case KEY_MINUS:
 			currentMapMusicOffset += 5;
-			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
+			barNotifs.send("Current map offset: " + currentMapMusicOffset);
 			break;
 		}
 		if (key == KEY_ADD || c == '+') {
 			currentMapMusicOffset -= 5;
-			BarNotifListener.EVENT.make().onBarNotif("Current map offset: " + currentMapMusicOffset);
+			barNotifs.send("Current map offset: " + currentMapMusicOffset);
 		}
 
 		return true;
@@ -1447,8 +1447,9 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (beatmap == null || beatmap.objects == null) {
-			BubNotifListener.EVENT.make().onBubNotif("Game was running without a beatmap", Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, "Game was running without a beatmap");
 			displayContainer.switchStateInstantly(songMenuState);
+			return;
 		}
 
 		Dancer.instance.reset();
@@ -1554,7 +1555,7 @@ public class Game extends ComplexOpsuState {
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
 					Log.error(message, e);
-					BubNotifListener.EVENT.make().onBubNotif(message, Colors.BUB_RED);
+					bubNotifs.send(BUB_RED, message);
 					gameObjects[i] = new DummyObject(hitObject);
 				}
 			}
@@ -2138,15 +2139,16 @@ public class Game extends ComplexOpsuState {
 		if (replay == null) {
 			this.isReplay = false;
 			this.replay = null;
-		} else {
-			if (replay.frames == null) {
-				BubNotifListener.EVENT.make().onBubNotif("Attempting to set a replay with no frames.",
-					Colors.BUB_ORANGE);
-				return;
-			}
-			this.isReplay = true;
-			this.replay = replay;
+			return;
 		}
+
+		if (replay.frames == null) {
+			bubNotifs.send(BUB_ORANGE, "Attempting to set a replay with no frames.");
+			return;
+		}
+
+		this.isReplay = true;
+		this.replay = replay;
 	}
 
 	/**

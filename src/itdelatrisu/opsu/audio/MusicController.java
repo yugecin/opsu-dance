@@ -33,7 +33,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -45,10 +44,10 @@ import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -103,8 +102,7 @@ public class MusicController {
 		if (lastBeatmap == null || !beatmap.audioFilename.equals(lastBeatmap.audioFilename)) {
 			final File audioFile = beatmap.audioFilename;
 			if (!audioFile.isFile() && !ResourceLoader.resourceExists(audioFile.getPath())) {
-				BarNotifListener.EVENT.make().onBarNotif(String.format("Could not find track '%s'.",
-					audioFile.getName()));
+				barNotifs.sendf("Could not find track '%s'.", audioFile.getName());
 				return;
 			}
 
@@ -159,7 +157,7 @@ public class MusicController {
 		} catch (Exception e) {
 			String err = String.format("Could not play track '%s'.", file.getName());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, err);
 		}
 	}
 

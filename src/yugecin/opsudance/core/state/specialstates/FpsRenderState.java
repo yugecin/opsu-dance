@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ public class FpsRenderState implements ResolutionChangedListener {
 	public FpsRenderState() {
 		fpsMeter = new FPSMeter(10);
 		upsMeter = new FPSMeter(10);
-		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void update() {

@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -439,7 +438,7 @@ public class Options {
 	public static final ToggleOption OPTION_DISABLE_MOUSE_BUTTONS = new ToggleOption("Disable mouse buttons in play mode", "MouseDisableButtons", "This option will disable all mouse buttons. Specifically for people who use their keyboard to click.", false) {
 		@Override
 		public void toggle() {
-			BarNotifListener.EVENT.make().onBarNotif(state ?
+			barNotifs.send(state ?
 				"Mouse buttons are disabled." : "Mouse buttons are enabled.");
 		}
 	};
@@ -608,7 +607,7 @@ public class Options {
 		public void clickListItem(int index){
 			if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
 				// TODO remove this when #79 is fixed
-				BarNotifListener.EVENT.make().onBarNotif("This mover is disabled in the storyboard right now");
+				barNotifs.send("This mover is disabled in the storyboard right now");
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);

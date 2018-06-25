@@ -38,11 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -101,7 +99,7 @@ public class BeatmapWatchService {
 			ws.register(config.beatmapDir.toPath());
 		} catch (IOException e) {
 			Log.error("Could not create watch service", e);
-			BubNotifListener.EVENT.make().onBubNotif("Could not create watch service", Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, "Could not create watch service");
 			return;
 		}
 
@@ -124,7 +122,7 @@ public class BeatmapWatchService {
 		} catch (IOException e) {
 			String msg = "An I/O exception occurred while closing the previous watch service.";
 			Log.error(msg, e);
-			BarNotifListener.EVENT.make().onBarNotif(msg);
+			barNotifs.send(msg);
 			ws = null;
 		}
 	}

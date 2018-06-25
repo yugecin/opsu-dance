@@ -64,7 +64,6 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.ui.OptionsOverlay;
 
@@ -446,8 +445,7 @@ public class SongMenu extends ComplexOpsuState {
 				if (!displayContainer.isInState(SongMenu.class)) {
 					return;
 				}
-				BarNotifListener.EVENT.make().onBarNotif(
-					"Changed is Songs folder detected. Hit F5 to refresh.");
+				barNotifs.send("Changes in Songs folder detected. Hit F5 to refresh.");
 			}
 		});
 
@@ -955,7 +953,7 @@ public class SongMenu extends ComplexOpsuState {
 			setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 
 			if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
-				BarNotifListener.EVENT.make().onBarNotif(group.getEmptyMessage());
+				barNotifs.send(group.getEmptyMessage());
 			}
 			return true;
 		}
@@ -1761,7 +1759,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (focusNode == null || beatmap != focusNode.getSelectedBeatmap()) {
-			BarNotifListener.EVENT.make().onBarNotif("Unable to load the beatmap audio.");
+			barNotifs.send("Unable to load the beatmap audio.");
 			return;
 		}
 

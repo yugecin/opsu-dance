@@ -21,8 +21,6 @@ package itdelatrisu.opsu.beatmap;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.db.BeatmapDB;
-import itdelatrisu.opsu.ui.Colors;
-import yugecin.opsudance.events.BubNotifListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +33,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static itdelatrisu.opsu.ui.Colors.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Indexed, expanding, doubly-linked list data type for song groups.
@@ -215,7 +216,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(dir);
 		} catch (IOException e) {
-			BubNotifListener.EVENT.make().onBubNotif("Could not delete song group", Colors.BUB_ORANGE);
+			bubNotifs.send(BUB_ORANGE, "Could not delete song group");
 		}
 		if (ws != null)
 			ws.resume();
@@ -271,7 +272,7 @@ public class BeatmapSetList {
 		try {
 			Utils.deleteToTrash(file);
 		} catch (IOException e) {
-			BubNotifListener.EVENT.make().onBubNotif("Could not delete song", Colors.BUB_ORANGE);
+			bubNotifs.send(BUB_ORANGE, "Could not delete song");
 		}
 		if (ws != null)
 			ws.resume();

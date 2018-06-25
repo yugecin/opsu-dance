@@ -36,7 +36,6 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.Constants;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -241,14 +240,13 @@ public class Updater {
 				@Override
 				public void completed() {
 					status = Status.UPDATE_DOWNLOADED;
-					BarNotifListener.EVENT.make().onBarNotif("Update has finished downloading");
+					barNotifs.send("Update has finished downloading");
 				}
 
 				@Override
 				public void error() {
 					status = Status.CONNECTION_ERROR;
-					BarNotifListener.EVENT.make().onBarNotif(
-						"Update failed due to a connection error.");
+					barNotifs.send("Update failed due to a connection error.");
 				}
 			});
 		}

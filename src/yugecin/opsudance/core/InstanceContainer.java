@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,10 @@ import itdelatrisu.opsu.states.*;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
+
+import yugecin.opsudance.core.state.specialstates.BarNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
+import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
@@ -55,6 +59,10 @@ public class InstanceContainer {
 	public static Input input;
 
 	public static GameObjectRenderer gameObjectRenderer;
+	
+	public static BarNotificationState barNotifs;
+	public static BubNotifState bubNotifs;
+	public static FpsRenderState fpsDisplay;
 
 	public static Splash splashState;
 	public static MainMenu mainmenuState;
@@ -94,6 +102,10 @@ public class InstanceContainer {
 		updater = new Updater();
 
 		displayContainer = new DisplayContainer();
+		
+		barNotifs = new BarNotificationState();
+		bubNotifs = new BubNotifState();
+		fpsDisplay = new FpsRenderState();
 
 		gameObjectRenderer = new GameObjectRenderer();
 

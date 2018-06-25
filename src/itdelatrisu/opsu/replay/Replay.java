@@ -39,13 +39,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.newdawn.slick.util.Log;
 
 import lzma.streams.LzmaOutputStream;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -275,7 +274,7 @@ public class Replay {
 	public void save() {
 		// create replay directory
 		if (!config.replayDir.isDirectory() && !config.replayDir.mkdir()) {
-			BubNotifListener.EVENT.make().onBubNotif("Failed to create replay directory", Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, "Failed to create replay directory");
 			return;
 		}
 

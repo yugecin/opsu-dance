@@ -38,7 +38,6 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.BaseOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -157,14 +156,14 @@ public class GameRanking extends BaseOpsuState {
 					gameState.setRestart((data.isGameplay()) ? Game.Restart.REPLAY : Game.Restart.NEW);
 					returnToGame = true;
 				} catch (FileNotFoundException e) {
-					BarNotifListener.EVENT.make().onBarNotif("Replay file not found.");
+					barNotifs.send("Replay file not found.");
 				} catch (IOException e) {
 					Log.error("Failed to load replay data.", e);
-					BarNotifListener.EVENT.make().onBarNotif(
-						"Failed to load replay data. See log for details.");
+					barNotifs.send("Failed to load replay data. See log for details.");
 				}
-			} else
-				BarNotifListener.EVENT.make().onBarNotif("Replay file not found.");
+			} else {
+				barNotifs.send("Replay file not found.");
+			}
 		}
 
 		// retry

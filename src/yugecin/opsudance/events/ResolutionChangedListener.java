@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,7 @@
  */
 package yugecin.opsudance.events;
 
-import yugecin.opsudance.core.events.Event;
-
-public interface ResolutionChangedListener {
-
-	Event<ResolutionChangedListener> EVENT = new Event<>(ResolutionChangedListener.class);
-
+public interface ResolutionChangedListener
+{
 	void onResolutionChanged(int w, int h);
-
 }

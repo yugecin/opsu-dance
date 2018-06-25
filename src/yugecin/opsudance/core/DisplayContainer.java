@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
-import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
@@ -43,16 +42,15 @@ import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.state.OpsuState;
-import yugecin.opsudance.core.state.specialstates.BarNotificationState;
-import yugecin.opsudance.core.state.specialstates.BubNotifState;
-import yugecin.opsudance.core.state.specialstates.FpsRenderState;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -60,13 +58,9 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, ResolutionChangedListener, SkinChangedListener {
+public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private static SGL GL = Renderer.get();
-
-	private FpsRenderState fpsState;
-	private BarNotificationState barNotifState;
-	private BubNotifState bubNotifState;
 
 	private OpsuState state;
 
@@ -104,6 +98,8 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 
 	public final Cursor cursor;
 	public boolean drawCursor;
+	
+	private final List<ResolutionChangedListener> resolutionChangedListeners;
 
 	class Transition {
 		int in;
@@ -145,12 +141,13 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 
 	private final Transition transition = new Transition();
 
-	public DisplayContainer() {
+	public DisplayContainer()
+	{
+		this.resolutionChangedListeners = new ArrayList<>();
 		this.cursor = new Cursor();
 		drawCursor = true;
 
-		ResolutionChangedListener.EVENT.addListener(this);
-		SkinChangedListener.EVENT.addListener(this);
+		skinservice.addSkinChangedListener(this);
 
 		this.nativeDisplayMode = Display.getDisplayMode();
 		targetBackgroundRenderInterval = 41; // ~24 fps
@@ -159,10 +156,9 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 		renderDelta = 1;
 	}
 
-	@Override
-	public void onResolutionChanged(int w, int h) {
-		destroyImages();
-		reinit();
+	public void addResolutionChangedListener(ResolutionChangedListener l)
+	{
+		this.resolutionChangedListeners.add(l);
 	}
 
 	@Override
@@ -208,10 +204,6 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 		setUPS(OPTION_TARGET_UPS.val);
 		setFPS(targetFPS[targetFPSIndex]);
 
-		fpsState = new FpsRenderState();
-		bubNotifState = new BubNotifState();
-		barNotifState = new BarNotificationState();
-
 		state = startingState;
 		state.enter();
 	}
@@ -229,7 +221,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 			mouseY = input.getMouseY();
 
 			transition.update();
-			fpsState.update();
+			fpsDisplay.update();
 
 			state.update();
 			if (drawCursor) {
@@ -257,9 +249,9 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 
 				state.preRenderUpdate();
 				state.render(graphics);
-				fpsState.render(graphics);
-				bubNotifState.render(graphics);
-				barNotifState.render(graphics);
+				fpsDisplay.render(graphics);
+				bubNotifs.render(graphics);
+				barNotifs.render(graphics);
 
 				cursor.updateAngle(renderDelta);
 				if (drawCursor) {
@@ -342,13 +334,13 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 			return true;
 		}
 		if (DownloadList.get().hasActiveDownloads()) {
-			BubNotifListener.EVENT.make().onBubNotif(DownloadList.EXIT_CONFIRMATION, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, DownloadList.EXIT_CONFIRMATION);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
 		}
 		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
-			BubNotifListener.EVENT.make().onBubNotif(Updater.EXIT_CONFIRMATION, Colors.BUB_PURPLE);
+			bubNotifs.send(BUB_PURPLE, Updater.EXIT_CONFIRMATION);
 			exitRequested = false;
 			exitconfirmation = System.currentTimeMillis();
 			return false;
@@ -387,7 +379,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
-			BubNotifListener.EVENT.make().onBubNotif("Failed to change resolution", Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, "Failed to change resolution");
 			Log.error("Failed to set display mode.", e);
 		}
 	}
@@ -409,7 +401,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 				fullscreen = false;
 				String msg = String.format("Fullscreen mode is not supported for %sx%s", width, height);
 				Log.warn(msg);
-				BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_ORANGE);
+				bubNotifs.send(BUB_ORANGE, msg);
 			}
 		}
 
@@ -439,7 +431,7 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 			input = new Input(height);
 			input.enableKeyRepeat();
 			input.addListener(new GlobalInputListener());
-			input.addMouseListener(bubNotifState);
+			input.addMouseListener(bubNotifs);
 		}
 		input.addListener(state);
 
@@ -448,7 +440,15 @@ public class DisplayContainer implements ErrorDumpable, ResolutionChangedListene
 		GameImage.init(width, height);
 		Fonts.init();
 
-		ResolutionChangedListener.EVENT.make().onResolutionChanged(width, height);
+		destroyImages();
+		reinit();
+
+		barNotifs.onResolutionChanged(width, height);
+		bubNotifs.onResolutionChanged(width, height);
+		fpsDisplay.onResolutionChanged(width, height);
+		for (ResolutionChangedListener l : this.resolutionChangedListeners) {
+			l.onResolutionChanged(width, height);
+		}
 	}
 
 	public void resetCursor() {

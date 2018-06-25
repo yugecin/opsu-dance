@@ -53,7 +53,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -273,13 +272,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (this.importedNode == null) {
 				return;
 			}
-			String msg;
+
 			if (dirs.length == 1) {
-				msg = "Imported 1 new song.";
-			} else {
-				msg = String.format("Imported %d new songs.", dirs.length);
+				barNotifs.send("Imported 1 new song.");
+				return;
 			}
-			BarNotifListener.EVENT.make().onBarNotif(msg);
+			barNotifs.sendf("Imported %d new songs.", dirs.length);
 		}
 	}
 
@@ -686,7 +684,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 											if (playing)
 												previewID = node.getID();
 										} catch (SlickException e) {
-											BarNotifListener.EVENT.make().onBarNotif("Failed to load track preview. See log for details.");
+											barNotifs.send("Failed to load track preview. See log for details.");
 											Log.error(e);
 										}
 									}
@@ -709,7 +707,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 								if (!DownloadList.get().contains(node.getID())) {
 									node.createDownload(serverMenu.getSelectedItem());
 									if (node.getDownload() == null) {
-										BarNotifListener.EVENT.make().onBarNotif("The download could not be started");
+										barNotifs.send("The download could not be started");
 									} else {
 										DownloadList.get().addNode(node);
 										node.getDownload().start();
@@ -951,7 +949,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		pageDir = Page.RESET;
 		previewID = -1;
 		if (barNotificationOnLoad != null) {
-			BarNotifListener.EVENT.make().onBarNotif(barNotificationOnLoad);
+			barNotifs.send(barNotificationOnLoad);
 			barNotificationOnLoad = null;
 		}
 	}
