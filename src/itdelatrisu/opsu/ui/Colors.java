@@ -53,8 +53,7 @@ public class Colors {
 		BUB_WHITE       = new Color(220, 220, 220),
 		BUB_PURPLE      = new Color(94, 46, 149),
 		BUB_RED         = new Color(141, 49, 16),
-		BUB_ORANGE      = new Color(138, 72, 51),
-		GHOST_LOGO      = new Color(1.0f, 1.0f, 1.0f, 0.25f);
+		BUB_ORANGE      = new Color(138, 72, 51);
 
 	// This class should not be instantiated.
 	private Colors() {}

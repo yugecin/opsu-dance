@@ -240,10 +240,11 @@ public class MainMenu extends BaseOpsuState {
 
 		// top/bottom horizontal bars
 		float oldAlpha = Colors.BLACK_ALPHA.a;
-		Colors.BLACK_ALPHA.a = 0.2f;
+		Colors.BLACK_ALPHA.a = 0.4f;
 		g.setColor(Colors.BLACK_ALPHA);
-		g.fillRect(0, 0, width, height / 9f);
-		g.fillRect(0, height * 8 / 9f, width, height / 9f);
+		final float barheight = height * 0.1125f;
+		g.fillRect(0, 0, width, barheight);
+		g.fillRect(0, height - barheight, width, barheight);
 		Colors.BLACK_ALPHA.a = oldAlpha;
 
 		// draw star fountain
@@ -274,7 +275,8 @@ public class MainMenu extends BaseOpsuState {
 		}
 		float ghostScale = logo.getLastScale() / scale * 1.05f;
 		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
-		ghostLogo.drawCentered(logo.getX(), logo.getY(), Colors.GHOST_LOGO);
+		ghostLogo.setAlpha(0.25f);
+		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
 
 		// draw music buttons
 		if (MusicController.isPlaying())
@@ -325,8 +327,12 @@ public class MainMenu extends BaseOpsuState {
 		float marginX = width * 0.015f, topMarginY = height * 0.01f, bottomMarginY = height * 0.015f;
 		g.setFont(Fonts.MEDIUM);
 		float lineHeight = Fonts.MEDIUM.getLineHeight() * 0.925f;
-		g.drawString(String.format("Loaded %d songs and %d beatmaps.",
-			BeatmapSetList.get().getMapSetCount(), BeatmapSetList.get().getMapCount()), marginX, topMarginY);
+		final String beatmapText = String.format(
+			"You have %d beatmaps (%d songs) available!",
+			BeatmapSetList.get().getMapCount(),
+			BeatmapSetList.get().getMapSetCount()
+		);
+		g.drawString(beatmapText, marginX, topMarginY);
 		if (MusicController.isTrackLoading()) {
 			g.drawString("Track loading...", marginX, topMarginY + lineHeight);
 		} else if (MusicController.trackExists()) {

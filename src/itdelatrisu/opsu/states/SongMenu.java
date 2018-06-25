@@ -561,10 +561,8 @@ public class SongMenu extends ComplexOpsuState {
 			footerLogoButton.draw(Color.white, 1f - expand);
 			Image ghostLogo = GameImage.MENU_LOGO.getImage();
 			ghostLogo = ghostLogo.getScaledCopy((1f + expand) * footerLogoSize / ghostLogo.getWidth());
-			float oldGhostAlpha = Colors.GHOST_LOGO.a;
-			Colors.GHOST_LOGO.a *= (1f - position);
-			ghostLogo.drawCentered(footerLogoButton.getX(), footerLogoButton.getY(), Colors.GHOST_LOGO);
-			Colors.GHOST_LOGO.a = oldGhostAlpha;
+			ghostLogo.setAlpha(0.25f * (1f - position));
+			ghostLogo.drawCentered(footerLogoButton.getX(), footerLogoButton.getY());
 		}
 
 		// header
