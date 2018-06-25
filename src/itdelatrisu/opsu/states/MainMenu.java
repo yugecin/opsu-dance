@@ -341,7 +341,7 @@ public class MainMenu extends BaseOpsuState {
 				Utils.getTimeString((int) (System.currentTimeMillis() - programStartTime) / 1000)),
 				marginX, height - bottomMarginY - (lineHeight * 2));
 		g.drawString(String.format("It is currently %s.",
-				new SimpleDateFormat("h:mm a").format(new Date())),
+				new SimpleDateFormat("HH:mm").format(new Date())),
 				marginX, height - bottomMarginY - lineHeight);
 
 		UI.draw(g);
