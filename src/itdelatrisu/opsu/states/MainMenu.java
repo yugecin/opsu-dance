@@ -50,6 +50,7 @@ import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
 import static itdelatrisu.opsu.ui.Colors.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -266,12 +267,13 @@ public class MainMenu extends BaseOpsuState {
 		if (position == null) {
 			position = System.currentTimeMillis() % 1000 / 1000f;
 		}
+		final float smoothExpandProgress;
 		if (position < 0.05f) {
-			position = 1f - AnimationEquation.IN_CUBIC.calc(position / 0.05f);
+			smoothExpandProgress = 1f - IN_CUBIC.calc(position / 0.05f);
 		} else {
-			position = (position - 0.05f) / 0.95f;
+			smoothExpandProgress = (position - 0.05f) / 0.95f;
 		}
-		logo.draw(color, 0.9726f + position * 0.0274f);
+		logo.draw(color, 0.9726f + smoothExpandProgress * 0.0274f);
 		final float hoverScale = logo.getCurrentHoverExpandValue();
 		if (renderPiece) {
 			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
@@ -279,7 +281,7 @@ public class MainMenu extends BaseOpsuState {
 			piece.rotate(position * 360);
 			piece.drawCentered(logo.getX(), logo.getY(), color);
 		}
-		final float ghostScale = hoverScale * 1.0186f - position * 0.0186f;
+		final float ghostScale = hoverScale * 1.0186f - smoothExpandProgress * 0.0186f;
 		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
 		ghostLogo.setAlpha(0.25f);
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
