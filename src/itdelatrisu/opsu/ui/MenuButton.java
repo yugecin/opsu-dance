@@ -98,9 +98,6 @@ public class MenuButton {
 	/** The default max rotation angle of the button. */
 	private static final float DEFAULT_ANGLE_MAX = 30f;
 
-	/** The last scale at which the button was drawn. */
-	private float lastScale = 1f;
-
 	/**
 	 * Creates a new button from an Image.
 	 * @param img the image
@@ -170,9 +167,14 @@ public class MenuButton {
 	public float getY() { return y; }
 
 	/**
-	 * Returns the last scale at which the button was drawn.
+	 * Returns the scale multiplier, from the hover effect, used to draw the button.
 	 */
-	public float getLastScale() { return lastScale; }
+	public float getCurrentHoverExpandValue() {
+		if ((hoverEffect & EFFECT_EXPAND) == 0) {
+			return 1f;
+		}
+		return scale.getValue();
+	}
 
 	/**
 	 * Sets text to draw in the middle of the button.
@@ -229,7 +231,6 @@ public class MenuButton {
 				xScaleOffset = image.getWidth() / 2f - xRadius;
 				yScaleOffset = image.getHeight() / 2f - yRadius;
 			}
-			lastScale = scaleOverride;
 			if (hoverEffect == 0)
 				image.draw(x - xRadius, y - yRadius, filter);
 			else {
@@ -243,7 +244,6 @@ public class MenuButton {
 							xScaleOffset = image.getWidth() / 2f - xRadius;
 							yScaleOffset = image.getHeight() / 2f - yRadius;
 						}
-						lastScale *= scale.getValue();
 					}
 				}
 				if ((hoverEffect & EFFECT_FADE) > 0)

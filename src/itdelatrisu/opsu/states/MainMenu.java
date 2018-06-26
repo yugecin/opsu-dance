@@ -145,11 +145,11 @@ public class MainMenu extends BaseOpsuState {
 		logo.setHoverAnimationDuration(logoAnimationDuration);
 		playButton.setHoverAnimationDuration(logoAnimationDuration);
 		exitButton.setHoverAnimationDuration(logoAnimationDuration);
-		final AnimationEquation logoAnimationEquation = AnimationEquation.IN_OUT_BACK;
+		final AnimationEquation logoAnimationEquation = AnimationEquation.IN_OUT_EXPO;
 		logo.setHoverAnimationEquation(logoAnimationEquation);
 		playButton.setHoverAnimationEquation(logoAnimationEquation);
 		exitButton.setHoverAnimationEquation(logoAnimationEquation);
-		final float logoHoverScale = 1.08f;
+		final float logoHoverScale = 1.096f;
 		logo.setHoverExpand(logoHoverScale);
 		playButton.setHoverExpand(logoHoverScale);
 		exitButton.setHoverExpand(logoHoverScale);
@@ -265,15 +265,21 @@ public class MainMenu extends BaseOpsuState {
 		boolean renderPiece = position != null;
 		if (position == null) {
 			position = System.currentTimeMillis() % 1000 / 1000f;
+			if (position < 0.05f) {
+				position = 1f - AnimationEquation.IN_CUBIC.calc(position / 0.05f);
+			} else {
+				position = (position - 0.05f) / 0.95f;
+			}
 		}
-		float scale = 1f + position * 0.05f;
-		logo.draw(color, scale);
+		logo.draw(color, 0.9726f + position * 0.0274f);
+		final float hoverScale = logo.getCurrentHoverExpandValue();
 		if (renderPiece) {
-			Image piece = GameImage.MENU_LOGO_PIECE.getImage().getScaledCopy(logo.getLastScale());
+			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
+			piece = piece.getScaledCopy(hoverScale);
 			piece.rotate(position * 360);
 			piece.drawCentered(logo.getX(), logo.getY(), color);
 		}
-		float ghostScale = logo.getLastScale() / scale * 1.05f;
+		final float ghostScale = hoverScale * 1.0186f - position * 0.0186f;
 		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
 		ghostLogo.setAlpha(0.25f);
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);

@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu;
 
-import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 
 import java.io.File;
@@ -300,13 +299,13 @@ public enum GameImage {
 	MENU_LOGO ("logo2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
 		}
 	},
 	MENU_LOGO_PIECE ("logo2piece2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
 		}
 	},
 	MENU_PLAY ("menu-play2", "png", false, false) {
