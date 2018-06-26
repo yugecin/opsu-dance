@@ -308,6 +308,12 @@ public enum GameImage {
 			return img.getScaledCopy(0.75f);
 		}
 	},
+	MENU_LOGO_PULSE ("logo2pulse", "png", false, true) {
+		@Override
+		protected Image process_sub(Image img, int w, int h) {
+			return img.getScaledCopy(0.75f);
+		}
+	},
 	MENU_PLAY ("menu-play2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

@@ -37,6 +37,8 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Stack;
 
 import org.lwjgl.opengl.Display;
@@ -124,6 +126,9 @@ public class MainMenu extends BaseOpsuState {
 
 	/** The star fountain. */
 	private StarFountain starFountain;
+	
+	private LinkedList<PulseData> pulseData = new LinkedList<>();
+	private float lastPulseProgress;
 
 	@Override
 	protected void revalidate() {
@@ -262,11 +267,25 @@ public class MainMenu extends BaseOpsuState {
 
 		// draw logo (pulsing)
 		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
+		for (PulseData pd : this.pulseData) {
+			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
+			final float scale = pd.initialScale + (0.432f * progress);
+			final Image p = GameImage.MENU_LOGO_PULSE.getImage().getScaledCopy(scale);
+			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
+			p.drawCentered(logo.getX(), logo.getY(), color);
+		}
 		Float position = MusicController.getBeatProgress();
+		Float beatLength = MusicController.getBeatLength();
 		boolean renderPiece = position != null;
 		if (position == null) {
 			position = System.currentTimeMillis() % 1000 / 1000f;
+			beatLength = 1000f;
 		}
+		final float hoverScale = logo.getCurrentHoverExpandValue();
+		if (position < this.lastPulseProgress) {
+			this.pulseData.add(new PulseData((int) (position*beatLength), hoverScale));
+		}
+		this.lastPulseProgress = position;
 		final float smoothExpandProgress;
 		if (position < 0.05f) {
 			smoothExpandProgress = 1f - IN_CUBIC.calc(position / 0.05f);
@@ -274,7 +293,6 @@ public class MainMenu extends BaseOpsuState {
 			smoothExpandProgress = (position - 0.05f) / 0.95f;
 		}
 		logo.draw(color, 0.9726f + smoothExpandProgress * 0.0274f);
-		final float hoverScale = logo.getCurrentHoverExpandValue();
 		if (renderPiece) {
 			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
 			piece = piece.getScaledCopy(hoverScale);
@@ -364,6 +382,15 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		int delta = displayContainer.renderDelta;
+		
+		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
+		while (pulseDataIter.hasNext()) {
+			final PulseData pd = pulseDataIter.next();
+			pd.position += delta;
+			if (pd.position > 1000) {
+				pulseDataIter.remove();
+			}
+		}
 
 		UI.update(delta);
 		if (MusicController.trackEnded())
@@ -747,5 +774,15 @@ public class MainMenu extends BaseOpsuState {
 			state = downloadState;
 		}
 		displayContainer.switchState(state);
+	}
+	
+	private static class PulseData {
+		private int position;
+		private float initialScale;
+
+		private PulseData(int position, float initialScale) {
+			this.position = position;
+			this.initialScale = initialScale;
+		}
 	}
 }

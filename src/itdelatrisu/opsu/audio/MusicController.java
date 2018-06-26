@@ -218,6 +218,17 @@ public class MusicController {
 	}
 
 	/**
+	 * gets the current beat length
+	 * @return
+	 */
+	public static Float getBeatLength() {
+		if (!updateTimingPoint())
+			return null;
+
+		return lastTimingPoint.getBeatLength();
+	}
+
+	/**
 	 * Gets the progress of the current measure.
 	 * @return a measure progress value [0,1) where 0 marks the start of the measure and
 	 *         1 marks the start of the next measure, or {@code null} if no timing information
