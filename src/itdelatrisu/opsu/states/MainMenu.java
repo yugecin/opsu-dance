@@ -265,11 +265,11 @@ public class MainMenu extends BaseOpsuState {
 		boolean renderPiece = position != null;
 		if (position == null) {
 			position = System.currentTimeMillis() % 1000 / 1000f;
-			if (position < 0.05f) {
-				position = 1f - AnimationEquation.IN_CUBIC.calc(position / 0.05f);
-			} else {
-				position = (position - 0.05f) / 0.95f;
-			}
+		}
+		if (position < 0.05f) {
+			position = 1f - AnimationEquation.IN_CUBIC.calc(position / 0.05f);
+		} else {
+			position = (position - 0.05f) / 0.95f;
 		}
 		logo.draw(color, 0.9726f + position * 0.0274f);
 		final float hoverScale = logo.getCurrentHoverExpandValue();
