@@ -21,6 +21,7 @@ The images included in opsu! belong to their respective authors.
 * kouyang
 * teinecthel
 * Font Awesome by Dave Gandy - http://fontawesome.io
+* Chaaoos/C0N - the opsu!dance logo
 
 Projects
 --------
@@ -32,5 +33,4 @@ The following projects were referenced in creating opsu!:
 
 Theme Song
 ----------
-The theme song is "On the Bach" by Jingle Punks, from the [YouTube Audio Library]
-(https://www.youtube.com/audiolibrary/music).
+The theme song is "On the Bach" by Jingle Punks, from the [YouTube Audio Library](https://www.youtube.com/audiolibrary/music).
