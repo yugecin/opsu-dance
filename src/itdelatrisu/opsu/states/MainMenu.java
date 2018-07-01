@@ -344,7 +344,12 @@ public class MainMenu extends BaseOpsuState {
 			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
 		}
 		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
-		final String trackText = beatmap.getArtist() + ": " + beatmap.getTitle();
+		final String trackText;
+		if (beatmap != null) {
+			trackText = beatmap.getArtist() + ": " + beatmap.getTitle();
+		} else {
+			trackText = "Loading...";
+		}
 		final float textWidth = Fonts.MEDIUM.getWidth(trackText);
 		final float npheight = Fonts.MEDIUM.getLineHeight() * 1.15f;
 		final float npscale = npheight / np.getHeight();
