@@ -345,6 +345,7 @@ public enum GameImage {
 	// Music Player Buttons
 	MUSIC_PLAY ("music-play", "png", false, false),
 	MUSIC_PAUSE ("music-pause", "png", false, false),
+	MUSIC_STOP ("music-stop", "png", false, false),
 	MUSIC_NEXT ("music-next", "png", false, false),
 	MUSIC_PREVIOUS ("music-previous", "png", false, false),
 	MUSIC_NOWPLAYING ("music-np", "png", false, false),
@@ -653,6 +654,14 @@ public enum GameImage {
 	public Image getImage() {
 		setDefaultImage();
 		return (skinImage != null) ? skinImage : defaultImage;
+	}
+	
+	/**
+	 * Returns the image associated with this resource, with a scale applied.
+	 * The beatmap skin image takes priority over the default image.
+	 */
+	public Image getScaledImage(float scale) {
+		return this.getImage().getScaledCopy(scale);
 	}
 
 	/**

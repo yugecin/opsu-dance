@@ -51,6 +51,7 @@ import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static org.lwjgl.input.Keyboard.*;
@@ -92,7 +93,8 @@ public class MainMenu extends BaseOpsuState {
 	private MenuButton playButton, exitButton;
 
 	/** Music control buttons. */
-	private MenuButton musicPlay, musicPause, musicNext, musicPrevious;
+	private MenuButton musicPlay, musicPause, musicStop, musicNext, musicPrev;
+	private MenuButton[] musicButtons = new MenuButton[5];
 
 	/** Button linking to Downloads menu. */
 	private MenuButton downloadsButton;
@@ -105,6 +107,11 @@ public class MainMenu extends BaseOpsuState {
 
 	/** Buttons for installing updates. */
 	private MenuButton updateButton, restartButton;
+
+	private int textMarginX;
+	private int textTopMarginY;
+	private int textBottomMarginY;
+	private int textLineHeight;
 
 	/** Application start time, for drawing the total running time. */
 	private long programStartTime;
@@ -119,7 +126,7 @@ public class MainMenu extends BaseOpsuState {
 	private boolean enterNotification = false;
 
 	/** Music position bar coordinates and dimensions. */
-	private float musicBarX, musicBarY, musicBarWidth, musicBarHeight;
+	private int musicBarX, musicBarY, musicBarWidth, musicBarHeight;
 
 	/** Last measure progress value. */
 	private float lastMeasureProgress = 0f;
@@ -134,6 +141,14 @@ public class MainMenu extends BaseOpsuState {
 	protected void revalidate() {
 		programStartTime = System.currentTimeMillis();
 		previous = new Stack<>();
+
+		final int width = displayContainer.width;
+		final int height = displayContainer.height;
+
+		this.textMarginX = (int) (width * 0.015f);
+		this.textTopMarginY = (int) (height * 0.01f);
+		this.textBottomMarginY = (int) (height * 0.015f);
+		this.textLineHeight = (int) (Fonts.MEDIUM.getLineHeight() * 0.925f);
 
 		// initialize menu buttons
 		Image logoImg = GameImage.MENU_LOGO.getImage();
@@ -161,22 +176,34 @@ public class MainMenu extends BaseOpsuState {
 		exitButton.setHoverExpand(logoHoverScale);
 
 		// initialize music buttons
-		int musicWidth  = GameImage.MUSIC_PLAY.getImage().getWidth();
-		int musicHeight = GameImage.MUSIC_PLAY.getImage().getHeight();
-		musicPlay     = new MenuButton(GameImage.MUSIC_PLAY.getImage(), displayContainer.width - (2 * musicWidth), musicHeight / 1.5f);
-		musicPause    = new MenuButton(GameImage.MUSIC_PAUSE.getImage(), displayContainer.width - (2 * musicWidth), musicHeight / 1.5f);
-		musicNext     = new MenuButton(GameImage.MUSIC_NEXT.getImage(), displayContainer.width - musicWidth, musicHeight / 1.5f);
-		musicPrevious = new MenuButton(GameImage.MUSIC_PREVIOUS.getImage(), displayContainer.width - (3 * musicWidth), musicHeight / 1.5f);
-		musicPlay.setHoverExpand(1.5f);
-		musicPause.setHoverExpand(1.5f);
-		musicNext.setHoverExpand(1.5f);
-		musicPrevious.setHoverExpand(1.5f);
+		final int musicSize = (int) (this.textLineHeight * 0.8f);
+		final float musicScale = (float) musicSize / MUSIC_STOP.getImage().getWidth();
+		final int musicSpacing = (int) (musicSize * 0.8f) + musicSize; // (center to center)
+		int x = width - this.textMarginX - musicSize / 2;
+		int y = this.textLineHeight * 2 + this.textLineHeight / 2;
+		this.musicNext = new MenuButton(MUSIC_NEXT.getScaledImage(musicScale), x, y);
+		x -= musicSpacing;
+		this.musicStop = new MenuButton(MUSIC_STOP.getScaledImage(musicScale), x, y);
+		x -= musicSpacing;
+		this.musicPause = new MenuButton(MUSIC_PAUSE.getScaledImage(musicScale), x, y);
+		x -= musicSpacing;
+		this.musicPlay = new MenuButton(MUSIC_PLAY.getScaledImage(musicScale), x, y);
+		x -= musicSpacing;
+		this.musicPrev = new MenuButton(MUSIC_PREVIOUS.getScaledImage(musicScale), x, y);
+		this.musicButtons[0] = this.musicPrev;
+		this.musicButtons[1] = this.musicPlay;
+		this.musicButtons[2] = this.musicPause;
+		this.musicButtons[3] = this.musicStop;
+		this.musicButtons[4] = this.musicNext;
+		for (MenuButton b : this.musicButtons) {
+			b.setHoverExpand(1.15f);
+		}
 
 		// initialize music position bar location
-		musicBarX = displayContainer.width - musicWidth * 3.5f;
-		musicBarY = musicHeight * 1.25f;
-		musicBarWidth = musicWidth * 3f;
-		musicBarHeight = musicHeight * 0.11f;
+		this.musicBarX = x - musicSize / 2;
+		this.musicBarY = y + musicSize;
+		this.musicBarWidth = musicSize + musicSpacing * 4;
+		this.musicBarHeight = (int) (musicSize * 0.3f);
 
 		// initialize downloads button
 		Image dlImg = GameImage.DOWNLOADS.getImage();
@@ -232,11 +259,6 @@ public class MainMenu extends BaseOpsuState {
 	public void render(Graphics g) {
 		int width = displayContainer.width;
 		int height = displayContainer.height;
-
-		final float textMarginX = width * 0.015f;
-		final float textTopMarginY = height * 0.01f;
-		final float textBottomMarginY = height * 0.015f;
-		final float textLineHeight = Fonts.MEDIUM.getLineHeight() * 0.925f;
 
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
@@ -328,22 +350,21 @@ public class MainMenu extends BaseOpsuState {
 		Fonts.MEDIUM.drawString(npTextX, 0, trackText);
 
 		// draw music buttons
-		if (MusicController.isPlaying())
-			musicPause.draw();
-		else
-			musicPlay.draw();
-		musicNext.draw();
-		musicPrevious.draw();
+		for (MenuButton b : this.musicButtons) {
+			b.draw();
+		}
 
 		// draw music position bar
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
 		g.setColor((musicPositionBarContains(mouseX, mouseY)) ? Colors.BLACK_BG_HOVER : Colors.BLACK_BG_NORMAL);
-		g.fillRoundRect(musicBarX, musicBarY, musicBarWidth, musicBarHeight, 4);
-		g.setColor(Color.white);
+		g.fillRect(this.musicBarX, this.musicBarY, this.musicBarWidth, this.musicBarHeight);
+		g.setColor(Colors.WHITE_ALPHA_75);
 		if (!MusicController.isTrackLoading() && beatmap != null) {
-			float musicBarPosition = Math.min((float) MusicController.getPosition() / MusicController.getDuration(), 1f);
-			g.fillRoundRect(musicBarX, musicBarY, musicBarWidth * musicBarPosition, musicBarHeight, 4);
+			final float trackpos = MusicController.getPosition();
+			final float tracklen = MusicController.getDuration();
+			final float barwidth = musicBarWidth * Math.min(trackpos / tracklen, 1f);
+			g.fillRect(this.musicBarX, this.musicBarY, barwidth, this.musicBarHeight);
 		}
 
 		// draw repository buttons
@@ -420,14 +441,9 @@ public class MainMenu extends BaseOpsuState {
 			restartButton.autoHoverUpdate(delta, false);
 		}
 		downloadsButton.hoverUpdate(delta, mouseX, mouseY);
-		// ensure only one button is in hover state at once
-		boolean noHoverUpdate = musicPositionBarContains(mouseX, mouseY);
-		boolean contains = musicPlay.contains(mouseX, mouseY);
-		musicPlay.hoverUpdate(delta, !noHoverUpdate && contains);
-		musicPause.hoverUpdate(delta, !noHoverUpdate && contains);
-		noHoverUpdate |= contains;
-		musicNext.hoverUpdate(delta, !noHoverUpdate && musicNext.contains(mouseX, mouseY));
-		musicPrevious.hoverUpdate(delta, !noHoverUpdate && musicPrevious.contains(mouseX, mouseY));
+		for (MenuButton b : this.musicButtons) {
+			b.hoverUpdate(delta, b.contains(mouseX, mouseY));
+		}
 		starFountain.update(delta);
 
 		// window focus change: increase/decrease theme song volume
@@ -489,12 +505,16 @@ public class MainMenu extends BaseOpsuState {
 		// tooltips
 		if (musicPositionBarContains(mouseX, mouseY))
 			UI.updateTooltip(delta, "Click to seek to a specific point in the song.", false);
+		else if (musicPrev.contains(mouseX, mouseY))
+			UI.updateTooltip(delta, "Previous track", false);
 		else if (musicPlay.contains(mouseX, mouseY))
-			UI.updateTooltip(delta, (MusicController.isPlaying()) ? "Pause" : "Play", false);
+			UI.updateTooltip(delta, "Play", false);
+		else if (musicPause.contains(mouseX, mouseY))
+			UI.updateTooltip(delta, "Pause", false);
+		else if (musicStop.contains(mouseX, mouseY))
+			UI.updateTooltip(delta, "Stop", false);
 		else if (musicNext.contains(mouseX, mouseY))
 			UI.updateTooltip(delta, "Next track", false);
-		else if (musicPrevious.contains(mouseX, mouseY))
-			UI.updateTooltip(delta, "Previous track", false);
 		else if (updater.showButton()) {
 			Updater.Status status = updater.getStatus();
 			if (((status == Updater.Status.UPDATE_AVAILABLE || status == Updater.Status.UPDATE_DOWNLOADING) && updateButton.contains(mouseX, mouseY)) ||
@@ -537,14 +557,11 @@ public class MainMenu extends BaseOpsuState {
 			playButton.resetHover();
 		if (!exitButton.contains(mouseX, mouseY, 0.25f))
 			exitButton.resetHover();
-		if (!musicPlay.contains(mouseX, mouseY))
-			musicPlay.resetHover();
-		if (!musicPause.contains(mouseX, mouseY))
-			musicPause.resetHover();
-		if (!musicNext.contains(mouseX, mouseY))
-			musicNext.resetHover();
-		if (!musicPrevious.contains(mouseX, mouseY))
-			musicPrevious.resetHover();
+		for (MenuButton b : this.musicButtons) {
+			if (!b.contains(mouseX, mouseY)) {
+				b.resetHover();
+			}
+		}
 		if (repoButton != null && !repoButton.contains(mouseX, mouseY))
 			repoButton.resetHover();
 		if (danceRepoButton != null && !danceRepoButton.contains(mouseX, mouseY))
@@ -569,30 +586,15 @@ public class MainMenu extends BaseOpsuState {
 			return false;
 
 		// music position bar
-		if (MusicController.isPlaying()) {
-			if (musicPositionBarContains(x, y)) {
-				lastMeasureProgress = 0f;
-				float pos = (x - musicBarX) / musicBarWidth;
-				MusicController.setPosition((int) (pos * MusicController.getDuration()));
-				return true;
-			}
+		if (MusicController.isPlaying() && musicPositionBarContains(x, y)) {
+			this.lastMeasureProgress = 0f;
+			float pos = (float) (x - this.musicBarX) / this.musicBarWidth;
+			MusicController.setPosition((int) (pos * MusicController.getDuration()));
+			return true;
 		}
 
 		// music button actions
-		if (musicPlay.contains(x, y)) {
-			if (MusicController.isPlaying()) {
-				MusicController.pause();
-				barNotifs.send("Pause");
-			} else if (!MusicController.isTrackLoading()) {
-				MusicController.resume();
-				barNotifs.send("Play");
-			}
-			return true;
-		} else if (musicNext.contains(x, y)) {
-			nextTrack(true);
-			barNotifs.send(">> Next");
-			return true;
-		} else if (musicPrevious.contains(x, y)) {
+		if (musicPrev.contains(x, y)) {
 			lastMeasureProgress = 0f;
 			if (!previous.isEmpty()) {
 				songMenuState.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
@@ -603,6 +605,33 @@ public class MainMenu extends BaseOpsuState {
 				MusicController.setPosition(0);
 			}
 			barNotifs.send("<< Previous");
+			return true;
+		} else if (musicPlay.contains(x, y)) {
+			if (MusicController.isPlaying()) {
+				lastMeasureProgress = 0f;
+				MusicController.setPosition(0);
+			} else if (!MusicController.isTrackLoading()) {
+				MusicController.resume();
+			}
+			barNotifs.send("Play");
+			return true;
+		} else if (musicPause.contains(x, y)) {
+			if (MusicController.isPlaying()) {
+				MusicController.pause();
+				barNotifs.send("Pause");
+			} else if (!MusicController.isTrackLoading()) {
+				MusicController.resume();
+				barNotifs.send("Unpause");
+			}
+		} else if (musicStop.contains(x, y)) {
+			if (MusicController.isPlaying()) {
+				MusicController.setPosition(0);
+				MusicController.pause();
+			}
+			barNotifs.send("Stop Playing");
+		} else if (musicNext.contains(x, y)) {
+			nextTrack(true);
+			barNotifs.send(">> Next");
 			return true;
 		}
 
