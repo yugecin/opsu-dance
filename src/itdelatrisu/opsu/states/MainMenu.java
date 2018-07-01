@@ -412,18 +412,25 @@ public class MainMenu extends BaseOpsuState {
 
 		// draw text
 		g.setFont(Fonts.MEDIUM);
-		final String beatmapText = String.format(
+		g.setColor(Color.white);
+		String txt = String.format(
 			"You have %d beatmaps (%d songs) available!",
 			BeatmapSetList.get().getMapCount(),
 			BeatmapSetList.get().getMapSetCount()
 		);
-		g.drawString(beatmapText, textMarginX, textTopMarginY);
-		g.drawString(String.format("opsu! has been running for %s.",
-				Utils.getTimeString((int) (System.currentTimeMillis() - programStartTime) / 1000)),
-				textMarginX, height - textBottomMarginY - (textLineHeight * 2));
-		g.drawString(String.format("It is currently %s.",
-				new SimpleDateFormat("HH:mm").format(new Date())),
-				textMarginX, height - textBottomMarginY - textLineHeight);
+		g.drawString(txt, textMarginX, textTopMarginY);
+		final long runningTime = System.currentTimeMillis() - programStartTime;
+		txt = String.format(
+			"%s has been running for %s.",
+			Constants.PROJECT_NAME,
+			Utils.getTimeString((int) (runningTime) / 1000)
+		);
+		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight);
+		txt = String.format(
+			"It is currently %s.",
+			new SimpleDateFormat("HH:mm").format(new Date())
+		);
+		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight * 2);
 
 		UI.draw(g);
 	}
