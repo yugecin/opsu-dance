@@ -54,6 +54,7 @@ import yugecin.opsudance.core.state.OpsuState;
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static java.awt.Desktop.Action.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -70,6 +71,8 @@ public class MainMenu extends BaseOpsuState {
 
 	/** Max alpha level of the menu background. */
 	private static final float BG_MAX_ALPHA = 0.9f;
+	
+	private float barHeight;
 
 	/** Logo button that reveals other buttons on click. */
 	private MenuButton logo;
@@ -113,7 +116,6 @@ public class MainMenu extends BaseOpsuState {
 
 	private int textMarginX;
 	private int textTopMarginY;
-	private int textBottomMarginY;
 	private int textLineHeight;
 
 	/** Application start time, for drawing the total running time. */
@@ -137,11 +139,15 @@ public class MainMenu extends BaseOpsuState {
 	/** The star fountain. */
 	private StarFountain starFountain;
 	
+	/** Time format used to show running time. */
+	private final SimpleDateFormat timeFormat;
+	
 	private LinkedList<PulseData> pulseData = new LinkedList<>();
 	private float lastPulseProgress;
 	
 	public MainMenu() {
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
+		this.timeFormat = new SimpleDateFormat("HH:mm");
 	}
 
 	@Override
@@ -152,9 +158,10 @@ public class MainMenu extends BaseOpsuState {
 		final int width = displayContainer.width;
 		final int height = displayContainer.height;
 
+		this.barHeight = height * 0.1125f;
+
 		this.textMarginX = (int) (width * 0.015f);
 		this.textTopMarginY = (int) (height * 0.01f);
-		this.textBottomMarginY = (int) (height * 0.015f);
 		this.textLineHeight = (int) (Fonts.MEDIUM.getLineHeight() * 0.925f);
 
 		// initialize menu buttons
@@ -219,24 +226,18 @@ public class MainMenu extends BaseOpsuState {
 		downloadsButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
 		downloadsButton.setHoverExpand(1.03f, Expand.LEFT);
 
-		// initialize repository button
-		float startX = displayContainer.width * 0.997f, startY = displayContainer.height * 0.997f;
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {  // only if a webpage can be opened
-			Image repoImg;
-			repoImg = GameImage.REPOSITORY.getImage();
-			repoButton = new MenuButton(repoImg,
-					startX - repoImg.getWidth() * 2.5f, startY - repoImg.getHeight()
-			);
-			repoButton.setHoverAnimationDuration(350);
-			repoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-			repoButton.setHoverExpand();
-			repoImg = GameImage.REPOSITORY.getImage();
-			danceRepoButton = new MenuButton(repoImg,
-				startX - repoImg.getWidth(), startY - repoImg.getHeight()
-			);
-			danceRepoButton.setHoverAnimationDuration(350);
-			danceRepoButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-			danceRepoButton.setHoverExpand();
+		// initialize repository button (only if a webpage can be opened)
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(BROWSE)) {
+			final Image repoImg = GameImage.REPOSITORY.getImage();
+			float repoX = this.textMarginX + repoImg.getWidth() / 2;
+			final float repoY = height - this.barHeight / 2;
+			repoButton = new MenuButton(repoImg, repoX, repoY);
+			repoButton.setHoverAnimationDuration(100);
+			repoButton.setHoverExpand(1.1f);
+			repoX += repoImg.getWidth() * 1.5f;
+			danceRepoButton = new MenuButton(repoImg, repoX, repoY);
+			danceRepoButton.setHoverAnimationDuration(100);
+			danceRepoButton.setHoverExpand(1.1f);
 		}
 
 		// initialize update buttons
@@ -282,9 +283,8 @@ public class MainMenu extends BaseOpsuState {
 		float oldAlpha = Colors.BLACK_ALPHA.a;
 		Colors.BLACK_ALPHA.a = 0.4f;
 		g.setColor(Colors.BLACK_ALPHA);
-		final float barheight = height * 0.1125f;
-		g.fillRect(0, 0, width, barheight);
-		g.fillRect(0, height - barheight, width, barheight);
+		g.fillRect(0, 0, width, this.barHeight);
+		g.fillRect(0, height - this.barHeight, width, this.barHeight);
 		Colors.BLACK_ALPHA.a = oldAlpha;
 
 		// draw star fountain
@@ -428,7 +428,7 @@ public class MainMenu extends BaseOpsuState {
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight);
 		txt = String.format(
 			"It is currently %s.",
-			new SimpleDateFormat("HH:mm").format(new Date())
+			this.timeFormat.format(new Date())
 		);
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight * 2);
 
