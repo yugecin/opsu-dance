@@ -233,6 +233,11 @@ public class MainMenu extends BaseOpsuState {
 		int width = displayContainer.width;
 		int height = displayContainer.height;
 
+		final float textMarginX = width * 0.015f;
+		final float textTopMarginY = height * 0.01f;
+		final float textBottomMarginY = height * 0.015f;
+		final float textLineHeight = Fonts.MEDIUM.getLineHeight() * 0.925f;
+
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (OPTION_DYNAMIC_BACKGROUND.state &&
@@ -303,6 +308,24 @@ public class MainMenu extends BaseOpsuState {
 		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
 		ghostLogo.setAlpha(0.25f);
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
+		
+		// now playing
+		if (OPTION_SHOW_UNICODE.state) {
+			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
+			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
+		}
+		final String trackText = beatmap.getArtist() + ": " + beatmap.getTitle();
+		final float textWidth = Fonts.MEDIUM.getWidth(trackText);
+		final float npheight = Fonts.MEDIUM.getLineHeight() * 1.15f;
+		float npx = width - textWidth - textMarginX;
+		GameImage.MUSIC_NOWPLAYING_BG_BLACK.getImage().draw(npx, 0, width - npx, npheight);
+		final float npTextX = npx;
+		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
+		final float npscale = npheight / np.getHeight();
+		npx -= np.getWidth() * npscale;
+		GameImage.MUSIC_NOWPLAYING_BG_WHITE.getImage().draw(npx, npheight, width - npx, 2);
+		np.draw(npx, 0, npscale);
+		Fonts.MEDIUM.drawString(npTextX, 0, trackText);
 
 		// draw music buttons
 		if (MusicController.isPlaying())
@@ -350,31 +373,19 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw text
-		float marginX = width * 0.015f, topMarginY = height * 0.01f, bottomMarginY = height * 0.015f;
 		g.setFont(Fonts.MEDIUM);
-		float lineHeight = Fonts.MEDIUM.getLineHeight() * 0.925f;
 		final String beatmapText = String.format(
 			"You have %d beatmaps (%d songs) available!",
 			BeatmapSetList.get().getMapCount(),
 			BeatmapSetList.get().getMapSetCount()
 		);
-		g.drawString(beatmapText, marginX, topMarginY);
-		if (MusicController.isTrackLoading()) {
-			g.drawString("Track loading...", marginX, topMarginY + lineHeight);
-		} else if (MusicController.trackExists()) {
-			if (OPTION_SHOW_UNICODE.state) {
-				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
-				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
-			}
-			g.drawString((MusicController.isPlaying()) ? "Now Playing:" : "Paused:", marginX, topMarginY + lineHeight);
-			g.drawString(String.format("%s: %s", beatmap.getArtist(), beatmap.getTitle()), marginX + 25, topMarginY + (lineHeight * 2));
-		}
+		g.drawString(beatmapText, textMarginX, textTopMarginY);
 		g.drawString(String.format("opsu! has been running for %s.",
 				Utils.getTimeString((int) (System.currentTimeMillis() - programStartTime) / 1000)),
-				marginX, height - bottomMarginY - (lineHeight * 2));
+				textMarginX, height - textBottomMarginY - (textLineHeight * 2));
 		g.drawString(String.format("It is currently %s.",
 				new SimpleDateFormat("HH:mm").format(new Date())),
-				marginX, height - bottomMarginY - lineHeight);
+				textMarginX, height - textBottomMarginY - textLineHeight);
 
 		UI.draw(g);
 	}

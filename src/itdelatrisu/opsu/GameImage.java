@@ -347,6 +347,9 @@ public enum GameImage {
 	MUSIC_PAUSE ("music-pause", "png", false, false),
 	MUSIC_NEXT ("music-next", "png", false, false),
 	MUSIC_PREVIOUS ("music-previous", "png", false, false),
+	MUSIC_NOWPLAYING ("music-np", "png", false, false),
+	MUSIC_NOWPLAYING_BG_BLACK ("music-np-bg-black", "png", false, false),
+	MUSIC_NOWPLAYING_BG_WHITE ("music-np-bg-white", "png", false, false),
 
 	DOWNLOADS ("downloads", "png", false, false) {
 		@Override
