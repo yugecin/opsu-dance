@@ -339,13 +339,13 @@ public class MainMenu extends BaseOpsuState {
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
 		
 		// now playing
-		if (OPTION_SHOW_UNICODE.state) {
-			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
-			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
-		}
 		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
 		final String trackText;
 		if (beatmap != null) {
+			if (OPTION_SHOW_UNICODE.state) {
+				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
+				Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
+			}
 			trackText = beatmap.getArtist() + ": " + beatmap.getTitle();
 		} else {
 			trackText = "Loading...";
