@@ -57,6 +57,26 @@ public class AnimatedValue {
 		this.diff = max - min;
 		this.eqn = eqn;
 	}
+	
+	/**
+	 * Change the from and to values
+	 * @param min start value
+	 * @param max end value
+	 */
+	public void setValues(float min, float max) {
+		this.base = min;
+		this.value = min;
+		this.diff = max - min;
+		this.setTime(0);
+	}
+	
+	/**
+	 * Gets the max (end) value
+	 * @return the max (end) value
+	 */
+	public float getMax() {
+		return this.base + this.diff;
+	}
 
 	/**
 	 * Returns the current value.

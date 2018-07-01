@@ -88,6 +88,9 @@ public class MainMenu extends BaseOpsuState {
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
+	
+	/** Now playing position vlaue. */
+	private final AnimatedValue nowPlayingPosition;
 
 	/** Main "Play" and "Exit" buttons. */
 	private MenuButton playButton, exitButton;
@@ -136,6 +139,10 @@ public class MainMenu extends BaseOpsuState {
 	
 	private LinkedList<PulseData> pulseData = new LinkedList<>();
 	private float lastPulseProgress;
+	
+	public MainMenu() {
+		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
+	}
 
 	@Override
 	protected void revalidate() {
@@ -336,18 +343,23 @@ public class MainMenu extends BaseOpsuState {
 			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
 			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.artistUnicode);
 		}
+		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
 		final String trackText = beatmap.getArtist() + ": " + beatmap.getTitle();
 		final float textWidth = Fonts.MEDIUM.getWidth(trackText);
 		final float npheight = Fonts.MEDIUM.getLineHeight() * 1.15f;
-		float npx = width - textWidth - textMarginX;
-		GameImage.MUSIC_NOWPLAYING_BG_BLACK.getImage().draw(npx, 0, width - npx, npheight);
-		final float npTextX = npx;
-		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
 		final float npscale = npheight / np.getHeight();
-		npx -= np.getWidth() * npscale;
-		GameImage.MUSIC_NOWPLAYING_BG_WHITE.getImage().draw(npx, npheight, width - npx, 2);
-		np.draw(npx, 0, npscale);
-		Fonts.MEDIUM.drawString(npTextX, 0, trackText);
+		final float npwidth = np.getWidth() * npscale;
+		float totalWidth = textMarginX + textWidth + npwidth;
+		if (this.nowPlayingPosition.getMax() != totalWidth) {
+			final float current = this.nowPlayingPosition.getValue();
+			this.nowPlayingPosition.setValues(current, totalWidth);
+		}
+		final float npimgx = width - this.nowPlayingPosition.getValue();
+		final float npx = npimgx + npwidth;
+		MUSIC_NOWPLAYING_BG_BLACK.getImage().draw(npx, 0, width - npx, npheight);
+		MUSIC_NOWPLAYING_BG_WHITE.getImage().draw(npimgx, npheight, width - npimgx, 2);
+		np.draw(npimgx, 0, npscale);
+		Fonts.MEDIUM.drawString(npx, 0, trackText);
 
 		// draw music buttons
 		for (MenuButton b : this.musicButtons) {
@@ -521,6 +533,8 @@ public class MainMenu extends BaseOpsuState {
 			    (status == Updater.Status.UPDATE_DOWNLOADED && restartButton.contains(mouseX, mouseY)))
 				UI.updateTooltip(delta, status.getDescription(), true);
 		}
+		
+		nowPlayingPosition.update(delta);
 	}
 
 	@Override
@@ -531,6 +545,7 @@ public class MainMenu extends BaseOpsuState {
 		logoOpen.setTime(0);
 		logoClose.setTime(0);
 		logoButtonAlpha.setTime(0);
+		nowPlayingPosition.setTime(0);
 		logoTimer = 0;
 		logoState = LogoState.DEFAULT;
 
