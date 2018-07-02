@@ -48,6 +48,7 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 
@@ -118,9 +119,6 @@ public class MainMenu extends BaseOpsuState {
 	private int textTopMarginY;
 	private int textLineHeight;
 
-	/** Application start time, for drawing the total running time. */
-	private long programStartTime;
-
 	/** Indexes of previous songs. */
 	private Stack<Integer> previous;
 
@@ -152,7 +150,6 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	protected void revalidate() {
-		programStartTime = System.currentTimeMillis();
 		previous = new Stack<>();
 
 		final int width = displayContainer.width;
@@ -419,11 +416,10 @@ public class MainMenu extends BaseOpsuState {
 			BeatmapSetList.get().getMapSetCount()
 		);
 		g.drawString(txt, textMarginX, textTopMarginY);
-		final long runningTime = System.currentTimeMillis() - programStartTime;
 		txt = String.format(
 			"%s has been running for %s.",
 			Constants.PROJECT_NAME,
-			Utils.getTimeString((int) (runningTime) / 1000)
+			Utils.getTimeString((int) (Entrypoint.runtime() / 1000L))
 		);
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight);
 		txt = String.format(
