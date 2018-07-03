@@ -43,7 +43,7 @@ import static org.lwjgl.input.Keyboard.*;
  *
  * @author kevin
  */
-@SuppressWarnings({"rawtypes", "unchecked", "unused"})
+@SuppressWarnings({"unused"})
 public class Input {
 
 	/** A helper for left ALT */
@@ -98,8 +98,6 @@ public class Input {
 	protected char[] keys = new char[1024];
 	/** True if the key has been pressed since last queries */
 	protected boolean[] pressed = new boolean[1024];
-	/** The time since the next key repeat to be fired for the key */
-	protected long[] nextRepeat = new long[1024];
 	
 	/** The listeners to notify of key events */
 	protected ArrayList<KeyListener> keyListeners = new ArrayList<>();
@@ -112,13 +110,6 @@ public class Input {
 	
 	/** True if the display is active */
 	private boolean displayActive = true;
-	
-	/** True if key repeat is enabled */
-	private boolean keyRepeat;
-	/** The initial delay for key repeat starts */
-	private int keyRepeatInitial;
-	/** The interval of key repeat */
-	private int keyRepeatInterval;
 	
 	/** The clicked button */
 	private int clickButton;
@@ -344,7 +335,6 @@ public class Input {
 
 				keys[eventKey] = Keyboard.getEventCharacter();
 				pressed[eventKey] = true;
-				nextRepeat[eventKey] = System.currentTimeMillis() + keyRepeatInitial;
 				
 				for (KeyListener listener : keyListeners) {
 					if (listener.keyPressed(eventKey, Keyboard.getEventCharacter())) {
@@ -353,7 +343,6 @@ public class Input {
 				}
 			} else {
 				int eventKey = Keyboard.getEventKey();
-				nextRepeat[eventKey] = 0;
 				
 				for (KeyListener listener : keyListeners) {
 					if (listener.keyReleased(eventKey, keys[eventKey])) {
@@ -422,21 +411,6 @@ public class Input {
 				}
 				lastMouseX = getMouseX();
 				lastMouseY = getMouseY();
-			}
-		}
-		
-		if (keyRepeat) {
-			for (int i=0;i<1024;i++) {
-				if (pressed[i] && (nextRepeat[i] != 0)) {
-					if (System.currentTimeMillis() > nextRepeat[i]) {
-						nextRepeat[i] = System.currentTimeMillis() + keyRepeatInterval;
-						for (KeyListener listener : keyListeners) {
-							if (listener.keyPressed(i, keys[i])) {
-								break;
-							}
-						}
-					}
-				}
 			}
 		}
 
