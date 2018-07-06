@@ -58,6 +58,21 @@ public class AnimatedValue {
 		this.eqn = eqn;
 	}
 	
+	public void change(int duration, float min, float max, AnimationEquation eqn) {
+		float progress = (float) this.time / this.duration;
+		if (this.eqn != eqn) {
+			if (this.time != 0 && this.time != this.duration) {
+				progress = this.eqn.uncalc(progress);
+			}
+			this.eqn = eqn;
+		}
+		this.duration = duration;
+		this.time = (int) (this.duration * progress);
+		this.base = min;
+		this.diff = max - min;
+		this.updateValue();
+	}
+	
 	/**
 	 * Change the from and to values
 	 * @param min start value
