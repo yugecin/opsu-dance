@@ -88,7 +88,8 @@ public class MainMenu extends BaseOpsuState {
 	private int logoTimer = 0;
 
 	/** Logo horizontal offset for opening and closing actions. */
-	private AnimatedValue logoOpen, logoClose;
+	private AnimatedValue logoPosition;
+	private float logoPositionOffsetX;
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
@@ -254,9 +255,8 @@ public class MainMenu extends BaseOpsuState {
 		starFountain = new StarFountain(displayContainer.width, displayContainer.height);
 
 		// logo animations
-		float centerOffsetX = displayContainer.width / 6.5f;
-		logoOpen = new AnimatedValue(100, 0, centerOffsetX, AnimationEquation.OUT_QUAD);
-		logoClose = new AnimatedValue(2200, centerOffsetX, 0, AnimationEquation.OUT_QUAD);
+		logoPositionOffsetX = 0.4f * MENU_LOGO.getImage().getHeight();
+		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
 	}
 
@@ -491,8 +491,8 @@ public class MainMenu extends BaseOpsuState {
 		case DEFAULT:
 			break;
 		case OPENING:
-			if (logoOpen.update(delta))  // shifting to left
-				logo.setX(centerX - logoOpen.getValue());
+			if (logoPosition.update(delta))  // shifting to left
+				logo.setX(centerX - logoPosition.getValue());
 			else {
 				logoState = LogoState.OPEN;
 				logoTimer = 0;
@@ -505,11 +505,10 @@ public class MainMenu extends BaseOpsuState {
 				playButton.getImage().setAlpha(currentLogoButtonAlpha);
 				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
 			} else if (logoTimer >= LOGO_IDLE_DELAY) {  // timer over: shift back to center
-				logoState = LogoState.CLOSING;
-				logoClose.setTime(0);
-				logoTimer = 0;
-			} else  // increment timer
+				this.closeLogo();
+			} else {
 				logoTimer += delta;
+			}
 			break;
 		case CLOSING:
 			if (logoButtonAlpha.update(-delta)) {  // fade out buttons
@@ -517,8 +516,8 @@ public class MainMenu extends BaseOpsuState {
 				playButton.getImage().setAlpha(currentLogoButtonAlpha);
 				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
 			}
-			if (logoClose.update(delta))  // shifting to right
-				logo.setX(centerX - logoClose.getValue());
+			if (logoPosition.update(-delta))  // shifting to right
+				logo.setX(centerX - logoPosition.getValue());
 			break;
 		}
 
@@ -550,8 +549,7 @@ public class MainMenu extends BaseOpsuState {
 		super.enter();
 
 		logo.setX(displayContainer.width / 2);
-		logoOpen.setTime(0);
-		logoClose.setTime(0);
+		logoPosition.setTime(0);
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);
 		logoTimer = 0;
@@ -712,11 +710,7 @@ public class MainMenu extends BaseOpsuState {
 		// start moving logo (if clicked)
 		if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
 			if (logo.contains(x, y, 0.25f)) {
-				logoState = LogoState.OPENING;
-				logoOpen.setTime(0);
-				logoTimer = 0;
-				playButton.getImage().setAlpha(0f);
-				exitButton.getImage().setAlpha(0f);
+				this.openLogo();
 				SoundController.playSound(SoundEffect.MENUHIT);
 				return true;
 			}
@@ -756,9 +750,7 @@ public class MainMenu extends BaseOpsuState {
 		case KEY_ESCAPE:
 		case KEY_Q:
 			if (logoTimer > 0) {
-				logoState = LogoState.CLOSING;
-				logoClose.setTime(0);
-				logoTimer = 0;
+				this.closeLogo();
 				break;
 			}
 			buttonState.setMenuState(MenuState.EXIT);
@@ -767,13 +759,10 @@ public class MainMenu extends BaseOpsuState {
 		case KEY_P:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
-				logoState = LogoState.OPENING;
-				logoOpen.setTime(0);
-				logoTimer = 0;
-				playButton.getImage().setAlpha(0f);
-				exitButton.getImage().setAlpha(0f);
-			} else
+				this.openLogo();
+			} else {
 				enterSongMenu();
+			}
 			return true;
 		case KEY_D:
 			SoundController.playSound(SoundEffect.MENUHIT);
@@ -837,6 +826,19 @@ public class MainMenu extends BaseOpsuState {
 			state = downloadState;
 		}
 		displayContainer.switchState(state);
+	}
+	
+	private void openLogo() {
+		logoPosition.change(100, 0, logoPositionOffsetX, OUT_QUAD);
+		logoState = LogoState.OPENING;
+		logoTimer = 0;
+		playButton.getImage().setAlpha(0f);
+		exitButton.getImage().setAlpha(0f);
+	}
+	
+	private void closeLogo() {
+		logoPosition.change(2200, 0, logoPositionOffsetX, IN_QUAD);
+		logoState = LogoState.CLOSING;
 	}
 	
 	private static class PulseData {
