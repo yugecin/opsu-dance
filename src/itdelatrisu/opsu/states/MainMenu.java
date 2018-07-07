@@ -54,6 +54,7 @@ import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.ui.ImagePosition;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
@@ -79,8 +80,8 @@ public class MainMenu extends BaseOpsuState {
 	
 	private float barHeight;
 
-	/** Logo button that reveals other buttons on click. */
-	private MenuButton logo;
+	private ImagePosition logo;
+	private AnimatedValue logoHover;
 
 	/** Logo states. */
 	private enum LogoState { DEFAULT, OPENING, OPEN, CLOSING }
@@ -99,17 +100,16 @@ public class MainMenu extends BaseOpsuState {
 	private int lastMouseY;
 	
 	private AnimatedValue logoClickScale;
-	private AnimatedValue buttonsAnimation;
+	private AnimatedValue buttonAnimation;
 	private int buttonsX;
+	private AnimatedValue[] buttonAnimations;
+	private ImagePosition[] buttonPositions;
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
 	
 	/** Now playing position vlaue. */
 	private final AnimatedValue nowPlayingPosition;
-
-	/** Main "Play" and "Exit" buttons. */
-	private MenuButton playButton, exitButton;
 
 	/** Music control buttons. */
 	private MenuButton musicPlay, musicPause, musicStop, musicNext, musicPrev;
@@ -158,7 +158,13 @@ public class MainMenu extends BaseOpsuState {
 	public MainMenu() {
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
 		this.logoClickScale = new AnimatedValue(300, .9f, 1f, OUT_QUAD);
-		this.buttonsAnimation = new AnimatedValue(1, 0f, 1f, OUT_QUAD);
+		this.logoHover = new AnimatedValue(350, 1f, 1.096f, IN_OUT_EXPO);
+		this.buttonAnimation = new AnimatedValue(1, 0f, 1f, OUT_QUAD);
+		this.buttonAnimations = new AnimatedValue[3];
+		for (int i = 0; i < 3; i++) {
+			this.buttonAnimations[i] = new AnimatedValue(1, 0f, 1f, LINEAR);
+		}
+		this.buttonPositions = new ImagePosition[3];
 		this.timeFormat = new SimpleDateFormat("HH:mm");
 	}
 
@@ -174,31 +180,6 @@ public class MainMenu extends BaseOpsuState {
 		this.textMarginX = (int) (width * 0.015f);
 		this.textTopMarginY = (int) (height * 0.01f);
 		this.textLineHeight = (int) (Fonts.MEDIUM.getLineHeight() * 0.925f);
-
-		// initialize menu buttons
-		Image logoImg = GameImage.MENU_LOGO.getImage();
-		Image playImg = GameImage.MENU_PLAY.getImage();
-		Image exitImg = GameImage.MENU_EXIT.getImage();
-		float exitOffset = (playImg.getWidth() - exitImg.getWidth()) / 3f;
-		logo = new MenuButton(logoImg, displayContainer.width / 2f, displayContainer.height / 2f);
-		playButton = new MenuButton(playImg,
-				displayContainer.width * 0.75f, (displayContainer.height / 2) - (logoImg.getHeight() / 5f)
-		);
-		exitButton = new MenuButton(exitImg,
-				displayContainer.width * 0.75f - exitOffset, (displayContainer.height / 2) + (exitImg.getHeight() / 2f)
-		);
-		final int logoAnimationDuration = 350;
-		logo.setHoverAnimationDuration(logoAnimationDuration);
-		playButton.setHoverAnimationDuration(logoAnimationDuration);
-		exitButton.setHoverAnimationDuration(logoAnimationDuration);
-		final AnimationEquation logoAnimationEquation = AnimationEquation.IN_OUT_EXPO;
-		logo.setHoverAnimationEquation(logoAnimationEquation);
-		playButton.setHoverAnimationEquation(logoAnimationEquation);
-		exitButton.setHoverAnimationEquation(logoAnimationEquation);
-		final float logoHoverScale = 1.096f;
-		logo.setHoverExpand(logoHoverScale);
-		playButton.setHoverExpand(logoHoverScale);
-		exitButton.setHoverExpand(logoHoverScale);
 
 		// initialize music buttons
 		final int musicSize = (int) (this.textLineHeight * 0.8f);
@@ -267,11 +248,22 @@ public class MainMenu extends BaseOpsuState {
 		// initialize star fountain
 		starFountain = new StarFountain(displayContainer.width, displayContainer.height);
 
-		// logo animations
+		// logo & buttons
+		this.logo = new ImagePosition(MENU_LOGO.getImage());
 		logoPositionOffsetX = 0.35f * MENU_LOGO.getImage().getHeight();
 		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
 		this.buttonsX = (displayContainer.width - MENU_OPTIONS.getImage().getWidth()) / 2;
+		this.buttonPositions[0] = new ImagePosition(MENU_PLAY.getImage());
+		this.buttonPositions[1] = new ImagePosition(MENU_OPTIONS.getImage());
+		this.buttonPositions[2] = new ImagePosition(MENU_EXIT.getImage());
+		final int basey = displayContainer.height / 2 - MENU_OPTIONS.getImage().getHeight() / 2;
+		final float halfradius = MENU_LOGO.getImage().getHeight() * 0.44498f / 2f;
+		for (int i = 0; i < 3; i++) {
+			this.buttonPositions[i].width = MENU_OPTIONS.getImage().getWidth();
+			this.buttonPositions[i].y = (int) (basey + (i - 1f) * halfradius);
+			this.buttonPositions[i].height = MENU_OPTIONS.getImage().getHeight();
+		}
 	}
 
 	@Override
@@ -303,72 +295,89 @@ public class MainMenu extends BaseOpsuState {
 
 		// draw downloads button
 		downloadsButton.draw();
-
-		// draw buttons
-		final float buttonProgress = this.buttonsAnimation.getValue();
-		if (this.logoState != LogoState.DEFAULT && buttonProgress > 0f) {
-			final int btnwidth = MENU_OPTIONS.getImage().getWidth();
-			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
-			final int basey = displayContainer.height / 2;
-			final int x = (int) (this.buttonsX + btnwidth * 0.4f * buttonProgress);
-			final float clipxstart = x - this.logo.getX();
-			Color col = new Color(1f, 1f, 1f, buttonProgress);
-			final Image[] imgs = {
-				MENU_PLAY.getImage(),
-				MENU_OPTIONS.getImage(),
-				MENU_EXIT.getImage()
-			};
-			final float cr = MENU_LOGO.getImage().getHeight() * 0.44498f;
-			final float halfradius = cr / 2f;
-			for (int i = 0; i < 3; i++) {
-				final float yoff = (i - 1f) * halfradius;
-				final double cliptop = cr * cos(asin((yoff - btnhalfheight) / cr));
-				final double clipbot = cr * cos(asin((yoff + btnhalfheight) / cr));
-				final int ct = (int) (cliptop - clipxstart);
-				final int cb = (int) (clipbot - clipxstart);
-				final int y = (int) (basey + yoff);
-				this.drawMenuButton(imgs[i], x, y, ct, cb, col);
-			}
-		}
-
-		// draw logo (pulsing)
+		
+		// calculate scale stuff for logo
 		final float clickScale = this.logoClickScale.getValue();
-		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
+		Float beatPosition = MusicController.getBeatProgress();
+		Float beatLength = MusicController.getBeatLength();
+		final boolean renderPiece = beatPosition != null;
+		if (beatPosition == null) {
+			beatPosition = System.currentTimeMillis() % 1000 / 1000f;
+			beatLength = 1000f;
+		}
+		final float hoverScale = this.logoHover.getValue();
+		if (beatPosition < this.lastPulseProgress) {
+			this.pulseData.add(new PulseData((int) (beatPosition*beatLength), hoverScale));
+		}
+		this.lastPulseProgress = beatPosition;
+		final float smoothExpandProgress;
+		if (beatPosition < 0.05f) {
+			smoothExpandProgress = 1f - IN_CUBIC.calc(beatPosition / 0.05f);
+		} else {
+			smoothExpandProgress = (beatPosition - 0.05f) / 0.95f;
+		}
+		final float logoScale = (0.9726f + smoothExpandProgress * 0.0274f) * clickScale;
+		final float totalLogoScale = hoverScale * logoScale;
+		
+		// pulse ripples
+		final Color logoColor;
+		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
+			logoColor = Cursor.lastCursorColor;
+		} else {
+			logoColor = Color.white;
+		}
 		for (PulseData pd : this.pulseData) {
 			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
 			final float scale = (pd.initialScale + (0.432f * progress)) * clickScale;
 			final Image p = MENU_LOGO_PULSE.getScaledImage(scale);
 			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
-			p.drawCentered(logo.getX(), logo.getY(), color);
+			p.drawCentered(this.logo.middleX(), this.logo.middleY(), logoColor);
 		}
-		Float position = MusicController.getBeatProgress();
-		Float beatLength = MusicController.getBeatLength();
-		boolean renderPiece = position != null;
-		if (position == null) {
-			position = System.currentTimeMillis() % 1000 / 1000f;
-			beatLength = 1000f;
+
+		// draw buttons
+		final float buttonProgress = this.buttonAnimation.getValue();
+		if (this.logoState != LogoState.DEFAULT && buttonProgress > 0f) {
+			final int btnwidth = MENU_OPTIONS.getImage().getWidth();
+			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
+			final int basey = displayContainer.height / 2;
+			final int x = (int) (this.buttonsX + btnwidth * 0.3f * buttonProgress);
+			final Color col = new Color(1f, 1f, 1f, 1f);
+			final Image[] imgs = {
+				MENU_PLAY.getImage(),
+				MENU_OPTIONS.getImage(),
+				MENU_EXIT.getImage()
+			};
+			final float circleradius = MENU_LOGO.getImage().getHeight() * 0.44498f;
+			final float halfradius = circleradius / 2f;
+			final float cr = circleradius * totalLogoScale;
+			for (int i = 0; i < 3; i++) {
+				final float hoverprogress = this.buttonAnimations[i].getValue();
+				final int bx = x + (int) (btnwidth * 0.075f * hoverprogress);
+				this.buttonPositions[i].x = bx;
+				final float yoff = (i - 1f) * halfradius;
+				final double cliptop = cr * cos(asin((yoff - btnhalfheight) / cr));
+				final double clipbot = cr * cos(asin((yoff + btnhalfheight) / cr));
+				final float clipxstart = bx - this.logo.middleX();
+				final int ct = (int) (cliptop - clipxstart);
+				final int cb = (int) (clipbot - clipxstart);
+				final int y = (int) (basey + yoff);
+				col.a = buttonProgress * 0.85f + hoverprogress * 0.15f;
+				this.drawMenuButton(imgs[i], bx, y, ct, cb, col);
+			}
 		}
-		final float hoverScale = logo.getCurrentHoverExpandValue();
-		if (position < this.lastPulseProgress) {
-			this.pulseData.add(new PulseData((int) (position*beatLength), hoverScale));
-		}
-		this.lastPulseProgress = position;
-		final float smoothExpandProgress;
-		if (position < 0.05f) {
-			smoothExpandProgress = 1f - IN_CUBIC.calc(position / 0.05f);
-		} else {
-			smoothExpandProgress = (position - 0.05f) / 0.95f;
-		}
-		logo.draw(color, (0.9726f + smoothExpandProgress * 0.0274f) * clickScale);
+
+		// draw logo
+		this.logo.scale(logoScale);
+		this.logo.draw(logoColor);
 		if (renderPiece) {
-			final Image piece = MENU_LOGO_PIECE.getScaledImage(hoverScale * clickScale);
-			piece.rotate(position * 360);
-			piece.drawCentered(logo.getX(), logo.getY(), color);
+			final Image piece = MENU_LOGO_PIECE.getScaledImage(hoverScale * logoScale);
+			piece.rotate(beatPosition * 360f);
+			piece.drawCentered(this.logo.middleX(), this.logo.middleY(), logoColor);
 		}
 		final float ghostScale = hoverScale * 1.0186f - smoothExpandProgress * 0.0186f;
 		Image ghostLogo = MENU_LOGO.getScaledImage(ghostScale * clickScale);
 		ghostLogo.setAlpha(0.25f);
-		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
+		ghostLogo.drawCentered(this.logo.middleX(), this.logo.middleY(), logoColor);
 		
 		// now playing
 		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
@@ -484,9 +493,6 @@ public class MainMenu extends BaseOpsuState {
 			nextTrack(false);  // end of track: go to next track
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-		logo.hoverUpdate(delta, mouseX, mouseY, 0.25f);
-		playButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
-		exitButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 		if (repoButton != null) {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
@@ -520,28 +526,28 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// buttons
-		int centerX = displayContainer.width / 2;
-		float currentLogoButtonAlpha;
+		this.logo.width = MENU_LOGO.getImage().getWidth();
+		this.logo.height = MENU_LOGO.getImage().getHeight();
+		this.logo.x = (displayContainer.width - this.logo.width) / 2;
+		this.logo.y = (displayContainer.height - this.logo.height) / 2;
+		if (this.logoState != LogoState.DEFAULT) {
+			this.logo.x -= (int) this.logoPosition.getValue();
+		}
 		switch (logoState) {
 		case DEFAULT:
 			break;
 		case OPENING:
 			if (logoPosition.update(delta)) {
-				logo.setX(centerX - logoPosition.getValue());
-				this.buttonsAnimation.update(delta);
+				this.buttonAnimation.update(delta);
 			} else {
-				this.buttonsAnimation.setTime(this.buttonsAnimation.getDuration());
+				this.buttonAnimation.setTime(this.buttonAnimation.getDuration());
 				logoState = LogoState.OPEN;
 				logoTimer = 0;
 				logoButtonAlpha.setTime(0);
 			}
 			break;
 		case OPEN:
-			if (logoButtonAlpha.update(delta)) {  // fade in buttons
-				currentLogoButtonAlpha = logoButtonAlpha.getValue();
-				playButton.getImage().setAlpha(currentLogoButtonAlpha);
-				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
-			}
+			logoButtonAlpha.update(delta);
 			if (this.lastMouseX != mouseX || this.lastMouseY != mouseY) {
 				this.logoTimer = 0;
 				this.lastMouseX = mouseX;
@@ -554,21 +560,44 @@ public class MainMenu extends BaseOpsuState {
 			}
 			break;
 		case CLOSING:
-			if (logoButtonAlpha.update(-delta)) {  // fade out buttons
-				currentLogoButtonAlpha = logoButtonAlpha.getValue();
-				playButton.getImage().setAlpha(currentLogoButtonAlpha);
-				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
-			}
+			logoButtonAlpha.update(-delta);
 			if (logoPosition.update(-delta)) {
-				logo.setX(centerX - logoPosition.getValue());
-				this.buttonsAnimation.update(-delta);
+				this.buttonAnimation.update(-delta);
 			} else {
 				this.logoState = LogoState.DEFAULT;
-				this.buttonsAnimation.setTime(0);
+				this.buttonAnimation.setTime(0);
 			}
 			break;
 		}
 		this.logoClickScale.update(delta);
+		final boolean logoHovered = this.logo.contains(mouseX, mouseY, 0.25f);
+		if (logoHovered) {
+			this.logoHover.update(delta);
+		} else {
+			this.logoHover.update(-delta);
+		}
+		final float hoverScale = this.logoHover.getValue();
+		if (hoverScale != 1f) {
+			this.logo.scale(hoverScale);
+		}
+		for (int i = 0; i < 3; i++) {
+			final ImagePosition pos = this.buttonPositions[i];
+			final AnimatedValue anim = this.buttonAnimations[i];
+			if (!logoHovered && pos.contains(mouseX, mouseY, 0.25f)) {
+				if (anim.getDuration() != 500) {
+					anim.change(500, 0f, 1f, OUT_ELASTIC);
+					continue;
+				}
+				anim.update(delta);
+				continue;
+			}
+
+			if (anim.getDuration() != 350) {
+				anim.change(350, 0f, 1f, IN_QUAD);
+				continue;
+			}
+			anim.update(-delta);
+		}
 
 		// tooltips
 		if (musicPositionBarContains(mouseX, mouseY))
@@ -597,13 +626,12 @@ public class MainMenu extends BaseOpsuState {
 	public void enter() {
 		super.enter();
 
-		logo.setX(displayContainer.width / 2);
 		logoPosition.setTime(0);
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);
 		logoState = LogoState.DEFAULT;
 		this.logoClickScale.setTime(this.logoClickScale.getDuration());
-		this.buttonsAnimation.setTime(0);
+		this.buttonAnimation.setTime(0);
 
 		UI.enter();
 		if (!enterNotification) {
@@ -622,12 +650,6 @@ public class MainMenu extends BaseOpsuState {
 		// reset button hover states if mouse is not currently hovering over the button
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-		if (!logo.contains(mouseX, mouseY, 0.25f))
-			logo.resetHover();
-		if (!playButton.contains(mouseX, mouseY, 0.25f))
-			playButton.resetHover();
-		if (!exitButton.contains(mouseX, mouseY, 0.25f))
-			exitButton.resetHover();
 		for (MenuButton b : this.musicButtons) {
 			if (!b.contains(mouseX, mouseY)) {
 				b.resetHover();
@@ -757,32 +779,27 @@ public class MainMenu extends BaseOpsuState {
 			}
 		}
 
-		// start moving logo (if clicked)
+		final boolean logoHovered = this.logo.contains(x, y, 0.25f);
 		if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
-			if (logo.contains(x, y, 0.25f)) {
+			if (logoHovered) {
 				this.openLogo();
 				SoundController.playSound(SoundEffect.MENUHIT);
 				this.logoClickScale.setTime(0);
 				return true;
 			}
-		}
-
-		// other button actions (if visible)
-		else if (logoState == LogoState.OPEN || logoState == LogoState.OPENING) {
-			boolean logocontains = false;
-			if (logo.contains(x, y, 0.25f)) {
-				logocontains = true;
-				this.logoClickScale.setTime(0);
-			}
-			if (logocontains || playButton.contains(x, y, 0.25f)) {
+		} else {
+			if (logoHovered || this.buttonPositions[0].contains(x, y, 0.25f)) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
 				return true;
-			} else if (exitButton.contains(x, y, 0.25f)) {
+			}
+
+			if (this.buttonPositions[2].contains(x, y, 0.25f)) {
 				displayContainer.exitRequested = true;
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -885,15 +902,13 @@ public class MainMenu extends BaseOpsuState {
 	}
 	
 	private void openLogo() {
-		buttonsAnimation.change(300, 0f, 1f, OUT_QUAD);
+		buttonAnimation.change(300, 0f, 1f, OUT_QUAD);
 		logoPosition.change(300, 0, logoPositionOffsetX, OUT_CUBIC);
 		logoState = LogoState.OPENING;
-		playButton.getImage().setAlpha(0f);
-		exitButton.getImage().setAlpha(0f);
 	}
 	
 	private void closeLogo() {
-		buttonsAnimation.change(500, 0f, 1f, OUT_QUAD);
+		buttonAnimation.change(500, 0f, 1f, OUT_QUAD);
 		logoPosition.change(1800, 0, logoPositionOffsetX, IN_QUAD);
 		logoState = LogoState.CLOSING;
 	}
@@ -910,8 +925,8 @@ public class MainMenu extends BaseOpsuState {
 		final Texture t = img.getTexture();
 		t.bind(); 
 		
-		final int width = t.getImageWidth();
-		final int height = t.getImageHeight();
+		final int width = img.getWidth();
+		final int height = img.getHeight();
 		final float twidth = t.getWidth();
 		final float theight = t.getHeight();
 		y -= height / 2;
