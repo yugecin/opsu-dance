@@ -258,10 +258,10 @@ public class MainMenu extends BaseOpsuState {
 		this.buttonPositions[1] = new ImagePosition(MENU_OPTIONS.getImage());
 		this.buttonPositions[2] = new ImagePosition(MENU_EXIT.getImage());
 		final int basey = displayContainer.height / 2 - MENU_OPTIONS.getImage().getHeight() / 2;
-		final float halfradius = MENU_LOGO.getImage().getHeight() * 0.44498f / 2f;
+		final float yoffset = MENU_LOGO.getImage().getHeight() * 0.196378f;
 		for (int i = 0; i < 3; i++) {
 			this.buttonPositions[i].width = MENU_OPTIONS.getImage().getWidth();
-			this.buttonPositions[i].y = (int) (basey + (i - 1f) * halfradius);
+			this.buttonPositions[i].y = (int) (basey + (i - 1f) * yoffset);
 			this.buttonPositions[i].height = MENU_OPTIONS.getImage().getHeight();
 		}
 	}
@@ -348,13 +348,13 @@ public class MainMenu extends BaseOpsuState {
 				MENU_EXIT.getImage()
 			};
 			final float circleradius = MENU_LOGO.getImage().getHeight() * 0.44498f;
-			final float halfradius = circleradius / 2f;
+			final float yoffset = MENU_LOGO.getImage().getHeight() * 0.196378f;
 			final float cr = circleradius * totalLogoScale;
 			for (int i = 0; i < 3; i++) {
 				final float hoverprogress = this.buttonAnimations[i].getValue();
 				final int bx = x + (int) (btnwidth * 0.075f * hoverprogress);
 				this.buttonPositions[i].x = bx;
-				final float yoff = (i - 1f) * halfradius;
+				final float yoff = (i - 1f) * yoffset;
 				final double cliptop = cr * cos(asin((yoff - btnhalfheight) / cr));
 				final double clipbot = cr * cos(asin((yoff + btnhalfheight) / cr));
 				final float clipxstart = bx - this.logo.middleX();
