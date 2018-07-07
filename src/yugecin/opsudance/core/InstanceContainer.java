@@ -34,6 +34,7 @@ import yugecin.opsudance.options.Configuration;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.utils.ManifestWrapper;
 
 import java.io.File;
@@ -55,6 +56,7 @@ public class InstanceContainer {
 	public static BeatmapParser beatmapParser;
 	public static Updater updater;
 
+	public static BackButton backButton;
 	public static DisplayContainer displayContainer;
 	public static Input input;
 
@@ -72,6 +74,8 @@ public class InstanceContainer {
 	public static Game gameState;
 	public static GameRanking gameRankingState;
 	public static GamePauseMenu pauseState;
+	
+	public static int width, width2, height, height2;
 
 	public static void kickstart() {
 		updater = new Updater();

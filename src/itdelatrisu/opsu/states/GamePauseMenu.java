@@ -32,6 +32,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -193,9 +194,9 @@ public class GamePauseMenu extends BaseOpsuState {
 	 */
 	public void loadImages() {
 		// initialize buttons
-		continueButton = new MenuButton(GameImage.PAUSE_CONTINUE.getImage(), displayContainer.width / 2f, displayContainer.height * 0.25f);
-		retryButton = new MenuButton(GameImage.PAUSE_RETRY.getImage(), displayContainer.width / 2f, displayContainer.height * 0.5f);
-		backButton = new MenuButton(GameImage.PAUSE_BACK.getImage(), displayContainer.width / 2f, displayContainer.height * 0.75f);
+		continueButton = new MenuButton(PAUSE_CONTINUE.getImage(), width2, height * 0.25f);
+		retryButton = new MenuButton(PAUSE_RETRY.getImage(), width2, height2);
+		backButton = new MenuButton(PAUSE_BACK.getImage(), width2, height * 0.75f);
 		final int buttonAnimationDuration = 300;
 		continueButton.setHoverAnimationDuration(buttonAnimationDuration);
 		retryButton.setHoverAnimationDuration(buttonAnimationDuration);

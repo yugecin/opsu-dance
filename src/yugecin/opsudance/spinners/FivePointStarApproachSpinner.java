@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@ public class FivePointStarApproachSpinner extends Spinner {
 			odd = !odd;
 		}
 
-		double rad = displayContainer.width / 4.0f * (1d - Spinner.PROGRESS);
+		double rad = width / 4.0f * (1d - Spinner.PROGRESS);
 		if (!odd) {
 			rad /= 3d;
 		}
-		point[0] = displayContainer.width / 2d + Math.cos(ang) * rad;
-		point[1] = displayContainer.height / 2d + Math.sin(ang) * rad;
+		point[0] = width2 + Math.cos(ang) * rad;
+		point[1] = height2 + Math.sin(ang) * rad;
 		return point;
 	}
 

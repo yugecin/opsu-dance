@@ -43,18 +43,16 @@ public class SpiralSpinner extends Spinner {
         double ang;
         double rad;
         for (int i = 0; i < SIZE / 2; i++) {
-            MAX_RAD = (int) (displayContainer.height * .35);
+            MAX_RAD = (int) (height * .35);
             ang = (DENSITY * (Math.PI / SIZE) * i);
             rad = (MAX_RAD / (SIZE / 2)) * i;
-            int offsetX = displayContainer.width / 2;
-            int offsetY = displayContainer.height / 2;
             points[SIZE / 2 - 1 - i] = new double[]{
-                    offsetX + rad * Math.cos(ang),
-                    offsetY + rad * Math.sin(ang)
+                    width2 + rad * Math.cos(ang),
+                    height2 + rad * Math.sin(ang)
             };
             points[SIZE / 2 + i] = new double[]{
-                    offsetX + rad * (Math.cos(ang) * Math.cos(Math.PI) - Math.sin(ang) * Math.sin(Math.PI)),
-                    offsetY + rad * -Math.sin(ang)
+                    width2 + rad * (Math.cos(ang) * Math.cos(Math.PI) - Math.sin(ang) * Math.sin(Math.PI)),
+                    height2 + rad * -Math.sin(ang)
             };
         }
     }
@@ -84,12 +82,12 @@ public class SpiralSpinner extends Spinner {
     }
 
     private void rotatePointAroundCenter(double[] point, double beta) {
-        double angle = Math.atan2(point[1] - displayContainer.height / 2, point[0] - displayContainer.width / 2);
-        double rad = Utils.distance(point[0], point[1], displayContainer.width / 2, displayContainer.height / 2);
+        double angle = Math.atan2(point[1] - height2, point[0] - width2);
+        double rad = Utils.distance(point[0], point[1], width2, height2);
 
         //rotationMatrix
-        point[0] = displayContainer.width / 2 + rad * (Math.cos(angle) * Math.cos(beta) - Math.sin(angle) * Math.sin(beta));
-        point[1] = displayContainer.height / 2 + rad * (Math.cos(angle) * Math.sin(beta) + Math.sin(angle) * Math.cos(beta));
+        point[0] = width2 + rad * (Math.cos(angle) * Math.cos(beta) - Math.sin(angle) * Math.sin(beta));
+        point[1] = height2 + rad * (Math.cos(angle) * Math.sin(beta) + Math.sin(angle) * Math.cos(beta));
     }
 
 

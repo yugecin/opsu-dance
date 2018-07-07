@@ -98,13 +98,13 @@ public abstract class Curve {
 	 * @param circleDiameter the circle diameter
 	 * @param borderColor the curve border color
 	 */
-	public static void init(int width, int height, float circleDiameter, Color borderColor) {
+	public static void init(float circleDiameter, Color borderColor) {
 		Curve.borderColor = borderColor;
 
 		ContextCapabilities capabilities = GLContext.getCapabilities();
 		mmsliderSupported = capabilities.OpenGL30;
 		if (mmsliderSupported) {
-			CurveRenderState.init(width, height, circleDiameter);
+			CurveRenderState.init(circleDiameter);
 		} else if (SkinService.skin.getSliderStyle() != Skin.STYLE_PEPPYSLIDER) {
 			Log.warn("New slider style requires OpenGL 3.0.");
 		}

@@ -26,7 +26,7 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 import java.util.Formatter;
 import java.util.List;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BarNotificationState implements ResolutionChangedListener {
 
@@ -60,10 +60,10 @@ public class BarNotificationState implements ResolutionChangedListener {
 		timeShown += displayContainer.renderDelta;
 		processAnimations();
 		g.setColor(bgcol);
-		g.fillRect(0, displayContainer.height / 2 - barHalfHeight, displayContainer.width, barHalfHeight * 2);
+		g.fillRect(0, height2 - barHalfHeight, width, barHalfHeight * 2);
 		int y = textY;
 		for (String line : lines) {
-			Fonts.LARGE.drawString((displayContainer.width - Fonts.LARGE.getWidth(line)) / 2, y, line, textCol);
+			Fonts.LARGE.drawString((width - Fonts.LARGE.getWidth(line)) / 2, y, line, textCol);
 			y += Fonts.LARGE.getLineHeight();
 		}
 	}
@@ -88,9 +88,9 @@ public class BarNotificationState implements ResolutionChangedListener {
 	}
 
 	private void calculatePosition() {
-		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (displayContainer.width * 0.96f), true);
+		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (width * 0.96f), true);
 		int textHeight = (int) (Fonts.LARGE.getLineHeight() * (lines.size() + 0.5f));
-		textY = (displayContainer.height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
+		textY = (height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
 		barHalfTargetHeight = textHeight / 2;
 	}
 	

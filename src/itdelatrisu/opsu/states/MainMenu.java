@@ -172,9 +172,6 @@ public class MainMenu extends BaseOpsuState {
 	protected void revalidate() {
 		previous = new Stack<>();
 
-		final int width = displayContainer.width;
-		final int height = displayContainer.height;
-
 		this.barHeight = height * 0.1125f;
 
 		this.textMarginX = (int) (width * 0.015f);
@@ -213,7 +210,7 @@ public class MainMenu extends BaseOpsuState {
 
 		// initialize downloads button
 		Image dlImg = GameImage.DOWNLOADS.getImage();
-		downloadsButton = new MenuButton(dlImg, displayContainer.width - dlImg.getWidth() / 2f, displayContainer.height / 2f);
+		downloadsButton = new MenuButton(dlImg, width - dlImg.getWidth() / 2f, height2);
 		downloadsButton.setHoverAnimationDuration(350);
 		downloadsButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
 		downloadsButton.setHoverExpand(1.03f, Expand.LEFT);
@@ -233,31 +230,31 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// initialize update buttons
-		float updateX = displayContainer.width / 2f, updateY = displayContainer.height * 17 / 18f;
-		Image downloadImg = GameImage.DOWNLOAD.getImage();
-		updateButton = new MenuButton(downloadImg, updateX, updateY);
+		final float updateY = height * 17 / 18f;
+		final Image downloadImg = GameImage.DOWNLOAD.getImage();
+		updateButton = new MenuButton(downloadImg, width2, updateY);
 		updateButton.setHoverAnimationDuration(400);
 		updateButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_QUAD);
 		updateButton.setHoverExpand(1.1f);
-		Image updateImg = GameImage.UPDATE.getImage();
-		restartButton = new MenuButton(updateImg, updateX, updateY);
+		final Image updateImg = GameImage.UPDATE.getImage();
+		restartButton = new MenuButton(updateImg, width2, updateY);
 		restartButton.setHoverAnimationDuration(2000);
 		restartButton.setHoverAnimationEquation(AnimationEquation.LINEAR);
 		restartButton.setHoverRotate(360);
 
 		// initialize star fountain
-		starFountain = new StarFountain(displayContainer.width, displayContainer.height);
+		starFountain = new StarFountain(width, height);
 
 		// logo & buttons
 		this.logo = new ImagePosition(MENU_LOGO.getImage());
 		logoPositionOffsetX = 0.35f * MENU_LOGO.getImage().getHeight();
 		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
-		this.buttonsX = (displayContainer.width - MENU_OPTIONS.getImage().getWidth()) / 2;
+		this.buttonsX = width2 - MENU_OPTIONS.getImage().getWidth() / 2;
 		this.buttonPositions[0] = new ImagePosition(MENU_PLAY.getImage());
 		this.buttonPositions[1] = new ImagePosition(MENU_OPTIONS.getImage());
 		this.buttonPositions[2] = new ImagePosition(MENU_EXIT.getImage());
-		final int basey = displayContainer.height / 2 - MENU_OPTIONS.getImage().getHeight() / 2;
+		final int basey = height2 - MENU_OPTIONS.getImage().getHeight() / 2;
 		final float yoffset = MENU_LOGO.getImage().getHeight() * 0.196378f;
 		for (int i = 0; i < 3; i++) {
 			this.buttonPositions[i].width = MENU_OPTIONS.getImage().getWidth();
@@ -268,9 +265,6 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public void render(Graphics g) {
-		int width = displayContainer.width;
-		int height = displayContainer.height;
-
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (OPTION_DYNAMIC_BACKGROUND.state &&
@@ -339,7 +333,7 @@ public class MainMenu extends BaseOpsuState {
 		if (this.logoState != LogoState.DEFAULT && buttonProgress > 0f) {
 			final int btnwidth = MENU_OPTIONS.getImage().getWidth();
 			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
-			final int basey = displayContainer.height / 2;
+			final int basey = height2;
 			final int x = (int) (this.buttonsX + btnwidth * 0.375f * buttonProgress);
 			final Color col = new Color(logoColor);
 			final Image[] imgs = {
@@ -528,8 +522,8 @@ public class MainMenu extends BaseOpsuState {
 		// buttons
 		this.logo.width = MENU_LOGO.getImage().getWidth();
 		this.logo.height = MENU_LOGO.getImage().getHeight();
-		this.logo.x = (displayContainer.width - this.logo.width) / 2;
-		this.logo.y = (displayContainer.height - this.logo.height) / 2;
+		this.logo.x = width2 - this.logo.width / 2;
+		this.logo.y = height2 - this.logo.height / 2;
 		if (this.logoState != LogoState.DEFAULT) {
 			this.logo.x -= (int) this.logoPosition.getValue();
 		}

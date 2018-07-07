@@ -131,6 +131,6 @@ public class CombinedSpiralMover extends Mover {
     }
 
     private boolean checkBounds(double[] pos) {
-        return 0 < pos[0] && pos[0] < displayContainer.width && 0 < pos[1] && pos[1] < displayContainer.height;
+        return 0 < pos[0] && pos[0] < width && 0 < pos[1] && pos[1] < height;
     }
 }

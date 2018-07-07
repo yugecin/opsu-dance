@@ -8,7 +8,7 @@ import yugecin.opsudance.movers.Mover;
 import awlex.ospu.movers.SpiralToMover;
 import yugecin.opsudance.movers.factories.MoverFactory;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Created by Alex Wieser on 09.10.2016.
@@ -88,7 +88,7 @@ public class SpiralMoverFactory implements MoverFactory {
      * @return
      */
     private boolean checkBounds(double[] pos) {
-        return 0 < pos[0] && pos[0] < displayContainer.width && 0 < pos[1] && pos[1] < displayContainer.height;
+        return 0 < pos[0] && pos[0] < width && 0 < pos[1] && pos[1] < height;
     }
 
     @Override

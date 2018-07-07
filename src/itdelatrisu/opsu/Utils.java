@@ -464,8 +464,8 @@ public class Utils {
 	 */
 	public static int getRegion(double x, double y) {
 		int q = 0;
-		if (y < displayContainer.height / 2d) q = 2;
-		if (x < displayContainer.width / 2d) q |= 1;
+		if (y < height2) q = 2;
+		if (x < width2) q |= 1;
 		return q;
 	}
 
@@ -483,24 +483,24 @@ public class Utils {
 	*/
 
 	public static float[] mirrorPoint(float x, float y) {
-		double dx = x - displayContainer.width / 2d;
-		double dy = y - displayContainer.height / 2d;
+		double dx = x - width2;
+		double dy = y - height2;
 		double ang = Math.atan2(dy, dx);
 		double d = -Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
-			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
+			(float) (width2 + Math.cos(ang) * d),
+			(float) (height2 + Math.sin(ang) * d)
 		};
 	}
 
 	public static float[] mirrorPoint(float x, float y, float degrees) {
-		double dx = x - displayContainer.width / 2d;
-		double dy = y - displayContainer.height / 2d;
+		double dx = x - width2;
+		double dy = y - height2;
 		double ang = Math.atan2(dy, dx) + (degrees * Math.PI / 180d);
 		double d = Math.sqrt(dx * dx + dy * dy);
 		return new float[]{
-			(float) (displayContainer.width / 2d + Math.cos(ang) * d),
-			(float) (displayContainer.height / 2d + Math.sin(ang) * d)
+			(float) (width2 + Math.cos(ang) * d),
+			(float) (height2 + Math.sin(ang) * d)
 		};
 	}
 

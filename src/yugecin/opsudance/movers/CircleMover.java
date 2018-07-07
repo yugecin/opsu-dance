@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class CircleMover extends Mover {
 				double a = ang + SOME_CONSTANT * t;
 				pos[0] = (startX + (endX - startX) * t) - middlexoffset - Math.cos(a) * radius;
 				pos[1] = (startY + (endY - startY) * t) - middleyoffset - Math.sin(a) * radius;
-				if (pos[0] < 0 || displayContainer.width < pos[0] || pos[1] < 0 || displayContainer.height < pos[1]) {
+				if (pos[0] < 0 || width < pos[0] || pos[1] < 0 || height < pos[1]) {
 					pass = false;
 					break;
 				}

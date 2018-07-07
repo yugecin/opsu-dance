@@ -72,10 +72,10 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener {
 
 	private void calculatePositions() {
 		// if width is 0, attempting to wrap it will result in infinite loop
-		Notification.width = Math.max(50, (int) (displayContainer.width * 0.1703125f));
-		Notification.baseLine = (int) (displayContainer.height * 0.9645f);
-		Notification.paddingY = (int) (displayContainer.height * 0.0144f);
-		Notification.finalX = displayContainer.width - Notification.width - (int) (displayContainer.width * 0.01);
+		Notification.width = Math.max(50, (int) (width * 0.1703125f));
+		Notification.baseLine = (int) (height * 0.9645f);
+		Notification.paddingY = (int) (height * 0.0144f);
+		Notification.finalX = width - Notification.width - (int) (width * 0.01);
 		Notification.fontPaddingX = (int) (Notification.width * 0.02f);
 		Notification.fontPaddingY = (int) (Fonts.SMALLBOLD.getLineHeight() / 4f);
 		Notification.lineHeight = Fonts.SMALLBOLD.getLineHeight();

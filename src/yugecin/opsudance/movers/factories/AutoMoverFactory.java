@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,8 +102,8 @@ public class AutoMoverFactory implements MoverFactory {
 	}
 
 	private boolean checkBounds( double[] pos ) {
-		return 0 < pos[0] && pos[0] < displayContainer.width - displayContainer.width / 8 &&
-			0 < pos[1] && pos[1] < displayContainer.height - displayContainer.height / 8;
+		return 0 < pos[0] && pos[0] < width - width / 8 &&
+			0 < pos[1] && pos[1] < height - height / 8;
 	}
 
 	@Override

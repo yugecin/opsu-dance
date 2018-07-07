@@ -107,11 +107,13 @@ public class Splash extends BaseOpsuState {
 	@Override
 	public void render(Graphics g) {
 		g.setBackground(Color.black);
-		GameImage.MENU_LOGO.getImage().drawCentered(
-			displayContainer.width / 2,
-			displayContainer.height / 2,
-			OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white
-		);
+		final Color col;
+		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
+			col = Cursor.lastCursorColor;
+		} else {
+			col = Color.white;
+		}
+		GameImage.MENU_LOGO.getImage().drawCentered(width2, height2, col);
 		UI.drawLoadingProgress(g);
 	}
 

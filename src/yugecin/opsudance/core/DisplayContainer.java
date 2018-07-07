@@ -44,6 +44,7 @@ import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
+import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -67,9 +68,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public final DisplayMode nativeDisplayMode;
 
 	private Graphics graphics;
-
-	public int width;
-	public int height;
 
 	public int mouseX;
 	public int mouseY;
@@ -149,12 +147,13 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 		}
 
+		backButton = new BackButton();
+
 		// TODO clean this up
 		GameMod.init(width, height);
 		PlaybackSpeed.init(width, height);
 		HitObject.init(width, height);
 		DownloadNode.init(width, height);
-		UI.init(this);
 	}
 
 	public void setUPS(int ups) {
@@ -262,7 +261,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void setup() throws Exception {
-		width = height = -1;
+		width = height = width2 = height2 = -1;
 		Display.setTitle("opsu!dance");
 		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
@@ -372,29 +371,34 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 	}
 
-	public void setDisplayMode(int width, int height, boolean fullscreen) throws Exception {
-		if (this.width == width && this.height == height) {
+	public void setDisplayMode(int w, int h, boolean fullscreen) throws Exception {
+		if (width == w && height == h) {
 			Display.setFullscreen(fullscreen);
 			return;
 		}
 
 		DisplayMode displayMode = null;
 		if (fullscreen) {
-			displayMode = GLHelper.findFullscreenDisplayMode(nativeDisplayMode.getBitsPerPixel(), nativeDisplayMode.getFrequency(), width, height);
+			final int bpp = this.nativeDisplayMode.getBitsPerPixel();
+			final int freq = this.nativeDisplayMode.getFrequency();
+			displayMode = GLHelper.findFullscreenDisplayMode(bpp, freq, w, h);
 		}
 
 		if (displayMode == null) {
-			displayMode = new DisplayMode(width, height);
+			displayMode = new DisplayMode(w, h);
 			if (fullscreen) {
 				fullscreen = false;
-				String msg = String.format("Fullscreen mode is not supported for %sx%s", width, height);
+				String msg = "Fullscreen mode is not supported for %sx%s";
+				msg = String.format(msg, w, h);
 				Log.warn(msg);
 				bubNotifs.send(BUB_ORANGE, msg);
 			}
 		}
 
-		this.width = displayMode.getWidth();
-		this.height = displayMode.getHeight();
+		width = displayMode.getWidth();
+		height = displayMode.getHeight();
+		width2 = width / 2;
+		height2 = height / 2;
 
 		Display.setDisplayMode(displayMode);
 		Display.setFullscreen(fullscreen);
@@ -509,6 +513,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		this.state = state;
 		this.state.enter();
 		input.addListener(this.state);
+		backButton.resetHover();
 		if (this.rendering) {
 			// state might be changed in preRenderUpdate,
 			// in that case the new state will be rendered without having

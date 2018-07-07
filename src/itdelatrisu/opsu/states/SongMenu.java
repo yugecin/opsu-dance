@@ -325,23 +325,23 @@ public class SongMenu extends ComplexOpsuState {
 		components.clear();
 
 		// header/footer coordinates
-		headerY = displayContainer.height * 0.0075f + GameImage.MENU_MUSICNOTE.getImage().getHeight() +
+		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getImage().getHeight() +
 				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				Fonts.SMALL.getLineHeight();
-		footerY = displayContainer.height - GameImage.SELECTION_MODS.getImage().getHeight();
+		footerY = height - GameImage.SELECTION_MODS.getImage().getHeight();
 
 		// footer logo coordinates
-		float footerHeight = displayContainer.height - footerY;
+		float footerHeight = height - footerY;
 		footerLogoSize = footerHeight * 3.25f;
 		Image logo = GameImage.MENU_LOGO.getImage();
 		logo = logo.getScaledCopy(footerLogoSize / logo.getWidth());
-		footerLogoButton = new MenuButton(logo, displayContainer.width - footerHeight * 0.8f, displayContainer.height - footerHeight * 0.65f);
+		footerLogoButton = new MenuButton(logo, width - footerHeight * 0.8f, height - footerHeight * 0.65f);
 		footerLogoButton.setHoverAnimationDuration(1);
 		footerLogoButton.setHoverExpand(1.2f);
 
 		// initialize sorts
-		int sortWidth = (int) (displayContainer.width * 0.12f);
-		int posX = (int) (displayContainer.width * 0.87f);
+		int sortWidth = (int) (width * 0.12f);
+		int posX = (int) (width * 0.87f);
 		int posY = (int) (headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f);
 		sortMenu = new DropdownMenu<BeatmapSortOrder>(displayContainer, BeatmapSortOrder.values(), posX, posY, sortWidth) {
 			@Override
@@ -372,25 +372,25 @@ public class SongMenu extends ComplexOpsuState {
 
 		// initialize group tabs
 		for (BeatmapGroup group : BeatmapGroup.values())
-			group.init(displayContainer.width, headerY - DIVIDER_LINE_WIDTH / 2);
+			group.init(width, headerY - DIVIDER_LINE_WIDTH / 2);
 
 		// initialize score data buttons
-		ScoreData.init(displayContainer.width, headerY + displayContainer.height * 0.01f);
+		ScoreData.init(width, headerY + height * 0.01f);
 
 		// song button background & graphics context
 		Image menuBackground = GameImage.MENU_BUTTON_BG.getImage();
 
 		// song button coordinates
-		buttonX = displayContainer.width * 0.6f;
+		buttonX = width * 0.6f;
 		//buttonY = headerY;
 		buttonWidth = menuBackground.getWidth();
 		buttonHeight = menuBackground.getHeight();
 		buttonOffset = (footerY - headerY - DIVIDER_LINE_WIDTH) / MAX_SONG_BUTTONS;
 
 		// search
-		int textFieldX = (int) (displayContainer.width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
+		int textFieldX = (int) (width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
 		int textFieldY = (int) (headerY + Fonts.BOLD.getLineHeight() / 2);
-		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
+		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;
@@ -413,8 +413,8 @@ public class SongMenu extends ComplexOpsuState {
 		if (selectButtonsWidth < 20) {
 			selectButtonsWidth = 100;
 		}
-		float selectX = displayContainer.width * 0.183f + selectButtonsWidth / 2f;
-		float selectY = displayContainer.height - selectButtonsHeight / 2f;
+		float selectX = width * 0.183f + selectButtonsWidth / 2f;
+		float selectY = height - selectButtonsHeight / 2f;
 		float selectOffset = selectButtonsWidth * 1.05f;
 		selectModsButton = new MenuButton(GameImage.SELECTION_MODS_OVERLAY.getImage(),
 				selectX, selectY);
@@ -450,8 +450,8 @@ public class SongMenu extends ComplexOpsuState {
 		});
 
 		// star stream
-		starStream = new StarStream(displayContainer.width, (displayContainer.height - GameImage.STAR.getImage().getHeight()) / 2, -displayContainer.width, 0, MAX_STREAM_STARS);
-		starStream.setPositionSpread(displayContainer.height / 20f);
+		starStream = new StarStream(width, height2 - GameImage.STAR.getImage().getHeight() / 2, -width, 0, MAX_STREAM_STARS);
+		starStream.setPositionSpread(height / 20f);
 		starStream.setDirectionSpread(10f);
 	}
 
@@ -459,8 +459,6 @@ public class SongMenu extends ComplexOpsuState {
 	public void render(Graphics g) {
 		g.setBackground(Color.black);
 
-		int width = displayContainer.width;
-		int height = displayContainer.height;
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
 
@@ -697,11 +695,9 @@ public class SongMenu extends ComplexOpsuState {
 			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
+		} else {
+			backButton.draw(g);
 		}
-
-		// back button
-		else
-			UI.getBackButton().draw(g);
 
 		UI.draw(g);
 
@@ -730,7 +726,7 @@ public class SongMenu extends ComplexOpsuState {
 		}
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
 		selectMapOptionsButton.hoverUpdate(delta, mouseX, mouseY);
@@ -904,7 +900,7 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (UI.getBackButton().contains(x, y)) {
+		if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			displayContainer.switchState(mainmenuState);
 			return true;

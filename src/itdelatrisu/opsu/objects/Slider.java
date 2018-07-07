@@ -384,7 +384,7 @@ public class Slider extends GameObject {
 					float oldAlphaBlack = Colors.BLACK_ALPHA.a;
 					Colors.BLACK_ALPHA.a = 0.75f;
 					g.setColor(Colors.BLACK_ALPHA);
-					g.fillRect(0, 0, displayContainer.width, displayContainer.height);
+					g.fillRect(0, 0, width, height);
 					Colors.BLACK_ALPHA.a = oldAlphaBlack;
 				}
 			}

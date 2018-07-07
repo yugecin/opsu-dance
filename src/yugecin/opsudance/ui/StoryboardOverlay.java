@@ -26,7 +26,6 @@ import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.ObjectColorOverrides;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.options.OptionTab;
 import yugecin.opsudance.sbv2.MoveStoryboard;
@@ -35,13 +34,11 @@ import java.util.*;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
-@SuppressWarnings("unchecked")
 public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverlay.Listener {
 
 	private final static List<Option> optionList = new ArrayList<>();
-
-	private final DisplayContainer displayContainer;
 
 	private boolean hide;
 
@@ -62,8 +59,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 		}
 	}
 
-	public StoryboardOverlay(DisplayContainer displayContainer, MoveStoryboard msb, OptionsOverlay optionsOverlay, Game game) {
-		this.displayContainer = displayContainer;
+	public StoryboardOverlay(MoveStoryboard msb, OptionsOverlay optionsOverlay, Game game) {
 		this.msb = msb;
 		this.optionsOverlay = optionsOverlay;
 		this.game = game;
@@ -78,18 +74,18 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
-		Fonts.SMALL.drawString(10, displayContainer.height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
-		Fonts.SMALL.drawString(10, displayContainer.height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
-		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh, "Menu: N", Color.cyan);
-		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh * 2, "HIDE: H", Color.cyan);
-		Fonts.SMALL.drawString(10, displayContainer.height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50 + lh, "save position: ctrl+s, load position: ctrl+l", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50, "speed: C " + (speed / 10f) + " V", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50 - lh, "Menu: N", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50 - lh * 2, "HIDE: H", Color.cyan);
+		Fonts.SMALL.drawString(10, height - 50 - lh * 3, "obj: J " + index + " K", Color.cyan);
 		g.setColor(Color.red);
 		if (index < optionsMap.length && optionsMap[index] != null) {
 			int i = 0;
 			for (Object o : optionsMap[index].entrySet()) {
 				Map.Entry<Option, String> option = (Map.Entry<Option, String>) o;
 				Fonts.SMALL.drawString(10, 50 + i * lh, option.getKey().name, Color.cyan);
-				Fonts.SMALL.drawString(displayContainer.width / 5, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
+				Fonts.SMALL.drawString(width / 5, 50 + i * lh, option.getKey().getValueString(), Color.cyan);
 				g.fillRect(0, 50 + i * lh + lh / 4, 10, 10);
 				i++;
 			}
@@ -98,7 +94,7 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 			int start = gameObjects[0].getTime();
 			int end = gameObjects[gameObjects.length - 1].getEndTime();
 			float curtime = (float) (MusicController.getPosition() - start) / (end - start);
-			g.fillRect(curtime * displayContainer.width, displayContainer.height - 10f, 10f, 10f);
+			g.fillRect(curtime * width, height - 10f, 10f, 10f);
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import yugecin.opsudance.options.Options;
-
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class HalfCircleSpinner extends Spinner {
 
@@ -47,8 +45,8 @@ public class HalfCircleSpinner extends Spinner {
 			skipang += 359;
 		}
 
-		point[0] = displayContainer.width / 2.0d + displayContainer.height / 2 * 0.8d * Math.cos(ang/180d*Math.PI);
-		point[1] = displayContainer.height / 2.0d + displayContainer.height / 2 * 0.8d * Math.sin(ang/180d*Math.PI);
+		point[0] = width2 + height2 * 0.8d * Math.cos(ang/180d*Math.PI);
+		point[1] = height2 + height2 * 0.8d * Math.sin(ang/180d*Math.PI);
 
 		return point;
 	}

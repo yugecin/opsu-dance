@@ -24,7 +24,7 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.utils.FPSMeter;
 
 import static yugecin.opsudance.options.Options.*;
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class FpsRenderState implements ResolutionChangedListener {
 
@@ -90,8 +90,8 @@ public class FpsRenderState implements ResolutionChangedListener {
 	@Override
 	public void onResolutionChanged(int w, int h) {
 		singleHeight = Fonts.SMALL.getLineHeight();
-		x = displayContainer.width - 3;
-		y = displayContainer.height - 3 - singleHeight - 10;
+		x = width - 3;
+		y = height - 3 - singleHeight - 10;
 	}
 
 }

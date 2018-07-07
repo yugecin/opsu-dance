@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ public class ExgonMover extends Mover {
 				pos[0] = endX;
 				pos[1] = endY;
 			} else {
-				pos[0] = randgen.nextInt(displayContainer.width);
-				pos[1] = randgen.nextInt(displayContainer.height);
+				pos[0] = randgen.nextInt(width);
+				pos[1] = randgen.nextInt(height);
 			}
 		}
 		return pos;

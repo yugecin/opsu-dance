@@ -293,8 +293,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 		components.clear();
 
-		int width = displayContainer.width;
-		int height = displayContainer.height;
 		int baseX = (int) (width * 0.024f);
 		int searchY = (int) (height * 0.04f + Fonts.LARGE.getLineHeight());
 		int searchWidth = (int) (width * 0.3f);
@@ -409,7 +407,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		GameImage.SEARCH_BG.getImage().draw();
 
 		// title
-		Fonts.LARGE.drawString(displayContainer.width * 0.024f, displayContainer.height * 0.03f, "Download Beatmaps!", Color.white);
+		Fonts.LARGE.drawString(width * 0.024f, height * 0.03f, "Download Beatmaps!", Color.white);
 
 		// search
 		g.setColor(Color.white);
@@ -446,9 +444,9 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 			// pages
 			if (nodes.length > 0) {
-				float baseX = displayContainer.width * 0.024f;
-				float buttonY = displayContainer.height * 0.2f;
-				float buttonWidth = displayContainer.width * 0.7f;
+				float baseX = width * 0.024f;
+				float buttonY = height * 0.2f;
+				float buttonWidth = width * 0.7f;
 				Fonts.BOLD.drawString(
 						baseX + (buttonWidth - Fonts.BOLD.getWidth("Page 1")) / 2f,
 						buttonY - Fonts.BOLD.getLineHeight() * 1.3f,
@@ -462,11 +460,10 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// downloads
-		float downloadsX = displayContainer.width * 0.75f, downloadsY = search.y;
+		float downloadsX = width * 0.75f, downloadsY = search.y;
 		g.setColor(Colors.BLACK_BG_NORMAL);
-		g.fillRect(downloadsX, downloadsY,
-				displayContainer.width * 0.25f, displayContainer.height - downloadsY * 2f);
-		Fonts.LARGE.drawString(downloadsX + displayContainer.width * 0.015f, downloadsY + displayContainer.height * 0.015f, "Downloads", Color.white);
+		g.fillRect(downloadsX, downloadsY, width * 0.25f, height - downloadsY * 2f);
+		Fonts.LARGE.drawString(downloadsX + width * 0.015f, downloadsY + height * 0.015f, "Downloads", Color.white);
 		int downloadsSize = DownloadList.get().size();
 		if (downloadsSize > 0) {
 			int maxDownloadsShown = DownloadNode.maxDownloadsShown();
@@ -505,14 +502,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 		if (importThread != null) {
 			// darken the screen
 			g.setColor(Colors.BLACK_ALPHA);
-			g.fillRect(0, 0, displayContainer.width, displayContainer.height);
+			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
+		} else {
+			backButton.draw(g);
 		}
-
-		// back button
-		else
-			UI.getBackButton().draw(g);
 
 		UI.draw(g);
 	}
@@ -544,7 +539,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
 		clearButton.hoverUpdate(delta, mouseX, mouseY);
@@ -614,7 +609,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// back
-		if (UI.getBackButton().contains(x, y)) {
+		if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			displayContainer.switchState(mainmenuState);
 			return true;

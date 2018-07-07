@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class CubeSpinner extends Spinner {
 
@@ -90,10 +90,10 @@ public class CubeSpinner extends Spinner {
 		x *= 3.0d / ( z + 3.0d + 5.0d + 0.5 );
 		y *= 3.0d / ( z + 3.0d + 5.0d + 0.5 );
 
-		double scale = displayContainer.width / (3.0f + 0.5f * Math.cos(size / 180f * Math.PI));
+		double scale = width / (3.0f + 0.5f * Math.cos(size / 180f * Math.PI));
 		//double scale = Options.width / (3.0f + -1f * ((float)(Options.s.ElapsedMilliseconds % Options.beatTimeMs)/(float)Options.beatTimeMs));
-		point[0] = (int) ( displayContainer.width / 2.0f + scale * x );
-		point[1] = (int) ( displayContainer.height / 2.0f - scale * y );
+		point[0] = (int) (width2 + scale * x );
+		point[1] = (int) (height2 - scale * y );
 
 		return point;
 	}

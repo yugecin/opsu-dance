@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,9 @@ public class FivePointStarSpinner extends Spinner {
 	@Override
 	public void init() {
 		double[][] points = new double[10][];
-		double midx = displayContainer.width / 2d;
-		double midy = displayContainer.height / 2d;
 		double angleIncRads = Math.PI * 36d / 180d;
 		double ang = -Math.PI / 2d;
-		double maxrad = displayContainer.width / 4d;
+		double maxrad = width / 4d;
 		double minrad = maxrad / 3d;
 		for (int i = 0; i < 10; i++) {
 			double rad = maxrad;
@@ -36,8 +34,8 @@ public class FivePointStarSpinner extends Spinner {
 				rad = minrad;
 			}
 			points[i] = new double[] {
-				midx + Math.cos(ang) * rad,
-				midy + Math.sin(ang) * rad
+				width2 + Math.cos(ang) * rad,
+				height2 + Math.sin(ang) * rad
 			};
 			ang += angleIncRads;
 		}

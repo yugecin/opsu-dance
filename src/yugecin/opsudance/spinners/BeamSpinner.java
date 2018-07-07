@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,30 +41,30 @@ public class BeamSpinner extends Spinner {
 		index = ++index % 4;
 		final int MOD = 60;
 
-		point[0] = displayContainer.width / 2d;
-		point[1] = displayContainer.height / 2d;
+		point[0] = width2;
+		point[1] = height2;
 
-		if( index == 0 ) {
-			add( MOD, 90 );
-			add( MOD, 180 );
-		} else if( index == 1 ) {
-			add( MOD, 90 );
-			add( displayContainer.height / 2 * 0.8d, 0 );
-		} else if( index == 2 ) {
-			add( MOD, -90 );
-			add( displayContainer.height / 2 * 0.8d, 0 );
-		} else if( index == 3 ) {
-			add( MOD, -90 );
-			add( MOD, 180 );
+		if (index == 0) {
+			add(MOD, 90);
+			add(MOD, 180);
+		} else if (index == 1) {
+			add(MOD, 90);
+			add(height2 * 0.8d, 0);
+		} else if (index == 2) {
+			add(MOD, -90);
+			add(height2 * 0.8d, 0);
+		} else if (index == 3) {
+			add(MOD, -90);
+			add(MOD, 180);
 			ang += 0.3;
 		}
 
 		return point;
 	}
 
-	private void add( double rad, double ang ) {
-		point[0] += rad * Math.cos( (this.ang + ang) / 180d * Math.PI);
-		point[1] -= rad * Math.sin( (this.ang + ang) / 180d * Math.PI);
+	private void add (double rad, double ang ) {
+		point[0] += rad * Math.cos((this.ang + ang) / 180d * Math.PI);
+		point[1] -= rad * Math.sin((this.ang + ang) / 180d * Math.PI);
 	}
 
 	@Override

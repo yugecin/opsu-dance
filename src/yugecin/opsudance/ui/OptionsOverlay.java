@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class OptionsOverlay extends OverlayOpsuState {
@@ -110,8 +111,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int openDropdownVirtualY;
 
 	private int targetWidth;
-	private int width;
-	private int height;
+	private int currentWidth;
 
 	private int navButtonSize;
 	private int navStartY;
@@ -185,18 +185,17 @@ public class OptionsOverlay extends OverlayOpsuState {
 		super.revalidate();
 
 		boolean isWidescreen = displayContainer.isWidescreen();
-		targetWidth = (int) (displayContainer.width * (isWidescreen ? 0.4f : 0.5f));
-		height = displayContainer.height;
+		targetWidth = (int) (width * (isWidescreen ? 0.4f : 0.5f));
 
 		// calculate positions
 		float navIconWidthRatio = isWidescreen ? 0.046875f : 0.065f;
 		// non-widescreen ratio is not accurate
-		navButtonSize = (int) (displayContainer.width * navIconWidthRatio);
+		navButtonSize = (int) (width * navIconWidthRatio);
 		navIndicatorSize = navButtonSize / 10;
 		navTargetWidth = (int) (targetWidth * 0.45f) - navButtonSize;
-		paddingRight = (int) (displayContainer.width * 0.009375f); // not so accurate
-		paddingLeft = navButtonSize + (int) (displayContainer.width * 0.0180f); // not so accurate
-		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625f); // not so accurate
+		paddingRight = (int) (width * 0.009375f); // not so accurate
+		paddingLeft = navButtonSize + (int) (width * 0.0180f); // not so accurate
+		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (width * 0.00625f); // not so accurate
 		optionStartX = paddingTextLeft;
 		textOptionsY = Fonts.LARGE.getLineHeight() * 2;
 		textChangeY = textOptionsY + Fonts.LARGE.getLineHeight();
@@ -206,8 +205,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
 		if (active) {
-			width = targetWidth;
-			optionWidth = width - optionStartX - paddingRight;
+			currentWidth = targetWidth;
+			optionWidth = currentWidth - optionStartX - paddingRight;
 		}
 
 		optionHeight = (int) (Fonts.MEDIUM.getLineHeight() * 1.3f);
@@ -267,11 +266,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	@Override
 	public void onRender(Graphics g) {
-		g.setClip(navButtonSize, 0, width - navButtonSize, height);
+		g.setClip(navButtonSize, 0, currentWidth - navButtonSize, height);
 
 		// bg
 		g.setColor(COL_BG);
-		g.fillRect(navButtonSize, 0, width, height);
+		g.fillRect(navButtonSize, 0, currentWidth, height);
 
 		// title
 		renderTitle();
@@ -291,13 +290,13 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		// scrollbar
 		g.setColor(COL_WHITE);
-		g.fillRect(width - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
+		g.fillRect(currentWidth - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
 		g.clearClip();
 
 		renderNavigation(g);
 
 		// UI
-		UI.getBackButton().draw(g);
+		backButton.draw(g);
 
 		// tooltip
 		renderTooltip(g);
@@ -373,16 +372,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
 			}
 		}
-		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), width, optionHeight);
+		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), currentWidth, optionHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
 		g.setColor(COL_BG);
-		g.fillRect(0, 0, displayContainer.width, height);
+		g.fillRect(0, 0, width, height);
 		g.setColor(COL_WHITE);
 		String prompt = (keyEntryLeft) ? "Please press the new left-click key." : "Please press the new right-click key.";
-		int y = (displayContainer.height - Fonts.LARGE.getLineHeight()) / 2;
-		FontUtil.drawCentered(Fonts.LARGE, displayContainer.width, 0, y, prompt, COL_WHITE);
+		int y = height2 - Fonts.LARGE.getLineHeight() / 2;
+		FontUtil.drawCentered(Fonts.LARGE, width, 0, y, prompt, COL_WHITE);
 	}
 
 	private void renderTooltip(Graphics g) {
@@ -413,7 +412,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (section != activeSection) {
 					COL_CYAN.a *= 0.2f;
 				}
-				FontUtil.drawRightAligned(Fonts.XLARGE, width, -paddingRight,
+				FontUtil.drawRightAligned(Fonts.XLARGE, currentWidth, -paddingRight,
 					(int) (y + Fonts.XLARGE.getLineHeight() * 0.3f), section.name.toUpperCase(),
 					COL_CYAN);
 				COL_CYAN.a = previousAlpha;
@@ -569,7 +568,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderTitle() {
-		int textWidth = width - navButtonSize;
+		int textWidth = currentWidth - navButtonSize;
 		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize,
 			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
 		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
@@ -581,7 +580,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
-			g.fillRect(navButtonSize, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+			g.fillRect(navButtonSize, 0, currentWidth, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
 		}
 		Color searchCol = COL_WHITE;
 		float invalidProgress = 0f;
@@ -597,7 +596,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (lastSearchText.length() > 0) {
 			searchText = lastSearchText;
 		}
-		int textWidth = width - navButtonSize;
+		int textWidth = currentWidth - navButtonSize;
 		if (invalidSearchAnimationProgress > 0) {
 			g.rotate(navButtonSize + textWidth / 2, ypos, invalidProgress * invalidSearchTextRotation);
 		}
@@ -684,7 +683,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		prevMouseY = mouseY;
 		updateHoverOption(mouseX, mouseY);
 		updateIndicatorAlpha();
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
 			int sliderValue = ((NumericOption) hoverOption).val;
 			updateSliderOption();
@@ -737,11 +736,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateShowHideAnimation(int delta) {
 		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
-			width = targetWidth;
+			currentWidth = targetWidth;
 			showHideProgress = 1f;
 			return;
 		}
-		optionWidth = width - optionStartX - paddingRight;
+		optionWidth = currentWidth - optionStartX - paddingRight;
 
 		// navigation elemenst fade out with a different animation
 		float navProgress;
@@ -763,7 +762,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
 			showHideProgress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(showHideProgress);
 		}
-		width = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
+		currentWidth = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
 		COL_NAV_FILTERED.a = COL_NAV_INACTIVE.a = COL_NAV_FILTERED_HOVERED.a = COL_NAV_INDICATOR.a =
 			COL_NAV_WHITE.a = COL_NAV_BG.a = navProgress;
 		COL_BG.a = BG_ALPHA * showHideProgress;
@@ -782,7 +781,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return true;
 		}
 
-		if (x > width) {
+		if (x > currentWidth) {
 			return false;
 		}
 
@@ -874,7 +873,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			scrollHandler.scrollToPosition(sectionPosition);
 		}
 
-		if (UI.getBackButton().contains(x, y)){
+		if (backButton.contains(x, y)){
 			hide();
 			if (listener != null) {
 				listener.onLeaveOptionsMenu();
@@ -1011,7 +1010,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return;
 		}
 		hoverOption = null;
-		if (mouseX > width) {
+		if (mouseX > currentWidth) {
 			return;
 		}
 

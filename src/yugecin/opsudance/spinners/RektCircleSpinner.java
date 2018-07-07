@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public class RektCircleSpinner extends Spinner {
 	@Override
 	public void init() {
 		index = 0;
-		size = displayContainer.height * 0.8d;
+		size = height * 0.8d;
 		point = new double[2];
 	}
 
@@ -42,20 +42,20 @@ public class RektCircleSpinner extends Spinner {
 		final int INC = 50;
 
 		if( index == 0 ) {
-			point[0] = displayContainer.width / 2d + size / 2d - pos;
-			point[1] = displayContainer.height / 2d - size / 2d;
+			point[0] = width2 + size / 2d - pos;
+			point[1] = height2 - size / 2d;
 			index++;
 		} else if( index == 1 ) {
-			point[0] = displayContainer.width / 2 - size / 2;
-			point[1] = displayContainer.height / 2 - size / 2 + pos;
+			point[0] = width2 - size / 2;
+			point[1] = height2 - size / 2 + pos;
 			index++;
 		} else if( index == 2 ) {
-			point[0] = displayContainer.width / 2 - size / 2 + pos;
-			point[1] = displayContainer.height / 2 + size / 2;
+			point[0] = width2 - size / 2 + pos;
+			point[1] = height2 + size / 2;
 			index++;
 		} else if( index == 3 ) {
-			point[0] = displayContainer.width / 2 + size / 2;
-			point[1] = displayContainer.height / 2 + size / 2 - pos;
+			point[0] = width2 + size / 2;
+			point[1] = height2 + size / 2 - pos;
 			pos += INC;
 			if( pos > size ) {
 				pos = INC;

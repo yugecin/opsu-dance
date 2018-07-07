@@ -603,8 +603,6 @@ public class GameData {
 	 */
 	@SuppressWarnings("deprecation")
 	public void drawGameElements(Graphics g, boolean breakPeriod, boolean firstObject, float alpha) {
-		int width = displayContainer.width;
-		int height = displayContainer.height;
 		boolean relaxAutoPilot = (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive());
 		int margin = (int) (width * 0.008f);
 		float uiScale = GameImage.getUIscale();
@@ -796,9 +794,6 @@ public class GameData {
 	 * @param beatmap the beatmap
 	 */
 	public void drawRankingElements(Graphics g, Beatmap beatmap) {
-		int width = displayContainer.width;
-		int height = displayContainer.height;
-
 		// TODO Version 2 skins
 		float rankingHeight = 75;
 		float scoreTextScale = 1.0f;
@@ -911,7 +906,7 @@ public class GameData {
 				if (hitResult.hitResultType == HitObjectType.SPINNER && hitResult.result != HIT_MISS) {
 					Image spinnerOsu = GameImage.SPINNER_OSU.getImage();
 					spinnerOsu.setAlpha(hitResult.alpha);
-					spinnerOsu.drawCentered(displayContainer.width / 2, displayContainer.height / 4);
+					spinnerOsu.drawCentered(width2, height / 4);
 					spinnerOsu.setAlpha(1f);
 				} else if (OPTION_SHOW_HIT_LIGHTING.state && !hitResult.hideResult && hitResult.result != HIT_MISS &&
 					// hit lighting
@@ -1185,7 +1180,7 @@ public class GameData {
 		// combo burst
 		if (comboBurstIndex > -1 && OPTION_SHOW_COMBO_BURSTS.state) {
 			int leftX  = 0;
-			int rightX = displayContainer.width - comboBurstImages[comboBurstIndex].getWidth();
+			int rightX = width - comboBurstImages[comboBurstIndex].getWidth();
 			if (comboBurstX < leftX) {
 				comboBurstX += (delta / 2f) * GameImage.getUIscale();
 				if (comboBurstX > leftX)
@@ -1246,7 +1241,7 @@ public class GameData {
 			}
 			comboBurstAlpha = 0.8f;
 			if ((comboBurstIndex % 2) == 0) {
-				comboBurstX = displayContainer.width;
+				comboBurstX = width;
 			} else {
 				comboBurstX = comboBurstImages[0].getWidth() * -1;
 			}
