@@ -341,7 +341,7 @@ public class MainMenu extends BaseOpsuState {
 			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
 			final int basey = displayContainer.height / 2;
 			final int x = (int) (this.buttonsX + btnwidth * 0.3f * buttonProgress);
-			final Color col = new Color(1f, 1f, 1f, buttonProgress);
+			final Color col = new Color(1f, 1f, 1f, 1f);
 			final Image[] imgs = {
 				MENU_PLAY.getImage(),
 				MENU_OPTIONS.getImage(),
@@ -361,7 +361,7 @@ public class MainMenu extends BaseOpsuState {
 				final int ct = (int) (cliptop - clipxstart);
 				final int cb = (int) (clipbot - clipxstart);
 				final int y = (int) (basey + yoff);
-				col.a = buttonProgress * 0.8f + hoverprogress * 0.2f;
+				col.a = buttonProgress * 0.85f + hoverprogress * 0.15f;
 				this.drawMenuButton(imgs[i], bx, y, ct, cb, col);
 			}
 		}
