@@ -17,11 +17,12 @@
  */
 package yugecin.opsudance.ui;
 
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 
-public class ImagePosition extends Rectangle {
+public class ImagePosition extends Rectangle2D.Float {
 	
 	private Image image;
 	
@@ -33,9 +34,29 @@ public class ImagePosition extends Rectangle {
 		if (!super.contains(x, y)) {
 			return false;
 		}
-		final int ix = x - this.x;
-		final int iy = y - this.y;
+		final int ix = x - (int) this.x;
+		final int iy = y - (int) this.y;
 		return this.image.getAlphaAt(ix, iy) > alphaThreshold;
 	}
+	
+	public float middleX() {
+		return this.x + this.width / 2;
+	}
+	
+	public float middleY() {
+		return this.y + this.height / 2;
+	}
+	
+	public void scale(float scale) {
+		final float width = this.width * scale;
+		final float height = this.height * scale;
+		this.x -= (width - this.width) / 2f;
+		this.y -= (height - this.height) / 2f;
+		this.width = width;
+		this.height = height;
+	}
 
+	public void draw(Color filter) {
+		this.image.draw(this.x, this.y, this.width, this.height, filter);
+	}
 }
