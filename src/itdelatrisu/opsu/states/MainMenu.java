@@ -42,10 +42,13 @@ import java.util.LinkedList;
 import java.util.Stack;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
@@ -56,6 +59,7 @@ import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static java.awt.Desktop.Action.*;
+import static java.lang.Math.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -95,6 +99,8 @@ public class MainMenu extends BaseOpsuState {
 	private int lastMouseY;
 	
 	private AnimatedValue logoClickScale;
+	private AnimatedValue buttonsAnimation;
+	private int buttonsX;
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
@@ -152,6 +158,7 @@ public class MainMenu extends BaseOpsuState {
 	public MainMenu() {
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
 		this.logoClickScale = new AnimatedValue(300, .9f, 1f, OUT_QUAD);
+		this.buttonsAnimation = new AnimatedValue(1, 0f, 1f, OUT_QUAD);
 		this.timeFormat = new SimpleDateFormat("HH:mm");
 	}
 
@@ -261,9 +268,10 @@ public class MainMenu extends BaseOpsuState {
 		starFountain = new StarFountain(displayContainer.width, displayContainer.height);
 
 		// logo animations
-		logoPositionOffsetX = 0.4f * MENU_LOGO.getImage().getHeight();
+		logoPositionOffsetX = 0.35f * MENU_LOGO.getImage().getHeight();
 		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
+		this.buttonsX = (displayContainer.width - MENU_OPTIONS.getImage().getWidth()) / 2;
 	}
 
 	@Override
@@ -297,9 +305,30 @@ public class MainMenu extends BaseOpsuState {
 		downloadsButton.draw();
 
 		// draw buttons
-		if (logoState == LogoState.OPEN || logoState == LogoState.CLOSING) {
-			playButton.draw();
-			exitButton.draw();
+		final float buttonProgress = this.buttonsAnimation.getValue();
+		if (this.logoState != LogoState.DEFAULT && buttonProgress > 0f) {
+			final int btnwidth = MENU_OPTIONS.getImage().getWidth();
+			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
+			final int basey = displayContainer.height / 2;
+			final int x = (int) (this.buttonsX + btnwidth * 0.4f * buttonProgress);
+			final float clipxstart = x - this.logo.getX();
+			Color col = new Color(1f, 1f, 1f, buttonProgress);
+			final Image[] imgs = {
+				MENU_PLAY.getImage(),
+				MENU_OPTIONS.getImage(),
+				MENU_EXIT.getImage()
+			};
+			final float cr = MENU_LOGO.getImage().getHeight() * 0.44498f;
+			final float halfradius = cr / 2f;
+			for (int i = 0; i < 3; i++) {
+				final float yoff = (i - 1f) * halfradius;
+				final double cliptop = cr * cos(asin((yoff - btnhalfheight) / cr));
+				final double clipbot = cr * cos(asin((yoff + btnhalfheight) / cr));
+				final int ct = (int) (cliptop - clipxstart);
+				final int cb = (int) (clipbot - clipxstart);
+				final int y = (int) (basey + yoff);
+				this.drawMenuButton(imgs[i], x, y, ct, cb, col);
+			}
 		}
 
 		// draw logo (pulsing)
@@ -497,9 +526,11 @@ public class MainMenu extends BaseOpsuState {
 		case DEFAULT:
 			break;
 		case OPENING:
-			if (logoPosition.update(delta))  // shifting to left
+			if (logoPosition.update(delta)) {
 				logo.setX(centerX - logoPosition.getValue());
-			else {
+				this.buttonsAnimation.update(delta);
+			} else {
+				this.buttonsAnimation.setTime(this.buttonsAnimation.getDuration());
 				logoState = LogoState.OPEN;
 				logoTimer = 0;
 				logoButtonAlpha.setTime(0);
@@ -528,8 +559,13 @@ public class MainMenu extends BaseOpsuState {
 				playButton.getImage().setAlpha(currentLogoButtonAlpha);
 				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
 			}
-			if (logoPosition.update(-delta))  // shifting to right
+			if (logoPosition.update(-delta)) {
 				logo.setX(centerX - logoPosition.getValue());
+				this.buttonsAnimation.update(-delta);
+			} else {
+				this.logoState = LogoState.DEFAULT;
+				this.buttonsAnimation.setTime(0);
+			}
 			break;
 		}
 		this.logoClickScale.update(delta);
@@ -567,6 +603,7 @@ public class MainMenu extends BaseOpsuState {
 		nowPlayingPosition.setTime(0);
 		logoState = LogoState.DEFAULT;
 		this.logoClickScale.setTime(this.logoClickScale.getDuration());
+		this.buttonsAnimation.setTime(0);
 
 		UI.enter();
 		if (!enterNotification) {
@@ -848,6 +885,7 @@ public class MainMenu extends BaseOpsuState {
 	}
 	
 	private void openLogo() {
+		buttonsAnimation.change(300, 0f, 1f, OUT_QUAD);
 		logoPosition.change(300, 0, logoPositionOffsetX, OUT_CUBIC);
 		logoState = LogoState.OPENING;
 		playButton.getImage().setAlpha(0f);
@@ -855,8 +893,42 @@ public class MainMenu extends BaseOpsuState {
 	}
 	
 	private void closeLogo() {
+		buttonsAnimation.change(500, 0f, 1f, OUT_QUAD);
 		logoPosition.change(1800, 0, logoPositionOffsetX, IN_QUAD);
 		logoState = LogoState.CLOSING;
+	}
+	
+	private void drawMenuButton(
+		Image img,
+		int x,
+		int y,
+		int clipxtop,
+		int clipxbot,
+		Color col)
+	{
+		col.bind();
+		final Texture t = img.getTexture();
+		t.bind(); 
+		
+		final int width = t.getImageWidth();
+		final int height = t.getImageHeight();
+		final float twidth = t.getWidth();
+		final float theight = t.getHeight();
+		y -= height / 2;
+		
+		final float texXtop = clipxtop > 0 ? (float) clipxtop / width * twidth : 0f;
+		final float texXbot = clipxbot > 0 ? (float) clipxbot / width * twidth : 0f;
+
+		GL11.glBegin(SGL.GL_QUADS); 
+		GL11.glTexCoord2f(texXtop, 0);
+		GL11.glVertex3i(x + clipxtop, y, 0);
+		GL11.glTexCoord2f(twidth, 0);
+		GL11.glVertex3i(x + width, y, 0);
+		GL11.glTexCoord2f(twidth, theight);
+		GL11.glVertex3i(x + width, y + height, 0);
+		GL11.glTexCoord2f(texXbot, theight);
+		GL11.glVertex3i(x + clipxbot, y + height, 0);
+		GL11.glEnd(); 
 	}
 	
 	private static class PulseData {
