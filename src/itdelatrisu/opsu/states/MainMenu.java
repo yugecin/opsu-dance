@@ -303,6 +303,29 @@ public class MainMenu extends BaseOpsuState {
 
 		// draw downloads button
 		downloadsButton.draw();
+		
+		// scale stuff for logo
+		final float clickScale = this.logoClickScale.getValue();
+		Float beatPosition = MusicController.getBeatProgress();
+		Float beatLength = MusicController.getBeatLength();
+		final boolean renderPiece = beatPosition != null;
+		if (beatPosition == null) {
+			beatPosition = System.currentTimeMillis() % 1000 / 1000f;
+			beatLength = 1000f;
+		}
+		final float hoverScale = logo.getCurrentHoverExpandValue();
+		if (beatPosition < this.lastPulseProgress) {
+			this.pulseData.add(new PulseData((int) (beatPosition*beatLength), hoverScale));
+		}
+		this.lastPulseProgress = beatPosition;
+		final float smoothExpandProgress;
+		if (beatPosition < 0.05f) {
+			smoothExpandProgress = 1f - IN_CUBIC.calc(beatPosition / 0.05f);
+		} else {
+			smoothExpandProgress = (beatPosition - 0.05f) / 0.95f;
+		}
+		final float logoScale = (0.9726f + smoothExpandProgress * 0.0274f) * clickScale;
+		final float totalLogoScale = hoverScale * logoScale;
 
 		// draw buttons
 		final float buttonProgress = this.buttonsAnimation.getValue();
@@ -318,8 +341,9 @@ public class MainMenu extends BaseOpsuState {
 				MENU_OPTIONS.getImage(),
 				MENU_EXIT.getImage()
 			};
-			final float cr = MENU_LOGO.getImage().getHeight() * 0.44498f;
-			final float halfradius = cr / 2f;
+			final float circleradius = MENU_LOGO.getImage().getHeight() * 0.44498f;
+			final float halfradius = circleradius / 2f;
+			final float cr = circleradius * totalLogoScale;
 			for (int i = 0; i < 3; i++) {
 				final float yoff = (i - 1f) * halfradius;
 				final double cliptop = cr * cos(asin((yoff - btnhalfheight) / cr));
@@ -332,7 +356,6 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw logo (pulsing)
-		final float clickScale = this.logoClickScale.getValue();
 		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
 		for (PulseData pd : this.pulseData) {
 			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
@@ -341,28 +364,10 @@ public class MainMenu extends BaseOpsuState {
 			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
 			p.drawCentered(logo.getX(), logo.getY(), color);
 		}
-		Float position = MusicController.getBeatProgress();
-		Float beatLength = MusicController.getBeatLength();
-		boolean renderPiece = position != null;
-		if (position == null) {
-			position = System.currentTimeMillis() % 1000 / 1000f;
-			beatLength = 1000f;
-		}
-		final float hoverScale = logo.getCurrentHoverExpandValue();
-		if (position < this.lastPulseProgress) {
-			this.pulseData.add(new PulseData((int) (position*beatLength), hoverScale));
-		}
-		this.lastPulseProgress = position;
-		final float smoothExpandProgress;
-		if (position < 0.05f) {
-			smoothExpandProgress = 1f - IN_CUBIC.calc(position / 0.05f);
-		} else {
-			smoothExpandProgress = (position - 0.05f) / 0.95f;
-		}
-		logo.draw(color, (0.9726f + smoothExpandProgress * 0.0274f) * clickScale);
+		logo.draw(color, logoScale);
 		if (renderPiece) {
 			final Image piece = MENU_LOGO_PIECE.getScaledImage(hoverScale * clickScale);
-			piece.rotate(position * 360);
+			piece.rotate(beatPosition * 360f);
 			piece.drawCentered(logo.getX(), logo.getY(), color);
 		}
 		final float ghostScale = hoverScale * 1.0186f - smoothExpandProgress * 0.0186f;
