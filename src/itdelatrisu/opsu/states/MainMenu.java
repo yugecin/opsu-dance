@@ -295,7 +295,7 @@ public class MainMenu extends BaseOpsuState {
 		Float beatPosition = MusicController.getBeatProgress();
 		Float beatLength = MusicController.getBeatLength();
 		final boolean renderPiece = beatPosition != null;
-		if (beatPosition == null) {
+		if (beatPosition == null || beatLength == null) {
 			beatPosition = System.currentTimeMillis() % 1000 / 1000f;
 			beatLength = 1000f;
 		}
