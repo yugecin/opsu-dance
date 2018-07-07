@@ -341,7 +341,7 @@ public class MainMenu extends BaseOpsuState {
 			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
 			final int basey = displayContainer.height / 2;
 			final int x = (int) (this.buttonsX + btnwidth * 0.375f * buttonProgress);
-			final Color col = new Color(1f, 1f, 1f, 1f);
+			final Color col = new Color(logoColor);
 			final Image[] imgs = {
 				MENU_PLAY.getImage(),
 				MENU_OPTIONS.getImage(),
