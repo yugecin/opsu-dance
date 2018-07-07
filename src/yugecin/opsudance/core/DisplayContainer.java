@@ -80,6 +80,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public int targetRenderInterval;
 	public int targetBackgroundRenderInterval;
 
+	private boolean rendering;
 	public int renderDelta;
 	public int delta;
 
@@ -212,6 +213,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 
 			if (timeSinceLastRender >= maxRenderInterval) {
+				rendering = true;
 				GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
 
 				/*
@@ -251,6 +253,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 				Display.update(false);
 				GL11.glFlush();
+				rendering = false;
 			}
 
 			Display.processMessages();
@@ -506,6 +509,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		this.state = state;
 		this.state.enter();
 		input.addListener(this.state);
+		if (this.rendering) {
+			// state might be changed in preRenderUpdate,
+			// in that case the new state will be rendered without having
+			// preRenderUpdate being called first, so do that now
+			this.state.preRenderUpdate();
+		}
 	}
 
 }
