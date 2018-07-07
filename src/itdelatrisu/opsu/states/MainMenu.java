@@ -829,7 +829,7 @@ public class MainMenu extends BaseOpsuState {
 	}
 	
 	private void openLogo() {
-		logoPosition.change(100, 0, logoPositionOffsetX, OUT_QUAD);
+		logoPosition.change(300, 0, logoPositionOffsetX, OUT_CUBIC);
 		logoState = LogoState.OPENING;
 		logoTimer = 0;
 		playButton.getImage().setAlpha(0f);
@@ -837,7 +837,7 @@ public class MainMenu extends BaseOpsuState {
 	}
 	
 	private void closeLogo() {
-		logoPosition.change(2200, 0, logoPositionOffsetX, IN_QUAD);
+		logoPosition.change(1800, 0, logoPositionOffsetX, IN_QUAD);
 		logoState = LogoState.CLOSING;
 	}
 	
