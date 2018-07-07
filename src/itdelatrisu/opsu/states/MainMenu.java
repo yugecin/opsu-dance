@@ -68,7 +68,7 @@ import static yugecin.opsudance.options.Options.*;
 public class MainMenu extends BaseOpsuState {
 
 	/** Idle time, in milliseconds, before returning the logo to its original position. */
-	private static final short LOGO_IDLE_DELAY = 10000;
+	private static final short LOGO_IDLE_DELAY = 6000;
 
 	/** Max alpha level of the menu background. */
 	private static final float BG_MAX_ALPHA = 0.9f;
@@ -90,6 +90,9 @@ public class MainMenu extends BaseOpsuState {
 	/** Logo horizontal offset for opening and closing actions. */
 	private AnimatedValue logoPosition;
 	private float logoPositionOffsetX;
+	
+	private int lastMouseX;
+	private int lastMouseY;
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
@@ -504,10 +507,16 @@ public class MainMenu extends BaseOpsuState {
 				currentLogoButtonAlpha = logoButtonAlpha.getValue();
 				playButton.getImage().setAlpha(currentLogoButtonAlpha);
 				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
-			} else if (logoTimer >= LOGO_IDLE_DELAY) {  // timer over: shift back to center
-				this.closeLogo();
+			}
+			if (this.lastMouseX != mouseX || this.lastMouseY != mouseY) {
+				this.logoTimer = 0;
+				this.lastMouseX = mouseX;
+				this.lastMouseY = mouseY;
 			} else {
-				logoTimer += delta;
+				this.logoTimer += delta;
+				if (this.logoTimer >= LOGO_IDLE_DELAY) {
+					this.closeLogo();
+				}
 			}
 			break;
 		case CLOSING:
@@ -552,7 +561,6 @@ public class MainMenu extends BaseOpsuState {
 		logoPosition.setTime(0);
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);
-		logoTimer = 0;
 		logoState = LogoState.DEFAULT;
 
 		UI.enter();
@@ -831,7 +839,6 @@ public class MainMenu extends BaseOpsuState {
 	private void openLogo() {
 		logoPosition.change(300, 0, logoPositionOffsetX, OUT_CUBIC);
 		logoState = LogoState.OPENING;
-		logoTimer = 0;
 		playButton.getImage().setAlpha(0f);
 		exitButton.getImage().setAlpha(0f);
 	}
