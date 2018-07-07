@@ -23,7 +23,6 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
@@ -37,8 +36,6 @@ import java.lang.reflect.Proxy;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class MoveStoryboard extends OverlayOpsuState{
-
-	private final DisplayContainer displayContainer;
 
 	private SimpleButton btnAddLinear;
 	private SimpleButton btnAddQuadratic;
@@ -57,8 +54,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private int trackPosition;
 
-	public MoveStoryboard(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
+	public MoveStoryboard() {
 		dummyMove = (StoryboardMove) Proxy.newProxyInstance(StoryboardMove.class.getClassLoader(), new Class<?>[]{StoryboardMove.class}, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -98,8 +94,8 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	@Override
 	protected void onPreRenderUpdate() {
-		int x = displayContainer.mouseX;
-		int y = displayContainer.mouseY;
+		int x = mouseX;
+		int y = mouseY;
 		btnAddLinear.update(x, y);
 		btnAddQuadratic.update(x, y);
 		btnAddCubic.update(x, y);
@@ -107,7 +103,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 		btnAnimMid.update(x, y);
 		btnAnimCub.update(x, y);
 		if (moves[objectIndex] != null) {
-			moves[objectIndex].update(displayContainer.renderDelta, x, y);
+			moves[objectIndex].update(renderDelta, x, y);
 		}
 	}
 

@@ -279,8 +279,8 @@ public class UI {
 			textWidth += Fonts.SMALL.getWidth(tooltip);
 
 		// get drawing coordinates
-		int x = displayContainer.mouseX + offset;
-		int y = displayContainer.mouseY + offset;
+		int x = mouseX + offset;
+		int y = mouseY + offset;
 		if (x + textWidth > width - margin)
 			x = width - margin - textWidth;
 		else if (x < margin)

@@ -407,8 +407,6 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw music position bar
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		g.setColor((musicPositionBarContains(mouseX, mouseY)) ? Colors.BLACK_BG_HOVER : Colors.BLACK_BG_NORMAL);
 		g.fillRect(this.musicBarX, this.musicBarY, this.musicBarWidth, this.musicBarHeight);
 		g.setColor(Colors.WHITE_ALPHA_75);
@@ -471,7 +469,7 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public void preRenderUpdate() {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
 		while (pulseDataIter.hasNext()) {
@@ -485,8 +483,6 @@ public class MainMenu extends BaseOpsuState {
 		UI.update(delta);
 		if (MusicController.trackEnded())
 			nextTrack(false);  // end of track: go to next track
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		if (repoButton != null) {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
@@ -642,8 +638,6 @@ public class MainMenu extends BaseOpsuState {
 		starFountain.clear();
 
 		// reset button hover states if mouse is not currently hovering over the button
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		for (MenuButton b : this.musicButtons) {
 			if (!b.contains(mouseX, mouseY)) {
 				b.resetHover();

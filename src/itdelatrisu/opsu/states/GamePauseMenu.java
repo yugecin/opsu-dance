@@ -74,11 +74,11 @@ public class GamePauseMenu extends BaseOpsuState {
 
 	@Override
 	public void preRenderUpdate() {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
-		continueButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
-		retryButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
-		backButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		continueButton.hoverUpdate(delta, mouseX, mouseY);
+		retryButton.hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 	}
 
 	@Override
@@ -90,9 +90,9 @@ public class GamePauseMenu extends BaseOpsuState {
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
 			if (key == OPTION_KEY_LEFT.intval) {
-				mousePressed(Input.MOUSE_LEFT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+				mousePressed(Input.MOUSE_LEFT_BUTTON, mouseX, mouseY);
 			} else if (key == OPTION_KEY_RIGHT.intval) {
-				mousePressed(Input.MOUSE_RIGHT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+				mousePressed(Input.MOUSE_RIGHT_BUTTON, mouseX, mouseY);
 			}
 		}
 

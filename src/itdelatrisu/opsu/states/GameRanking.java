@@ -99,15 +99,15 @@ public class GameRanking extends BaseOpsuState {
 
 	@Override
 	public void preRenderUpdate() {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
-		replayButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		replayButton.hoverUpdate(delta, mouseX, mouseY);
 		if (data.isGameplay()) {
-			retryButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+			retryButton.hoverUpdate(delta, mouseX, mouseY);
 		} else {
 			MusicController.loopTrackIfEnded(true);
 		}
-		backButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 	}
 
 	@Override

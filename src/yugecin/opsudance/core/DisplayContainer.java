@@ -69,9 +69,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private Graphics graphics;
 
-	public int mouseX;
-	public int mouseY;
-
 	private int targetUpdatesPerSecond;
 	public int targetUpdateInterval;
 	private int targetRendersPerSecond;
@@ -79,7 +76,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public int targetBackgroundRenderInterval;
 
 	private boolean rendering;
-	public int renderDelta;
 	public int delta;
 
 	public boolean exitRequested;
@@ -230,7 +226,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
-				cursor.updateAngle(renderDelta);
+				cursor.updateAngle();
 				if (drawCursor) {
 					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
 						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));

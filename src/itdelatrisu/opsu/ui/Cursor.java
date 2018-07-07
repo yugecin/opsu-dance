@@ -30,6 +30,7 @@ import yugecin.opsudance.Dancer;
 import yugecin.opsudance.skinning.SkinService;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Updates and draws the cursor.
@@ -252,8 +253,8 @@ public class Cursor {
 	 * If the old style cursor is being used, this will do nothing.
 	 * @param delta the delta interval since the last call
 	 */
-	public void updateAngle(int delta) {
-		cursorAngle += delta / 40f;
+	public void updateAngle() {
+		cursorAngle += renderDelta / 40f;
 		cursorAngle %= 360;
 	}
 

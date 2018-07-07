@@ -76,6 +76,8 @@ public class InstanceContainer {
 	public static GamePauseMenu pauseState;
 	
 	public static int width, width2, height, height2;
+	public static int mouseX, mouseY;
+	public static int renderDelta;
 
 	public static void kickstart() {
 		updater = new Updater();

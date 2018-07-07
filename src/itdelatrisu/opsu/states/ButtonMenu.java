@@ -226,14 +226,14 @@ public class ButtonMenu extends BaseOpsuState {
 				super.preRenderUpdate();
 				GameMod hoverMod = null;
 				for (GameMod mod : GameMod.values()) {
-					mod.hoverUpdate(displayContainer.renderDelta, mod.isActive());
-					if (hoverMod == null && mod.contains(displayContainer.mouseX, displayContainer.mouseY))
+					mod.hoverUpdate(renderDelta, mod.isActive());
+					if (hoverMod == null && mod.contains(mouseX, mouseY))
 						hoverMod = mod;
 				}
 
 				// tooltips
 				if (hoverMod != null) {
-					UI.updateTooltip(displayContainer.renderDelta, hoverMod.getDescription(), true);
+					UI.updateTooltip(renderDelta, hoverMod.getDescription(), true);
 				}
 			}
 
@@ -340,11 +340,11 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Updates the menu state.
 		 */
 		public void preRenderUpdate() {
-			boolean centerOffsetUpdated = centerOffset.update(displayContainer.renderDelta);
+			boolean centerOffsetUpdated = centerOffset.update(renderDelta);
 			float centerOffsetX = centerOffset.getValue();
 			final float[] offsets = { centerOffsetX, - centerOffsetX };
 			for (int i = 0; i < buttons.length; i++) {
-				menuButtons[i].hoverUpdate(displayContainer.renderDelta, displayContainer.mouseX, displayContainer.mouseY);
+				menuButtons[i].hoverUpdate(renderDelta, mouseX, mouseY);
 
 				// move button to center
 				if (centerOffsetUpdated) {
@@ -622,7 +622,7 @@ public class ButtonMenu extends BaseOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		UI.update(displayContainer.renderDelta);
+		UI.update(renderDelta);
 		MusicController.loopTrackIfEnded(false);
 		menuState.preRenderUpdate();
 	}

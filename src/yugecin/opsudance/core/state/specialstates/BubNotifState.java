@@ -53,7 +53,7 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener {
 		if (!iter.hasNext()) {
 			return;
 		}
-		addAnimationTime += displayContainer.renderDelta;
+		addAnimationTime += renderDelta;
 		if (addAnimationTime > IN_TIME) {
 			finishAddAnimation();
 		}
@@ -63,7 +63,7 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener {
 			if (animateUp && addAnimationTime < IN_TIME) {
 				next.y = next.baseY - (int) (addAnimationHeight * AnimationEquation.OUT_QUINT.calc((float) addAnimationTime / IN_TIME));
 			}
-			if (next.render(g, displayContainer.mouseX, displayContainer.mouseY, displayContainer.renderDelta)) {
+			if (next.render(g, mouseX, mouseY, renderDelta)) {
 				iter.remove();
 			}
 			animateUp = true;

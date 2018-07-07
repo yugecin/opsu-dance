@@ -364,7 +364,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// dropdown menu
 		int serverWidth = (int) (width * 0.12f);
 		int x = baseX + searchWidth + buttonMarginX * 3 + resetButtonWidth + rankedButtonWidth;
-		serverMenu = new DropdownMenu<DownloadServer>(displayContainer, SERVERS, x, searchY, serverWidth) {
+		serverMenu = new DropdownMenu<DownloadServer>(SERVERS, x, searchY, serverWidth) {
 			@Override
 			public void itemSelected(int index, DownloadServer item) {
 				resultList = null;
@@ -433,7 +433,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				if (index >= nodes.length)
 					break;
 				nodes[index].drawResult(g, offset + i * DownloadNode.getButtonOffset(),
-						DownloadNode.resultContains(displayContainer.mouseX, displayContainer.mouseY - offset, i) && !serverMenu.isHovered(),
+						DownloadNode.resultContains(mouseX, mouseY - offset, i) && !serverMenu.isHovered(),
 						(index == focusResult), (previewID == nodes[index].getID()));
 			}
 			g.clearClip();
@@ -479,7 +479,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				if (node == null)
 					break;
 				node.drawDownload(g, i * DownloadNode.getInfoHeight() + offset, index,
-						DownloadNode.downloadContains(displayContainer.mouseX, displayContainer.mouseY - offset, i));
+						DownloadNode.downloadContains(mouseX, mouseY - offset, i));
 			}
 			g.clearClip();
 
@@ -516,7 +516,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
 		if (importThread == null)
 			MusicController.loopTrackIfEnded(false);
@@ -537,8 +537,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 			}
 			importThread = null;
 		}
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		backButton.hoverUpdate(delta, mouseX, mouseY);
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
@@ -846,7 +844,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		int shift = (newValue < 0) ? 1 : -1;
-		scrollLists(displayContainer.mouseX, displayContainer.mouseY, shift);
+		scrollLists(mouseX, mouseY, shift);
 		return true;
 	}
 

@@ -316,8 +316,8 @@ public class Game extends ComplexOpsuState {
 	public Game() {
 		super();
 		mirrorCursor = new Cursor(true);
-		this.moveStoryboardOverlay = new MoveStoryboard(displayContainer);
-		this.optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.storyboardOptions);
+		this.moveStoryboardOverlay = new MoveStoryboard();
+		this.optionsOverlay = new OptionsOverlay(OptionGroups.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(moveStoryboardOverlay, optionsOverlay, this);
 		storyboardOverlay.show();
 		moveStoryboardOverlay.show();
@@ -448,23 +448,23 @@ public class Game extends ComplexOpsuState {
 			// draw alpha map around cursor
 			g.setDrawMode(Graphics.MODE_ALPHA_MAP);
 			g.clearAlphaMap();
-			int mouseX, mouseY;
+			int mx, my;
 			if (pauseTime > -1 && pausedMousePosition != null) {
-				mouseX = (int) pausedMousePosition.x;
-				mouseY = (int) pausedMousePosition.y;
+				mx = (int) pausedMousePosition.x;
+				my = (int) pausedMousePosition.y;
 			} else if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
-				mouseX = (int) autoMousePosition.x;
-				mouseY = (int) autoMousePosition.y;
+				mx = (int) autoMousePosition.x;
+				my = (int) autoMousePosition.y;
 			} else if (isReplay) {
-				mouseX = replayX;
-				mouseY = replayY;
+				mx = replayX;
+				my = replayY;
 			} else {
-				mouseX = displayContainer.mouseX;
-				mouseY = displayContainer.mouseY;
+				mx = mouseX;
+				my = mouseY;
 			}
 			int alphaRadius = flashlightRadius * 256 / 215;
-			int alphaX = mouseX - alphaRadius / 2;
-			int alphaY = mouseY - alphaRadius / 2;
+			int alphaX = mx - alphaRadius / 2;
+			int alphaY = my - alphaRadius / 2;
 			GameImage.ALPHA_MAP.getImage().draw(alphaX, alphaY, alphaRadius, alphaRadius);
 
 			// blend offscreen image
@@ -676,7 +676,7 @@ public class Game extends ComplexOpsuState {
 
 		// draw music position bar (for replay seeking)
 		if (isReplay && OPTION_REPLAY_SEEKING.state) {
-			g.setColor((musicPositionBarContains(displayContainer.mouseX, displayContainer.mouseY)) ? MUSICBAR_HOVER : MUSICBAR_NORMAL);
+			g.setColor((musicPositionBarContains(mouseX, mouseY)) ? MUSICBAR_HOVER : MUSICBAR_NORMAL);
 			g.fillRoundRect(musicBarX, musicBarY, musicBarWidth, musicBarHeight, 4);
 			if (!isLeadIn()) {
 				g.setColor(MUSICBAR_FILL);
@@ -721,7 +721,7 @@ public class Game extends ComplexOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 
 		UI.update(delta);
 		Pippi.update(delta);
@@ -729,8 +729,6 @@ public class Game extends ComplexOpsuState {
 			epiImgTime -= delta;
 		}
 		yugecin.opsudance.spinners.Spinner.update(delta);
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		skipButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
@@ -914,7 +912,7 @@ public class Game extends ComplexOpsuState {
 		} else if (GameMod.AUTOPILOT.isActive()) {
 			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
 		} else {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, displayContainer.mouseX, displayContainer.mouseY);
+			displayContainer.cursor.setCursorPosition(displayContainer.delta, mouseX, mouseY);
 		}
 	}
 
@@ -1104,8 +1102,6 @@ public class Game extends ComplexOpsuState {
 		}
 
 		int trackPosition = MusicController.getPosition();
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
@@ -1602,7 +1598,7 @@ public class Game extends ComplexOpsuState {
 				lastKeysPressed = ReplayFrame.KEY_NONE;
 				replaySkipTime = -1;
 				replayFrames = new LinkedList<>();
-				replayFrames.add(new ReplayFrame(0, 0, displayContainer.mouseX, displayContainer.mouseY, 0));
+				replayFrames.add(new ReplayFrame(0, 0, mouseX, mouseY, 0));
 			}
 
 			for (int i = 0; i < gameObjects.length; i++) {

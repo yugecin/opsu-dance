@@ -26,7 +26,6 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
@@ -39,8 +38,6 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class OptionsOverlay extends OverlayOpsuState {
-
-	private final DisplayContainer displayContainer;
 
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
@@ -161,9 +158,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 
-	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] sections) {
-		this.displayContainer = displayContainer;
-
+	public OptionsOverlay(OptionTab[] sections) {
 		this.sections = sections;
 
 		dropdownMenus = new HashMap<>();
@@ -231,7 +226,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				}
 				final ListOption listOption = (ListOption) option;
 				Object[] items = listOption.getListItems();
-				DropdownMenu<Object> menu = new DropdownMenu<Object>(displayContainer, items, 0, 0, 0) {
+				DropdownMenu<Object> menu = new DropdownMenu<Object>(items, 0, 0, 0) {
 					@Override
 					public void itemSelected(int index, Object item) {
 						listOption.clickListItem(index);
@@ -313,7 +308,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navWidth += navTargetWidth;
 		} else if (navHoverTime > 300) {
 			AnimationEquation anim = AnimationEquation.IN_EXPO;
-			if (displayContainer.mouseX < navWidth) {
+			if (mouseX < navWidth) {
 				anim = AnimationEquation.OUT_EXPO;
 			}
 			float progress = anim.calc((navHoverTime - 300f) / 300f);
@@ -362,7 +357,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.setColor(COL_INDICATOR);
 		int indicatorPos = this.indicatorPos;
 		if (indicatorMoveAnimationTime > 0) {
-			indicatorMoveAnimationTime += displayContainer.renderDelta;
+			indicatorMoveAnimationTime += renderDelta;
 			if (indicatorMoveAnimationTime > INDICATORMOVEANIMATIONTIME) {
 				indicatorMoveAnimationTime = 0;
 				indicatorPos += indicatorOffsetToNextPos;
@@ -390,7 +385,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (hoverOption instanceof NumericOption) {
 				tip = "(" + hoverOption.getValueString() + ") " + tip;
 			}
-			UI.updateTooltip(displayContainer.renderDelta, tip, true);
+			UI.updateTooltip(renderDelta, tip, true);
 			UI.drawTooltip(g);
 		}
 	}
@@ -634,9 +629,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	@Override
 	public void onPreRenderUpdate() {
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 
 		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
@@ -715,7 +708,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateIndicatorAlpha() {
 		if (hoverOption == null) {
 			if (indicatorHideAnimationTime < INDICATORHIDEANIMATIONTIME) {
-				indicatorHideAnimationTime += displayContainer.renderDelta;
+				indicatorHideAnimationTime += renderDelta;
 				if (indicatorHideAnimationTime > INDICATORHIDEANIMATIONTIME) {
 					indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME;
 				}
@@ -724,7 +717,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA * showHideProgress;
 			}
 		} else if (indicatorHideAnimationTime > 0) {
-			indicatorHideAnimationTime -= displayContainer.renderDelta * 3;
+			indicatorHideAnimationTime -= renderDelta * 3;
 			if (indicatorHideAnimationTime < 0) {
 				indicatorHideAnimationTime = 0;
 			}
@@ -967,7 +960,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private void updateSliderOption() {
 		NumericOption o = (NumericOption) hoverOption;
-		int value = o.min + Math.round((float) (o.max - o.min) * (displayContainer.mouseX - sliderOptionStartX) / (sliderOptionLength));
+		int value = o.min + Math.round((float) (o.max - o.min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
 		o.setValue(Utils.clamp(value, o.min, o.max));
 	}
 

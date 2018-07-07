@@ -49,7 +49,7 @@ public class FpsRenderState implements ResolutionChangedListener {
 	}
 
 	public void render(Graphics g) {
-		fpsMeter.update(displayContainer.renderDelta);
+		fpsMeter.update(renderDelta);
 		if (!OPTION_SHOW_FPS.state) {
 			return;
 		}

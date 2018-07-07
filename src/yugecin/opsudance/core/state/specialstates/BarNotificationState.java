@@ -57,7 +57,7 @@ public class BarNotificationState implements ResolutionChangedListener {
 		if (timeShown >= TOTAL_TIME) {
 			return;
 		}
-		timeShown += displayContainer.renderDelta;
+		timeShown += renderDelta;
 		processAnimations();
 		g.setColor(bgcol);
 		g.fillRect(0, height2 - barHalfHeight, width, barHalfHeight * 2);

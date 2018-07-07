@@ -314,7 +314,7 @@ public class SongMenu extends ComplexOpsuState {
 
 	public SongMenu() {
 		super();
-		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
+		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 		overlays.add(optionsOverlay);
 	}
 
@@ -343,7 +343,7 @@ public class SongMenu extends ComplexOpsuState {
 		int sortWidth = (int) (width * 0.12f);
 		int posX = (int) (width * 0.87f);
 		int posY = (int) (headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f);
-		sortMenu = new DropdownMenu<BeatmapSortOrder>(displayContainer, BeatmapSortOrder.values(), posX, posY, sortWidth) {
+		sortMenu = new DropdownMenu<BeatmapSortOrder>(BeatmapSortOrder.values(), posX, posY, sortWidth) {
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
 				BeatmapSortOrder.set(item);
@@ -458,9 +458,6 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public void render(Graphics g) {
 		g.setBackground(Color.black);
-
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 
 		// background
 		if (focusNode != null) {
@@ -708,7 +705,7 @@ public class SongMenu extends ComplexOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
 		if (reloadThread == null)
 			MusicController.loopTrackIfEnded(true);
@@ -724,8 +721,6 @@ public class SongMenu extends ComplexOpsuState {
 				MusicController.playThemeSong(config.themeBeatmap);
 			reloadThread = null;
 		}
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 		backButton.hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
