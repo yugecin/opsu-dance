@@ -570,7 +570,8 @@ public class MainMenu extends BaseOpsuState {
 			break;
 		}
 		this.logoClickScale.update(delta);
-		if (this.logo.contains(mouseX, mouseY, 0.25f)) {
+		final boolean logoHovered = this.logo.contains(mouseX, mouseY, 0.25f);
+		if (logoHovered) {
 			this.logoHover.update(delta);
 		} else {
 			this.logoHover.update(-delta);
@@ -582,7 +583,7 @@ public class MainMenu extends BaseOpsuState {
 		for (int i = 0; i < 3; i++) {
 			final ImagePosition pos = this.buttonPositions[i];
 			final AnimatedValue anim = this.buttonAnimations[i];
-			if (pos.contains(mouseX, mouseY, 0.25f)) {
+			if (!logoHovered && pos.contains(mouseX, mouseY, 0.25f)) {
 				if (anim.getDuration() != 500) {
 					anim.change(500, 0f, 1f, OUT_ELASTIC);
 					continue;
@@ -778,32 +779,27 @@ public class MainMenu extends BaseOpsuState {
 			}
 		}
 
-		// start moving logo (if clicked)
+		final boolean logoHovered = this.logo.contains(x, y, 0.25f);
 		if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
-			if (this.logo.contains(x, y, 0.25f)) {
+			if (logoHovered) {
 				this.openLogo();
 				SoundController.playSound(SoundEffect.MENUHIT);
 				this.logoClickScale.setTime(0);
 				return true;
 			}
-		}
-
-		// other button actions (if visible)
-		else if (logoState == LogoState.OPEN || logoState == LogoState.OPENING) {
-			boolean logocontains = false;
-			if (this.logo.contains(x, y, 0.25f)) {
-				logocontains = true;
-				this.logoClickScale.setTime(0);
-			}
-			if (logocontains || this.buttonPositions[0].contains(x, y, 0.25f)) {
+		} else {
+			if (logoHovered || this.buttonPositions[0].contains(x, y, 0.25f)) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
 				return true;
-			} else if (this.buttonPositions[2].contains(x, y, 0.25f)) {
+			}
+
+			if (this.buttonPositions[2].contains(x, y, 0.25f)) {
 				displayContainer.exitRequested = true;
 				return true;
 			}
 		}
+
 		return false;
 	}
 
