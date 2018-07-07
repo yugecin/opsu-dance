@@ -93,6 +93,8 @@ public class MainMenu extends BaseOpsuState {
 	
 	private int lastMouseX;
 	private int lastMouseY;
+	
+	private AnimatedValue logoClickScale;
 
 	/** Logo button alpha levels. */
 	private AnimatedValue logoButtonAlpha;
@@ -149,6 +151,7 @@ public class MainMenu extends BaseOpsuState {
 	
 	public MainMenu() {
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
+		this.logoClickScale = new AnimatedValue(300, .9f, 1f, OUT_QUAD);
 		this.timeFormat = new SimpleDateFormat("HH:mm");
 	}
 
@@ -300,11 +303,12 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// draw logo (pulsing)
+		final float clickScale = this.logoClickScale.getValue();
 		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
 		for (PulseData pd : this.pulseData) {
 			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
-			final float scale = pd.initialScale + (0.432f * progress);
-			final Image p = GameImage.MENU_LOGO_PULSE.getImage().getScaledCopy(scale);
+			final float scale = (pd.initialScale + (0.432f * progress)) * clickScale;
+			final Image p = MENU_LOGO_PULSE.getScaledImage(scale);
 			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
 			p.drawCentered(logo.getX(), logo.getY(), color);
 		}
@@ -326,15 +330,14 @@ public class MainMenu extends BaseOpsuState {
 		} else {
 			smoothExpandProgress = (position - 0.05f) / 0.95f;
 		}
-		logo.draw(color, 0.9726f + smoothExpandProgress * 0.0274f);
+		logo.draw(color, (0.9726f + smoothExpandProgress * 0.0274f) * clickScale);
 		if (renderPiece) {
-			Image piece = GameImage.MENU_LOGO_PIECE.getImage();
-			piece = piece.getScaledCopy(hoverScale);
+			final Image piece = MENU_LOGO_PIECE.getScaledImage(hoverScale * clickScale);
 			piece.rotate(position * 360);
 			piece.drawCentered(logo.getX(), logo.getY(), color);
 		}
 		final float ghostScale = hoverScale * 1.0186f - smoothExpandProgress * 0.0186f;
-		Image ghostLogo = GameImage.MENU_LOGO.getImage().getScaledCopy(ghostScale);
+		Image ghostLogo = MENU_LOGO.getScaledImage(ghostScale * clickScale);
 		ghostLogo.setAlpha(0.25f);
 		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
 		
@@ -529,6 +532,7 @@ public class MainMenu extends BaseOpsuState {
 				logo.setX(centerX - logoPosition.getValue());
 			break;
 		}
+		this.logoClickScale.update(delta);
 
 		// tooltips
 		if (musicPositionBarContains(mouseX, mouseY))
@@ -562,6 +566,7 @@ public class MainMenu extends BaseOpsuState {
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);
 		logoState = LogoState.DEFAULT;
+		this.logoClickScale.setTime(this.logoClickScale.getDuration());
 
 		UI.enter();
 		if (!enterNotification) {
@@ -720,13 +725,19 @@ public class MainMenu extends BaseOpsuState {
 			if (logo.contains(x, y, 0.25f)) {
 				this.openLogo();
 				SoundController.playSound(SoundEffect.MENUHIT);
+				this.logoClickScale.setTime(0);
 				return true;
 			}
 		}
 
 		// other button actions (if visible)
 		else if (logoState == LogoState.OPEN || logoState == LogoState.OPENING) {
-			if (logo.contains(x, y, 0.25f) || playButton.contains(x, y, 0.25f)) {
+			boolean logocontains = false;
+			if (logo.contains(x, y, 0.25f)) {
+				logocontains = true;
+				this.logoClickScale.setTime(0);
+			}
+			if (logocontains || playButton.contains(x, y, 0.25f)) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
 				return true;
