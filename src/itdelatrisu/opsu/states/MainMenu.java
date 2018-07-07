@@ -111,9 +111,6 @@ public class MainMenu extends BaseOpsuState {
 	/** Now playing position vlaue. */
 	private final AnimatedValue nowPlayingPosition;
 
-	/** Main "Play" and "Exit" buttons. */
-	private MenuButton playButton, exitButton;
-
 	/** Music control buttons. */
 	private MenuButton musicPlay, musicPause, musicStop, musicNext, musicPrev;
 	private MenuButton[] musicButtons = new MenuButton[5];
@@ -185,28 +182,13 @@ public class MainMenu extends BaseOpsuState {
 
 		// initialize menu buttons
 		Image logoImg = GameImage.MENU_LOGO.getImage();
-		Image playImg = GameImage.MENU_PLAY.getImage();
-		Image exitImg = GameImage.MENU_EXIT.getImage();
-		float exitOffset = (playImg.getWidth() - exitImg.getWidth()) / 3f;
 		logo = new MenuButton(logoImg, displayContainer.width / 2f, displayContainer.height / 2f);
-		playButton = new MenuButton(playImg,
-				displayContainer.width * 0.75f, (displayContainer.height / 2) - (logoImg.getHeight() / 5f)
-		);
-		exitButton = new MenuButton(exitImg,
-				displayContainer.width * 0.75f - exitOffset, (displayContainer.height / 2) + (exitImg.getHeight() / 2f)
-		);
 		final int logoAnimationDuration = 350;
 		logo.setHoverAnimationDuration(logoAnimationDuration);
-		playButton.setHoverAnimationDuration(logoAnimationDuration);
-		exitButton.setHoverAnimationDuration(logoAnimationDuration);
 		final AnimationEquation logoAnimationEquation = AnimationEquation.IN_OUT_EXPO;
 		logo.setHoverAnimationEquation(logoAnimationEquation);
-		playButton.setHoverAnimationEquation(logoAnimationEquation);
-		exitButton.setHoverAnimationEquation(logoAnimationEquation);
 		final float logoHoverScale = 1.096f;
 		logo.setHoverExpand(logoHoverScale);
-		playButton.setHoverExpand(logoHoverScale);
-		exitButton.setHoverExpand(logoHoverScale);
 
 		// initialize music buttons
 		final int musicSize = (int) (this.textLineHeight * 0.8f);
@@ -519,8 +501,6 @@ public class MainMenu extends BaseOpsuState {
 		int mouseX = displayContainer.mouseX;
 		int mouseY = displayContainer.mouseY;
 		logo.hoverUpdate(delta, mouseX, mouseY, 0.25f);
-		playButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
-		exitButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 		if (repoButton != null) {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
@@ -555,7 +535,6 @@ public class MainMenu extends BaseOpsuState {
 
 		// buttons
 		int centerX = displayContainer.width / 2;
-		float currentLogoButtonAlpha;
 		switch (logoState) {
 		case DEFAULT:
 			break;
@@ -571,11 +550,7 @@ public class MainMenu extends BaseOpsuState {
 			}
 			break;
 		case OPEN:
-			if (logoButtonAlpha.update(delta)) {  // fade in buttons
-				currentLogoButtonAlpha = logoButtonAlpha.getValue();
-				playButton.getImage().setAlpha(currentLogoButtonAlpha);
-				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
-			}
+			logoButtonAlpha.update(delta);
 			if (this.lastMouseX != mouseX || this.lastMouseY != mouseY) {
 				this.logoTimer = 0;
 				this.lastMouseX = mouseX;
@@ -588,11 +563,7 @@ public class MainMenu extends BaseOpsuState {
 			}
 			break;
 		case CLOSING:
-			if (logoButtonAlpha.update(-delta)) {  // fade out buttons
-				currentLogoButtonAlpha = logoButtonAlpha.getValue();
-				playButton.getImage().setAlpha(currentLogoButtonAlpha);
-				exitButton.getImage().setAlpha(currentLogoButtonAlpha);
-			}
+			logoButtonAlpha.update(-delta);
 			if (logoPosition.update(-delta)) {
 				logo.setX(centerX - logoPosition.getValue());
 				this.buttonAnimation.update(-delta);
@@ -676,10 +647,6 @@ public class MainMenu extends BaseOpsuState {
 		int mouseY = displayContainer.mouseY;
 		if (!logo.contains(mouseX, mouseY, 0.25f))
 			logo.resetHover();
-		if (!playButton.contains(mouseX, mouseY, 0.25f))
-			playButton.resetHover();
-		if (!exitButton.contains(mouseX, mouseY, 0.25f))
-			exitButton.resetHover();
 		for (MenuButton b : this.musicButtons) {
 			if (!b.contains(mouseX, mouseY)) {
 				b.resetHover();
@@ -830,7 +797,7 @@ public class MainMenu extends BaseOpsuState {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
 				return true;
-			} else if (exitButton.contains(x, y, 0.25f)) {
+			} else if (this.buttonPositions[2].contains(x, y, 0.25f)) {
 				displayContainer.exitRequested = true;
 				return true;
 			}
@@ -940,8 +907,6 @@ public class MainMenu extends BaseOpsuState {
 		buttonAnimation.change(300, 0f, 1f, OUT_QUAD);
 		logoPosition.change(300, 0, logoPositionOffsetX, OUT_CUBIC);
 		logoState = LogoState.OPENING;
-		playButton.getImage().setAlpha(0f);
-		exitButton.getImage().setAlpha(0f);
 	}
 	
 	private void closeLogo() {
