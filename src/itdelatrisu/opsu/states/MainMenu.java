@@ -749,7 +749,7 @@ public class MainMenu extends BaseOpsuState {
 		switch (key) {
 		case KEY_ESCAPE:
 		case KEY_Q:
-			if (logoTimer > 0) {
+			if (logoState == LogoState.OPEN || logoState == LogoState.OPENING) {
 				this.closeLogo();
 				break;
 			}
