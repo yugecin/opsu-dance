@@ -895,7 +895,7 @@ public class MainMenu extends BaseOpsuState {
 	private void enterSongMenu() {
 		OpsuState state = songMenuState;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
-			downloadState.notifyOnLoad("Download some beatmaps to get started!");
+			barNotifs.send("Download some beatmaps to get started!");
 			state = downloadState;
 		}
 		displayContainer.switchState(state);

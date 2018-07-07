@@ -149,9 +149,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 	/** Beatmap set ID of the current beatmap being previewed, or -1 if none. */
 	private int previewID = -1;
 
-	/** The bar notification to send upon entering the state. */
-	private String barNotificationOnLoad;
-
 	/** Search query, executed in {@code queryThread}. */
 	private SearchQuery searchQuery;
 
@@ -948,10 +945,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 		startDownloadIndexPos.setPosition(0);
 		pageDir = Page.RESET;
 		previewID = -1;
-		if (barNotificationOnLoad != null) {
-			barNotifs.send(barNotificationOnLoad);
-			barNotificationOnLoad = null;
-		}
 	}
 
 	@Override
@@ -992,10 +985,4 @@ public class DownloadsMenu extends ComplexOpsuState {
 		else if (DownloadNode.downloadAreaContains(cx, cy))
 			startDownloadIndexPos.scrollOffset(shift * DownloadNode.getInfoHeight());
 	}
-
-	/**
-	 * Sends a bar notification upon entering the state.
-	 * @param s the notification string
-	 */
-	public void notifyOnLoad(String s) { barNotificationOnLoad = s; }
 }
