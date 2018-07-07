@@ -62,7 +62,7 @@ public class AnimatedValue {
 		float progress = (float) this.time / this.duration;
 		if (this.eqn != eqn) {
 			if (this.time != 0 && this.time != this.duration) {
-				progress = this.eqn.uncalc(progress);
+				progress = eqn.uncalc(this.eqn.calc(progress));
 			}
 			this.eqn = eqn;
 		}
