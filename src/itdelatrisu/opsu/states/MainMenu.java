@@ -304,7 +304,7 @@ public class MainMenu extends BaseOpsuState {
 		// draw downloads button
 		downloadsButton.draw();
 		
-		// scale stuff for logo
+		// calculate scale stuff for logo
 		final float clickScale = this.logoClickScale.getValue();
 		Float beatPosition = MusicController.getBeatProgress();
 		Float beatLength = MusicController.getBeatLength();
@@ -326,6 +326,21 @@ public class MainMenu extends BaseOpsuState {
 		}
 		final float logoScale = (0.9726f + smoothExpandProgress * 0.0274f) * clickScale;
 		final float totalLogoScale = hoverScale * logoScale;
+		
+		// pulse ripples
+		final Color logoColor;
+		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
+			logoColor = Cursor.lastCursorColor;
+		} else {
+			logoColor = Color.white;
+		}
+		for (PulseData pd : this.pulseData) {
+			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
+			final float scale = (pd.initialScale + (0.432f * progress)) * clickScale;
+			final Image p = MENU_LOGO_PULSE.getScaledImage(scale);
+			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
+			p.drawCentered(logo.getX(), logo.getY(), logoColor);
+		}
 
 		// draw buttons
 		final float buttonProgress = this.buttonsAnimation.getValue();
@@ -355,25 +370,17 @@ public class MainMenu extends BaseOpsuState {
 			}
 		}
 
-		// draw logo (pulsing)
-		Color color = OPTION_COLOR_MAIN_MENU_LOGO.state ? Cursor.lastCursorColor : Color.white;
-		for (PulseData pd : this.pulseData) {
-			final float progress = OUT_CUBIC.calc(pd.position / 1000f);
-			final float scale = (pd.initialScale + (0.432f * progress)) * clickScale;
-			final Image p = MENU_LOGO_PULSE.getScaledImage(scale);
-			p.setAlpha(0.15f * (1f - IN_QUAD.calc(progress)));
-			p.drawCentered(logo.getX(), logo.getY(), color);
-		}
-		logo.draw(color, logoScale);
+		// draw logo
+		logo.draw(logoColor, logoScale);
 		if (renderPiece) {
 			final Image piece = MENU_LOGO_PIECE.getScaledImage(hoverScale * clickScale);
 			piece.rotate(beatPosition * 360f);
-			piece.drawCentered(logo.getX(), logo.getY(), color);
+			piece.drawCentered(logo.getX(), logo.getY(), logoColor);
 		}
 		final float ghostScale = hoverScale * 1.0186f - smoothExpandProgress * 0.0186f;
 		Image ghostLogo = MENU_LOGO.getScaledImage(ghostScale * clickScale);
 		ghostLogo.setAlpha(0.25f);
-		ghostLogo.drawCentered(logo.getX(), logo.getY(), color);
+		ghostLogo.drawCentered(logo.getX(), logo.getY(), logoColor);
 		
 		// now playing
 		final Image np = GameImage.MUSIC_NOWPLAYING.getImage();
