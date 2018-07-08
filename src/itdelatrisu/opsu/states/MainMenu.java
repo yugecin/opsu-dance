@@ -160,6 +160,8 @@ public class MainMenu extends BaseOpsuState {
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
 		this.logoClickScale = new AnimatedValue(300, .9f, 1f, OUT_QUAD);
 		this.logoHover = new AnimatedValue(350, 1f, 1.096f, IN_OUT_EXPO);
+		this.logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
+		this.logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
 		this.buttonAnimation = new AnimatedValue(1, 0f, 1f, OUT_QUAD);
 		this.buttonAnimations = new AnimatedValue[3];
 		for (int i = 0; i < 3; i++) {
@@ -248,9 +250,8 @@ public class MainMenu extends BaseOpsuState {
 
 		// logo & buttons
 		this.logo = new ImagePosition(MENU_LOGO.getImage());
-		logoPositionOffsetX = 0.35f * MENU_LOGO.getHeight();
-		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
-		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
+		this.logoPositionOffsetX = 0.35f * MENU_LOGO.getHeight();
+		this.logoPosition.setValues(0,  logoPositionOffsetX);
 		this.buttonsX = width2 - MENU_OPTIONS.getWidth() / 2;
 		this.buttonPositions[0] = new ImagePosition(MENU_PLAY.getImage());
 		this.buttonPositions[1] = new ImagePosition(MENU_OPTIONS.getImage());
@@ -394,6 +395,7 @@ public class MainMenu extends BaseOpsuState {
 		if (this.nowPlayingPosition.getMax() != totalWidth) {
 			final float current = this.nowPlayingPosition.getValue();
 			this.nowPlayingPosition.setValues(current, totalWidth);
+			this.nowPlayingPosition.setTime(0);
 		}
 		final float npimgx = width - this.nowPlayingPosition.getValue();
 		final float npx = npimgx + npwidth;

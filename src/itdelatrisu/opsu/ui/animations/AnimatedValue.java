@@ -82,7 +82,7 @@ public class AnimatedValue {
 		this.base = min;
 		this.value = min;
 		this.diff = max - min;
-		this.setTime(0);
+		this.updateValue();
 	}
 	
 	/**
