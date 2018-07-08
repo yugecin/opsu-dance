@@ -811,8 +811,10 @@ public class MainMenu extends BaseOpsuState {
 			}
 
 			if (this.buttonPositions[1].contains(x, y, 0.25f)) {
-				SoundController.playSound(SoundEffect.MENUHIT);
-				optionsOverlay.show();
+				if (!optionsOverlay.isActive()) {
+					SoundController.playSound(SoundEffect.MENUHIT);
+					optionsOverlay.show();
+				}
 				return true;
 			}
 

@@ -928,8 +928,10 @@ public class SongMenu extends ComplexOpsuState {
 			this.keyPressed(KEY_F3, '\0');
 			return true;
 		} else if (selectOptionsButton.contains(x, y)) {
-			SoundController.playSound(SoundEffect.MENUHIT);
-			optionsOverlay.show();
+			if (!optionsOverlay.isActive()) {
+				SoundController.playSound(SoundEffect.MENUHIT);
+				optionsOverlay.show();
+			}
 			return true;
 		}
 
