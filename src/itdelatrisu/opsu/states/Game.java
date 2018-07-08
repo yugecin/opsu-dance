@@ -713,13 +713,13 @@ public class Game extends ComplexOpsuState {
 			displayContainer.cursor.draw(Utils.isGameKeyPressed());
 		}
 		
+		super.render(g);
+
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.render(g);
 		}
 
 		UI.draw(g);
-
-		super.render(g);
 	}
 
 	@Override
@@ -1102,11 +1102,11 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyPressed(key, c)) {
 			return true;
 		}
 
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyPressed(key, c)) {
+		if (super.keyPressed(key, c)) {
 			return true;
 		}
 
@@ -1242,20 +1242,22 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (super.mouseDragged(oldx, oldy, newx, newy)) {
+		if (OPTION_DANCE_ENABLE_SB.state &&
+			optionsOverlay.mouseDragged(oldx, oldy, newx, newy))
+		{
 			return true;
 		}
-		return OPTION_DANCE_ENABLE_SB.state &&
-			optionsOverlay.mouseDragged(oldx, oldy, newx, newy);
+
+		return super.mouseDragged(oldx, oldy, newx, newy);
 	}
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
-		if (super.mousePressed(button, x, y)) {
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mousePressed(button, x, y)) {
 			return true;
 		}
-		
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mousePressed(button, x, y)) {
+
+		if (super.mousePressed(button, x, y)) {
 			return true;
 		}
 
@@ -1360,11 +1362,11 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
-		if (super.mouseReleased(button, x, y)) {
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseReleased(button, x, y)) {
 			return true;
 		}
 
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseReleased(button, x, y)) {
+		if (super.mouseReleased(button, x, y)) {
 			return true;
 		}
 
@@ -1393,14 +1395,14 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean keyReleased(int key, char c) {
-		if (super.keyReleased(key, c)) {
-			return true;
-		}
-		
 		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyReleased(key, c)) {
 			return true;
 		}
 
+		if (super.keyReleased(key, c)) {
+			return true;
+		}
+		
 		if (gameFinished) {
 			return true;
 		}
@@ -1434,11 +1436,11 @@ public class Game extends ComplexOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
-		if (super.mouseWheelMoved(newValue)) {
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseWheelMoved(newValue)) {
 			return true;
 		}
 		
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseWheelMoved(newValue)) {
+		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
 
