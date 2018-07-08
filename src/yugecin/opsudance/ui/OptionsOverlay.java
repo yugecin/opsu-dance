@@ -702,7 +702,6 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		prevMouseY = mouseY;
 		updateHoverOption(mouseX, mouseY);
 		updateIndicatorAlpha();
-		backButton.hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
 			int sliderValue = ((NumericOption) hoverOption).val;
 			updateSliderOption();

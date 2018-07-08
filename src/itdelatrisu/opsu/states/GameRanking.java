@@ -107,7 +107,7 @@ public class GameRanking extends BaseOpsuState {
 		} else {
 			MusicController.loopTrackIfEnded(true);
 		}
-		backButton.hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate();
 	}
 
 	@Override

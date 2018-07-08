@@ -689,10 +689,10 @@ public class SongMenu extends ComplexOpsuState {
 
 			UI.drawLoadingProgress(g);
 		} else {
+			optionsOverlay.render(g);
 			backButton.draw(g);
 		}
 
-		optionsOverlay.render(g);
 
 		UI.draw(g);
 
@@ -729,7 +729,7 @@ public class SongMenu extends ComplexOpsuState {
 				MusicController.playThemeSong(config.themeBeatmap);
 			reloadThread = null;
 		}
-		backButton.hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate();
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
 		selectMapOptionsButton.hoverUpdate(delta, mouseX, mouseY);

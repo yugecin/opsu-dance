@@ -537,7 +537,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			}
 			importThread = null;
 		}
-		backButton.hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate();
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
 		clearButton.hoverUpdate(delta, mouseX, mouseY);

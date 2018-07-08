@@ -481,6 +481,9 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		optionsOverlay.preRenderUpdate();
+		if (optionsOverlay.isActive()) {
+			backButton.hoverUpdate();
+		}
 
 		int delta = renderDelta;
 		

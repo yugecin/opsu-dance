@@ -172,11 +172,11 @@ public class BackButton {
 	/**
 	 * Processes a hover action depending on whether or not the cursor
 	 * is hovering over the button.
-	 * @param delta the delta interval
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
 	 */
-	public void hoverUpdate(int delta, int cx, int cy) {
+	public void hoverUpdate() {
+		final int delta = renderDelta;
+		final int cx = mouseX;
+		final int cy = mouseY;
 		if (backButton != null) {
 			backButton.hoverUpdate(delta, cx, cy);
 			return;
