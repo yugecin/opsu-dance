@@ -807,6 +807,7 @@ public class MainMenu extends BaseOpsuState {
 			}
 		} else {
 			if (logoHovered || this.buttonPositions[0].contains(x, y, 0.25f)) {
+				this.logoClickScale.setTime(0);
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
 				return true;
