@@ -793,7 +793,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
-		if (!this.active) {
+		if (!this.active || x > this.currentWidth) {
 			return false;
 		}
 
@@ -822,7 +822,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
-		if (!this.active) {
+		if (!this.active || x > this.currentWidth) {
 			return false;
 		}
 
@@ -922,7 +922,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public boolean mouseWheelMoved(int delta) {
-		if (!this.active) {
+		if (!this.active || mouseX > this.currentWidth) {
 			return false;
 		}
 
