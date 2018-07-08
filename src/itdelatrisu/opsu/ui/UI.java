@@ -262,7 +262,7 @@ public class UI {
 			return;
 
 		int margin = width / 100, textMarginX = 2;
-		int offset = GameImage.CURSOR_MIDDLE.getImage().getWidth() / 2;
+		int offset = GameImage.CURSOR_MIDDLE.getWidth() / 2;
 		int lineHeight = Fonts.SMALL.getLineHeight();
 		int textWidth = textMarginX * 2, textHeight = lineHeight;
 		if (tooltipNewlines) {

@@ -180,7 +180,7 @@ public class MainMenu extends BaseOpsuState {
 
 		// initialize music buttons
 		final int musicSize = (int) (this.textLineHeight * 0.8f);
-		final float musicScale = (float) musicSize / MUSIC_STOP.getImage().getWidth();
+		final float musicScale = (float) musicSize / MUSIC_STOP.getWidth();
 		final int musicSpacing = (int) (musicSize * 0.8f) + musicSize; // (center to center)
 		int x = width - this.textMarginX - musicSize / 2;
 		int y = this.textLineHeight * 2 + this.textLineHeight / 2;
@@ -247,19 +247,19 @@ public class MainMenu extends BaseOpsuState {
 
 		// logo & buttons
 		this.logo = new ImagePosition(MENU_LOGO.getImage());
-		logoPositionOffsetX = 0.35f * MENU_LOGO.getImage().getHeight();
+		logoPositionOffsetX = 0.35f * MENU_LOGO.getHeight();
 		logoPosition = new AnimatedValue(1, 0, 1, AnimationEquation.OUT_QUAD);
 		logoButtonAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
-		this.buttonsX = width2 - MENU_OPTIONS.getImage().getWidth() / 2;
+		this.buttonsX = width2 - MENU_OPTIONS.getWidth() / 2;
 		this.buttonPositions[0] = new ImagePosition(MENU_PLAY.getImage());
 		this.buttonPositions[1] = new ImagePosition(MENU_OPTIONS.getImage());
 		this.buttonPositions[2] = new ImagePosition(MENU_EXIT.getImage());
-		final int basey = height2 - MENU_OPTIONS.getImage().getHeight() / 2;
-		final float yoffset = MENU_LOGO.getImage().getHeight() * 0.196378f;
+		final int basey = height2 - MENU_OPTIONS.getHeight() / 2;
+		final float yoffset = MENU_LOGO.getHeight() * 0.196378f;
 		for (int i = 0; i < 3; i++) {
-			this.buttonPositions[i].width = MENU_OPTIONS.getImage().getWidth();
+			this.buttonPositions[i].width = MENU_OPTIONS.getWidth();
 			this.buttonPositions[i].y = (int) (basey + (i - 1f) * yoffset);
-			this.buttonPositions[i].height = MENU_OPTIONS.getImage().getHeight();
+			this.buttonPositions[i].height = MENU_OPTIONS.getHeight();
 		}
 	}
 
@@ -331,8 +331,8 @@ public class MainMenu extends BaseOpsuState {
 		// draw buttons
 		final float buttonProgress = this.buttonAnimation.getValue();
 		if (this.logoState != LogoState.DEFAULT && buttonProgress > 0f) {
-			final int btnwidth = MENU_OPTIONS.getImage().getWidth();
-			final float btnhalfheight = MENU_OPTIONS.getImage().getHeight() / 2f;
+			final int btnwidth = MENU_OPTIONS.getWidth();
+			final float btnhalfheight = MENU_OPTIONS.getHeight() / 2f;
 			final int basey = height2;
 			final int x = (int) (this.buttonsX + btnwidth * 0.375f * buttonProgress);
 			final Color col = new Color(logoColor);
@@ -341,8 +341,8 @@ public class MainMenu extends BaseOpsuState {
 				MENU_OPTIONS.getImage(),
 				MENU_EXIT.getImage()
 			};
-			final float circleradius = MENU_LOGO.getImage().getHeight() * 0.44498f;
-			final float yoffset = MENU_LOGO.getImage().getHeight() * 0.196378f;
+			final float circleradius = MENU_LOGO.getHeight() * 0.44498f;
+			final float yoffset = MENU_LOGO.getHeight() * 0.196378f;
 			final float cr = circleradius * totalLogoScale;
 			for (int i = 0; i < 3; i++) {
 				final float hoverprogress = this.buttonAnimations[i].getValue();
@@ -421,16 +421,21 @@ public class MainMenu extends BaseOpsuState {
 		if (repoButton != null) {
 			String text;
 			int fheight, fwidth;
+			float x, y;
 			repoButton.draw();
 			text = "opsu!";
 			fheight = Fonts.SMALL.getLineHeight();
 			fwidth = Fonts.SMALL.getWidth(text);
-			Fonts.SMALL.drawString(repoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
+			x = repoButton.getX() - fwidth / 2;
+			y = repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight;
+			Fonts.SMALL.drawString(x, y, text, Color.white);
 			danceRepoButton.draw();
 			text = "opsu!dance";
 			fheight = Fonts.SMALL.getLineHeight();
 			fwidth = Fonts.SMALL.getWidth(text);
-			Fonts.SMALL.drawString(danceRepoButton.getX() - fwidth / 2, repoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight, text, Color.white);
+			x = danceRepoButton.getX() - fwidth / 2;
+			y = danceRepoButton.getY() - repoButton.getImage().getHeight() / 2 - fheight;
+			Fonts.SMALL.drawString(x, y, text, Color.white);
 		}
 
 		// draw update button
@@ -516,8 +521,8 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		// buttons
-		this.logo.width = MENU_LOGO.getImage().getWidth();
-		this.logo.height = MENU_LOGO.getImage().getHeight();
+		this.logo.width = MENU_LOGO.getWidth();
+		this.logo.height = MENU_LOGO.getHeight();
 		this.logo.x = width2 - this.logo.width / 2;
 		this.logo.y = height2 - this.logo.height / 2;
 		if (this.logoState != LogoState.DEFAULT) {

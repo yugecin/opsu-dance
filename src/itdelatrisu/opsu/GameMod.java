@@ -100,7 +100,7 @@ public enum GameMod {
 		 */
 		public void init(int width, int height) {
 			float multY = Fonts.LARGE.getLineHeight() * 2 + height * 0.06f;
-			float offsetY = GameImage.MOD_EASY.getImage().getHeight() * 1.5f;
+			float offsetY = GameImage.MOD_EASY.getHeight() * 1.5f;
 			this.x = width / 30f;
 			this.y = multY + Fonts.LARGE.getLineHeight() * 3f + offsetY * index;
 		}
@@ -193,7 +193,7 @@ public enum GameMod {
 
 		// create buttons
 		float baseX = Category.EASY.getX() + Fonts.LARGE.getWidth(Category.EASY.getName()) * 1.25f;
-		float offsetX = GameImage.MOD_EASY.getImage().getWidth() * 2.1f;
+		float offsetX = GameImage.MOD_EASY.getWidth() * 2.1f;
 		for (GameMod mod : GameMod.values()) {
 			Image img = mod.image.getImage();
 			mod.button = new MenuButton(img,

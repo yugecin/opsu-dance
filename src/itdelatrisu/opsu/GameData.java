@@ -858,7 +858,7 @@ public class GameData {
 		if (comboMax == fullObjectCount) {
 			GameImage.RANKING_PERFECT.getImage().draw(
 					width * 0.08f,
-					(height * 0.99f) - GameImage.RANKING_PERFECT.getImage().getHeight()
+					(height * 0.99f) - GameImage.RANKING_PERFECT.getHeight()
 			);
 		}
 

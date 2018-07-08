@@ -325,10 +325,10 @@ public class SongMenu extends ComplexOpsuState {
 		components.clear();
 
 		// header/footer coordinates
-		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getImage().getHeight() +
+		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getHeight() +
 				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				Fonts.SMALL.getLineHeight();
-		footerY = height - GameImage.SELECTION_MODS.getImage().getHeight();
+		footerY = height - GameImage.SELECTION_MODS.getHeight();
 
 		// footer logo coordinates
 		float footerHeight = height - footerY;
@@ -342,7 +342,7 @@ public class SongMenu extends ComplexOpsuState {
 		// initialize sorts
 		int sortWidth = (int) (width * 0.12f);
 		int posX = (int) (width * 0.87f);
-		int posY = (int) (headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f);
+		int posY = (int) (headerY - GameImage.MENU_TAB.getHeight() * 2.25f);
 		sortMenu = new DropdownMenu<BeatmapSortOrder>(BeatmapSortOrder.values(), posX, posY, sortWidth) {
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
@@ -430,7 +430,7 @@ public class SongMenu extends ComplexOpsuState {
 		selectOptionsButton.setHoverFade(0f);
 
 		// loader
-		int loaderDim = GameImage.MENU_MUSICNOTE.getImage().getWidth();
+		int loaderDim = GameImage.MENU_MUSICNOTE.getWidth();
 		SpriteSheet spr = new SpriteSheet(GameImage.MENU_LOADER.getImage(), loaderDim, loaderDim);
 		loader = new Animation(spr, 50);
 

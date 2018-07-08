@@ -131,7 +131,7 @@ public class DownloadNode {
 	 * @param index the index (to offset the button from the topmost button)
 	 */
 	public static boolean resultIconContains(float cx, float cy, int index) {
-		int iconWidth = GameImage.MUSIC_PLAY.getImage().getWidth();
+		int iconWidth = GameImage.MUSIC_PLAY.getWidth();
 		float x = buttonBaseX + buttonWidth * 0.001f;
 		float y = buttonBaseY + (index * buttonOffset) + buttonHeight / 2f;
 		return ((cx > x && cx < x + iconWidth) &&
@@ -186,7 +186,7 @@ public class DownloadNode {
 	 * @param index the index (to offset the button from the topmost button)
 	 */
 	public static boolean downloadIconContains(float cx, float cy, int index) {
-		int iconWidth = GameImage.DELETE.getImage().getWidth();
+		int iconWidth = GameImage.DELETE.getWidth();
 		float edgeX = infoBaseX + infoWidth * 0.985f;
 		float y = infoBaseY + (index * infoHeight);
 		float marginY = infoHeight * 0.04f;

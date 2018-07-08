@@ -338,13 +338,13 @@ public enum GameImage {
 	STAR ("star", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getImage().getHeight() * 0.16f) / img.getHeight());
+			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.16f) / img.getHeight());
 		}
 	},
 	STAR2 ("star2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getImage().getHeight() * 0.33f) / img.getHeight());
+			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.33f) / img.getHeight());
 		}
 	},
 
@@ -661,6 +661,14 @@ public enum GameImage {
 		setDefaultImage();
 		return (skinImage != null) ? skinImage : defaultImage;
 	}
+
+	public int getHeight() {
+		return getImage().getHeight();
+	}
+
+	public int getWidth() {
+		return getImage().getWidth();
+	}
 	
 	/**
 	 * Returns the image associated with this resource, with a scale applied.
@@ -668,6 +676,14 @@ public enum GameImage {
 	 */
 	public Image getScaledImage(float scale) {
 		return this.getImage().getScaledCopy(scale);
+	}
+
+	/**
+	 * Returns the image associated with this resource, with a scale applied.
+	 * The beatmap skin image takes priority over the default image.
+	 */
+	public Image getScaledImage(int width, int height) {
+		return this.getImage().getScaledCopy(width, height);
 	}
 
 	/**

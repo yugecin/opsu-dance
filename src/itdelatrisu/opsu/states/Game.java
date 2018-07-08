@@ -66,6 +66,7 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.utils.GLHelper;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
@@ -551,8 +552,8 @@ public class Game extends ComplexOpsuState {
 				// show retries
 				if (retries >= 2 && timeDiff >= -1000) {
 					int retryHeight = Math.max(
-							GameImage.SCOREBAR_BG.getImage().getHeight(),
-							GameImage.SCOREBAR_KI.getImage().getHeight()
+							GameImage.SCOREBAR_BG.getHeight(),
+							GameImage.SCOREBAR_KI.getHeight()
 					);
 					float oldAlpha = Colors.WHITE_FADE.a;
 					if (timeDiff < -500)
@@ -588,7 +589,7 @@ public class Game extends ComplexOpsuState {
 							}
 						}
 						if (timeDiff < 1500 * speedModifier) {
-							GameImage.COUNTDOWN_2.getImage().draw(width - GameImage.COUNTDOWN_2.getImage().getWidth(), 0);
+							COUNTDOWN_2.getImage().draw(width - COUNTDOWN_2.getWidth(), 0);
 							if (!countdown2Sound) {
 								SoundController.playSound(SoundEffect.COUNT2);
 								countdown2Sound = true;
@@ -692,8 +693,8 @@ public class Game extends ComplexOpsuState {
 			g.fillRect(0, 0, width, height);
 
 			// draw glowing hit select circle and pulse effect
-			int circleDiameter = GameImage.HITCIRCLE.getImage().getWidth();
-			Image cursorCircle = GameImage.HITCIRCLE_SELECT.getImage().getScaledCopy(circleDiameter, circleDiameter);
+			int circleDiameter = HITCIRCLE.getWidth();
+			Image cursorCircle = HITCIRCLE_SELECT.getScaledImage(circleDiameter, circleDiameter);
 			cursorCircle.setAlpha(1.0f);
 			cursorCircle.drawCentered(pausedMousePosition.x, pausedMousePosition.y);
 			Image cursorCirclePulse = cursorCircle.getScaledCopy(1f + pausePulse);
@@ -1312,7 +1313,7 @@ public class Game extends ComplexOpsuState {
 		// returning from pause screen
 		if (pauseTime > -1) {
 			double distance = Math.hypot(pausedMousePosition.x - x, pausedMousePosition.y - y);
-			int circleRadius = GameImage.HITCIRCLE.getImage().getWidth() / 2;
+			int circleRadius = GameImage.HITCIRCLE.getWidth() / 2;
 			if (distance < circleRadius) {
 				// unpause the game
 				pauseTime = -1;
@@ -1776,7 +1777,7 @@ public class Game extends ComplexOpsuState {
 				float xDiff = endPoint.x - startPoint.x;
 				float yDiff = endPoint.y - startPoint.y;
 				float dist = (float) Math.hypot(xDiff, yDiff);
-				int numPoints = (int) ((dist - GameImage.HITCIRCLE.getImage().getWidth()) / followPointInterval);
+				int numPoints = (int) ((dist - GameImage.HITCIRCLE.getWidth()) / followPointInterval);
 				if (numPoints > 0) {
 					// set the image angle
 					Image followPoint = GameImage.FOLLOWPOINT.getImage();

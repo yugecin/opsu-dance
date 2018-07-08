@@ -28,6 +28,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.skinning.SkinService;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class GameObjectRenderer {
@@ -88,7 +89,8 @@ public class GameObjectRenderer {
 
 	public void renderComboNumberOnly(float x, float y, int number, float alpha) {
 		if (number > 0) {
-			gameData.drawSymbolNumber(number, x, y, GameImage.HITCIRCLE.getImage().getWidth() * 0.40f / gameData.getDefaultSymbolImage(0).getHeight(), alpha);
+			float scale = HITCIRCLE.getWidth() * 0.40f / gameData.getDefaultSymbolImage(0).getHeight();
+			gameData.drawSymbolNumber(number, x, y, scale, alpha);
 		}
 	}
 

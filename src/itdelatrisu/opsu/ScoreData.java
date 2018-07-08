@@ -101,7 +101,7 @@ public class ScoreData implements Comparable<ScoreData> {
 		baseX = containerWidth * 0.01f;
 		baseY = topY;
 		buttonWidth = containerWidth * 0.4f;
-		float gradeHeight = GameImage.MENU_BUTTON_BG.getImage().getHeight() * 0.45f;
+		float gradeHeight = GameImage.MENU_BUTTON_BG.getHeight() * 0.45f;
 		buttonHeight = Math.max(gradeHeight, Fonts.DEFAULT.getLineHeight() * 3.03f);
 		buttonOffset = buttonHeight + gradeHeight / 10f;
 		buttonAreaHeight = (SongMenu.MAX_SCORE_BUTTONS - 1) * buttonOffset + buttonHeight;
