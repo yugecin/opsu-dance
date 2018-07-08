@@ -64,8 +64,6 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.options.OptionGroups;
-import yugecin.opsudance.ui.OptionsOverlay;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -310,12 +308,8 @@ public class SongMenu extends ComplexOpsuState {
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
-	private final OptionsOverlay optionsOverlay;
-
 	public SongMenu() {
 		super();
-		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
-		overlays.add(optionsOverlay);
 	}
 
 	@Override
@@ -696,6 +690,8 @@ public class SongMenu extends ComplexOpsuState {
 			backButton.draw(g);
 		}
 
+		optionsOverlay.render(g);
+
 		UI.draw(g);
 
 		super.render(g);
@@ -704,6 +700,8 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
+		
+		optionsOverlay.preRenderUpdate();
 
 		int delta = renderDelta;
 		UI.update(delta);
@@ -860,6 +858,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mousePressed(button, x, y)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mousePressed(button, x, y)) {
+			return true;
+		}
 
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
@@ -877,6 +879,10 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public boolean mouseReleased(int button, int x, int y) {
 		if (super.mouseReleased(button, x, y)) {
+			return true;
+		}
+		
+		if (optionsOverlay.mouseReleased(button, x, y)) {
 			return true;
 		}
 
@@ -1023,6 +1029,10 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public boolean keyPressed(int key, char c) {
 		if (super.keyPressed(key, c)) {
+			return true;
+		}
+		
+		if (optionsOverlay.keyPressed(key, c)) {
 			return true;
 		}
 
@@ -1179,6 +1189,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseDragged(oldx, oldy, newx, newy)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mouseDragged(oldx, oldy, newx, newy)) {
+			return true;
+		}
 
 		if (isInputBlocked()) {
 			return true;
@@ -1212,6 +1226,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mouseWheelMoved(newValue)) {
+			return true;
+		}
 
 		if (isInputBlocked()) {
 			return true;
@@ -1228,6 +1246,15 @@ public class SongMenu extends ComplexOpsuState {
 		else
 			changeIndex(shift);
 		return false;
+	}
+	
+	@Override
+	public boolean keyReleased(int key, char c) {
+		if (super.keyReleased(key, c)) {
+			return true;
+		}
+
+		return optionsOverlay.keyReleased(key, c);
 	}
 
 	@Override

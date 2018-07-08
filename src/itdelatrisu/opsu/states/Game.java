@@ -712,6 +712,10 @@ public class Game extends ComplexOpsuState {
 		} else {
 			displayContainer.cursor.draw(Utils.isGameKeyPressed());
 		}
+		
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.render(g);
+		}
 
 		UI.draw(g);
 
@@ -721,6 +725,10 @@ public class Game extends ComplexOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
+		
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.preRenderUpdate();
+		}
 
 		int delta = renderDelta;
 
@@ -1098,6 +1106,10 @@ public class Game extends ComplexOpsuState {
 			return true;
 		}
 
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyPressed(key, c)) {
+			return true;
+		}
+
 		if (gameFinished) {
 			return true;
 		}
@@ -1233,12 +1245,17 @@ public class Game extends ComplexOpsuState {
 		if (super.mouseDragged(oldx, oldy, newx, newy)) {
 			return true;
 		}
-		return true;
+		return OPTION_DANCE_ENABLE_SB.state &&
+			optionsOverlay.mouseDragged(oldx, oldy, newx, newy);
 	}
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
 		if (super.mousePressed(button, x, y)) {
+			return true;
+		}
+		
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mousePressed(button, x, y)) {
 			return true;
 		}
 
@@ -1347,6 +1364,10 @@ public class Game extends ComplexOpsuState {
 			return true;
 		}
 
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseReleased(button, x, y)) {
+			return true;
+		}
+
 		if (gameFinished) {
 			return true;
 		}
@@ -1373,6 +1394,10 @@ public class Game extends ComplexOpsuState {
 	@Override
 	public boolean keyReleased(int key, char c) {
 		if (super.keyReleased(key, c)) {
+			return true;
+		}
+		
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyReleased(key, c)) {
 			return true;
 		}
 
@@ -1412,6 +1437,10 @@ public class Game extends ComplexOpsuState {
 		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
+		
+		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseWheelMoved(newValue)) {
+			return true;
+		}
 
 		if (OPTION_DISABLE_MOUSE_WHEEL.state) {
 			return true;
@@ -1425,11 +1454,9 @@ public class Game extends ComplexOpsuState {
 	public void enter() {
 		overlays.clear();
 		if (OPTION_DANCE_ENABLE_SB.state) {
-			overlays.add(optionsOverlay);
 			overlays.add(moveStoryboardOverlay);
 			overlays.add(storyboardOverlay);
 			storyboardOverlay.onEnter();
-			optionsOverlay.revalidate();
 		}
 
 		super.enter();
@@ -1691,6 +1718,8 @@ public class Game extends ComplexOpsuState {
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			storyboardOverlay.onLeave();
 		}
+		
+		optionsOverlay.hide();
 
 		isInGame = false;
 //		container.setMouseGrabbed(false);

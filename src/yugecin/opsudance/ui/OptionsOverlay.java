@@ -26,7 +26,7 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.state.OverlayOpsuState;
+import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
@@ -37,7 +37,7 @@ import java.util.Random;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay extends OverlayOpsuState {
+public class OptionsOverlay implements ResolutionChangedListener {
 
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
@@ -58,6 +58,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private static final float INDICATOR_ALPHA = 0.8f;
 	private static final Color COL_INDICATOR = new Color(Color.black);
 
+	private boolean active;
+	private boolean acceptInput;
+	private boolean dirty;
 
 	/** Duration, in ms, of the show (slide-in) animation. */
 	private static final int SHOWANIMATIONTIME = 1000;
@@ -160,6 +163,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	public OptionsOverlay(OptionTab[] sections) {
 		this.sections = sections;
+		this.dirty = true;
 
 		dropdownMenus = new HashMap<>();
 		visibleDropdownMenus = new LinkedList<>();
@@ -169,15 +173,28 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		scrollHandler = new KineticScrolling();
 		scrollHandler.setAllowOverScroll(true);
+		
+		displayContainer.addResolutionChangedListener(this);
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		this.dirty = true;
+		if (this.active) {
+			this.revalidate();
+		}
+	}
+	
+	public boolean isActive() {
+		return this.active;
 	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
 	}
 
-	@Override
 	public void revalidate() {
-		super.revalidate();
+		this.dirty = false;
 
 		boolean isWidescreen = displayContainer.isWidescreen();
 		targetWidth = (int) (width * (isWidescreen ? 0.4f : 0.5f));
@@ -259,8 +276,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
 	}
 
-	@Override
-	public void onRender(Graphics g) {
+	public void render(Graphics g) {
+		if (!this.active && this.currentWidth == 0) {
+			return;
+		}
+
 		g.setClip(navButtonSize, 0, currentWidth - navButtonSize, height);
 
 		// bg
@@ -289,9 +309,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.clearClip();
 
 		renderNavigation(g);
-
-		// UI
-		backButton.draw(g);
 
 		// tooltip
 		renderTooltip(g);
@@ -605,30 +622,35 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.resetTransform();
 	}
 
-	@Override
 	public void hide() {
+		if (!this.active) {
+			return;
+		}
+		acceptInput = active = false;
 		searchField.setFocused(false);
-		acceptInput = false;
-		SoundController.playSound(SoundEffect.MENUBACK);
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
 	}
 
-	@Override
 	public void show() {
 		navHoverTime = 0;
 		indicatorPos = -optionHeight;
 		indicatorOffsetToNextPos = 0;
 		indicatorMoveAnimationTime = 0;
 		indicatorHideAnimationTime = 0;
-		acceptInput = true;
-		active = true;
+		acceptInput = active = true;
 		animationtime = 0;
 		resetSearch();
+		if (this.dirty) {
+			this.revalidate();
+		}
 	}
 
-	@Override
-	public void onPreRenderUpdate() {
+	public void preRenderUpdate() {
+		if (!this.active && this.currentWidth == 0) {
+			return;
+		}
+
 		int delta = renderDelta;
 
 		int prevscrollpos = scrollHandler.getIntPosition();
@@ -767,8 +789,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
-	@Override
-	public boolean onMousePressed(int button, int x, int y) {
+	public boolean mousePressed(int button, int x, int y) {
+		if (!this.active) {
+			return false;
+		}
+
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
 			return true;
@@ -793,8 +818,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onMouseReleased(int button, int x, int y) {
+	public boolean mouseReleased(int button, int x, int y) {
+		if (!this.active) {
+			return false;
+		}
+
 		selectedOption = null;
 		if (isAdjustingSlider && listener != null) {
 			listener.onSaveOption(hoverOption);
@@ -867,6 +895,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 
 		if (backButton.contains(x, y)){
+			SoundController.playSound(SoundEffect.MENUBACK);
 			hide();
 			if (listener != null) {
 				listener.onLeaveOptionsMenu();
@@ -875,8 +904,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (!this.active) {
+			return false;
+		}
+
 		if (!isAdjustingSlider) {
 			int diff = newy - oldy;
 			if (diff != 0) {
@@ -886,16 +918,22 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onMouseWheelMoved(int delta) {
+	public boolean mouseWheelMoved(int delta) {
+		if (!this.active) {
+			return false;
+		}
+
 		if (!isAdjustingSlider) {
 			scrollHandler.scrollOffset(-delta);
 		}
 		return true;
 	}
 
-	@Override
-	public boolean onKeyPressed(int key, char c) {
+	public boolean keyPressed(int key, char c) {
+		if (!this.active) {
+			return false;
+		}
+
 		if (keyEntryRight) {
 			if (Utils.isValidGameKey(key)) {
 				OPTION_KEY_RIGHT.intval = key;
@@ -922,6 +960,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				updateHoverOption(prevMouseX, prevMouseY);
 				return true;
 			}
+			SoundController.playSound(SoundEffect.MENUBACK);
 			hide();
 			if (listener != null) {
 				listener.onLeaveOptionsMenu();
@@ -953,8 +992,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onKeyReleased(int key, char c) {
+	public boolean keyReleased(int key, char c) {
 		return false;
 	}
 

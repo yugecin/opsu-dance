@@ -469,11 +469,18 @@ public class MainMenu extends BaseOpsuState {
 		);
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight * 2);
 
+		optionsOverlay.render(g);
+		if (optionsOverlay.isActive()) {
+			backButton.draw(g);
+		}
+
 		UI.draw(g);
 	}
 
 	@Override
 	public void preRenderUpdate() {
+		optionsOverlay.preRenderUpdate();
+
 		int delta = renderDelta;
 		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
@@ -667,6 +674,10 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
+		if (optionsOverlay.mousePressed(button, x, y)) {
+			return true;
+		}
+
 		// check mouse button
 		if (button == Input.MOUSE_MIDDLE_BUTTON)
 			return false;
@@ -787,6 +798,12 @@ public class MainMenu extends BaseOpsuState {
 				return true;
 			}
 
+			if (this.buttonPositions[1].contains(x, y, 0.25f)) {
+				SoundController.playSound(SoundEffect.MENUHIT);
+				optionsOverlay.show();
+				return true;
+			}
+
 			if (this.buttonPositions[2].contains(x, y, 0.25f)) {
 				displayContainer.exitRequested = true;
 				return true;
@@ -798,7 +815,7 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mouseWheelMoved(int newValue) {
-		if (super.mouseWheelMoved(newValue)) {
+		if (optionsOverlay.mouseWheelMoved(newValue)) {
 			return true;
 		}
 
@@ -808,7 +825,7 @@ public class MainMenu extends BaseOpsuState {
 
 	@Override
 	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
+		if (optionsOverlay.keyPressed(key, c)) {
 			return true;
 		}
 
@@ -843,8 +860,27 @@ public class MainMenu extends BaseOpsuState {
 		case KEY_DOWN:
 			UI.changeVolume(-1);
 			return true;
+		case KEY_O:
+			if (input.isControlDown()) {
+				optionsOverlay.show();
+			}
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean keyReleased(int key, char c) {
+		return optionsOverlay.keyReleased(key, c);
+	}
+
+	@Override
+	public boolean mouseReleased(int button, int x, int y) {
+		return optionsOverlay.mouseReleased(button, x, y);
+	}
+
+	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		return optionsOverlay.mouseDragged(oldx, oldy, newx, newy);
 	}
 
 	/**
@@ -886,6 +922,9 @@ public class MainMenu extends BaseOpsuState {
 	 * Enters the song menu, or the downloads menu if no beatmaps are loaded.
 	 */
 	private void enterSongMenu() {
+		if (optionsOverlay.isActive()) {
+			optionsOverlay.hide();
+		}
 		OpsuState state = songMenuState;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
 			barNotifs.send("Download some beatmaps to get started!");

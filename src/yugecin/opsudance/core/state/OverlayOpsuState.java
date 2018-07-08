@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,10 @@ public abstract class OverlayOpsuState implements OpsuState {
 
 	public void show() {
 		acceptInput = active = true;
+	}
+	
+	public boolean isActive() {
+		return this.active;
 	}
 
 	@Override

@@ -31,10 +31,12 @@ import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
+import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.utils.ManifestWrapper;
 
 import java.io.File;
@@ -65,6 +67,8 @@ public class InstanceContainer {
 	public static BarNotificationState barNotifs;
 	public static BubNotifState bubNotifs;
 	public static FpsRenderState fpsDisplay;
+	
+	public static OptionsOverlay optionsOverlay;
 
 	public static Splash splashState;
 	public static MainMenu mainmenuState;
@@ -114,6 +118,8 @@ public class InstanceContainer {
 		fpsDisplay = new FpsRenderState();
 
 		gameObjectRenderer = new GameObjectRenderer();
+
+		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 
 		splashState = new Splash();
 		mainmenuState = new MainMenu();
