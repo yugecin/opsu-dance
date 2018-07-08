@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,9 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 
 	static {
 		for (OptionTab tab : OptionGroups.storyboardOptions) {
-			optionList.addAll(Arrays.asList(tab.options));
+			if (tab.options != null) {
+				optionList.addAll(Arrays.asList(tab.options));
+			}
 		}
 	}
 
