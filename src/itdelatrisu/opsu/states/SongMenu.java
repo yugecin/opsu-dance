@@ -63,6 +63,8 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
+
+import yugecin.opsudance.core.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 
 import static org.lwjgl.input.Keyboard.*;
@@ -702,6 +704,14 @@ public class SongMenu extends ComplexOpsuState {
 		super.preRenderUpdate();
 		
 		optionsOverlay.preRenderUpdate();
+
+		int mouseX = InstanceContainer.mouseX;
+		int mouseY = InstanceContainer.mouseY;
+		if (optionsOverlay.containsMouse()) {
+			// dirty hack to not show elements underneath options overlay as hovered
+			mouseX = -mouseX;
+			mouseY = -mouseY;
+		}
 
 		int delta = renderDelta;
 		UI.update(delta);

@@ -52,6 +52,7 @@ import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
+import yugecin.opsudance.core.InstanceContainer;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.ui.ImagePosition;
@@ -482,6 +483,14 @@ public class MainMenu extends BaseOpsuState {
 		optionsOverlay.preRenderUpdate();
 
 		int delta = renderDelta;
+		
+		int mouseX = InstanceContainer.mouseX;
+		int mouseY = InstanceContainer.mouseY;
+		if (optionsOverlay.containsMouse()) {
+			// dirty hack to not show elements underneath options overlay as hovered
+			mouseX = -mouseX;
+			mouseY = -mouseY;
+		}
 		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
 		while (pulseDataIter.hasNext()) {

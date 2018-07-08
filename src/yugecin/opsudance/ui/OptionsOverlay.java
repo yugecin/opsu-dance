@@ -188,6 +188,10 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	public boolean isActive() {
 		return this.active;
 	}
+	
+	public boolean containsMouse() {
+		return this.active && mouseX <= this.currentWidth;
+	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
