@@ -19,6 +19,5 @@ package yugecin.opsudance.events;
 
 public interface SkinChangedListener
 {
-	void onSkinChanged(String stringName);
-
+	void onSkinChanged(String name);
 }
