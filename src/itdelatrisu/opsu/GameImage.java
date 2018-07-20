@@ -90,7 +90,9 @@ public enum GameImage {
 	PLAYFIELD ("playfield", "png|jpg", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.7f);
+			if (img.getWidth() == 1 && img.getHeight() == 1) {
+				img = MENU_BG.getImage().getFlippedCopy(/*h*/ false, /*v*/ true);
+			}
 			return img.getScaledCopy(w, h);
 		}
 	},
