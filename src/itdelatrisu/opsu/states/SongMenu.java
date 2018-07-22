@@ -160,7 +160,7 @@ public class SongMenu extends ComplexOpsuState {
 	private BeatmapSetNode hoverIndex = null;
 
 	/** The selection buttons. */
-	private MenuButton selectModsButton, selectRandomButton, selectMapOptionsButton, selectOptionsButton;
+	private MenuButton selectModsButton, selectRandomButton, selectMapOptionsButton;
 
 	/** The search textfield. */
 	private TextField searchTextField;
@@ -418,12 +418,9 @@ public class SongMenu extends ComplexOpsuState {
 				selectX + selectOffset, selectY);
 		selectMapOptionsButton = new MenuButton(GameImage.SELECTION_OPTIONS_OVERLAY.getImage(),
 				selectX + selectOffset * 2f, selectY);
-		selectOptionsButton = new MenuButton(GameImage.SELECTION_OTHER_OPTIONS_OVERLAY.getImage(),
-				selectX + selectOffset * 3f, selectY);
 		selectModsButton.setHoverFade(0f);
 		selectRandomButton.setHoverFade(0f);
 		selectMapOptionsButton.setHoverFade(0f);
-		selectOptionsButton.setHoverFade(0f);
 
 		// loader
 		int loaderDim = GameImage.MENU_MUSICNOTE.getWidth();
@@ -629,8 +626,6 @@ public class SongMenu extends ComplexOpsuState {
 		selectRandomButton.draw();
 		GameImage.SELECTION_OPTIONS.getImage().drawCentered(selectMapOptionsButton.getX(), selectMapOptionsButton.getY());
 		selectMapOptionsButton.draw();
-		GameImage.SELECTION_OTHER_OPTIONS.getImage().drawCentered(selectOptionsButton.getX(), selectOptionsButton.getY());
-		selectOptionsButton.draw();
 
 		// group tabs
 		BeatmapGroup currentGroup = BeatmapGroup.current();
@@ -733,7 +728,6 @@ public class SongMenu extends ComplexOpsuState {
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
 		selectMapOptionsButton.hoverUpdate(delta, mouseX, mouseY);
-		selectOptionsButton.hoverUpdate(delta, mouseX, mouseY);
 		footerLogoButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 
 		// beatmap menu timer
@@ -926,12 +920,6 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		} else if (selectMapOptionsButton.contains(x, y)) {
 			this.keyPressed(KEY_F3, '\0');
-			return true;
-		} else if (selectOptionsButton.contains(x, y)) {
-			if (!optionsOverlay.isActive()) {
-				SoundController.playSound(SoundEffect.MENUHIT);
-				optionsOverlay.show();
-			}
 			return true;
 		}
 
@@ -1277,7 +1265,6 @@ public class SongMenu extends ComplexOpsuState {
 		selectModsButton.resetHover();
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
-		selectOptionsButton.resetHover();
 		hoverOffset.setTime(0);
 		hoverIndex = null;
 		isScrollingToFocusNode = false;

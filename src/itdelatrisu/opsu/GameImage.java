@@ -238,8 +238,6 @@ public enum GameImage {
 	SELECTION_RANDOM_OVERLAY ("selection-random-over", "png", false, false),
 	SELECTION_OPTIONS ("selection-options", "png", false, false),
 	SELECTION_OPTIONS_OVERLAY ("selection-options-over", "png", false, false),
-	SELECTION_OTHER_OPTIONS ("selection-selectoptions", "png", false, false),
-	SELECTION_OTHER_OPTIONS_OVERLAY ("selection-selectoptions-over", "png", false, false),
 
 	// Replay Speed Buttons
 	REPLAY_PLAYBACK_NORMAL ("playback-normal", "png", false, false),
