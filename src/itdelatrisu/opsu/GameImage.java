@@ -402,13 +402,6 @@ public enum GameImage {
 			return img.getScaledCopy((h / 14f) / img.getHeight());
 		}
 	},
-	OPTIONS_BG ("options-background", "png|jpg", false, true) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.7f);
-			return img.getScaledCopy(w, h);
-		}
-	},
 	CHEVRON_DOWN ("chevron-down", "png", false, false),
 	CHEVRON_RIGHT ("chevron-right", "png", false, false),
 
