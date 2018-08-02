@@ -8,6 +8,7 @@
 	<artifactId>opsu-dance</artifactId>
 	<version>0.5.0-SNAPSHOT</version>
 	<properties>
+		<nativesTargetDir>target/Natives</nativesTargetDir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version>${project.version}</version>
 		<timestamp>${maven.build.timestamp}</timestamp>
