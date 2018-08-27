@@ -143,6 +143,8 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	private int maxScrollOffset;
 
 	private int mousePressY;
+	
+	private boolean wasPressed;
 
 	private boolean keyEntryLeft;
 	private boolean keyEntryRight;
@@ -796,6 +798,8 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		if (!this.active || x > this.currentWidth) {
 			return false;
 		}
+		
+		wasPressed = true;
 
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
@@ -822,9 +826,11 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
-		if (!this.active || x > this.currentWidth) {
+		if (!this.active || (!wasPressed && x > this.currentWidth)) {
 			return false;
 		}
+		
+		wasPressed = false;
 
 		selectedOption = null;
 		if (isAdjustingSlider && listener != null) {
