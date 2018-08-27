@@ -103,6 +103,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	private int sliderOptionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
+	private int unchangedSliderValue;
 
 	private final HashMap<ListOption, DropdownMenu<Object>> dropdownMenus;
 	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
@@ -283,7 +284,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public void render(Graphics g) {
-		if (!this.active && this.currentWidth == 0) {
+		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
 
@@ -653,7 +654,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 	}
 
 	public void preRenderUpdate() {
-		if (!this.active && this.currentWidth == 0) {
+		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
 
@@ -818,6 +819,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
 			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
+				unchangedSliderValue = ((NumericOption) hoverOption).val;
 				updateSliderOption();
 			}
 		}
@@ -960,6 +962,11 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		}
 
 		if (key == Keyboard.KEY_ESCAPE) {
+			if (isAdjustingSlider) {
+				isAdjustingSlider = false;
+				((NumericOption) hoverOption).setValue(unchangedSliderValue);
+				//updateHoverOption(mouseX, mouseY);
+			}
 			if (openDropdownMenu != null) {
 				openDropdownMenu.keyPressed(key, c);
 				return true;
