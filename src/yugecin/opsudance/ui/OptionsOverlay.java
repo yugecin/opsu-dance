@@ -835,8 +835,11 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		wasPressed = false;
 
 		selectedOption = null;
-		if (isAdjustingSlider && listener != null) {
-			listener.onSaveOption(hoverOption);
+		if (isAdjustingSlider) {
+			if (listener != null) {
+				listener.onSaveOption(hoverOption);
+			}
+			updateHoverOption(x, y);
 		}
 		isAdjustingSlider = false;
 		sliderOptionLength = 0;
