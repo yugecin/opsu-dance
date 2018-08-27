@@ -101,6 +101,7 @@ public class ErrorHandler {
 		textArea.setTabSize(2);
 		textArea.setLineWrap(false);
 		textArea.setWrapStyleWord(true);
+		textArea.setFont(message.getFont());
 		textArea.setText(messageBody);
 
 		ActionListener reportAction = new ActionListener() {
