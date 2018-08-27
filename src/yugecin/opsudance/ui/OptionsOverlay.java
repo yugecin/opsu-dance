@@ -318,7 +318,9 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		renderNavigation(g);
 
 		// tooltip
-		renderTooltip(g);
+		if (this.active) {
+			renderTooltip(g);
+		}
 
 		// key input options
 		if (keyEntryLeft || keyEntryRight) {
