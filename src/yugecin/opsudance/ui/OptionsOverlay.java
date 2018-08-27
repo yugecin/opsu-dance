@@ -842,8 +842,8 @@ public class OptionsOverlay implements ResolutionChangedListener {
 				listener.onSaveOption(hoverOption);
 			}
 			updateHoverOption(x, y);
+			isAdjustingSlider = false;
 		}
-		isAdjustingSlider = false;
 		sliderOptionLength = 0;
 
 		if (x > navWidth) {
@@ -968,9 +968,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 
 		if (key == Keyboard.KEY_ESCAPE) {
 			if (isAdjustingSlider) {
-				isAdjustingSlider = false;
-				((NumericOption) hoverOption).setValue(unchangedSliderValue);
-				//updateHoverOption(mouseX, mouseY);
+				cancelAdjustingSlider();
 			}
 			if (openDropdownMenu != null) {
 				openDropdownMenu.keyPressed(key, c);
@@ -1017,6 +1015,13 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		return false;
 	}
 
+	private void cancelAdjustingSlider() {
+		if (isAdjustingSlider) {
+			isAdjustingSlider = false;
+			((NumericOption) hoverOption).setValue(unchangedSliderValue);
+		}
+	}
+
 	private void updateSliderOption() {
 		NumericOption o = (NumericOption) hoverOption;
 		int value = o.min + Math.round((float) (o.max - o.min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
@@ -1051,6 +1056,7 @@ public class OptionsOverlay implements ResolutionChangedListener {
 
 	private void updateHoverOption(int mouseX, int mouseY) {
 		if (mouseX < navWidth) {
+			cancelAdjustingSlider();
 			hoverOption = null;
 			return;
 		}
