@@ -169,11 +169,11 @@ public class MainMenu extends BaseOpsuState {
 		}
 		this.buttonPositions = new ImagePosition[3];
 		this.timeFormat = new SimpleDateFormat("HH:mm");
+		this.previous = new Stack<>();
 	}
 
 	@Override
 	protected void revalidate() {
-		previous = new Stack<>();
 
 		this.barHeight = height * 0.1125f;
 
