@@ -1077,7 +1077,6 @@ public class Game extends ComplexOpsuState {
 		if (restart != Restart.LOSE) {
 			// update objects (loop in unlikely event of any skipped indexes)
 			boolean keyPressed = keys != ReplayFrame.KEY_NONE;
-			boolean skippedObject = false;
 			while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
 				// check if we've already passed the next object's start time
 				boolean overlap = (objectIndex + 1 < gameObjects.length &&
@@ -1085,7 +1084,6 @@ public class Game extends ComplexOpsuState {
 
 				// update hit object and check completion status
 				if (gameObjects[objectIndex].update(overlap, delta, mouseX, mouseY, keyPressed, trackPosition)) {
-					skippedObject = true;
 					objectIndex++;  // done, so increment object index
 					storyboardOverlay.updateIndex(objectIndex);
 					if (objectIndex >= mirrorTo) {
