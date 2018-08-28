@@ -27,6 +27,7 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
@@ -34,10 +35,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay implements ResolutionChangedListener {
+public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener {
 
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
@@ -178,10 +180,19 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		scrollHandler.setAllowOverScroll(true);
 		
 		displayContainer.addResolutionChangedListener(this);
+		skinservice.addSkinChangedListener(this);
 	}
 
 	@Override
 	public void onResolutionChanged(int w, int h) {
+		this.dirty = true;
+		if (this.active) {
+			this.revalidate();
+		}
+	}
+
+	@Override
+	public void onSkinChanged(String name) {
 		this.dirty = true;
 		if (this.active) {
 			this.revalidate();
@@ -233,9 +244,10 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		controlImageSize = (int) (Fonts.MEDIUM.getLineHeight() * 0.7f);
 		controlImagePadding = (optionHeight - controlImageSize) / 2;
 
-		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(controlImageSize, controlImageSize);
+		final int s = controlImageSize;
+		sliderBallImg = CONTROL_SLIDER_BALL.getScaledImage(s, s);
+		checkOnImg = CONTROL_CHECK_ON.getScaledImage(s, s);
+		checkOffImg = CONTROL_CHECK_OFF.getScaledImage(s, s);
 
 		int navTotalHeight = 0;
 		dropdownMenus.clear();
@@ -1175,5 +1187,4 @@ public class OptionsOverlay implements ResolutionChangedListener {
 		void onLeaveOptionsMenu();
 		void onSaveOption(Option option);
 	}
-
 }
