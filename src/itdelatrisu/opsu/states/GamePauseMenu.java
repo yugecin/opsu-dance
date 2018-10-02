@@ -117,6 +117,15 @@ public class GamePauseMenu extends BaseOpsuState {
 			return true;
 		}
 
+		if (key == KEY_SUBTRACT || key == KEY_MINUS) {
+			gameState.adjustLocalMusicOffset(-5);
+			return true;
+		}
+		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+			gameState.adjustLocalMusicOffset(5);
+			return true;
+		}
+
 		return false;
 	}
 

@@ -423,7 +423,7 @@ public class Options {
 
 	public static final NumericOption OPTION_EFFECT_VOLUME = new NumericOption("Effects", "VolumeEffect", "Volume of menu and game sounds.", 70, 0, 100);
 	public static final NumericOption OPTION_HITSOUND_VOLUME = new NumericOption("Hit Sounds", "VolumeHitSound", "Volume of hit sounds.", 30, 0, 100);
-	public static final NumericOption OPTION_MUSIC_OFFSET = new NumericOption("Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
+	public static final NumericOption OPTION_MUSIC_OFFSET = new NumericOption("Global Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
 		@Override
 		public String getValueString () {
 			return String.format("%dms", val);

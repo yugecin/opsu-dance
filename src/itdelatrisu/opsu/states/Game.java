@@ -265,8 +265,6 @@ public class Game extends ComplexOpsuState {
 	/** Music position bar coordinates and dimensions (for replay seeking). */
 	private float musicBarX, musicBarY, musicBarWidth, musicBarHeight;
 
-	public static int currentMapMusicOffset;
-
 	private int mirrorFrom;
 	private int mirrorTo;
 
@@ -386,7 +384,7 @@ public class Game extends ComplexOpsuState {
 	public void render(Graphics g) {
 		int trackPosition = MusicController.getPosition();
 		if (isLeadIn()) {
-			trackPosition -= leadInTime - currentMapMusicOffset - OPTION_MUSIC_OFFSET.val;
+			trackPosition -= leadInTime - OPTION_MUSIC_OFFSET.val - beatmap.localMusicOffset;
 		}
 		if (pauseTime > -1)  // returning from pause screen
 			trackPosition = pauseTime;
@@ -439,7 +437,7 @@ public class Game extends ComplexOpsuState {
 		if (GameMod.FLASHLIGHT.isActive()) {
 			// render hit objects offscreen
 			Graphics.setCurrent(gOffscreen);
-			int trackPos = (isLeadIn()) ? (leadInTime - OPTION_MUSIC_OFFSET.val) * -1 : trackPosition;
+			int trackPos = (isLeadIn()) ? (leadInTime - OPTION_MUSIC_OFFSET.val - beatmap.localMusicOffset) * -1 : trackPosition;
 			drawHitObjects(gOffscreen, trackPos);
 
 			// restore original graphics context
@@ -566,8 +564,8 @@ public class Game extends ComplexOpsuState {
 					Colors.WHITE_FADE.a = oldAlpha;
 				}
 
-				if (isLeadIn())
-					trackPosition = (leadInTime - OPTION_MUSIC_OFFSET.val) * -1;  // render approach circles during song lead-in
+				if (isLeadIn()) // render approach circles during song lead-in
+					trackPosition = (leadInTime - OPTION_MUSIC_OFFSET.val - beatmap.localMusicOffset) * -1;
 
 				// countdown
 				if (beatmap.countdown > 0) {
@@ -1231,14 +1229,13 @@ public class Game extends ComplexOpsuState {
 			}
 			OPTION_DANCE_MIRROR.toggle();
 			break;
+		case KEY_SUBTRACT:
 		case KEY_MINUS:
-			currentMapMusicOffset += 5;
-			barNotifs.send("Current map offset: " + currentMapMusicOffset);
+			adjustLocalMusicOffset(-5);
 			break;
 		}
-		if (key == KEY_ADD || c == '+') {
-			currentMapMusicOffset -= 5;
-			barNotifs.send("Current map offset: " + currentMapMusicOffset);
+		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+			adjustLocalMusicOffset(5);
 		}
 
 		return true;
@@ -1650,6 +1647,10 @@ public class Game extends ComplexOpsuState {
 			scoreboardVisible = true;
 			currentScoreboardAlpha = 0f;
 
+			// using local offset?
+			if (beatmap.localMusicOffset != 0)
+				barNotifs.send(String.format("Using local beatmap offset (%dms)", beatmap.localMusicOffset));
+
 			// needs to play before setting position to resume without lag later
 			MusicController.play(false);
 			MusicController.setPosition(0);
@@ -1749,7 +1750,19 @@ public class Game extends ComplexOpsuState {
 		if (isReplay)
 			GameMod.loadModState(previousMods);
 	}
-
+	
+	/**
+	 * Adjusts the beatmap's local music offset.
+	 * @param sign the sign (multiplier)
+	 */
+	public void adjustLocalMusicOffset(int amount) {
+		int newOffset = beatmap.localMusicOffset + amount;
+		barNotifs.send(String.format("Local beatmap offset set to %dms", newOffset));
+		if (beatmap.localMusicOffset != newOffset) {
+			beatmap.localMusicOffset = newOffset;
+			BeatmapDB.updateLocalOffset(beatmap);
+		}
+	}
 	public void addMergedSliderPointsToRender(int from, int to) {
 		knorkesliders.addRange(from, to);
 	}
@@ -1908,9 +1921,6 @@ public class Game extends ComplexOpsuState {
 	 * @param beatmap the beatmap to load
 	 */
 	public void loadBeatmap(Beatmap beatmap) {
-		if (this.beatmap == null || this.beatmap.beatmapID != beatmap.beatmapID) {
-			currentMapMusicOffset = 0;
-		}
 		this.beatmap = beatmap;
 		Display.setTitle(String.format("opsu!dance - %s", beatmap.toString()));
 		if (beatmap.breaks == null) {

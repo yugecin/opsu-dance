@@ -22,6 +22,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.states.Game;
+import yugecin.opsudance.options.Options;
 
 import java.io.File;
 import java.io.IOException;
@@ -358,10 +359,14 @@ public class MusicController {
 	 * If no track is loaded, 0 will be returned.
 	 */
 	public static int getPosition() {
+		int offset = OPTION_MUSIC_OFFSET.val;
+		if (lastBeatmap != null)
+			offset += lastBeatmap.localMusicOffset;
+
 		if (isPlaying())
-			return (int) (player.getPosition() * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset);
+			return (int) (player.getPosition() * 1000 + offset);
 		else if (isPaused())
-			return Math.max((int) (pauseTime * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset), 0);
+			return Math.max((int) (pauseTime * 1000 + offset), 0);
 		else
 			return 0;
 	}
