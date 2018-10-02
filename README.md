@@ -38,10 +38,7 @@ You should know how to do this. It's recommended to use a working directory like
 
 ### Using apache ant
 
-Resolve dependencies first, use either:
-
-* `ant ivyresolve` to download dependencies using apache ivy
-* `ant mvnresolve` to download dependencies using apache mvn
+Resolve dependencies first by doing `ant mvnresolve` or `mvn initialize`
 
 Then do `ant run`
 
