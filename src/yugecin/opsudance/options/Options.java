@@ -21,7 +21,6 @@ import awlex.ospu.polymover.factory.PolyMoverFactory;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
-import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.SlickException;
@@ -191,12 +190,7 @@ public class Options {
 		public void toggle()
 		{
 			super.toggle();
-			try {
-				displayContainer.setDisplayMode(width, height, state);
-			} catch (Exception e) {
-				bubNotifs.send(Colors.BUB_RED, "Failed to change fullscreen state");
-				Log.error("Failed to change fullscreen state.", e);
-			}
+			displayContainer.updateDisplayMode(width, height);
 		}
 	};
 	public static final ListOption OPTION_SKIN = new ListOption("Skin", "Skin", "Change how the game looks.") {

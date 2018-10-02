@@ -351,6 +351,13 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			width = Integer.parseInt(res[0]);
 			height = Integer.parseInt(res[1]);
 		}
+		
+		updateDisplayMode(width, height);
+	}
+	
+	public void updateDisplayMode(int width, int height) {
+		int screenWidth = nativeDisplayMode.getWidth();
+		int screenHeight = nativeDisplayMode.getHeight();
 
 		// check for larger-than-screen dimensions
 		if (!OPTION_ALLOW_LARGER_RESOLUTIONS.state && (screenWidth < width || screenHeight < height)) {
@@ -366,7 +373,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		try {
 			setDisplayMode(width, height, OPTION_FULLSCREEN.state);
 		} catch (Exception e) {
-			bubNotifs.send(BUB_RED, "Failed to change resolution");
+			bubNotifs.send(BUB_RED, "Failed to change display mode");
 			Log.error("Failed to set display mode.", e);
 		}
 	}
