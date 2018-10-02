@@ -166,6 +166,7 @@ public class Options {
 		public void clickListItem(int index){
 			idx = index;
 			displayContainer.updateDisplayMode(resolutions[idx]);
+			this.onChange();
 		}
 
 		@Override
@@ -201,6 +202,7 @@ public class Options {
 		public void clickListItem(int index){
 			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
 			skinservice.reloadSkin();
+			this.onChange();
 		}
 
 		@Override
@@ -283,6 +285,7 @@ public class Options {
 					}
 				}
 			}
+			this.onChange();
 		}
 
 		@Override
@@ -344,6 +347,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			this.index = index;
+			this.onChange();
 		}
 
 		@Override
@@ -638,6 +642,7 @@ public class Options {
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);
+			this.onChange();
 		}
 
 		@Override
@@ -727,6 +732,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.moverDirection = MoverDirection.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -757,6 +763,7 @@ public class Options {
 		public void clickListItem(int index){
 			val = index;
 			Dancer.sliderMoverController = Dancer.sliderMovers[index];
+			this.onChange();
 		}
 
 		@Override
@@ -779,6 +786,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.instance.setSpinnerIndex(index);
+			this.onChange();
 		}
 
 		@Override
@@ -823,6 +831,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorOverride = ObjectColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -850,6 +859,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorMirrorOverride = ObjectColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -884,6 +894,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -911,6 +922,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override

@@ -269,16 +269,20 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 						openDropdownMenu = null;
 					}
 				};
-				// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
-				String selectedValue = option.getValueString();
-				int idx = 0;
-				for (Object item : items) {
-					if (item.toString().equals(selectedValue)) {
-						break;
+				final Runnable observer = () -> {
+					// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
+					String selectedValue = option.getValueString();
+					int idx = 0;
+					for (Object item : items) {
+						if (item.toString().equals(selectedValue)) {
+							break;
+						}
+						idx++;
 					}
-					idx++;
-				}
-				menu.setSelectedIndex(idx);
+					menu.setSelectedIndex(idx);
+				};
+				observer.run();
+				listOption.observer = observer;
 				menu.setBackgroundColor(COL_BG);
 				menu.setBorderColor(Color.transparent);
 				menu.setChevronDownColor(COL_WHITE);
