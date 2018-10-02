@@ -25,6 +25,7 @@ import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
+import itdelatrisu.opsu.render.FrameBufferCache;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
 import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
@@ -295,6 +296,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		GameImage.destroyImages();
 		GameData.Grade.destroyImages();
 		Beatmap.destroyBackgroundImageCache();
+		FrameBufferCache.shutdown();
 	}
 
 	public void teardownAL() {

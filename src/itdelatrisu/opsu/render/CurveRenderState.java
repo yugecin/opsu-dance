@@ -77,8 +77,6 @@ public class CurveRenderState {
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
 	 * Should be called before any curves are drawn.
-	 * @param width the container width
-	 * @param height the container height
 	 * @param circleDiameter the circle diameter
 	 */
 	public static void init(float circleDiameter) {
