@@ -252,7 +252,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 
 			Display.processMessages();
-			Display.sync(targetUpdatesPerSecond);
+			if (targetUpdatesPerSecond >= 60) {
+				Display.sync(targetUpdatesPerSecond);
+			}
 		}
 	}
 

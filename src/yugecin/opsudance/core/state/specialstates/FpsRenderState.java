@@ -60,7 +60,7 @@ public class FpsRenderState implements ResolutionChangedListener {
 	}
 
 	private String getText(int value, String unit) {
-		if (OPTION_USE_FPS_DELTAS.state) {
+		if (OPTION_USE_FPS_DELTAS.state || value > 1000) {
 			return String.format("%.2fms", 1000f / value);
 		}
 		return value + " " + unit;

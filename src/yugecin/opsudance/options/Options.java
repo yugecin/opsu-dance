@@ -214,16 +214,34 @@ public class Options {
 		}
 	};
 
-	public static final NumericOption OPTION_TARGET_UPS = new NumericOption("target UPS", "targetUPS", "Higher values result in less input lag and smoother cursor trail, but may cause high CPU usage.", 480, 20, 1000) {
+	public static final int[] targetUPS = { 60, 120, 240, 480, 960, 1000, -1 };
+
+	public static final NumericOption OPTION_TARGET_UPS = new NumericOption("target UPS", "targetUPS", "Higher values result in less input lag and smoother cursor trail, but may cause high CPU usage.", 2, 0, targetUPS.length - 1) {
 		@Override
 		public String getValueString () {
-			return String.format("%dups", val);
+			if (targetUPS[val] == -1) {
+				return "unlimited";
+			}
+			return String.valueOf(targetUPS[val]);
 		}
 
 		@Override
-		public void setValue ( int value){
+		public void setValue(int value) {
+			if (value < 0 || targetUPS.length <= value) {
+				return;
+			}
+			final int ups = targetUPS[value];
+			final int fps = targetFPS[targetFPSIndex];
 			super.setValue(value);
-			displayContainer.setUPS(value);
+			displayContainer.setUPS(ups);
+			if (ups != -1 && fps > ups) {
+				for (int i = targetFPSIndex - 1; i >= 0; i--) {
+					if (targetFPS[i] >= ups) {
+						OPTION_TARGET_FPS.clickListItem(i);
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -255,7 +273,16 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			targetFPSIndex = index;
-			displayContainer.setFPS(targetFPS[targetFPSIndex]);
+			int fps = targetFPS[targetFPSIndex];
+			displayContainer.setFPS(fps);
+			if (targetUPS[OPTION_TARGET_UPS.val] < fps) {
+				for (int i = 0; i < targetUPS.length; i++) {
+					if (targetUPS[i] >= fps) {
+						OPTION_TARGET_UPS.setValue(i);
+						break;
+					}
+				}
+			}
 		}
 
 		@Override
