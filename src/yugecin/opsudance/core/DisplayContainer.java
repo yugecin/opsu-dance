@@ -372,11 +372,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void setDisplayMode(int w, int h, boolean fullscreen) throws Exception {
-		if (width == w && height == h) {
-			Display.setFullscreen(fullscreen);
-			return;
-		}
-
 		DisplayMode displayMode = null;
 		if (fullscreen) {
 			final int bpp = this.nativeDisplayMode.getBitsPerPixel();

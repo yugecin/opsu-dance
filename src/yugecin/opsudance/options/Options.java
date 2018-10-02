@@ -21,6 +21,7 @@ import awlex.ospu.polymover.factory.PolyMoverFactory;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.states.Game;
+import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.SlickException;
@@ -185,7 +186,19 @@ public class Options {
 	};
 
 	public static final ToggleOption OPTION_ALLOW_LARGER_RESOLUTIONS = new ToggleOption("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false);
-	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false);
+	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Fullscreen mode", false) {
+		@Override
+		public void toggle()
+		{
+			super.toggle();
+			try {
+				displayContainer.setDisplayMode(width, height, state);
+			} catch (Exception e) {
+				bubNotifs.send(Colors.BUB_RED, "Failed to change fullscreen state");
+				Log.error("Failed to change fullscreen state.", e);
+			}
+		}
+	};
 	public static final ListOption OPTION_SKIN = new ListOption("Skin", "Skin", "Change how the game looks.") {
 
 		@Override
