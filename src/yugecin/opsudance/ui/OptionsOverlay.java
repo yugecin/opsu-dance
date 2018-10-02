@@ -26,6 +26,8 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
+
+import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
@@ -144,6 +146,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 	private final KineticScrolling scrollHandler;
 	private int maxScrollOffset;
+	private int lastOptionHeight;
 
 	private int mousePressY;
 	
@@ -487,6 +490,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			g.setColor(COL_GREY);
 			g.fillRect(paddingLeft, lineStartY, LINEWIDTH, lineHeight);
 		}
+		lastOptionHeight = maxScrollOffset;
 		// iterate over skipped options to correctly calculate max scroll offset
 		for (; sectionIndex < sections.length; sectionIndex++) {
 			if (sections[sectionIndex].filtered) {
@@ -610,6 +614,17 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
 		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
 			textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
+
+		int y = lastOptionHeight - scrollHandler.getIntPosition();
+		y += Fonts.LARGE.getLineHeight() * 2.5f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.PROJECT_NAME + " " + updater.getCurrentVersion(), COL_WHITE);
+		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.DANCE_REPOSITORY_URI.toString(), COL_WHITE);
+		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.REPOSITORY_URI.toString(), COL_WHITE);
 	}
 
 	private void renderSearch(Graphics g) {
