@@ -240,7 +240,7 @@ public class HitObject {
 				String[] edgeHitSoundTokens = tokens[8].split("\\|");
 				this.edgeHitSound = new byte[edgeHitSoundTokens.length];
 				for (int j = 0; j < edgeHitSoundTokens.length; j++)
-					edgeHitSound[j] = Byte.parseByte(edgeHitSoundTokens[j]);
+					edgeHitSound[j] = (byte) Short.parseShort(edgeHitSoundTokens[j]);
 			}
 			if (tokens.length > 9) {
 				String[] edgeAdditionTokens = tokens[9].split("\\|");
