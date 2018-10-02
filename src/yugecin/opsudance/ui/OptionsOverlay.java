@@ -655,6 +655,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		searchField.setFocused(false);
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
+		hoverOption = null;
 	}
 
 	public void show() {
@@ -862,6 +863,15 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 		sliderOptionLength = 0;
 
+		if (backButton.contains(x, y)){
+			SoundController.playSound(SoundEffect.MENUBACK);
+			hide();
+			if (listener != null) {
+				listener.onLeaveOptionsMenu();
+			}
+			return true;
+		}
+
 		if (x > navWidth) {
 			if (openDropdownMenu != null) {
 				openDropdownMenu.mouseReleased(button);
@@ -924,14 +934,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			}
 			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
 			scrollHandler.scrollToPosition(sectionPosition);
-		}
-
-		if (backButton.contains(x, y)){
-			SoundController.playSound(SoundEffect.MENUBACK);
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
 		}
 		return true;
 	}
