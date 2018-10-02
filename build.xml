@@ -119,9 +119,6 @@ then run (code is compiled automatically when you run)
 				<attribute name="Manifest-Version" value="1.0" />
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="${main}" />
-				<attribute name="WinNatives" value="OpenAL32.dll,OpenAL64.dll,lwjgl.dll,lwjgl64.dll" />
-				<attribute name="NixNatives" value="liblwjgl.so,liblwjgl64.so,libopenal.so,libopenal64.so" />
-				<attribute name="MacNatives" value="liblwjgl.dylib,openal.dylib" />
 			</manifest>
 			<fileset dir="${dir.out}/classes" />
 			<zipfileset src="${dir.out}/lib.jar">

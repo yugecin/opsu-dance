@@ -19,7 +19,6 @@
 package itdelatrisu.opsu;
 
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.utils.ManifestWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,42 +49,32 @@ public class NativeLoader {
 	 * Unpacks natives for the current operating system to the natives directory.
 	 * @throws IOException if an I/O exception occurs
 	 */
-	public static void loadNatives(JarFile jarfile, ManifestWrapper manifest) throws IOException {
+	public static void loadNatives(JarFile jarfile) throws IOException {
 		if (!config.NATIVE_DIR.exists() && !config.NATIVE_DIR.mkdir()) {
 			String msg = String.format("Could not create folder '%s'",
 				config.NATIVE_DIR.getAbsolutePath());
 			throw new RuntimeException(msg);
 		}
 
-		String osName = System.getProperty("os.name");
-		String nativekey = null;
+		final String osName = System.getProperty("os.name");
+		final String[] files;
 		if (osName.startsWith("Win")) {
-			nativekey = "WinNatives";
+			files = new String[] { "OpenAL32.dll", "OpenAL64.dll", "lwjgl.dll", "lwjgl64.dll" };
 		} else if (osName.startsWith("Linux")) {
-			nativekey = "NixNatives";
+			files = new String[] { "liblwjgl.so", "liblwjgl64.so", "libopenal.so", "libopenal64.so" };
 		} else if (osName.startsWith("Mac") || osName.startsWith("Darwin")) {
-			nativekey = "MacNatives";
-		}
-
-		if (nativekey == null) {
+			files = new String[] { "liblwjgl.dylib", "openal.dylib" };
+		} else {
 			Log.warn("Cannot determine natives for os " + osName);
 			return;
 		}
 
-		String natives = manifest.valueOrDefault(null, nativekey, null);
-		if (natives == null) {
-			String msg = String.format("No entry for '%s' in manifest, jar is badly packed or damaged",
-				nativekey);
-			throw new RuntimeException(msg);
-		}
-
-		String[] nativefiles = natives.split(",");
-		for (String nativefile : nativefiles) {
-			File unpackedFile = new File(config.NATIVE_DIR, nativefile);
+		for (String file : files) {
+			File unpackedFile = new File(config.NATIVE_DIR, file);
 			if (unpackedFile.exists()) {
 				continue;
 			}
-			Utils.unpackFromJar(jarfile, unpackedFile, nativefile);
+			Utils.unpackFromJar(jarfile, unpackedFile, file);
 		}
 	}
 

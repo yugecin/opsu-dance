@@ -92,7 +92,7 @@ public class InstanceContainer {
 		config = new Configuration(manifest);
 		if (jarfile != null) {
 			try {
-				NativeLoader.loadNatives(jarfile, manifest);
+				NativeLoader.loadNatives(jarfile);
 			} catch (IOException e) {
 				String msg = String.format("Could not unpack native(s): %s", e.getMessage());
 				throw new RuntimeException(msg, e);

@@ -149,9 +149,6 @@
 							<manifestEntries>
 								<Main-Class>${mainClassName}</Main-Class>
 								<Use-XDG>${XDG}</Use-XDG>
-								<WinNatives>OpenAL32.dll,OpenAL64.dll,lwjgl.dll,lwjgl64.dll</WinNatives>
-								<NixNatives>liblwjgl.so,liblwjgl64.so,libopenal.so,libopenal64.so</NixNatives>
-								<MacNatives>liblwjgl.dylib,openal.dylib</MacNatives>
 							</manifestEntries>
 						</transformer>
 					</transformers>
