@@ -37,7 +37,6 @@ import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
-import yugecin.opsudance.utils.ManifestWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,8 +87,7 @@ public class InstanceContainer {
 		env = new Environment();
 
 		JarFile jarfile = getJarfile();
-		ManifestWrapper manifest = new ManifestWrapper(getJarManifest(jarfile));
-		config = new Configuration(manifest);
+		config = new Configuration();
 		if (jarfile != null) {
 			try {
 				NativeLoader.loadNatives(jarfile);

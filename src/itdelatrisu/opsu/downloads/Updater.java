@@ -32,10 +32,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
 
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.utils.SimpleVersion;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -91,7 +91,7 @@ public class Updater {
 	private Status status;
 
 	/** The current and latest versions. */
-	private DefaultArtifactVersion currentVersion, latestVersion;
+	private SimpleVersion currentVersion, latestVersion;
 
 	/** The version information if the program was just updated. */
 	private String updatedFromVersion, updatedToVersion;
@@ -106,7 +106,7 @@ public class Updater {
 		if (currentVersion == null) {
 			return "unknown version";
 		}
-		return currentVersion.getMajorVersion() + "." + currentVersion.getMinorVersion() + "." + currentVersion.getIncrementalVersion();
+		return currentVersion.toString();
 	}
 
 	public Updater() {
@@ -181,13 +181,13 @@ public class Updater {
 	 * @param props the set of properties
 	 * @return the version, or null if not found
 	 */
-	private DefaultArtifactVersion getVersion(Properties props) {
-		String version = props.getProperty("version");
-		if (version == null || version.equals("${pom.version}")) {
-			status = Status.INTERNAL_ERROR;
-			return null;
-		} else
-			return new DefaultArtifactVersion(version);
+	private SimpleVersion getVersion(Properties props) {
+		final String version = props.getProperty("version");
+		if (version != null && !version.equals("${pom.version}")) {
+			return SimpleVersion.parse(version);
+		}
+		this.status = Status.INTERNAL_ERROR;
+		return null;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class Updater {
 	 * @throws IOException if an I/O exception occurs
 	 */
 	public void checkForUpdates() throws IOException {
-		if (status != Status.INITIAL || config.USE_XDG)
+		if (status != Status.INITIAL)
 			return;
 
 		status = Status.CHECKING;
