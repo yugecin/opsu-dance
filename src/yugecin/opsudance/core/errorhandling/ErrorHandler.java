@@ -24,6 +24,11 @@ import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
 import java.awt.Desktop;
+import java.awt.Dialog.ModalityType;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -94,31 +99,15 @@ public class ErrorHandler {
 		}
 		JLabel message = new JLabel(messageText);
 
-		JTextArea textArea = new JTextArea(15, 100);
-		textArea.setEditable(false);
-		textArea.setBackground(UIManager.getColor("Panel.background"));
-		textArea.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		textArea.setTabSize(2);
-		textArea.setLineWrap(false);
-		textArea.setWrapStyleWord(true);
-		textArea.setFont(message.getFont());
-		textArea.setText(messageBody);
-
 		ActionListener reportAction = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				try {
-					URI url = createGithubIssueUrl(customMessage, cause, errorDump);
-					Desktop.getDesktop().browse(url);
-				} catch (IOException e) {
-					Log.warn("Could not open browser to report issue", e);
-					JOptionPane.showMessageDialog(null, "whoops could not launch a browser",
-						"errorception", JOptionPane.ERROR_MESSAGE);
-				}
+				Window parent = SwingUtilities.getWindowAncestor(message);
+				showCreateIssueDialog(parent, errorDump, customMessage, cause);
 			}
 		};
 
-		Object[] messageComponents = new Object[] { message, new JScrollPane(textArea), createViewLogButton(),
+		Object[] messageComponents = new Object[] { message, readonlyTextarea(messageBody), createViewLogButton(),
 			createReportButton(flags, reportAction) };
 
 		String[] buttons;
@@ -182,8 +171,71 @@ public class ErrorHandler {
 		button.setEnabled(false);
 		return button;
 	}
+	
+	private static void showCreateIssueDialog(
+		Window parent,
+		String errorDump,
+		String customMessage,
+		Throwable cause)
+	{
+		final String dump = createIssueDump(customMessage, cause, errorDump);
 
-	private static URI createGithubIssueUrl(String customMessage, Throwable cause, String errorDump) {
+		final String title = "report error";
+		JDialog d = new JDialog(parent, title, ModalityType.APPLICATION_MODAL);
+		d.setLayout(new GridBagLayout());
+		final GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 1;
+		c.weightx = 1d;
+		c.weighty = 0d;
+		c.fill = GridBagConstraints.BOTH;
+		c.insets = new Insets(4, 8, 4, 8);
+		
+		d.add(new JLabel(
+			"<html>Copy the text in the box below.<br/>"
+			+ "Then click the button below.<br/>"
+			+ "Your browser should open a page where you can report the issue.<br/>"
+			+ "Please paste the dump below in the issue box."
+		), c);
+
+		c.gridy++;
+		c.weighty = 1d;
+		d.add(readonlyTextarea(dump), c);
+		c.gridy++;
+		c.weighty = c.weightx = 0d;
+		c.fill = GridBagConstraints.NONE;
+		JButton btn = new JButton("Report");
+		btn.addActionListener(e -> {
+			try {
+				URI url = createGithubIssueUrl(customMessage, cause);
+				Desktop.getDesktop().browse(url);
+				d.dispose();
+			} catch (IOException t) {
+				Log.warn("Could not open browser to report issue", t);
+				JOptionPane.showMessageDialog(null, "whoops could not launch a browser",
+					"errorception", JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		d.add(btn, c);
+		d.pack();
+		d.setLocationRelativeTo(parent);
+		d.setVisible(true);
+	}
+
+	private static URI createGithubIssueUrl(String customMessage, Throwable cause) {
+		String issueTitle = "";
+		String issueBody = "";
+		try {
+			issueTitle = URLEncoder.encode("*** Unhandled " + cause.getClass().getSimpleName() + ": " +
+				customMessage, "UTF-8");
+			issueBody = URLEncoder.encode("PASTE THE DUMP HERE", "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
+		}
+		return URI.create(String.format(Constants.ISSUES_URL, issueTitle, issueBody));
+	}
+	
+	private static String createIssueDump(String customMessage, Throwable cause, String errorDump) {
 		StringWriter dump = new StringWriter();
 
 		dump.append(customMessage).append("\n");
@@ -204,25 +256,19 @@ public class ErrorHandler {
 
 		dump.append("**info dump**").append('\n');
 		dump.append("```\n").append(errorDump).append("\n```\n\n");
-
-		String issueTitle = "";
-		String issueBody = "";
-		try {
-			issueTitle = URLEncoder.encode("*** Unhandled " + cause.getClass().getSimpleName() + " " +
-				customMessage, "UTF-8");
-			issueBody = URLEncoder.encode(truncateGithubIssueBody(dump.toString()), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			Log.warn("URLEncoder failed to encode the auto-filled issue report URL.", e);
-		}
-		return URI.create(String.format(Constants.ISSUES_URL, issueTitle, issueBody));
+		return dump.toString();
 	}
 
-	private static String truncateGithubIssueBody(String body) {
-		if (body.replaceAll("[^a-zA-Z+-]", "").length() < 1750) {
-			return body;
-		}
-		Log.warn("error dump too long to fit into github issue url, truncating");
-		return body.substring(0, 1640) + "** TRUNCATED **\n```";
+	private static JComponent readonlyTextarea(String contents) {
+		JTextArea textArea = new JTextArea(15, 100);
+		textArea.setEditable(false);
+		textArea.setBackground(UIManager.getColor("Panel.background"));
+		textArea.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+		textArea.setTabSize(2);
+		textArea.setLineWrap(false);
+		textArea.setWrapStyleWord(true);
+		textArea.setFont(new JLabel().getFont());
+		textArea.setText(contents);
+		return new JScrollPane(textArea);
 	}
-
 }
