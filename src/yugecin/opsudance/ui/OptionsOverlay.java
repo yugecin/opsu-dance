@@ -150,6 +150,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 	private int mousePressY;
 	
+	private boolean isDraggingFromOutside;
 	private boolean wasPressed;
 
 	private boolean keyEntryLeft;
@@ -830,7 +831,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	}
 
 	public boolean mousePressed(int button, int x, int y) {
-		if (!this.active || x > this.currentWidth) {
+		if (!this.active) {
+			return false;
+		}
+		if (x > this.currentWidth) {
+			this.isDraggingFromOutside = true;
 			return false;
 		}
 		
@@ -862,6 +867,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	}
 
 	public boolean mouseReleased(int button, int x, int y) {
+		this.isDraggingFromOutside = false;
 		if (!this.active || (!wasPressed && x > this.currentWidth)) {
 			return false;
 		}
@@ -954,7 +960,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	}
 
 	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (!this.active) {
+		if (!this.active || this.isDraggingFromOutside) {
 			return false;
 		}
 
