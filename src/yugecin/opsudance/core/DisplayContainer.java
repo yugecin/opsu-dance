@@ -164,7 +164,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	}
 
 	public void init(OpsuState startingState) {
-		setUPS(OPTION_TARGET_UPS.val);
+		setUPS(targetUPS[OPTION_TARGET_UPS.val]);
 		setFPS(targetFPS[targetFPSIndex]);
 
 		state = startingState;
