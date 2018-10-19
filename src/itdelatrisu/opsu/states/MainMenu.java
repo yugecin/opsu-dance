@@ -287,7 +287,9 @@ public class MainMenu extends BaseOpsuState {
 		Colors.BLACK_ALPHA.a = oldAlpha;
 
 		// draw star fountain
-		starFountain.draw();
+		if (OPTION_STARFOUNTAINS.state) {
+			starFountain.draw();
+		}
 
 		// draw downloads button
 		downloadsButton.draw();
@@ -521,7 +523,9 @@ public class MainMenu extends BaseOpsuState {
 		for (MenuButton b : this.musicButtons) {
 			b.hoverUpdate(delta, b.contains(mouseX, mouseY));
 		}
-		starFountain.update(delta);
+		if (OPTION_STARFOUNTAINS.state) {
+			starFountain.update(delta);
+		}
 
 		// window focus change: increase/decrease theme song volume
 		if (MusicController.isThemePlaying() &&
@@ -536,7 +540,7 @@ public class MainMenu extends BaseOpsuState {
 		// check measure progress
 		Float measureProgress = MusicController.getMeasureProgress(2);
 		if (measureProgress != null) {
-			if (measureProgress < lastMeasureProgress)
+			if (OPTION_STARFOUNTAINS.state && measureProgress < lastMeasureProgress)
 				starFountain.burst(true);
 			lastMeasureProgress = measureProgress;
 		}

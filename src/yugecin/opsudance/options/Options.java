@@ -127,6 +127,8 @@ public class Options {
 
 	public static final ToggleOption OPTION_NOSINGLEINSTANCE = new ToggleOption("-", "NoSingleInstance", "-", false);
 
+	public static final ToggleOption OPTION_STARFOUNTAINS = new ToggleOption("Star fountains in main menu", "StarFountains", "Show star bursts in main menu", true);
+
 	// in-game options
 	public static final ListOption OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
 		private final String[] resolutions = {

@@ -42,6 +42,7 @@ public class OptionGroups {
 			OPTION_TARGET_FPS,
 			OPTION_SHOW_FPS,
 			OPTION_USE_FPS_DELTAS,
+			OPTION_STARFOUNTAINS,
 			OPTION_SCREENSHOT_FORMAT,
 		}),
 		new OptionTab("SLIDER OPTIONS", new Option[]{
