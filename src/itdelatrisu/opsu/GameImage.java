@@ -232,6 +232,8 @@ public enum GameImage {
 	MOD_AUTOPILOT ("selection-mod-relax2", "png", false, false),
 
 	// Selection Buttons
+	SELECTION_MODE ("selection-mode", "png", false, false),
+	SELECTION_MODE_OVERLAY ("selection-mode-over", "png", false, false),
 	SELECTION_MODS ("selection-mods", "png", false, false),
 	SELECTION_MODS_OVERLAY ("selection-mods-over", "png", false, false),
 	SELECTION_RANDOM ("selection-random", "png", false, false),

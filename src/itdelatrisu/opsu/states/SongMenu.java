@@ -48,6 +48,7 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import java.awt.Point;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -67,6 +68,7 @@ import org.newdawn.slick.gui.TextField;
 import yugecin.opsudance.core.InstanceContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -98,7 +100,7 @@ public class SongMenu extends ComplexOpsuState {
 	private static final int SEARCH_TRANSITION_TIME = 250;
 
 	/** Line width of the header/footer divider. */
-	private static final int DIVIDER_LINE_WIDTH = 4;
+	private static final int DIVIDER_LINE_WIDTH = 3;
 
 	/** Song node class representing an BeatmapSetNode and file index. */
 	private static class SongNode {
@@ -160,7 +162,7 @@ public class SongMenu extends ComplexOpsuState {
 	private BeatmapSetNode hoverIndex = null;
 
 	/** The selection buttons. */
-	private MenuButton selectModsButton, selectRandomButton, selectMapOptionsButton;
+	private MenuButton selectModeButton, selectModsButton, selectRandomButton, selectMapOptionsButton;
 
 	/** The search textfield. */
 	private TextField searchTextField;
@@ -320,14 +322,15 @@ public class SongMenu extends ComplexOpsuState {
 
 		components.clear();
 
+		final float footerHeight = height * 0.116666666666f;
+
 		// header/footer coordinates
 		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getHeight() +
 				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				Fonts.SMALL.getLineHeight();
-		footerY = height - GameImage.SELECTION_MODS.getHeight();
+		footerY = height - footerHeight;
 
 		// footer logo coordinates
-		float footerHeight = height - footerY;
 		footerLogoSize = footerHeight * 3.25f;
 		Image logo = GameImage.MENU_LOGO.getImage();
 		logo = logo.getScaledCopy(footerLogoSize / logo.getWidth());
@@ -400,24 +403,17 @@ public class SongMenu extends ComplexOpsuState {
 		components.add(searchTextField);
 
 		// selection buttons
-		Image selectionMods = GameImage.SELECTION_MODS.getImage();
-		int selectButtonsWidth = selectionMods.getWidth();
-		int selectButtonsHeight = selectionMods.getHeight();
-		if (selectButtonsHeight < 20) {
-			selectButtonsHeight = 100;
-		}
-		if (selectButtonsWidth < 20) {
-			selectButtonsWidth = 100;
-		}
-		float selectX = width * 0.183f + selectButtonsWidth / 2f;
-		float selectY = height - selectButtonsHeight / 2f;
-		float selectOffset = selectButtonsWidth * 1.05f;
-		selectModsButton = new MenuButton(GameImage.SELECTION_MODS_OVERLAY.getImage(),
-				selectX, selectY);
-		selectRandomButton = new MenuButton(GameImage.SELECTION_RANDOM_OVERLAY.getImage(),
-				selectX + selectOffset, selectY);
-		selectMapOptionsButton = new MenuButton(GameImage.SELECTION_OPTIONS_OVERLAY.getImage(),
-				selectX + selectOffset * 2f, selectY);
+		// TODO: the origin should be bottomleft or something
+		float selectX = width * (displayContainer.isWidescreen() ? 0.164f : 0.1875f);
+		final float footerButtonWidth = footerHeight * 0.84f;
+		selectModeButton = new MenuButton(SELECTION_MODE_OVERLAY, selectX, footerY);
+		selectX += footerHeight + 2;
+		selectModsButton = new MenuButton(SELECTION_MODS_OVERLAY, selectX, footerY);
+		selectX += footerButtonWidth;
+		selectRandomButton = new MenuButton(SELECTION_RANDOM_OVERLAY, selectX, footerY);
+		selectX += footerButtonWidth;
+		selectMapOptionsButton = new MenuButton(SELECTION_OPTIONS_OVERLAY, selectX, footerY);
+		selectModeButton.setHoverFade(0f);
 		selectModsButton.setHoverFade(0f);
 		selectRandomButton.setHoverFade(0f);
 		selectMapOptionsButton.setHoverFade(0f);
@@ -528,14 +524,12 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// top/bottom bars
-		g.setColor(Colors.BLACK_ALPHA);
+		g.setColor(Color.black);
 		g.fillRect(0, 0, width, headerY);
 		g.fillRect(0, footerY, width, height - footerY);
 		g.setColor(Colors.BLUE_DIVIDER);
-		g.setLineWidth(DIVIDER_LINE_WIDTH);
-		g.drawLine(0, headerY, width, headerY);
-		g.drawLine(0, footerY, width, footerY);
-		g.resetLineWidth();
+		g.fillRect(0, headerY, width, DIVIDER_LINE_WIDTH);
+		g.fillRect(0, footerY, width, DIVIDER_LINE_WIDTH);
 
 		// footer logo (pulsing)
 		Float position = MusicController.getBeatProgress();
@@ -620,11 +614,18 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// selection buttons
-		GameImage.SELECTION_MODS.getImage().drawCentered(selectModsButton.getX(), selectModsButton.getY());
+		Point c;
+		c = selectModeButton.bottomLeft();
+		SELECTION_MODE.getImage().draw(c.x, c.y - SELECTION_MODE.getHeight());
+		selectModeButton.draw();
+		c = selectModsButton.bottomLeft();
+		SELECTION_MODS.getImage().draw(c.x, c.y - SELECTION_MODS.getHeight());
 		selectModsButton.draw();
-		GameImage.SELECTION_RANDOM.getImage().drawCentered(selectRandomButton.getX(), selectRandomButton.getY());
+		c = selectRandomButton.bottomLeft();
+		SELECTION_RANDOM.getImage().draw(c.x, c.y - SELECTION_RANDOM.getHeight());
 		selectRandomButton.draw();
-		GameImage.SELECTION_OPTIONS.getImage().drawCentered(selectMapOptionsButton.getX(), selectMapOptionsButton.getY());
+		c = selectMapOptionsButton.bottomLeft();
+		SELECTION_OPTIONS.getImage().draw(c.x, c.y - SELECTION_OPTIONS.getHeight());
 		selectMapOptionsButton.draw();
 
 		// group tabs
@@ -725,6 +726,7 @@ public class SongMenu extends ComplexOpsuState {
 			reloadThread = null;
 		}
 		backButton.hoverUpdate();
+		selectModeButton.hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
 		selectMapOptionsButton.hoverUpdate(delta, mouseX, mouseY);
@@ -912,7 +914,10 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// selection buttons
-		if (selectModsButton.contains(x, y)) {
+		if (selectModeButton.contains(x, y)) {
+			barNotifs.send("There are no other modes available.");
+			return true;
+		} else if (selectModsButton.contains(x, y)) {
 			this.keyPressed(KEY_F1, '\0');
 			return true;
 		} else if (selectRandomButton.contains(x, y)) {
@@ -1262,6 +1267,7 @@ public class SongMenu extends ComplexOpsuState {
 		super.enter();
 
 		UI.enter();
+		selectModeButton.resetHover();
 		selectModsButton.resetHover();
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();

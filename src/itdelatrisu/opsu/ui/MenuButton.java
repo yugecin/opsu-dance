@@ -18,9 +18,12 @@
 
 package itdelatrisu.opsu.ui;
 
+import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+
+import java.awt.Point;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -112,6 +115,14 @@ public class MenuButton {
 		this.yRadius = img.getHeight() / 2f;
 	}
 
+	public MenuButton(GameImage img, float topleftX, float topleftY) {
+		this.img = img.getImage();
+		this.xRadius = img.getWidth() / 2f;
+		this.yRadius = img.getHeight() / 2f;
+		this.x = topleftX + this.xRadius;
+		this.y = topleftY + this.yRadius;
+	}
+
 	/**
 	 * Creates a new button from a 3-part Image.
 	 * @param imgCenter the center image
@@ -165,6 +176,10 @@ public class MenuButton {
 	 * Returns the center y coordinate.
 	 */
 	public float getY() { return y; }
+	
+	public Point bottomLeft() {
+		return new Point((int) (x - xRadius), (int) (y + yRadius));
+	}
 
 	/**
 	 * Returns the scale multiplier, from the hover effect, used to draw the button.
