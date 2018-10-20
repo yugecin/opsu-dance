@@ -218,7 +218,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	public void revalidate() {
 		this.dirty = false;
 
-		boolean isWidescreen = displayContainer.isWidescreen();
 		targetWidth = (int) (width * (isWidescreen ? 0.4f : 0.5f));
 
 		// calculate positions

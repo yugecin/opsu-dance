@@ -404,7 +404,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// selection buttons
 		// TODO: the origin should be bottomleft or something
-		float selectX = width * (displayContainer.isWidescreen() ? 0.164f : 0.1875f);
+		float selectX = width * (isWidescreen ? 0.164f : 0.1875f);
 		final float footerButtonWidth = footerHeight * 0.84f;
 		selectModeButton = new MenuButton(SELECTION_MODE_OVERLAY, selectX, footerY);
 		selectX += footerHeight + 2;

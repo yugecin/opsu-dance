@@ -401,6 +401,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		height = displayMode.getHeight();
 		width2 = width / 2;
 		height2 = height / 2;
+		isWidescreen =  width * 1000 / height > 1500; // 1777 = 16:9, 1333 = 4:3
 
 		Display.setDisplayMode(displayMode);
 		Display.setFullscreen(fullscreen);
@@ -458,10 +459,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	public long getTime() {
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
-	}
-
-	public boolean isWidescreen() {
-		return width * 1000 / height > 1500; // 1777 = 16:9, 1333 = 4:3
 	}
 
 	@Override
