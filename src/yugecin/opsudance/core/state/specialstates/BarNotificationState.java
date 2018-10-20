@@ -31,7 +31,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 public class BarNotificationState implements ResolutionChangedListener {
 
 	private final int IN_TIME = 200;
-	private final int DISPLAY_TIME = 5700 + IN_TIME;
+	private final int DISPLAY_TIME = 2700 + IN_TIME;
 	private final int OUT_TIME = 200;
 	private final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
