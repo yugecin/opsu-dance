@@ -1485,7 +1485,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/xi/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/furioso/");
 		if (!replaydir.exists()) {
 			bubNotifs.sendf(Colors.BUB_RED, "replay folder '%s' does not exist", replaydir.getAbsolutePath());
 			displayContainer.switchStateInstantly(songMenuState);
@@ -1505,7 +1505,7 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 		replays = new LinkedList<>();
-		float hueshift = 360f / files.length + 18f;
+		float hueshift = 360f / files.length + 6;
 		float hue = 0;
 		for (File file : files) {
 			final String datafilename = file.getName().substring(0, file.getName().length() - 3) + "ope";
@@ -1532,7 +1532,7 @@ public class Game extends ComplexOpsuState {
 			}
 		});
 
-		hue = 0;
+		hue = 180;
 		for (ReplayPlayback r : replays) {
 			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, .7f, 1.0f).getRGB());
 			r.color = c;
