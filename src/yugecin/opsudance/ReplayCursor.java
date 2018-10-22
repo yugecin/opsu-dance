@@ -31,6 +31,7 @@ import itdelatrisu.opsu.render.Rendertarget;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.options.Options.*;
 
 public class ReplayCursor
 {
@@ -93,8 +94,8 @@ public class ReplayCursor
 		GL11.glEnd();
 		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-		CURSOR.getImage().drawCentered(lastPosition.x, lastPosition.y, filter);
-		CURSOR_MIDDLE.getImage().drawCentered(lastPosition.x, lastPosition.y, filter);
+		CURSOR.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
+		CURSOR_MIDDLE.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
 	}
 
 	private void renderstuff()
@@ -110,8 +111,8 @@ public class ReplayCursor
 
 		float alpha = 0f;
 		float alphaIncrease = .5f / trail.size;
-		float trailwidth2 = img.getWidth() / 2f;
-		float trailheight2 = img.getHeight() / 2f;
+		float trailwidth2 = img.getWidth() * OPTION_CURSOR_SIZE.val / 100f / 2f;
+		float trailheight2 = img.getHeight() * OPTION_CURSOR_SIZE.val / 100f / 2f;
 		float txtwidth = txt.getWidth();
 		float txtheight = txt.getHeight();
 		GL11.glBegin(GL11.GL_QUADS);
