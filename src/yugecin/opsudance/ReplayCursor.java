@@ -66,43 +66,6 @@ public class ReplayCursor
 		// render
 		GL11.glClearColor(0f, 0f, 0f, 0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		//GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		// render2
-
-		renderstuff();
-
-		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, oldTex);
-		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
-		GL11.glViewport(oldViewport.get(0), oldViewport.get(1), oldViewport.get(2), oldViewport.get(3));
-
-		//GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_TEXTURE_1D);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, fbo.getTextureID());
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glColor4f(1f, 1f, 1f, 1f);
-		GL11.glTexCoord2f(1f, 1f);
-		GL11.glVertex2i(fbo.width, 0);
-		GL11.glTexCoord2f(0f, 1f);
-		GL11.glVertex2i(0, 0);
-		GL11.glTexCoord2f(0f, 0f);
-		GL11.glVertex2i(0, fbo.height);
-		GL11.glTexCoord2f(1f, 0f);
-		GL11.glVertex2i(fbo.width, fbo.height);
-		GL11.glEnd();
-		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-		CURSOR.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
-		CURSOR_MIDDLE.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
-	}
-
-	private void renderstuff()
-	{
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, fbo.getVbo());
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_TEXTURE_1D);
 
 		final Image img = CURSOR_TRAIL.getImage();
 		final Texture txt = img.getTexture();
@@ -132,6 +95,30 @@ public class ReplayCursor
 			lastpoint.y = p.y;
 		}
 		GL11.glEnd();
+
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, oldTex);
+		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
+		GL11.glViewport(oldViewport.get(0), oldViewport.get(1), oldViewport.get(2), oldViewport.get(3));
+
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_TEXTURE_1D);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, fbo.getTextureID());
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glColor4f(1f, 1f, 1f, 1f);
+		GL11.glTexCoord2f(1f, 1f);
+		GL11.glVertex2i(fbo.width, 0);
+		GL11.glTexCoord2f(0f, 1f);
+		GL11.glVertex2i(0, 0);
+		GL11.glTexCoord2f(0f, 0f);
+		GL11.glVertex2i(0, fbo.height);
+		GL11.glTexCoord2f(1f, 0f);
+		GL11.glVertex2i(fbo.width, fbo.height);
+		GL11.glEnd();
+		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		CURSOR.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
+		CURSOR_MIDDLE.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
 	}
 
 	/**
