@@ -733,12 +733,12 @@ public class Game extends ComplexOpsuState {
 		for (ReplayPlayback replayPlayback : replays) {
 			totalHeight += replayPlayback.getHeight();
 		}
-		float ypos = (displayContainer.height - totalHeight) / 2 - ReplayPlayback.UNITHEIGHT;
+		float ypos = (height - totalHeight) / 2 - ReplayPlayback.UNITHEIGHT;
 		for (ReplayPlayback replayPlayback : replays) {
 			float h = replayPlayback.getHeight();
 			ypos += h;
 			//if (h > 0f) {
-				replayPlayback.render(displayContainer.renderDelta, g, ypos, trackPosition);
+				replayPlayback.render(renderDelta, g, ypos, trackPosition);
 			//}
 		}
 	}
@@ -1486,11 +1486,9 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/furioso/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/xi/");
 		if (!replaydir.exists()) {
-			BubNotifListener.EVENT.make().onBubNotif(String.format(
-				"replay folder '%s' does not exist", replaydir.getAbsolutePath()
-			), Colors.BUB_RED);
+			bubNotifs.sendf(Colors.BUB_RED, "replay folder '%s' does not exist", replaydir.getAbsolutePath());
 			displayContainer.switchStateInstantly(songMenuState);
 			return;
 		}
@@ -1515,12 +1513,12 @@ public class Game extends ComplexOpsuState {
 			try {
 				r.load();
 			} catch (IOException e) {
-				BubNotifListener.EVENT.make().onBubNotif("could not load replay " + file.getName(), Colors.BUB_RED);
+				bubNotifs.sendf(Colors.BUB_RED, "could not load replay %s", file.getName());
 				continue;
 			}
 			Color color = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
 			final ReplayPlayback.HitData hitdata = new ReplayPlayback.HitData(hitdatafile);
-			replays.add(new ReplayPlayback(displayContainer, r, hitdata, color));
+			replays.add(new ReplayPlayback(r, hitdata, color));
 			hue += hueshift;
 		}
 
@@ -1826,10 +1824,6 @@ public class Game extends ComplexOpsuState {
 			GameMod.loadModState(previousMods);
 	}
 
-	/**
-	 * Adjusts the beatmap's local music offset.
-	 * @param sign the sign (multiplier)
-	 */
 	public void adjustLocalMusicOffset(int amount) {
 		int newOffset = beatmap.localMusicOffset + amount;
 		barNotifs.send(String.format("Local beatmap offset set to %dms", newOffset));

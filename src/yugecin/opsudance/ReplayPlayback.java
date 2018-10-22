@@ -26,7 +26,6 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.Entrypoint;
 
 import java.io.*;
@@ -36,12 +35,12 @@ import java.util.LinkedList;
 import static itdelatrisu.opsu.GameData.*;
 import static itdelatrisu.opsu.Utils.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class ReplayPlayback {
 
 	private static final boolean HIDEMOUSEBTNS = true;
 
-	private final DisplayContainer container;
 	private final HitData hitdata;
 	public final Replay replay;
 	public ReplayFrame currentFrame;
@@ -73,8 +72,7 @@ public class ReplayPlayback {
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
-	public ReplayPlayback(DisplayContainer container, Replay replay, HitData hitdata, Color color) {
-		this.container = container;
+	public ReplayPlayback(Replay replay, HitData hitdata, Color color) {
 		this.replay = replay;
 		this.hitdata = hitdata;
 		resetFrameIndex();
@@ -259,7 +257,7 @@ public class ReplayPlayback {
 					failposx = currentFrame.getScaledX();
 					failposy = currentFrame.getScaledY();
 					if (hr) {
-						failposy = container.height - failposy;
+						failposy = height - failposy;
 					}
 				}
 				missed = true;
@@ -298,7 +296,7 @@ public class ReplayPlayback {
 		}
 		int y = currentFrame.getScaledY();
 		if (hr) {
-			y = container.height - y;
+			y = height - y;
 		}
 		cursor.setCursorPosition(renderdelta, currentFrame.getScaledX(), y);
 		cursor.draw(false);
