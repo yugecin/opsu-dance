@@ -1520,9 +1520,8 @@ public class Game extends ComplexOpsuState {
 				bubNotifs.sendf(Colors.BUB_RED, "could not load replay %s", file.getName());
 				continue;
 			}
-			Color color = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
 			final ReplayPlayback.HitData hitdata = new ReplayPlayback.HitData(hitdatafile);
-			replays.add(new ReplayPlayback(r, hitdata, color));
+			replays.add(new ReplayPlayback(r, hitdata, new Color(Color.white)));
 			hue += hueshift;
 		}
 
@@ -1535,7 +1534,7 @@ public class Game extends ComplexOpsuState {
 
 		hue = 0;
 		for (ReplayPlayback r : replays) {
-			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
+			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, .7f, 1.0f).getRGB());
 			r.color = c;
 			r.cursor.filter = c;
 			hue += hueshift;
