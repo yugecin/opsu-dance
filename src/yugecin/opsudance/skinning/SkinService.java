@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,21 +26,39 @@ import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.events.SkinChangedListener;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
  */
-public class SkinService {
+public class SkinService
+{
+	private final List<SkinChangedListener> skinChangedListeners;
 
 	public String[] availableSkinDirectories;
 	public String usedSkinName = "Default";
 	public static Skin skin;
+	
+	public SkinService()
+	{
+		this.skinChangedListeners = new ArrayList<>();
+	}
+	
+	public void addSkinChangedListener(SkinChangedListener l)
+	{
+		this.skinChangedListeners.add(l);
+	}
 
-	public void reloadSkin() {
+	public void reloadSkin()
+	{
 		loadSkin();
 		SoundController.init();
-		SkinChangedListener.EVENT.make().onSkinChanged(usedSkinName);
+		for (SkinChangedListener l : this.skinChangedListeners) {
+			l.onSkinChanged(this.usedSkinName);
+		}
 	}
 
 	/**

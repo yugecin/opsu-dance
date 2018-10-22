@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,17 @@ import itdelatrisu.opsu.states.*;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
+
+import yugecin.opsudance.core.state.specialstates.BarNotificationState;
+import yugecin.opsudance.core.state.specialstates.BubNotifState;
+import yugecin.opsudance.core.state.specialstates.FpsRenderState;
 import yugecin.opsudance.options.Configuration;
+import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
-import yugecin.opsudance.utils.ManifestWrapper;
+import yugecin.opsudance.ui.BackButton;
+import yugecin.opsudance.ui.OptionsOverlay;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,10 +57,17 @@ public class InstanceContainer {
 	public static BeatmapParser beatmapParser;
 	public static Updater updater;
 
+	public static BackButton backButton;
 	public static DisplayContainer displayContainer;
 	public static Input input;
 
 	public static GameObjectRenderer gameObjectRenderer;
+	
+	public static BarNotificationState barNotifs;
+	public static BubNotifState bubNotifs;
+	public static FpsRenderState fpsDisplay;
+	
+	public static OptionsOverlay optionsOverlay;
 
 	public static Splash splashState;
 	public static MainMenu mainmenuState;
@@ -64,17 +77,21 @@ public class InstanceContainer {
 	public static Game gameState;
 	public static GameRanking gameRankingState;
 	public static GamePauseMenu pauseState;
+	
+	public static int width, width2, height, height2;
+	public static boolean isWidescreen;
+	public static int mouseX, mouseY;
+	public static int renderDelta;
 
 	public static void kickstart() {
 		updater = new Updater();
 		env = new Environment();
 
 		JarFile jarfile = getJarfile();
-		ManifestWrapper manifest = new ManifestWrapper(getJarManifest(jarfile));
-		config = new Configuration(manifest);
+		config = new Configuration();
 		if (jarfile != null) {
 			try {
-				NativeLoader.loadNatives(jarfile, manifest);
+				NativeLoader.loadNatives(jarfile);
 			} catch (IOException e) {
 				String msg = String.format("Could not unpack native(s): %s", e.getMessage());
 				throw new RuntimeException(msg, e);
@@ -94,8 +111,14 @@ public class InstanceContainer {
 		updater = new Updater();
 
 		displayContainer = new DisplayContainer();
+		
+		barNotifs = new BarNotificationState();
+		bubNotifs = new BubNotifState();
+		fpsDisplay = new FpsRenderState();
 
 		gameObjectRenderer = new GameObjectRenderer();
+
+		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 
 		splashState = new Splash();
 		mainmenuState = new MainMenu();

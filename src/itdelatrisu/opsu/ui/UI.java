@@ -22,26 +22,20 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
-import itdelatrisu.opsu.beatmap.OszUnpacker;
-import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.ui.BackButton;
 
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * Draws common UI components.
  */
 public class UI {
-
-	/** Back button. */
-	private static BackButton backButton;
 
 	/** Time to show volume image, in milliseconds. */
 	private static final int VOLUME_DISPLAY_TIME = 1500;
@@ -58,19 +52,8 @@ public class UI {
 	/** The alpha level of the current tooltip (if any). */
 	private static AnimatedValue tooltipAlpha = new AnimatedValue(200, 0f, 1f, AnimationEquation.LINEAR);
 
-	// game-related variables
-	private static DisplayContainer displayContainer;
-
 	// This class should not be instantiated.
 	private UI() {}
-
-	/**
-	 * Initializes UI data.
-	 */
-	public static void init(DisplayContainer displayContainer) {
-		UI.displayContainer = displayContainer;
-		backButton = new BackButton(displayContainer);
-	}
 
 	/**
 	 * Updates all UI components by a delta interval.
@@ -93,14 +76,8 @@ public class UI {
 	 * Resets the necessary UI components upon entering a state.
 	 */
 	public static void enter() {
-		backButton.resetHover();
 		resetTooltip();
 	}
-
-	/**
-	 * Returns the 'menu-back' MenuButton.
-	 */
-	public static BackButton getBackButton() { return backButton; }
 
 	/**
 	 * Draws a tab image and text centered at a location.
@@ -145,13 +122,13 @@ public class UI {
 		else if (ratio >= 0.9f)
 			xOffset = img.getWidth() * (1 - ((1 - ratio) * 10f));
 
-		img.drawCentered(displayContainer.width - img.getWidth() / 2f + xOffset, displayContainer.height / 2f);
+		img.drawCentered(width - img.getWidth() / 2f + xOffset, height2);
 		float barHeight = img.getHeight() * 0.9f;
 		float volume = OPTION_MASTER_VOLUME.val / 100f;
 		g.setColor(Color.white);
 		g.fillRoundRect(
-				displayContainer.width - (img.getWidth() * 0.368f) + xOffset,
-				(displayContainer.height / 2f) - (img.getHeight() * 0.47f) + (barHeight * (1 - volume)),
+				width - (img.getWidth() * 0.368f) + xOffset,
+				height2 - (img.getHeight() * 0.47f) + (barHeight * (1 - volume)),
 				img.getWidth() * 0.15f, barHeight * volume, 3
 		);
 	}
@@ -193,33 +170,25 @@ public class UI {
 		int progress;
 
 		// determine current action
-		//
-		/*
-		TODO
-		if ((file = OszUnpacker.getCurrentFileName()) != null) {
+		if ((file = oszunpacker.getCurrentFileName()) != null) {
 			text = "Unpacking new beatmaps...";
-			progress = OszUnpacker.getUnpackerProgress();
-		} else if ((file = BeatmapParser.getCurrentFileName()) != null) {
-			text = (BeatmapParser.getStatus() == BeatmapParser.Status.INSERTING) ?
+			progress = oszunpacker.getUnpackerProgress();
+		} else if ((file = beatmapParser.getCurrentFileName()) != null) {
+			text = (beatmapParser.getStatus() == BeatmapParser.Status.INSERTING) ?
 					"Updating database..." : "Loading beatmaps...";
-			progress = BeatmapParser.getParserProgress();
-		} else if ((file = ReplayImporter.getCurrentFileName()) != null) {
+			progress = beatmapParser.getParserProgress();
+		} else if ((file = replayImporter.getCurrentFileName()) != null) {
 			text = "Importing replays...";
-			progress = ReplayImporter.getLoadingProgress();
+			progress = replayImporter.getLoadingProgress();
 		} else if ((file = SoundController.getCurrentFileName()) != null) {
 			text = "Loading sounds...";
 			progress = SoundController.getLoadingProgress();
 		} else
 			return;
-		*/
-
-		if (true) {
-			return; // TODO
-		}
 
 		// draw loading info
-		float marginX = displayContainer.width * 0.02f, marginY = displayContainer.height * 0.02f;
-		float lineY = displayContainer.height - marginY;
+		float marginX = width * 0.02f, marginY = height * 0.02f;
+		float lineY = height - marginY;
 		int lineOffsetY = Fonts.MEDIUM.getLineHeight();
 		if (OPTION_LOAD_VERBOSE.state) {
 			// verbose: display percentages and file names
@@ -232,7 +201,7 @@ public class UI {
 			Fonts.MEDIUM.drawString(marginX, lineY - (lineOffsetY * 2), text, Color.white);
 			g.setColor(Color.white);
 			g.fillRoundRect(marginX, lineY - (lineOffsetY / 2f),
-					(displayContainer.width - (marginX * 2f)) * progress / 100f, lineOffsetY / 4f, 4
+					(width - (marginX * 2f)) * progress / 100f, lineOffsetY / 4f, 4
 			);
 		}
 	}
@@ -256,7 +225,7 @@ public class UI {
 			float unitBaseX, float unitBaseY, float unitWidth, float scrollAreaHeight,
 			Color bgColor, Color scrollbarColor, boolean right
 	) {
-		float scrollbarWidth = displayContainer.width * 0.00347f;
+		float scrollbarWidth = width * 0.00347f;
 		float scrollbarHeight = scrollAreaHeight * lengthShown / totalLength;
 		float offsetY = (scrollAreaHeight - scrollbarHeight) * (position / (totalLength - lengthShown));
 		float scrollbarX = unitBaseX + unitWidth - ((right) ? scrollbarWidth : 0);
@@ -292,8 +261,8 @@ public class UI {
 		if (tooltipAlpha.getTime() == 0 || tooltip == null)
 			return;
 
-		int margin = displayContainer.width / 100, textMarginX = 2;
-		int offset = GameImage.CURSOR_MIDDLE.getImage().getWidth() / 2;
+		int margin = width / 100, textMarginX = 2;
+		int offset = GameImage.CURSOR_MIDDLE.getWidth() / 2;
 		int lineHeight = Fonts.SMALL.getLineHeight();
 		int textWidth = textMarginX * 2, textHeight = lineHeight;
 		if (tooltipNewlines) {
@@ -310,14 +279,14 @@ public class UI {
 			textWidth += Fonts.SMALL.getWidth(tooltip);
 
 		// get drawing coordinates
-		int x = displayContainer.mouseX + offset;
-		int y = displayContainer.mouseY + offset;
-		if (x + textWidth > displayContainer.width - margin)
-			x = displayContainer.width - margin - textWidth;
+		int x = mouseX + offset;
+		int y = mouseY + offset;
+		if (x + textWidth > width - margin)
+			x = width - margin - textWidth;
 		else if (x < margin)
 			x = margin;
-		if (y + textHeight > displayContainer.height - margin)
-			y = displayContainer.height - margin - textHeight;
+		if (y + textHeight > height - margin)
+			y = height - margin - textHeight;
 		else if (y < margin)
 			y = margin;
 

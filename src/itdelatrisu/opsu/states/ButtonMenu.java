@@ -181,7 +181,7 @@ public class ButtonMenu extends BaseOpsuState {
 
 			@Override
 			protected float getBaseY() {
-				return displayContainer.height * 2f / 3;
+				return height * 2f / 3;
 			}
 
 			@Override
@@ -203,10 +203,9 @@ public class ButtonMenu extends BaseOpsuState {
 				float mult = GameMod.getScoreMultiplier();
 				String multString = String.format("Score Multiplier: %.2fx", mult);
 				Color multColor = (mult == 1f) ? Color.white : (mult > 1f) ? Color.green : Color.red;
-				float multY = Fonts.LARGE.getLineHeight() * 2 + displayContainer.height * 0.06f;
-				Fonts.LARGE.drawString(
-						(displayContainer.width - Fonts.LARGE.getWidth(multString)) / 2f,
-						multY, multString, multColor);
+				float multY = Fonts.LARGE.getLineHeight() * 2 + height * 0.06f;
+				final float multX = width2 - Fonts.LARGE.getWidth(multString) / 2f;
+				Fonts.LARGE.drawString(multX, multY, multString, multColor);
 
 				// category text
 				for (GameMod.Category category : GameMod.Category.values()) {
@@ -227,14 +226,14 @@ public class ButtonMenu extends BaseOpsuState {
 				super.preRenderUpdate();
 				GameMod hoverMod = null;
 				for (GameMod mod : GameMod.values()) {
-					mod.hoverUpdate(displayContainer.renderDelta, mod.isActive());
-					if (hoverMod == null && mod.contains(displayContainer.mouseX, displayContainer.mouseY))
+					mod.hoverUpdate(renderDelta, mod.isActive());
+					if (hoverMod == null && mod.contains(mouseX, mouseY))
 						hoverMod = mod;
 				}
 
 				// tooltips
 				if (hoverMod != null) {
-					UI.updateTooltip(displayContainer.renderDelta, hoverMod.getDescription(), true);
+					UI.updateTooltip(renderDelta, hoverMod.getDescription(), true);
 				}
 			}
 
@@ -296,13 +295,12 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Initializes the menu state.
 		 */
 		public void revalidate(Image button, Image buttonL, Image buttonR) {
-			float center = displayContainer.width / 2;
 			float baseY = getBaseY();
 			float offsetY = button.getHeight() * 1.25f;
 
 			menuButtons = new MenuButton[buttons.length];
 			for (int i = 0; i < buttons.length; i++) {
-				MenuButton b = new MenuButton(button, buttonL, buttonR, center, baseY + (i * offsetY));
+				MenuButton b = new MenuButton(button, buttonL, buttonR, width2, baseY + (i * offsetY));
 				b.setText(String.format("%d. %s", i + 1, buttons[i].getText()), Fonts.XLARGE, Color.white);
 				b.setHoverFade();
 				menuButtons[i] = b;
@@ -313,7 +311,7 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Returns the base Y coordinate for the buttons.
 		 */
 		protected float getBaseY() {
-			float baseY = displayContainer.height * 0.2f;
+			float baseY = height * 0.2f;
 			baseY += ((getTitle().length - 1) * Fonts.LARGE.getLineHeight());
 			return baseY;
 		}
@@ -325,7 +323,7 @@ public class ButtonMenu extends BaseOpsuState {
 		public void render(Graphics g) {
 			// draw title
 			if (actualTitle != null) {
-				float marginX = displayContainer.width * 0.015f, marginY = displayContainer.height * 0.01f;
+				float marginX = width * 0.015f, marginY = height * 0.01f;
 				int lineHeight = Fonts.LARGE.getLineHeight();
 				for (int i = 0, size = actualTitle.size(); i < size; i++)
 					Fonts.LARGE.drawString(marginX, marginY + (i * lineHeight), actualTitle.get(i), Color.white);
@@ -342,15 +340,16 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Updates the menu state.
 		 */
 		public void preRenderUpdate() {
-			float center = displayContainer.width / 2f;
-			boolean centerOffsetUpdated = centerOffset.update(displayContainer.renderDelta);
+			boolean centerOffsetUpdated = centerOffset.update(renderDelta);
 			float centerOffsetX = centerOffset.getValue();
+			final float[] offsets = { centerOffsetX, - centerOffsetX };
 			for (int i = 0; i < buttons.length; i++) {
-				menuButtons[i].hoverUpdate(displayContainer.renderDelta, displayContainer.mouseX, displayContainer.mouseY);
+				menuButtons[i].hoverUpdate(renderDelta, mouseX, mouseY);
 
 				// move button to center
-				if (centerOffsetUpdated)
-					menuButtons[i].setX((i % 2 == 0) ? center + centerOffsetX : center - centerOffsetX);
+				if (centerOffsetUpdated) {
+					menuButtons[i].setX(width2 + offsets[i & 1]);
+				}
 			}
 		}
 
@@ -394,18 +393,17 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Processes a state enter request.
 		 */
 		public void enter() {
-			float center = displayContainer.width / 2f;
-			float centerOffsetX = displayContainer.width * OFFSET_WIDTH_RATIO;
+			float centerOffsetX = width * OFFSET_WIDTH_RATIO;
 			centerOffset = new AnimatedValue(700, centerOffsetX, 0, AnimationEquation.OUT_BOUNCE);
 			for (int i = 0; i < buttons.length; i++) {
-				menuButtons[i].setX(center + ((i % 2 == 0) ? centerOffsetX : centerOffsetX * -1));
+				menuButtons[i].setX(width2 + ((i % 2 == 0) ? centerOffsetX : centerOffsetX * -1));
 				menuButtons[i].resetHover();
 			}
 
 			// create title string list
 			actualTitle = new ArrayList<>();
 			String[] title = getTitle();
-			int maxLineWidth = (int) (displayContainer.width * 0.96f);
+			int maxLineWidth = (int) (width * 0.96f);
 			for (String aTitle : title) {
 				// wrap text if too long
 				if (Fonts.LARGE.getWidth(aTitle) > maxLineWidth) {
@@ -601,7 +599,7 @@ public class ButtonMenu extends BaseOpsuState {
 
 		// initialize buttons
 		Image button = GameImage.MENU_BUTTON_MID.getImage();
-		button = button.getScaledCopy(displayContainer.width / 2, button.getHeight());
+		button = button.getScaledCopy(width2, button.getHeight());
 		Image buttonL = GameImage.MENU_BUTTON_LEFT.getImage();
 		Image buttonR = GameImage.MENU_BUTTON_RIGHT.getImage();
 		for (MenuState ms : MenuState.values()) {
@@ -624,7 +622,7 @@ public class ButtonMenu extends BaseOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		UI.update(displayContainer.renderDelta);
+		UI.update(renderDelta);
 		MusicController.loopTrackIfEnded(false);
 		menuState.preRenderUpdate();
 	}

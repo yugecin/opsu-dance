@@ -57,6 +57,41 @@ public class AnimatedValue {
 		this.diff = max - min;
 		this.eqn = eqn;
 	}
+	
+	public void change(int duration, float min, float max, AnimationEquation eqn) {
+		float progress = (float) this.time / this.duration;
+		if (this.eqn != eqn) {
+			if (this.time != 0 && this.time != this.duration) {
+				progress = eqn.uncalc(this.eqn.calc(progress));
+			}
+			this.eqn = eqn;
+		}
+		this.duration = duration;
+		this.time = (int) (this.duration * progress);
+		this.base = min;
+		this.diff = max - min;
+		this.updateValue();
+	}
+	
+	/**
+	 * Change the from and to values
+	 * @param min start value
+	 * @param max end value
+	 */
+	public void setValues(float min, float max) {
+		this.base = min;
+		this.value = min;
+		this.diff = max - min;
+		this.updateValue();
+	}
+	
+	/**
+	 * Gets the max (end) value
+	 * @return the max (end) value
+	 */
+	public float getMax() {
+		return this.base + this.diff;
+	}
 
 	/**
 	 * Returns the current value.

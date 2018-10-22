@@ -28,6 +28,7 @@ public class Colors {
 		BLACK_ALPHA     = new Color(0, 0, 0, 0.5f),
 		BLACK_ALPHA_75  = new Color(0, 0, 0, 0.75f),
 		BLACK_ALPHA_85  = new Color(0, 0, 0, 0.85f),
+		WHITE_ALPHA_75  = new Color(1, 1, 1, 0.75f),
 		WHITE_ALPHA     = new Color(255, 255, 255, 0.5f),
 		BLUE_DIVIDER    = new Color(49, 94, 237),
 		BLUE_BACKGROUND = new Color(74, 130, 255),
@@ -53,8 +54,7 @@ public class Colors {
 		BUB_WHITE       = new Color(220, 220, 220),
 		BUB_PURPLE      = new Color(94, 46, 149),
 		BUB_RED         = new Color(141, 49, 16),
-		BUB_ORANGE      = new Color(138, 72, 51),
-		GHOST_LOGO      = new Color(1.0f, 1.0f, 1.0f, 0.25f);
+		BUB_ORANGE      = new Color(138, 72, 51);
 
 	// This class should not be instantiated.
 	private Colors() {}

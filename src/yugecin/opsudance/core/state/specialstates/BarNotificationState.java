@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,17 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.events.ResolutionChangedListener;
 
+import java.util.Formatter;
 import java.util.List;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BarNotificationState implements BarNotifListener, ResolutionChangedListener {
+public class BarNotificationState implements ResolutionChangedListener {
 
 	private final int IN_TIME = 200;
-	private final int DISPLAY_TIME = 5700 + IN_TIME;
+	private final int DISPLAY_TIME = 2700 + IN_TIME;
 	private final int OUT_TIME = 200;
 	private final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
@@ -51,21 +51,19 @@ public class BarNotificationState implements BarNotifListener, ResolutionChanged
 		this.bgcol = new Color(Color.black);
 		this.textCol = new Color(Color.white);
 		this.timeShown = TOTAL_TIME;
-		BarNotifListener.EVENT.addListener(this);
-		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void render(Graphics g) {
 		if (timeShown >= TOTAL_TIME) {
 			return;
 		}
-		timeShown += displayContainer.renderDelta;
+		timeShown += renderDelta;
 		processAnimations();
 		g.setColor(bgcol);
-		g.fillRect(0, displayContainer.height / 2 - barHalfHeight, displayContainer.width, barHalfHeight * 2);
+		g.fillRect(0, height2 - barHalfHeight, width, barHalfHeight * 2);
 		int y = textY;
 		for (String line : lines) {
-			Fonts.LARGE.drawString((displayContainer.width - Fonts.LARGE.getWidth(line)) / 2, y, line, textCol);
+			Fonts.LARGE.drawString((width - Fonts.LARGE.getWidth(line)) / 2, y, line, textCol);
 			y += Fonts.LARGE.getLineHeight();
 		}
 	}
@@ -90,14 +88,18 @@ public class BarNotificationState implements BarNotifListener, ResolutionChanged
 	}
 
 	private void calculatePosition() {
-		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (displayContainer.width * 0.96f), true);
+		this.lines = Fonts.wrap(Fonts.LARGE, message, (int) (width * 0.96f), true);
 		int textHeight = (int) (Fonts.LARGE.getLineHeight() * (lines.size() + 0.5f));
-		textY = (displayContainer.height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
+		textY = (height - textHeight) / 2 + (int) (Fonts.LARGE.getLineHeight() / 5f);
 		barHalfTargetHeight = textHeight / 2;
 	}
+	
+	@SuppressWarnings("resource")
+	public void sendf(String format, Object... args) {
+		this.send(new Formatter().format(format, args).toString());
+	}
 
-	@Override
-	public void onBarNotif(String message) {
+	public void send(String message) {
 		this.message = message;
 		calculatePosition();
 		timeShown = 0;

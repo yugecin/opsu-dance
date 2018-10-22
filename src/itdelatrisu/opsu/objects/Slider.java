@@ -370,13 +370,13 @@ public class Slider extends GameObject {
 				float followCircleScale = 1f + (tickExpandTime / (float) TICK_EXPAND_TIME) * 0.1f;
 				float followAlpha = 1f;
 				if (followCircleActive && followExpandTime < FOLLOW_EXPAND_TIME) {
-					followExpandTime += displayContainer.renderDelta;
+					followExpandTime += renderDelta;
 					followCircleScale *= 0.5f;
 					float progress = AnimationEquation.OUT_QUAD.calc((float) followExpandTime / FOLLOW_EXPAND_TIME);
 					followCircleScale = followCircleScale + followCircleScale * progress;
 					followAlpha = progress;
 				} else if (!followCircleActive) {
-					followExpandTime -= displayContainer.renderDelta;
+					followExpandTime -= renderDelta;
 					if (followExpandTime > FOLLOW_SHRINK_TIME) {
 						followExpandTime = FOLLOW_SHRINK_TIME;
 					}
@@ -391,7 +391,7 @@ public class Slider extends GameObject {
 					float oldAlphaBlack = Colors.BLACK_ALPHA.a;
 					Colors.BLACK_ALPHA.a = 0.75f;
 					g.setColor(Colors.BLACK_ALPHA);
-					g.fillRect(0, 0, displayContainer.width, displayContainer.height);
+					g.fillRect(0, 0, width, height);
 					Colors.BLACK_ALPHA.a = oldAlphaBlack;
 				}
 			}

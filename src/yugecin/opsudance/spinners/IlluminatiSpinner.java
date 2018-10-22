@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ public class IlluminatiSpinner extends Spinner {
 	@Override
 	public void init() {
 		init( new double[][] {
-			new double[] { displayContainer.width / 2d - 120, displayContainer.height / 2d + 80 },
-			new double[] { displayContainer.width / 2d, displayContainer.height / 2d - 160 },
-			new double[] { displayContainer.width / 2d + 120, displayContainer.height / 2d + 80 }
+			new double[] { width2 - 120, height2 + 80 },
+			new double[] { width2, height2 - 160 },
+			new double[] { width2 + 120, height2 + 80 }
 		} );
 	}
 

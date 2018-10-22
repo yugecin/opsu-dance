@@ -53,7 +53,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -149,9 +148,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 	/** Beatmap set ID of the current beatmap being previewed, or -1 if none. */
 	private int previewID = -1;
-
-	/** The bar notification to send upon entering the state. */
-	private String barNotificationOnLoad;
 
 	/** Search query, executed in {@code queryThread}. */
 	private SearchQuery searchQuery;
@@ -273,13 +269,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (this.importedNode == null) {
 				return;
 			}
-			String msg;
+
 			if (dirs.length == 1) {
-				msg = "Imported 1 new song.";
-			} else {
-				msg = String.format("Imported %d new songs.", dirs.length);
+				barNotifs.send("Imported 1 new song.");
+				return;
 			}
-			BarNotifListener.EVENT.make().onBarNotif(msg);
+			barNotifs.sendf("Imported %d new songs.", dirs.length);
 		}
 	}
 
@@ -298,8 +293,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 		components.clear();
 
-		int width = displayContainer.width;
-		int height = displayContainer.height;
 		int baseX = (int) (width * 0.024f);
 		int searchY = (int) (height * 0.04f + Fonts.LARGE.getLineHeight());
 		int searchWidth = (int) (width * 0.3f);
@@ -371,7 +364,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		// dropdown menu
 		int serverWidth = (int) (width * 0.12f);
 		int x = baseX + searchWidth + buttonMarginX * 3 + resetButtonWidth + rankedButtonWidth;
-		serverMenu = new DropdownMenu<DownloadServer>(displayContainer, SERVERS, x, searchY, serverWidth) {
+		serverMenu = new DropdownMenu<DownloadServer>(SERVERS, x, searchY, serverWidth) {
 			@Override
 			public void itemSelected(int index, DownloadServer item) {
 				resultList = null;
@@ -414,7 +407,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		GameImage.SEARCH_BG.getImage().draw();
 
 		// title
-		Fonts.LARGE.drawString(displayContainer.width * 0.024f, displayContainer.height * 0.03f, "Download Beatmaps!", Color.white);
+		Fonts.LARGE.drawString(width * 0.024f, height * 0.03f, "Download Beatmaps!", Color.white);
 
 		// search
 		g.setColor(Color.white);
@@ -440,7 +433,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				if (index >= nodes.length)
 					break;
 				nodes[index].drawResult(g, offset + i * DownloadNode.getButtonOffset(),
-						DownloadNode.resultContains(displayContainer.mouseX, displayContainer.mouseY - offset, i) && !serverMenu.isHovered(),
+						DownloadNode.resultContains(mouseX, mouseY - offset, i) && !serverMenu.isHovered(),
 						(index == focusResult), (previewID == nodes[index].getID()));
 			}
 			g.clearClip();
@@ -451,9 +444,9 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 			// pages
 			if (nodes.length > 0) {
-				float baseX = displayContainer.width * 0.024f;
-				float buttonY = displayContainer.height * 0.2f;
-				float buttonWidth = displayContainer.width * 0.7f;
+				float baseX = width * 0.024f;
+				float buttonY = height * 0.2f;
+				float buttonWidth = width * 0.7f;
 				Fonts.BOLD.drawString(
 						baseX + (buttonWidth - Fonts.BOLD.getWidth("Page 1")) / 2f,
 						buttonY - Fonts.BOLD.getLineHeight() * 1.3f,
@@ -467,11 +460,10 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// downloads
-		float downloadsX = displayContainer.width * 0.75f, downloadsY = search.y;
+		float downloadsX = width * 0.75f, downloadsY = search.y;
 		g.setColor(Colors.BLACK_BG_NORMAL);
-		g.fillRect(downloadsX, downloadsY,
-				displayContainer.width * 0.25f, displayContainer.height - downloadsY * 2f);
-		Fonts.LARGE.drawString(downloadsX + displayContainer.width * 0.015f, downloadsY + displayContainer.height * 0.015f, "Downloads", Color.white);
+		g.fillRect(downloadsX, downloadsY, width * 0.25f, height - downloadsY * 2f);
+		Fonts.LARGE.drawString(downloadsX + width * 0.015f, downloadsY + height * 0.015f, "Downloads", Color.white);
 		int downloadsSize = DownloadList.get().size();
 		if (downloadsSize > 0) {
 			int maxDownloadsShown = DownloadNode.maxDownloadsShown();
@@ -487,7 +479,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				if (node == null)
 					break;
 				node.drawDownload(g, i * DownloadNode.getInfoHeight() + offset, index,
-						DownloadNode.downloadContains(displayContainer.mouseX, displayContainer.mouseY - offset, i));
+						DownloadNode.downloadContains(mouseX, mouseY - offset, i));
 			}
 			g.clearClip();
 
@@ -510,14 +502,12 @@ public class DownloadsMenu extends ComplexOpsuState {
 		if (importThread != null) {
 			// darken the screen
 			g.setColor(Colors.BLACK_ALPHA);
-			g.fillRect(0, 0, displayContainer.width, displayContainer.height);
+			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
+		} else {
+			backButton.draw(g);
 		}
-
-		// back button
-		else
-			UI.getBackButton().draw(g);
 
 		UI.draw(g);
 	}
@@ -526,7 +516,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
 		if (importThread == null)
 			MusicController.loopTrackIfEnded(false);
@@ -547,9 +537,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			}
 			importThread = null;
 		}
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate();
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
 		clearButton.hoverUpdate(delta, mouseX, mouseY);
@@ -619,7 +607,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		// back
-		if (UI.getBackButton().contains(x, y)) {
+		if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			displayContainer.switchState(mainmenuState);
 			return true;
@@ -686,7 +674,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 											if (playing)
 												previewID = node.getID();
 										} catch (SlickException e) {
-											BarNotifListener.EVENT.make().onBarNotif("Failed to load track preview. See log for details.");
+											barNotifs.send("Failed to load track preview. See log for details.");
 											Log.error(e);
 										}
 									}
@@ -709,7 +697,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 								if (!DownloadList.get().contains(node.getID())) {
 									node.createDownload(serverMenu.getSelectedItem());
 									if (node.getDownload() == null) {
-										BarNotifListener.EVENT.make().onBarNotif("The download could not be started");
+										barNotifs.send("The download could not be started");
 									} else {
 										DownloadList.get().addNode(node);
 										node.getDownload().start();
@@ -856,7 +844,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		}
 
 		int shift = (newValue < 0) ? 1 : -1;
-		scrollLists(displayContainer.mouseX, displayContainer.mouseY, shift);
+		scrollLists(mouseX, mouseY, shift);
 		return true;
 	}
 
@@ -950,10 +938,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 		startDownloadIndexPos.setPosition(0);
 		pageDir = Page.RESET;
 		previewID = -1;
-		if (barNotificationOnLoad != null) {
-			BarNotifListener.EVENT.make().onBarNotif(barNotificationOnLoad);
-			barNotificationOnLoad = null;
-		}
 	}
 
 	@Override
@@ -994,10 +978,4 @@ public class DownloadsMenu extends ComplexOpsuState {
 		else if (DownloadNode.downloadAreaContains(cx, cy))
 			startDownloadIndexPos.scrollOffset(shift * DownloadNode.getInfoHeight());
 	}
-
-	/**
-	 * Sends a bar notification upon entering the state.
-	 * @param s the notification string
-	 */
-	public void notifyOnLoad(String s) { barNotificationOnLoad = s; }
 }

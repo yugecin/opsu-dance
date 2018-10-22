@@ -8,12 +8,12 @@
 	<artifactId>opsu-dance</artifactId>
 	<version>0.5.0-SNAPSHOT</version>
 	<properties>
+		<nativesTargetDir>target/Natives</nativesTargetDir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version>${project.version}</version>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<mainClassName>yugecin.opsudance.core.Entrypoint</mainClassName>
-		<XDG>false</XDG>
 	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -147,10 +147,6 @@
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 							<manifestEntries>
 								<Main-Class>${mainClassName}</Main-Class>
-								<Use-XDG>${XDG}</Use-XDG>
-								<WinNatives>OpenAL32.dll,OpenAL64.dll,lwjgl.dll,lwjgl64.dll</WinNatives>
-								<NixNatives>liblwjgl.so,liblwjgl64.so,libopenal.so,libopenal64.so</NixNatives>
-								<MacNatives>liblwjgl.dylib,openal.dylib</MacNatives>
 							</manifestEntries>
 						</transformer>
 					</transformers>
@@ -235,11 +231,6 @@
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna-platform</artifactId>
 			<version>4.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-artifact</artifactId>
-			<version>3.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

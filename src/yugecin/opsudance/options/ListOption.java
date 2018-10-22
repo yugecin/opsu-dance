@@ -19,6 +19,8 @@ package yugecin.opsudance.options;
 
 public abstract class ListOption extends Option {
 
+	public Runnable observer;
+
 	public ListOption(String name, String configurationName, String description) {
 		super(name, configurationName, description);
 	}
@@ -29,5 +31,9 @@ public abstract class ListOption extends Option {
 	public abstract void read(String s);
 	public abstract Object[] getListItems();
 	public abstract void clickListItem(int index);
+
+	protected final void onChange() {
+		observer.run();
+	}
 
 }

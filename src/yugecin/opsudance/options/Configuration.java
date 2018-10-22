@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,10 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
-import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BubNotifListener;
-import yugecin.opsudance.utils.ManifestWrapper;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -42,13 +39,12 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class Configuration {
 
-	public final boolean USE_XDG;
 	public final File CONFIG_DIR;
 	public final File DATA_DIR;
 	public final File CACHE_DIR;
@@ -73,12 +69,10 @@ public class Configuration {
 	public File replayImportDir;
 	public File skinRootDir;
 
-	public Configuration(ManifestWrapper jarmanifest) {
-		USE_XDG = jarmanifest.valueOrDefault(null, "Use-XDG", "").equalsIgnoreCase("true");
-
-		CONFIG_DIR = getXDGBaseDir("XDG_CONFIG_HOME", ".config");
-		DATA_DIR = getXDGBaseDir("XDG_DATA_HOME", ".local/share");
-		CACHE_DIR = getXDGBaseDir("XDG_CACHE_HOME", ".cache");
+	public Configuration() {
+		CONFIG_DIR = env.workingdir;
+		DATA_DIR = env.workingdir;
+		CACHE_DIR = env.workingdir;
 
 		BEATMAP_DIR = new File(DATA_DIR, "Songs/");
 		SKIN_ROOT_DIR = new File(DATA_DIR, "Skins/");
@@ -155,7 +149,7 @@ public class Configuration {
 		}
 		if (!defaultDir.isDirectory() && !defaultDir.mkdir()) {
 			String msg = String.format("Failed to create %s directory at '%s'.", kind, defaultDir.getAbsolutePath());
-			BubNotifListener.EVENT.make().onBubNotif(msg, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, msg);
 		}
 		return defaultDir;
 	}
@@ -176,48 +170,17 @@ public class Configuration {
 	}
 
 	/**
-	 * Returns the directory based on the XDG base directory specification for
-	 * Unix-like operating systems, only if the "XDG" flag is enabled.
-	 * @param envvar the environment variable to check (XDG_*_*)
-	 * @param fallback the fallback directory relative to ~home
-	 * @return the XDG base directory, or the working directory if unavailable
-	 */
-	private File getXDGBaseDir(String envvar, String fallback) {
-		if (!USE_XDG) {
-			return env.workingdir;
-		}
-
-		String OS = System.getProperty("os.name").toLowerCase();
-		if (OS.indexOf("nix") == -1 && OS.indexOf("nux") == -1 && OS.indexOf("aix") == -1){
-			return env.workingdir;
-		}
-
-		String rootPath = System.getenv(envvar);
-		if (rootPath == null) {
-			String home = System.getProperty("user.home");
-			if (home == null) {
-				return new File("./");
-			}
-			rootPath = String.format("%s/%s", home, fallback);
-		}
-		File dir = new File(rootPath, "opsu");
-		if (!dir.isDirectory() && !dir.mkdir()) {
-			explode(String.format("Failed to create configuration folder at '%s/opsu'.", rootPath),
-				new Exception("empty"), PREVENT_REPORT);
-		}
-		return dir;
-	}
-
-	/**
 	 * @author http://wiki.lwjgl.org/index.php?title=Taking_Screen_Shots
 	 */
 	public void takeScreenShot() {
 		// TODO: get a decent place for this
 		// create the screenshot directory
 		if (!screenshotDir.isDirectory() && !screenshotDir.mkdir()) {
-			BubNotifListener.EVENT.make().onBubNotif(
-				String.format( "Failed to create screenshot directory at '%s'.",
-					screenshotDir.getAbsolutePath()), Colors.BUB_RED);
+			bubNotifs.sendf(
+				BUB_RED,
+				"Failed to create screenshot directory at '%s'.",
+				screenshotDir.getAbsolutePath()
+			);
 			return;
 		}
 
@@ -251,13 +214,13 @@ public class Configuration {
 						}
 					}
 					ImageIO.write(image, OPTION_SCREENSHOT_FORMAT.getValueString().toLowerCase(), file);
-					BubNotifListener.EVENT.make().onBubNotif("Created " + fileName,
-						Colors.BUB_PURPLE);
+					bubNotifs.send(BUB_PURPLE, "Created " + fileName);
 				} catch (Exception e) {
 					Log.error("Could not take screenshot", e);
-					BubNotifListener.EVENT.make().onBubNotif(
-						"Failed to take a screenshot. See log file for details",
-						Colors.BUB_PURPLE);
+					bubNotifs.send(
+						BUB_PURPLE,
+						"Failed to take a screenshot. See log file for details"
+					);
 				}
 			}
 		}.start();

@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,9 @@
 package yugecin.opsudance.options;
 
 import itdelatrisu.opsu.Utils;
-import itdelatrisu.opsu.ui.Colors;
-import yugecin.opsudance.events.BubNotifListener;
+
+import static itdelatrisu.opsu.ui.Colors.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class NumericOption extends Option {
 
@@ -53,8 +54,7 @@ public class NumericOption extends Option {
 		try {
 			val = Utils.clamp(Integer.parseInt(s), min, max);
 		} catch (Exception ignored) {
-			BubNotifListener.EVENT.make().onBubNotif("Failed to parse " + configurationName + " option",
-				Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, "Failed to parse '" + configurationName + "' option");
 		}
 	}
 

@@ -31,13 +31,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Nullable;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.skinning.SkinService;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -890,7 +889,7 @@ public class BeatmapParser {
 	private static void logAndShowErrorNotification(Exception e, String message, Object... formatArgs) {
 		message = String.format(message, formatArgs);
 		Log.error(message, e);
-		BubNotifListener.EVENT.make().onBubNotif(message, Colors.BUB_RED);
+		bubNotifs.send(BUB_RED, message);
 	}
 
 }

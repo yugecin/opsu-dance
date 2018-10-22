@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.SliderMoverController;
-import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.spinners.*;
 
 import java.awt.*;
@@ -252,8 +251,8 @@ public class Dancer {
 			}
 		}
 		Pippi.dance(time, c, isCurrentLazySlider);
-		x = Utils.clamp(x, 10, displayContainer.width - 10);
-		y = Utils.clamp(y, 10, displayContainer.height - 10);
+		x = Utils.clamp(x, 10, width - 10);
+		y = Utils.clamp(y, 10, height - 10);
 	}
 
 	private void createNewMover() {

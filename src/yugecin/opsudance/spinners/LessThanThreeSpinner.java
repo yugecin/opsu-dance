@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 package yugecin.opsudance.spinners;
 
+import static java.lang.Math.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class LessThanThreeSpinner extends Spinner {
@@ -24,9 +25,7 @@ public class LessThanThreeSpinner extends Spinner {
 	private int angle = 0;
 
 	@Override
-	public void init()
-	{
-
+	public void init() {
 	}
 
 	@Override
@@ -37,15 +36,12 @@ public class LessThanThreeSpinner extends Spinner {
 		}
 		if( angle > 360 ) angle = 0;
 		double theta = angle / 180d * Math.PI;
-		double[] pos = new double[] {
-			displayContainer.width / 2d,
-			displayContainer.height / 2d
-		};
+		double[] pos = { width2, height2 };
 
-		double r = 2 - 2 * Math.sin( theta ) + Math.sin( theta ) * Math.sqrt( Math.abs( Math.cos( theta ) ) ) / ( Math.sin( theta ) + 1.4 );
+		double r = 2 - 2 * sin(theta) + sin(theta) * sqrt(abs(cos(theta))) / (sin(theta) + 1.4);
 
-		pos[0] += Math.cos( theta ) * r * 100;
-		pos[1] -= Math.sin( theta ) * r * 100 + 100;
+		pos[0] += Math.cos(theta) * r * 100;
+		pos[1] -= Math.sin(theta) * r * 100 + 100;
 
 		return pos;
 	}

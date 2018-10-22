@@ -33,10 +33,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 /**
@@ -220,7 +220,7 @@ public class Download {
 							else if (redirectCount > MAX_REDIRECTS)
 								error = String.format("Download for URL '%s' is attempting too many redirects (over %d).", base.toString(), MAX_REDIRECTS);
 							if (error != null) {
-								BubNotifListener.EVENT.make().onBubNotif(error, Colors.BUB_ORANGE);
+								bubNotifs.send(BUB_ORANGE, error);
 								throw new IOException();
 							}
 

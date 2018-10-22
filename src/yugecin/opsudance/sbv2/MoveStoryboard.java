@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.OverlayOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
 import yugecin.opsudance.sbv2.movers.QuadraticStoryboardMover;
@@ -35,9 +33,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public class MoveStoryboard extends OverlayOpsuState{
+import static yugecin.opsudance.core.InstanceContainer.*;
 
-	private final DisplayContainer displayContainer;
+public class MoveStoryboard extends OverlayOpsuState{
 
 	private SimpleButton btnAddLinear;
 	private SimpleButton btnAddQuadratic;
@@ -56,8 +54,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private int trackPosition;
 
-	public MoveStoryboard(DisplayContainer displayContainer) {
-		this.displayContainer = displayContainer;
+	public MoveStoryboard() {
 		dummyMove = (StoryboardMove) Proxy.newProxyInstance(StoryboardMove.class.getClassLoader(), new Class<?>[]{StoryboardMove.class}, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -70,12 +67,12 @@ public class MoveStoryboard extends OverlayOpsuState{
 	public void revalidate() {
 		super.revalidate();
 
-		btnAddLinear = new SimpleButton(displayContainer.width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAddQuadratic = new SimpleButton(displayContainer.width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAddCubic = new SimpleButton(displayContainer.width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
-		btnAnimLin = new SimpleButton(displayContainer.width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
-		btnAnimMid = new SimpleButton(displayContainer.width - 250, 80, 40, 25, Fonts.SMALL, "mid", Color.blue, Color.white, Color.white, Color.orange);
-		btnAnimCub = new SimpleButton(displayContainer.width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
+		btnAddLinear = new SimpleButton(width - 205, 50, 200, 25, Fonts.SMALL, "add linear", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAddQuadratic = new SimpleButton(width - 205, 80, 200, 25, Fonts.SMALL, "add quadratic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAddCubic = new SimpleButton(width - 205, 110, 200, 25, Fonts.SMALL, "add cubic", Colors.BLUE_BUTTON, Colors.WHITE_FADE, Colors.WHITE_FADE, Colors.ORANGE_BUTTON);
+		btnAnimLin = new SimpleButton(width - 250, 50, 40, 25, Fonts.SMALL, "lin", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimMid = new SimpleButton(width - 250, 80, 40, 25, Fonts.SMALL, "mid", Color.blue, Color.white, Color.white, Color.orange);
+		btnAnimCub = new SimpleButton(width - 250, 110, 40, 25, Fonts.SMALL, "cub", Color.blue, Color.white, Color.white, Color.orange);
 	}
 
 	/**
@@ -97,8 +94,8 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	@Override
 	protected void onPreRenderUpdate() {
-		int x = displayContainer.mouseX;
-		int y = displayContainer.mouseY;
+		int x = mouseX;
+		int y = mouseY;
 		btnAddLinear.update(x, y);
 		btnAddQuadratic.update(x, y);
 		btnAddCubic.update(x, y);
@@ -106,7 +103,7 @@ public class MoveStoryboard extends OverlayOpsuState{
 		btnAnimMid.update(x, y);
 		btnAnimCub.update(x, y);
 		if (moves[objectIndex] != null) {
-			moves[objectIndex].update(displayContainer.renderDelta, x, y);
+			moves[objectIndex].update(renderDelta, x, y);
 		}
 	}
 
@@ -185,11 +182,11 @@ public class MoveStoryboard extends OverlayOpsuState{
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
 		if (gameObjects[objectIndex].isSlider() && trackPosition > gameObjects[objectIndex].getTime() && trackPosition < gameObjects[objectIndex].getEndTime()) {
-			BarNotifListener.EVENT.make().onBarNotif("Wait until the slider ended");
+			barNotifs.send("Wait until the slider ended");
 			return dummyMove;
 		}
 		if (moves[objectIndex] == null) {
-			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start, displayContainer.width);
+			return moves[objectIndex] = new StoryboardMoveImpl(gameObjects[objectIndex - 1].end, gameObjects[objectIndex].start, width);
 		}
 		return moves[objectIndex];
 	}

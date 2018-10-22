@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,10 +36,10 @@ public class CircleSpinner extends Spinner {
 			ang += 15;
 		}
 
-		double rad = displayContainer.width / 4.0f;
+		double rad = width / 4.0f;
 
-		point[0] = displayContainer.width / 2.0f + rad * Math.sin(ang / 180d * Math.PI);
-		point[1] = displayContainer.height / 2.0f - rad * Math.cos(ang / 180d * Math.PI);
+		point[0] = width2 + rad * Math.sin(ang / 180d * Math.PI);
+		point[1] = height2 - rad * Math.cos(ang / 180d * Math.PI);
 
 		return point;
 	}

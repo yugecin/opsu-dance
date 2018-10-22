@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,14 @@
  */
 package yugecin.opsudance.options;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.newdawn.slick.util.Log;
-import yugecin.opsudance.events.BubNotifListener;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -80,7 +79,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to read option file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, err);
 		}
 		config.loadDirectories();
 	}
@@ -109,7 +108,7 @@ public class OptionsService {
 		} catch (IOException e) {
 			String err = String.format("Failed to write to file '%s'.", config.OPTIONS_FILE.getAbsolutePath());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, err);
 		}
 	}
 

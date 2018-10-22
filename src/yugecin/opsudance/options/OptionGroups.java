@@ -42,6 +42,7 @@ public class OptionGroups {
 			OPTION_TARGET_FPS,
 			OPTION_SHOW_FPS,
 			OPTION_USE_FPS_DELTAS,
+			OPTION_STARFOUNTAINS,
 			OPTION_SCREENSHOT_FORMAT,
 		}),
 		new OptionTab("SLIDER OPTIONS", new Option[]{
@@ -181,7 +182,8 @@ public class OptionGroups {
 	};
 
 	public static final OptionTab[] storyboardOptions = new OptionTab[] {
-		new OptionTab("Gameplay", new Option[] {
+		new OptionTab("Gameplay", GameImage.MENU_NAV_GAMEPLAY),
+		new OptionTab("GENERAL", new Option[] {
 			OPTION_BACKGROUND_DIM,
 			OPTION_DANCE_REMOVE_BG,
 			OPTION_SNAKING_SLIDERS,
@@ -192,12 +194,14 @@ public class OptionGroups {
 			OPTION_SHOW_PERFECT_HIT,
 			OPTION_SHOW_FOLLOW_POINTS,
 		}),
-		new OptionTab("Input", new Option[] {
+		new OptionTab("Input", GameImage.MENU_NAV_INPUT),
+		new OptionTab("INPUT", new Option[] {
 			OPTION_CURSOR_SIZE,
 			OPTION_NEW_CURSOR,
 			OPTION_DISABLE_CURSOR
 		}),
-		new OptionTab("Dance", new Option[] {
+		new OptionTab("Dance", GameImage.MENU_NAV_DANCE),
+		new OptionTab("MOVER", new Option[]{
 			OPTION_DANCE_MOVER,
 			OPTION_DANCE_EXGON_DELAY,
 			OPTION_DANCE_QUAD_BEZ_AGGRESSIVENESS,
@@ -206,36 +210,56 @@ public class OptionGroups {
 			OPTION_DANCE_QUAD_BEZ_CUBIC_AGGRESSIVENESS_FACTOR,
 			OPTION_DANCE_MOVER_DIRECTION,
 			OPTION_DANCE_SLIDER_MOVER_TYPE,
+		}),
+		new OptionTab("SPINNER", new Option[]{
 			OPTION_DANCE_SPINNER,
 			OPTION_DANCE_SPINNER_DELAY,
+		}),
+		new OptionTab("SLIDER OPTIONS", new Option[]{
 			OPTION_DANCE_LAZY_SLIDERS,
-			OPTION_DANCE_CIRCLE_STREAMS,
-			OPTION_DANCE_ONLY_CIRCLE_STACKS,
 			OPTION_DANCE_CIRLCE_IN_SLOW_SLIDERS,
 			OPTION_DANCE_CIRLCE_IN_LAZY_SLIDERS,
+		}),
+		new OptionTab("CIRCLE MOVEMENTS", new Option[]{
+			OPTION_DANCE_CIRCLE_STREAMS,
+			OPTION_DANCE_ONLY_CIRCLE_STACKS,
+		}),
+		new OptionTab("MIRROR", new Option[] {
 			OPTION_DANCE_MIRROR,
 		}),
-		new OptionTab("Dance display", new Option[] {
+		new OptionTab("Advanced Display", GameImage.MENU_NAV_ADVANCED),
+		new OptionTab("OBJECTS", new Option[]{
 			OPTION_DANCE_DRAW_APPROACH,
 			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
 			OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
 			OPTION_DANCE_RGB_OBJECT_INC,
+			OPTION_DANCE_HIDE_OBJECTS,
+		}),
+		new OptionTab("CURSOR", new Option[]{
 			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
 			OPTION_DANCE_CURSOR_MIRROR_COLOR_OVERRIDE,
 			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
 			OPTION_DANCE_RGB_CURSOR_INC,
 			OPTION_DANCE_CURSOR_TRAIL_OVERRIDE,
-			OPTION_DANCE_HIDE_OBJECTS,
-			OPTION_DANCE_HIDE_UI,
 		}),
-		new OptionTab ("Pippi", new Option[] {
+		new OptionTab("MISC", new Option[] {
+			OPTION_DANCE_HIDE_UI,
+			OPTION_DANCE_REMOVE_BG,
+			OPTION_DANCE_ENABLE_SB,
+		}),
+		new OptionTab ("Pippi", GameImage.MENU_NAV_PIPPI),
+		new OptionTab ("GENERAL", new Option[]{
 			OPTION_PIPPI_ENABLE,
 			OPTION_PIPPI_RADIUS_PERCENT,
+		}),
+		new OptionTab ("ANGLE MULTIPLIERS", new Option[]{
 			OPTION_PIPPI_ANGLE_INC_MUL,
 			OPTION_PIPPI_ANGLE_INC_MUL_SLIDER,
+		}),
+		new OptionTab ("MISC", new Option[] {
 			OPTION_PIPPI_SLIDER_FOLLOW_EXPAND,
 			OPTION_PIPPI_PREVENT_WOBBLY_STREAMS,
-		})
+		}),
 	};
 
 }

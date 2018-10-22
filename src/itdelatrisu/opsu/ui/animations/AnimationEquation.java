@@ -312,4 +312,19 @@ public enum AnimationEquation {
 	 * @return the new {@code t} value [0,1]
 	 */
 	public abstract float calc(float t);
+	
+	public float uncalc(float x) {
+		float min = 0f;
+		float max = 1f;
+		// 7 iterations is already decent, do we need 8?
+		for (int i = 0; i < 8; i++) {
+			float pos = (min + max) / 2f;
+			if (this.calc(pos) > x) {
+				max = pos;
+			} else {
+				min = pos;
+			}
+		}
+		return (min + max) / 2f;
+	}
 }

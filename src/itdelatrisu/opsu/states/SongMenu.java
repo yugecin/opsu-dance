@@ -48,6 +48,7 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import java.awt.Point;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -63,11 +64,11 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.state.ComplexOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.options.OptionGroups;
-import yugecin.opsudance.ui.OptionsOverlay;
 
+import yugecin.opsudance.core.InstanceContainer;
+import yugecin.opsudance.core.state.ComplexOpsuState;
+
+import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -99,7 +100,7 @@ public class SongMenu extends ComplexOpsuState {
 	private static final int SEARCH_TRANSITION_TIME = 250;
 
 	/** Line width of the header/footer divider. */
-	private static final int DIVIDER_LINE_WIDTH = 4;
+	private static final int DIVIDER_LINE_WIDTH = 3;
 
 	/** Song node class representing an BeatmapSetNode and file index. */
 	private static class SongNode {
@@ -161,7 +162,7 @@ public class SongMenu extends ComplexOpsuState {
 	private BeatmapSetNode hoverIndex = null;
 
 	/** The selection buttons. */
-	private MenuButton selectModsButton, selectRandomButton, selectMapOptionsButton, selectOptionsButton;
+	private MenuButton selectModeButton, selectModsButton, selectRandomButton, selectMapOptionsButton;
 
 	/** The search textfield. */
 	private TextField searchTextField;
@@ -311,12 +312,8 @@ public class SongMenu extends ComplexOpsuState {
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
-	private final OptionsOverlay optionsOverlay;
-
 	public SongMenu() {
 		super();
-		optionsOverlay = new OptionsOverlay(displayContainer, OptionGroups.normalOptions);
-		overlays.add(optionsOverlay);
 	}
 
 	@Override
@@ -325,26 +322,27 @@ public class SongMenu extends ComplexOpsuState {
 
 		components.clear();
 
+		final float footerHeight = height * 0.116666666666f;
+
 		// header/footer coordinates
-		headerY = displayContainer.height * 0.0075f + GameImage.MENU_MUSICNOTE.getImage().getHeight() +
+		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getHeight() +
 				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
 				Fonts.SMALL.getLineHeight();
-		footerY = displayContainer.height - GameImage.SELECTION_MODS.getImage().getHeight();
+		footerY = height - footerHeight;
 
 		// footer logo coordinates
-		float footerHeight = displayContainer.height - footerY;
 		footerLogoSize = footerHeight * 3.25f;
 		Image logo = GameImage.MENU_LOGO.getImage();
 		logo = logo.getScaledCopy(footerLogoSize / logo.getWidth());
-		footerLogoButton = new MenuButton(logo, displayContainer.width - footerHeight * 0.8f, displayContainer.height - footerHeight * 0.65f);
+		footerLogoButton = new MenuButton(logo, width - footerHeight * 0.8f, height - footerHeight * 0.65f);
 		footerLogoButton.setHoverAnimationDuration(1);
 		footerLogoButton.setHoverExpand(1.2f);
 
 		// initialize sorts
-		int sortWidth = (int) (displayContainer.width * 0.12f);
-		int posX = (int) (displayContainer.width * 0.87f);
-		int posY = (int) (headerY - GameImage.MENU_TAB.getImage().getHeight() * 2.25f);
-		sortMenu = new DropdownMenu<BeatmapSortOrder>(displayContainer, BeatmapSortOrder.values(), posX, posY, sortWidth) {
+		int sortWidth = (int) (width * 0.12f);
+		int posX = (int) (width * 0.87f);
+		int posY = (int) (headerY - GameImage.MENU_TAB.getHeight() * 2.25f);
+		sortMenu = new DropdownMenu<BeatmapSortOrder>(BeatmapSortOrder.values(), posX, posY, sortWidth) {
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
 				BeatmapSortOrder.set(item);
@@ -373,25 +371,25 @@ public class SongMenu extends ComplexOpsuState {
 
 		// initialize group tabs
 		for (BeatmapGroup group : BeatmapGroup.values())
-			group.init(displayContainer.width, headerY - DIVIDER_LINE_WIDTH / 2);
+			group.init(width, headerY - DIVIDER_LINE_WIDTH / 2);
 
 		// initialize score data buttons
-		ScoreData.init(displayContainer.width, headerY + displayContainer.height * 0.01f);
+		ScoreData.init(width, headerY + height * 0.01f);
 
 		// song button background & graphics context
 		Image menuBackground = GameImage.MENU_BUTTON_BG.getImage();
 
 		// song button coordinates
-		buttonX = displayContainer.width * 0.6f;
+		buttonX = width * 0.6f;
 		//buttonY = headerY;
 		buttonWidth = menuBackground.getWidth();
 		buttonHeight = menuBackground.getHeight();
 		buttonOffset = (footerY - headerY - DIVIDER_LINE_WIDTH) / MAX_SONG_BUTTONS;
 
 		// search
-		int textFieldX = (int) (displayContainer.width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
+		int textFieldX = (int) (width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
 		int textFieldY = (int) (headerY + Fonts.BOLD.getLineHeight() / 2);
-		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (displayContainer.width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
+		searchTextField = new TextField(Fonts.BOLD, textFieldX, textFieldY, (int) (width * 0.99f) - textFieldX, Fonts.BOLD.getLineHeight()) {
 			@Override
 			public boolean isFocusable() {
 				return false;
@@ -405,33 +403,23 @@ public class SongMenu extends ComplexOpsuState {
 		components.add(searchTextField);
 
 		// selection buttons
-		Image selectionMods = GameImage.SELECTION_MODS.getImage();
-		int selectButtonsWidth = selectionMods.getWidth();
-		int selectButtonsHeight = selectionMods.getHeight();
-		if (selectButtonsHeight < 20) {
-			selectButtonsHeight = 100;
-		}
-		if (selectButtonsWidth < 20) {
-			selectButtonsWidth = 100;
-		}
-		float selectX = displayContainer.width * 0.183f + selectButtonsWidth / 2f;
-		float selectY = displayContainer.height - selectButtonsHeight / 2f;
-		float selectOffset = selectButtonsWidth * 1.05f;
-		selectModsButton = new MenuButton(GameImage.SELECTION_MODS_OVERLAY.getImage(),
-				selectX, selectY);
-		selectRandomButton = new MenuButton(GameImage.SELECTION_RANDOM_OVERLAY.getImage(),
-				selectX + selectOffset, selectY);
-		selectMapOptionsButton = new MenuButton(GameImage.SELECTION_OPTIONS_OVERLAY.getImage(),
-				selectX + selectOffset * 2f, selectY);
-		selectOptionsButton = new MenuButton(GameImage.SELECTION_OTHER_OPTIONS_OVERLAY.getImage(),
-				selectX + selectOffset * 3f, selectY);
+		// TODO: the origin should be bottomleft or something
+		float selectX = width * (isWidescreen ? 0.164f : 0.1875f);
+		final float footerButtonWidth = footerHeight * 0.84f;
+		selectModeButton = new MenuButton(SELECTION_MODE_OVERLAY, selectX, footerY);
+		selectX += footerHeight + 2;
+		selectModsButton = new MenuButton(SELECTION_MODS_OVERLAY, selectX, footerY);
+		selectX += footerButtonWidth;
+		selectRandomButton = new MenuButton(SELECTION_RANDOM_OVERLAY, selectX, footerY);
+		selectX += footerButtonWidth;
+		selectMapOptionsButton = new MenuButton(SELECTION_OPTIONS_OVERLAY, selectX, footerY);
+		selectModeButton.setHoverFade(0f);
 		selectModsButton.setHoverFade(0f);
 		selectRandomButton.setHoverFade(0f);
 		selectMapOptionsButton.setHoverFade(0f);
-		selectOptionsButton.setHoverFade(0f);
 
 		// loader
-		int loaderDim = GameImage.MENU_MUSICNOTE.getImage().getWidth();
+		int loaderDim = GameImage.MENU_MUSICNOTE.getWidth();
 		SpriteSheet spr = new SpriteSheet(GameImage.MENU_LOADER.getImage(), loaderDim, loaderDim);
 		loader = new Animation(spr, 50);
 
@@ -446,25 +434,19 @@ public class SongMenu extends ComplexOpsuState {
 				if (!displayContainer.isInState(SongMenu.class)) {
 					return;
 				}
-				BarNotifListener.EVENT.make().onBarNotif(
-					"Changed is Songs folder detected. Hit F5 to refresh.");
+				barNotifs.send("Changes in Songs folder detected. Hit F5 to refresh.");
 			}
 		});
 
 		// star stream
-		starStream = new StarStream(displayContainer.width, (displayContainer.height - GameImage.STAR.getImage().getHeight()) / 2, -displayContainer.width, 0, MAX_STREAM_STARS);
-		starStream.setPositionSpread(displayContainer.height / 20f);
+		starStream = new StarStream(width, height2 - GameImage.STAR.getImage().getHeight() / 2, -width, 0, MAX_STREAM_STARS);
+		starStream.setPositionSpread(height / 20f);
 		starStream.setDirectionSpread(10f);
 	}
 
 	@Override
 	public void render(Graphics g) {
 		g.setBackground(Color.black);
-
-		int width = displayContainer.width;
-		int height = displayContainer.height;
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
 
 		// background
 		if (focusNode != null) {
@@ -542,14 +524,12 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// top/bottom bars
-		g.setColor(Colors.BLACK_ALPHA);
+		g.setColor(Color.black);
 		g.fillRect(0, 0, width, headerY);
 		g.fillRect(0, footerY, width, height - footerY);
 		g.setColor(Colors.BLUE_DIVIDER);
-		g.setLineWidth(DIVIDER_LINE_WIDTH);
-		g.drawLine(0, headerY, width, headerY);
-		g.drawLine(0, footerY, width, footerY);
-		g.resetLineWidth();
+		g.fillRect(0, headerY, width, DIVIDER_LINE_WIDTH);
+		g.fillRect(0, footerY, width, DIVIDER_LINE_WIDTH);
 
 		// footer logo (pulsing)
 		Float position = MusicController.getBeatProgress();
@@ -563,10 +543,8 @@ public class SongMenu extends ComplexOpsuState {
 			footerLogoButton.draw(Color.white, 1f - expand);
 			Image ghostLogo = GameImage.MENU_LOGO.getImage();
 			ghostLogo = ghostLogo.getScaledCopy((1f + expand) * footerLogoSize / ghostLogo.getWidth());
-			float oldGhostAlpha = Colors.GHOST_LOGO.a;
-			Colors.GHOST_LOGO.a *= (1f - position);
-			ghostLogo.drawCentered(footerLogoButton.getX(), footerLogoButton.getY(), Colors.GHOST_LOGO);
-			Colors.GHOST_LOGO.a = oldGhostAlpha;
+			ghostLogo.setAlpha(0.25f * (1f - position));
+			ghostLogo.drawCentered(footerLogoButton.getX(), footerLogoButton.getY());
 		}
 
 		// header
@@ -636,14 +614,19 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// selection buttons
-		GameImage.SELECTION_MODS.getImage().drawCentered(selectModsButton.getX(), selectModsButton.getY());
+		Point c;
+		c = selectModeButton.bottomLeft();
+		SELECTION_MODE.getImage().draw(c.x, c.y - SELECTION_MODE.getHeight());
+		selectModeButton.draw();
+		c = selectModsButton.bottomLeft();
+		SELECTION_MODS.getImage().draw(c.x, c.y - SELECTION_MODS.getHeight());
 		selectModsButton.draw();
-		GameImage.SELECTION_RANDOM.getImage().drawCentered(selectRandomButton.getX(), selectRandomButton.getY());
+		c = selectRandomButton.bottomLeft();
+		SELECTION_RANDOM.getImage().draw(c.x, c.y - SELECTION_RANDOM.getHeight());
 		selectRandomButton.draw();
-		GameImage.SELECTION_OPTIONS.getImage().drawCentered(selectMapOptionsButton.getX(), selectMapOptionsButton.getY());
+		c = selectMapOptionsButton.bottomLeft();
+		SELECTION_OPTIONS.getImage().draw(c.x, c.y - SELECTION_OPTIONS.getHeight());
 		selectMapOptionsButton.draw();
-		GameImage.SELECTION_OTHER_OPTIONS.getImage().drawCentered(selectOptionsButton.getX(), selectOptionsButton.getY());
-		selectOptionsButton.draw();
 
 		// group tabs
 		BeatmapGroup currentGroup = BeatmapGroup.current();
@@ -701,11 +684,11 @@ public class SongMenu extends ComplexOpsuState {
 			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
+		} else {
+			optionsOverlay.render(g);
+			backButton.draw(g);
 		}
 
-		// back button
-		else
-			UI.getBackButton().draw(g);
 
 		UI.draw(g);
 
@@ -715,8 +698,18 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
+		
+		optionsOverlay.preRenderUpdate();
 
-		int delta = displayContainer.renderDelta;
+		int mouseX = InstanceContainer.mouseX;
+		int mouseY = InstanceContainer.mouseY;
+		if (optionsOverlay.containsMouse()) {
+			// dirty hack to not show elements underneath options overlay as hovered
+			mouseX = -mouseX;
+			mouseY = -mouseY;
+		}
+
+		int delta = renderDelta;
 		UI.update(delta);
 		if (reloadThread == null)
 			MusicController.loopTrackIfEnded(true);
@@ -732,13 +725,11 @@ public class SongMenu extends ComplexOpsuState {
 				MusicController.playThemeSong(config.themeBeatmap);
 			reloadThread = null;
 		}
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate();
+		selectModeButton.hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
 		selectMapOptionsButton.hoverUpdate(delta, mouseX, mouseY);
-		selectOptionsButton.hoverUpdate(delta, mouseX, mouseY);
 		footerLogoButton.hoverUpdate(delta, mouseX, mouseY, 0.25f);
 
 		// beatmap menu timer
@@ -873,6 +864,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mousePressed(button, x, y)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mousePressed(button, x, y)) {
+			return true;
+		}
 
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
@@ -892,6 +887,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseReleased(button, x, y)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mouseReleased(button, x, y)) {
+			return true;
+		}
 
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
@@ -908,14 +907,17 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (UI.getBackButton().contains(x, y)) {
+		if (backButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUBACK);
 			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
 		// selection buttons
-		if (selectModsButton.contains(x, y)) {
+		if (selectModeButton.contains(x, y)) {
+			barNotifs.send("There are no other modes available.");
+			return true;
+		} else if (selectModsButton.contains(x, y)) {
 			this.keyPressed(KEY_F1, '\0');
 			return true;
 		} else if (selectRandomButton.contains(x, y)) {
@@ -923,10 +925,6 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		} else if (selectMapOptionsButton.contains(x, y)) {
 			this.keyPressed(KEY_F3, '\0');
-			return true;
-		} else if (selectOptionsButton.contains(x, y)) {
-			SoundController.playSound(SoundEffect.MENUHIT);
-			optionsOverlay.show();
 			return true;
 		}
 
@@ -955,7 +953,7 @@ public class SongMenu extends ComplexOpsuState {
 			setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 
 			if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
-				BarNotifListener.EVENT.make().onBarNotif(group.getEmptyMessage());
+				barNotifs.send(group.getEmptyMessage());
 			}
 			return true;
 		}
@@ -1036,6 +1034,10 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public boolean keyPressed(int key, char c) {
 		if (super.keyPressed(key, c)) {
+			return true;
+		}
+		
+		if (optionsOverlay.keyPressed(key, c)) {
 			return true;
 		}
 
@@ -1192,6 +1194,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseDragged(oldx, oldy, newx, newy)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mouseDragged(oldx, oldy, newx, newy)) {
+			return true;
+		}
 
 		if (isInputBlocked()) {
 			return true;
@@ -1225,6 +1231,10 @@ public class SongMenu extends ComplexOpsuState {
 		if (super.mouseWheelMoved(newValue)) {
 			return true;
 		}
+		
+		if (optionsOverlay.mouseWheelMoved(newValue)) {
+			return true;
+		}
 
 		if (isInputBlocked()) {
 			return true;
@@ -1242,16 +1252,25 @@ public class SongMenu extends ComplexOpsuState {
 			changeIndex(shift);
 		return false;
 	}
+	
+	@Override
+	public boolean keyReleased(int key, char c) {
+		if (super.keyReleased(key, c)) {
+			return true;
+		}
+
+		return optionsOverlay.keyReleased(key, c);
+	}
 
 	@Override
 	public void enter() {
 		super.enter();
 
 		UI.enter();
+		selectModeButton.resetHover();
 		selectModsButton.resetHover();
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
-		selectOptionsButton.resetHover();
 		hoverOffset.setTime(0);
 		hoverIndex = null;
 		isScrollingToFocusNode = false;
@@ -1761,7 +1780,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		Beatmap beatmap = MusicController.getBeatmap();
 		if (focusNode == null || beatmap != focusNode.getSelectedBeatmap()) {
-			BarNotifListener.EVENT.make().onBarNotif("Unable to load the beatmap audio.");
+			barNotifs.send("Unable to load the beatmap audio.");
 			return;
 		}
 

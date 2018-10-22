@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.utils.FPSMeter;
 
 import static yugecin.opsudance.options.Options.*;
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class FpsRenderState implements ResolutionChangedListener {
 
@@ -42,7 +42,6 @@ public class FpsRenderState implements ResolutionChangedListener {
 	public FpsRenderState() {
 		fpsMeter = new FPSMeter(10);
 		upsMeter = new FPSMeter(10);
-		ResolutionChangedListener.EVENT.addListener(this);
 	}
 
 	public void update() {
@@ -50,7 +49,7 @@ public class FpsRenderState implements ResolutionChangedListener {
 	}
 
 	public void render(Graphics g) {
-		fpsMeter.update(displayContainer.renderDelta);
+		fpsMeter.update(renderDelta);
 		if (!OPTION_SHOW_FPS.state) {
 			return;
 		}
@@ -61,7 +60,7 @@ public class FpsRenderState implements ResolutionChangedListener {
 	}
 
 	private String getText(int value, String unit) {
-		if (OPTION_USE_FPS_DELTAS.state) {
+		if (OPTION_USE_FPS_DELTAS.state || value > 1000) {
 			return String.format("%.2fms", 1000f / value);
 		}
 		return value + " " + unit;
@@ -91,8 +90,8 @@ public class FpsRenderState implements ResolutionChangedListener {
 	@Override
 	public void onResolutionChanged(int w, int h) {
 		singleHeight = Fonts.SMALL.getLineHeight();
-		x = displayContainer.width - 3;
-		y = displayContainer.height - 3 - singleHeight - 10;
+		x = width - 3;
+		y = height - 3 - singleHeight - 10;
 	}
 
 }

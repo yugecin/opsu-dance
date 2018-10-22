@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.InputListener;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -38,8 +37,8 @@ public class GlobalInputListener implements InputListener {
 	public boolean keyReleased(int key, char c) {
 		if (key == KEY_F7) {
 			OPTION_TARGET_FPS.clickListItem((targetFPSIndex + 1) % targetFPS.length);
-			BarNotifListener.EVENT.make().onBarNotif(String.format("Frame limiter: %s",
-				OPTION_TARGET_FPS.getValueString()));
+			final String value = OPTION_TARGET_FPS.getValueString();
+			barNotifs.sendf("Frame limiter: %s", value);
 			return true;
 		}
 		if (key == KEY_F10) {

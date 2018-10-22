@@ -22,13 +22,12 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapSetList;
+import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.UI;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
-import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
@@ -65,9 +64,6 @@ public class Splash extends BaseOpsuState {
 			return;
 		}
 
-		System.out.println(
-			Renderer.get().getClass()
-		);
 		inited = true;
 		thread = new Thread() {
 			@Override
@@ -111,7 +107,13 @@ public class Splash extends BaseOpsuState {
 	@Override
 	public void render(Graphics g) {
 		g.setBackground(Color.black);
-		GameImage.MENU_LOGO.getImage().drawCentered(displayContainer.width / 2, displayContainer.height / 2);
+		final Color col;
+		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
+			col = Cursor.lastCursorColor;
+		} else {
+			col = Color.white;
+		}
+		GameImage.MENU_LOGO.getImage().drawCentered(width2, height2, col);
 		UI.drawLoadingProgress(g);
 	}
 

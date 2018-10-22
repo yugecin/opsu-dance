@@ -75,6 +75,14 @@ public class Option {
 			return false;
 		}
 		filtered = !name.toLowerCase().contains(searchString) && !description.toLowerCase().contains(searchString);
+		if (this instanceof ListOption) {
+			for (Object itm : ((ListOption) this).getListItems()) {
+				if (itm != null && itm.toString().toLowerCase().contains(searchString)) {
+					filtered = false;
+					return false;
+				}
+			}
+		}
 		return filtered;
 	}
 

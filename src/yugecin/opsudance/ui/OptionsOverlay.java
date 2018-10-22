@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
+ * Copyright (C) 2016-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,10 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
-import yugecin.opsudance.core.DisplayContainer;
-import yugecin.opsudance.core.state.OverlayOpsuState;
+
+import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
@@ -35,11 +37,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
+import static itdelatrisu.opsu.GameImage.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay extends OverlayOpsuState {
-
-	private final DisplayContainer displayContainer;
+public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener {
 
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
@@ -60,6 +62,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private static final float INDICATOR_ALPHA = 0.8f;
 	private static final Color COL_INDICATOR = new Color(Color.black);
 
+	private boolean active;
+	private boolean acceptInput;
+	private boolean dirty;
 
 	/** Duration, in ms, of the show (slide-in) animation. */
 	private static final int SHOWANIMATIONTIME = 1000;
@@ -102,6 +107,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int sliderOptionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
+	private int unchangedSliderValue;
 
 	private final HashMap<ListOption, DropdownMenu<Object>> dropdownMenus;
 	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
@@ -110,8 +116,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int openDropdownVirtualY;
 
 	private int targetWidth;
-	private int width;
-	private int height;
+	private int currentWidth;
 
 	private int navButtonSize;
 	private int navStartY;
@@ -141,8 +146,12 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private final KineticScrolling scrollHandler;
 	private int maxScrollOffset;
+	private int lastOptionHeight;
 
 	private int mousePressY;
+	
+	private boolean isDraggingFromOutside;
+	private boolean wasPressed;
 
 	private boolean keyEntryLeft;
 	private boolean keyEntryRight;
@@ -161,10 +170,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 
-	public OptionsOverlay(DisplayContainer displayContainer, OptionTab[] sections) {
-		this.displayContainer = displayContainer;
-
+	public OptionsOverlay(OptionTab[] sections) {
 		this.sections = sections;
+		this.dirty = true;
 
 		dropdownMenus = new HashMap<>();
 		visibleDropdownMenus = new LinkedList<>();
@@ -174,29 +182,53 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		scrollHandler = new KineticScrolling();
 		scrollHandler.setAllowOverScroll(true);
+		
+		displayContainer.addResolutionChangedListener(this);
+		skinservice.addSkinChangedListener(this);
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h) {
+		this.dirty = true;
+		if (this.active) {
+			this.revalidate();
+		}
+	}
+
+	@Override
+	public void onSkinChanged(String name) {
+		this.dirty = true;
+		if (this.active) {
+			this.revalidate();
+		}
+	}
+	
+	public boolean isActive() {
+		return this.active;
+	}
+	
+	public boolean containsMouse() {
+		return this.active && mouseX <= this.currentWidth;
 	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
 	}
 
-	@Override
 	public void revalidate() {
-		super.revalidate();
+		this.dirty = false;
 
-		boolean isWidescreen = displayContainer.isWidescreen();
-		targetWidth = (int) (displayContainer.width * (isWidescreen ? 0.4f : 0.5f));
-		height = displayContainer.height;
+		targetWidth = (int) (width * (isWidescreen ? 0.4f : 0.5f));
 
 		// calculate positions
 		float navIconWidthRatio = isWidescreen ? 0.046875f : 0.065f;
 		// non-widescreen ratio is not accurate
-		navButtonSize = (int) (displayContainer.width * navIconWidthRatio);
+		navButtonSize = (int) (width * navIconWidthRatio);
 		navIndicatorSize = navButtonSize / 10;
 		navTargetWidth = (int) (targetWidth * 0.45f) - navButtonSize;
-		paddingRight = (int) (displayContainer.width * 0.009375f); // not so accurate
-		paddingLeft = navButtonSize + (int) (displayContainer.width * 0.0180f); // not so accurate
-		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (displayContainer.width * 0.00625f); // not so accurate
+		paddingRight = (int) (width * 0.009375f); // not so accurate
+		paddingLeft = navButtonSize + (int) (width * 0.0180f); // not so accurate
+		paddingTextLeft = paddingLeft + LINEWIDTH + (int) (width * 0.00625f); // not so accurate
 		optionStartX = paddingTextLeft;
 		textOptionsY = Fonts.LARGE.getLineHeight() * 2;
 		textChangeY = textOptionsY + Fonts.LARGE.getLineHeight();
@@ -206,8 +238,8 @@ public class OptionsOverlay extends OverlayOpsuState {
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
 		if (active) {
-			width = targetWidth;
-			optionWidth = width - optionStartX - paddingRight;
+			currentWidth = targetWidth;
+			optionWidth = currentWidth - optionStartX - paddingRight;
 		}
 
 		optionHeight = (int) (Fonts.MEDIUM.getLineHeight() * 1.3f);
@@ -215,9 +247,10 @@ public class OptionsOverlay extends OverlayOpsuState {
 		controlImageSize = (int) (Fonts.MEDIUM.getLineHeight() * 0.7f);
 		controlImagePadding = (optionHeight - controlImageSize) / 2;
 
-		sliderBallImg = GameImage.CONTROL_SLIDER_BALL.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		checkOnImg = GameImage.CONTROL_CHECK_ON.getImage().getScaledCopy(controlImageSize, controlImageSize);
-		checkOffImg = GameImage.CONTROL_CHECK_OFF.getImage().getScaledCopy(controlImageSize, controlImageSize);
+		final int s = controlImageSize;
+		sliderBallImg = CONTROL_SLIDER_BALL.getScaledImage(s, s);
+		checkOnImg = CONTROL_CHECK_ON.getScaledImage(s, s);
+		checkOffImg = CONTROL_CHECK_OFF.getScaledImage(s, s);
 
 		int navTotalHeight = 0;
 		dropdownMenus.clear();
@@ -232,23 +265,27 @@ public class OptionsOverlay extends OverlayOpsuState {
 				}
 				final ListOption listOption = (ListOption) option;
 				Object[] items = listOption.getListItems();
-				DropdownMenu<Object> menu = new DropdownMenu<Object>(displayContainer, items, 0, 0, 0) {
+				DropdownMenu<Object> menu = new DropdownMenu<Object>(items, 0, 0, 0) {
 					@Override
 					public void itemSelected(int index, Object item) {
 						listOption.clickListItem(index);
 						openDropdownMenu = null;
 					}
 				};
-				// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
-				String selectedValue = option.getValueString();
-				int idx = 0;
-				for (Object item : items) {
-					if (item.toString().equals(selectedValue)) {
-						break;
+				final Runnable observer = () -> {
+					// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
+					String selectedValue = option.getValueString();
+					int idx = 0;
+					for (Object item : items) {
+						if (item.toString().equals(selectedValue)) {
+							break;
+						}
+						idx++;
 					}
-					idx++;
-				}
-				menu.setSelectedIndex(idx);
+					menu.setSelectedIndex(idx);
+				};
+				observer.run();
+				listOption.observer = observer;
 				menu.setBackgroundColor(COL_BG);
 				menu.setBorderColor(Color.transparent);
 				menu.setChevronDownColor(COL_WHITE);
@@ -265,13 +302,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
 	}
 
-	@Override
-	public void onRender(Graphics g) {
-		g.setClip(navButtonSize, 0, width - navButtonSize, height);
+	public void render(Graphics g) {
+		if (!this.active && this.currentWidth == this.navButtonSize) {
+			return;
+		}
+
+		g.setClip(navButtonSize, 0, currentWidth - navButtonSize, height);
 
 		// bg
 		g.setColor(COL_BG);
-		g.fillRect(navButtonSize, 0, width, height);
+		g.fillRect(navButtonSize, 0, currentWidth, height);
 
 		// title
 		renderTitle();
@@ -291,16 +331,15 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 		// scrollbar
 		g.setColor(COL_WHITE);
-		g.fillRect(width - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
+		g.fillRect(currentWidth - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
 		g.clearClip();
 
 		renderNavigation(g);
 
-		// UI
-		UI.getBackButton().draw(g);
-
 		// tooltip
-		renderTooltip(g);
+		if (this.active) {
+			renderTooltip(g);
+		}
 
 		// key input options
 		if (keyEntryLeft || keyEntryRight) {
@@ -314,7 +353,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navWidth += navTargetWidth;
 		} else if (navHoverTime > 300) {
 			AnimationEquation anim = AnimationEquation.IN_EXPO;
-			if (displayContainer.mouseX < navWidth) {
+			if (mouseX < navWidth) {
 				anim = AnimationEquation.OUT_EXPO;
 			}
 			float progress = anim.calc((navHoverTime - 300f) / 300f);
@@ -363,7 +402,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.setColor(COL_INDICATOR);
 		int indicatorPos = this.indicatorPos;
 		if (indicatorMoveAnimationTime > 0) {
-			indicatorMoveAnimationTime += displayContainer.renderDelta;
+			indicatorMoveAnimationTime += renderDelta;
 			if (indicatorMoveAnimationTime > INDICATORMOVEANIMATIONTIME) {
 				indicatorMoveAnimationTime = 0;
 				indicatorPos += indicatorOffsetToNextPos;
@@ -373,16 +412,16 @@ public class OptionsOverlay extends OverlayOpsuState {
 				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
 			}
 		}
-		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), width, optionHeight);
+		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), currentWidth, optionHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
 		g.setColor(COL_BG);
-		g.fillRect(0, 0, displayContainer.width, height);
+		g.fillRect(0, 0, width, height);
 		g.setColor(COL_WHITE);
 		String prompt = (keyEntryLeft) ? "Please press the new left-click key." : "Please press the new right-click key.";
-		int y = (displayContainer.height - Fonts.LARGE.getLineHeight()) / 2;
-		FontUtil.drawCentered(Fonts.LARGE, displayContainer.width, 0, y, prompt, COL_WHITE);
+		int y = height2 - Fonts.LARGE.getLineHeight() / 2;
+		FontUtil.drawCentered(Fonts.LARGE, width, 0, y, prompt, COL_WHITE);
 	}
 
 	private void renderTooltip(Graphics g) {
@@ -391,7 +430,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			if (hoverOption instanceof NumericOption) {
 				tip = "(" + hoverOption.getValueString() + ") " + tip;
 			}
-			UI.updateTooltip(displayContainer.renderDelta, tip, true);
+			UI.updateTooltip(renderDelta, tip, true);
 			UI.drawTooltip(g);
 		}
 	}
@@ -413,7 +452,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				if (section != activeSection) {
 					COL_CYAN.a *= 0.2f;
 				}
-				FontUtil.drawRightAligned(Fonts.XLARGE, width, -paddingRight,
+				FontUtil.drawRightAligned(Fonts.XLARGE, currentWidth, -paddingRight,
 					(int) (y + Fonts.XLARGE.getLineHeight() * 0.3f), section.name.toUpperCase(),
 					COL_CYAN);
 				COL_CYAN.a = previousAlpha;
@@ -451,6 +490,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			g.setColor(COL_GREY);
 			g.fillRect(paddingLeft, lineStartY, LINEWIDTH, lineHeight);
 		}
+		lastOptionHeight = maxScrollOffset;
 		// iterate over skipped options to correctly calculate max scroll offset
 		for (; sectionIndex < sections.length; sectionIndex++) {
 			if (sections[sectionIndex].filtered) {
@@ -569,11 +609,22 @@ public class OptionsOverlay extends OverlayOpsuState {
 	}
 
 	private void renderTitle() {
-		int textWidth = width - navButtonSize;
+		int textWidth = currentWidth - navButtonSize;
 		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize,
 			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
 		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
 			textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
+
+		int y = lastOptionHeight - scrollHandler.getIntPosition();
+		y += Fonts.LARGE.getLineHeight() * 2.5f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.PROJECT_NAME + " " + updater.getCurrentVersion(), COL_WHITE);
+		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.DANCE_REPOSITORY_URI.toString(), COL_WHITE);
+		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
+			y, Constants.REPOSITORY_URI.toString(), COL_WHITE);
 	}
 
 	private void renderSearch(Graphics g) {
@@ -581,7 +632,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
-			g.fillRect(navButtonSize, 0, width, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+			g.fillRect(navButtonSize, 0, currentWidth, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
 		}
 		Color searchCol = COL_WHITE;
 		float invalidProgress = 0f;
@@ -597,7 +648,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (lastSearchText.length() > 0) {
 			searchText = lastSearchText;
 		}
-		int textWidth = width - navButtonSize;
+		int textWidth = currentWidth - navButtonSize;
 		if (invalidSearchAnimationProgress > 0) {
 			g.rotate(navButtonSize + textWidth / 2, ypos, invalidProgress * invalidSearchTextRotation);
 		}
@@ -611,33 +662,37 @@ public class OptionsOverlay extends OverlayOpsuState {
 		g.resetTransform();
 	}
 
-	@Override
 	public void hide() {
+		if (!this.active) {
+			return;
+		}
+		acceptInput = active = false;
 		searchField.setFocused(false);
-		acceptInput = false;
-		SoundController.playSound(SoundEffect.MENUBACK);
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
+		hoverOption = null;
 	}
 
-	@Override
 	public void show() {
 		navHoverTime = 0;
 		indicatorPos = -optionHeight;
 		indicatorOffsetToNextPos = 0;
 		indicatorMoveAnimationTime = 0;
 		indicatorHideAnimationTime = 0;
-		acceptInput = true;
-		active = true;
+		acceptInput = active = true;
 		animationtime = 0;
 		resetSearch();
+		if (this.dirty) {
+			this.revalidate();
+		}
 	}
 
-	@Override
-	public void onPreRenderUpdate() {
-		int mouseX = displayContainer.mouseX;
-		int mouseY = displayContainer.mouseY;
-		int delta = displayContainer.renderDelta;
+	public void preRenderUpdate() {
+		if (!this.active && this.currentWidth == this.navButtonSize) {
+			return;
+		}
+
+		int delta = renderDelta;
 
 		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
@@ -684,7 +739,6 @@ public class OptionsOverlay extends OverlayOpsuState {
 		prevMouseY = mouseY;
 		updateHoverOption(mouseX, mouseY);
 		updateIndicatorAlpha();
-		UI.getBackButton().hoverUpdate(delta, mouseX, mouseY);
 		if (isAdjustingSlider) {
 			int sliderValue = ((NumericOption) hoverOption).val;
 			updateSliderOption();
@@ -716,7 +770,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateIndicatorAlpha() {
 		if (hoverOption == null) {
 			if (indicatorHideAnimationTime < INDICATORHIDEANIMATIONTIME) {
-				indicatorHideAnimationTime += displayContainer.renderDelta;
+				indicatorHideAnimationTime += renderDelta;
 				if (indicatorHideAnimationTime > INDICATORHIDEANIMATIONTIME) {
 					indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME;
 				}
@@ -725,7 +779,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				COL_INDICATOR.a = (1f - progress) * INDICATOR_ALPHA * showHideProgress;
 			}
 		} else if (indicatorHideAnimationTime > 0) {
-			indicatorHideAnimationTime -= displayContainer.renderDelta * 3;
+			indicatorHideAnimationTime -= renderDelta * 3;
 			if (indicatorHideAnimationTime < 0) {
 				indicatorHideAnimationTime = 0;
 			}
@@ -737,11 +791,11 @@ public class OptionsOverlay extends OverlayOpsuState {
 	private void updateShowHideAnimation(int delta) {
 		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
-			width = targetWidth;
+			currentWidth = targetWidth;
 			showHideProgress = 1f;
 			return;
 		}
-		optionWidth = width - optionStartX - paddingRight;
+		optionWidth = currentWidth - optionStartX - paddingRight;
 
 		// navigation elemenst fade out with a different animation
 		float navProgress;
@@ -763,7 +817,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
 			showHideProgress = hideAnimationStartProgress * AnimationEquation.IN_EXPO.calc(showHideProgress);
 		}
-		width = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
+		currentWidth = navButtonSize + (int) (showHideProgress * (targetWidth - navButtonSize));
 		COL_NAV_FILTERED.a = COL_NAV_INACTIVE.a = COL_NAV_FILTERED_HOVERED.a = COL_NAV_INDICATOR.a =
 			COL_NAV_WHITE.a = COL_NAV_BG.a = navProgress;
 		COL_BG.a = BG_ALPHA * showHideProgress;
@@ -775,14 +829,23 @@ public class OptionsOverlay extends OverlayOpsuState {
 		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
-	@Override
-	public boolean onMousePressed(int button, int x, int y) {
+	public boolean mousePressed(int button, int x, int y) {
+		if (!this.active) {
+			return false;
+		}
+		if (x > this.currentWidth) {
+			this.isDraggingFromOutside = true;
+			return false;
+		}
+		
+		wasPressed = true;
+
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
 			return true;
 		}
 
-		if (x > width) {
+		if (x > currentWidth) {
 			return false;
 		}
 
@@ -794,6 +857,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
 			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
+				unchangedSliderValue = ((NumericOption) hoverOption).val;
 				updateSliderOption();
 			}
 		}
@@ -801,14 +865,32 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onMouseReleased(int button, int x, int y) {
-		selectedOption = null;
-		if (isAdjustingSlider && listener != null) {
-			listener.onSaveOption(hoverOption);
+	public boolean mouseReleased(int button, int x, int y) {
+		this.isDraggingFromOutside = false;
+		if (!this.active || (!wasPressed && x > this.currentWidth)) {
+			return false;
 		}
-		isAdjustingSlider = false;
+		
+		wasPressed = false;
+
+		selectedOption = null;
+		if (isAdjustingSlider) {
+			if (listener != null) {
+				listener.onSaveOption(hoverOption);
+			}
+			updateHoverOption(x, y);
+			isAdjustingSlider = false;
+		}
 		sliderOptionLength = 0;
+
+		if (backButton.contains(x, y)){
+			SoundController.playSound(SoundEffect.MENUBACK);
+			hide();
+			if (listener != null) {
+				listener.onLeaveOptionsMenu();
+			}
+			return true;
+		}
 
 		if (x > navWidth) {
 			if (openDropdownMenu != null) {
@@ -873,18 +955,14 @@ public class OptionsOverlay extends OverlayOpsuState {
 			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
 			scrollHandler.scrollToPosition(sectionPosition);
 		}
-
-		if (UI.getBackButton().contains(x, y)){
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
-		}
 		return true;
 	}
 
-	@Override
-	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+		if (!this.active || this.isDraggingFromOutside) {
+			return false;
+		}
+
 		if (!isAdjustingSlider) {
 			int diff = newy - oldy;
 			if (diff != 0) {
@@ -894,16 +972,22 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onMouseWheelMoved(int delta) {
+	public boolean mouseWheelMoved(int delta) {
+		if (!this.active || mouseX > this.currentWidth) {
+			return false;
+		}
+
 		if (!isAdjustingSlider) {
 			scrollHandler.scrollOffset(-delta);
 		}
 		return true;
 	}
 
-	@Override
-	public boolean onKeyPressed(int key, char c) {
+	public boolean keyPressed(int key, char c) {
+		if (!this.active) {
+			return false;
+		}
+
 		if (keyEntryRight) {
 			if (Utils.isValidGameKey(key)) {
 				OPTION_KEY_RIGHT.intval = key;
@@ -921,6 +1005,9 @@ public class OptionsOverlay extends OverlayOpsuState {
 		}
 
 		if (key == Keyboard.KEY_ESCAPE) {
+			if (isAdjustingSlider) {
+				cancelAdjustingSlider();
+			}
 			if (openDropdownMenu != null) {
 				openDropdownMenu.keyPressed(key, c);
 				return true;
@@ -930,6 +1017,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 				updateHoverOption(prevMouseX, prevMouseY);
 				return true;
 			}
+			SoundController.playSound(SoundEffect.MENUBACK);
 			hide();
 			if (listener != null) {
 				listener.onLeaveOptionsMenu();
@@ -961,14 +1049,20 @@ public class OptionsOverlay extends OverlayOpsuState {
 		return true;
 	}
 
-	@Override
-	public boolean onKeyReleased(int key, char c) {
+	public boolean keyReleased(int key, char c) {
 		return false;
+	}
+
+	private void cancelAdjustingSlider() {
+		if (isAdjustingSlider) {
+			isAdjustingSlider = false;
+			((NumericOption) hoverOption).setValue(unchangedSliderValue);
+		}
 	}
 
 	private void updateSliderOption() {
 		NumericOption o = (NumericOption) hoverOption;
-		int value = o.min + Math.round((float) (o.max - o.min) * (displayContainer.mouseX - sliderOptionStartX) / (sliderOptionLength));
+		int value = o.min + Math.round((float) (o.max - o.min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
 		o.setValue(Utils.clamp(value, o.min, o.max));
 	}
 
@@ -1000,6 +1094,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 
 	private void updateHoverOption(int mouseX, int mouseY) {
 		if (mouseX < navWidth) {
+			cancelAdjustingSlider();
 			hoverOption = null;
 			return;
 		}
@@ -1011,7 +1106,7 @@ public class OptionsOverlay extends OverlayOpsuState {
 			return;
 		}
 		hoverOption = null;
-		if (mouseX > width) {
+		if (mouseX > currentWidth) {
 			return;
 		}
 
@@ -1118,5 +1213,4 @@ public class OptionsOverlay extends OverlayOpsuState {
 		void onLeaveOptionsMenu();
 		void onSaveOption(Option option);
 	}
-
 }

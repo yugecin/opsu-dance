@@ -29,14 +29,13 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.UnicodeFont;
-import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.components.Component;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class DropdownMenu<E> extends Component {
 
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
-
-	private final DisplayContainer displayContainer;
 
 	private E[] items;
 	private String[] itemNames;
@@ -61,8 +60,7 @@ public class DropdownMenu<E> extends Component {
 	private Image chevronDown;
 	private Image chevronRight;
 
-	public DropdownMenu(DisplayContainer displayContainer, E[] items, int x, int y, int width) {
-		this.displayContainer = displayContainer;
+	public DropdownMenu(E[] items, int x, int y, int width) {
 		init(items, x, y, width);
 	}
 
@@ -143,13 +141,13 @@ public class DropdownMenu<E> extends Component {
 
 	@Override
 	public void render(Graphics g) {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 
 		// update animation
 		expandProgress.update((expanded) ? delta : -delta * 2);
 
 		// get parameters
-		int idx = getIndexAt(displayContainer.mouseY);
+		int idx = getIndexAt(mouseY);
 		float t = expandProgress.getValue();
 		if (expanded) {
 			t = AnimationEquation.OUT_CUBIC.calc(t);
@@ -245,7 +243,7 @@ public class DropdownMenu<E> extends Component {
 			return;
 		}
 
-		int idx = getIndexAt(displayContainer.mouseY);
+		int idx = getIndexAt(mouseY);
 		if (idx == -2) {
 			this.expanded = false;
 			return;

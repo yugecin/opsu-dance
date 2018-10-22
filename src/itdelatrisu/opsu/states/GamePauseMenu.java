@@ -32,6 +32,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -73,11 +74,11 @@ public class GamePauseMenu extends BaseOpsuState {
 
 	@Override
 	public void preRenderUpdate() {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
-		continueButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
-		retryButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
-		backButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		continueButton.hoverUpdate(delta, mouseX, mouseY);
+		retryButton.hoverUpdate(delta, mouseX, mouseY);
+		backButton.hoverUpdate(delta, mouseX, mouseY);
 	}
 
 	@Override
@@ -89,9 +90,9 @@ public class GamePauseMenu extends BaseOpsuState {
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
 			if (key == OPTION_KEY_LEFT.intval) {
-				mousePressed(Input.MOUSE_LEFT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+				mousePressed(Input.MOUSE_LEFT_BUTTON, mouseX, mouseY);
 			} else if (key == OPTION_KEY_RIGHT.intval) {
-				mousePressed(Input.MOUSE_RIGHT_BUTTON, displayContainer.mouseX, displayContainer.mouseY);
+				mousePressed(Input.MOUSE_RIGHT_BUTTON, mouseX, mouseY);
 			}
 		}
 
@@ -113,6 +114,15 @@ public class GamePauseMenu extends BaseOpsuState {
 		if (key == KEY_R && input.isControlDown()) {
 			gameState.setRestart(Game.Restart.MANUAL);
 			displayContainer.switchState(gameState);
+			return true;
+		}
+
+		if (key == KEY_SUBTRACT || key == KEY_MINUS) {
+			gameState.adjustLocalMusicOffset(-5);
+			return true;
+		}
+		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+			gameState.adjustLocalMusicOffset(5);
 			return true;
 		}
 
@@ -193,9 +203,9 @@ public class GamePauseMenu extends BaseOpsuState {
 	 */
 	public void loadImages() {
 		// initialize buttons
-		continueButton = new MenuButton(GameImage.PAUSE_CONTINUE.getImage(), displayContainer.width / 2f, displayContainer.height * 0.25f);
-		retryButton = new MenuButton(GameImage.PAUSE_RETRY.getImage(), displayContainer.width / 2f, displayContainer.height * 0.5f);
-		backButton = new MenuButton(GameImage.PAUSE_BACK.getImage(), displayContainer.width / 2f, displayContainer.height * 0.75f);
+		continueButton = new MenuButton(PAUSE_CONTINUE.getImage(), width2, height * 0.25f);
+		retryButton = new MenuButton(PAUSE_RETRY.getImage(), width2, height2);
+		backButton = new MenuButton(PAUSE_BACK.getImage(), width2, height * 0.75f);
 		final int buttonAnimationDuration = 300;
 		continueButton.setHoverAnimationDuration(buttonAnimationDuration);
 		retryButton.setHoverAnimationDuration(buttonAnimationDuration);

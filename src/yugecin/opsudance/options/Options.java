@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.events.BarNotifListener;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
@@ -128,6 +127,8 @@ public class Options {
 
 	public static final ToggleOption OPTION_NOSINGLEINSTANCE = new ToggleOption("-", "NoSingleInstance", "-", false);
 
+	public static final ToggleOption OPTION_STARFOUNTAINS = new ToggleOption("Star fountains in main menu", "StarFountains", "Show star bursts in main menu", true);
+
 	// in-game options
 	public static final ListOption OPTION_SCREEN_RESOLUTION = new ListOption("Screen Resolution", "ScreenResolution", "Change the size of the game.") {
 		private final String[] resolutions = {
@@ -167,6 +168,7 @@ public class Options {
 		public void clickListItem(int index){
 			idx = index;
 			displayContainer.updateDisplayMode(resolutions[idx]);
+			this.onChange();
 		}
 
 		@Override
@@ -185,7 +187,14 @@ public class Options {
 	};
 
 	public static final ToggleOption OPTION_ALLOW_LARGER_RESOLUTIONS = new ToggleOption("Allow large resolutions", "AllowLargeRes", "Allow resolutions larger than the native resolution", false);
-	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Restart to apply changes.", false);
+	public static final ToggleOption OPTION_FULLSCREEN = new ToggleOption("Fullscreen Mode", "Fullscreen", "Fullscreen mode", false) {
+		@Override
+		public void toggle()
+		{
+			super.toggle();
+			displayContainer.updateDisplayMode(width, height);
+		}
+	};
 	public static final ListOption OPTION_SKIN = new ListOption("Skin", "Skin", "Change how the game looks.") {
 
 		@Override
@@ -202,6 +211,7 @@ public class Options {
 		public void clickListItem(int index){
 			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
 			skinservice.reloadSkin();
+			this.onChange();
 		}
 
 		@Override
@@ -215,16 +225,34 @@ public class Options {
 		}
 	};
 
-	public static final NumericOption OPTION_TARGET_UPS = new NumericOption("target UPS", "targetUPS", "Higher values result in less input lag and smoother cursor trail, but may cause high CPU usage.", 480, 20, 1000) {
+	public static final int[] targetUPS = { 60, 120, 240, 480, 960, 1000, -1 };
+
+	public static final NumericOption OPTION_TARGET_UPS = new NumericOption("target UPS", "targetUPS", "Higher values result in less input lag and smoother cursor trail, but may cause high CPU usage.", 2, 0, targetUPS.length - 1) {
 		@Override
 		public String getValueString () {
-			return String.format("%dups", val);
+			if (targetUPS[val] == -1) {
+				return "unlimited";
+			}
+			return String.valueOf(targetUPS[val]);
 		}
 
 		@Override
-		public void setValue ( int value){
+		public void setValue(int value) {
+			if (value < 0 || targetUPS.length <= value) {
+				return;
+			}
+			final int ups = targetUPS[value];
+			final int fps = targetFPS[targetFPSIndex];
 			super.setValue(value);
-			displayContainer.setUPS(value);
+			displayContainer.setUPS(ups);
+			if (ups != -1 && fps > ups) {
+				for (int i = targetFPSIndex - 1; i >= 0; i--) {
+					if (targetFPS[i] >= ups) {
+						OPTION_TARGET_FPS.clickListItem(i);
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -256,7 +284,17 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			targetFPSIndex = index;
-			displayContainer.setFPS(targetFPS[targetFPSIndex]);
+			int fps = targetFPS[targetFPSIndex];
+			displayContainer.setFPS(fps);
+			if (targetUPS[OPTION_TARGET_UPS.val] < fps) {
+				for (int i = 0; i < targetUPS.length; i++) {
+					if (targetUPS[i] >= fps) {
+						OPTION_TARGET_UPS.setValue(i);
+						break;
+					}
+				}
+			}
+			this.onChange();
 		}
 
 		@Override
@@ -318,6 +356,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			this.index = index;
+			this.onChange();
 		}
 
 		@Override
@@ -386,7 +425,7 @@ public class Options {
 
 	public static final NumericOption OPTION_EFFECT_VOLUME = new NumericOption("Effects", "VolumeEffect", "Volume of menu and game sounds.", 70, 0, 100);
 	public static final NumericOption OPTION_HITSOUND_VOLUME = new NumericOption("Hit Sounds", "VolumeHitSound", "Volume of hit sounds.", 30, 0, 100);
-	public static final NumericOption OPTION_MUSIC_OFFSET = new NumericOption("Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
+	public static final NumericOption OPTION_MUSIC_OFFSET = new NumericOption("Global Music Offset", "Offset", "Adjust this value if hit objects are out of sync.", -75, -500, 500) {
 		@Override
 		public String getValueString () {
 			return String.format("%dms", val);
@@ -439,7 +478,7 @@ public class Options {
 	public static final ToggleOption OPTION_DISABLE_MOUSE_BUTTONS = new ToggleOption("Disable mouse buttons in play mode", "MouseDisableButtons", "This option will disable all mouse buttons. Specifically for people who use their keyboard to click.", false) {
 		@Override
 		public void toggle() {
-			BarNotifListener.EVENT.make().onBarNotif(state ?
+			barNotifs.send(state ?
 				"Mouse buttons are disabled." : "Mouse buttons are enabled.");
 		}
 	};
@@ -608,10 +647,11 @@ public class Options {
 		public void clickListItem(int index){
 			if (Game.isInGame && Dancer.moverFactories[index] instanceof PolyMoverFactory) {
 				// TODO remove this when #79 is fixed
-				BarNotifListener.EVENT.make().onBarNotif("This mover is disabled in the storyboard right now");
+				barNotifs.send("This mover is disabled in the storyboard right now");
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);
+			this.onChange();
 		}
 
 		@Override
@@ -701,6 +741,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.moverDirection = MoverDirection.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -731,6 +772,7 @@ public class Options {
 		public void clickListItem(int index){
 			val = index;
 			Dancer.sliderMoverController = Dancer.sliderMovers[index];
+			this.onChange();
 		}
 
 		@Override
@@ -753,6 +795,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.instance.setSpinnerIndex(index);
+			this.onChange();
 		}
 
 		@Override
@@ -797,6 +840,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorOverride = ObjectColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -824,6 +868,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorMirrorOverride = ObjectColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -858,6 +903,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override
@@ -885,6 +931,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
+			this.onChange();
 		}
 
 		@Override

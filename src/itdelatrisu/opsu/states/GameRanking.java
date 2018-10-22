@@ -38,7 +38,6 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.state.BaseOpsuState;
-import yugecin.opsudance.events.BarNotifListener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -67,10 +66,10 @@ public class GameRanking extends BaseOpsuState {
 		// buttons
 		Image retry = GameImage.PAUSE_RETRY.getImage();
 		Image replay = GameImage.PAUSE_REPLAY.getImage();
-		replayY = (displayContainer.height * 0.985f) - replay.getHeight() / 2f;
+		replayY = height * 0.985f - replay.getHeight() / 2f;
 		retryY = replayY - (replay.getHeight() / 2f) - (retry.getHeight() / 1.975f);
-		retryButton = new MenuButton(retry, displayContainer.width - (retry.getWidth() / 2f), retryY);
-		replayButton = new MenuButton(replay, displayContainer.width - (replay.getWidth() / 2f), replayY);
+		retryButton = new MenuButton(retry, width - (retry.getWidth() / 2f), retryY);
+		replayButton = new MenuButton(replay, width - (replay.getWidth() / 2f), replayY);
 		retryButton.setHoverFade();
 		replayButton.setHoverFade();
 	}
@@ -80,7 +79,7 @@ public class GameRanking extends BaseOpsuState {
 		Beatmap beatmap = MusicController.getBeatmap();
 
 		// background
-		if (!beatmap.drawBackground(displayContainer.width, displayContainer.height, 0.7f, true)) {
+		if (!beatmap.drawBackground(width, height, 0.7f, true)) {
 			GameImage.PLAYFIELD.getImage().draw(0, 0);
 		}
 
@@ -91,7 +90,7 @@ public class GameRanking extends BaseOpsuState {
 		replayButton.draw();
 		if (data.isGameplay() && !GameMod.AUTO.isActive())
 			retryButton.draw();
-		UI.getBackButton().draw(g);
+		backButton.draw(g);
 
 		UI.draw(g);
 
@@ -100,15 +99,15 @@ public class GameRanking extends BaseOpsuState {
 
 	@Override
 	public void preRenderUpdate() {
-		int delta = displayContainer.renderDelta;
+		int delta = renderDelta;
 		UI.update(delta);
-		replayButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		replayButton.hoverUpdate(delta, mouseX, mouseY);
 		if (data.isGameplay()) {
-			retryButton.hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+			retryButton.hoverUpdate(delta, mouseX, mouseY);
 		} else {
 			MusicController.loopTrackIfEnded(true);
 		}
-		UI.getBackButton().hoverUpdate(delta, displayContainer.mouseX, displayContainer.mouseY);
+		backButton.hoverUpdate();
 	}
 
 	@Override
@@ -140,7 +139,7 @@ public class GameRanking extends BaseOpsuState {
 		}
 
 		// back to menu
-		if (UI.getBackButton().contains(x, y)) {
+		if (backButton.contains(x, y)) {
 			returnToSongMenu();
 			return true;
 		}
@@ -157,14 +156,14 @@ public class GameRanking extends BaseOpsuState {
 					gameState.setRestart((data.isGameplay()) ? Game.Restart.REPLAY : Game.Restart.NEW);
 					returnToGame = true;
 				} catch (FileNotFoundException e) {
-					BarNotifListener.EVENT.make().onBarNotif("Replay file not found.");
+					barNotifs.send("Replay file not found.");
 				} catch (IOException e) {
 					Log.error("Failed to load replay data.", e);
-					BarNotifListener.EVENT.make().onBarNotif(
-						"Failed to load replay data. See log for details.");
+					barNotifs.send("Failed to load replay data. See log for details.");
 				}
-			} else
-				BarNotifListener.EVENT.make().onBarNotif("Replay file not found.");
+			} else {
+				barNotifs.send("Replay file not found.");
+			}
 		}
 
 		// retry

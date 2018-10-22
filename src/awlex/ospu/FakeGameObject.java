@@ -10,7 +10,7 @@ import itdelatrisu.opsu.objects.curves.Vec2f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
-import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * This class is just a dummy {@link GameObject} to place in the middle of 2 GameObjects.
@@ -24,8 +24,8 @@ public class FakeGameObject extends GameObject {
     public FakeGameObject() {
         this.start = new Vec2f();
         this.end = new Vec2f();
-        this.start.x = this.end.x = displayContainer.width / 2;
-        this.start.y = this.end.y = displayContainer.height / 2;
+        this.start.x = this.end.x = width2;
+        this.start.y = this.end.y = height2;
     }
 
     public FakeGameObject(GameObject start, GameObject end) {

@@ -18,9 +18,12 @@
 
 package itdelatrisu.opsu.ui;
 
+import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+
+import java.awt.Point;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -98,9 +101,6 @@ public class MenuButton {
 	/** The default max rotation angle of the button. */
 	private static final float DEFAULT_ANGLE_MAX = 30f;
 
-	/** The last scale at which the button was drawn. */
-	private float lastScale = 1f;
-
 	/**
 	 * Creates a new button from an Image.
 	 * @param img the image
@@ -113,6 +113,14 @@ public class MenuButton {
 		this.y = y;
 		this.xRadius = img.getWidth() / 2f;
 		this.yRadius = img.getHeight() / 2f;
+	}
+
+	public MenuButton(GameImage img, float topleftX, float topleftY) {
+		this.img = img.getImage();
+		this.xRadius = img.getWidth() / 2f;
+		this.yRadius = img.getHeight() / 2f;
+		this.x = topleftX + this.xRadius;
+		this.y = topleftY + this.yRadius;
 	}
 
 	/**
@@ -168,11 +176,20 @@ public class MenuButton {
 	 * Returns the center y coordinate.
 	 */
 	public float getY() { return y; }
+	
+	public Point bottomLeft() {
+		return new Point((int) (x - xRadius), (int) (y + yRadius));
+	}
 
 	/**
-	 * Returns the last scale at which the button was drawn.
+	 * Returns the scale multiplier, from the hover effect, used to draw the button.
 	 */
-	public float getLastScale() { return lastScale; }
+	public float getCurrentHoverExpandValue() {
+		if ((hoverEffect & EFFECT_EXPAND) == 0) {
+			return 1f;
+		}
+		return scale.getValue();
+	}
 
 	/**
 	 * Sets text to draw in the middle of the button.
@@ -229,7 +246,6 @@ public class MenuButton {
 				xScaleOffset = image.getWidth() / 2f - xRadius;
 				yScaleOffset = image.getHeight() / 2f - yRadius;
 			}
-			lastScale = scaleOverride;
 			if (hoverEffect == 0)
 				image.draw(x - xRadius, y - yRadius, filter);
 			else {
@@ -243,7 +259,6 @@ public class MenuButton {
 							xScaleOffset = image.getWidth() / 2f - xRadius;
 							yScaleOffset = image.getHeight() / 2f - yRadius;
 						}
-						lastScale *= scale.getValue();
 					}
 				}
 				if ((hoverEffect & EFFECT_FADE) > 0)

@@ -22,6 +22,7 @@ import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.states.Game;
+import yugecin.opsudance.options.Options;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +34,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import itdelatrisu.opsu.ui.Colors;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
@@ -45,10 +45,10 @@ import org.newdawn.slick.openal.SoundStore;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
-import yugecin.opsudance.events.BarNotifListener;
-import yugecin.opsudance.events.BubNotifListener;
 
+import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -103,8 +103,7 @@ public class MusicController {
 		if (lastBeatmap == null || !beatmap.audioFilename.equals(lastBeatmap.audioFilename)) {
 			final File audioFile = beatmap.audioFilename;
 			if (!audioFile.isFile() && !ResourceLoader.resourceExists(audioFile.getPath())) {
-				BarNotifListener.EVENT.make().onBarNotif(String.format("Could not find track '%s'.",
-					audioFile.getName()));
+				barNotifs.sendf("Could not find track '%s'.", audioFile.getName());
 				return;
 			}
 
@@ -159,7 +158,7 @@ public class MusicController {
 		} catch (Exception e) {
 			String err = String.format("Could not play track '%s'.", file.getName());
 			Log.error(err, e);
-			BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+			bubNotifs.send(BUB_RED, err);
 		}
 	}
 
@@ -217,6 +216,17 @@ public class MusicController {
 		if (trackPosition < beatTime)
 			trackPosition += (beatLength / 100.0) * (beatTime / lastTimingPoint.getBeatLength());
 		return (float) ((((trackPosition - beatTime) * 100.0) % beatLength) / beatLength);
+	}
+
+	/**
+	 * gets the current beat length
+	 * @return
+	 */
+	public static Float getBeatLength() {
+		if (!updateTimingPoint())
+			return null;
+
+		return lastTimingPoint.getBeatLength();
 	}
 
 	/**
@@ -349,10 +359,14 @@ public class MusicController {
 	 * If no track is loaded, 0 will be returned.
 	 */
 	public static int getPosition() {
+		int offset = OPTION_MUSIC_OFFSET.val;
+		if (lastBeatmap != null)
+			offset += lastBeatmap.localMusicOffset;
+
 		if (isPlaying())
-			return (int) (player.getPosition() * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset);
+			return (int) (player.getPosition() * 1000 + offset);
 		else if (isPaused())
-			return Math.max((int) (pauseTime * 1000 + OPTION_MUSIC_OFFSET.val + Game.currentMapMusicOffset), 0);
+			return Math.max((int) (pauseTime * 1000 + offset), 0);
 		else
 			return 0;
 	}

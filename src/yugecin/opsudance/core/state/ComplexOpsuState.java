@@ -130,7 +130,7 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
 		for (Component component : components) {
-			component.updateHover(displayContainer.mouseX, displayContainer.mouseY);
+			component.updateHover(mouseX, mouseY);
 			component.preRenderUpdate();
 		}
 		for (OverlayOpsuState overlay : overlays) {

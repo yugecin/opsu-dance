@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,15 @@ package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.events.SkinChangedListener;
 
 import java.io.StringWriter;
 
-public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListener {
+import static yugecin.opsudance.core.InstanceContainer.*;
 
+public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListener,
+	SkinChangedListener
+{
 	/**
 	 * state is dirty when resolution or skin changed but hasn't rendered yet
 	 */
@@ -31,7 +35,8 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListe
 	private boolean isCurrentState;
 
 	public BaseOpsuState() {
-		ResolutionChangedListener.EVENT.addListener(this);
+		displayContainer.addResolutionChangedListener(this);
+		skinservice.addSkinChangedListener(this);
 	}
 
 	protected void revalidate() {
@@ -48,9 +53,18 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListe
 	@Override
 	public void render(Graphics g) {
 	}
+	
+	@Override
+	public void onSkinChanged(String name) {
+		makeDirty();
+	}
 
 	@Override
 	public void onResolutionChanged(int w, int h) {
+		makeDirty();
+	}
+	
+	private void makeDirty() {
 		if (isCurrentState) {
 			revalidate();
 			return;

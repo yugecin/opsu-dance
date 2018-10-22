@@ -2,7 +2,7 @@
 
 **Table of contents**
 
-* [What](#What) - [Why](#why) - [Downloads](#downloads) - [Running](#running) - [Building a JAR](#building-a-jar) - [Credits](#credits) - [License](#license)
+* [What](#what) - [Why](#why) - [Downloads](#downloads) - [Running](#running) - [Building a JAR](#building-a-jar) - [Credits](#credits) - [License](#license)
 
 What
 ----
@@ -38,10 +38,7 @@ You should know how to do this. It's recommended to use a working directory like
 
 ### Using apache ant
 
-Resolve dependencies first, use either:
-
-* `ant ivyresolve` to download dependencies using apache ivy
-* `ant mvnresolve` to download dependencies using apache mvn
+Resolve dependencies first by doing `ant mvnresolve` or `mvn initialize`
 
 Then do `ant run`
 

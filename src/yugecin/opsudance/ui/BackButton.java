@@ -1,6 +1,6 @@
 /*
  * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
+ * Copyright (C) 2017-2018 yugecin
  *
  * opsu!dance is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.*;
-import yugecin.opsudance.core.DisplayContainer;
+
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BackButton {
 
@@ -80,7 +81,7 @@ public class BackButton {
 	/** The real button with, determined by the size and animations. */
 	private int realButtonWidth;
 
-	public BackButton(DisplayContainer container) {
+	public BackButton() {
 		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
 			backButton = null;
 			textWidth = Fonts.MEDIUM.getWidth("back");
@@ -90,7 +91,7 @@ public class BackButton {
 			paddingY *= 0.736f;
 			paddingX = paddingY / 2f;
 			chevronBaseSize = paddingY * 3f / 2f;
-			buttonYpos = (int) (container.height - paddingY * 4f);
+			buttonYpos = height - (int) (paddingY * 4f);
 			slopeImageSize = (int) (paddingY * 3f);
 			slopeImageSlopeWidth = (int) (slopeImageSize * 0.295f);
 			firstButtonWidth = slopeImageSize;
@@ -101,10 +102,10 @@ public class BackButton {
 
 		if (GameImage.MENU_BACK.getImages() != null) {
 			Animation back = GameImage.MENU_BACK.getAnimation(120);
-			backButton = new MenuButton(back, back.getWidth() / 2f, container.height - (back.getHeight() / 2f));
+			backButton = new MenuButton(back, back.getWidth() / 2f, height - (back.getHeight() / 2f));
 		} else {
 			Image back = GameImage.MENU_BACK.getImage();
-			backButton = new MenuButton(back, back.getWidth() / 2f, container.height - (back.getHeight() / 2f));
+			backButton = new MenuButton(back, back.getWidth() / 2f, height - (back.getHeight() / 2f));
 		}
 		backButton.setHoverAnimationDuration(350);
 		backButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
@@ -171,11 +172,11 @@ public class BackButton {
 	/**
 	 * Processes a hover action depending on whether or not the cursor
 	 * is hovering over the button.
-	 * @param delta the delta interval
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
 	 */
-	public void hoverUpdate(int delta, int cx, int cy) {
+	public void hoverUpdate() {
+		final int delta = renderDelta;
+		final int cx = mouseX;
+		final int cy = mouseY;
 		if (backButton != null) {
 			backButton.hoverUpdate(delta, cx, cy);
 			return;

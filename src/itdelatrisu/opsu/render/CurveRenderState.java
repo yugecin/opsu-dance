@@ -48,8 +48,6 @@ import static yugecin.opsudance.options.Options.*;
  * @author Bigpet {@literal <dravorek (at) gmail.com>}
  */
 public class CurveRenderState {
-	/** The width and height of the display container this curve gets drawn into. */
-	protected static int containerWidth, containerHeight;
 
 	/** Thickness of the curve. */
 	protected static int scale;
@@ -79,14 +77,9 @@ public class CurveRenderState {
 	/**
 	 * Set the width and height of the container that Curves get drawn into.
 	 * Should be called before any curves are drawn.
-	 * @param width the container width
-	 * @param height the container height
 	 * @param circleDiameter the circle diameter
 	 */
-	public static void init(int width, int height, float circleDiameter) {
-		containerWidth = width;
-		containerHeight = height;
-
+	public static void init(float circleDiameter) {
 		// equivalent to what happens in Slider.init()
 		scale = (int) (circleDiameter * HitObject.getXMultiplier());  // convert from Osupixels (640x480)
 		//scale = scale * 118 / 128; //for curves exactly as big as the sliderball
@@ -410,8 +403,6 @@ public class CurveRenderState {
 			x1 = m[0];
 			y1 = m[1];
 		}
-		float divx = containerWidth / 2.0f;
-		float divy = containerHeight / 2.0f;
 		float offx = -1.0f;
 		float offy = 1.0f;
 		float radius = scale / 2;
@@ -419,8 +410,8 @@ public class CurveRenderState {
 		for (int i = 0; i < NewCurveStyleState.unitCone.length / 6; ++i) {
 			buff.put(NewCurveStyleState.unitCone[i * 6 + 0]);
 			buff.put(NewCurveStyleState.unitCone[i * 6 + 1]);
-			buff.put(offx + (x1 + radius * NewCurveStyleState.unitCone[i * 6 + 2]) / divx);
-			buff.put(offy - (y1 + radius * NewCurveStyleState.unitCone[i * 6 + 3]) / divy);
+			buff.put(offx + (x1 + radius * NewCurveStyleState.unitCone[i * 6 + 2]) / width2);
+			buff.put(offy - (y1 + radius * NewCurveStyleState.unitCone[i * 6 + 3]) / height2);
 			buff.put(NewCurveStyleState.unitCone[i * 6 + 4]);
 			buff.put(NewCurveStyleState.unitCone[i * 6 + 5]);
 		}

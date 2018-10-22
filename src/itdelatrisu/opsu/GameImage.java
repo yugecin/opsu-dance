@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu;
 
-import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 
 import java.io.File;
@@ -31,10 +30,11 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import yugecin.opsudance.core.errorhandling.ErrorHandler;
-import yugecin.opsudance.events.BubNotifListener;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
+import static itdelatrisu.opsu.ui.Colors.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -90,7 +90,9 @@ public enum GameImage {
 	PLAYFIELD ("playfield", "png|jpg", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.7f);
+			if (img.getWidth() == 1 && img.getHeight() == 1) {
+				img = MENU_BG.getImage().getFlippedCopy(/*h*/ false, /*v*/ true);
+			}
 			return img.getScaledCopy(w, h);
 		}
 	},
@@ -230,14 +232,14 @@ public enum GameImage {
 	MOD_AUTOPILOT ("selection-mod-relax2", "png", false, false),
 
 	// Selection Buttons
+	SELECTION_MODE ("selection-mode", "png", false, false),
+	SELECTION_MODE_OVERLAY ("selection-mode-over", "png", false, false),
 	SELECTION_MODS ("selection-mods", "png", false, false),
 	SELECTION_MODS_OVERLAY ("selection-mods-over", "png", false, false),
 	SELECTION_RANDOM ("selection-random", "png", false, false),
 	SELECTION_RANDOM_OVERLAY ("selection-random-over", "png", false, false),
 	SELECTION_OPTIONS ("selection-options", "png", false, false),
 	SELECTION_OPTIONS_OVERLAY ("selection-options-over", "png", false, false),
-	SELECTION_OTHER_OPTIONS ("selection-selectoptions", "png", false, false),
-	SELECTION_OTHER_OPTIONS_OVERLAY ("selection-selectoptions-over", "png", false, false),
 
 	// Replay Speed Buttons
 	REPLAY_PLAYBACK_NORMAL ("playback-normal", "png", false, false),
@@ -299,25 +301,37 @@ public enum GameImage {
 	MENU_LOGO ("logo2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
 		}
 	},
-	MENU_LOGO_PIECE ("logo2piece2", "png", false, true) {
+	MENU_LOGO_PIECE ("logo2piece", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
 		}
 	},
-	MENU_PLAY ("menu-play2", "png", false, false) {
+	MENU_LOGO_PULSE ("logo2pulse", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
 		}
 	},
-	MENU_EXIT ("menu-exit2", "png", false, false) {
+	MENU_PLAY ("menu-play", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy(0.8f);
+			return img.getScaledCopy(0.75f);
+		}
+	},
+	MENU_EXIT ("menu-exit", "png", false, false) {
+		@Override
+		protected Image process_sub(Image img, int w, int h) {
+			return img.getScaledCopy(0.75f);
+		}
+	},
+	MENU_OPTIONS ("menu-options", "png", false, false) {
+		@Override
+		protected Image process_sub(Image img, int w, int h) {
+			return img.getScaledCopy(0.75f);
 		}
 	},
 	MENU_BUTTON_MID ("button-middle", "png", false, false),
@@ -326,21 +340,25 @@ public enum GameImage {
 	STAR ("star", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getImage().getHeight() * 0.16f) / img.getHeight());
+			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.16f) / img.getHeight());
 		}
 	},
 	STAR2 ("star2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getImage().getHeight() * 0.33f) / img.getHeight());
+			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.33f) / img.getHeight());
 		}
 	},
 
 	// Music Player Buttons
 	MUSIC_PLAY ("music-play", "png", false, false),
 	MUSIC_PAUSE ("music-pause", "png", false, false),
+	MUSIC_STOP ("music-stop", "png", false, false),
 	MUSIC_NEXT ("music-next", "png", false, false),
 	MUSIC_PREVIOUS ("music-previous", "png", false, false),
+	MUSIC_NOWPLAYING ("music-np", "png", false, false),
+	MUSIC_NOWPLAYING_BG_BLACK ("music-np-bg-black", "png", false, false),
+	MUSIC_NOWPLAYING_BG_WHITE ("music-np-bg-white", "png", false, false),
 
 	DOWNLOADS ("downloads", "png", false, false) {
 		@Override
@@ -384,13 +402,6 @@ public enum GameImage {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy((h / 14f) / img.getHeight());
-		}
-	},
-	OPTIONS_BG ("options-background", "png|jpg", false, true) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.7f);
-			return img.getScaledCopy(w, h);
 		}
 	},
 	CHEVRON_DOWN ("chevron-down", "png", false, false),
@@ -646,6 +657,30 @@ public enum GameImage {
 		return (skinImage != null) ? skinImage : defaultImage;
 	}
 
+	public int getHeight() {
+		return getImage().getHeight();
+	}
+
+	public int getWidth() {
+		return getImage().getWidth();
+	}
+	
+	/**
+	 * Returns the image associated with this resource, with a scale applied.
+	 * The beatmap skin image takes priority over the default image.
+	 */
+	public Image getScaledImage(float scale) {
+		return this.getImage().getScaledCopy(scale);
+	}
+
+	/**
+	 * Returns the image associated with this resource, with a scale applied.
+	 * The beatmap skin image takes priority over the default image.
+	 */
+	public Image getScaledImage(int width, int height) {
+		return this.getImage().getScaledCopy(width, height);
+	}
+
 	/**
 	 * Returns an Animation based on the image array.
 	 * If no image array exists, returns the single image as an animation.
@@ -743,7 +778,7 @@ public enum GameImage {
 
 		String err = String.format("Could not find default image '%s'.", filename);
 		Log.warn(err);
-		BubNotifListener.EVENT.make().onBubNotif(err, Colors.BUB_RED);
+		bubNotifs.send(BUB_RED, err);
 	}
 
 	/**
@@ -806,8 +841,7 @@ public enum GameImage {
 						img = img.getScaledCopy(0.5f);
 					list.add(img);
 				} catch (SlickException e) {
-					BubNotifListener.EVENT.make().onBubNotif(
-						String.format("Failed to set image '%s'.", name), Colors.BUB_RED);
+					bubNotifs.sendf(BUB_RED, "Failed to set image '%s'.", name);
 					break;
 				}
 			}
@@ -834,8 +868,7 @@ public enum GameImage {
 					img = img.getScaledCopy(0.5f);
 				return img;
 			} catch (SlickException e) {
-				BubNotifListener.EVENT.make().onBubNotif(
-					String.format("Failed to set image '%s'.", filename), Colors.BUB_RED);
+				bubNotifs.sendf(BUB_RED, "Failed to set image '%s'.", filename);
 			}
 		}
 		return null;
