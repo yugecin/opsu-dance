@@ -51,7 +51,6 @@ import java.util.*;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -1500,6 +1499,11 @@ public class Game extends ComplexOpsuState {
 			}
 		});
 
+		if (replays != null) {
+			for (ReplayPlayback r : replays) {
+				r.cursor.destroy();
+			}
+		}
 		replays = new LinkedList<>();
 		float hueshift = 360f / files.length + 18f;
 		float hue = 0;
@@ -1533,7 +1537,7 @@ public class Game extends ComplexOpsuState {
 		for (ReplayPlayback r : replays) {
 			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, 1.0f, 1.0f).getRGB());
 			r.color = c;
-			r.cursor = new Cursor(c);
+			r.cursor.filter = c;
 			hue += hueshift;
 		}
 
@@ -1806,6 +1810,13 @@ public class Game extends ComplexOpsuState {
 		skippedToCheckpoint = false;
 
 		knorkesliders = null;
+
+		if (replays != null) {
+			for (ReplayPlayback r : replays) {
+				r.cursor.destroy();
+			}
+			replays.clear();
+		}
 
 		Dancer.instance.setGameObjects(null);
 

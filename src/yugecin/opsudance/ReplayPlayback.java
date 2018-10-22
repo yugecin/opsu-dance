@@ -20,7 +20,6 @@ package yugecin.opsudance;
 import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.replay.Replay;
 import itdelatrisu.opsu.replay.ReplayFrame;
-import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
@@ -48,7 +47,7 @@ public class ReplayPlayback {
 	private int frameIndex;
 	public Color color;
 	public Color originalcolor;
-	public Cursor cursor;
+	public final ReplayCursor cursor;
 	private int keydelay[];
 	public static final int SQSIZE = 15;
 	public static final int UNITHEIGHT = SQSIZE + 5;
@@ -80,7 +79,7 @@ public class ReplayPlayback {
 		this.originalcolor = new Color(color);
 		Color cursorcolor = new Color(color);
 		//cursorcolor.a = 0.5f;
-		cursor = new Cursor(cursorcolor);
+		cursor = new ReplayCursor(cursorcolor);
 		keydelay = new int[4];
 		this.player = replay.playerName;
 		this.playerwidth = Fonts.SMALLBOLD.getWidth(this.player);
@@ -299,7 +298,7 @@ public class ReplayPlayback {
 			y = height - y;
 		}
 		cursor.setCursorPosition(renderdelta, currentFrame.getScaledX(), y);
-		cursor.draw(false);
+		cursor.draw();
 	}
 
 	private void processKeys() {
@@ -322,11 +321,11 @@ public class ReplayPlayback {
 	public static class HitData {
 
 		int combobreaktime = -1;
-		LinkedList<Integer> time300 = new LinkedList();
-		LinkedList<Integer> time100 = new LinkedList();
-		LinkedList<Integer> time50 = new LinkedList();
-		LinkedList<AccData> acc = new LinkedList();
-		LinkedList<ComboData> combo = new LinkedList();
+		LinkedList<Integer> time300 = new LinkedList<>();
+		LinkedList<Integer> time100 = new LinkedList<>();
+		LinkedList<Integer> time50 = new LinkedList<>();
+		LinkedList<AccData> acc = new LinkedList<>();
+		LinkedList<ComboData> combo = new LinkedList<>();
 
 		public HitData(File file) {
 			try (InputStream in = new FileInputStream(file)) {
