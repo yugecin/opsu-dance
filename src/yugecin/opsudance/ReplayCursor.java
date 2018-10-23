@@ -129,9 +129,7 @@ public class ReplayCursor
 	public void setCursorPosition(int delta, int mouseX, int mouseY) {
 		nowtime = System.currentTimeMillis();
 
-		if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
-			//trail.add(new Trailpart(mouseX, mouseY));
-		}
+		addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY);
 		lastPosition.move(mouseX, mouseY);
 
 		int removecount = 0;

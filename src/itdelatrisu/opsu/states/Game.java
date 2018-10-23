@@ -1485,7 +1485,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/furioso/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/xi/");
 		if (!replaydir.exists()) {
 			bubNotifs.sendf(Colors.BUB_RED, "replay folder '%s' does not exist", replaydir.getAbsolutePath());
 			displayContainer.switchStateInstantly(songMenuState);
