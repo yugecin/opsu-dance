@@ -59,6 +59,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
+import yugecin.opsudance.ReplayPlayback.HitData;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
@@ -1478,6 +1479,14 @@ public class Game extends ComplexOpsuState {
 		return true;
 	}
 
+	static class ReplayData {
+		final HitData hitdata;
+		final Replay replay;
+		ReplayData(HitData hitdata, Replay replay) {
+			this.hitdata = hitdata;
+			this.replay = replay;
+		}
+	}
 	private ReplayPlayback[] replays;
 	private ReplayCursors replayCursors;
 	@Override
@@ -1508,8 +1517,7 @@ public class Game extends ComplexOpsuState {
 		if (replayCursors != null) {
 			replayCursors.destroy();
 		}
-		final ArrayList<Replay> actualReplays = new ArrayList<>(50);
-		final ArrayList<ReplayPlayback.HitData> hitdatas = new ArrayList<>(50);
+		final ArrayList<ReplayData> rdata = new ArrayList<>(50);
 		for (File file : files) {
 			final String datafilename = file.getName().substring(0, file.getName().length() - 3) + "ope";
 			final File hitdatafile = new File(file.getParentFile(), datafilename);
@@ -1529,39 +1537,36 @@ public class Game extends ComplexOpsuState {
 				);
 				continue;
 			}
-			Replay r = new Replay(file);
+			final Replay r = new Replay(file);
 			try {
 				r.load();
 			} catch (IOException e) {
 				bubNotifs.sendf(Colors.BUB_RED, "could not load replay %s", file.getName());
 				continue;
 			}
-			actualReplays.add(r);
-			hitdatas.add(hitdata);
+			rdata.add(new ReplayData(hitdata, r));
 		}
 
-		actualReplays.sort(new Comparator<Replay>() {
+		rdata.sort(new Comparator<ReplayData>() {
 			@Override
-			public int compare(Replay o1, Replay o2) {
-				return Integer.compare(o2.score, o1.score);
+			public int compare(ReplayData o1, ReplayData o2) {
+				return Integer.compare(o2.replay.score, o1.replay.score);
 			}
 		});
 
-		replayCursors = new ReplayCursors(actualReplays.size());
-		replays = new ReplayPlayback[actualReplays.size()];
+		replayCursors = new ReplayCursors(rdata.size());
+		replays = new ReplayPlayback[rdata.size()];
 
-		float hueshift = 360f / actualReplays.size();
+		float hueshift = 360f / rdata.size();
 		float hue = 180;
 
-		final Iterator<ReplayPlayback.HitData> hitdataIter = hitdatas.iterator();
-		final Iterator<Replay> replayIter = actualReplays.iterator();
 		int idx = 0;
-		while (replayIter.hasNext()) {
+		for (ReplayData d : rdata) {
 			final Color c = new Color(java.awt.Color.HSBtoRGB((hue) / 360f, .7f, 1.0f));
 			final ReplayCursor cursor = new ReplayCursor(c);
 			replays[idx] = new ReplayPlayback(
-				replayIter.next(),
-				hitdataIter.next(),
+				d.replay,
+				d.hitdata,
 				c,
 				cursor
 			);
