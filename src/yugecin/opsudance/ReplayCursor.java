@@ -79,7 +79,6 @@ public class ReplayCursor
 		float txtwidth = txt.getWidth();
 		float txtheight = txt.getHeight();
 		GL11.glBegin(GL11.GL_QUADS);
-		final Point lastpoint = new Point(-1, -1);
 		for (Trailpart p : trail) {
 			alpha += alphaIncrease;
 			GL11.glColor4f(filter.r, filter.g, filter.b, alpha);
@@ -91,8 +90,6 @@ public class ReplayCursor
 			GL11.glVertex3f(p.x + trailwidth2, p.y + trailheight2, 0f);
 			GL11.glTexCoord2f(0f, txtheight);
 			GL11.glVertex3f(p.x - trailwidth2, p.y + trailheight2, 0f);
-			lastpoint.x = p.x;
-			lastpoint.y = p.y;
 		}
 		GL11.glEnd();
 
