@@ -43,7 +43,7 @@ public class ReplayCursor
 	public void drawTrail(float trailw2, float trailh2, float txtw, float txth)
 	{
 		float alpha = 0f;
-		float alphaIncrease = .5f / trail.size;
+		float alphaIncrease = .4f / trail.size;
 		for (Trailpart p : trail) {
 			alpha += alphaIncrease;
 			GL11.glColor4f(filter.r, filter.g, filter.b, alpha);
