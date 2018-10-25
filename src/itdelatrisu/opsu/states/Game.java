@@ -724,6 +724,10 @@ public class Game extends ComplexOpsuState {
 
 		UI.draw(g);
 
+		if (replayCursors == null) {
+			return;
+		}
+
 		//g.setColor(new Color(0.2f, 0.2f, 0.2f));
 		//g.fillRect(0, 0, ReplayPlayback.SQSIZE * 2, displayContainer.height);
 		//g.setColor(Color.black);
@@ -740,6 +744,7 @@ public class Game extends ComplexOpsuState {
 				replayPlayback.render(renderDelta, g, ypos, trackPosition);
 			//}
 		}
+		replayCursors.draw();
 	}
 
 	@Override
@@ -1473,7 +1478,8 @@ public class Game extends ComplexOpsuState {
 		return true;
 	}
 
-	private LinkedList<ReplayPlayback> replays;
+	private ReplayPlayback[] replays;
+	private ReplayCursors replayCursors;
 	@Override
 	public void enter() {
 		overlays.clear();
@@ -1485,7 +1491,7 @@ public class Game extends ComplexOpsuState {
 
 		super.enter();
 
-		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/xi/");
+		File replaydir = new File("d:/Users/Robin/games/osu/osr-stuff-master/xi3/");
 		if (!replaydir.exists()) {
 			bubNotifs.sendf(Colors.BUB_RED, "replay folder '%s' does not exist", replaydir.getAbsolutePath());
 			displayContainer.switchStateInstantly(songMenuState);
@@ -1499,18 +1505,28 @@ public class Game extends ComplexOpsuState {
 			}
 		});
 
-		if (replays != null) {
-			for (ReplayPlayback r : replays) {
-				r.cursor.destroy();
-			}
+		if (replayCursors != null) {
+			replayCursors.destroy();
 		}
-		replays = new LinkedList<>();
-		float hueshift = 360f / files.length + 6;
-		float hue = 0;
+		final ArrayList<Replay> actualReplays = new ArrayList<>(50);
+		final ArrayList<ReplayPlayback.HitData> hitdatas = new ArrayList<>(50);
 		for (File file : files) {
 			final String datafilename = file.getName().substring(0, file.getName().length() - 3) + "ope";
 			final File hitdatafile = new File(file.getParentFile(), datafilename);
 			if (!hitdatafile.exists()) {
+				bubNotifs.sendf(Colors.BUB_RED, "no hitdata file for %s", file.getName());
+				continue;
+			}
+			final ReplayPlayback.HitData hitdata;
+			try {
+				hitdata = new ReplayPlayback.HitData(hitdatafile);
+			} catch (Exception e) {
+				bubNotifs.sendf(
+					Colors.BUB_RED,
+					"cannot parse hitdata for '%s': %s",
+					hitdatafile.getName(),
+					e.toString()
+				);
 				continue;
 			}
 			Replay r = new Replay(file);
@@ -1520,24 +1536,39 @@ public class Game extends ComplexOpsuState {
 				bubNotifs.sendf(Colors.BUB_RED, "could not load replay %s", file.getName());
 				continue;
 			}
-			final ReplayPlayback.HitData hitdata = new ReplayPlayback.HitData(hitdatafile);
-			replays.add(new ReplayPlayback(r, hitdata, new Color(Color.white)));
-			hue += hueshift;
+			actualReplays.add(r);
+			hitdatas.add(hitdata);
 		}
 
-		replays.sort(new Comparator<ReplayPlayback>() {
+		actualReplays.sort(new Comparator<Replay>() {
 			@Override
-			public int compare(ReplayPlayback o1, ReplayPlayback o2) {
-				return Integer.compare(o2.replay.score, o1.replay.score);
+			public int compare(Replay o1, Replay o2) {
+				return Integer.compare(o2.score, o1.score);
 			}
 		});
 
-		hue = 180;
-		for (ReplayPlayback r : replays) {
-			Color c = new Color(java.awt.Color.getHSBColor((hue) / 360f, .7f, 1.0f).getRGB());
-			r.color = c;
-			r.cursor.filter = c;
+		replayCursors = new ReplayCursors(actualReplays.size());
+		replays = new ReplayPlayback[actualReplays.size()];
+
+		float hueshift = 360f / actualReplays.size();
+		float hue = 180;
+
+		final Iterator<ReplayPlayback.HitData> hitdataIter = hitdatas.iterator();
+		final Iterator<Replay> replayIter = actualReplays.iterator();
+		int idx = 0;
+		while (replayIter.hasNext()) {
+			final Color c = new Color(java.awt.Color.HSBtoRGB((hue) / 360f, .7f, 1.0f));
+			final ReplayCursor cursor = new ReplayCursor(c);
+			replays[idx] = new ReplayPlayback(
+				replayIter.next(),
+				hitdataIter.next(),
+				c,
+				cursor
+			);
+			replayCursors.playbacks[idx] = replays[idx];
+
 			hue += hueshift;
+			idx++;
 		}
 
 		displayContainer.drawCursor = false;
@@ -1810,11 +1841,10 @@ public class Game extends ComplexOpsuState {
 
 		knorkesliders = null;
 
-		if (replays != null) {
-			for (ReplayPlayback r : replays) {
-				r.cursor.destroy();
-			}
-			replays.clear();
+		if (replayCursors != null) {
+			replayCursors.destroy();
+			replayCursors = null;
+			replays = null;
 		}
 
 		Dancer.instance.setGameObjects(null);

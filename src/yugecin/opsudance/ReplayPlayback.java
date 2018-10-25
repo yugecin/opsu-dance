@@ -45,8 +45,8 @@ public class ReplayPlayback {
 	public ReplayFrame currentFrame;
 	public ReplayFrame nextFrame;
 	private int frameIndex;
-	public Color color;
-	public Color originalcolor;
+	private Color color;
+	private final Color originalcolor;
 	public final ReplayCursor cursor;
 	private int keydelay[];
 	public static final int SQSIZE = 15;
@@ -71,15 +71,13 @@ public class ReplayPlayback {
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
-	public ReplayPlayback(Replay replay, HitData hitdata, Color color) {
+	public ReplayPlayback(Replay replay, HitData hitdata, Color color, ReplayCursor cursor) {
 		this.replay = replay;
 		this.hitdata = hitdata;
 		resetFrameIndex();
-		this.color = color;
-		this.originalcolor = new Color(color);
-		Color cursorcolor = new Color(color);
-		//cursorcolor.a = 0.5f;
-		cursor = new ReplayCursor(cursorcolor);
+		this.color = new Color(color);
+		this.originalcolor = color;
+		this.cursor = cursor;
 		keydelay = new int[4];
 		this.player = replay.playerName;
 		this.playerwidth = Fonts.SMALLBOLD.getWidth(this.player);
@@ -298,7 +296,11 @@ public class ReplayPlayback {
 			y = height - y;
 		}
 		cursor.setCursorPosition(renderdelta, currentFrame.getScaledX(), y);
-		cursor.draw();
+	}
+
+	public boolean shouldDrawCursor()
+	{
+		return !missed;
 	}
 
 	private void processKeys() {

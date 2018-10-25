@@ -174,6 +174,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	public void run() throws Exception {
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
+			nowtime = System.currentTimeMillis();
 			delta = getDelta();
 
 			timeSinceLastRender += delta;

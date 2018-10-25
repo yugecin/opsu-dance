@@ -19,15 +19,10 @@
 package yugecin.opsudance;
 
 import java.awt.Point;
-import java.nio.IntBuffer;
 import java.util.Iterator;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.newdawn.slick.*;
-import org.newdawn.slick.opengl.Texture;
-
-import itdelatrisu.opsu.render.Rendertarget;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -40,80 +35,31 @@ public class ReplayCursor
 
 	public Color filter;
 
-	private Rendertarget fbo;
-
-	private static long nowtime;
-
 	public ReplayCursor(Color filter) {
 		this.filter = filter;
 		this.lastPosition = new Point(width2, 0);
-		this.fbo = Rendertarget.createRTTFramebuffer(width, height);
 	}
 
-	public void draw()
+	public void drawTrail(float trailw2, float trailh2, float txtw, float txth)
 	{
-		nowtime = System.currentTimeMillis();
-
-		// stuff copied from CurveRenderState and stuff, I don't know what I'm doing
-		int oldFb = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
-		int oldTex = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-		//glGetInteger requires a buffer of size 16, even though just 4
-		//values are returned in this specific case
-		IntBuffer oldViewport = BufferUtils.createIntBuffer(16);
-		GL11.glGetInteger(GL11.GL_VIEWPORT, oldViewport);
-		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbo.getID());
-		GL11.glViewport(0, 0, fbo.width, fbo.height);
-		// render
-		GL11.glClearColor(0f, 0f, 0f, 0f);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-
-		final Image img = CURSOR_TRAIL.getImage();
-		final Texture txt = img.getTexture();
-		Color.white.bind();
-		txt.bind();
-
 		float alpha = 0f;
 		float alphaIncrease = .5f / trail.size;
-		float trailwidth2 = img.getWidth() * OPTION_CURSOR_SIZE.val / 100f / 2f;
-		float trailheight2 = img.getHeight() * OPTION_CURSOR_SIZE.val / 100f / 2f;
-		float txtwidth = txt.getWidth();
-		float txtheight = txt.getHeight();
-		GL11.glBegin(GL11.GL_QUADS);
 		for (Trailpart p : trail) {
 			alpha += alphaIncrease;
 			GL11.glColor4f(filter.r, filter.g, filter.b, alpha);
 			GL11.glTexCoord2f(0f, 0f);
-			GL11.glVertex3f(p.x - trailwidth2, p.y - trailheight2, 0f);
-			GL11.glTexCoord2f(txtwidth, 0);
-			GL11.glVertex3f(p.x + trailwidth2, p.y - trailheight2, 0f);
-			GL11.glTexCoord2f(txtwidth, txtheight);
-			GL11.glVertex3f(p.x + trailwidth2, p.y + trailheight2, 0f);
-			GL11.glTexCoord2f(0f, txtheight);
-			GL11.glVertex3f(p.x - trailwidth2, p.y + trailheight2, 0f);
+			GL11.glVertex3f(p.x - trailw2, p.y - trailh2, 0f);
+			GL11.glTexCoord2f(txtw, 0);
+			GL11.glVertex3f(p.x + trailw2, p.y - trailh2, 0f);
+			GL11.glTexCoord2f(txtw, txth);
+			GL11.glVertex3f(p.x + trailw2, p.y + trailh2, 0f);
+			GL11.glTexCoord2f(0f, txth);
+			GL11.glVertex3f(p.x - trailw2, p.y + trailh2, 0f);
 		}
-		GL11.glEnd();
-
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, oldTex);
-		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
-		GL11.glViewport(oldViewport.get(0), oldViewport.get(1), oldViewport.get(2), oldViewport.get(3));
-
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_TEXTURE_1D);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, fbo.getTextureID());
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glColor4f(1f, 1f, 1f, 1f);
-		GL11.glTexCoord2f(1f, 1f);
-		GL11.glVertex2i(fbo.width, 0);
-		GL11.glTexCoord2f(0f, 1f);
-		GL11.glVertex2i(0, 0);
-		GL11.glTexCoord2f(0f, 0f);
-		GL11.glVertex2i(0, fbo.height);
-		GL11.glTexCoord2f(1f, 0f);
-		GL11.glVertex2i(fbo.width, fbo.height);
-		GL11.glEnd();
-		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
+	}
+	
+	public void drawCursor()
+	{
 		CURSOR.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
 		CURSOR_MIDDLE.getScaledImage(OPTION_CURSOR_SIZE.val / 100f).drawCentered(lastPosition.x, lastPosition.y, filter);
 	}
@@ -184,11 +130,6 @@ public class ReplayCursor
 			}
 		}
 		return trail.size != size;
-	}
-
-	public void destroy()
-	{
-		this.fbo.destroyRTT();
 	}
 
 	private static class TrailList implements Iterable<Trailpart>

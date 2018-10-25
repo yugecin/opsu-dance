@@ -82,6 +82,7 @@ public class InstanceContainer {
 	public static boolean isWidescreen;
 	public static int mouseX, mouseY;
 	public static int renderDelta;
+	public static long nowtime;
 
 	public static void kickstart() {
 		updater = new Updater();
