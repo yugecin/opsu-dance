@@ -22,6 +22,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureImpl;
 
 import itdelatrisu.opsu.render.Rendertarget;
 
@@ -68,6 +69,7 @@ public class ReplayCursors
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 			txt.bind();
+			TextureImpl.unbind();
 			GL11.glBegin(GL11.GL_QUADS);
 			p.cursor.drawTrail(trailw2, trailh2, txtw, txth);
 			GL11.glEnd();
@@ -92,9 +94,6 @@ public class ReplayCursors
 			GL11.glVertex2i(fbo.width, fbo.height);
 			GL11.glEnd();
 			GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-			// something have to be drawn or things are broken... yeah...
-			CURSOR.getImage().draw(width, height);
 		}
 
 		for (ReplayPlayback p : playbacks) {
