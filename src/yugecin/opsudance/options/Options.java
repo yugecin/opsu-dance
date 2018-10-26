@@ -496,7 +496,7 @@ public class Options {
 		}
 	};
 
-	public static final NumericOption OPTION_MERGING_SLIDERS_MIRROR_POOL = new NumericOption("Merging sliders mirror pool", "MergingSliderMirrorPool", "Amount of mirrors to calculate for merging sliders (impacts performance)", 2, 1, 5) {
+	public static final NumericOption OPTION_MERGING_SLIDERS_MIRROR_POOL = new NumericOption("Mirrors", "MergingSliderMirrorPool", "Amount of mirrors to calculate for merging sliders (impacts performance)", 2, 2, 6) {
 		@Override
 		public String getValueString () {
 			return String.valueOf(val);

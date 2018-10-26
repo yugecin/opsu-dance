@@ -957,7 +957,7 @@ public class GameData {
 	private void drawHitAnimations(HitObjectResult hitResult, int trackPosition) {
 		// fade out slider curve
 		if (hitResult.result != HIT_SLIDER_REPEAT && hitResult.result != HIT_SLIDER_REPEAT_M && hitResult.curve != null) {
-			if (!OPTION_SHRINKING_SLIDERS.state) {
+			if (!OPTION_SHRINKING_SLIDERS.state && hitResult.curve.getCurvePoints().length > 0) {
 				float progress = AnimationEquation.OUT_CUBIC.calc(
 					(float) Utils.clamp(trackPosition - hitResult.time, 0, HITCIRCLE_FADE_TIME) / HITCIRCLE_FADE_TIME);
 				float alpha = 1f - progress;

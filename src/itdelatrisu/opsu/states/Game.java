@@ -68,6 +68,7 @@ import yugecin.opsudance.utils.GLHelper;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
+import static java.lang.System.arraycopy;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -1672,22 +1673,36 @@ public class Game extends ComplexOpsuState {
 				}
 				if (knorkesliders == null) {
 					// let's create knorkesliders
-					List<Vec2f> curvepoints = new ArrayList<>();
-					for (GameObject gameObject : gameObjects) {
-						if (gameObject.isSlider()) {
-							((Slider) gameObject).baseSliderFrom = curvepoints.size();
-							curvepoints.addAll(Arrays.asList(((Slider) gameObject).getCurve().getCurvePoints()));
+					int totalpoints = 0;
+					ArrayList<Slider> sliders = new ArrayList<>();
+					for (GameObject o : gameObjects) {
+						if (o.isSlider()) {
+							final Slider s = (Slider) o;
+							final int len = s.getCurvePointsCount();
+							if (len > 0) {
+								sliders.add(s);
+								s.curveStartIndex = totalpoints;
+								totalpoints += s.getCurvePointsCount();
+							}
 						}
 					}
-					if (curvepoints.size() > 0) {
-						knorkesliders = new FakeCombinedCurve(curvepoints.toArray(new Vec2f[curvepoints.size()]));
+					if (totalpoints > 0) {
+						Vec2f[] combinedcurve = new Vec2f[totalpoints];
+						int idx = 0;
+						for (Slider s : sliders) {
+							int len = s.getCurvePointsCount();
+							arraycopy(s.getCurvePoints(), 0, combinedcurve, idx, len);
+							idx += len;
+						}
+						knorkesliders = new FakeCombinedCurve(combinedcurve);
 					}
 				} else {
-					int base = 0;
+					int startIndex = 0;
 					for (GameObject gameObject : gameObjects) {
 						if (gameObject.isSlider()) {
-							((Slider) gameObject).baseSliderFrom = base;
-							base += ((Slider) gameObject).getCurve().getCurvePoints().length;
+							final Slider s = (Slider) gameObject;
+							s.curveStartIndex = startIndex;
+							startIndex += s.getCurvePointsCount();
 						}
 					}
 				}

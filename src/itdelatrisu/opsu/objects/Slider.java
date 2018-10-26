@@ -124,7 +124,7 @@ public class Slider extends GameObject {
 
 	private int comboColorIndex;
 
-	public int baseSliderFrom;
+	public int curveStartIndex;
 
 	/**
 	 * Initializes the Slider data type with images and dimensions.
@@ -205,9 +205,9 @@ public class Slider extends GameObject {
 		final int fadeInTime = game.getFadeInTime();
 		float scale = timeDiff / (float) approachTime;
 		float approachScale = 1 + scale * 3;
-		double fadeinScale = (timeDiff - approachTime + fadeInTime) / (double) fadeInTime;
-		float alpha = Utils.clamp(1 - (float) fadeinScale, 0, 1);
-		float decorationsAlpha = Utils.clamp(-2.0f * (float) fadeinScale, 0, 1);
+		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
+		float alpha = Utils.clamp(1f - fadeinScale, 0f, 1f);
+		float decorationsAlpha = Utils.clamp(-2.0f * fadeinScale, 0f, 1f);
 		boolean overlayAboveNumber = SkinService.skin.isHitCircleOverlayAboveNumber();
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
@@ -222,7 +222,7 @@ public class Slider extends GameObject {
 		}
 
 		curveColor.a = sliderAlpha;
-		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, Utils.clamp(1d - fadeinScale, 0d, 1d));
+		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, Utils.clamp(1f - fadeinScale, 0f, 1f));
 		color.a = alpha;
 
 		// end circle (only draw if ball still has to go there)
@@ -448,38 +448,46 @@ public class Slider extends GameObject {
 		}
 	}
 
-	private boolean drawSliderTrack(int trackPosition, double snakingSliderProgress) {
-		double curveIntervalTo = OPTION_SNAKING_SLIDERS.state ? snakingSliderProgress : 1d;
-		double curveIntervalFrom = 0d;
+	/**
+	 * @return {@code true} if track is completely drawn (snaking, shrinking etc)
+	 */
+	private boolean drawSliderTrack(int trackPosition, float snakingSliderProgress)
+	{
+		int curvelen = curve.curve.length;
+		if (curvelen == 0) {
+			return true;
+		}
+		float curveIntervalTo = OPTION_SNAKING_SLIDERS.state ? snakingSliderProgress : 1f;
+		float curveIntervalFrom = 0f;
 		if (OPTION_SHRINKING_SLIDERS.state) {
-			double sliderprogress = (trackPosition - getTime() - ((double) sliderTime * (repeats - 1))) / (double) sliderTime;
+			float sliderprogress = (trackPosition - getTime() - sliderTime * (repeats - 1)) / sliderTime;
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
-		int curvelen = curve.getCurvePoints().length;
 		if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
-			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0) {
+			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0d) {
 				if (hitObject.getRepeatCount() % 2 == 0) {
-					game.addMergedSliderPointsToRender(baseSliderFrom, baseSliderFrom + (int) ((1d - curveIntervalFrom) * curvelen));
+					game.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + (int) ((1d - curveIntervalFrom) * curvelen));
 				} else {
-					game.addMergedSliderPointsToRender(baseSliderFrom + (int) (curveIntervalFrom * curvelen) + 1, baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
+					game.addMergedSliderPointsToRender(curveStartIndex + (int) (curveIntervalFrom * curvelen) + 1, curveStartIndex + (int) (curveIntervalTo * (curvelen - 1)));
 				}
 			} else {
-				game.addMergedSliderPointsToRender(baseSliderFrom, baseSliderFrom + (int) (curveIntervalTo * curve.getCurvePoints().length));
+				int to = (int) (curveIntervalTo * (curvelen - 1));
+				game.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + to);
 			}
 		} else {
 			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0 && repeats % 2 == 0) {
 				if (OPTION_FALLBACK_SLIDERS.state) {
-					curveIntervalTo = 1d - curveIntervalFrom;
+					curveIntervalTo = 1f - curveIntervalFrom;
 				} else {
-					curve.splice((int) ((1d - curveIntervalFrom) * curvelen), curvelen);
+					curve.splice((int) ((1f - curveIntervalFrom) * curvelen), curvelen);
 				}
-				curveIntervalFrom = 0d;
+				curveIntervalFrom = 0f;
 			}
 			curve.draw(curveColor, (int) (curveIntervalFrom * curvelen), (int) (curveIntervalTo * curvelen));
 		}
-		return curveIntervalTo == 1d;
+		return curveIntervalTo == 1f;
 	}
 
 	/**
@@ -828,6 +836,16 @@ public class Slider extends GameObject {
 
 	public Curve getCurve() {
 		return curve;
+	}
+
+	public Vec2f[] getCurvePoints()
+	{
+		return curve.curve;
+	}
+
+	public int getCurvePointsCount()
+	{
+		return curve.curve.length;
 	}
 
 	public int getRepeats() {

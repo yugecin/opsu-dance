@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * This is cache for OpenGL FrameBufferObjects. This is currently only used
  * to draw curve objects of the new slider style. Does currently not integrate
@@ -39,20 +41,6 @@ public class FrameBufferCache {
 
 	/** */
 	private ArrayList<Rendertarget> cache;
-
-	/** Container dimensions. */
-	public static int width, height;
-
-	/**
-	 * Set the width and height of the framebuffers in this cache.
-	 * Should be called before anything is inserted into the map.
-	 * @param width the container width
-	 * @param height the container height
-	 */
-	public static void init(int width, int height) {
-		FrameBufferCache.width = width;
-		FrameBufferCache.height = height;
-	}
 
 	/**
 	 * Constructor.
