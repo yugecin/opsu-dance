@@ -167,6 +167,7 @@ public class OptionGroups {
 			OPTION_RP_SHOW_GRADES,
 			OPTION_RP_SHOW_HITS,
 			OPTION_RP_SHOW_ACC,
+			OPTION_RP_SHOW_MOUSECOLUMN,
 			OPTION_RP_KEYPRESS_DELAY,
 		}),
 		new OptionTab("MISC", new Option[] {
