@@ -29,17 +29,17 @@ import yugecin.opsudance.core.Entrypoint;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import static itdelatrisu.opsu.GameData.*;
 import static itdelatrisu.opsu.Utils.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.options.Options.*;
 
-public class ReplayPlayback {
-
-	private static final boolean HIDEMOUSEBTNS = true;
-
+public class ReplayPlayback
+{
 	private final HitData hitdata;
 	public final Replay replay;
 	public ReplayFrame currentFrame;
@@ -59,19 +59,20 @@ public class ReplayPlayback {
 	private String currentAcc;
 	private int currentAccWidth;
 	private final int ACCMAXWIDTH;
-	private float failposx, failposy;
 
-	private int c300, c100, c50;
+	private int c300, c100, c50, fakecmiss;
 
 	private Image hitImage;
 	private int hitImageTimer = 0;
-	private boolean missed;
+	private boolean knockedout;
+	private final LinkedList<MissIndicator> missIndicators;
 
 	private Image gradeImage;
 
 	private static final Color missedColor = new Color(0.4f, 0.4f, 0.4f, 1f);
 
 	public ReplayPlayback(Replay replay, HitData hitdata, Color color, ReplayCursor cursor) {
+		this.missIndicators = new LinkedList<>();
 		this.replay = replay;
 		this.hitdata = hitdata;
 		resetFrameIndex();
@@ -133,17 +134,20 @@ public class ReplayPlayback {
 	}
 
 	private void updateGradeImage() {
-		if (missed) {
+		if (knockedout || !OPTION_RP_SHOW_GRADES.state) {
 			gradeImage = null;
 			return;
 		}
 
 		boolean silver = (replay.mods & 0x408) > 0 && (replay.mods & 0x200) == 0;
-		GameData.Grade grade = GameData.getGrade(c300, c100, c50, 0, silver);
+		GameData.Grade grade = GameData.getGrade(c300, c100, c50, fakecmiss, silver);
 
 		if (grade == GameData.Grade.NULL) {
-			gradeImage = null;
-			return;
+			if ((replay.mods & 0x8) > 0 && (replay.mods & 0x200) == 0) {
+				grade = GameData.Grade.SSH;
+			} else {
+				grade = GameData.Grade.SS;
+			}
 		}
 		gradeImage = grade.getSmallImage().getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 	}
@@ -160,16 +164,16 @@ public class ReplayPlayback {
 		}
 
 		hitImageTimer += renderdelta;
-		if (!missed && hitImageTimer > HITIMAGETIMERFADEEND) {
+		if (!knockedout && hitImageTimer > HITIMAGETIMERFADEEND) {
 			hitImage = null;
 			return;
 		}
 
 		Color color = new Color(1f, 1f, 1f, 1f);
-		if (!missed && hitImageTimer > HITIMAGETIMERFADESTART) {
+		if (!knockedout && hitImageTimer > HITIMAGETIMERFADESTART) {
 			color.a = (HITIMAGETIMERFADEEND - hitImageTimer) / HITIMAGETIMERFADEDELTA;
 		}
-		if (missed) {
+		if (knockedout) {
 			if (hitImageTimer > HITIMAGEDEADFADE) {
 				this.color.a = color.a = 0f;
 			} else {
@@ -195,8 +199,8 @@ public class ReplayPlayback {
 		return UNITHEIGHT * (1f - AnimationEquation.OUT_QUART.calc((hitImageTimer - HITIMAGEDEADFADE) / SHRINKTIME));
 	}
 
-	public void render(int renderdelta, Graphics g, float ypos, int time) {
-
+	public void render(int renderdelta, Graphics g, float ypos, int time)
+	{
 		while (nextFrame != null && nextFrame.getTime() < time) {
 			currentFrame = nextFrame;
 			processKeys();
@@ -209,7 +213,7 @@ public class ReplayPlayback {
 		}
 		processKeys();
 		g.setColor(color);
-		if (!missed) {
+		if (!knockedout) {
 			for (int i = 0; i < 4; i++) {
 				if (keydelay[i] > 0) {
 					g.fillRect(SQSIZE * i, ypos + 5, SQSIZE, SQSIZE);
@@ -240,36 +244,44 @@ public class ReplayPlayback {
 			while (!hitdata.time50.isEmpty() && hitdata.time50.getFirst() <= time) {
 				hitdata.time50.removeFirst();
 				hitImageTimer = 0;
-				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				hitImage = GameData.hitResults[GameData.HIT_50].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
 				c50++;
 				hitschanged = true;
+			}
+
+			while (!hitdata.timeCombobreaks.isEmpty() && hitdata.timeCombobreaks.getFirst() <= time) {
+				hitdata.timeCombobreaks.removeFirst();
+				hitImageTimer = 0;
+				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				fakecmiss++;
+				hitschanged = true;
+				if (OPTION_RP_SHOW_MISSES.state) {
+					float posx = currentFrame.getScaledX();
+					float posy = currentFrame.getScaledY();
+					if (hr) {
+						posy = height - posy;
+					}
+					this.missIndicators.add(new MissIndicator(posx, posy));
+				}
+				if (OPTION_RP_KNOCKOUT.state) {
+					knockedout = true;
+					color = new Color(missedColor);
+				}
 			}
 
 			if (hitschanged) {
 				updateGradeImage();
 			}
-
-			if (time >= hitdata.combobreaktime) {
-				if (!missed) {
-					failposx = currentFrame.getScaledX();
-					failposy = currentFrame.getScaledY();
-					if (hr) {
-						failposy = height - failposy;
-					}
-				}
-				missed = true;
-				color = new Color(missedColor);
-				hitImageTimer = 0;
-				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
-			}
 		}
-		int xpos = SQSIZE * (HIDEMOUSEBTNS ? 3 : 5);
-		Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
-		xpos += ACCMAXWIDTH;
-		if (!missed && gradeImage != null) {
+		int xpos = SQSIZE * (OPTION_RP_SHOW_MOUSECOLUMN.state ? 5 : 3);
+		if (OPTION_RP_SHOW_ACC.state) { 
+			Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
+			xpos += ACCMAXWIDTH;
+		}
+		if (gradeImage != null) {
 			gradeImage.draw(xpos, ypos);
+			xpos += SQSIZE + 10;
 		}
-		xpos += SQSIZE + 10;
 		Fonts.SMALLBOLD.drawString(xpos, ypos, this.player, color);
 		xpos += playerwidth;
 		if (!this.mods.isEmpty()) {
@@ -277,18 +289,29 @@ public class ReplayPlayback {
 			xpos += modwidth;
 		}
 		xpos += 10;
-		showHitImage(renderdelta, xpos, ypos);
-		if (missed) {
-			if (hitImageTimer < HITIMAGEDEADFADE) {
-				float progress = (float) hitImageTimer / HITIMAGEDEADFADE;
-				float failposy = this.failposy + 50f * OUT_QUART.calc(progress);
+		if (OPTION_RP_SHOW_HITS.state) {
+			showHitImage(renderdelta, xpos, ypos);
+		}
+		if (OPTION_RP_SHOW_MISSES.state) { 
+			final Iterator<MissIndicator> iter = this.missIndicators.iterator();
+			while (iter.hasNext()) {
+				final MissIndicator mi = iter.next();
+				if (mi.timer >= HITIMAGEDEADFADE) {
+					iter.remove();
+					continue;
+				}
+				float progress = (float) mi.timer / HITIMAGEDEADFADE;
+				float failposy = mi.posy + 50f * OUT_QUART.calc(progress);
 				Color col = new Color(originalcolor);
 				col.a = 1f - IN_QUAD.calc(clamp(progress * 2f, 0f, 1f));
-				Fonts.SMALLBOLD.drawString(failposx - playerwidth / 2, failposy, player, col);
+				Fonts.SMALLBOLD.drawString(mi.posx - playerwidth / 2, failposy, player, col);
 				Color failimgcol = new Color(1f, 1f, 1f, col.a);
 				Image failimg = hitResults[HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
-				failimg.draw(failposx + playerwidth / 2 + 5, failposy + 2f, failimgcol);
+				failimg.draw(mi.posx + playerwidth / 2 + 5, failposy + 2f, failimgcol);
+				mi.timer += renderdelta;
 			}
+		}
+		if (knockedout) {
 			return;
 		}
 		int y = currentFrame.getScaledY();
@@ -300,32 +323,44 @@ public class ReplayPlayback {
 
 	public boolean shouldDrawCursor()
 	{
-		return !missed;
+		return !knockedout;
 	}
 
 	private void processKeys() {
 		int keys = currentFrame.getKeys();
-		int KEY_DELAY = 10;
 		if ((keys & 5) == 5) {
-			keydelay[0] = KEY_DELAY;
+			keydelay[0] = OPTION_RP_KEYPRESS_DELAY.val;
 		}
 		if ((keys & 10) == 10) {
-			keydelay[1] = KEY_DELAY;
+			keydelay[1] = OPTION_RP_KEYPRESS_DELAY.val;
 		}
 		if ((keys ^ 5) == 4) {
-			keydelay[2] = KEY_DELAY;
+			keydelay[2] = OPTION_RP_KEYPRESS_DELAY.val;
 		}
 		if ((keys ^ 10) == 8) {
-			keydelay[3] = KEY_DELAY;
+			keydelay[3] = OPTION_RP_KEYPRESS_DELAY.val;
+		}
+	}
+	
+	private static class MissIndicator
+	{
+		private float posx, posy;
+		private int timer;
+		
+		private MissIndicator(float posx, float posy)
+		{
+			this.posx = posx;
+			this.posy = posy;
+			this.timer = 0;
 		}
 	}
 
-	public static class HitData {
-
-		int combobreaktime = -1;
+	public static class HitData
+	{
 		LinkedList<Integer> time300 = new LinkedList<>();
 		LinkedList<Integer> time100 = new LinkedList<>();
 		LinkedList<Integer> time50 = new LinkedList<>();
+		LinkedList<Integer> timeCombobreaks = new LinkedList<>();
 		LinkedList<AccData> acc = new LinkedList<>();
 		LinkedList<ComboData> combo = new LinkedList<>();
 
@@ -339,11 +374,11 @@ public class ReplayPlayback {
 				while (true) {
 					byte[] time = new byte[4];
 					int rd = in.read(time);
-					if (rd == 0) {
+					if (rd <= 0) {
 						break;
 					}
 					if (rd != 4) {
-						throw new RuntimeException();
+						throw new RuntimeException("expected 4 bytes, got " + rd);
 					}
 					byte[] _time = { time[3], time[2], time[1], time[0] };
 					lasttime = ByteBuffer.wrap(_time).getInt();
@@ -379,30 +414,22 @@ public class ReplayPlayback {
 						int c = ByteBuffer.wrap(_time).getInt();
 						combo.add(new ComboData(lasttime, c));
 						if (c < lastcombo) {
-							combobreaktime = lasttime;
-						} else {
-							lastcombo = c;
+							timeCombobreaks.add(lasttime);
 						}
+						lastcombo = c;
 						break;
 					default:
-						throw new RuntimeException();
-					}
-					if (combobreaktime != -1) {
-						break;
+						throw new RuntimeException("unexpected data");
 					}
 				}
-				if (combobreaktime == -1) {
-					combobreaktime = lasttime;
-				}
-				if (combobreaktime == -1) {
+				if (lasttime == -1) {
 					throw new RuntimeException("nodata");
 				}
 				Entrypoint.sout(String.format(
-					"%s combobreak at %d, lastcombo %d lastacc %f",
+					"%s lastcombo %d lasttime %d",
 					file.getName(),
-					combobreaktime,
 					lastcombo,
-					acc.getLast().acc
+					lasttime
 				));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -446,5 +473,4 @@ public class ReplayPlayback {
 			this.combo = combo;
 		}
 	}
-
 }

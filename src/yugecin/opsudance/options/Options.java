@@ -998,4 +998,19 @@ public class Options {
 	public static final ToggleOption OPTION_PIPPI_SLIDER_FOLLOW_EXPAND = new ToggleOption("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false);
 	public static final ToggleOption OPTION_PIPPI_PREVENT_WOBBLY_STREAMS = new ToggleOption("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
 
+	public static final ToggleOption
+		OPTION_RP_KNOCKOUT = new ToggleOption("Knockout", "ReplayKnockout", "Remove replays on combobreaks.", true),
+		OPTION_RP_SHOW_MISSES = new ToggleOption("Show misses", "ReplayShowMiss", "Show falling miss indicators.", true),
+		OPTION_RP_SHOW_GRADES = new ToggleOption("Show grades", "ReplayShowGrades", "Show grades next to players.", true),
+		OPTION_RP_SHOW_HITS = new ToggleOption("Show hits", "ReplayShowHits", "Show miss, 50, 100 hits next to players.", true),
+		OPTION_RP_SHOW_MOUSECOLUMN = new ToggleOption("Mouse buttons column", "ReplayShowMouseColumn", "Preserve space for mouse button columns.", true),
+		OPTION_RP_SHOW_ACC = new ToggleOption("Show accuracy", "ReplayShowAcc", "Show accuracy next to players.", true);
+	
+	public static final NumericOption
+		OPTION_RP_KEYPRESS_DELAY = new NumericOption("Key indicator delay", "ReplayKeyDelay", "How long the key indicator should show after the key being released (ms).", 10, 1, 50) {
+			@Override
+			public String getValueString() {
+				return String.valueOf(val);
+			}
+		};
 }
