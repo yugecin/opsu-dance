@@ -1561,20 +1561,20 @@ public class Game extends ComplexOpsuState {
 		float hueshift = 360f / rdata.size();
 		float hue = 180;
 
-		int idx = 0;
+		int replayidx = 0;
 		for (ReplayData d : rdata) {
 			final Color c = new Color(java.awt.Color.HSBtoRGB((hue) / 360f, .7f, 1.0f));
 			final ReplayCursor cursor = new ReplayCursor(c);
-			replays[idx] = new ReplayPlayback(
+			replays[replayidx] = new ReplayPlayback(
 				d.replay,
 				d.hitdata,
 				c,
 				cursor
 			);
-			replayCursors.playbacks[idx] = replays[idx];
+			replayCursors.playbacks[replayidx] = replays[replayidx];
 
 			hue += hueshift;
-			idx++;
+			replayidx++;
 		}
 
 		displayContainer.drawCursor = false;
