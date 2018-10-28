@@ -37,6 +37,7 @@ import itdelatrisu.opsu.beatmap.BeatmapWatchService.BeatmapWatchServiceListener;
 import itdelatrisu.opsu.beatmap.LRUCache;
 import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
+import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.DropdownMenu;
@@ -48,7 +49,6 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import java.awt.Point;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -405,7 +405,7 @@ public class SongMenu extends ComplexOpsuState {
 		// selection buttons
 		// TODO: the origin should be bottomleft or something
 		float selectX = width * (isWidescreen ? 0.164f : 0.1875f);
-		final float footerButtonWidth = footerHeight * 0.84f;
+		final float footerButtonWidth = footerHeight * 0.85f;
 		selectModeButton = new MenuButton(SELECTION_MODE_OVERLAY, selectX, footerY);
 		selectX += footerHeight + 2;
 		selectModsButton = new MenuButton(SELECTION_MODS_OVERLAY, selectX, footerY);
@@ -614,7 +614,7 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		// selection buttons
-		Point c;
+		Vec2f c;
 		c = selectModeButton.bottomLeft();
 		SELECTION_MODE.getImage().draw(c.x, c.y - SELECTION_MODE.getHeight());
 		selectModeButton.draw();

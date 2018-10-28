@@ -91,10 +91,8 @@ public abstract class Curve {
 	}
 
 	/**
-	 * Set the width and height of the container that Curves get drawn into.
+	 * Init curves for given circle diameter
 	 * Should be called before any curves are drawn.
-	 * @param width the container width
-	 * @param height the container height
 	 * @param circleDiameter the circle diameter
 	 * @param borderColor the curve border color
 	 */
