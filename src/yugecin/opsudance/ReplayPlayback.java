@@ -49,8 +49,10 @@ public class ReplayPlayback
 	private final Color originalcolor;
 	public final ReplayCursor cursor;
 	private int keydelay[];
-	public static final int SQSIZE = 15;
-	public static final int UNITHEIGHT = SQSIZE + 5;
+	public final int PADDING = 3;
+	public final int sqsize;
+	public final int unitHeight;
+	public static int lineHeight;
 	private boolean hr;
 	private String player;
 	private String mods;
@@ -86,6 +88,9 @@ public class ReplayPlayback
 		this.currentAcc = "100,00%";
 		this.currentAccWidth = Fonts.SMALLBOLD.getWidth(currentAcc);
 		this.ACCMAXWIDTH = currentAccWidth + 10;
+		this.unitHeight = (int) (Fonts.SMALLBOLD.getLineHeight() * 0.9f);
+		this.sqsize = unitHeight - PADDING;
+		lineHeight = this.unitHeight;
 		if ((replay.mods & 0x1) > 0) {
 			this.mods += "NF";
 		}
@@ -149,10 +154,10 @@ public class ReplayPlayback
 				grade = GameData.Grade.SS;
 			}
 		}
-		gradeImage = grade.getSmallImage().getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+		gradeImage = grade.getSmallImage().getScaledCopy(unitHeight, unitHeight);
 	}
 
-	private int HITIMAGETIMEREXPAND = 200;
+	private int HITIMAGETIMEREXPAND = 250;
 	private int HITIMAGETIMERFADESTART = 500;
 	private int HITIMAGETIMERFADEEND = 700;
 	private float HITIMAGETIMERFADEDELTA = HITIMAGETIMERFADEEND - HITIMAGETIMERFADESTART;
@@ -184,19 +189,19 @@ public class ReplayPlayback
 		float offset = 0f;
 		if (hitImageTimer < HITIMAGETIMEREXPAND) {
 			scale = AnimationEquation.OUT_EXPO.calc((float) hitImageTimer / HITIMAGETIMEREXPAND);
-			offset = UNITHEIGHT / 2f * (1f - scale);
+			offset = unitHeight / 2f * (1f - scale);
 		}
-		hitImage.draw(xpos + offset, 2f + ypos + offset, scale, color);
+		hitImage.draw(xpos, 2f + ypos + offset, scale, color);
 	}
 
 	public float getHeight() {
 		if (hitImageTimer < HITIMAGEDEADFADE) {
-			return UNITHEIGHT;
+			return unitHeight;
 		}
 		if (hitImageTimer >= HITIMAGEDEADFADE + SHRINKTIME) {
 			return 0f;
 		}
-		return UNITHEIGHT * (1f - AnimationEquation.OUT_QUART.calc((hitImageTimer - HITIMAGEDEADFADE) / SHRINKTIME));
+		return unitHeight * (1f - AnimationEquation.OUT_QUART.calc((hitImageTimer - HITIMAGEDEADFADE) / SHRINKTIME));
 	}
 
 	public void render(int renderdelta, Graphics g, float ypos, int time)
@@ -216,7 +221,7 @@ public class ReplayPlayback
 		if (!knockedout) {
 			for (int i = 0; i < 4; i++) {
 				if (keydelay[i] > 0) {
-					g.fillRect(SQSIZE * i, ypos + 5, SQSIZE, SQSIZE);
+					g.fillRect(sqsize * i, ypos + PADDING, sqsize, sqsize);
 				}
 				keydelay[i] -= renderdelta;
 			}
@@ -236,7 +241,7 @@ public class ReplayPlayback
 			while (!hitdata.time100.isEmpty() && hitdata.time100.getFirst() <= time) {
 				hitdata.time100.removeFirst();
 				hitImageTimer = 0;
-				hitImage = GameData.hitResults[GameData.HIT_100].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				hitImage = GameData.hitResults[GameData.HIT_100];
 				c100++;
 				hitschanged = true;
 			}
@@ -244,7 +249,7 @@ public class ReplayPlayback
 			while (!hitdata.time50.isEmpty() && hitdata.time50.getFirst() <= time) {
 				hitdata.time50.removeFirst();
 				hitImageTimer = 0;
-				hitImage = GameData.hitResults[GameData.HIT_50].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				hitImage = GameData.hitResults[GameData.HIT_50];
 				c50++;
 				hitschanged = true;
 			}
@@ -252,7 +257,7 @@ public class ReplayPlayback
 			while (!hitdata.timeCombobreaks.isEmpty() && hitdata.timeCombobreaks.getFirst() <= time) {
 				hitdata.timeCombobreaks.removeFirst();
 				hitImageTimer = 0;
-				hitImage = GameData.hitResults[GameData.HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				hitImage = GameData.hitResults[GameData.HIT_MISS];
 				fakecmiss++;
 				hitschanged = true;
 				if (OPTION_RP_SHOW_MISSES.state) {
@@ -269,18 +274,27 @@ public class ReplayPlayback
 				}
 			}
 
+			if (hitImage != null) {
+				final float h = hitImage.getHeight();
+				if (h == 0) {
+					hitImage = null;
+				} else {
+					hitImage = hitImage.getScaledCopy(unitHeight / h);
+				}
+			}
+
 			if (hitschanged) {
 				updateGradeImage();
 			}
 		}
-		int xpos = SQSIZE * (OPTION_RP_SHOW_MOUSECOLUMN.state ? 5 : 3);
+		int xpos = sqsize * (OPTION_RP_SHOW_MOUSECOLUMN.state ? 5 : 3);
 		if (OPTION_RP_SHOW_ACC.state) { 
 			Fonts.SMALLBOLD.drawString(xpos + ACCMAXWIDTH - currentAccWidth - 10, ypos, currentAcc, new Color(.4f, .4f, .4f, color.a));
 			xpos += ACCMAXWIDTH;
 		}
 		if (gradeImage != null) {
 			gradeImage.draw(xpos, ypos);
-			xpos += SQSIZE + 10;
+			xpos += sqsize + 10;
 		}
 		Fonts.SMALLBOLD.drawString(xpos, ypos, this.player, color);
 		xpos += playerwidth;
@@ -306,7 +320,7 @@ public class ReplayPlayback
 				col.a = 1f - IN_QUAD.calc(clamp(progress * 2f, 0f, 1f));
 				Fonts.SMALLBOLD.drawString(mi.posx - playerwidth / 2, failposy, player, col);
 				Color failimgcol = new Color(1f, 1f, 1f, col.a);
-				Image failimg = hitResults[HIT_MISS].getScaledCopy(SQSIZE + 5, SQSIZE + 5);
+				Image failimg = hitResults[HIT_MISS].getScaledCopy(unitHeight, unitHeight);
 				failimg.draw(mi.posx + playerwidth / 2 + 5, failposy + 2f, failimgcol);
 				mi.timer += renderdelta;
 			}
