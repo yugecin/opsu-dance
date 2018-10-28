@@ -77,7 +77,7 @@ public class ReplayCursor
 
 		int removecount = 0;
 		TrailNode newfirst = trail.first;
-		while (newfirst != null && newfirst.value.time < nowtime - 400) {
+		while (newfirst != null && newfirst.value.time < nowtime - 175) {
 			newfirst = newfirst.next;
 			removecount++;
 		}

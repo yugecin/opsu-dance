@@ -232,12 +232,14 @@ public class Spinner extends GameObject {
 		GameImage.SPINNER_SPIN.getImage().setAlpha(alpha);
 		GameImage.SPINNER_SPIN.getImage().drawCentered(width2, height * 3 / 4);
 
+		/*
 		if (spinnerComplete) {
 			GameImage.SPINNER_CLEAR.getImage().drawCentered(width2, height / 4);
 			int extraRotations = (int) (rotations - rotationsNeeded);
 			if (extraRotations > 0)
 				data.drawSymbolNumber(extraRotations * 1000, width2, height * 2 / 3, 1f, 1f);
 		}
+		*/
 	}
 
 	/**
