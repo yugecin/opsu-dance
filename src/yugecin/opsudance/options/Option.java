@@ -70,6 +70,9 @@ public class Option {
 	 * @return true if this option does need to be filtered
 	 */
 	public boolean filter(String searchString) {
+		if (!showCondition()) {
+			return filtered = true;
+		}
 		if (searchString == null || searchString.length() == 0) {
 			filtered = false;
 			return false;
