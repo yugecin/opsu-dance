@@ -20,10 +20,9 @@ package itdelatrisu.opsu.ui;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
+import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
-
-import java.awt.Point;
 
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -177,8 +176,8 @@ public class MenuButton {
 	 */
 	public float getY() { return y; }
 	
-	public Point bottomLeft() {
-		return new Point((int) (x - xRadius), (int) (y + yRadius));
+	public Vec2f bottomLeft() {
+		return new Vec2f(x - xRadius, y + yRadius);
 	}
 
 	/**
