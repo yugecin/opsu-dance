@@ -720,8 +720,6 @@ public class Game extends ComplexOpsuState {
 				backButton.draw(g);
 			}
 		}
-
-		UI.draw(g);
 	}
 
 	@Override
@@ -1200,10 +1198,10 @@ public class Game extends ComplexOpsuState {
 			}
 			break;
 		case KEY_UP:
-			UI.changeVolume(1);
+			volumeControl.changeVolume(1);
 			break;
 		case KEY_DOWN:
-			UI.changeVolume(-1);
+			volumeControl.changeVolume(-1);
 			break;
 		case KEY_TAB:
 			if (!OPTION_DANCE_HIDE_UI.state) {
@@ -1450,7 +1448,7 @@ public class Game extends ComplexOpsuState {
 			return true;
 		}
 
-		UI.changeVolume((newValue < 0) ? -1 : 1);
+		volumeControl.changeVolume(newValue);
 		return true;
 	}
 

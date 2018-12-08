@@ -396,6 +396,7 @@ public class Options {
 	public static final ToggleOption OPTION_DYNAMIC_BACKGROUND = new ToggleOption("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true);
 	public static final ToggleOption OPTION_LOAD_VERBOSE = new ToggleOption("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false);
 	public static final ToggleOption OPTION_COLOR_MAIN_MENU_LOGO = new ToggleOption("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false);
+	public static final ToggleOption OPTION_FORCE_FALLBACK_VOLUMECONTROL = new ToggleOption("Alternative volume indicator", "FallbackVolumeControl", "Use a simpeler volume control", false);
 	public static final NumericOption OPTION_MASTER_VOLUME = new NumericOption("Master", "VolumeUniversal", "Global volume level.", 35, 0, 100) {
 		@Override
 		public void setValue(int value){

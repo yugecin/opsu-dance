@@ -46,6 +46,7 @@ import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.ui.BackButton;
+import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -227,6 +228,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
+				volumeControl.draw();
 				cursor.updateAngle();
 				if (drawCursor) {
 					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
@@ -266,7 +268,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
-		initGL();
+		postInitGL();
 		glVersion = GL11.glGetString(GL11.GL_VERSION);
 		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 		GLHelper.hideNativeCursor();
@@ -288,6 +290,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public void teardown() {
 		destroyImages();
 		CurveRenderState.shutdown();
+		VolumeControl.destroyProgram();
 		Display.destroy();
 	}
 
@@ -407,7 +410,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		Display.setFullscreen(fullscreen);
 
 		if (Display.isCreated()) {
-			initGL();
+			postInitGL();
 		}
 
 		if (displayMode.getBitsPerPixel() == 16) {
@@ -415,7 +418,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 	}
 
-	private void initGL() throws Exception {
+	private void postInitGL() throws Exception
+	{
 		GL.initDisplay(width, height);
 		GL.enterOrtho(width, height);
 
@@ -437,6 +441,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 		destroyImages();
 		reinit();
+		VolumeControl.createProgram();
 
 		barNotifs.onResolutionChanged(width, height);
 		bubNotifs.onResolutionChanged(width, height);

@@ -92,8 +92,6 @@ public class GameRanking extends BaseOpsuState {
 			retryButton.draw();
 		backButton.draw(g);
 
-		UI.draw(g);
-
 		super.render(g);
 	}
 

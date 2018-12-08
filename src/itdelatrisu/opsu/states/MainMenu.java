@@ -478,8 +478,6 @@ public class MainMenu extends BaseOpsuState {
 		if (optionsOverlay.isActive()) {
 			backButton.draw(g);
 		}
-
-		UI.draw(g);
 	}
 
 	@Override
@@ -840,7 +838,7 @@ public class MainMenu extends BaseOpsuState {
 			return true;
 		}
 
-		UI.changeVolume((newValue < 0) ? -1 : 1);
+		volumeControl.changeVolume(newValue);
 		return true;
 	}
 
@@ -876,10 +874,10 @@ public class MainMenu extends BaseOpsuState {
 			nextTrack(true);
 			return true;
 		case KEY_UP:
-			UI.changeVolume(1);
+			volumeControl.changeVolume(1);
 			return true;
 		case KEY_DOWN:
-			UI.changeVolume(-1);
+			volumeControl.changeVolume(-1);
 			return true;
 		case KEY_O:
 			if (input.isControlDown()) {

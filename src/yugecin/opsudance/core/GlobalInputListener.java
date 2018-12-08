@@ -59,7 +59,7 @@ public class GlobalInputListener implements InputListener {
 	@Override
 	public boolean mouseWheelMoved(int delta) {
 		if (isKeyDown(Input.KEY_LALT) || isKeyDown(Input.KEY_RALT)) {
-			UI.changeVolume((delta < 0) ? -1 : 1);
+			volumeControl.changeVolume(delta);
 			return true;
 		}
 		return false;

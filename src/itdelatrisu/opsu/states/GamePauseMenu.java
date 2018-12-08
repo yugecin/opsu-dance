@@ -68,8 +68,6 @@ public class GamePauseMenu extends BaseOpsuState {
 			continueButton.draw();
 		retryButton.draw();
 		backButton.draw();
-
-		UI.draw(g);
 	}
 
 	@Override
@@ -175,7 +173,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			return true;
 		}
 
-		UI.changeVolume((newValue < 0) ? -1 : 1);
+		volumeControl.changeVolume(newValue);
 		return true;
 	}
 

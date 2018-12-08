@@ -332,8 +332,6 @@ public class ButtonMenu extends BaseOpsuState {
 			// draw buttons
 			for (int i = 0; i < buttons.length; i++)
 				menuButtons[i].draw(buttons[i].getColor());
-
-			UI.draw(g);
 		}
 
 		/**
@@ -385,8 +383,9 @@ public class ButtonMenu extends BaseOpsuState {
 		 * Processes a mouse wheel movement.
 		 * @param newValue the amount that the mouse wheel moved
 		 */
-		public void mouseWheelMoved(int newValue) {
-			UI.changeVolume((newValue < 0) ? -1 : 1);
+		public void mouseWheelMoved(int newValue)
+		{
+			volumeControl.changeVolume(newValue);
 		}
 
 		/**

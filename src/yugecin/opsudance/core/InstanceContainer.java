@@ -37,6 +37,7 @@ import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
+import yugecin.opsudance.ui.VolumeControl;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class InstanceContainer {
 	public static Updater updater;
 
 	public static BackButton backButton;
+	public static VolumeControl volumeControl;
 	public static DisplayContainer displayContainer;
 	public static Input input;
 
@@ -128,6 +130,8 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 		pauseState = new GamePauseMenu();
+
+		volumeControl = new VolumeControl();
 	}
 
 	@Nullable

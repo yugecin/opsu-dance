@@ -508,8 +508,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 		} else {
 			backButton.draw(g);
 		}
-
-		UI.draw(g);
 	}
 
 	@Override

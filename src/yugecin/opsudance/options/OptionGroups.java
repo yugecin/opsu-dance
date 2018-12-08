@@ -74,6 +74,7 @@ public class OptionGroups {
 		}),
 		new OptionTab("Audio", GameImage.MENU_NAV_AUDIO),
 		new OptionTab("VOLUME", new Option[]{
+			OPTION_FORCE_FALLBACK_VOLUMECONTROL,
 			OPTION_MASTER_VOLUME,
 			OPTION_MUSIC_VOLUME,
 			OPTION_EFFECT_VOLUME,
