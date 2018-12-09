@@ -31,7 +31,7 @@ public class VolumeControl
 	private static final int DISPLAY_TIME = 2000;
 
 	private static int programId = -1;
-	private static int program_attrib_dim;
+	private static int program_attrib_uv;
 
 	public static void createProgram()
 	{
@@ -48,11 +48,11 @@ public class VolumeControl
 		result = compileShader(
 			vert,
 			"#version 110\n"
-			+ "attribute float dim;"
-			+ "varying float v_dim;\n"
+			+ "attribute vec2 a_uv;"
+			+ "varying vec2 uv;\n"
 			+ "void main(){"
 			+ "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;"
-			+ "v_dim=dim;"
+			+ "uv=a_uv;"
 			+ "}"
 		);
 
@@ -65,7 +65,6 @@ public class VolumeControl
 		result = compileShader(
 			frag,
 			"#version 110\n"
-
 +"#define PI2 1.570796326795\n"
 +"#define PI 3.14159265359\n"
 +"#define TWOPI 6.28318530718\n"
@@ -79,12 +78,10 @@ public class VolumeControl
 +"#define TRANSITION_WIDTH .001\n"
 +"#define GLOW_OVERFLOW_RADIANS 4.\n"
 +"\n"
-+"varying float v_dim;\n"
++"varying vec2 uv;\n"
 +"\n"
 +"void main()\n"
 +"{\n"
-+"    vec2 uv = gl_FragCoord.xy/v_dim;\n"
-+"\n"
 +"    vec2 d = uv - vec2(.5);\n"
 +"    float dl = length(d);\n"
 +"    \n"
@@ -112,9 +109,7 @@ public class VolumeControl
 +"        *smoothstep(RADIUS + CIRCLE_WIDTH, RADIUS + CIRCLE_WIDTH - TRANSITION_WIDTH, dl);\n"
 +"    vec3 col = (1. - x) * blue + x * white;\n"
 +"    \n"
-//+"    gl_FragColor = vec4(col,1.0);\n"
-+"gl_FragColor=vec4(vec3(v_dim/100.),1.);"
-//+"gl_FragColor=vec4(vec3(mix(1.,0.,uv.x/100.)),1.);"
++"    gl_FragColor = vec4(col,1.0);\n"
 +"}\n"
 
 		);
@@ -138,7 +133,7 @@ public class VolumeControl
 		glDeleteShader(vert);
 		glDeleteShader(frag);
 
-		program_attrib_dim = glGetAttribLocation(programId, "dim");
+		program_attrib_uv = glGetAttribLocation(programId, "a_uv");
 	}
 
 	public static void destroyProgram()
@@ -188,16 +183,18 @@ public class VolumeControl
 
 		final float DIM = 100f;
 		glUseProgram(programId);
-		glUniform1f(program_attrib_dim, DIM);
-		glColor4f(1f, 0f, 0f, 1f);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0f, 0f);
+		glVertexAttrib2f(program_attrib_uv, 0f, 1f);
 		glVertex3f(width - DIM, height - DIM, 0f);
 		glTexCoord2f(1f, 0f);
+		glVertexAttrib2f(program_attrib_uv, 1f, 1f);
 		glVertex3f(width, height - DIM, 0f);
 		glTexCoord2f(1f, 1f);
+		glVertexAttrib2f(program_attrib_uv, 1f, 0f);
 		glVertex3f(width, height, 0f);
 		glTexCoord2f(0f, 1f);
+		glVertexAttrib2f(program_attrib_uv, 0f, 0f);
 		glVertex3f(width - DIM, height, 0f);
 		glEnd();
 		glUseProgram(0);
