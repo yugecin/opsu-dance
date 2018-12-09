@@ -31,7 +31,7 @@ public class VolumeControl
 	private static final int DISPLAY_TIME = 2000;
 
 	private static int programId = -1;
-	private static int program_attrib_uv;
+	private static int program_attrib_uv, program_uniform_tang;
 
 	public static void createProgram()
 	{
@@ -70,14 +70,15 @@ public class VolumeControl
 +"#define TWOPI 6.28318530718\n"
 +"\n"
 +"#define RADIUS .3\n"
-+"#define CIRCLE_WIDTH .0275\n"
++"#define CIRCLE_WIDTH .04\n"
 +"#define OUTER_RADIUS RADIUS + CIRCLE_WIDTH\n"
 +"#define INNER_RADIUS RADIUS - CIRCLE_WIDTH\n"
-+"#define GLOW_WIDTH .035\n"
-+"#define GLOW_EXTRA_WIDTH .005\n"
-+"#define TRANSITION_WIDTH .001\n"
-+"#define GLOW_OVERFLOW_RADIANS 4.\n"
++"#define GLOW_WIDTH .08\n"
++"#define GLOW_EXTRA_WIDTH .015\n"
++"#define TRANSITION_WIDTH .005\n"
++"#define GLOW_OVERFLOW_RADIANS 15.\n"
 +"\n"
++"uniform float tang;\n"
 +"varying vec2 uv;\n"
 +"\n"
 +"void main()\n"
@@ -87,29 +88,23 @@ public class VolumeControl
 +"    \n"
 +"    float pang = atan(d.y, d.x) - PI2;\n"
 +"    if (pang < 0.) pang += TWOPI;\n"
-+"    float tang = .6f;\n"
 +"    \n"
 +"    float extraglow = tang == 0. ? GLOW_EXTRA_WIDTH : 0.;\n"
 +"    \n"
-+"    vec3 blue =\n"
-+"        vec3(.3, .8, 1.)\n"
-+"        *smoothstep(INNER_RADIUS - GLOW_WIDTH - extraglow, INNER_RADIUS, dl)\n"
++"    float blue =\n"
++"        smoothstep(INNER_RADIUS - GLOW_WIDTH - extraglow, INNER_RADIUS, dl)\n"
 +"        *smoothstep(OUTER_RADIUS + GLOW_WIDTH + extraglow, OUTER_RADIUS, dl)\n"
 +"        ;\n"
 +"    float bluefade = radians(GLOW_OVERFLOW_RADIANS);\n"
 +"    float maxblue = 1. - clamp((tang - TWOPI + radians(2.)) / radians(2.), 0., .65);\n"
 +"    blue *= clamp(max((pang - (tang - bluefade)) / bluefade, 1. - pang / bluefade), .35, maxblue);\n"
 +"\n"
-+"    vec3 white = vec3(1.) - .4 * step(pang, tang);\n"
-+"    //float whitefade = radians(2.);\n"
-+"    //vec3 white = vec3(1.) * clamp((pang - (tang - whitefade)) / whitefade, .6, 1.);\n"
++"    float white = 1. - .4 * step(pang, tang);\n"
 +"    \n"
 +"    float x =\n"
 +"        smoothstep(RADIUS - CIRCLE_WIDTH - TRANSITION_WIDTH, RADIUS - CIRCLE_WIDTH, dl)\n"
 +"        *smoothstep(RADIUS + CIRCLE_WIDTH, RADIUS + CIRCLE_WIDTH - TRANSITION_WIDTH, dl);\n"
-+"    vec3 col = (1. - x) * blue + x * white;\n"
-+"    \n"
-+"    gl_FragColor = vec4(col,1.0);\n"
++"    gl_FragColor = (1. - x) * vec4(.3, .8, 1., blue) + x * vec4(1., 1., 1., white);\n"
 +"}\n"
 
 		);
@@ -134,6 +129,7 @@ public class VolumeControl
 		glDeleteShader(frag);
 
 		program_attrib_uv = glGetAttribLocation(programId, "a_uv");
+		program_uniform_tang = glGetUniformLocation(programId, "tang");
 	}
 
 	public static void destroyProgram()
@@ -155,6 +151,8 @@ public class VolumeControl
 	}
 
 	private int displayTimeLeft;
+	private float displayedVolume;
+	private float targetVolume;
 
 	/**
 	 * This changes either master, music or effect volume
@@ -162,10 +160,12 @@ public class VolumeControl
 	 */
 	public void changeVolume(int direction)
 	{
-		float newvolume = OPTION_MASTER_VOLUME.val / 100f;
-		newvolume += .05f * (1 - ((direction & 0x80000000) >>> 30));
-		newvolume = clamp(newvolume, 0f, 1f);
-		OPTION_MASTER_VOLUME.setValue((int) (newvolume * 100f));
+		this.targetVolume = clamp(
+			OPTION_MASTER_VOLUME.val / 100f + .05f * (1 - ((direction & 0x80000000) >>> 30)),
+			0f,
+			1f
+		);
+		OPTION_MASTER_VOLUME.setValue((int) (this.targetVolume * 100f));
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
 
@@ -176,13 +176,23 @@ public class VolumeControl
 		}
 		displayTimeLeft -= renderDelta;
 
+		float diff = this.targetVolume - this.displayedVolume;
+		if (diff < 0) {
+			this.displayedVolume -= 0.025f;
+		} else if (diff > 0) {
+			this.displayedVolume += 0.025f;
+		}
+
 		if (OPTION_FORCE_FALLBACK_VOLUMECONTROL.state || programId == -1) {
 			this.drawFallback();
 			return;
 		}
 
-		final float DIM = 100f;
+		final float targetAngle =
+			(1f - this.displayedVolume) * 6.2831853071795864f;
+		final float DIM = 200f;
 		glUseProgram(programId);
+		glUniform1f(program_uniform_tang, targetAngle);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0f, 0f);
 		glVertexAttrib2f(program_attrib_uv, 0f, 1f);
@@ -233,7 +243,7 @@ public class VolumeControl
 		glVertex3f(ENDX, Y2, 0f);
 		glVertex3f(ENDX - IPAD, Y2, 0f);
 
-		int width = (int) (MAXWIDTH * OPTION_MASTER_VOLUME.val / 100f);
+		int width = (int) (MAXWIDTH * this.displayedVolume);
 		glVertex3f(MINX, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y2 - TWOPAD, 0f);
