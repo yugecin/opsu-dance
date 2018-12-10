@@ -21,13 +21,17 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 
 import org.newdawn.slick.util.Log;
 
+import itdelatrisu.opsu.ui.animations.AnimatedValue;
+
 import static itdelatrisu.opsu.Utils.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.LINEAR;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class VolumeControl
 {
+	private static final int VALUE_ANIMATION_TIME = 200;
 	private static final int DISPLAY_TIME = 2000;
 
 	private static int programId = -1;
@@ -151,8 +155,16 @@ public class VolumeControl
 	}
 
 	private int displayTimeLeft;
-	private float displayedVolume;
 	private float targetVolume;
+	private AnimatedValue val;
+
+	public VolumeControl()
+	{
+		this.val = new AnimatedValue(VALUE_ANIMATION_TIME, 0, 1, LINEAR);
+
+		final float currentVolume = OPTION_MASTER_VOLUME.val / 100f;
+		this.val.setValues(currentVolume, currentVolume);
+	}
 
 	/**
 	 * This changes either master, music or effect volume
@@ -165,6 +177,9 @@ public class VolumeControl
 			0f,
 			1f
 		);
+		final float displayedVolume = val.getValue();
+		val.setTime(0);
+		val.setValues(displayedVolume, this.targetVolume);
 		OPTION_MASTER_VOLUME.setValue((int) (this.targetVolume * 100f));
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
@@ -176,20 +191,14 @@ public class VolumeControl
 		}
 		displayTimeLeft -= renderDelta;
 
-		float diff = this.targetVolume - this.displayedVolume;
-		if (diff < 0) {
-			this.displayedVolume -= 0.025f;
-		} else if (diff > 0) {
-			this.displayedVolume += 0.025f;
-		}
+		val.update(renderDelta);
 
 		if (OPTION_FORCE_FALLBACK_VOLUMECONTROL.state || programId == -1) {
 			this.drawFallback();
 			return;
 		}
 
-		final float targetAngle =
-			(1f - this.displayedVolume) * 6.2831853071795864f;
+		final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
 		final float DIM = 200f;
 		glUseProgram(programId);
 		glUniform1f(program_uniform_tang, targetAngle);
@@ -243,7 +252,7 @@ public class VolumeControl
 		glVertex3f(ENDX, Y2, 0f);
 		glVertex3f(ENDX - IPAD, Y2, 0f);
 
-		int width = (int) (MAXWIDTH * this.displayedVolume);
+		int width = (int) (MAXWIDTH * this.val.getValue());
 		glVertex3f(MINX, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y2 - TWOPAD, 0f);
