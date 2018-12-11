@@ -22,6 +22,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import org.newdawn.slick.util.Log;
 
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
+import yugecin.opsudance.events.ResolutionChangedListener;
 
 import static itdelatrisu.opsu.Utils.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.LINEAR;
@@ -29,13 +30,13 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class VolumeControl
+public class VolumeControl implements ResolutionChangedListener
 {
 	private static final int VALUE_ANIMATION_TIME = 200;
 	private static final int DISPLAY_TIME = 2000;
 
 	private static int programId = -1;
-	private static int program_attrib_uv, program_uniform_tang;
+	private static int program_attrib_uv, program_uniform_tang, program_uniform_bgalpha;
 
 	public static void createProgram()
 	{
@@ -73,16 +74,17 @@ public class VolumeControl
 +"#define PI 3.14159265359\n"
 +"#define TWOPI 6.28318530718\n"
 +"\n"
-+"#define RADIUS .3\n"
-+"#define CIRCLE_WIDTH .04\n"
++"#define RADIUS .3777\n"
++"#define CIRCLE_WIDTH .0333\n"
 +"#define OUTER_RADIUS RADIUS + CIRCLE_WIDTH\n"
 +"#define INNER_RADIUS RADIUS - CIRCLE_WIDTH\n"
-+"#define GLOW_WIDTH .08\n"
++"#define GLOW_WIDTH .085\n"
 +"#define GLOW_EXTRA_WIDTH .015\n"
 +"#define TRANSITION_WIDTH .005\n"
 +"#define GLOW_OVERFLOW_RADIANS 15.\n"
 +"\n"
 +"uniform float tang;\n"
++"uniform float bgalpha;\n"
 +"varying vec2 uv;\n"
 +"\n"
 +"void main()\n"
@@ -93,7 +95,7 @@ public class VolumeControl
 +"    float pang = atan(d.y, d.x) - PI2;\n"
 +"    if (pang < 0.) pang += TWOPI;\n"
 +"    \n"
-+"    float extraglow = tang == 0. ? GLOW_EXTRA_WIDTH : 0.;\n"
++"    float extraglow = smoothstep(.2, .0, tang) * GLOW_EXTRA_WIDTH;"
 +"    \n"
 +"    float blue =\n"
 +"        smoothstep(INNER_RADIUS - GLOW_WIDTH - extraglow, INNER_RADIUS, dl)\n"
@@ -108,7 +110,10 @@ public class VolumeControl
 +"    float x =\n"
 +"        smoothstep(RADIUS - CIRCLE_WIDTH - TRANSITION_WIDTH, RADIUS - CIRCLE_WIDTH, dl)\n"
 +"        *smoothstep(RADIUS + CIRCLE_WIDTH, RADIUS + CIRCLE_WIDTH - TRANSITION_WIDTH, dl);\n"
-+"    gl_FragColor = (1. - x) * vec4(.3, .8, 1., blue) + x * vec4(1., 1., 1., white);\n"
++"    gl_FragColor = "
++"        (1. - x) * vec4(vec3(.3, .8, 1.) * blue, blue * (1. - bgalpha))"
++"        + x * vec4(white, white, white, 1.)"
++"        + (1. - smoothstep(.49, .495, dl)) * vec4(0., 0., 0., bgalpha);"
 +"}\n"
 
 		);
@@ -134,6 +139,7 @@ public class VolumeControl
 
 		program_attrib_uv = glGetAttribLocation(programId, "a_uv");
 		program_uniform_tang = glGetUniformLocation(programId, "tang");
+		program_uniform_bgalpha = glGetUniformLocation(programId, "bgalpha");
 	}
 
 	public static void destroyProgram()
@@ -154,6 +160,9 @@ public class VolumeControl
 		return true;
 	}
 
+	private int size;
+	private float posX, posY;
+
 	private int displayTimeLeft;
 	private float targetVolume;
 	private AnimatedValue val;
@@ -164,6 +173,17 @@ public class VolumeControl
 
 		final float currentVolume = OPTION_MASTER_VOLUME.val / 100f;
 		this.val.setValues(currentVolume, currentVolume);
+
+		displayContainer.addResolutionChangedListener(this);
+	}
+
+	@Override
+	public void onResolutionChanged(int w, int h)
+	{
+		this.size = (int) (0.09f * w);
+		final int offset = (int) (0.0225f * w + this.size);
+		this.posX = w - offset;
+		this.posY = h - offset;
 	}
 
 	/**
@@ -199,23 +219,22 @@ public class VolumeControl
 		}
 
 		final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
-		final float DIM = 200f;
 		glUseProgram(programId);
 		glUniform1f(program_uniform_tang, targetAngle);
+		glUniform1f(program_uniform_bgalpha, .3f);
+		glPushMatrix();
+		glTranslatef(this.posX, this.posY, 0f);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0f, 0f);
 		glVertexAttrib2f(program_attrib_uv, 0f, 1f);
-		glVertex3f(width - DIM, height - DIM, 0f);
-		glTexCoord2f(1f, 0f);
+		glVertex3f(0f, 0f, 0f);
 		glVertexAttrib2f(program_attrib_uv, 1f, 1f);
-		glVertex3f(width, height - DIM, 0f);
-		glTexCoord2f(1f, 1f);
+		glVertex3f(this.size, 0f, 0f);
 		glVertexAttrib2f(program_attrib_uv, 1f, 0f);
-		glVertex3f(width, height, 0f);
-		glTexCoord2f(0f, 1f);
+		glVertex3f(this.size, this.size, 0f);
 		glVertexAttrib2f(program_attrib_uv, 0f, 0f);
-		glVertex3f(width - DIM, height, 0f);
+		glVertex3f(0f, this.size, 0f);
 		glEnd();
+		glPopMatrix();
 		glUseProgram(0);
 	}
 
