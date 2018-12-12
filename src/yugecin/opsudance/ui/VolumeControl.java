@@ -36,8 +36,9 @@ public class VolumeControl implements ResolutionChangedListener
 	private static final int VALUE_ANIMATION_TIME = 200;
 	private static final int DISPLAY_TIME = 2000;
 
-	private static int programId = -1;
-	private static int program_attrib_uv, program_uniform_tang, program_uniform_bgalpha;
+	private static int
+		programId = -1, bgprogramId = -1,
+		program_attrib_uv, program_uniform_tang, program_uniform_bgalpha, bgprogram_attrib_uv;
 
 	public static void createProgram()
 	{
@@ -49,13 +50,16 @@ public class VolumeControl implements ResolutionChangedListener
 		int vert = glCreateShader(GL_VERTEX_SHADER);
 		int frag = glCreateShader(GL_FRAGMENT_SHADER);
 
+		bgprogramId = glCreateProgram();
+		int bgfrag = glCreateShader(GL_FRAGMENT_SHADER);
+
 		boolean result;
 
 		result = compileShader(
 			vert,
 "#version 110\n"
-+ "attribute vec2 a_uv;varying vec2 uv;void main(){"
-+ "gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;uv=a_uv;}"
++"attribute vec2 a_uv;varying vec2 uv;void main(){"
++"gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;uv=a_uv;}"
 		);
 
 		if (!result) {
@@ -84,28 +88,40 @@ public class VolumeControl implements ResolutionChangedListener
 			return;
 		}
 
-		glAttachShader(programId, vert);
-		glAttachShader(programId, frag);
-		glLinkProgram(programId);
+		result = compileShader(
+			bgfrag,
+"#version 110\n"
++"varying vec2 uv;void main(){gl_FragColor=vec4(0.,0.,0.,(1.-min(length(uv),1.))*.7);}"
+		);
 
-		if (glGetProgrami(programId, GL_LINK_STATUS) != GL_TRUE) {
-			String error = glGetProgramInfoLog(programId, 1024);
-			Log.error("Program linking failed.", new Exception(error));
+		if (!result) {
+			glDeleteShader(vert);
+			glDeleteShader(frag);
 			destroyProgram();
+			return;
 		}
+
+		linkShader(programId, vert, frag);
+		linkShader(bgprogramId, vert, bgfrag);
 
 		glDeleteShader(vert);
 		glDeleteShader(frag);
+		glDeleteShader(bgfrag);
 
 		program_attrib_uv = glGetAttribLocation(programId, "a_uv");
 		program_uniform_tang = glGetUniformLocation(programId, "tang");
 		program_uniform_bgalpha = glGetUniformLocation(programId, "bgalpha");
+		bgprogram_attrib_uv = glGetAttribLocation(bgprogramId, "a_uv");
 	}
 
 	public static void destroyProgram()
 	{
-		glDeleteProgram(programId);
-		programId = -1;
+		if (programId != -1) {
+			glDeleteProgram(programId);
+			glDeleteProgram(bgprogramId);
+			programId = -1;
+			bgprogramId = -1;
+		}
 	}
 
 	private static boolean compileShader(int handle, String source)
@@ -120,8 +136,27 @@ public class VolumeControl implements ResolutionChangedListener
 		return true;
 	}
 
+	private static void linkShader(int program, int vert, int frag)
+	{
+		if (program == -1) {
+			return;
+		}
+
+		glAttachShader(program, vert);
+		glAttachShader(program, frag);
+		glLinkProgram(program);
+
+		if (glGetProgrami(program, GL_LINK_STATUS) != GL_TRUE) {
+			String error = glGetProgramInfoLog(program, 1024);
+			Log.error("Program linking failed.", new Exception(error));
+			destroyProgram();
+		}
+	}
+
 	private final Dial music, effects, master;
 
+	private int bgsize;
+	private int bgxpad, bgypad;
 	private int displayTimeLeft;
 
 	public VolumeControl()
@@ -139,6 +174,10 @@ public class VolumeControl implements ResolutionChangedListener
 		this.music.updatePositions(0.044f, 0.0815f, 0.192f);
 		this.effects.updatePositions(0.044f, 0.114f, 0.1173f);
 		this.master.updatePositions(0.09f, 0.0225f, 0.0417f);
+
+		this.bgsize = (int) (w * 0.20468f);
+		this.bgxpad = w - bgsize;
+		this.bgypad = h - bgsize;
 	}
 
 	/**
@@ -168,6 +207,23 @@ public class VolumeControl implements ResolutionChangedListener
 
 		this.music.val.update(renderDelta);
 		this.effects.val.update(renderDelta);
+
+		// circle center is at .6743 of the square x&y
+		glUseProgram(bgprogramId);
+		glPushMatrix();
+		glTranslatef(this.bgxpad, this.bgypad, 0f);
+		glBegin(GL_QUADS);
+		glVertexAttrib2f(bgprogram_attrib_uv, -1f, -1f);
+		glVertex3f(0f, 0f, 0f);
+		glVertexAttrib2f(bgprogram_attrib_uv, .3257f, -1f);
+		glVertex3f(this.bgsize, 0f, 0f);
+		glVertexAttrib2f(bgprogram_attrib_uv, .3257f, .3257f);
+		glVertex3f(this.bgsize, this.bgsize, 0f);
+		glVertexAttrib2f(bgprogram_attrib_uv, -1f, .3257f);
+		glVertex3f(0f, this.bgsize, 0f);
+		glEnd();
+		glPopMatrix();
+		glUseProgram(0);
 
 		this.master.draw();
 		this.effects.draw();
