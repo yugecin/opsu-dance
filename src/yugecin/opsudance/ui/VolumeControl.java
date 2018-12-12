@@ -23,6 +23,7 @@ import org.newdawn.slick.util.Log;
 
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import yugecin.opsudance.events.ResolutionChangedListener;
+import yugecin.opsudance.options.NumericOption;
 
 import static itdelatrisu.opsu.Utils.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.LINEAR;
@@ -119,19 +120,15 @@ public class VolumeControl implements ResolutionChangedListener
 		return true;
 	}
 
-	private int size;
-	private float posX, posY;
+	private final Dial music, effects, master;
 
 	private int displayTimeLeft;
-	private float targetVolume;
-	private AnimatedValue val;
 
 	public VolumeControl()
 	{
-		this.val = new AnimatedValue(VALUE_ANIMATION_TIME, 0, 1, LINEAR);
-
-		final float currentVolume = OPTION_MASTER_VOLUME.val / 100f;
-		this.val.setValues(currentVolume, currentVolume);
+		this.music = new Dial(OPTION_MUSIC_VOLUME);
+		this.effects = new Dial(OPTION_EFFECT_VOLUME);
+		this.master = new Dial(OPTION_MASTER_VOLUME);
 
 		displayContainer.addResolutionChangedListener(this);
 	}
@@ -139,10 +136,9 @@ public class VolumeControl implements ResolutionChangedListener
 	@Override
 	public void onResolutionChanged(int w, int h)
 	{
-		this.size = (int) (0.09f * w);
-		final int offset = (int) (0.0225f * w + this.size);
-		this.posX = w - offset;
-		this.posY = h - offset;
+		this.music.updatePositions(0.044f, 0.0815f, 0.192f);
+		this.effects.updatePositions(0.044f, 0.114f, 0.1173f);
+		this.master.updatePositions(0.09f, 0.0225f, 0.0417f);
 	}
 
 	/**
@@ -151,15 +147,8 @@ public class VolumeControl implements ResolutionChangedListener
 	 */
 	public void changeVolume(int direction)
 	{
-		this.targetVolume = clamp(
-			OPTION_MASTER_VOLUME.val / 100f + .05f * (1 - ((direction & 0x80000000) >>> 30)),
-			0f,
-			1f
-		);
-		final float displayedVolume = val.getValue();
-		val.setTime(0);
-		val.setValues(displayedVolume, this.targetVolume);
-		OPTION_MASTER_VOLUME.setValue((int) (this.targetVolume * 100f));
+		final float value = .05f * (1 - ((direction & 0x80000000) >>> 30));
+		this.master.changeVolume(value);
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
 
@@ -170,31 +159,19 @@ public class VolumeControl implements ResolutionChangedListener
 		}
 		displayTimeLeft -= renderDelta;
 
-		val.update(renderDelta);
+		this.master.val.update(renderDelta);
 
 		if (OPTION_FORCE_FALLBACK_VOLUMECONTROL.state || programId == -1) {
 			this.drawFallback();
 			return;
 		}
 
-		final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
-		glUseProgram(programId);
-		glUniform1f(program_uniform_tang, targetAngle);
-		glUniform1f(program_uniform_bgalpha, .3f);
-		glPushMatrix();
-		glTranslatef(this.posX, this.posY, 0f);
-		glBegin(GL_QUADS);
-		glVertexAttrib2f(program_attrib_uv, 0f, 1f);
-		glVertex3f(0f, 0f, 0f);
-		glVertexAttrib2f(program_attrib_uv, 1f, 1f);
-		glVertex3f(this.size, 0f, 0f);
-		glVertexAttrib2f(program_attrib_uv, 1f, 0f);
-		glVertex3f(this.size, this.size, 0f);
-		glVertexAttrib2f(program_attrib_uv, 0f, 0f);
-		glVertex3f(0f, this.size, 0f);
-		glEnd();
-		glPopMatrix();
-		glUseProgram(0);
+		this.music.val.update(renderDelta);
+		this.effects.val.update(renderDelta);
+
+		this.master.draw();
+		this.effects.draw();
+		this.music.draw();
 	}
 
 	private void drawFallback()
@@ -230,11 +207,66 @@ public class VolumeControl implements ResolutionChangedListener
 		glVertex3f(ENDX, Y2, 0f);
 		glVertex3f(ENDX - IPAD, Y2, 0f);
 
-		int width = (int) (MAXWIDTH * this.val.getValue());
+		int width = (int) (MAXWIDTH * this.master.val.getValue());
 		glVertex3f(MINX, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y + TWOPAD, 0f);
 		glVertex3f(MINX + width, Y2 - TWOPAD, 0f);
 		glVertex3f(MINX, Y2 - TWOPAD, 0f);
 		glEnd();
+	}
+
+	private static class Dial
+	{
+		private final NumericOption option;
+		private final AnimatedValue val;
+
+		private int size;
+		private float xpad, ypad;
+
+		private Dial(NumericOption option)
+		{
+			this.option = option;
+
+			final float value = option.val / 100f;
+			this.val = new AnimatedValue(VALUE_ANIMATION_TIME, value, value, LINEAR);
+		}
+
+		private void changeVolume(float value)
+		{
+			final float targetVolume = clamp(this.option.val / 100f + value, 0f, 1f);
+			final float displayedVolume = val.getValue();
+			val.setTime(0);
+			val.setValues(displayedVolume, targetVolume);
+			OPTION_MASTER_VOLUME.setValue((int) (targetVolume * 100f));
+		}
+
+		private void updatePositions(float wratio, float xpadratio, float ypadratio)
+		{
+			this.size = (int) (wratio * width);
+			this.xpad = width - (int) (xpadratio * width + this.size);
+			this.ypad = height - (int) (ypadratio * height + this.size);
+		}
+
+		private void draw()
+		{
+			final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
+			glUseProgram(programId);
+			glUniform1f(program_uniform_tang, targetAngle);
+			glUniform1f(program_uniform_bgalpha, .3f);
+			glPushMatrix();
+			glTranslatef(this.xpad, this.ypad, 0f);
+			glBegin(GL_QUADS);
+			glVertexAttrib2f(program_attrib_uv, 0f, 1f);
+			glVertex3f(0f, 0f, 0f);
+			glVertexAttrib2f(program_attrib_uv, 1f, 1f);
+			glVertex3f(this.size, 0f, 0f);
+			glVertexAttrib2f(program_attrib_uv, 1f, 0f);
+			glVertex3f(this.size, this.size, 0f);
+			glVertexAttrib2f(program_attrib_uv, 0f, 0f);
+			glVertex3f(0f, this.size, 0f);
+			glEnd();
+			glPopMatrix();
+			glUseProgram(0);
+		}
 	}
 }
