@@ -19,8 +19,10 @@ package yugecin.opsudance.ui;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
+import org.newdawn.slick.Font;
 import org.newdawn.slick.util.Log;
 
+import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.options.NumericOption;
@@ -161,9 +163,9 @@ public class VolumeControl implements ResolutionChangedListener
 
 	public VolumeControl()
 	{
-		this.music = new Dial(OPTION_MUSIC_VOLUME);
-		this.effects = new Dial(OPTION_EFFECT_VOLUME);
-		this.master = new Dial(OPTION_MASTER_VOLUME);
+		this.music = new Dial("music", OPTION_MUSIC_VOLUME, Fonts.SMALLBOLD, -1f, 0f);
+		this.effects = new Dial("effect", OPTION_EFFECT_VOLUME, Fonts.SMALLBOLD, -1f, 0f);
+		this.master = new Dial("master", OPTION_MASTER_VOLUME, Fonts.MEDIUMBOLD, -.866f, .5f);
 
 		displayContainer.addResolutionChangedListener(this);
 	}
@@ -273,15 +275,29 @@ public class VolumeControl implements ResolutionChangedListener
 
 	private static class Dial
 	{
+		private final String name;
 		private final NumericOption option;
 		private final AnimatedValue val;
+		private final Font numberFont;
+		private final float textxoff, textyoff;
 
 		private int size;
 		private float xpad, ypad;
+		private float textx, texty;
+		private float numberx, numbery;
 
-		private Dial(NumericOption option)
+		private Dial(
+			String name,
+			NumericOption option,
+			Font numberFont,
+			float textxoff,
+			float textyoff)
 		{
+			this.name = name;
 			this.option = option;
+			this.numberFont = numberFont;
+			this.textxoff = textxoff;
+			this.textyoff = textyoff;
 
 			final float value = option.val / 100f;
 			this.val = new AnimatedValue(VALUE_ANIMATION_TIME, value, value, LINEAR);
@@ -301,6 +317,15 @@ public class VolumeControl implements ResolutionChangedListener
 			this.size = (int) (wratio * width);
 			this.xpad = width - (int) (xpadratio * width + this.size);
 			this.ypad = height - (int) (ypadratio * height + this.size);
+
+			final float textwidth = Fonts.MEDIUM.getWidth(this.name + " ");
+			final float lh2 = Fonts.MEDIUM.getHeight(this.name) * .7f;
+			final float size2 = this.size / 2f;
+			this.numberx = this.xpad + size2;
+			this.numbery = this.ypad + size2;
+			this.textx = this.numberx + this.textxoff * size2 - textwidth;
+			this.texty = this.numbery + this.textyoff * size2 - lh2;
+			this.numbery -= this.numberFont.getHeight("196%") * .7f;
 		}
 
 		private void draw()
@@ -323,6 +348,11 @@ public class VolumeControl implements ResolutionChangedListener
 			glEnd();
 			glPopMatrix();
 			glUseProgram(0);
+
+			Fonts.MEDIUM.drawString(this.textx, this.texty, this.name);
+			final String number = String.valueOf((int) (val.getValue() * 100)) + "%";
+			final float noffx = this.numberFont.getWidth(number) / 2f;
+			this.numberFont.drawString(this.numberx - noffx, this.numbery, number);
 		}
 	}
 }

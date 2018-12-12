@@ -441,6 +441,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		GameImage.init(width, height);
 		Fonts.init();
 
+		if (volumeControl == null) {
+			volumeControl = new VolumeControl();
+		}
+
 		destroyImages();
 		reinit();
 		VolumeControl.createProgram();

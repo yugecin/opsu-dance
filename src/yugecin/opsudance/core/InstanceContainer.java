@@ -130,8 +130,6 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 		pauseState = new GamePauseMenu();
-
-		volumeControl = new VolumeControl();
 	}
 
 	@Nullable
