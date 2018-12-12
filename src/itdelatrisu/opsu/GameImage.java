@@ -261,12 +261,6 @@ public enum GameImage {
 	MENU_NAV_ADVANCED ("menu-nav-advanced", "png", false, false),
 	MENU_NAV_DANCE ("menu-nav-dance", "png", false, false),
 	MENU_NAV_PIPPI ("menu-nav-pippi", "png", false, false),
-	VOLUME ("volume-bg", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((h * 0.3f) / img.getHeight());
-		}
-	},
 	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
