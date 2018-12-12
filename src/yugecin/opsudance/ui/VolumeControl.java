@@ -36,7 +36,7 @@ import static yugecin.opsudance.options.Options.*;
 public class VolumeControl implements ResolutionChangedListener
 {
 	private static final int VALUE_ANIMATION_TIME = 200;
-	private static final int DISPLAY_TIME = 2000;
+	private static final int DISPLAY_TIME = 1500;
 
 	private static int
 		programId = -1, bgprogramId = -1,
@@ -212,7 +212,12 @@ public class VolumeControl implements ResolutionChangedListener
 		if (displayTimeLeft <= 0) {
 			return;
 		}
-		displayTimeLeft -= renderDelta;
+
+		if (mouseX > this.bgxpad && mouseY > this.bgypad) {
+			displayTimeLeft = DISPLAY_TIME;
+		} else {
+			displayTimeLeft -= renderDelta;
+		}
 
 		if (OPTION_FORCE_FALLBACK_VOLUMECONTROL.state || programId == -1) {
 			this.drawFallback();
