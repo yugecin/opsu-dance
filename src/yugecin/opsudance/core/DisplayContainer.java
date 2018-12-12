@@ -197,6 +197,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 			fpsDisplay.update();
 
+			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
 				cursor.setCursorPosition(delta, mouseX, mouseY);

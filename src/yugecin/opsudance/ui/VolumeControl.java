@@ -157,6 +157,7 @@ public class VolumeControl implements ResolutionChangedListener
 
 	private final Dial music, effects, master;
 
+	private Dial hoveredDial;
 	private int bgsize;
 	private int bgxpad, bgypad;
 	private int displayTimeLeft;
@@ -188,9 +189,22 @@ public class VolumeControl implements ResolutionChangedListener
 	 */
 	public void changeVolume(int direction)
 	{
-		final int value = 5 * (1 - ((direction & 0x80000000) >>> 30));
-		this.master.changeVolume(value);
+		this.hoveredDial.changeVolume(5 * (1 - ((direction & 0x80000000) >>> 30)));
 		this.displayTimeLeft = DISPLAY_TIME;
+	}
+
+	public void updateHover()
+	{
+		this.hoveredDial = this.master;
+		if (displayTimeLeft <= 0) {
+			return;
+		}
+		if (this.effects.contains(mouseX, mouseY)) {
+			this.hoveredDial = this.effects;
+		}
+		if (this.music.contains(mouseX, mouseY)) {
+			this.hoveredDial = this.music;
+		}
 	}
 
 	public void draw()
@@ -200,15 +214,10 @@ public class VolumeControl implements ResolutionChangedListener
 		}
 		displayTimeLeft -= renderDelta;
 
-		this.master.val.update(renderDelta);
-
 		if (OPTION_FORCE_FALLBACK_VOLUMECONTROL.state || programId == -1) {
 			this.drawFallback();
 			return;
 		}
-
-		this.music.val.update(renderDelta);
-		this.effects.val.update(renderDelta);
 
 		// circle center is at .6743 of the square x&y
 		glUseProgram(bgprogramId);
@@ -227,13 +236,15 @@ public class VolumeControl implements ResolutionChangedListener
 		glPopMatrix();
 		glUseProgram(0);
 
-		this.master.draw();
-		this.effects.draw();
-		this.music.draw();
+		this.master.draw(this.master == this.hoveredDial);
+		this.effects.draw(this.effects == this.hoveredDial);
+		this.music.draw(this.music == this.hoveredDial);
 	}
 
 	private void drawFallback()
 	{
+		this.master.val.update(renderDelta);
+
 		final int IPAD = 4, OPAD = 20, TWOPAD = IPAD * 2;
 		final int HEIGHT = 40;
 		final int Y = height - OPAD - HEIGHT - IPAD * 4;
@@ -282,7 +293,7 @@ public class VolumeControl implements ResolutionChangedListener
 		private final float textxoff, textyoff;
 
 		private int size;
-		private float xpad, ypad;
+		private int xpad, ypad;
 		private float textx, texty;
 		private float numberx, numbery;
 
@@ -309,7 +320,7 @@ public class VolumeControl implements ResolutionChangedListener
 			final float displayedVolume = val.getValue();
 			val.setTime(0);
 			val.setValues(displayedVolume, targetVolume / 100f);
-			OPTION_MASTER_VOLUME.setValue(targetVolume);
+			this.option.setValue(targetVolume);
 		}
 
 		private void updatePositions(float wratio, float xpadratio, float ypadratio)
@@ -328,12 +339,22 @@ public class VolumeControl implements ResolutionChangedListener
 			this.numbery -= this.numberFont.getHeight("196%") * .7f;
 		}
 
-		private void draw()
+		private boolean contains(int x, int y)
 		{
+			final int size2 = this.size / 2;
+			final int dx = this.xpad + size2 - x;
+			final int dy = this.ypad + size2 - y;
+			return dx * dx + dy * dy < size2 * size2;
+		}
+
+		private void draw(boolean isHovered)
+		{
+			this.val.update(renderDelta);
+
 			final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
 			glUseProgram(programId);
 			glUniform1f(program_uniform_tang, targetAngle);
-			glUniform1f(program_uniform_bgalpha, .3f);
+			glUniform1f(program_uniform_bgalpha, isHovered ? .3f : .15f);
 			glPushMatrix();
 			glTranslatef(this.xpad, this.ypad, 0f);
 			glBegin(GL_QUADS);
