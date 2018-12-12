@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu;
 
+import org.lwjgl.LWJGLUtil;
 import org.newdawn.slick.util.Log;
 
 import java.io.File;
@@ -27,8 +28,8 @@ import java.util.jar.JarFile;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class NativeLoader {
-
+public class NativeLoader
+{
 	public static void setNativePath() {
 		String nativepath = config.NATIVE_DIR.getAbsolutePath();
 		System.setProperty("org.lwjgl.librarypath", nativepath);
@@ -49,27 +50,21 @@ public class NativeLoader {
 	 * Unpacks natives for the current operating system to the natives directory.
 	 * @throws IOException if an I/O exception occurs
 	 */
-	public static void loadNatives(JarFile jarfile) throws IOException {
+	public static void loadNatives(JarFile jarfile) throws IOException
+	{
 		if (!config.NATIVE_DIR.exists() && !config.NATIVE_DIR.mkdir()) {
 			String msg = String.format("Could not create folder '%s'",
 				config.NATIVE_DIR.getAbsolutePath());
 			throw new RuntimeException(msg);
 		}
 
-		final String osName = System.getProperty("os.name");
-		final String[] files;
-		if (osName.startsWith("Win")) {
-			files = new String[] { "OpenAL32.dll", "OpenAL64.dll", "lwjgl.dll", "lwjgl64.dll" };
-		} else if (osName.startsWith("Linux")) {
-			files = new String[] { "liblwjgl.so", "liblwjgl64.so", "libopenal.so", "libopenal64.so" };
-		} else if (osName.startsWith("Mac") || osName.startsWith("Darwin")) {
-			files = new String[] { "liblwjgl.dylib", "openal.dylib" };
-		} else {
-			Log.warn("Cannot determine natives for os " + osName);
-			return;
-		}
+		final String[][] files = {
+			{ "liblwjgl.so", "liblwjgl64.so", "libopenal.so", "libopenal64.so" },
+			{ "liblwjgl.dylib", "openal.dylib" },
+			{ "OpenAL32.dll", "OpenAL64.dll", "lwjgl.dll", "lwjgl64.dll" }
+		};
 
-		for (String file : files) {
+		for (String file : files[LWJGLUtil.getPlatform() - 1]) {
 			File unpackedFile = new File(config.NATIVE_DIR, file);
 			if (unpackedFile.exists()) {
 				continue;
@@ -77,5 +72,4 @@ public class NativeLoader {
 			Utils.unpackFromJar(jarfile, unpackedFile, file);
 		}
 	}
-
 }
