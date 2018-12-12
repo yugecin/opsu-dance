@@ -188,7 +188,7 @@ public class VolumeControl implements ResolutionChangedListener
 	 */
 	public void changeVolume(int direction)
 	{
-		final float value = .05f * (1 - ((direction & 0x80000000) >>> 30));
+		final int value = 5 * (1 - ((direction & 0x80000000) >>> 30));
 		this.master.changeVolume(value);
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
@@ -303,13 +303,13 @@ public class VolumeControl implements ResolutionChangedListener
 			this.val = new AnimatedValue(VALUE_ANIMATION_TIME, value, value, LINEAR);
 		}
 
-		private void changeVolume(float value)
+		private void changeVolume(int diff)
 		{
-			final float targetVolume = clamp(this.option.val / 100f + value, 0f, 1f);
+			final int targetVolume = clamp(this.option.val + diff, 0, 100);
 			final float displayedVolume = val.getValue();
 			val.setTime(0);
-			val.setValues(displayedVolume, targetVolume);
-			OPTION_MASTER_VOLUME.setValue((int) (targetVolume * 100f));
+			val.setValues(displayedVolume, targetVolume / 100f);
+			OPTION_MASTER_VOLUME.setValue(targetVolume);
 		}
 
 		private void updatePositions(float wratio, float xpadratio, float ypadratio)
