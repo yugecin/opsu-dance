@@ -57,6 +57,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
+import yugecin.opsudance.core.DisplayContainer;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
@@ -403,7 +404,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		// background
-		if (!OPTION_DANCE_REMOVE_BG.state && GameMod.AUTO.isActive()) {
+		if (!OPTION_DANCE_REMOVE_BG.state) {
 			float dimLevel = (100 - OPTION_BACKGROUND_DIM.val) / 100f;
 			if (trackPosition < firstObjectTime) {
 				if (timeDiff < approachTime)
@@ -469,7 +470,8 @@ public class Game extends ComplexOpsuState {
 
 			// blend offscreen image
 			g.setDrawMode(Graphics.MODE_ALPHA_BLEND);
-			g.setClip(alphaX, alphaY, alphaRadius, alphaRadius);
+			// TODO fix this :) (if even needed because window is not big enough anyways)
+			//g.setClip(alphaX, alphaY, alphaRadius, alphaRadius);
 			g.drawImage(offscreen, 0, 0);
 			g.clearClip();
 			g.setDrawMode(Graphics.MODE_NORMAL);
