@@ -37,6 +37,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.*;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
@@ -49,6 +51,8 @@ import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.utils.GLHelper;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +107,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	private int tProgress = -1;
 	private OpsuState tNextState;
 	private final Color tOVERLAY = new Color(Color.black);
+
+	private JFrame frame;
 
 	public DisplayContainer()
 	{
@@ -172,6 +178,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		state.enter();
 	}
 
+	boolean wasingame = false;
+	int xsx = 8, xsy = 27;
+	int ofx = -4, ofy = -23;
+	public static int tx, ty;
 
 	public void run() throws Exception {
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
@@ -183,6 +193,38 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			Music.poll(delta);
 			mouseX = input.getMouseX();
 			mouseY = input.getMouseY();
+
+			boolean doflx = state == gameState;
+
+			Point p1 = MouseInfo.getPointerInfo().getLocation();
+			Point p2 = new Point(p1);
+			tx = 0;
+			ty = 0;
+			if (doflx) {
+				int minx = (1920 - 1600) / 2;
+				int miny = (1080 - 900) / 2;
+				int radius = Math.max(50, gameState.flashlightRadius);
+				int radius2 = radius / 2;
+
+				p1.x -= radius2;
+				p1.y -= radius2;
+				p2.x += radius2;
+				p2.y += radius2;
+
+				p1.x = Math.min(minx + 1600 - radius2, p1.x);
+				p1.y = Math.min(miny + 900 - radius2, p1.y);
+				p1.x = Math.max(minx, p1.x);
+				p1.y = Math.max(miny, p1.y);
+				p2.x = Math.min(minx + 1600, p2.x);
+				p2.y = Math.min(miny + 900, p2.y);
+				p2.x = Math.max(minx + radius2, p2.x);
+				p2.y = Math.max(miny + radius2, p2.y);
+
+				p2.x -= p1.x;
+				p2.y -= p1.y;
+				tx = minx - p1.x;
+				ty = 900 - p1.y - p2.y + miny;
+			}
 
 			// state transition
 			if (tProgress != -1) {
@@ -208,6 +250,19 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				maxRenderInterval = targetRenderInterval;
 			} else {
 				maxRenderInterval = targetBackgroundRenderInterval;
+			}
+
+			GL11.glPushMatrix();
+
+			if (doflx) {
+				frame.setLocation(p1.x + ofx, p1.y + ofy);
+				frame.setSize(p2.x + xsx, p2.y + xsy);
+				wasingame = true;
+				GL11.glTranslatef(tx, ty, 0f);
+			} else if (wasingame) {
+				wasingame = false;
+				frame.setLocation((1920 - 1600) / 2 + ofx, (1080 - 900) / 2 + ofy);
+				frame.setSize(1600 + xsx, 900 + xsy);
 			}
 
 			if (timeSinceLastRender >= maxRenderInterval) {
@@ -257,6 +312,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				rendering = false;
 			}
 
+			GL11.glPopMatrix();
+
 			Display.processMessages();
 			if (targetUpdatesPerSecond >= 60) {
 				Display.sync(targetUpdatesPerSecond);
@@ -269,6 +326,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		Display.setTitle("opsu!dance");
 		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
+		frame = new JFrame();
+		Canvas c = new Canvas();
+		frame.setLayout(new BorderLayout());
+		frame.add(c);
+		frame.setVisible(true);
+		frame.setSize(1608, 927);
+		frame.setLocationRelativeTo(null);
+		Display.setParent(c);
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
 		postInitGL();

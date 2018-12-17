@@ -34,6 +34,7 @@ import java.util.Arrays;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import yugecin.opsudance.core.DisplayContainer;
 
 import static org.lwjgl.input.Keyboard.*;
 
@@ -284,7 +285,7 @@ public class Input {
 	 * @return The x position of the mouse cursor
 	 */
 	public int getMouseX() {
-		return Mouse.getX();
+		return Mouse.getX() - DisplayContainer.tx;
 	}
 	
 	/**
@@ -293,7 +294,7 @@ public class Input {
 	 * @return The y position of the mouse cursor
 	 */
 	public int getMouseY() {
-		return height - Mouse.getY();
+		return height - Mouse.getY() - DisplayContainer.ty;
 	}
 
 	/**
@@ -359,6 +360,8 @@ public class Input {
 
 					lastMouseX = Mouse.getEventX();
 					lastMouseY = height - Mouse.getEventY();
+					lastMouseX -= DisplayContainer.tx;
+					lastMouseY -= DisplayContainer.ty;
 
 					for (MouseListener listener : mouseListeners) {
 						if (listener.mousePressed(Mouse.getEventButton(), lastMouseX, lastMouseY)) {
@@ -370,6 +373,8 @@ public class Input {
 					
 					int releasedX = Mouse.getEventX();
 					int releasedY = height - Mouse.getEventY();
+					releasedX -= DisplayContainer.tx;
+					releasedY -= DisplayContainer.ty;
 
 					for (MouseListener listener : mouseListeners) {
 						if (listener.mouseReleased(Mouse.getEventButton(), releasedX, releasedY)) {
@@ -402,6 +407,8 @@ public class Input {
 		if (!displayActive || Mouse.isGrabbed()) {
 			lastMouseX = getMouseX();
 			lastMouseY = getMouseY();
+			lastMouseX -= DisplayContainer.tx;
+			lastMouseY -= DisplayContainer.ty;
 		} else {
 			if (anyMouseDown() && (lastMouseX != getMouseX() || lastMouseY != getMouseY())) {
 				for (MouseListener listener : mouseListeners) {
@@ -411,6 +418,8 @@ public class Input {
 				}
 				lastMouseX = getMouseX();
 				lastMouseY = getMouseY();
+				lastMouseX -= DisplayContainer.tx;
+				lastMouseY -= DisplayContainer.ty;
 			}
 		}
 

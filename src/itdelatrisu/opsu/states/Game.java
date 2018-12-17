@@ -249,7 +249,7 @@ public class Game extends ComplexOpsuState {
 	private Graphics gOffscreen;
 
 	/** The current flashlight area radius. */
-	private int flashlightRadius;
+	public int flashlightRadius;
 
 	/** The cursor coordinates using the "auto" or "relax" mods. */
 	private Vec2f autoMousePosition;
