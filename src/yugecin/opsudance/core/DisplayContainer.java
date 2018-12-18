@@ -48,7 +48,7 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
-import yugecin.opsudance.ui.cursor.CursorInterfaceChangeMyNamePleaseThanks;
+import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
 import yugecin.opsudance.utils.GLHelper;
 
@@ -96,7 +96,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private long exitconfirmation;
 
-	public CursorInterfaceChangeMyNamePleaseThanks cursor;
+	public Cursor cursor;
 	public boolean drawCursor;
 	
 	private final List<ResolutionChangedListener> resolutionChangedListeners;

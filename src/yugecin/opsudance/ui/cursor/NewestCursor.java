@@ -20,7 +20,7 @@ import static org.lwjgl.opengl.GL14.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class NewestCursor implements CursorInterfaceChangeMyNamePleaseThanks
+public class NewestCursor implements Cursor
 {
 	private final Rendertarget fbo;
 	private final CursorTrail trail;

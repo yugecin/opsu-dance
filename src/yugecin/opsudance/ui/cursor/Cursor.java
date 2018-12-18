@@ -2,7 +2,7 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.cursor;
 
-public interface CursorInterfaceChangeMyNamePleaseThanks
+public interface Cursor
 {
 	void draw(boolean expanded);
 	void setCursorPosition(int x, int y);

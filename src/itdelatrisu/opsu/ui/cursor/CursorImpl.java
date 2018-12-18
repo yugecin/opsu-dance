@@ -28,7 +28,7 @@ import java.util.LinkedList;
 import org.newdawn.slick.*;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.skinning.SkinService;
-import yugecin.opsudance.ui.cursor.CursorInterfaceChangeMyNamePleaseThanks;
+import yugecin.opsudance.ui.cursor.Cursor;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -36,7 +36,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 /**
  * Updates and draws the cursor.
  */
-public class CursorImpl implements CursorInterfaceChangeMyNamePleaseThanks
+public class CursorImpl implements Cursor
 {
 	/** Last cursor coordinates. */
 	private Point lastPosition;
