@@ -190,6 +190,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 
 	public void run() throws Exception {
+		input.poll(width, height);
+		mouseX = input.getMouseX();
+		mouseY = input.getMouseY();
+		this.cursor.reset();
+
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
 
