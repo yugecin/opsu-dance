@@ -154,7 +154,7 @@ public class GamePauseMenu extends BaseOpsuState {
 			else
 				MusicController.resume();
 			if (displayContainer.cursor.isBeatmapSkinned()) {
-				displayContainer.resetCursor();
+				displayContainer.cursor.reset();
 			}
 			MusicController.setPitch(1.0f);
 			displayContainer.switchState(songMenuState);

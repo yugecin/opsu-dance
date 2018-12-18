@@ -111,7 +111,7 @@ public class NewestCursor implements Cursor
 	}
 
 	@Override
-	public void reset(int x, int y)
+	public void reset()
 	{
 		this.trail.reset();
 	}

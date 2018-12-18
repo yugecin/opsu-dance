@@ -474,10 +474,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 	}
 
-	public void resetCursor() {
-		cursor.reset(mouseX, mouseY);
-	}
-
 	private int getDelta() {
 		long time = getTime();
 		int delta = (int) (time - lastFrame);

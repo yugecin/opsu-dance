@@ -230,7 +230,7 @@ public class GameRanking extends BaseOpsuState {
 		}
 		songMenuState.resetGameDataOnLoad();
 		if (displayContainer.cursor.isBeatmapSkinned()) {
-			displayContainer.resetCursor();
+			displayContainer.cursor.reset();
 		}
 		displayContainer.switchState(songMenuState);
 	}

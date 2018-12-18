@@ -263,7 +263,7 @@ public class CursorImpl implements Cursor
 	 * Resets all cursor data and beatmap skins.
 	 */
 	@Override
-	public void reset(int mouseX, int mouseY) {
+	public void reset() {
 		// destroy skin images
 		GameImage.CURSOR.destroyBeatmapSkinImage();
 		GameImage.CURSOR_MIDDLE.destroyBeatmapSkinImage();
