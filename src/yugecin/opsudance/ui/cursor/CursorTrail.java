@@ -5,6 +5,9 @@ package yugecin.opsudance.ui.cursor;
 import java.awt.Point;
 import java.util.Iterator;
 
+import yugecin.opsudance.options.NumericOption;
+import yugecin.opsudance.options.Options;
+
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 class CursorTrail implements Iterable<CursorTrail.Part>
@@ -34,6 +37,12 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 	void lineTo(int x, int y)
 	{
+		final NumericOption opt = Options.OPTION_DANCE_CURSOR_TRAIL_OVERRIDE;
+		
+		int fadeoff = 175;
+		if (opt.val != opt.min) {
+			fadeoff = (int) (1000f * opt.percentage());
+		}
 		nowtime = System.currentTimeMillis();
 
 		this.addAllInbetween(lastPosition.x, lastPosition.y, mouseX, mouseY);
@@ -41,7 +50,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 		int removecount = 0;
 		Node newfirst = this.first;
-		while (newfirst != null && newfirst.value.time < nowtime - 175) {
+		while (newfirst != null && newfirst.value.time < nowtime - fadeoff) {
 			newfirst = newfirst.next;
 			removecount++;
 		}
