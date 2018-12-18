@@ -159,6 +159,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	
 	public void reinitCursor()
 	{
+		if (this.cursor != null) {
+			this.cursor.destroy();
+		}
+
 		if (OPTION_NEWEST_CURSOR.state) {
 			this.cursor = new NewestCursor();
 		} else {
