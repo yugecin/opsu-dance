@@ -392,7 +392,23 @@ public class Options {
 		}
 	};
 
-	public static final ToggleOption OPTION_NEW_CURSOR = new ToggleOption("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true);
+	public static final ToggleOption OPTION_NEW_CURSOR = new ToggleOption("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true)
+	{
+		@Override
+		public boolean showCondition()
+		{
+			return !OPTION_NEWEST_CURSOR.state;
+		}
+	};
+	public static final ToggleOption OPTION_NEWEST_CURSOR = new ToggleOption("Enable Newest Cursor", "NewestCursor", "Completely smooth cursortrail,  maybe more intensive", true)
+	{
+		@Override
+		public void toggle()
+		{
+			super.toggle();
+			displayContainer.reinitCursor();
+		}
+	};
 	public static final ToggleOption OPTION_DYNAMIC_BACKGROUND = new ToggleOption("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true);
 	public static final ToggleOption OPTION_LOAD_VERBOSE = new ToggleOption("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false);
 	public static final ToggleOption OPTION_COLOR_MAIN_MENU_LOGO = new ToggleOption("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false);

@@ -43,6 +43,7 @@ import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import java.io.File;
 import java.util.*;
@@ -304,7 +305,7 @@ public class Game extends ComplexOpsuState {
 		MUSICBAR_HOVER  = new Color(12, 9, 10, 0.35f),
 		MUSICBAR_FILL   = new Color(255, 255, 255, 0.75f);
 
-	private final Cursor mirrorCursor;
+	private final CursorImpl mirrorCursor;
 	private final MoveStoryboard moveStoryboardOverlay;
 	private final StoryboardOverlay storyboardOverlay;
 	private final OptionsOverlay optionsOverlay;
@@ -315,7 +316,7 @@ public class Game extends ComplexOpsuState {
 
 	public Game() {
 		super();
-		mirrorCursor = new Cursor(true);
+		mirrorCursor = new CursorImpl(true);
 		this.moveStoryboardOverlay = new MoveStoryboard();
 		this.optionsOverlay = new OptionsOverlay(OptionGroups.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(moveStoryboardOverlay, optionsOverlay, this);
@@ -911,20 +912,20 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (isReplay) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, replayX, replayY);
+			displayContainer.cursor.setCursorPosition(replayX, replayY);
 		} else if (GameMod.AUTO.isActive()) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 			if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 				double dx = autoMousePosition.x - width2;
 				double dy = autoMousePosition.y - height2;
 				double d = Math.sqrt(dx * dx + dy * dy);
 				double a = Math.atan2(dy, dx) + Math.PI;
-				mirrorCursor.setCursorPosition(displayContainer.delta, (int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
+				mirrorCursor.setCursorPosition((int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
 			}
 		} else if (GameMod.AUTOPILOT.isActive()) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 		} else {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, mouseX, mouseY);
+			displayContainer.cursor.setCursorPosition(mouseX, mouseY);
 		}
 	}
 
@@ -987,11 +988,11 @@ public class Game extends ComplexOpsuState {
 		GameObject g = gameObjects[objectIndex];
 		if (g.isCircle() || g.isSlider()) {
 			if (g.getTime() <= trackPosition) {
-				Cursor.lastObjColor = g.getColor();
-				Cursor.lastMirroredObjColor = g.getMirroredColor();
+				CursorImpl.lastObjColor = g.getColor();
+				CursorImpl.lastMirroredObjColor = g.getMirroredColor();
 			} else {
-				Cursor.nextObjColor = g.getColor();
-				Cursor.nextMirroredObjColor = g.getMirroredColor();
+				CursorImpl.nextObjColor = g.getColor();
+				CursorImpl.nextMirroredObjColor = g.getMirroredColor();
 			}
 		}
 
@@ -1749,10 +1750,10 @@ public class Game extends ComplexOpsuState {
 
 		Dancer.instance.setGameObjects(null);
 
-		Cursor.lastObjColor = Color.white;
-		Cursor.lastMirroredObjColor = Color.white;
-		Cursor.nextObjColor = Color.white;
-		Cursor.nextMirroredObjColor = Color.white;
+		CursorImpl.lastObjColor = Color.white;
+		CursorImpl.lastMirroredObjColor = Color.white;
+		CursorImpl.nextObjColor = Color.white;
+		CursorImpl.nextMirroredObjColor = Color.white;
 
 		// re-hide cursor
 		if (GameMod.AUTO.isActive() || isReplay) {

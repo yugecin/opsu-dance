@@ -27,9 +27,10 @@ import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.render.FrameBufferCache;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
-import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
+import itdelatrisu.opsu.ui.cursor.CursorImpl;
+
 import org.lwjgl.Sys;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
@@ -47,6 +48,8 @@ import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
+import yugecin.opsudance.ui.cursor.CursorInterfaceChangeMyNamePleaseThanks;
+import yugecin.opsudance.ui.cursor.NewestCursor;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -93,7 +96,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private long exitconfirmation;
 
-	public final Cursor cursor;
+	public CursorInterfaceChangeMyNamePleaseThanks cursor;
 	public boolean drawCursor;
 	
 	private final List<ResolutionChangedListener> resolutionChangedListeners;
@@ -107,7 +110,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public DisplayContainer()
 	{
 		this.resolutionChangedListeners = new ArrayList<>();
-		this.cursor = new Cursor();
 		drawCursor = true;
 
 		skinservice.addSkinChangedListener(this);
@@ -146,12 +148,22 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 
 		backButton = new BackButton();
+		this.reinitCursor();
 
 		// TODO clean this up
 		GameMod.init(width, height);
 		PlaybackSpeed.init(width, height);
 		HitObject.init(width, height);
 		DownloadNode.init(width, height);
+	}
+	
+	public void reinitCursor()
+	{
+		if (OPTION_NEWEST_CURSOR.state) {
+			this.cursor = new NewestCursor();
+		} else {
+			this.cursor = new CursorImpl();
+		}
 	}
 
 	public void setUPS(int ups) {
@@ -200,7 +212,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
-				cursor.setCursorPosition(delta, mouseX, mouseY);
+				cursor.setCursorPosition(mouseX, mouseY);
 			}
 
 			int maxRenderInterval;
