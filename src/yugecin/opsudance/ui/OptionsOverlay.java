@@ -520,8 +520,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			renderCheckOption((ToggleOption) option, y);
 		} else if (option instanceof NumericOption) {
 			renderSliderOption(g, (NumericOption) option, y);
-		} else if (option instanceof GenericOption) {
-			renderGenericOption((GenericOption) option, y);
+		} else if (option instanceof KeyOption) {
+			renderKeyOption((KeyOption) option, y);
 		}
 	}
 
@@ -598,7 +598,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
-	private void renderGenericOption(GenericOption option, int y) {
+	private void renderKeyOption(KeyOption option, int y)
+	{
 		String value = option.getValueString();
 		int valueLen = Fonts.MEDIUM.getWidth(value);
 		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
@@ -987,7 +988,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 		if (keyEntryRight) {
 			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_RIGHT.intval = key;
+				OPTION_KEY_RIGHT.setKeycode(key);
 			}
 			keyEntryRight = false;
 			return true;
@@ -995,7 +996,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 		if (keyEntryLeft) {
 			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_LEFT.intval = key;
+				OPTION_KEY_LEFT.setKeycode(key);
 			}
 			keyEntryLeft = false;
 			return true;

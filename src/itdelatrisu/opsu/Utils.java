@@ -155,8 +155,8 @@ public class Utils {
 	 */
 	public static boolean isGameKeyPressed() {
 		return
-			input.isKeyPressed(Options.OPTION_KEY_LEFT.intval) ||
-			input.isKeyPressed(Options.OPTION_KEY_RIGHT.intval) ||
+			input.isKeyPressed(Options.OPTION_KEY_LEFT.keycode) ||
+			input.isKeyPressed(Options.OPTION_KEY_RIGHT.keycode) ||
 			(!Options.OPTION_DISABLE_MOUSE_BUTTONS.state && (
 				input.isMousePressed(Input.MOUSE_LEFT_BUTTON) ||
 				input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)));

@@ -436,45 +436,10 @@ public class Options
 	};
 
 	public static final ToggleOption OPTION_DISABLE_SOUNDS = new ToggleOption("Disable All Sound Effects", "DisableSound", "May resolve Linux sound driver issues.  Requires a restart.", (System.getProperty("os.name").toLowerCase().contains("linux")));
-	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z, null, false) {
-		@Override
-		public String getValueString () {
-			return Keyboard.getKeyName(intval);
-		}
 
-		@Override
-		public String write () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public void read(String s){
-			intval = Keyboard.getKeyIndex(s);
-			if (intval == Keyboard.KEY_NONE) {
-				intval = Keyboard.KEY_Y;
-			}
-		}
-	};
-
-	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X, null, false) {
-		@Override
-		public String getValueString () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public String write () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public void read(String s){
-			intval = Keyboard.getKeyIndex(s);
-			if (intval == Keyboard.KEY_NONE) {
-				intval = Keyboard.KEY_X;
-			}
-		}
-	};
+	public static final KeyOption
+		OPTION_KEY_LEFT = new KeyOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z),
+		OPTION_KEY_RIGHT = new KeyOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X);
 
 	public static final NumericOption OPTION_BACKGROUND_DIM = new NumericOption("Background Dim", "DimLevel", "Percentage to dim the background image during gameplay.", 50, 0, 100);
 	public static final ToggleOption OPTION_DISABLE_MOUSE_WHEEL = new ToggleOption("Disable mouse wheel in play mode", "MouseDisableWheel", "During play, you can use the mouse wheel to adjust the volume and pause the game. This will disable that functionality.", false);

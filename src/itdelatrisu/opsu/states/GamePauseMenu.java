@@ -87,9 +87,9 @@ public class GamePauseMenu extends BaseOpsuState {
 
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
-			if (key == OPTION_KEY_LEFT.intval) {
+			if (key == OPTION_KEY_LEFT.keycode) {
 				mousePressed(Input.MOUSE_LEFT_BUTTON, mouseX, mouseY);
-			} else if (key == OPTION_KEY_RIGHT.intval) {
+			} else if (key == OPTION_KEY_RIGHT.keycode) {
 				mousePressed(Input.MOUSE_RIGHT_BUTTON, mouseX, mouseY);
 			}
 		}

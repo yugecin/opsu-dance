@@ -1121,9 +1121,9 @@ public class Game extends ComplexOpsuState {
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
 			int keys = ReplayFrame.KEY_NONE;
-			if (key == OPTION_KEY_LEFT.intval) {
+			if (key == OPTION_KEY_LEFT.keycode) {
 				keys = ReplayFrame.KEY_K1;
-			} else if (key == OPTION_KEY_RIGHT.intval) {
+			} else if (key == OPTION_KEY_RIGHT.keycode) {
 				keys = ReplayFrame.KEY_K2;
 			}
 			if (keys != ReplayFrame.KEY_NONE) {
@@ -1409,9 +1409,9 @@ public class Game extends ComplexOpsuState {
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (key == OPTION_KEY_LEFT.intval) {
+		if (key == OPTION_KEY_LEFT.keycode) {
 			keys = ReplayFrame.KEY_K1;
-		} else if (key == OPTION_KEY_RIGHT.intval) {
+		} else if (key == OPTION_KEY_RIGHT.keycode) {
 			keys = ReplayFrame.KEY_K2;
 		}
 		if (keys != ReplayFrame.KEY_NONE) {
