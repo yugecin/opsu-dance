@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.options;
 
 import awlex.ospu.polymover.factory.PolyMoverFactory;
@@ -39,10 +24,11 @@ import java.util.concurrent.TimeUnit;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
+ * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from
+ *                     itdelatrisu/opsu/Options.java
  */
-public class Options {
-
+public class Options
+{
 	// internal options (not displayed in-game)
 	static {
 		new Option("BeatmapDirectory") {
@@ -168,7 +154,7 @@ public class Options {
 		public void clickListItem(int index){
 			idx = index;
 			displayContainer.updateDisplayMode(resolutions[idx]);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -211,7 +197,7 @@ public class Options {
 		public void clickListItem(int index){
 			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
 			skinservice.reloadSkin();
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -294,7 +280,7 @@ public class Options {
 					}
 				}
 			}
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -356,7 +342,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			this.index = index;
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -668,7 +654,7 @@ public class Options {
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -758,7 +744,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.moverDirection = MoverDirection.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -789,7 +775,7 @@ public class Options {
 		public void clickListItem(int index){
 			val = index;
 			Dancer.sliderMoverController = Dancer.sliderMovers[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -812,7 +798,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.instance.setSpinnerIndex(index);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -857,7 +843,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorOverride = ObjectColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -885,7 +871,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorMirrorOverride = ObjectColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -920,7 +906,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -948,7 +934,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -1014,5 +1000,4 @@ public class Options {
 
 	public static final ToggleOption OPTION_PIPPI_SLIDER_FOLLOW_EXPAND = new ToggleOption("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false);
 	public static final ToggleOption OPTION_PIPPI_PREVENT_WOBBLY_STREAMS = new ToggleOption("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
-
 }

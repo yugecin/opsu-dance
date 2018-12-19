@@ -20,8 +20,10 @@ public class NumericOption extends Option
 		this.val = val;
 	}
 
-	public void setValue(int val) {
+	public void setValue(int val)
+	{
 		this.val = val;
+		this.notifyListeners();
 	}
 
 	@Override

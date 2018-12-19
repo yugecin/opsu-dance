@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2016-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
@@ -33,6 +18,7 @@ import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
@@ -41,8 +27,8 @@ import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener {
-
+public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener
+{
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
 	private static final Color COL_BG = new Color(Color.black);
@@ -169,8 +155,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private int invalidSearchTextRotation;
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
+	
+	private final ArrayList<MyOptionListener> installedOptionListeners;
 
 	public OptionsOverlay(OptionTab[] sections) {
+		this.installedOptionListeners = new ArrayList<>();
 		this.sections = sections;
 		this.dirty = true;
 
@@ -252,6 +241,10 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		checkOnImg = CONTROL_CHECK_ON.getScaledImage(s, s);
 		checkOffImg = CONTROL_CHECK_OFF.getScaledImage(s, s);
 
+		for (MyOptionListener listener : this.installedOptionListeners) {
+			listener.uninstall();
+		}
+
 		int navTotalHeight = 0;
 		dropdownMenus.clear();
 		for (OptionTab section : sections) {
@@ -285,7 +278,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 					menu.setSelectedIndex(idx);
 				};
 				observer.run();
-				listOption.observer = observer;
+				listOption.addListener(observer);
+				final MyOptionListener optionlistener;
+				optionlistener = new MyOptionListener(listOption, observer);
+				this.installedOptionListeners.add(optionlistener);
+
 				menu.setBackgroundColor(COL_BG);
 				menu.setBorderColor(Color.transparent);
 				menu.setChevronDownColor(COL_WHITE);
@@ -1212,5 +1209,22 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	public interface Listener {
 		void onLeaveOptionsMenu();
 		void onSaveOption(Option option);
+	}
+	
+	private static class MyOptionListener
+	{
+		private ListOption option;
+		private Runnable listener;
+		
+		public MyOptionListener(ListOption option, Runnable listener)
+		{
+			this.option = option;
+			this.listener = listener;
+		}
+		
+		public void uninstall()
+		{
+			this.option.removeListener(this.listener);
+		}
 	}
 }
