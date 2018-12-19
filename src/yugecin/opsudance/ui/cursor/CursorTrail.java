@@ -30,7 +30,6 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	void reset()
 	{
 		this.lastPosition.move(mouseX, mouseY);
-		System.out.printf("reset x %d y %d%n", mouseX, mouseY);
 		this.first = this.last = null;
 		this.size = 0;
 	}
