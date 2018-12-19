@@ -133,5 +133,6 @@ public class NewestCursor implements Cursor
 	public void destroy()
 	{
 		this.fbo.destroyRTT();
+		this.trail.dispose();
 	}
 }

@@ -6,16 +6,19 @@ import java.awt.Point;
 import java.util.Iterator;
 
 import yugecin.opsudance.options.NumericOption;
-import yugecin.opsudance.options.Options;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.options.Options.*;
 
 class CursorTrail implements Iterable<CursorTrail.Part>
 {
 	private static long nowtime;
 
+	private final Runnable trailLengthOptionListener;
+
 	private Node first;
 	private Node last;
+	private int fadeoff;
 
 	final Point lastPosition;
 
@@ -25,6 +28,21 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	{
 		this.lastPosition = new Point();
 		this.reset();
+		
+		this.trailLengthOptionListener = this::updateFadeoff;
+		OPTION_DANCE_CURSOR_TRAIL_OVERRIDE.addListener(this.trailLengthOptionListener);
+		this.updateFadeoff();
+	}
+	
+	void dispose()
+	{
+		OPTION_DANCE_CURSOR_TRAIL_OVERRIDE.removeListener(this.trailLengthOptionListener);
+	}
+	
+	private void updateFadeoff()
+	{
+		final NumericOption opt = OPTION_DANCE_CURSOR_TRAIL_OVERRIDE;
+		this.fadeoff = opt.val == opt.min ? 175 : (int) (1000f * opt.percentage());
 	}
 	
 	void reset()
@@ -36,12 +54,6 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 	void lineTo(int x, int y)
 	{
-		final NumericOption opt = Options.OPTION_DANCE_CURSOR_TRAIL_OVERRIDE;
-		
-		int fadeoff = 175;
-		if (opt.val != opt.min) {
-			fadeoff = (int) (1000f * opt.percentage());
-		}
 		nowtime = System.currentTimeMillis();
 
 		this.addAllInbetween(lastPosition.x, lastPosition.y, mouseX, mouseY);
@@ -49,7 +61,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 		int removecount = 0;
 		Node newfirst = this.first;
-		while (newfirst != null && newfirst.value.time < nowtime - fadeoff) {
+		while (newfirst != null && newfirst.value.time < nowtime - this.fadeoff) {
 			newfirst = newfirst.next;
 			removecount++;
 		}
