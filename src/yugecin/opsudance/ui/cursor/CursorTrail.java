@@ -56,8 +56,8 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	{
 		nowtime = System.currentTimeMillis();
 
-		this.addAllInbetween(lastPosition.x, lastPosition.y, mouseX, mouseY);
-		lastPosition.move(mouseX, mouseY);
+		this.addAllInbetween(lastPosition.x, lastPosition.y, x, y);
+		lastPosition.move(x, y);
 
 		int removecount = 0;
 		Node newfirst = this.first;
