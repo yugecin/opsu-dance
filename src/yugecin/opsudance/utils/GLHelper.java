@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.utils;
 
 import org.lwjgl.BufferUtils;
@@ -29,9 +14,12 @@ import org.newdawn.slick.opengl.TGAImageData;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 
+import yugecin.opsudance.render.TextureData;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 
 public class GLHelper {
@@ -109,4 +97,18 @@ public class GLHelper {
 		}
 	}
 
+	public static void simpleTexturedQuad(TextureData td)
+	{
+		glBindTexture(GL_TEXTURE_2D, td.id);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0f, 0f);
+		glVertex2f(-td.width2, -td.height2);
+		glTexCoord2f(td.txtw, 0f);
+		glVertex2f(td.width2, -td.height2);
+		glTexCoord2f(td.txtw, td.txth);
+		glVertex2f(td.width2, td.height2);
+		glTexCoord2f(0f, td.txth);
+		glVertex2f(-td.width2, td.height2);
+		glEnd();
+	}
 }

@@ -4,46 +4,57 @@ package yugecin.opsudance.ui.cursor;
 
 import itdelatrisu.opsu.render.Rendertarget;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.render.TextureData;
+import yugecin.opsudance.skinning.SkinService;
 
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureImpl;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.utils.GLHelper.*;
 
 public class NewestCursor implements Cursor
 {
 	private final Rendertarget fbo;
 	private final CursorTrail trail;
-	
+	private final Runnable cursorSizeListener;
+
+	private final TextureData cursorTexture, cursorMiddleTexture, cursorTrailTexture;
+	private float cursorAngle;
+
 	public NewestCursor()
 	{
 		this.fbo = Rendertarget.createRTTFramebuffer(width, height);
 		this.trail = new CursorTrail();
+
+		this.cursorTexture = new TextureData(CURSOR);
+		this.cursorMiddleTexture = new TextureData(CURSOR_MIDDLE);
+		this.cursorTrailTexture = new TextureData(CURSOR_TRAIL);
+
+		this.cursorSizeListener = this::onCursorSizeOptionChanged;
+		OPTION_CURSOR_SIZE.addListener(this.cursorSizeListener);
+		this.onCursorSizeOptionChanged();
+	}
+
+	private void onCursorSizeOptionChanged()
+	{
+		final float scale = OPTION_CURSOR_SIZE.val / 100f;
+		this.cursorTexture.useScale(scale);
+		// middle is not scaled apparently?
+		this.cursorTrailTexture.useScale(scale);
 	}
 
 	@Override
 	public void draw(boolean expanded)
 	{
 		Color filter = Dancer.cursorColorOverride.getColor();
-
-		final Image img = CURSOR_TRAIL.getImage();
-		final Texture txt = img.getTexture();
-
-		final float cursorsize = OPTION_CURSOR_SIZE.val / 100f;
-		final float trailw2 = img.getWidth() * cursorsize / 2f;
-		final float trailh2 = img.getHeight() * cursorsize / 2f;
-		float txtw = txt.getWidth();
-		float txth = txt.getHeight();
 
 		// stuff copied from CurveRenderState and stuff, I don't know what I'm doing
 		int oldFb = glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
@@ -55,26 +66,26 @@ public class NewestCursor implements Cursor
 		glClearColor(0f, 0f, 0f, 0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		txt.bind();
-		TextureImpl.unbind();
-		glBegin(GL_QUADS);
-
+		final TextureData td = this.cursorTrailTexture;
 		float alpha = 0f;
 		float alphaIncrease = .4f / trail.size;
+		glPushMatrix();
+		glBindTexture(GL_TEXTURE_2D, td.id);
+		glBegin(GL_QUADS);
 		for (CursorTrail.Part p : this.trail) {
 			alpha += alphaIncrease;
 			glColor4f(filter.r, filter.g, filter.b, alpha);
 			glTexCoord2f(0f, 0f);
-			glVertex3f(p.x - trailw2, p.y - trailh2, 0f);
-			glTexCoord2f(txtw, 0);
-			glVertex3f(p.x + trailw2, p.y - trailh2, 0f);
-			glTexCoord2f(txtw, txth);
-			glVertex3f(p.x + trailw2, p.y + trailh2, 0f);
-			glTexCoord2f(0f, txth);
-			glVertex3f(p.x - trailw2, p.y + trailh2, 0f);
+			glVertex2f(p.x + -td.width2, p.y + -td.height2);
+			glTexCoord2f(td.txtw, 0);
+			glVertex2f(p.x +td.width2, p.y + -td.height2);
+			glTexCoord2f(td.txtw, td.txth);
+			glVertex2f(p.x +td.width2, p.y + td.height2);
+			glTexCoord2f(0f, td.txth);
+			glVertex2f(p.x +-td.width2, p.y + td.height2);
 		}
-
 		glEnd();
+		glPopMatrix();
 
 		glBindTexture(GL_TEXTURE_2D, oldTex);
 		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
@@ -100,12 +111,26 @@ public class NewestCursor implements Cursor
 		int cx = trail.lastPosition.x;
 		int cy = trail.lastPosition.y;
 
-		if (OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
-			filter = Color.white;
+		if (!OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
+			filter.bind();
 		}
 
-		CURSOR.getScaledImage(cursorsize).drawCentered(cx, cy, filter);
-		CURSOR_MIDDLE.getScaledImage(cursorsize).drawCentered(cx, cy, filter);
+		glPushMatrix();
+		glTranslatef(cx, cy, 0.0f);
+
+		// cursor
+		if (SkinService.skin.isCursorRotated()) {
+			glPushMatrix();
+			glRotatef(this.cursorAngle, 0.0f, 0.0f, 1.0f);
+		}
+		simpleTexturedQuad(cursorTexture);
+		if (SkinService.skin.isCursorRotated()) {
+			glPopMatrix();
+		}
+		// cursormiddle
+		simpleTexturedQuad(cursorMiddleTexture);
+
+		glPopMatrix();
 	}
 
 	@Override
@@ -130,7 +155,7 @@ public class NewestCursor implements Cursor
 	@Override
 	public void updateAngle()
 	{
-		// TODO
+		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 	}
 
 	@Override
@@ -138,5 +163,6 @@ public class NewestCursor implements Cursor
 	{
 		this.fbo.destroyRTT();
 		this.trail.dispose();
+		OPTION_CURSOR_SIZE.removeListener(this.cursorSizeListener);
 	}
 }
