@@ -34,7 +34,7 @@ public class NewestCursor implements Cursor
 	@Override
 	public void draw(boolean expanded)
 	{
-		final Color filter = Dancer.cursorColorOverride.getColor();
+		Color filter = Dancer.cursorColorOverride.getColor();
 
 		final Image img = CURSOR_TRAIL.getImage();
 		final Texture txt = img.getTexture();
@@ -99,6 +99,10 @@ public class NewestCursor implements Cursor
 		
 		int cx = trail.lastPosition.x;
 		int cy = trail.lastPosition.y;
+
+		if (OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
+			filter = Color.white;
+		}
 
 		CURSOR.getScaledImage(cursorsize).drawCentered(cx, cy, filter);
 		CURSOR_MIDDLE.getScaledImage(cursorsize).drawCentered(cx, cy, filter);
