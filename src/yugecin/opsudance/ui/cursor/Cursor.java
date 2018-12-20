@@ -7,7 +7,6 @@ public interface Cursor
 	void draw(boolean expanded);
 	void setCursorPosition(int x, int y);
 	void reset();
-	void updateAngle();
 	void destroy();
 	boolean isBeatmapSkinned();
 }

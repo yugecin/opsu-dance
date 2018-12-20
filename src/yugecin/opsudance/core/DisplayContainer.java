@@ -253,7 +253,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
-				cursor.updateAngle();
 				if (drawCursor) {
 					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
 						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));

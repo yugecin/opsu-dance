@@ -85,6 +85,8 @@ public class CursorImpl implements Cursor
 			return;
 		}
 
+		this.updateAngle();
+
 		// determine correct cursor image
 		Image cursor, cursorMiddle = null, cursorTrail;
 		boolean beatmapSkinned = GameImage.CURSOR.hasBeatmapSkinImage();
@@ -253,8 +255,7 @@ public class CursorImpl implements Cursor
 	 * If the old style cursor is being used, this will do nothing.
 	 * @param delta the delta interval since the last call
 	 */
-	@Override
-	public void updateAngle() {
+	private void updateAngle() {
 		cursorAngle += renderDelta / 40f;
 		cursorAngle %= 360;
 	}

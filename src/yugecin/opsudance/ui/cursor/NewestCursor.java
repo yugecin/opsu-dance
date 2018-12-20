@@ -54,6 +54,11 @@ public class NewestCursor implements Cursor
 	@Override
 	public void draw(boolean expanded)
 	{
+		if (OPTION_DISABLE_CURSOR.state) {
+			return;
+		}
+
+		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 		Color filter = Dancer.cursorColorOverride.getColor();
 
 		// stuff copied from CurveRenderState and stuff, I don't know what I'm doing
@@ -150,12 +155,6 @@ public class NewestCursor implements Cursor
 	{
 		// TODO(?)
 		return false;
-	}
-
-	@Override
-	public void updateAngle()
-	{
-		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 	}
 
 	@Override
