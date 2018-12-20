@@ -404,7 +404,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		// background
-		if (!OPTION_DANCE_REMOVE_BG.state && GameMod.AUTO.isActive()) {
+		if (!OPTION_DANCE_REMOVE_BG.state) {
 			float dimLevel = (100 - OPTION_BACKGROUND_DIM.val) / 100f;
 			if (trackPosition < firstObjectTime) {
 				if (timeDiff < approachTime)
