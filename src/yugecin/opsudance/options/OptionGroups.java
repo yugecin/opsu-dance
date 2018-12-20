@@ -68,8 +68,8 @@ public class OptionGroups {
 		}),
 		new OptionTab("CURSOR", new Option[]{
 			OPTION_CURSOR_SIZE,
-			OPTION_NEW_CURSOR,
 			OPTION_NEWEST_CURSOR,
+			OPTION_NEW_CURSOR,
 			OPTION_DISABLE_CURSOR
 			// TODO use combo colour as tint for slider ball option
 		}),
