@@ -39,7 +39,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 public class CursorImpl implements Cursor
 {
 	/** Last cursor coordinates. */
-	private Point lastPosition;
+	private final Point lastPosition;
 
 	/** Cursor rotation angle. */
 	private static float cursorAngle = 0f;
@@ -74,7 +74,7 @@ public class CursorImpl implements Cursor
 	}
 
 	public CursorImpl(boolean isMirrored) {
-		resetLocations(0, 0);
+		this.lastPosition = new Point(mouseX, mouseY);
 		this.isMirrored = isMirrored;
 	}
 
@@ -271,7 +271,7 @@ public class CursorImpl implements Cursor
 		GameImage.CURSOR_TRAIL.destroyBeatmapSkinImage();
 
 		// reset locations
-		resetLocations(mouseX, mouseY);
+		this.resetLocations(mouseX, mouseY);
 
 		// reset angles
 		cursorAngle = 0f;
@@ -280,9 +280,9 @@ public class CursorImpl implements Cursor
 	/**
 	 * Resets all cursor location data.
 	 */
-	public void resetLocations(int mouseX, int mouseY) {
+	public void resetLocations(int x, int y) {
 		trail.clear();
-		lastPosition = new Point(mouseX, mouseY);
+		this.lastPosition.move(x, y);
 		for (int i = 0; i < 50; i++) {
 			trail.add(new Point(lastPosition));
 		}
