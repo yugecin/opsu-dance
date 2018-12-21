@@ -152,6 +152,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 	/** Search query, executed in {@code queryThread}. */
 	private SearchQuery searchQuery;
 
+	private final Runnable backButtonListener = this::exit;
+
 	/** Search query helper class. */
 	private class SearchQuery implements Runnable {
 		/** The search query. */
@@ -400,6 +402,14 @@ public class DownloadsMenu extends ComplexOpsuState {
 	}
 
 	@Override
+	public void update()
+	{
+		if (importThread != null) {
+			displayContainer.disableBackButton = true;
+		}
+	}
+
+	@Override
 	public void render(Graphics g) {
 		super.render(g);
 
@@ -505,8 +515,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
-		} else {
-			backButton.draw(g);
 		}
 	}
 
@@ -535,7 +543,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 			}
 			importThread = null;
 		}
-		backButton.hoverUpdate();
 		prevPage.hoverUpdate(delta, mouseX, mouseY);
 		nextPage.hoverUpdate(delta, mouseX, mouseY);
 		clearButton.hoverUpdate(delta, mouseX, mouseY);
@@ -601,13 +608,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 		// block input during beatmap importing
 		if (importThread != null) {
-			return true;
-		}
-
-		// back
-		if (backButton.contains(x, y)) {
-			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
@@ -891,8 +891,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				resetSearchTimer();
 			} else {
 				// return to main menu
-				SoundController.playSound(SoundEffect.MENUBACK);
-				displayContainer.switchState(mainmenuState);
+				this.exit();
 			}
 			return true;
 		case KEY_RETURN:
@@ -936,6 +935,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 		startDownloadIndexPos.setPosition(0);
 		pageDir = Page.RESET;
 		previewID = -1;
+		displayContainer.addBackButtonListener(this.backButtonListener);
 	}
 
 	@Override
@@ -945,6 +945,13 @@ public class DownloadsMenu extends ComplexOpsuState {
 		focusComponent(search);
 		SoundController.stopTrack();
 		MusicController.resume();
+		displayContainer.removeBackButtonListener(this.backButtonListener);
+	}
+
+	private void exit()
+	{
+		SoundController.playSound(SoundEffect.MENUBACK);
+		displayContainer.switchState(mainmenuState);
 	}
 
 	/**

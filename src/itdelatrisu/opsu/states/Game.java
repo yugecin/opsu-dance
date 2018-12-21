@@ -717,9 +717,6 @@ public class Game extends ComplexOpsuState {
 
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.render(g);
-			if (optionsOverlay.isActive()) {
-				backButton.draw(g);
-			}
 		}
 	}
 
@@ -729,9 +726,6 @@ public class Game extends ComplexOpsuState {
 		
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.preRenderUpdate();
-			if (optionsOverlay.isActive()) {
-				backButton.hoverUpdate();
-			}
 		}
 
 		int delta = renderDelta;

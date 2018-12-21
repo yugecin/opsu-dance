@@ -312,9 +312,7 @@ public class SongMenu extends ComplexOpsuState {
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
-	public SongMenu() {
-		super();
-	}
+	private final Runnable backButtonListener = this::exit;
 
 	@Override
 	public void revalidate() {
@@ -442,6 +440,14 @@ public class SongMenu extends ComplexOpsuState {
 		starStream = new StarStream(width, height2 - GameImage.STAR.getImage().getHeight() / 2, -width, 0, MAX_STREAM_STARS);
 		starStream.setPositionSpread(height / 20f);
 		starStream.setDirectionSpread(10f);
+	}
+
+	@Override
+	public void update()
+	{
+		if (reloadThread != null) {
+			displayContainer.disableBackButton = true;
+		}
 	}
 
 	@Override
@@ -686,7 +692,6 @@ public class SongMenu extends ComplexOpsuState {
 			UI.drawLoadingProgress(g);
 		} else {
 			optionsOverlay.render(g);
-			backButton.draw(g);
 		}
 
 		super.render(g);
@@ -722,7 +727,6 @@ public class SongMenu extends ComplexOpsuState {
 				MusicController.playThemeSong(config.themeBeatmap);
 			reloadThread = null;
 		}
-		backButton.hoverUpdate();
 		selectModeButton.hoverUpdate(delta, mouseX, mouseY);
 		selectModsButton.hoverUpdate(delta, mouseX, mouseY);
 		selectRandomButton.hoverUpdate(delta, mouseX, mouseY);
@@ -901,12 +905,6 @@ public class SongMenu extends ComplexOpsuState {
 		startScorePos.released();
 
 		if (isInputBlocked()) {
-			return true;
-		}
-
-		if (backButton.contains(x, y)) {
-			SoundController.playSound(SoundEffect.MENUBACK);
-			displayContainer.switchState(mainmenuState);
 			return true;
 		}
 
@@ -1442,6 +1440,20 @@ public class SongMenu extends ComplexOpsuState {
 			stateActionNode = null;
 			stateActionScore = null;
 		}
+
+		displayContainer.addBackButtonListener(this.backButtonListener);
+	}
+
+	@Override
+	public void leave()
+	{
+		displayContainer.removeBackButtonListener(this.backButtonListener);
+	}
+
+	private void exit()
+	{
+		SoundController.playSound(SoundEffect.MENUBACK);
+		displayContainer.switchState(mainmenuState);
 	}
 
 	/**

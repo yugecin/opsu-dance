@@ -59,6 +59,8 @@ public class GameRanking extends BaseOpsuState {
 	/** Button coordinates. */
 	private float retryY, replayY;
 
+	private final Runnable backButtonListener = this::returnToSongMenu;
+
 	@Override
 	public void revalidate() {
 		super.revalidate();
@@ -90,7 +92,6 @@ public class GameRanking extends BaseOpsuState {
 		replayButton.draw();
 		if (data.isGameplay() && !GameMod.AUTO.isActive())
 			retryButton.draw();
-		backButton.draw(g);
 
 		super.render(g);
 	}
@@ -105,7 +106,6 @@ public class GameRanking extends BaseOpsuState {
 		} else {
 			MusicController.loopTrackIfEnded(true);
 		}
-		backButton.hoverUpdate();
 	}
 
 	@Override
@@ -134,12 +134,6 @@ public class GameRanking extends BaseOpsuState {
 		// check mouse button
 		if (button == Input.MOUSE_MIDDLE_BUTTON) {
 			return false;
-		}
-
-		// back to menu
-		if (backButton.contains(x, y)) {
-			returnToSongMenu();
-			return true;
 		}
 
 		// replay
@@ -197,6 +191,7 @@ public class GameRanking extends BaseOpsuState {
 			replayButton.setY(!GameMod.AUTO.isActive() ? replayY : retryY);
 		}
 		replayButton.resetHover();
+		displayContainer.addBackButtonListener(this.backButtonListener);
 	}
 
 	@Override
@@ -207,6 +202,7 @@ public class GameRanking extends BaseOpsuState {
 		if (MusicController.isTrackDimmed()) {
 			MusicController.toggleTrackDimmed(1f);
 		}
+		displayContainer.removeBackButtonListener(this.backButtonListener);
 	}
 
 	@Override

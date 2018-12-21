@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
@@ -26,8 +11,8 @@ import org.newdawn.slick.*;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BackButton {
-
+public class BackButton implements MouseListener
+{
 	/** Skinned back button. */
 	private MenuButton backButton;
 
@@ -80,6 +65,8 @@ public class BackButton {
 
 	/** The real button with, determined by the size and animations. */
 	private int realButtonWidth;
+
+	public Runnable activeListener;
 
 	public BackButton() {
 		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
@@ -137,8 +124,16 @@ public class BackButton {
 		AnimationEquation anim;
 		if (isHovered) {
 			anim = AnimationEquation.OUT_ELASTIC;
+			animationTime += renderDelta;
+			if (animationTime > ANIMATION_TIME) {
+				animationTime = ANIMATION_TIME;
+			}
 		} else {
 			anim = AnimationEquation.IN_ELASTIC;
+			animationTime -= renderDelta;
+			if (animationTime < 0) {
+				animationTime = 0;
+			}
 		}
 		float progress = anim.calc((float) animationTime / ANIMATION_TIME);
 		float firstSize = firstButtonWidth + (firstButtonWidth - slopeImageSlopeWidth * 2) * progress;
@@ -187,17 +182,9 @@ public class BackButton {
 			if (!wasHovered) {
 				animationTime = 0;
 			}
-			animationTime += delta;
-			if (animationTime > ANIMATION_TIME) {
-				animationTime = ANIMATION_TIME;
-			}
 		} else {
 			if (wasHovered) {
 				animationTime = ANIMATION_TIME;
-			}
-			animationTime -= delta;
-			if (animationTime < 0) {
-				animationTime = 0;
 			}
 		}
 	}
@@ -226,4 +213,34 @@ public class BackButton {
 		animationTime = 0;
 	}
 
+	@Override
+	public boolean mouseWheelMoved(int delta)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean mousePressed(int button, int x, int y)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean mouseReleased(int button, int x, int y)
+	{
+		if (displayContainer.disableBackButton) {
+			return true;
+		}
+		if (this.contains(x, y)) {
+			this.activeListener.run();
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean mouseDragged(int oldx, int oldy, int newx, int newy)
+	{
+		return false;
+	}
 }

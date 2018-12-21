@@ -476,17 +476,11 @@ public class MainMenu extends BaseOpsuState {
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight * 2);
 
 		optionsOverlay.render(g);
-		if (optionsOverlay.isActive()) {
-			backButton.draw(g);
-		}
 	}
 
 	@Override
 	public void preRenderUpdate() {
 		optionsOverlay.preRenderUpdate();
-		if (optionsOverlay.isActive()) {
-			backButton.hoverUpdate();
-		}
 
 		int delta = renderDelta;
 		

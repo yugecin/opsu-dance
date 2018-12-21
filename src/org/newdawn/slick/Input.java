@@ -217,6 +217,11 @@ public class Input {
 	public void removeMouseListener(MouseListener listener) {
 		mouseListeners.remove(listener);
 	}
+
+	public void addPrimaryMouseListener(MouseListener listener)
+	{
+		mouseListeners.add(0, listener);
+	}
 	
 	/**
 	 * Initialise the input system

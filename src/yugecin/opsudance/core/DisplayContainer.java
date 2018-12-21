@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.*;
@@ -54,6 +39,7 @@ import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static itdelatrisu.opsu.ui.Colors.*;
@@ -64,8 +50,8 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
-
+public class DisplayContainer implements ErrorDumpable, SkinChangedListener
+{
 	private static SGL GL = Renderer.get();
 
 	private OpsuState state;
@@ -96,6 +82,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private long exitconfirmation;
 
+	private BackButton backButton;
+	private final LinkedList<Runnable> backButtonListeners;
+	/**
+	 * set to {@code false} to disable back button next update
+	 * has to be set every update (not frame!) to be effective
+	 */
+	public boolean disableBackButton;
+
 	public Cursor cursor;
 	public boolean drawCursor;
 	
@@ -110,6 +104,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	public DisplayContainer()
 	{
 		this.resolutionChangedListeners = new ArrayList<>();
+		this.backButtonListeners = new LinkedList<>();
 		drawCursor = true;
 
 		skinservice.addSkinChangedListener(this);
@@ -147,7 +142,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 		}
 
-		backButton = new BackButton();
+		this.backButton = new BackButton();
 		this.reinitCursor();
 
 		// TODO clean this up
@@ -218,10 +213,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 			fpsDisplay.update();
 
+			this.disableBackButton = false;
 			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
 				cursor.setCursorPosition(mouseX, mouseY);
+			}
+			if (!this.disableBackButton && !this.backButtonListeners.isEmpty()) {
+				this.backButton.hoverUpdate();
 			}
 
 			int maxRenderInterval;
@@ -253,6 +252,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
+				if (!this.disableBackButton &&
+					!this.backButtonListeners.isEmpty())
+				{
+					backButton.draw(graphics);
+				}
 				if (drawCursor) {
 					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
 						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));
@@ -540,7 +544,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		this.state = state;
 		this.state.enter();
 		input.addListener(this.state);
-		backButton.resetHover();
 		if (this.rendering) {
 			// state might be changed in preRenderUpdate,
 			// in that case the new state will be rendered without having
@@ -549,4 +552,24 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 	}
 
+	public void addBackButtonListener(Runnable listener)
+	{
+		if (!this.backButtonListeners.isEmpty()) {
+			input.removeMouseListener(this.backButton);
+		}
+		this.backButtonListeners.add(listener);
+		input.addPrimaryMouseListener(this.backButton);
+		this.backButton.activeListener = listener;
+	}
+
+	public void removeBackButtonListener(Runnable listener)
+	{
+		this.backButtonListeners.remove(listener);
+		if (this.backButtonListeners.isEmpty()) {
+			this.backButton.resetHover();
+			input.removeMouseListener(this.backButton);
+		} else {
+			this.backButton.activeListener = this.backButtonListeners.getLast();
+		}
+	}
 }

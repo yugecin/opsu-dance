@@ -156,6 +156,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 	
+	private final Runnable backButtonListener = this::exit;
 	private final ArrayList<MyOptionListener> installedOptionListeners;
 
 	public OptionsOverlay(OptionTab[] sections) {
@@ -660,6 +661,15 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		g.resetTransform();
 	}
 
+	/**
+	 * when user actively choses to leave (not external)
+	 */
+	private void exit()
+	{
+		SoundController.playSound(SoundEffect.MENUBACK);
+		this.hide();
+	}
+
 	public void hide() {
 		if (!this.active) {
 			return;
@@ -669,6 +679,10 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
 		hoverOption = null;
+		displayContainer.removeBackButtonListener(this.backButtonListener);
+		if (this.listener != null) {
+			this.listener.onLeaveOptionsMenu();
+		}
 	}
 
 	public void show() {
@@ -680,6 +694,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		acceptInput = active = true;
 		animationtime = 0;
 		resetSearch();
+		isDraggingFromOutside = false;
+		displayContainer.addBackButtonListener(this.backButtonListener);
 		if (this.dirty) {
 			this.revalidate();
 		}
@@ -881,15 +897,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 		sliderOptionLength = 0;
 
-		if (backButton.contains(x, y)){
-			SoundController.playSound(SoundEffect.MENUBACK);
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
-			return true;
-		}
-
 		if (x > navWidth) {
 			if (openDropdownMenu != null) {
 				openDropdownMenu.mouseReleased(button);
@@ -1015,11 +1022,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 				updateHoverOption(prevMouseX, prevMouseY);
 				return true;
 			}
-			SoundController.playSound(SoundEffect.MENUBACK);
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
+			this.exit();
 			return true;
 		}
 
