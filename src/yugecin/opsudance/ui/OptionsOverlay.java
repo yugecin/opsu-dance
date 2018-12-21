@@ -129,6 +129,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private int textChangeY;
 	private int posSearchY;
 	private int textSearchYOffset;
+	private int searchBoxHeight;
 
 	private final KineticScrolling scrollHandler;
 	private int maxScrollOffset;
@@ -224,6 +225,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		textChangeY = textOptionsY + Fonts.LARGE.getLineHeight();
 		posSearchY = textChangeY + Fonts.MEDIUM.getLineHeight() * 2;
 		textSearchYOffset = Fonts.MEDIUM.getLineHeight() / 2;
+		searchBoxHeight = textSearchYOffset * 2 + Fonts.LARGE.getLineHeight();
 		optionStartY = posSearchY + Fonts.MEDIUM.getLineHeight() + Fonts.LARGE.getLineHeight();
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
@@ -631,7 +633,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
-			g.fillRect(navButtonSize, 0, currentWidth, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+			g.fillRect(navButtonSize, 0, currentWidth, searchBoxHeight);
 		}
 		Color searchCol = COL_WHITE;
 		float invalidProgress = 0f;
@@ -1096,6 +1098,10 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private void updateHoverOption(int mouseX, int mouseY) {
 		if (mouseX < navWidth) {
 			cancelAdjustingSlider();
+			hoverOption = null;
+			return;
+		}
+		if (mouseY < searchBoxHeight) {
 			hoverOption = null;
 			return;
 		}
