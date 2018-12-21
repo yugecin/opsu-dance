@@ -82,7 +82,7 @@ public abstract class Option
 	 */
 	public boolean filter(String searchString) {
 		if (!showCondition()) {
-			return filtered = true;
+			return true;
 		}
 		if (searchString == null || searchString.length() == 0) {
 			filtered = false;
