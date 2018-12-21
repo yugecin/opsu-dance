@@ -402,14 +402,6 @@ public class DownloadsMenu extends ComplexOpsuState {
 	}
 
 	@Override
-	public void update()
-	{
-		if (importThread != null) {
-			displayContainer.disableBackButton = true;
-		}
-	}
-
-	@Override
 	public void render(Graphics g) {
 		super.render(g);
 
@@ -510,6 +502,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 		// importing beatmaps
 		if (importThread != null) {
+			displayContainer.disableBackButton = true;
 			// darken the screen
 			g.setColor(Colors.BLACK_ALPHA);
 			g.fillRect(0, 0, width, height);

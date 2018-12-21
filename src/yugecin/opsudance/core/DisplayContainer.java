@@ -86,7 +86,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	private final LinkedList<Runnable> backButtonListeners;
 	/**
 	 * set to {@code false} to disable back button next update
-	 * has to be set every update (not frame!) to be effective
+	 * has to be set every rendered frame to be effective
 	 */
 	public boolean disableBackButton;
 
@@ -213,14 +213,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			}
 			fpsDisplay.update();
 
-			this.disableBackButton = false;
 			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
 				cursor.setCursorPosition(mouseX, mouseY);
-			}
-			if (!this.disableBackButton && !this.backButtonListeners.isEmpty()) {
-				this.backButton.hoverUpdate();
 			}
 
 			int maxRenderInterval;
@@ -242,6 +238,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				*/
 
 				renderDelta = timeSinceLastRender;
+
+				this.disableBackButton = false;
 
 				state.preRenderUpdate();
 				state.render(graphics);

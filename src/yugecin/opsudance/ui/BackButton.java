@@ -102,11 +102,40 @@ public class BackButton implements MouseListener
 	/**
 	 * Draws the backbutton.
 	 */
-	public void draw(Graphics g) {
+	public void draw(Graphics g)
+	{
+		final int delta = renderDelta;
+		final int cx = mouseX;
+		final int cy = mouseY;
+
 		// draw image if it's skinned
 		if (backButton != null) {
+			backButton.hoverUpdate(delta, cx, cy);
 			backButton.draw();
 			return;
+		}
+
+		AnimationEquation anim;
+		boolean wasHovered = isHovered;
+		isHovered = buttonYpos - paddingY < cy && cx < realButtonWidth;
+		if (isHovered) {
+			if (!wasHovered) {
+				animationTime = 0;
+			}
+			animationTime += renderDelta;
+			if (animationTime > ANIMATION_TIME) {
+				animationTime = ANIMATION_TIME;
+			}
+			anim = AnimationEquation.OUT_ELASTIC;
+		} else {
+			if (wasHovered) {
+				animationTime = ANIMATION_TIME;
+			}
+			animationTime -= renderDelta;
+			if (animationTime < 0) {
+				animationTime = 0;
+			}
+			anim = AnimationEquation.IN_ELASTIC;
 		}
 
 		// calc chevron size
@@ -121,20 +150,6 @@ public class BackButton implements MouseListener
 		int chevronSize = (int) (chevronBaseSize - (isHovered ? 6f : 3f) * beatProgress);
 
 		// calc button sizes
-		AnimationEquation anim;
-		if (isHovered) {
-			anim = AnimationEquation.OUT_ELASTIC;
-			animationTime += renderDelta;
-			if (animationTime > ANIMATION_TIME) {
-				animationTime = ANIMATION_TIME;
-			}
-		} else {
-			anim = AnimationEquation.IN_ELASTIC;
-			animationTime -= renderDelta;
-			if (animationTime < 0) {
-				animationTime = 0;
-			}
-		}
 		float progress = anim.calc((float) animationTime / ANIMATION_TIME);
 		float firstSize = firstButtonWidth + (firstButtonWidth - slopeImageSlopeWidth * 2) * progress;
 		float secondSize = secondButtonSize + secondButtonSize * 0.25f * progress;
@@ -162,31 +177,6 @@ public class BackButton implements MouseListener
 		float textX = firstSize + (secondSize - paddingX * 2 - textWidth) / 2;
 		Fonts.MEDIUM.drawString(textX, textY + 1, "back", Color.black);
 		Fonts.MEDIUM.drawString(textX, textY, "back", Color.white);
-	}
-
-	/**
-	 * Processes a hover action depending on whether or not the cursor
-	 * is hovering over the button.
-	 */
-	public void hoverUpdate() {
-		final int delta = renderDelta;
-		final int cx = mouseX;
-		final int cy = mouseY;
-		if (backButton != null) {
-			backButton.hoverUpdate(delta, cx, cy);
-			return;
-		}
-		boolean wasHovered = isHovered;
-		isHovered = buttonYpos - paddingY < cy && cx < realButtonWidth;
-		if (isHovered) {
-			if (!wasHovered) {
-				animationTime = 0;
-			}
-		} else {
-			if (wasHovered) {
-				animationTime = ANIMATION_TIME;
-			}
-		}
 	}
 
 	/**
