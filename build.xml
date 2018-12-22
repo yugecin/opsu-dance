@@ -1,10 +1,13 @@
 <project name="opsu!dance" default="hi">
 
 	<property name="dir.src" value="${basedir}/src" />
+	<property name="dir.testsrc" value="${basedir}/test" />
 	<property name="dir.lib" value="${basedir}/lib" />
 	<property name="dir.mvnlibs" value="${basedir}/mvnlibs" />
 	<property name="dir.res" value="${basedir}/res" />
 	<property name="dir.out" value="${basedir}/bin" />
+	<property name="dir.classes" value="${dir.out}/classes" />
+	<property name="dir.testclasses" value="${dir.out}/test-classes" />
 
 	<property name="lang.src" value="1.8" />
 	<property name="lang.target" value="1.8" />
@@ -23,6 +26,7 @@ ant cleanlib   --> clean the lib folder
 ant mvnresolve --> resolve dependencies using mvn
 ant compile    --> compile the code
 ant run        --> prepare to run and run
+ant test       --> run tests (requires junit in ant lib)
 ant jar        --> package a jar
 
 resolve dependencies first (mvnresolve)
@@ -59,22 +63,22 @@ then run (code is compiled automatically when you run)
 	</target>
 
 	<target name="compile" description="--> compile sources">
-		<mkdir dir="${dir.out}/classes" />
+		<mkdir dir="${dir.classes}" />
 
 		<javac
 			srcdir="${dir.src}"
-			destdir="${dir.out}/classes"
+			destdir="${dir.classes}"
 			includes="**/*.java"
 			source="${lang.src}"
 			target="${lang.target}"
 			includeantruntime="false"
 			classpathref="classpath.base" />
 
-		<copy todir="${dir.out}/classes">
+		<copy todir="${dir.classes}">
 			<fileset dir="${dir.res}" excludes="version,*.pdn" />
 		</copy>
 
-		<copy todir="${dir.out}/classes">
+		<copy todir="${dir.classes}">
 			<filterchain>
 				<expandproperties />
 			</filterchain>
@@ -97,6 +101,31 @@ then run (code is compiled automatically when you run)
 			classname="${main}" />
 	</target>
 
+	<target name="compiletests" depends="compile" description="--> compile test sources">
+		<mkdir dir="${dir.testclasses}" />
+		<javac
+			srcdir="${dir.testsrc}"
+			destdir="${dir.testclasses}"
+			includes="**/*.java"
+			source="${lang.src}"
+			target="${lang.target}"
+			includeantruntime="true"
+			classpathref="classpath.run" />
+	</target>
+
+	<target name="test" depends="compiletests" description="--> run tests">
+		<junit showoutput="true" haltonfailure="true">
+			<classpath>
+				<pathelement path="${dir.classes}" />
+				<pathelement path="${dir.testclasses}" />
+			</classpath>
+			<formatter type="plain" usefile="false" />
+			<batchtest>
+				<fileset dir="test" />
+			</batchtest>
+		</junit>
+	</target>
+
 	<target name="jar" depends="compile" description="--> package a jar">
 		<property name="jarfile" value="${dir.out}/opsu-dance-${version}.jar" />
 		<delete file="${jarfile}" />
@@ -111,7 +140,7 @@ then run (code is compiled automatically when you run)
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="${main}" />
 			</manifest>
-			<fileset dir="${dir.out}/classes" />
+			<fileset dir="${dir.classes}" />
 			<zipfileset src="${dir.out}/lib.jar">
 				<exclude name="META-INF/**" />
 				<exclude name="org/newdawn/slick/GameContainer.*" />
@@ -140,8 +169,7 @@ then run (code is compiled automatically when you run)
 	</path>
 
 	<path id="classpath.run">
-		<pathelement path="${dir.out}/classes" />
+		<pathelement path="${dir.classes}" />
 		<fileset dir="${dir.lib}" includes="**/*.jar" />
 	</path>
-
 </project>
