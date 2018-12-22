@@ -33,7 +33,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
-import yugecin.opsudance.core.components.ActionListener;
 import yugecin.opsudance.core.components.Component;
 import yugecin.opsudance.core.input.*;
 
@@ -53,18 +52,12 @@ public class TextField extends Component
 	private Color textCol = Color.white;
 	private Color backgroundCol = new Color(0, 0, 0, 0.5f);
 
-	private ActionListener listener;
-
 	public TextField(Font font, int x, int y, int width, int height) {
 		this.font = font;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-	}
-
-	public void setListener(ActionListener listener) {
-		this.listener = listener;
 	}
 
 	public void setBorderColor(Color border) {
@@ -143,6 +136,8 @@ public class TextField extends Component
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+		e.consume();
+
 		if (e.keyCode == KEY_V && input.isControlDown()) {
 			String text = Sys.getClipboard();
 			if (text != null) {
@@ -177,10 +172,6 @@ public class TextField extends Component
 					value = "";
 					break;
 				}
-			}
-		case KEY_RETURN:
-			if (listener != null) {
-				listener.onAction();
 			}
 		default:
 			if (31 < e.chr && e.chr < 127 && value.length() < maxCharacters) {
