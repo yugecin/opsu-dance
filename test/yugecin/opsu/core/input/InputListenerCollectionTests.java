@@ -107,6 +107,17 @@ public class InputListenerCollectionTests
 		assertTrue(this.primaryListenerWasCalled);
 	}
 
+	public void remove_listener_while_backing_array_is_full()
+	{
+		Runnable last = null;
+		for (int i = 0; i < 10; i++) {
+			last = () -> {};
+			this.collection.add(last);
+		}
+		
+		this.collection.remove(last);
+	}
+
 	@Test
 	public void clear_should_remove_all_except_primary()
 	{
