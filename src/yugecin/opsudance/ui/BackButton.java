@@ -211,7 +211,10 @@ public class BackButton
 
 	public boolean mouseReleased(MouseEvent e)
 	{
-		if (!displayContainer.disableBackButton && this.contains(e.x, e.y)) {
+		if (!displayContainer.disableBackButton &&
+			this.contains(e.x, e.y) &&
+			this.contains(mousePressX, mousePressY))
+		{
 			this.activeListener.run();
 			return true;
 		}
