@@ -429,7 +429,7 @@ public class SongMenu extends ComplexOpsuState {
 					return;
 				}
 				songFolderChanged = true;
-				if (!displayContainer.isInState(SongMenu.class)) {
+				if (!displayContainer.isIn(songMenuState)) {
 					return;
 				}
 				barNotifs.send("Changes in Songs folder detected. Hit F5 to refresh.");
@@ -1573,7 +1573,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// change the focus node
 		if (changeStartNode || (startNode.index == 0 && startNode.beatmapIndex == -1 && startNode.prev == null)) {
-			if (startNode == null || displayContainer.isInState(SongMenu.class)) {
+			if (startNode == null || displayContainer.isIn(songMenuState)) {
 				songScrolling.setPosition((node.index - 1) * buttonOffset);
 			} else {
 				isScrollingToFocusNode = true;

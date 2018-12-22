@@ -497,9 +497,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		state.writeErrorDump(dump);
 	}
 
-	// TODO change this
-	public boolean isInState(Class<? extends OpsuState> state) {
-		return state.isInstance(state);
+	public boolean isIn(OpsuState state)
+	{
+		return this.state == state;
 	}
 
 	public void switchState(OpsuState state) {
