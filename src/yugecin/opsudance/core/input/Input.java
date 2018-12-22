@@ -23,7 +23,7 @@ public class Input
 	private int lastMouseX;
 	private int lastMouseY;
 
-	protected KeyEvent[] keyEvents = new KeyEvent[1024];
+	private final KeyEvent[] keyEvents;
 
 	public final InputListenerCollection<KeyListener> keyListeners;
 	public final InputListenerCollection<MouseListener> mouseListeners;
@@ -32,6 +32,7 @@ public class Input
 
 	public Input()
 	{
+		this.keyEvents = new KeyEvent[Keyboard.KEYBOARD_SIZE];
 		final GlobalInputListener globalListener = new GlobalInputListener();
 		this.keyListeners = new InputListenerCollection<>(globalListener);
 		this.mouseListeners = new InputListenerCollection<>(globalListener);
