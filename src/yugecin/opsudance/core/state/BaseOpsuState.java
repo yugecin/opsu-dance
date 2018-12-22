@@ -1,23 +1,10 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
+
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 
@@ -25,8 +12,8 @@ import java.io.StringWriter;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListener,
-	SkinChangedListener
+public abstract class BaseOpsuState
+	implements OpsuState, ResolutionChangedListener, SkinChangedListener
 {
 	/**
 	 * state is dirty when resolution or skin changed but hasn't rendered yet
@@ -92,33 +79,33 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListe
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		return false;
+	public void keyPressed(KeyEvent e)
+	{
 	}
 
 	@Override
-	public boolean keyReleased(int key, char c) {
-		return false;
+	public void keyReleased(KeyEvent e)
+	{
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int delta) {
-		return false;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		return false;
+	public void mousePressed(MouseEvent e)
+	{
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		return false;
+	public void mouseReleased(MouseEvent e)
+	{
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		return false;
+	public void mouseDragged(MouseDragEvent e)
+	{
 	}
 
 	@Override
@@ -126,5 +113,4 @@ public abstract class BaseOpsuState implements OpsuState, ResolutionChangedListe
 		dump.append("> BaseOpsuState dump\n");
 		dump.append("isDirty: ").append(String.valueOf(isDirty)).append('\n');
 	}
-
 }

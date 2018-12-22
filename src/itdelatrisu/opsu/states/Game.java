@@ -58,7 +58,7 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
@@ -1105,17 +1105,24 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyPressed(key, c)) {
-			return true;
+	public void keyPressed(KeyEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.keyPressed(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.keyPressed(key, c)) {
-			return true;
+		super.keyPressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		int trackPosition = MusicController.getPosition();
@@ -1123,9 +1130,9 @@ public class Game extends ComplexOpsuState {
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
 			int keys = ReplayFrame.KEY_NONE;
-			if (key == OPTION_KEY_LEFT.keycode) {
+			if (e.keyCode == OPTION_KEY_LEFT.keycode) {
 				keys = ReplayFrame.KEY_K1;
-			} else if (key == OPTION_KEY_RIGHT.keycode) {
+			} else if (e.keyCode == OPTION_KEY_RIGHT.keycode) {
 				keys = ReplayFrame.KEY_K2;
 			}
 			if (keys != ReplayFrame.KEY_NONE) {
@@ -1133,7 +1140,7 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		switch (key) {
+		switch (e.keyCode) {
 		case KEY_ESCAPE:
 			// "auto" mod or watching replay: go back to song menu
 			if (GameMod.AUTO.isActive() || isReplay) {
@@ -1236,42 +1243,53 @@ public class Game extends ComplexOpsuState {
 			adjustLocalMusicOffset(-5);
 			break;
 		}
-		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+		if (e.keyCode == KEY_EQUALS || e.keyCode == KEY_ADD || e.chr == '+') {
 			adjustLocalMusicOffset(5);
 		}
-
-		return true;
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (OPTION_DANCE_ENABLE_SB.state &&
-			optionsOverlay.mouseDragged(oldx, oldy, newx, newy))
-		{
-			return true;
+	public void mouseDragged(MouseDragEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			this.optionsOverlay.mouseDragged(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		return super.mouseDragged(oldx, oldy, newx, newy);
+		super.mouseDragged(e);
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mousePressed(button, x, y)) {
-			return true;
+	public void mousePressed(MouseEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mousePressed(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.mousePressed(button, x, y)) {
-			return true;
+		super.mousePressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
+
+		final int button = e.button;
+		final int x = e.x;
+		final int y = e.y;
 
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
 			if (button == Input.MMB) {
-				return true;
+				return;
 			}
 
 			// skip button
@@ -1291,11 +1309,11 @@ public class Game extends ComplexOpsuState {
 				MusicController.setPosition((int) pos);
 				isSeeking = true;
 			}
-			return true;
+			return;
 		}
 
 		if (OPTION_DISABLE_MOUSE_BUTTONS.state) {
-			return true;
+			return;
 		}
 
 		// mouse wheel: pause the game
@@ -1309,7 +1327,7 @@ public class Game extends ComplexOpsuState {
 				pauseTime = trackPosition;
 			}
 			displayContainer.switchStateInstantly(pauseState);
-			return true;
+			return;
 		}
 
 		// game keys
@@ -1320,8 +1338,6 @@ public class Game extends ComplexOpsuState {
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
 			gameKeyPressed(keys, x, y, MusicController.getPosition());
-
-		return true;
 	}
 
 	/**
@@ -1364,63 +1380,70 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseReleased(button, x, y)) {
-			return true;
+	public void mouseReleased(MouseEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mouseReleased(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.mouseReleased(button, x, y)) {
-			return true;
+		super.mouseReleased(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		if (OPTION_DISABLE_MOUSE_BUTTONS.state) {
-			return true;
+			return;
 		}
 
-		if (button == Input.MMB) {
-			return true;
+		if (e.button == Input.MMB) {
+			return;
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (button == Input.LMB)
+		if (e.button == Input.LMB)
 			keys = ReplayFrame.KEY_M1;
-		else if (button == Input.RMB)
+		else if (e.button == Input.RMB)
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
-			gameKeyReleased(keys, x, y, MusicController.getPosition());
-
-		return true;
+			gameKeyReleased(keys, e.x, e.y, MusicController.getPosition());
 	}
 
 	@Override
-	public boolean keyReleased(int key, char c) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyReleased(key, c)) {
-			return true;
+	public void keyReleased(KeyEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			return;
 		}
 
-		if (super.keyReleased(key, c)) {
-			return true;
+		super.keyReleased(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 		
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (key == OPTION_KEY_LEFT.keycode) {
+		if (e.keyCode == OPTION_KEY_LEFT.keycode) {
 			keys = ReplayFrame.KEY_K1;
-		} else if (key == OPTION_KEY_RIGHT.keycode) {
+		} else if (e.keyCode == OPTION_KEY_RIGHT.keycode) {
 			keys = ReplayFrame.KEY_K2;
 		}
 		if (keys != ReplayFrame.KEY_NONE) {
 			gameKeyReleased(keys, mouseX, mouseY, MusicController.getPosition());
 		}
-
-		return true;
 	}
 
 	/**
@@ -1438,21 +1461,27 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseWheelMoved(newValue)) {
-			return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mouseWheelMoved(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
-		
-		if (super.mouseWheelMoved(newValue)) {
-			return true;
+
+		super.mouseWheelMoved(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (OPTION_DISABLE_MOUSE_WHEEL.state) {
-			return true;
+			return;
 		}
 
-		volumeControl.changeVolume(newValue);
-		return true;
+		volumeControl.changeVolume(e.delta);
 	}
 
 	@Override

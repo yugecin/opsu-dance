@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.ui;
 
-import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -29,8 +28,9 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.UnicodeFont;
 import yugecin.opsudance.core.components.Component;
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class DropdownMenu<E> extends Component {
@@ -80,9 +80,11 @@ public class DropdownMenu<E> extends Component {
 	}
 
 	@Override
-	public void keyPressed(int key, char c) {
-		if (key == Keyboard.KEY_ESCAPE) {
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
 			this.expanded = false;
+			e.consume();
 		}
 	}
 
@@ -109,7 +111,6 @@ public class DropdownMenu<E> extends Component {
 		return maxWidth;
 	}
 
-	@SuppressWarnings("SuspiciousNameCombination")
 	private void init(E[] items, int x, int y, int width) {
 		this.items = items;
 		this.itemNames = new String[items.length];
@@ -121,10 +122,11 @@ public class DropdownMenu<E> extends Component {
 		this.baseHeight = fontNormal.getLineHeight();
 		this.offsetY = baseHeight + baseHeight * PADDING_Y;
 		this.height = (int) (offsetY * (items.length + 1));
-		int chevronDownSize = baseHeight * 4 / 5;
-		this.chevronDown = GameImage.CHEVRON_DOWN.getImage().getScaledCopy(chevronDownSize, chevronDownSize);
-		int chevronRightSize = baseHeight * 2 / 3;
-		this.chevronRight = GameImage.CHEVRON_RIGHT.getImage().getScaledCopy(chevronRightSize, chevronRightSize);
+		int downChevronSize = baseHeight * 4 / 5;
+		this.chevronDown = CHEVRON_DOWN.getScaledImage(downChevronSize, downChevronSize);
+		int rightChevronSize = baseHeight * 2 / 3;
+		//noinspection SuspiciousNameCombination
+		this.chevronRight = CHEVRON_RIGHT.getScaledImage(rightChevronSize, rightChevronSize);
 		int maxItemWidth = getMaxItemWidth();
 		int minWidth = maxItemWidth + chevronRight.getWidth() * 2;
 		this.width = Math.max(width, minWidth);
@@ -236,10 +238,14 @@ public class DropdownMenu<E> extends Component {
 	}
 
 	@Override
-	public void mouseReleased(int button) {
-		super.mouseReleased(button);
+	public void mouseReleased(MouseEvent e)
+	{
+		super.mouseReleased(e);
+		if (e.isConsumed()) {
+			return;
+		}
 
-		if (button == Input.MMB) {
+		if (e.button == Input.MMB) {
 			return;
 		}
 

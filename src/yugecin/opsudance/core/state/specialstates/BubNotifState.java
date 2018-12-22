@@ -1,27 +1,13 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core.state.specialstates;
 
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.MouseListener;
+
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.events.ResolutionChangedListener;
 
 import java.util.Formatter;
@@ -31,8 +17,8 @@ import java.util.ListIterator;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BubNotifState implements MouseListener, ResolutionChangedListener {
-
+public class BubNotifState implements MouseListener, ResolutionChangedListener
+{
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
 	public static final int OUT_TIME = 433;
@@ -134,31 +120,31 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener {
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int delta) {
-		return false;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		return false;
+	public void mousePressed(MouseEvent e)
+	{
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		if (x < Notification.finalX) {
-			return false;
+	public void mouseReleased(MouseEvent e) {
+		if (e.x < Notification.finalX) {
+			return;
 		}
 		for (Notification bubble : bubbles) {
-			if (bubble.mouseReleased(x, y)) {
-				return true;
+			if (bubble.mouseReleased(e.x, e.y)) {
+				e.consume();
+				return;
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		return false;
+	public void mouseDragged(MouseDragEvent e)
+	{
 	}
 
 	private static class Notification {
@@ -264,5 +250,4 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener {
 		}
 
 	}
-
 }

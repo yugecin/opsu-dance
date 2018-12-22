@@ -37,7 +37,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
 
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -110,36 +110,24 @@ public class GameRanking extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		return true;
-	}
-
-	@Override
-	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
-			return true;
-		}
-
-		if (key == Keyboard.KEY_ESCAPE) {
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
 			returnToSongMenu();
 		}
-		return true;
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (super.mousePressed(button, x, y)) {
-			return true;
-		}
-
+	public void mousePressed(MouseEvent e)
+	{
 		// check mouse button
-		if (button == Input.MMB) {
-			return false;
+		if (e.button == Input.MMB) {
+			return;
 		}
 
 		// replay
 		boolean returnToGame = false;
-		boolean replayButtonPressed = replayButton.contains(x, y);
+		boolean replayButtonPressed = replayButton.contains(e.x, e.y);
 		if (replayButtonPressed && !(data.isGameplay() && GameMod.AUTO.isActive())) {
 			Replay r = data.getReplay(null, null);
 			if (r != null) {
@@ -148,10 +136,10 @@ public class GameRanking extends BaseOpsuState {
 					gameState.setReplay(r);
 					gameState.setRestart((data.isGameplay()) ? Game.Restart.REPLAY : Game.Restart.NEW);
 					returnToGame = true;
-				} catch (FileNotFoundException e) {
+				} catch (FileNotFoundException t) {
 					barNotifs.send("Replay file not found.");
-				} catch (IOException e) {
-					Log.error("Failed to load replay data.", e);
+				} catch (IOException t) {
+					Log.error("Failed to load replay data.", t);
 					barNotifs.send("Failed to load replay data. See log for details.");
 				}
 			} else {
@@ -161,7 +149,7 @@ public class GameRanking extends BaseOpsuState {
 
 		// retry
 		else if (data.isGameplay() &&
-		         (!GameMod.AUTO.isActive() && retryButton.contains(x, y)) ||
+		         (!GameMod.AUTO.isActive() && retryButton.contains(e.x, e.y)) ||
 		         (GameMod.AUTO.isActive() && replayButtonPressed)) {
 			gameState.setReplay(null);
 			gameState.setRestart(Game.Restart.MANUAL);
@@ -174,7 +162,6 @@ public class GameRanking extends BaseOpsuState {
 			SoundController.playSound(SoundEffect.MENUHIT);
 			displayContainer.switchState(gameState);
 		}
-		return true;
 	}
 
 	@Override

@@ -40,7 +40,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -93,8 +93,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				BEATMAP.mouseWheelMoved(e);
 			}
 		},
 		/** The beatmap deletion screen for a beatmap set with multiple beatmaps. */
@@ -112,8 +113,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				MenuState.BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				MenuState.BEATMAP.mouseWheelMoved(e);
 			}
 		},
 		/** The beatmap deletion screen for a single beatmap. */
@@ -129,8 +131,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				MenuState.BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				MenuState.BEATMAP.mouseWheelMoved(e);
 			}
 		},
 		/** The beatmap reloading confirmation screen. */
@@ -150,8 +153,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				MenuState.BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				MenuState.BEATMAP.mouseWheelMoved(e);
 			}
 		},
 		/** The score management screen. */
@@ -167,8 +171,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				MenuState.BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				MenuState.BEATMAP.mouseWheelMoved(e);
 			}
 		},
 		/** The game mod selection screen. */
@@ -239,10 +244,11 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void keyPressed(int key, char c) {
-				super.keyPressed(key, c);
+			public void keyPressed(KeyEvent e)
+			{
+				super.keyPressed(e);
 				for (GameMod mod : GameMod.values()) {
-					if (key == mod.getKey()) {
+					if (e.keyCode == mod.getKey()) {
 						mod.toggle(true);
 						break;
 					}
@@ -250,10 +256,11 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mousePressed(int cx, int cy) {
-				super.mousePressed(cx, cy);
+			public void mousePressed(MouseEvent e)
+			{
+				super.mousePressed(e);
 				for (GameMod mod : GameMod.values()) {
-					if (mod.contains(cx, cy)) {
+					if (mod.contains(e.x, e.y)) {
 						boolean prevState = mod.isActive();
 						mod.toggle(true);
 						if (mod.isActive() != prevState)
@@ -264,8 +271,9 @@ public class ButtonMenu extends BaseOpsuState {
 			}
 
 			@Override
-			public void mouseWheelMoved(int newValue) {
-				MenuState.BEATMAP.mouseWheelMoved(newValue);
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				MenuState.BEATMAP.mouseWheelMoved(e);
 			}
 		};
 
@@ -355,9 +363,10 @@ public class ButtonMenu extends BaseOpsuState {
 		/**
 		 * Processes a mouse click action.
 		 */
-		public void mousePressed(int x, int y) {
+		public void mousePressed(MouseEvent e)
+		{
 			for (int i = 0; i < buttons.length; i++) {
-				if (menuButtons[i].contains(x, y)) {
+				if (menuButtons[i].contains(e.x, e.y)) {
 					buttons[i].click();
 					break;
 				}
@@ -366,11 +375,10 @@ public class ButtonMenu extends BaseOpsuState {
 
 		/**
 		 * Processes a key press action.
-		 * @param key the key code that was pressed (see {@link org.lwjgl.input.Keyboard})
-		 * @param c the character of the key that was pressed
 		 */
-		public void keyPressed(int key, char c) {
-			int index = Character.getNumericValue(c) - 1;
+		public void keyPressed(KeyEvent e)
+		{
+			int index = Character.getNumericValue(e.chr) - 1;
 			if (index >= 0 && index < buttons.length)
 				buttons[index].click();
 		}
@@ -380,13 +388,9 @@ public class ButtonMenu extends BaseOpsuState {
 		 */
 		public String[] getTitle() { return new String[0]; }
 
-		/**
-		 * Processes a mouse wheel movement.
-		 * @param newValue the amount that the mouse wheel moved
-		 */
-		public void mouseWheelMoved(int newValue)
+		public void mouseWheelMoved(MouseWheelEvent e)
 		{
-			volumeControl.changeVolume(newValue);
+			volumeControl.changeVolume(e.delta);
 		}
 
 		/**
@@ -628,34 +632,32 @@ public class ButtonMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (button == Input.MMB) {
-			return false;
+	public void mousePressed(MouseEvent e)
+	{
+		if (e.button == Input.MMB) {
+			return;
 		}
 
-		menuState.mousePressed(x, y);
-		return true;
+		this.menuState.mousePressed(e);
+		e.consume();
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		menuState.mouseWheelMoved(newValue);
-		return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		this.menuState.mouseWheelMoved(e);
+		e.consume();
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
-			return true;
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
+			this.menuState.leave();
+		} else {
+			this.menuState.keyPressed(e);
 		}
-
-		if (key == Keyboard.KEY_ESCAPE) {
-			menuState.leave();
-			return true;
-		}
-
-		menuState.keyPressed(key, c);
-		return true;
+		e.consume();
 	}
 
 	@Override

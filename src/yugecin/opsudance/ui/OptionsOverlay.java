@@ -13,6 +13,7 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 
 import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
@@ -845,48 +846,53 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
-	public boolean mousePressed(int button, int x, int y) {
+	public void mousePressed(MouseEvent e)
+	{
 		if (!this.active) {
-			return false;
+			return;
 		}
-		if (x > this.currentWidth) {
+
+		if (e.x > this.currentWidth) {
 			this.isDraggingFromOutside = true;
-			return false;
+			return;
 		}
-		
+
+		e.consume();
 		wasPressed = true;
 
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
-			return true;
+			return;
 		}
 
-		if (x > currentWidth) {
-			return false;
+		if (e.x > currentWidth) {
+			e.unconsume();
+			return;
 		}
 
 		scrollHandler.pressed();
 
-		mousePressY = y;
+		mousePressY = e.y;
 		selectedOption = hoverOption;
 
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
-			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			isAdjustingSlider = sliderOptionStartX <= e.x && e.x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
 				unchangedSliderValue = ((NumericOption) hoverOption).val;
 				updateSliderOption();
 			}
 		}
-
-		return true;
 	}
 
-	public boolean mouseReleased(int button, int x, int y) {
+	public void mouseReleased(MouseEvent e)
+	{
 		this.isDraggingFromOutside = false;
-		if (!this.active || (!wasPressed && x > this.currentWidth)) {
-			return false;
+		if (!this.active || (!wasPressed && e.x > this.currentWidth)) {
+			return;
 		}
-		
+
+		e.consume();
+
 		wasPressed = false;
 
 		selectedOption = null;
@@ -894,21 +900,21 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			if (listener != null) {
 				listener.onSaveOption(hoverOption);
 			}
-			updateHoverOption(x, y);
+			updateHoverOption(e.x, e.y);
 			isAdjustingSlider = false;
 		}
 		sliderOptionLength = 0;
 
-		if (x > navWidth) {
+		if (e.x > navWidth) {
 			if (openDropdownMenu != null) {
-				openDropdownMenu.mouseReleased(button);
-				updateHoverOption(x, y);
-				return true;
+				openDropdownMenu.mouseReleased(e);
+				updateHoverOption(e.x, e.y);
+				return;
 			} else {
 				for (DropdownMenu<Object> menu : visibleDropdownMenus) {
-					menu.mouseReleased(button);
+					menu.mouseReleased(e);
 					if (menu.isOpen()) {
-						return true;
+						return;
 					}
 				}
 			}
@@ -917,12 +923,13 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		scrollHandler.released();
 
 		// check if clicked, not dragged
-		if (Math.abs(y - mousePressY) >= 5) {
-			return true;
+		if (Math.abs(e.y - mousePressY) >= 5) {
+			return;
 		}
 
-		if (x > targetWidth) {
-			return false;
+		if (e.x > targetWidth) {
+			e.unconsume();
+			return;
 		}
 
 		if (hoverOption != null) {
@@ -932,7 +939,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 					listener.onSaveOption(hoverOption);
 				}
 				SoundController.playSound(SoundEffect.MENUHIT);
-				return true;
+				return;
 			} else if (hoverOption == OPTION_KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (hoverOption == OPTION_KEY_RIGHT) {
@@ -962,73 +969,78 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
 			scrollHandler.scrollToPosition(sectionPosition);
 		}
-		return true;
 	}
 
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+	public void mouseDragged(MouseDragEvent e)
+	{
 		if (!this.active || this.isDraggingFromOutside) {
-			return false;
+			return;
 		}
 
+		e.consume();
+
 		if (!isAdjustingSlider) {
-			int diff = newy - oldy;
-			if (diff != 0) {
-				scrollHandler.dragged(-diff);
+			if (e.dy != 0) {
+				scrollHandler.dragged(-e.dy);
 			}
 		}
-		return true;
 	}
 
-	public boolean mouseWheelMoved(int delta) {
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
 		if (!this.active || mouseX > this.currentWidth) {
-			return false;
+			return;
 		}
+
+		e.consume();
 
 		if (!isAdjustingSlider) {
-			scrollHandler.scrollOffset(-delta);
+			scrollHandler.scrollOffset(-e.delta);
 		}
-		return true;
 	}
 
-	public boolean keyPressed(int key, char c) {
+	public void keyPressed(KeyEvent e)
+	{
 		if (!this.active) {
-			return false;
+			return;
 		}
+
+		e.consume();
 
 		if (keyEntryRight) {
-			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_RIGHT.setKeycode(key);
+			if (Utils.isValidGameKey(e.keyCode)) {
+				OPTION_KEY_RIGHT.setKeycode(e.keyCode);
 			}
 			keyEntryRight = false;
-			return true;
+			return;
 		}
 
 		if (keyEntryLeft) {
-			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_LEFT.setKeycode(key);
+			if (Utils.isValidGameKey(e.keyCode)) {
+				OPTION_KEY_LEFT.setKeycode(e.keyCode);
 			}
 			keyEntryLeft = false;
-			return true;
+			return;
 		}
 
-		if (key == Keyboard.KEY_ESCAPE) {
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
 			if (isAdjustingSlider) {
 				cancelAdjustingSlider();
 			}
 			if (openDropdownMenu != null) {
-				openDropdownMenu.keyPressed(key, c);
-				return true;
+				openDropdownMenu.keyPressed(e);
+				return;
 			}
 			if (lastSearchText.length() != 0) {
 				resetSearch();
 				updateHoverOption(prevMouseX, prevMouseY);
-				return true;
+				return;
 			}
 			this.exit();
-			return true;
+			return;
 		}
 
-		searchField.keyPressed(key, c);
+		searchField.keyPressed(e);
 		if (!searchField.getText().equals(lastSearchText)) {
 			String newSearchText = searchField.getText().toLowerCase();
 			if (!hasSearchResults(newSearchText)) {
@@ -1048,12 +1060,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 				updateSearch();
 			}
 		}
-
-		return true;
-	}
-
-	public boolean keyReleased(int key, char c) {
-		return false;
 	}
 
 	private void cancelAdjustingSlider() {

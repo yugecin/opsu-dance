@@ -52,7 +52,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
 
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 
 import static org.lwjgl.input.Keyboard.*;
@@ -591,19 +591,25 @@ public class DownloadsMenu extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (super.mousePressed(button, x, y)) {
-			return true;
+	public void mousePressed(MouseEvent e)
+	{
+		super.mousePressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
-		if (button == Input.MMB) {
-			return false;
+		if (e.button == Input.MMB) {
+			return;
 		}
 
 		// block input during beatmap importing
 		if (importThread != null) {
-			return true;
+			e.consume();
+			return;
 		}
+
+		final int x = e.x;
+		final int y = e.y;
 
 		// search results
 		DownloadNode[] nodes = resultList;
@@ -672,11 +678,13 @@ public class DownloadsMenu extends ComplexOpsuState {
 									}
 								}.start();
 							}
-							return true;
+							e.consume();
+							return;
 						}
 
 						if (isLoaded) {
-							return true;
+							e.consume();
+							return;
 						}
 
 						SoundController.playSound(SoundEffect.MENUCLICK);
@@ -704,7 +712,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 						break;
 					}
 				}
-				return true;
+				e.consume();
+				return;
 			}
 
 			// pages
@@ -720,7 +729,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 							searchQuery.interrupt();
 						resetSearchTimer();
 					}
-					return true;
+					e.consume();
+					return;
 				}
 				if (pageResultTotal < totalResults && nextPage.contains(x, y)) {
 					if (lastQueryDir == Page.NEXT && searchQuery != null && !searchQuery.isComplete())
@@ -732,7 +742,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 						if (searchQuery != null)
 							searchQuery.interrupt();
 						resetSearchTimer();
-						return true;
+						e.consume();
+						return;
 					}
 				}
 			}
@@ -742,7 +753,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 		if (clearButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			DownloadList.get().clearInactiveDownloads();
-			return true;
+			e.consume();
+			return;
 		}
 		if (importButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -750,7 +762,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 			// import songs in new thread
 			importThread = new BeatmapImportThread();
 			importThread.start();
-			return true;
+			e.consume();
+			return;
 		}
 		if (resetButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -760,7 +773,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return true;
+			e.consume();
+			return;
 		}
 		if (rankedButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUCLICK);
@@ -770,7 +784,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return true;
+			e.consume();
+			return;
 		}
 
 		// downloads
@@ -787,7 +802,8 @@ public class DownloadsMenu extends ComplexOpsuState {
 					SoundController.playSound(SoundEffect.MENUCLICK);
 					DownloadNode node = DownloadList.get().getNode(index);
 					if (node == null) {
-						return true;
+						e.consume();
+						return;
 					}
 					Download dl = node.getDownload();
 					switch (dl.getStatus()) {
@@ -802,78 +818,79 @@ public class DownloadsMenu extends ComplexOpsuState {
 						dl.cancel();
 						break;
 					}
-					return true;
+					e.consume();
+					return;
 				}
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		if (super.mouseReleased(button, x, y)) {
-			return true;
+	public void mouseReleased(MouseEvent e)
+	{
+		super.mouseReleased(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
-		if (button == Input.MMB) {
-			return false;
+		if (e.button == Input.MMB) {
+			return;
 		}
 
 		startDownloadIndexPos.released();
 		startResultPos.released();
-		return true;
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		if (super.mouseWheelMoved(newValue)) {
-			return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		super.mouseWheelMoved(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
 		// block input during beatmap importing
 		if (importThread != null) {
-			return true;
+			e.consume();
+			return;
 		}
 
-		int shift = (newValue < 0) ? 1 : -1;
+		int shift = (e.delta < 0) ? 1 : -1;
 		scrollLists(mouseX, mouseY, shift);
-		return true;
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+	public void mouseDragged(MouseDragEvent e)
+	{
 		// block input during beatmap importing
 		if (importThread != null) {
-			return true;
+			e.consume();
+			return;
 		}
 
-		int diff = newy - oldy;
-		if (diff == 0) {
-			return false;
+		if (e.dy == 0) {
+			return;
 		}
 
-		startDownloadIndexPos.dragged(-diff);
-		startResultPos.dragged(-diff);
-		return true;
+		startDownloadIndexPos.dragged(-e.dy);
+		startResultPos.dragged(-e.dy);
 	}
 
 	@Override
-	public boolean keyReleased(int key, char c) {
-		return super.keyReleased(key, c);
-	}
-
-	@Override
-	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
-			return true;
+	public void keyPressed(KeyEvent e)
+	{
+		super.keyPressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
 		// block input during beatmap importing
-		if (importThread != null && key != KEY_ESCAPE) {
-			return true;
+		if (importThread != null && e.keyCode != KEY_ESCAPE) {
+			e.consume();
+			return;
 		}
 
-		switch (key) {
+		switch (e.keyCode) {
 		case KEY_ESCAPE:
 			if (importThread != null) {
 				// beatmap importing: stop parsing beatmaps by sending interrupt to BeatmapParser
@@ -887,13 +904,15 @@ public class DownloadsMenu extends ComplexOpsuState {
 				// return to main menu
 				this.exit();
 			}
-			return true;
+			e.consume();
+			return;
 		case KEY_RETURN:
 			if (!search.getText().isEmpty()) {
 				pageDir = Page.RESET;
 				resetSearchTimer();
 			}
-			return true;
+			e.consume();
+			return;
 		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			lastQuery = null;
@@ -901,15 +920,15 @@ public class DownloadsMenu extends ComplexOpsuState {
 			if (searchQuery != null)
 				searchQuery.interrupt();
 			resetSearchTimer();
-			return true;
+			e.consume();
+			return;
 		}
 		// wait for user to finish typing
-		if (Character.isLetterOrDigit(c) || key == KEY_BACK) {
-			search.keyPressed(key, c);
+		if (Character.isLetterOrDigit(e.chr) || e.keyCode == KEY_BACK) {
+			search.keyPressed(e);
 			searchTimer = 0;
 			pageDir = Page.RESET;
 		}
-		return true;
 	}
 
 	@Override

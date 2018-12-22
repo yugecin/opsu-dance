@@ -53,7 +53,7 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.InstanceContainer;
-import yugecin.opsudance.core.input.Input;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.ui.ImagePosition;
@@ -684,21 +684,26 @@ public class MainMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (optionsOverlay.mousePressed(button, x, y)) {
-			return true;
+	public void mousePressed(MouseEvent evt)
+	{
+		optionsOverlay.mousePressed(evt);
+		if (evt.isConsumed()) {
+			return;
 		}
 
-		// check mouse button
-		if (button == Input.MMB)
-			return false;
+		if (evt.button == Input.MMB) {
+			return;
+		}
+
+		final int x = evt.x;
+		final int y = evt.y;
 
 		// music position bar
 		if (MusicController.isPlaying() && musicPositionBarContains(x, y)) {
 			this.lastMeasureProgress = 0f;
 			float pos = (float) (x - this.musicBarX) / this.musicBarWidth;
 			MusicController.setPosition((int) (pos * MusicController.getDuration()));
-			return true;
+			return;
 		}
 
 		// music button actions
@@ -713,7 +718,7 @@ public class MainMenu extends BaseOpsuState {
 				MusicController.setPosition(0);
 			}
 			barNotifs.send("<< Previous");
-			return true;
+			return;
 		} else if (musicPlay.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				lastMeasureProgress = 0f;
@@ -722,7 +727,7 @@ public class MainMenu extends BaseOpsuState {
 				MusicController.resume();
 			}
 			barNotifs.send("Play");
-			return true;
+			return;
 		} else if (musicPause.contains(x, y)) {
 			if (MusicController.isPlaying()) {
 				MusicController.pause();
@@ -740,14 +745,14 @@ public class MainMenu extends BaseOpsuState {
 		} else if (musicNext.contains(x, y)) {
 			nextTrack(true);
 			barNotifs.send(">> Next");
-			return true;
+			return;
 		}
 
 		// downloads button actions
 		if (downloadsButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
 			displayContainer.switchState(downloadState);
-			return true;
+			return;
 		}
 
 		// repository button actions
@@ -760,7 +765,7 @@ public class MainMenu extends BaseOpsuState {
 				Log.error("could not browse to repo", e);
 				bubNotifs.send(BUB_ORANGE, "Could not browse to repo");
 			}
-			return true;
+			return;
 		}
 
 		if (danceRepoButton != null && danceRepoButton.contains(x, y)) {
@@ -772,7 +777,7 @@ public class MainMenu extends BaseOpsuState {
 				Log.error("could not browse to repo", e);
 				bubNotifs.send(BUB_ORANGE, "Could not browse to repo");
 			}
-			return true;
+			return;
 		}
 
 		// update button actions
@@ -785,13 +790,12 @@ public class MainMenu extends BaseOpsuState {
 				updateButton.setHoverAnimationDuration(800);
 				updateButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_QUAD);
 				updateButton.setHoverFade(0.6f);
-				return true;
 			} else if (restartButton.contains(x, y) && status == Updater.Status.UPDATE_DOWNLOADED) {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				updater.prepareUpdate();
 				displayContainer.exitRequested = true;
-				return true;
 			}
+			return;
 		}
 
 		final boolean logoHovered = this.logo.contains(x, y, 0.25f);
@@ -800,14 +804,14 @@ public class MainMenu extends BaseOpsuState {
 				this.openLogo();
 				SoundController.playSound(SoundEffect.MENUHIT);
 				this.logoClickScale.setTime(0);
-				return true;
+				return;
 			}
 		} else {
 			if (logoHovered || this.buttonPositions[0].contains(x, y, 0.25f)) {
 				this.logoClickScale.setTime(0);
 				SoundController.playSound(SoundEffect.MENUHIT);
 				enterSongMenu();
-				return true;
+				return;
 			}
 
 			if (this.buttonPositions[1].contains(x, y, 0.25f)) {
@@ -815,35 +819,36 @@ public class MainMenu extends BaseOpsuState {
 					SoundController.playSound(SoundEffect.MENUHIT);
 					optionsOverlay.show();
 				}
-				return true;
+				return;
 			}
 
 			if (this.buttonPositions[2].contains(x, y, 0.25f)) {
 				displayContainer.exitRequested = true;
-				return true;
+				return;
 			}
 		}
-
-		return false;
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		if (optionsOverlay.mouseWheelMoved(newValue)) {
-			return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		optionsOverlay.mouseWheelMoved(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
-		volumeControl.changeVolume(newValue);
-		return true;
+		volumeControl.changeVolume(e.delta);
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (optionsOverlay.keyPressed(key, c)) {
-			return true;
+	public void keyPressed(KeyEvent e)
+	{
+		optionsOverlay.keyPressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
 
-		switch (key) {
+		switch (e.keyCode) {
 		case KEY_ESCAPE:
 		case KEY_Q:
 			if (logoState == LogoState.OPEN || logoState == LogoState.OPENING) {
@@ -852,7 +857,7 @@ public class MainMenu extends BaseOpsuState {
 			}
 			buttonState.setMenuState(MenuState.EXIT);
 			displayContainer.switchState(buttonState);
-			return true;
+			return;
 		case KEY_P:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (logoState == LogoState.DEFAULT || logoState == LogoState.CLOSING) {
@@ -860,41 +865,37 @@ public class MainMenu extends BaseOpsuState {
 			} else {
 				enterSongMenu();
 			}
-			return true;
+			return;
 		case KEY_D:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			displayContainer.switchState(downloadState);
-			return true;
+			return;
 		case KEY_R:
 			nextTrack(true);
-			return true;
+			return;
 		case KEY_UP:
 			volumeControl.changeVolume(1);
-			return true;
+			return;
 		case KEY_DOWN:
 			volumeControl.changeVolume(-1);
-			return true;
+			return;
 		case KEY_O:
 			if (input.isControlDown()) {
 				optionsOverlay.show();
 			}
 		}
-		return false;
-	}
-	
-	@Override
-	public boolean keyReleased(int key, char c) {
-		return optionsOverlay.keyReleased(key, c);
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		return optionsOverlay.mouseReleased(button, x, y);
+	public void mouseReleased(MouseEvent e)
+	{
+		optionsOverlay.mouseReleased(e);
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		return optionsOverlay.mouseDragged(oldx, oldy, newx, newy);
+	public void mouseDragged(MouseDragEvent e)
+	{
+		optionsOverlay.mouseDragged(e);
 	}
 
 	/**

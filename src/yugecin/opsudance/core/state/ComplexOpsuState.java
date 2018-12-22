@@ -1,32 +1,19 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core.state;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.core.components.Component;
+import yugecin.opsudance.core.input.*;
 
 import java.util.LinkedList;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public abstract class ComplexOpsuState extends BaseOpsuState {
-
+@Deprecated
+public abstract class ComplexOpsuState extends BaseOpsuState
+{
 	protected final LinkedList<Component> components;
 	protected final LinkedList<OverlayOpsuState> overlays;
 
@@ -63,43 +50,45 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int delta) {
-		if (super.mouseWheelMoved(delta)) {
-			return true;
-		}
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.mouseWheelMoved(delta)) {
-				return true;
+			overlay.mouseWheelMoved(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
+	public void mousePressed(MouseEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.mousePressed(button, x, y)) {
-				return true;
+			overlay.mousePressed(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
+	public void mouseDragged(MouseDragEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.mouseDragged(oldx, oldy, newx, newy)) {
-				return true;
+			overlay.mouseDragged(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
+	public void mouseReleased(MouseEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.mouseReleased(button, x, y)) {
-				return true;
+			overlay.mouseReleased(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
 		if (focusedComponent == null) {
@@ -107,23 +96,24 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 				if (!component.isFocusable()) {
 					continue;
 				}
-				component.updateHover(x, y);
+				component.updateHover(e.x, e.y);
 				if (component.isHovered()) {
 					focusedComponent = component;
 					focusedComponent.setFocused(true);
-					return true;
+					e.consume();
+					return;
 				}
 			}
-			return false;
+			return;
 		}
-		focusedComponent.updateHover(x, y);
+		focusedComponent.updateHover(e.x, e.y);
 		if (focusedComponent.isHovered()) {
-			focusedComponent.mouseReleased(button);
-			return true;
+			focusedComponent.mouseReleased(e);
+			e.consume();
+			return;
 		}
 		focusedComponent.setFocused(false);
 		focusedComponent = null;
-		return true;
 	}
 
 	@Override
@@ -155,44 +145,42 @@ public abstract class ComplexOpsuState extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean keyReleased(int key, char c) {
-		if (super.keyReleased(key, c)) {
-			return true;
-		}
+	public void keyReleased(KeyEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.keyReleased(key, c)) {
-				return true;
+			overlay.keyReleased(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
 		if (focusedComponent != null) {
-			if (key == Keyboard.KEY_ESCAPE) {
+			if (e.keyCode == Keyboard.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);
 				focusedComponent = null;
-				return true;
+			} else {
+				focusedComponent.keyReleased(e);
 			}
-			focusedComponent.keyReleased(key, c);
-			return true;
+			e.consume();
 		}
-		return false;
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
+	public void keyPressed(KeyEvent e)
+	{
 		for (OverlayOpsuState overlay : overlays) {
-			if (overlay.keyPressed(key, c)) {
-				return true;
+			overlay.keyPressed(e);
+			if (e.isConsumed()) {
+				return;
 			}
 		}
 		if (focusedComponent != null) {
-			if (key == Keyboard.KEY_ESCAPE) {
+			if (e.keyCode == Keyboard.KEY_ESCAPE) {
 				focusedComponent.setFocused(false);
 				focusedComponent = null;
-				return true;
+			} else {
+				focusedComponent.keyPressed(e);
 			}
-			focusedComponent.keyPressed(key, c);
-			return true;
+			e.consume();
 		}
-		return false;
 	}
-
 }

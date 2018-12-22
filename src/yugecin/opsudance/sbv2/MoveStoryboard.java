@@ -23,6 +23,8 @@ import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.sbv2.movers.CubicStoryboardMover;
 import yugecin.opsudance.sbv2.movers.LinearStoryboardMover;
@@ -35,8 +37,8 @@ import java.lang.reflect.Proxy;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class MoveStoryboard extends OverlayOpsuState{
-
+public class MoveStoryboard extends OverlayOpsuState
+{
 	private SimpleButton btnAddLinear;
 	private SimpleButton btnAddQuadratic;
 	private SimpleButton btnAddCubic;
@@ -121,38 +123,44 @@ public class MoveStoryboard extends OverlayOpsuState{
 	}
 
 	@Override
-	protected boolean onKeyPressed(int key, char c) {
-		return false;
+	protected void onKeyPressed(KeyEvent e)
+	{
+		e.consume();
 	}
 
 	@Override
-	protected boolean onKeyReleased(int key, char c) {
-		return false;
+	protected void onKeyReleased(KeyEvent e)
+	{
+		e.consume();
 	}
 
 	@Override
-	protected boolean onMouseWheelMoved(int delta) {
-		return false;
+	protected void onMouseWheelMoved(MouseWheelEvent e)
+	{
+		e.consume();
 	}
 
 	@Override
-	protected boolean onMousePressed(int button, int x, int y) {
+	protected void onMousePressed(MouseEvent e)
+	{
 		if (moves[objectIndex] != null) {
-			moves[objectIndex].mousePressed(x, y);
+			moves[objectIndex].mousePressed(e.x, e.y);
 		}
-		return true;
+		e.consume();
 	}
 
 	@Override
-	protected boolean onMouseReleased(int button, int x, int y) {
+	protected void onMouseReleased(MouseEvent e)
+	{
 		if (moves[objectIndex] != null) {
-			moves[objectIndex].mouseReleased(x, y);
+			moves[objectIndex].mouseReleased(e.x, e.y);
 			if (moves[objectIndex].getAmountOfMovers() == 0) {
 				moves[objectIndex] = null;
 			}
 		}
 		if (objectIndex == 0) {
-			return true;
+			e.consume();
+			return;
 		}
 		if (btnAddLinear.isHovered()) {
 			getCurrentMoveOrCreateNew().add(new LinearStoryboardMover());
@@ -172,12 +180,12 @@ public class MoveStoryboard extends OverlayOpsuState{
 		if (btnAnimCub.isHovered()) {
 			getCurrentMoveOrDummy().setAnimationEquation(AnimationEquation.IN_OUT_EASE_MIDDLE);
 		}
-		return true;
+		e.consume();
 	}
 
 	@Override
-	protected boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
-		return false;
+	protected void onMouseDragged(MouseDragEvent e) {
+		e.consume();
 	}
 
 	private StoryboardMove getCurrentMoveOrCreateNew() {
@@ -206,5 +214,4 @@ public class MoveStoryboard extends OverlayOpsuState{
 	public void setIndex(int objectIndex) {
 		this.objectIndex = objectIndex;
 	}
-
 }

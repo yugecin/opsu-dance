@@ -35,6 +35,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 import yugecin.opsudance.core.components.ActionListener;
 import yugecin.opsudance.core.components.Component;
+import yugecin.opsudance.core.input.*;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -44,14 +45,14 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  * 
  * @author kevin
  */
-public class TextField extends Component {
-
+public class TextField extends Component
+{
 	private static final int INITIAL_KEY_REPEAT_INTERVAL = 400;
 	private static final int KEY_REPEAT_INTERVAL = 50;
 
 	private String value = "";
 	private Font font;
-	private int maxCharacter = 10000;
+	private int maxCharacters = 10000;
 
 	private Color borderCol = Color.white;
 	private Color textCol = Color.white;
@@ -98,7 +99,7 @@ public class TextField extends Component {
 			if (isKeyDown(lastKey)) {
 				if (repeatTimer < System.currentTimeMillis()) {
 					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-					keyPressed(lastKey, lastChar);
+					//keyPressed(lastKey, lastChar);
 				}
 			} else {
 				lastKey = -1;
@@ -155,54 +156,39 @@ public class TextField extends Component {
 	}
 
 	public void setMaxLength(int length) {
-		maxCharacter = length;
-		if (value.length() > maxCharacter) {
-			value = value.substring(0, maxCharacter);
+		maxCharacters = length;
+		if (value.length() > maxCharacters) {
+			value = value.substring(0, maxCharacters);
 		}
 	}
 
 	protected void doPaste(String text) {
 		for (int i=0;i<text.length();i++) {
-			keyPressed(-1, text.charAt(i));
+			//keyPressed(-1, text.charAt(i));
 		}
 	}
 
-	public void keyPressed(int key, char c) {
-		if (key != -1) {
-			if (key == KEY_V && input.isControlDown()) {
-				String text = Sys.getClipboard();
-				if (text != null) {
-					doPaste(text);
-				}
-				return;
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == KEY_V && input.isControlDown()) {
+			String text = Sys.getClipboard();
+			if (text != null) {
+				doPaste(text);
 			}
+			return;
 		}
 
-		if (lastKey != key) {
-			lastKey = key;
+		if (lastKey != e.keyCode) {
+			lastKey = e.keyCode;
 			repeatTimer = System.currentTimeMillis() + INITIAL_KEY_REPEAT_INTERVAL;
 		} else {
 			repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
 		}
-		lastChar = c;
+		lastChar = e.chr;
 
-		if (key == KEY_LEFT) { /*
-			if (cursorPos > 0) {
-				cursorPos--;
-			}
-			// Nobody more will be notified
-			if (consume) {
-				container.getInput().consumeEvent();
-			}
-		*/ } else if (key == KEY_RIGHT) { /*
-			if (cursorPos < value.length()) {
-				cursorPos++;
-			}
-			// Nobody more will be notified
-			if (consume) {
-				container.getInput().consumeEvent();
-			}
-		*/ } else if (key == KEY_BACK) {
+		switch (e.keyCode) {
+		case KEY_BACK:
 			if ((cursorPos > 0) && (value.length() > 0)) {
 				if (input.isControlDown()) {
 					int sp = 0;
@@ -236,24 +222,25 @@ public class TextField extends Component {
 					cursorPos--;
 				}
 			}
-		} else if (key == KEY_DELETE) {
+		case KEY_DELETE:
 			if (value.length() > cursorPos) {
 				value = value.substring(0,cursorPos) + value.substring(cursorPos+1);
 			}
-		} else if ((c < 127) && (c > 31) && (value.length() < maxCharacter)) {
-			if (cursorPos < value.length()) {
-				value = value.substring(0, cursorPos) + c
-						+ value.substring(cursorPos);
-			} else {
-				value = value.substring(0, cursorPos) + c;
-			}
-			cursorPos++;
-		} else if (key == KEY_RETURN) {
+		case KEY_RETURN:
 			if (listener != null) {
 				listener.onAction();
+			}
+		default:
+			if (31 < e.chr && e.chr < 127 && value.length() < maxCharacters) {
+				if (cursorPos < value.length()) {
+					value = value.substring(0, cursorPos) + e.chr
+							+ value.substring(cursorPos);
+				} else {
+					value = value.substring(0, cursorPos) + e.chr;
+				}
+				cursorPos++;
 			}
 		}
 
 	}
-
 }

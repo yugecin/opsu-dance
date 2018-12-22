@@ -29,6 +29,8 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.util.Log;
+
+import yugecin.opsudance.core.input.KeyEvent;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -134,16 +136,16 @@ public class Splash extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (key != Keyboard.KEY_ESCAPE) {
-			return false;
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode != Keyboard.KEY_ESCAPE) {
+			return;
 		}
 		if (++escapeCount >= 3) {
 			displayContainer.exitRequested = true;
 		} else if (thread != null) {
 			thread.interrupt();
 		}
-		return true;
 	}
 
 }

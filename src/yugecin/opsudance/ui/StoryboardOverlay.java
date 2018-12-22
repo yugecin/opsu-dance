@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2016-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.audio.MusicController;
@@ -25,7 +10,9 @@ import yugecin.opsudance.options.OptionGroups;
 import itdelatrisu.opsu.ui.Fonts;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.OverlayOpsuState;
 import yugecin.opsudance.options.OptionTab;
 import yugecin.opsudance.sbv2.MoveStoryboard;
@@ -105,8 +92,11 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	}
 
 	@Override
-	public boolean onKeyPressed(int key, char c) {
-		if (key == KEY_C) {
+	public void onKeyPressed(KeyEvent e)
+	{
+		e.consume();
+		switch (e.keyCode) {
+		case KEY_C:
 			if (speed > 0) {
 				speed -= 1;
 			}
@@ -115,34 +105,46 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 			} else {
 				MusicController.setPitch(speed / 10f);
 			}
-		} else if (key == KEY_V && speed < 21) {
-			if (speed == 0) {
-				MusicController.resume();
+			break;
+		case KEY_V:
+			if (speed < 21) {
+				if (speed == 0) {
+					MusicController.resume();
+				}
+				speed += 1;
+				MusicController.setPitch(speed / 10f);
 			}
-			speed += 1;
-			MusicController.setPitch(speed / 10f);
-		} else if (key == KEY_H) {
+			break;
+		case KEY_H:
 			hide = !hide;
-		} else if (key == KEY_N) {
+			break;
+		case KEY_N:
 			optionsOverlay.show();
 			if (speed != 0) {
 				MusicController.pause();
 			}
-		} else if (key == KEY_J && index > 0) {
-			index--;
-			goBackOneSBIndex();
-			setMusicPosition();
-		} else if (key == KEY_K && index < gameObjects.length - 1) {
-			index++;
-			updateIndex(index);
-			setMusicPosition();
+			break;
+		case KEY_J:
+			if (index > 0) {
+				index--;
+				goBackOneSBIndex();
+				setMusicPosition();
+			}
+			break;
+		case KEY_K:
+			if (index < gameObjects.length - 1) {
+				index++;
+				updateIndex(index);
+				setMusicPosition();
+			}
+			break;
 		}
-		return false;
 	}
 
 	@Override
-	protected boolean onKeyReleased(int key, char c) {
-		return false;
+	protected void onKeyReleased(KeyEvent e)
+	{
+		e.consume();
 	}
 
 	private void goBackOneSBIndex() {
@@ -184,13 +186,15 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	}
 
 	@Override
-	public boolean onMousePressed(int button, int x, int y) {
-		return true;
+	public void onMousePressed(MouseEvent e)
+	{
+		e.consume();
 	}
 
 	@Override
-	public boolean onMouseDragged(int oldx, int oldy, int newx, int newy) {
-		return true;
+	public void onMouseDragged(MouseDragEvent e)
+	{
+		e.consume();
 	}
 
 	public void updateIndex(int index) {
@@ -218,29 +222,31 @@ public class StoryboardOverlay extends OverlayOpsuState implements OptionsOverla
 	}
 
 	@Override
-	public boolean onMouseReleased(int button, int x, int y) {
-		if (x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
-			return false;
+	public void onMouseReleased(MouseEvent e)
+	{
+		e.consume();
+		if (e.x > 10 || index >= optionsMap.length || optionsMap[index] == null) {
+			return;
 		}
 		int lh = Fonts.SMALL.getLineHeight();
 		int ypos = 50 + lh / 4;
 		for (Object o : optionsMap[index].entrySet()) {
-			if (y >= ypos && y <= ypos + 10) {
+			if (e.y >= ypos && e.y <= ypos + 10) {
 				optionsMap[index].remove(((Map.Entry<Option, String>) o).getKey());
 				if (optionsMap[index].size() == 0) {
 					optionsMap[index] = null;
 				}
 				reloadSBsettingsToIndex(index);
-				return true;
+				return;
 			}
 			ypos += lh;
 		}
-		return true;
 	}
 
 	@Override
-	public boolean onMouseWheelMoved(int delta) {
-		return false;
+	public void onMouseWheelMoved(MouseWheelEvent e)
+	{
+		e.consume();
 	}
 
 	public void onEnter() {

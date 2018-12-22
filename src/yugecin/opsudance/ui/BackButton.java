@@ -7,6 +7,8 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import yugecin.opsudance.core.input.MouseEvent;
+
 import org.newdawn.slick.*;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -204,15 +206,11 @@ public class BackButton
 		animationTime = 0;
 	}
 
-	public boolean mouseReleased(int x, int y)
+	public void mouseReleased(MouseEvent e)
 	{
-		if (displayContainer.disableBackButton) {
-			return true;
-		}
-		if (this.contains(x, y)) {
+		if (!displayContainer.disableBackButton && this.contains(e.x, e.y)) {
 			this.activeListener.run();
-			return true;
+			e.consume();
 		}
-		return false;
 	}
 }
