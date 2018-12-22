@@ -528,9 +528,8 @@ public class SongMenu extends ComplexOpsuState {
 		g.fillRect(0, footerY, width, DIVIDER_LINE_WIDTH);
 
 		// footer logo (pulsing)
-		Float position = MusicController.getBeatProgress();
-		if (position == null)  // default to 60bpm
-			position = System.currentTimeMillis() % 1000 / 1000f;
+		final float fallbackProgress = System.currentTimeMillis() % 1000 / 1000f;
+		final float position = MusicController.getBeatProgressOrDefault(fallbackProgress);
 		if (footerLogoButton.isHovered()) {
 			// hovering over logo: stop pulsing and scale
 			footerLogoButton.draw(Color.white, 1.2f);

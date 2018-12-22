@@ -147,10 +147,8 @@ public class BackButton
 		}
 
 		// calc chevron size
-		Float beatProgress = MusicController.getBeatProgress();
-		if (beatProgress == null) {
-			beatProgress = 0f;
-		} else if (beatProgress < 0.2f) {
+		float beatProgress = MusicController.getBeatProgressOrDefault(0f);
+		if (beatProgress < 0.2f) {
 			beatProgress = AnimationEquation.IN_QUINT.calc(beatProgress * 5f);
 		} else {
 			beatProgress = 1f - AnimationEquation.OUT_QUAD.calc((beatProgress - 0.2f) * 1.25f);

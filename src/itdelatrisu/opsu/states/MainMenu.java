@@ -52,7 +52,6 @@ import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
-import yugecin.opsudance.core.InstanceContainer;
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.core.state.OpsuState;
@@ -297,12 +296,16 @@ public class MainMenu extends BaseOpsuState {
 		
 		// calculate scale stuff for logo
 		final float clickScale = this.logoClickScale.getValue();
-		Float beatPosition = MusicController.getBeatProgress();
-		Float beatLength = MusicController.getBeatLength();
-		final boolean renderPiece = beatPosition != null;
-		if (beatPosition == null || beatLength == null) {
+		final Float boxedBeatPosition = MusicController.getBeatProgress();
+		final Float boxedBeatLength = MusicController.getBeatLength();
+		final boolean renderPiece = boxedBeatPosition != null;
+		final float beatPosition, beatLength;
+		if (boxedBeatPosition == null || boxedBeatLength == null) {
 			beatPosition = System.currentTimeMillis() % 1000 / 1000f;
 			beatLength = 1000f;
+		} else {
+			beatPosition = (float) boxedBeatPosition;
+			beatLength = (float) boxedBeatLength;
 		}
 		final float hoverScale = this.logoHover.getValue();
 		if (beatPosition < this.lastPulseProgress) {

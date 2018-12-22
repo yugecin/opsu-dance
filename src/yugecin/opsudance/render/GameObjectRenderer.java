@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.render;
 
 import itdelatrisu.opsu.GameData;
@@ -31,8 +16,8 @@ import yugecin.opsudance.skinning.SkinService;
 import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class GameObjectRenderer {
-
+public class GameObjectRenderer
+{
 	public GameData gameData;
 
 	public float circleDiameter;
@@ -58,10 +43,7 @@ public class GameObjectRenderer {
 		if (!OPTION_DANCING_CIRCLES.state) {
 			return;
 		}
-		Float position = MusicController.getBeatProgress();
-		if (position == null) {
-			position = 0f;
-		}
+		final float position = MusicController.getBeatProgressOrDefault(0f);
 		int size = circleDiameterInt + (int) (circleDiameter * OPTION_DANCING_CIRCLES_MULTIPLIER.val / 1000f * AnimationEquation.IN_OUT_QUAD.calc(position));
 		hitcircle = GameImage.HITCIRCLE.getImage().getScaledCopy(size, size);
 		hitcircleOverlay = GameImage.HITCIRCLE_OVERLAY.getImage().getScaledCopy(size, size);
@@ -99,5 +81,4 @@ public class GameObjectRenderer {
 			approachCircle.getScaledCopy(approachScale).drawCentered(x, y, color);
 		}
 	}
-
 }
