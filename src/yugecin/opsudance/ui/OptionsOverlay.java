@@ -14,6 +14,8 @@ import org.newdawn.slick.gui.TextField;
 
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.input.*;
+import yugecin.opsudance.core.input.InputListener;
+import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
@@ -28,7 +30,8 @@ import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener
+public class OptionsOverlay
+	implements Renderable, ResolutionChangedListener, SkinChangedListener, InputListener
 {
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
@@ -50,7 +53,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private static final Color COL_INDICATOR = new Color(Color.black);
 
 	private boolean active;
-	private boolean acceptInput;
 	private boolean dirty;
 
 	/** Duration, in ms, of the show (slide-in) animation. */
@@ -303,7 +305,9 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
 	}
 
-	public void render(Graphics g) {
+	@Override
+	public void render(Graphics g)
+	{
 		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
@@ -673,38 +677,49 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		this.hide();
 	}
 
-	public void hide() {
+	public void hide()
+	{
 		if (!this.active) {
 			return;
 		}
-		acceptInput = active = false;
+		active = false;
 		searchField.setFocused(false);
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
 		hoverOption = null;
 		displayContainer.removeBackButtonListener(this.backButtonListener);
+		input.removeListener(this);
 		if (this.listener != null) {
 			this.listener.onLeaveOptionsMenu();
 		}
 	}
 
-	public void show() {
+	public void show()
+	{
 		navHoverTime = 0;
 		indicatorPos = -optionHeight;
 		indicatorOffsetToNextPos = 0;
 		indicatorMoveAnimationTime = 0;
 		indicatorHideAnimationTime = 0;
-		acceptInput = active = true;
+		active = true;
+		if (animationtime == 0) {
+			// if it wasn't zero, it wasn't fully hidden yet,
+			// thus not unregistered as an overlay yet
+			displayContainer.addOverlay(this);
+		}
 		animationtime = 0;
 		resetSearch();
 		isDraggingFromOutside = false;
 		displayContainer.addBackButtonListener(this.backButtonListener);
+		input.addListener(this);
 		if (this.dirty) {
 			this.revalidate();
 		}
 	}
 
-	public void preRenderUpdate() {
+	@Override
+	public void preRenderUpdate()
+	{
 		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
@@ -806,7 +821,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	}
 
 	private void updateShowHideAnimation(int delta) {
-		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
+		if (active && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
 			currentWidth = targetWidth;
 			showHideProgress = 1f;
@@ -816,8 +831,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 		// navigation elemenst fade out with a different animation
 		float navProgress;
-		// if acceptInput is false, it means that we're currently hiding ourselves
-		if (acceptInput) {
+		// if active is false, it means that we're currently hiding ourselves
+		if (active) {
 			animationtime += delta;
 			if (animationtime >= SHOWANIMATIONTIME) {
 				animationtime = SHOWANIMATIONTIME;
@@ -829,6 +844,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			animationtime -= delta;
 			if (animationtime < 0) {
 				animationtime = 0;
+				displayContainer.removeOverlay(this);
 			}
 			showHideProgress = (float) animationtime / hideAnimationTime;
 			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
@@ -846,18 +862,16 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e)
 	{
-		if (!this.active) {
-			return;
-		}
-
 		if (e.x > this.currentWidth) {
 			this.isDraggingFromOutside = true;
 			return;
 		}
 
 		e.consume();
+
 		wasPressed = true;
 
 		if (keyEntryLeft || keyEntryRight) {
@@ -884,15 +898,16 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		this.isDraggingFromOutside = false;
-		if (!this.active || (!wasPressed && e.x > this.currentWidth)) {
+		if (!wasPressed && e.x > this.currentWidth) {
 			return;
 		}
 
 		e.consume();
 
+		isDraggingFromOutside = false;
 		wasPressed = false;
 
 		selectedOption = null;
@@ -971,9 +986,10 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
+	@Override
 	public void mouseDragged(MouseDragEvent e)
 	{
-		if (!this.active || this.isDraggingFromOutside) {
+		if (this.isDraggingFromOutside) {
 			return;
 		}
 
@@ -986,9 +1002,10 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
+	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		if (!this.active || mouseX > this.currentWidth) {
+		if (mouseX > this.currentWidth) {
 			return;
 		}
 
@@ -999,12 +1016,9 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
+	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		if (!this.active) {
-			return;
-		}
-
 		e.consume();
 
 		if (keyEntryRight) {
@@ -1060,6 +1074,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 				updateSearch();
 			}
 		}
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+		e.consume();
 	}
 
 	private void cancelAdjustingSlider() {

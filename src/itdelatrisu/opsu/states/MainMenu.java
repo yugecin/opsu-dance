@@ -474,14 +474,10 @@ public class MainMenu extends BaseOpsuState {
 			this.timeFormat.format(new Date())
 		);
 		g.drawString(txt, textMarginX, textTopMarginY + textLineHeight * 2);
-
-		optionsOverlay.render(g);
 	}
 
 	@Override
 	public void preRenderUpdate() {
-		optionsOverlay.preRenderUpdate();
-
 		int delta = renderDelta;
 		
 		int mouseX = InstanceContainer.mouseX;
@@ -686,11 +682,6 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void mousePressed(MouseEvent evt)
 	{
-		optionsOverlay.mousePressed(evt);
-		if (evt.isConsumed()) {
-			return;
-		}
-
 		if (evt.button == Input.MMB) {
 			return;
 		}
@@ -832,22 +823,12 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		optionsOverlay.mouseWheelMoved(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		volumeControl.changeVolume(e.delta);
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		optionsOverlay.keyPressed(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		switch (e.keyCode) {
 		case KEY_ESCAPE:
 		case KEY_Q:
@@ -936,10 +917,9 @@ public class MainMenu extends BaseOpsuState {
 	/**
 	 * Enters the song menu, or the downloads menu if no beatmaps are loaded.
 	 */
-	private void enterSongMenu() {
-		if (optionsOverlay.isActive()) {
-			optionsOverlay.hide();
-		}
+	private void enterSongMenu()
+	{
+		optionsOverlay.hide();
 		OpsuState state = songMenuState;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
 			barNotifs.send("Download some beatmaps to get started!");

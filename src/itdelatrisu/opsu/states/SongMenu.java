@@ -683,8 +683,6 @@ public class SongMenu extends ComplexOpsuState {
 			g.fillRect(0, 0, width, height);
 
 			UI.drawLoadingProgress(g);
-		} else {
-			optionsOverlay.render(g);
 		}
 
 		super.render(g);
@@ -693,8 +691,6 @@ public class SongMenu extends ComplexOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
-		
-		optionsOverlay.preRenderUpdate();
 
 		int mouseX = InstanceContainer.mouseX;
 		int mouseY = InstanceContainer.mouseY;
@@ -861,11 +857,6 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 		
-		optionsOverlay.mousePressed(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		if (e.button == Input.MMB) {
 			return;
 		}
@@ -886,11 +877,6 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 		
-		optionsOverlay.mouseReleased(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		if (e.button == Input.MMB) {
 			return;
 		}
@@ -1034,11 +1020,6 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 		
-		optionsOverlay.keyPressed(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		// block input
 		if ((reloadThread != null && e.keyCode != KEY_ESCAPE) ||
 			beatmapMenuTimer > -1 || isScrollingToFocusNode)
@@ -1142,7 +1123,7 @@ public class SongMenu extends ComplexOpsuState {
 			changeIndex(-MAX_SONG_BUTTONS);
 			return;
 		case KEY_O:
-			if (input.isControlDown()) {
+			if (reloadThread == null && input.isControlDown()) {
 				optionsOverlay.show();
 				return;
 			}
@@ -1217,11 +1198,6 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 		
-		optionsOverlay.mouseDragged(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		if (isInputBlocked()) {
 			return;
 		}
@@ -1258,11 +1234,6 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 		
-		optionsOverlay.mouseWheelMoved(e);
-		if (e.isConsumed()) {
-			return;
-		}
-
 		if (isInputBlocked()) {
 			return;
 		}

@@ -30,6 +30,7 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.ui.VolumeControl;
@@ -82,6 +83,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	private long exitconfirmation;
 
+	private final ArrayList<Renderable> overlays;
+
 	private final LinkedList<Runnable> backButtonListeners;
 	/**
 	 * set to {@code false} to disable back button next update
@@ -102,6 +105,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	public DisplayContainer()
 	{
+		this.overlays = new ArrayList<>();
 		this.resolutionChangedListeners = new ArrayList<>();
 		this.backButtonListeners = new LinkedList<>();
 		drawCursor = true;
@@ -225,19 +229,22 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				rendering = true;
 				GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
 
-				/*
-				graphics.resetTransform();
-				graphics.resetFont();
-				graphics.resetLineWidth();
-				graphics.resetTransform();
-				*/
-
 				renderDelta = timeSinceLastRender;
 
 				this.disableBackButton = this.backButtonListeners.isEmpty();
 
 				state.preRenderUpdate();
 				state.render(graphics);
+
+				if (!this.overlays.isEmpty()) {
+					// clone to allow themselves to unregister
+					final Renderable[] overlays;
+					overlays = this.overlays.toArray(Renderable.EMPTY_ARRAY);
+					for (Renderable overlay : overlays) {
+						overlay.preRenderUpdate();
+						overlay.render(graphics);
+					}
+				}
 
 				if (!this.disableBackButton) {
 					backButton.draw(graphics);
@@ -551,5 +558,15 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		} else {
 			backButton.activeListener = this.backButtonListeners.getLast();
 		}
+	}
+
+	public void addOverlay(Renderable overlay)
+	{
+		this.overlays.add(overlay);
+	}
+
+	public void removeOverlay(Renderable overlay)
+	{
+		this.overlays.remove(overlay);
 	}
 }
