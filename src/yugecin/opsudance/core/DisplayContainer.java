@@ -441,7 +441,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		input.mouseListeners.clear();
 		input.keyListeners.clear();
-		input.mouseListeners.add(bubNotifs);
 		input.addListener(state);
 		Keyboard.enableRepeatEvents(true);
 

@@ -206,11 +206,12 @@ public class BackButton
 		animationTime = 0;
 	}
 
-	public void mouseReleased(MouseEvent e)
+	public boolean mouseReleased(MouseEvent e)
 	{
 		if (!displayContainer.disableBackButton && this.contains(e.x, e.y)) {
 			this.activeListener.run();
-			e.consume();
+			return true;
 		}
+		return false;
 	}
 }

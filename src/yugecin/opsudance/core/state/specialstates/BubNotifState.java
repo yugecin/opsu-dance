@@ -17,7 +17,7 @@ import java.util.ListIterator;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BubNotifState implements MouseListener, ResolutionChangedListener
+public class BubNotifState implements ResolutionChangedListener
 {
 	public static final int IN_TIME = 633;
 	public static final int DISPLAY_TIME = 7000 + IN_TIME;
@@ -119,32 +119,17 @@ public class BubNotifState implements MouseListener, ResolutionChangedListener
 		calculatePositions();
 	}
 
-	@Override
-	public void mouseWheelMoved(MouseWheelEvent e)
+	public boolean mouseReleased(MouseEvent e)
 	{
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e)
-	{
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
 		if (e.x < Notification.finalX) {
-			return;
+			return false;
 		}
 		for (Notification bubble : bubbles) {
 			if (bubble.mouseReleased(e.x, e.y)) {
-				e.consume();
-				return;
+				return true;
 			}
 		}
-	}
-
-	@Override
-	public void mouseDragged(MouseDragEvent e)
-	{
+		return false;
 	}
 
 	private static class Notification {

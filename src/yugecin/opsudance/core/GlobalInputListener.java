@@ -61,7 +61,9 @@ public class GlobalInputListener implements InputListener
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		backButton.mouseReleased(e);
+		if (backButton.mouseReleased(e) || bubNotifs.mouseReleased(e)) {
+			e.consume();
+		}
 	}
 
 	@Override
