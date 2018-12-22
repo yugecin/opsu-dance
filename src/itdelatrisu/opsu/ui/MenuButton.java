@@ -245,9 +245,11 @@ public class MenuButton {
 				xScaleOffset = image.getWidth() / 2f - xRadius;
 				yScaleOffset = image.getHeight() / 2f - yRadius;
 			}
-			if (hoverEffect == 0)
-				image.draw(x - xRadius, y - yRadius, filter);
-			else {
+			if (hoverEffect == 0) {
+				float x = this.x - xRadius - xScaleOffset;
+				float y = this.y - yRadius - yScaleOffset;
+				image.draw(x, y, filter);
+			} else {
 				float oldAlpha = image.getAlpha();
 				float oldAngle = image.getRotation();
 				if ((hoverEffect & EFFECT_EXPAND) > 0) {
@@ -264,7 +266,9 @@ public class MenuButton {
 					image.setAlpha(alpha.getValue());
 				if ((hoverEffect & EFFECT_ROTATE) > 0)
 					image.setRotation(angle.getValue());
-				image.draw(x - xRadius - xScaleOffset, y - yRadius - yScaleOffset, filter);
+				float x = this.x - xRadius - xScaleOffset;
+				float y = this.y - yRadius - yScaleOffset;
+				image.draw(x, y, filter);
 				if (image == this.img) {
 					image.setAlpha(oldAlpha);
 					image.setRotation(oldAngle);
