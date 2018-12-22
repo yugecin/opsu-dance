@@ -41,15 +41,10 @@ import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * A single text field supporting text entry
- * 
- * @author kevin
+ * based on {@link org.newdawn.slick.gui.TextField}
  */
 public class TextField extends Component
 {
-	private static final int INITIAL_KEY_REPEAT_INTERVAL = 400;
-	private static final int KEY_REPEAT_INTERVAL = 50;
-
 	private String value = "";
 	private Font font;
 	private int maxCharacters = 10000;
@@ -57,11 +52,6 @@ public class TextField extends Component
 	private Color borderCol = Color.white;
 	private Color textCol = Color.white;
 	private Color backgroundCol = new Color(0, 0, 0, 0.5f);
-
-	private int cursorPos;
-	private int lastKey = -1;
-	private char lastChar = 0;
-	private long repeatTimer;
 
 	private ActionListener listener;
 
@@ -94,17 +84,8 @@ public class TextField extends Component
 		return true;
 	}
 
-	public void render(Graphics g) {
-		if (lastKey != -1) {
-			if (isKeyDown(lastKey)) {
-				if (repeatTimer < System.currentTimeMillis()) {
-					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-					//keyPressed(lastKey, lastChar);
-				}
-			} else {
-				lastKey = -1;
-			}
-		}
+	public void render(Graphics g)
+	{
 		Rectangle oldClip = g.getClip();
 		g.setWorldClip(x,y,width, height);
 		
@@ -118,10 +99,10 @@ public class TextField extends Component
 		g.setColor(textCol.multiply(clr));
 		Font temp = g.getFont();
 
-		int cpos = font.getWidth(value.substring(0, cursorPos));
+		int cursorpos = font.getWidth(value);
 		int tx = 0;
-		if (cpos > width) {
-			tx = width - cpos - font.getWidth("_");
+		if (cursorpos > width) {
+			tx = width - cursorpos - font.getWidth("_");
 		}
 
 		g.translate(tx + 2, 0);
@@ -129,7 +110,7 @@ public class TextField extends Component
 		g.drawString(value, x + 1, y + 1);
 
 		if (focused) {
-			g.drawString("|", x + 1 + cpos + 2, y + 1);
+			g.drawString("|", x + cursorpos, y + 1);
 		}
 
 		g.translate(-tx - 2, 0);
@@ -150,9 +131,6 @@ public class TextField extends Component
 
 	public void setText(String value) {
 		this.value = value;
-		if (cursorPos > value.length()) {
-			cursorPos = value.length();
-		}
 	}
 
 	public void setMaxLength(int length) {
@@ -162,69 +140,43 @@ public class TextField extends Component
 		}
 	}
 
-	protected void doPaste(String text) {
-		for (int i=0;i<text.length();i++) {
-			//keyPressed(-1, text.charAt(i));
-		}
-	}
-
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		if (e.keyCode == KEY_V && input.isControlDown()) {
 			String text = Sys.getClipboard();
 			if (text != null) {
-				doPaste(text);
+				value += text;
+				this.setMaxLength(this.maxCharacters);
 			}
 			return;
 		}
 
-		if (lastKey != e.keyCode) {
-			lastKey = e.keyCode;
-			repeatTimer = System.currentTimeMillis() + INITIAL_KEY_REPEAT_INTERVAL;
-		} else {
-			repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-		}
-		lastChar = e.chr;
-
 		switch (e.keyCode) {
 		case KEY_BACK:
-			if ((cursorPos > 0) && (value.length() > 0)) {
-				if (input.isControlDown()) {
-					int sp = 0;
-					boolean startSpace = Character.isWhitespace(value.charAt(cursorPos - 1));
-					boolean charSeen = false;
-					for (int i = cursorPos - 1; i >= 0; i--) {
-						boolean isSpace = Character.isWhitespace(value.charAt(i));
-						if (!startSpace && isSpace) {
-							sp = i;
-							break;
-						} else if (startSpace) {
-							if (charSeen && isSpace) {
-								sp = i + 1;
-								break;
-							} else if (!charSeen && !isSpace)
-								charSeen = true;
-						}
-					}
-					if (cursorPos < value.length())
-						value = value.substring(0, sp) + value.substring(cursorPos);
-					else
-						value = value.substring(0, sp);
-					cursorPos = sp;
-				} else {
-					if (cursorPos < value.length()) {
-						value = value.substring(0, cursorPos - 1)
-								+ value.substring(cursorPos);
-					} else {
-						value = value.substring(0, cursorPos - 1);
-					}
-					cursorPos--;
-				}
+			final int len = value.length();
+			if (len == 0) {
+				break;
 			}
-		case KEY_DELETE:
-			if (value.length() > cursorPos) {
-				value = value.substring(0,cursorPos) + value.substring(cursorPos+1);
+			if (!input.isControlDown() || len == 1) {
+				value = value.substring(0, len - 1);
+				return;
+			}
+			int lastindex = len - 2;
+			while (true) {
+				if (Character.isWhitespace(value.charAt(lastindex))) {
+					while (lastindex > 0 &&
+						Character.isWhitespace(value.charAt(lastindex - 1)))
+					{
+						lastindex--;
+					}
+					value = value.substring(0, lastindex);
+					break;
+				}
+				if (--lastindex == 0) {
+					value = "";
+					break;
+				}
 			}
 		case KEY_RETURN:
 			if (listener != null) {
@@ -232,15 +184,8 @@ public class TextField extends Component
 			}
 		default:
 			if (31 < e.chr && e.chr < 127 && value.length() < maxCharacters) {
-				if (cursorPos < value.length()) {
-					value = value.substring(0, cursorPos) + e.chr
-							+ value.substring(cursorPos);
-				} else {
-					value = value.substring(0, cursorPos) + e.chr;
-				}
-				cursorPos++;
+				value += e.chr;
 			}
 		}
-
 	}
 }
