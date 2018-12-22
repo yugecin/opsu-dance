@@ -239,15 +239,16 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				state.preRenderUpdate();
 				state.render(graphics);
 
+				if (!this.disableBackButton) {
+					backButton.draw(graphics);
+				}
+
 				volumeControl.draw();
 				fpsDisplay.render(graphics);
 
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
-				if (!this.disableBackButton) {
-					backButton.draw(graphics);
-				}
 				if (drawCursor) {
 					cursor.draw(Mouse.isButtonDown(Input.LMB) || Mouse.isButtonDown(Input.RMB));
 				}
