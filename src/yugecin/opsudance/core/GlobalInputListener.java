@@ -8,8 +8,8 @@ import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class GlobalInputListener implements InputListener {
-
+public class GlobalInputListener implements InputListener
+{
 	@Override
 	public boolean keyPressed(int key, char c) {
 		return false;
@@ -53,13 +53,13 @@ public class GlobalInputListener implements InputListener {
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		return false;
+	public boolean mouseReleased(int button, int x, int y)
+	{
+		return backButton.mouseReleased(x, y);
 	}
 
 	@Override
 	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
 		return false;
 	}
-
 }

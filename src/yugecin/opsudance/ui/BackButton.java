@@ -11,7 +11,7 @@ import org.newdawn.slick.*;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BackButton implements MouseListener
+public class BackButton
 {
 	/** Skinned back button. */
 	private MenuButton backButton;
@@ -68,7 +68,8 @@ public class BackButton implements MouseListener
 
 	public Runnable activeListener;
 
-	public BackButton() {
+	public void revalidate()
+	{
 		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
 			backButton = null;
 			textWidth = Fonts.MEDIUM.getWidth("back");
@@ -203,20 +204,7 @@ public class BackButton implements MouseListener
 		animationTime = 0;
 	}
 
-	@Override
-	public boolean mouseWheelMoved(int delta)
-	{
-		return false;
-	}
-
-	@Override
-	public boolean mousePressed(int button, int x, int y)
-	{
-		return false;
-	}
-
-	@Override
-	public boolean mouseReleased(int button, int x, int y)
+	public boolean mouseReleased(int x, int y)
 	{
 		if (displayContainer.disableBackButton) {
 			return true;
@@ -225,12 +213,6 @@ public class BackButton implements MouseListener
 			this.activeListener.run();
 			return true;
 		}
-		return false;
-	}
-
-	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy)
-	{
 		return false;
 	}
 }

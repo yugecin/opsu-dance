@@ -28,8 +28,6 @@
 
 package yugecin.opsudance.core.input;
 
-import java.util.ArrayList;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -37,11 +35,13 @@ import org.newdawn.slick.InputListener;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
 
+import yugecin.opsudance.core.GlobalInputListener;
+
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * based on {@link org.newdawn.slick.Input}
+ * somewhat based on {@link org.newdawn.slick.Input}
  */
 public class Input
 {
@@ -57,112 +57,35 @@ public class Input
 	/** The character values representing the pressed keys */
 	protected char[] keys = new char[1024];
 
-	/** The listeners to notify of key events */
-	protected ArrayList<KeyListener> keyListeners = new ArrayList<>();
-	/** The listener to add */
-	protected ArrayList<MouseListener> mouseListeners = new ArrayList<>();
+	public final InputListenerCollection<KeyListener> keyListeners;
+	public final InputListenerCollection<MouseListener> mouseListeners;
 
 	/** True if the display is active */
 	private boolean displayActive = true;
-	
-	/**
-	 * Add a listener to be notified of input events
-	 * 
-	 * @param listener The listener to be notified
-	 */
-	public void addListener(InputListener listener) {
-		addKeyListener(listener);
-		addMouseListener(listener);
-	}
 
-	/**
-	 * Add a key listener to be notified of key input events
-	 * 
-	 * @param listener The listener to be notified
-	 */
-	public void addKeyListener(KeyListener listener) {
-		if (!keyListeners.contains(listener)) {
-			keyListeners.add(listener);
-		}
-	}
-	
-	/**
-	 * Add a mouse listener to be notified of mouse input events
-	 * 
-	 * @param listener The listener to be notified
-	 */
-	public void addMouseListener(MouseListener listener) {
-		if (!mouseListeners.contains(listener)) {
-			mouseListeners.add(listener);
-		}
-	}
-	
-	/**
-	 * Remove all the listeners from this input
-	 */
-	public void removeAllListeners() {
-		removeAllKeyListeners();
-		removeAllMouseListeners();
-	}
-
-	/**
-	 * Remove all the key listeners from this input
-	 */
-	public void removeAllKeyListeners() {
-		keyListeners.clear();
-	}
-
-	/**
-	 * Remove all the mouse listeners from this input
-	 */
-	public void removeAllMouseListeners() {
-		mouseListeners.clear();
-	}
-
-	/**
-	 * Add a listener to be notified of input events. This listener
-	 * will get events before others that are currently registered
-	 * 
-	 * @param listener The listener to be notified
-	 */
-	public void addPrimaryListener(InputListener listener) {
-		removeListener(listener);
-		
-		keyListeners.add(0, listener);
-		mouseListeners.add(0, listener);
-	}
-	
-	/**
-	 * Remove a listener that will no longer be notified
-	 * 
-	 * @param listener The listen to be removed
-	 */
-	public void removeListener(InputListener listener) {
-		removeKeyListener(listener);
-		removeMouseListener(listener);
-	}
-
-	/**
-	 * Remove a key listener that will no longer be notified
-	 * 
-	 * @param listener The listen to be removed
-	 */
-	public void removeKeyListener(KeyListener listener) {
-		keyListeners.remove(listener);
-	}
-
-	/**
-	 * Remove a mouse listener that will no longer be notified
-	 * 
-	 * @param listener The listen to be removed
-	 */
-	public void removeMouseListener(MouseListener listener) {
-		mouseListeners.remove(listener);
-	}
-
-	public void addPrimaryMouseListener(MouseListener listener)
+	public Input()
 	{
-		mouseListeners.add(0, listener);
+		final GlobalInputListener globalListener = new GlobalInputListener();
+		this.keyListeners = new InputListenerCollection<>(globalListener);
+		this.mouseListeners = new InputListenerCollection<>(globalListener);
+	}
+
+	/**
+	 * convenience method
+	 */
+	public void addListener(InputListener listener)
+	{
+		this.mouseListeners.add(listener);
+		this.keyListeners.add(listener);
+	}
+
+	/**
+	 * convenience method
+	 */
+	public void removeListener(InputListener listener)
+	{
+		this.mouseListeners.remove(listener);
+		this.keyListeners.remove(listener);
 	}
 
 	/**

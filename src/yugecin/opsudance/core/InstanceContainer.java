@@ -21,6 +21,7 @@ import yugecin.opsudance.options.OptionGroups;
 import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
 
@@ -53,6 +54,7 @@ public class InstanceContainer {
 	public static BubNotifState bubNotifs;
 	public static FpsRenderState fpsDisplay;
 	
+	static BackButton backButton;
 	public static OptionsOverlay optionsOverlay;
 
 	public static Splash splashState;
@@ -106,6 +108,7 @@ public class InstanceContainer {
 
 		gameObjectRenderer = new GameObjectRenderer();
 
+		backButton = new BackButton();
 		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 
 		splashState = new Splash();

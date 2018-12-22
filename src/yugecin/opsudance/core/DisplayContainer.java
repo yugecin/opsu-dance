@@ -32,7 +32,6 @@ import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
-import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
@@ -83,7 +82,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	private long exitconfirmation;
 
-	private BackButton backButton;
 	private final LinkedList<Runnable> backButtonListeners;
 	/**
 	 * set to {@code false} to disable back button next update
@@ -143,7 +141,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			}
 		}
 
-		this.backButton = new BackButton();
+		backButton.revalidate();
 		this.reinitCursor();
 
 		// TODO clean this up
@@ -236,7 +234,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 				renderDelta = timeSinceLastRender;
 
-				this.disableBackButton = false;
+				this.disableBackButton = this.backButtonListeners.isEmpty();
 
 				state.preRenderUpdate();
 				state.render(graphics);
@@ -247,9 +245,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
-				if (!this.disableBackButton &&
-					!this.backButtonListeners.isEmpty())
-				{
+				if (!this.disableBackButton) {
 					backButton.draw(graphics);
 				}
 				if (drawCursor) {
@@ -443,9 +439,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		input.removeAllListeners();
-		input.addListener(new GlobalInputListener());
-		input.addMouseListener(bubNotifs);
+		input.mouseListeners.clear();
+		input.keyListeners.clear();
+		input.mouseListeners.add(bubNotifs);
 		input.addListener(state);
 		Keyboard.enableRepeatEvents(true);
 
@@ -542,22 +538,18 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	public void addBackButtonListener(Runnable listener)
 	{
-		if (!this.backButtonListeners.isEmpty()) {
-			input.removeMouseListener(this.backButton);
-		}
 		this.backButtonListeners.add(listener);
-		input.addPrimaryMouseListener(this.backButton);
-		this.backButton.activeListener = listener;
+		backButton.activeListener = listener;
 	}
 
 	public void removeBackButtonListener(Runnable listener)
 	{
 		this.backButtonListeners.remove(listener);
 		if (this.backButtonListeners.isEmpty()) {
-			this.backButton.resetHover();
-			input.removeMouseListener(this.backButton);
+			backButton.resetHover();
+			this.disableBackButton = true;
 		} else {
-			this.backButton.activeListener = this.backButtonListeners.getLast();
+			backButton.activeListener = this.backButtonListeners.getLast();
 		}
 	}
 }
