@@ -743,16 +743,12 @@ public class OptionsOverlay
 		}
 
 		updateShowHideAnimation(delta);
-		if (animationtime <= 0) {
-			active = false;
-			return;
-		}
 
 		if (sliderSoundDelay > 0) {
 			sliderSoundDelay -= delta;
 		}
 
-		if (mouseX < navWidth) {
+		if (active && mouseX < navWidth) {
 			if (navHoverTime < 600) {
 				navHoverTime += delta;
 			}
