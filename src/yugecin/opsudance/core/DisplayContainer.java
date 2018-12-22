@@ -19,7 +19,6 @@ import itdelatrisu.opsu.ui.cursor.CursorImpl;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -322,10 +321,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		GameData.Grade.destroyImages();
 		Beatmap.destroyBackgroundImageCache();
 		FrameBufferCache.shutdown();
-	}
-
-	public void teardownAL() {
-		AL.destroy();
 	}
 
 	public void pause() {

@@ -1,26 +1,13 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance;
 
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
 import itdelatrisu.opsu.downloads.DownloadList;
+
+import org.lwjgl.openal.AL;
 import org.newdawn.slick.util.Log;
 
 import java.io.IOException;
@@ -33,11 +20,11 @@ import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-/*
- * loosely based on itdelatrisu.opsu.Opsu
+/**
+ * loosely based on {@link itdelatrisu.opsu.Opsu}
  */
-public class OpsuDance {
-
+public class OpsuDance
+{
 	private ServerSocket singleInstanceSocket;
 
 	public void start(String[] args) {
@@ -58,7 +45,7 @@ public class OpsuDance {
 		}
 
 		while (rungame());
-		displayContainer.teardownAL();
+		AL.destroy();
 
 		optionservice.saveOptions();
 		closeSingleInstanceSocket();
@@ -150,5 +137,4 @@ public class OpsuDance {
 		explode(errstr, cause, PREVENT_CONTINUE);
 		System.exit(1);
 	}
-
 }
