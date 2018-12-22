@@ -205,6 +205,9 @@ public class VolumeControl implements ResolutionChangedListener
 		if (this.music.contains(mouseX, mouseY)) {
 			this.hoveredDial = this.music;
 		}
+
+		int dx = width - mouseX, dy = height - mouseY;
+		displayContainer.suppressHover |= dx * dx + dy * dy < this.bgsize * this.bgsize;
 	}
 
 	public void draw()

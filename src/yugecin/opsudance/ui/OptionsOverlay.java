@@ -200,10 +200,6 @@ public class OptionsOverlay
 	public boolean isActive() {
 		return this.active;
 	}
-	
-	public boolean containsMouse() {
-		return this.active && mouseX <= this.currentWidth;
-	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
@@ -748,7 +744,7 @@ public class OptionsOverlay
 			sliderSoundDelay -= delta;
 		}
 
-		if (active && mouseX < navWidth) {
+		if (active && mouseX < navWidth && !displayContainer.suppressHover) {
 			if (navHoverTime < 600) {
 				navHoverTime += delta;
 			}
@@ -756,6 +752,10 @@ public class OptionsOverlay
 			navHoverTime -= delta;
 		}
 		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
+
+		if (this.active && mouseX <= this.currentWidth) {
+			displayContainer.suppressHover = true;
+		}
 
 		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
@@ -779,7 +779,7 @@ public class OptionsOverlay
 
 	private void updateHoverNavigation(int mouseX, int mouseY) {
 		hoveredNavigationEntry = null;
-		if (mouseX >= navWidth) {
+		if (mouseX >= navWidth || displayContainer.suppressHover) {
 			return;
 		}
 		int y = navStartY;

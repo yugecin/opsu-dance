@@ -480,14 +480,6 @@ public class MainMenu extends BaseOpsuState {
 	public void preRenderUpdate() {
 		int delta = renderDelta;
 		
-		int mouseX = InstanceContainer.mouseX;
-		int mouseY = InstanceContainer.mouseY;
-		if (optionsOverlay.containsMouse()) {
-			// dirty hack to not show elements underneath options overlay as hovered
-			mouseX = -mouseX;
-			mouseY = -mouseY;
-		}
-		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
 		while (pulseDataIter.hasNext()) {
 			final PulseData pd = pulseDataIter.next();

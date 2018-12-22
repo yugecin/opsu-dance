@@ -333,8 +333,6 @@ public class SongMenu extends ComplexOpsuState {
 		Image logo = GameImage.MENU_LOGO.getImage();
 		logo = logo.getScaledCopy(footerLogoSize / logo.getWidth());
 		footerLogoButton = new MenuButton(logo, width - footerHeight * 0.8f, height - footerHeight * 0.65f);
-		footerLogoButton.setHoverAnimationDuration(1);
-		footerLogoButton.setHoverExpand(1.2f);
 
 		// initialize sorts
 		int sortWidth = (int) (width * 0.12f);
@@ -533,9 +531,9 @@ public class SongMenu extends ComplexOpsuState {
 		Float position = MusicController.getBeatProgress();
 		if (position == null)  // default to 60bpm
 			position = System.currentTimeMillis() % 1000 / 1000f;
-		if (footerLogoButton.contains(mouseX, mouseY, 0.25f)) {
-			// hovering over logo: stop pulsing
-			footerLogoButton.draw();
+		if (footerLogoButton.isHovered()) {
+			// hovering over logo: stop pulsing and scale
+			footerLogoButton.draw(Color.white, 1.2f);
 		} else {
 			float expand = position * 0.15f;
 			footerLogoButton.draw(Color.white, 1f - expand);
@@ -689,16 +687,9 @@ public class SongMenu extends ComplexOpsuState {
 	}
 
 	@Override
-	public void preRenderUpdate() {
+	public void preRenderUpdate()
+	{
 		super.preRenderUpdate();
-
-		int mouseX = InstanceContainer.mouseX;
-		int mouseY = InstanceContainer.mouseY;
-		if (optionsOverlay.containsMouse()) {
-			// dirty hack to not show elements underneath options overlay as hovered
-			mouseX = -mouseX;
-			mouseY = -mouseY;
-		}
 
 		int delta = renderDelta;
 		UI.update(delta);
@@ -818,7 +809,7 @@ public class SongMenu extends ComplexOpsuState {
 
 		// mouse hover
 		BeatmapSetNode node = getNodeAtPosition(mouseX, mouseY);
-		if (node != null && !isAnyComponentFocused()) {
+		if (node != null && !isAnyComponentFocused() && !displayContainer.suppressHover) {
 			if (node == hoverIndex)
 				hoverOffset.update(delta);
 			else {

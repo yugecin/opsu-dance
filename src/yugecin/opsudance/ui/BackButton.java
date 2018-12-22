@@ -41,8 +41,8 @@ public class BackButton
 	/** The width of the second part of the button. */
 	private int secondButtonSize;
 
-	/** Variable to hold the hovered state, to not recalculate it twice per frame. */
-	private boolean isHovered;
+	private boolean wasHoveredLastFrame;
+	private boolean isHoveredLastFrame;
 
 	/** The width of the "back" text to draw. */
 	private int textWidth;
@@ -102,27 +102,32 @@ public class BackButton
 		backButton.setHoverExpand(MenuButton.Expand.UP_RIGHT);
 	}
 
+	public void preRenderUpdate()
+	{
+		if (backButton != null) {
+			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
+			return;
+		}
+
+		wasHoveredLastFrame = isHoveredLastFrame;
+		isHoveredLastFrame = buttonYpos - paddingY < mouseY && mouseX < realButtonWidth;
+		displayContainer.suppressHover |= isHoveredLastFrame;
+	}
+
 	/**
 	 * Draws the backbutton.
 	 */
 	public void draw(Graphics g)
 	{
-		final int delta = renderDelta;
-		final int cx = mouseX;
-		final int cy = mouseY;
-
 		// draw image if it's skinned
 		if (backButton != null) {
-			backButton.hoverUpdate(delta, cx, cy);
 			backButton.draw();
 			return;
 		}
 
 		AnimationEquation anim;
-		boolean wasHovered = isHovered;
-		isHovered = buttonYpos - paddingY < cy && cx < realButtonWidth;
-		if (isHovered) {
-			if (!wasHovered) {
+		if (isHoveredLastFrame) {
+			if (!wasHoveredLastFrame) {
 				animationTime = 0;
 			}
 			animationTime += renderDelta;
@@ -131,7 +136,7 @@ public class BackButton
 			}
 			anim = AnimationEquation.OUT_ELASTIC;
 		} else {
-			if (wasHovered) {
+			if (wasHoveredLastFrame) {
 				animationTime = ANIMATION_TIME;
 			}
 			animationTime -= renderDelta;
@@ -150,7 +155,7 @@ public class BackButton
 		} else {
 			beatProgress = 1f - AnimationEquation.OUT_QUAD.calc((beatProgress - 0.2f) * 1.25f);
 		}
-		int chevronSize = (int) (chevronBaseSize - (isHovered ? 6f : 3f) * beatProgress);
+		int chevronSize = (int) (chevronBaseSize - (isHoveredLastFrame ? 6f : 3f) * beatProgress);
 
 		// calc button sizes
 		float progress = anim.calc((float) animationTime / ANIMATION_TIME);
@@ -202,7 +207,7 @@ public class BackButton
 			backButton.resetHover();
 			return;
 		}
-		isHovered = false;
+		isHoveredLastFrame = false;
 		animationTime = 0;
 	}
 

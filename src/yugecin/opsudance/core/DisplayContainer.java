@@ -92,6 +92,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	 */
 	public boolean disableBackButton;
 
+	/**
+	 * set to {@code true} if something is hovered and none other thing should be marked as such
+	 */
+	public boolean suppressHover;
+
 	public Cursor cursor;
 	public boolean drawCursor;
 	
@@ -212,6 +217,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			}
 			fpsDisplay.update();
 
+			this.suppressHover = false; // put here for volume control
+
 			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
@@ -233,17 +240,25 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 				this.disableBackButton = this.backButtonListeners.isEmpty();
 
+				// clone overlays to have a consistent list in this block
+				Renderable[] overlays = Renderable.EMPTY_ARRAY;
+				if (!this.overlays.isEmpty()) {
+					overlays = this.overlays.toArray(Renderable.EMPTY_ARRAY);
+				}
+
+				if (!this.disableBackButton) {
+					backButton.preRenderUpdate();
+				}
+
+				for (Renderable overlay : overlays) {
+					overlay.preRenderUpdate();
+				}
+
 				state.preRenderUpdate();
 				state.render(graphics);
 
-				if (!this.overlays.isEmpty()) {
-					// clone to allow themselves to unregister
-					final Renderable[] overlays;
-					overlays = this.overlays.toArray(Renderable.EMPTY_ARRAY);
-					for (Renderable overlay : overlays) {
-						overlay.preRenderUpdate();
-						overlay.render(graphics);
-					}
+				for (Renderable overlay : overlays) {
+					overlay.render(graphics);
 				}
 
 				if (!this.disableBackButton) {
