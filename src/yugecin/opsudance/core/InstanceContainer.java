@@ -88,6 +88,8 @@ public class InstanceContainer {
 
 		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
 
+		input = new Input();
+
 		optionservice = new OptionsService();
 		skinservice = new SkinService();
 		oszunpacker = new OszUnpacker();
@@ -113,6 +115,7 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 		pauseState = new GamePauseMenu();
+
 	}
 
 	@Nullable

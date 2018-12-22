@@ -17,6 +17,7 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
@@ -185,9 +186,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 
 	public void run() throws Exception {
-		input.poll(width, height);
-		mouseX = input.getMouseX();
-		mouseY = input.getMouseY();
+		input.poll();
 		this.cursor.reset();
 
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
@@ -195,10 +194,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 			timeSinceLastRender += delta;
 
-			input.poll(width, height);
+			input.poll();
 			Music.poll(delta);
-			mouseX = input.getMouseX();
-			mouseY = input.getMouseY();
 
 			// state transition
 			if (tProgress != -1) {
@@ -256,8 +253,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 					backButton.draw(graphics);
 				}
 				if (drawCursor) {
-					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
-						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));
+					cursor.draw(Mouse.isButtonDown(Input.LMB) || Mouse.isButtonDown(Input.RMB));
 				}
 				UI.drawTooltip(graphics);
 
@@ -451,13 +447,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		if (input == null) {
-			input = new Input(height);
-			input.enableKeyRepeat();
-			input.addListener(new GlobalInputListener());
-			input.addMouseListener(bubNotifs);
-		}
+		input.removeAllListeners();
+		input.addListener(new GlobalInputListener());
+		input.addMouseListener(bubNotifs);
 		input.addListener(state);
+		Keyboard.enableRepeatEvents(true);
 
 		sout("GL ready");
 

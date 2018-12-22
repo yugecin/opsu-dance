@@ -595,7 +595,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 
@@ -814,7 +814,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 

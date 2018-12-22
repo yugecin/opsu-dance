@@ -29,100 +29,39 @@
 package org.newdawn.slick;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import static org.lwjgl.input.Keyboard.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * A wrapped for all keyboard, mouse and controller input
- * Edited for opsu!
- *
- * @author kevin
+ * based on {@link org.newdawn.slick.Input}
  */
-@SuppressWarnings({"unused"})
-public class Input {
-
-	/** A helper for left ALT */
-	public static final int KEY_LALT = KEY_LMENU;
-	/** A helper for right ALT */
-	public static final int KEY_RALT = KEY_RMENU;
-	
-	/** Control index */
-	private static final int LEFT = 0;
-	/** Control index */
-	private static final int RIGHT = 1;
-	/** Control index */
-	private static final int UP = 2;
-	/** Control index */
-	private static final int DOWN = 3;
-	/** Control index */
-	private static final int BUTTON1 = 4;
-	/** Control index */
-	private static final int BUTTON2 = 5;
-	/** Control index */
-	private static final int BUTTON3 = 6;
-	/** Control index */
-	private static final int BUTTON4 = 7;
-	/** Control index */
-	private static final int BUTTON5 = 8;
-	/** Control index */
-	private static final int BUTTON6 = 9;
-	/** Control index */
-	private static final int BUTTON7 = 10;
-	/** Control index */
-	private static final int BUTTON8 = 11;
-	/** Control index */
-	private static final int BUTTON9 = 12;
-	/** Control index */
-	private static final int BUTTON10 = 13;
-	
-	/** The left mouse button indicator */
-	public static final int MOUSE_LEFT_BUTTON = 0;
-	/** The right mouse button indicator */
-	public static final int MOUSE_RIGHT_BUTTON = 1;
-	/** The middle mouse button indicator */
-	public static final int MOUSE_MIDDLE_BUTTON = 2;
+public class Input
+{
+	public static final int LMB = 0;
+	public static final int RMB = 1;
+	public static final int MMB = 2;
 	
 	/** The last recorded mouse x position */
 	private int lastMouseX;
 	/** The last recorded mouse y position */
 	private int lastMouseY;
-	/** THe state of the mouse buttons */
-	protected boolean[] mousePressed = new boolean[10];
 
 	/** The character values representing the pressed keys */
 	protected char[] keys = new char[1024];
-	/** True if the key has been pressed since last queries */
-	protected boolean[] pressed = new boolean[1024];
-	
+
 	/** The listeners to notify of key events */
 	protected ArrayList<KeyListener> keyListeners = new ArrayList<>();
 	/** The listener to add */
 	protected ArrayList<MouseListener> mouseListeners = new ArrayList<>();
-	/** The current value of the wheel */
-	private int wheel;
-	/** The height of the display */
-	private int height;
-	
+
 	/** True if the display is active */
 	private boolean displayActive = true;
 	
-	/** The clicked button */
-	private int clickButton;
-
-	/**
-	 * Create a new input with the height of the screen
-	 * 
-	 * @param height The height of the screen
-	 */
-	public Input(int height) {
-		init(height);
-	}
-
 	/**
 	 * Add a listener to be notified of input events
 	 * 
@@ -222,84 +161,6 @@ public class Input {
 	{
 		mouseListeners.add(0, listener);
 	}
-	
-	/**
-	 * Initialise the input system
-	 * 
-	 * @param height The height of the window
-	 */
-	void init(int height) {
-		this.height = height;
-		lastMouseX = getMouseX();
-		lastMouseY = getMouseY();
-	}
-
-	/**
-	 * Check if a particular key has been pressed since this method 
-	 * was last called for the specified key
-	 * 
-	 * @param code The key code of the key to check
-	 * @return True if the key has been pressed
-	 */
-	public boolean isKeyPressed(int code) {
-		if (pressed[code]) {
-			pressed[code] = false;
-			return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Check if a mouse button has been pressed since last call
-	 * 
-	 * @param button The button to check
-	 * @return True if the button has been pressed since last call
-	 */
-	public boolean isMousePressed(int button) {
-		if (mousePressed[button]) {
-			mousePressed[button] = false;
-			return true;
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Clear the state for the <code>isKeyPressed</code> method. This will
-	 * resort in all keys returning that they haven't been pressed, until
-	 * they are pressed again
-	 */
-	public void clearKeyPressedRecord() {
-		Arrays.fill(pressed, false);
-	}
-
-	/**
-	 * Clear the state for the <code>isMousePressed</code> method. This will
-	 * resort in all mouse buttons returning that they haven't been pressed, until
-	 * they are pressed again
-	 */
-	public void clearMousePressedRecord() {
-		Arrays.fill(mousePressed, false);
-	}
-
-	/**
-	 * Get the x position of the mouse cursor
-	 * 
-	 * @return The x position of the mouse cursor
-	 */
-	public int getMouseX() {
-		return Mouse.getX();
-	}
-	
-	/**
-	 * Get the y position of the mouse cursor
-	 * 
-	 * @return The y position of the mouse cursor
-	 */
-	public int getMouseY() {
-		return height - Mouse.getY();
-	}
 
 	/**
 	 * Check if any mouse button is down
@@ -316,31 +177,22 @@ public class Input {
 		return false;
 	}
 
+	public boolean isAltDown() {
+		return Keyboard.isKeyDown(KEY_LMENU) || Keyboard.isKeyDown(KEY_RMENU);
+	}
+
 	public boolean isControlDown() {
 		return Keyboard.isKeyDown(KEY_RCONTROL) || Keyboard.isKeyDown(KEY_LCONTROL);
 	}
 
-	/**
-	 * Poll the state of the input
-	 * 
-	 * @param width The width of the game view
-	 * @param height The height of the game view
-	 */
-	public void poll(int width, int height) {
-		if (!Display.isActive()) {
-			clearKeyPressedRecord();
-			clearMousePressedRecord();
-		}
-
-		this.height = height;
-
+	public void poll()
+	{
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				int eventKey = Keyboard.getEventKey();
 
 				keys[eventKey] = Keyboard.getEventCharacter();
-				pressed[eventKey] = true;
-				
+
 				for (KeyListener listener : keyListeners) {
 					if (listener.keyPressed(eventKey, Keyboard.getEventCharacter())) {
 						break;
@@ -358,10 +210,8 @@ public class Input {
 		}
 		
 		while (Mouse.next()) {
-			if (Mouse.getEventButton() >= 0 && Mouse.getEventButton() < mousePressed.length) {
+			if (Mouse.getEventButton() >= 0) {
 				if (Mouse.getEventButtonState()) {
-					mousePressed[Mouse.getEventButton()] = true;
-
 					lastMouseX = Mouse.getEventX();
 					lastMouseY = height - Mouse.getEventY();
 
@@ -371,8 +221,6 @@ public class Input {
 						}
 					}
 				} else {
-					mousePressed[Mouse.getEventButton()] = false;
-					
 					int releasedX = Mouse.getEventX();
 					int releasedY = height - Mouse.getEventY();
 
@@ -393,7 +241,6 @@ public class Input {
 				}
 				
 				int dwheel = Mouse.getEventDWheel();
-				wheel += dwheel;
 				if (dwheel != 0) {
 					for (MouseListener listener : mouseListeners) {
 						if (listener.mouseWheelMoved(dwheel)) {
@@ -403,19 +250,22 @@ public class Input {
 				}
 			}
 		}
-		
+
+		mouseX = Mouse.getX();
+		mouseY = height - Mouse.getY();
+
 		if (!displayActive || Mouse.isGrabbed()) {
-			lastMouseX = getMouseX();
-			lastMouseY = getMouseY();
+			lastMouseX = mouseX;
+			lastMouseY = mouseY;
 		} else {
-			if (anyMouseDown() && (lastMouseX != getMouseX() || lastMouseY != getMouseY())) {
+			if (anyMouseDown() && (lastMouseX != mouseX || lastMouseY != mouseY)) {
 				for (MouseListener listener : mouseListeners) {
-					if (listener.mouseDragged(lastMouseX ,  lastMouseY, getMouseX(), getMouseY())) {
+					if (listener.mouseDragged(lastMouseX ,  lastMouseY, mouseX, mouseY)) {
 						break;
 					}
 				}
-				lastMouseX = getMouseX();
-				lastMouseY = getMouseY();
+				lastMouseX = mouseX;
+				lastMouseY = mouseY;
 			}
 		}
 
@@ -423,29 +273,4 @@ public class Input {
 			displayActive = Display.isActive();
 		}
 	}
-	
-	/**
-	 * Enable key repeat for this input context. Uses the system settings for repeat
-	 * interval configuration.
-	 */
-	public void enableKeyRepeat() {
-		Keyboard.enableRepeatEvents(true);
-	}
-	
-	/**
-	 * Disable key repeat for this input context
-	 */
-	public void disableKeyRepeat() {
-		Keyboard.enableRepeatEvents(false);
-	}
-	
-	/**
-	 * Check if key repeat is enabled
-	 * 
-	 * @return True if key repeat is enabled
-	 */
-	public boolean isKeyRepeatEnabled() {
-		return Keyboard.areRepeatEventsEnabled();
-	}
-
 }

@@ -628,7 +628,7 @@ public class ButtonMenu extends BaseOpsuState {
 
 	@Override
 	public boolean mousePressed(int button, int x, int y) {
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 

@@ -863,7 +863,7 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 
@@ -886,7 +886,7 @@ public class SongMenu extends ComplexOpsuState {
 			return true;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 
@@ -967,7 +967,7 @@ public class SongMenu extends ComplexOpsuState {
 			if (node.index == expandedIndex) {
 				if (node.beatmapIndex == focusNode.beatmapIndex) {
 					// if already focused, load the beatmap
-					if (button != Input.MOUSE_RIGHT_BUTTON)
+					if (button != Input.RMB)
 						startGame();
 					else
 						SoundController.playSound(SoundEffect.MENUCLICK);
@@ -989,7 +989,7 @@ public class SongMenu extends ComplexOpsuState {
 			hoverIndex = oldHoverIndex;
 
 			// open beatmap menu
-			if (button == Input.MOUSE_RIGHT_BUTTON)
+			if (button == Input.RMB)
 				beatmapMenuTimer = (node.index == expandedIndex) ? BEATMAP_MENU_DELAY * 4 / 5 : 0;
 
 			return true;
@@ -1003,7 +1003,7 @@ public class SongMenu extends ComplexOpsuState {
 			for (int i = 0, rank = startScore; i < scoreButtons; i++, rank++) {
 				if (ScoreData.buttonContains(x, y - offset, i)) {
 					SoundController.playSound(SoundEffect.MENUHIT);
-					if (button != Input.MOUSE_RIGHT_BUTTON) {
+					if (button != Input.RMB) {
 						// view score
 						gameRankingState.setGameData(new GameData(focusScores[rank]));
 						displayContainer.switchState(gameRankingState);
@@ -1198,9 +1198,9 @@ public class SongMenu extends ComplexOpsuState {
 
 		// check mouse button (right click scrolls faster on songs)
 		int multiplier;
-		if (Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+		if (Mouse.isButtonDown(Input.RMB)) {
 			multiplier = 10;
-		} else if (Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+		} else if (Mouse.isButtonDown(Input.LMB)) {
 			multiplier = 1;
 		} else {
 			return false;
@@ -1229,15 +1229,17 @@ public class SongMenu extends ComplexOpsuState {
 		}
 
 		int shift = (newValue < 0) ? 1 : -1;
-		int mouseX = input.getMouseX(), mouseY = input.getMouseY();
 
-		// score buttons
-		if (focusScores != null && focusScores.length >= MAX_SCORE_BUTTONS && ScoreData.areaContains(mouseX, mouseY))
+		if (focusScores != null &&
+			focusScores.length >= MAX_SCORE_BUTTONS &&
+			ScoreData.areaContains(mouseX, mouseY))
+		{
+			// score buttons
 			startScorePos.scrollOffset(ScoreData.getButtonOffset() * shift);
-
-		// song buttons
-		else
+		} else {
+			// song buttons
 			changeIndex(shift);
+		}
 		return false;
 	}
 	

@@ -239,7 +239,7 @@ public class DropdownMenu<E> extends Component {
 	public void mouseReleased(int button) {
 		super.mouseReleased(button);
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return;
 		}
 

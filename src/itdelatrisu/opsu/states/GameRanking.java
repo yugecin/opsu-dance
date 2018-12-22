@@ -132,7 +132,7 @@ public class GameRanking extends BaseOpsuState {
 		}
 
 		// check mouse button
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return false;
 		}
 

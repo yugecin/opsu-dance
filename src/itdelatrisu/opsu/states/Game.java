@@ -49,6 +49,7 @@ import java.io.File;
 import java.util.*;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -710,7 +711,14 @@ public class Game extends ComplexOpsuState {
 				mirrorCursor.draw(autoMousePressed);
 			}
 		} else {
-			displayContainer.cursor.draw(Utils.isGameKeyPressed());
+			final boolean expandCursor =
+				Keyboard.isKeyDown(OPTION_KEY_LEFT.keycode) ||
+				Keyboard.isKeyDown(OPTION_KEY_RIGHT.keycode) ||
+				(!OPTION_DISABLE_MOUSE_BUTTONS.state && (
+				Mouse.isButtonDown(Input.LMB) ||
+				Mouse.isButtonDown(Input.RMB)));
+
+			displayContainer.cursor.draw(expandCursor);
 		}
 		
 		super.render(g);
@@ -1262,7 +1270,7 @@ public class Game extends ComplexOpsuState {
 
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
-			if (button == Input.MOUSE_MIDDLE_BUTTON) {
+			if (button == Input.MMB) {
 				return true;
 			}
 
@@ -1291,7 +1299,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		// mouse wheel: pause the game
-		if (button == Input.MOUSE_MIDDLE_BUTTON && !OPTION_DISABLE_MOUSE_WHEEL.state) {
+		if (button == Input.MMB && !OPTION_DISABLE_MOUSE_WHEEL.state) {
 			int trackPosition = MusicController.getPosition();
 			if (pauseTime < 0 && breakTime <= 0 && trackPosition >= beatmap.objects[0].getTime()) {
 				pausedMousePosition = new Vec2f(x, y);
@@ -1306,9 +1314,9 @@ public class Game extends ComplexOpsuState {
 
 		// game keys
 		int keys = ReplayFrame.KEY_NONE;
-		if (button == Input.MOUSE_LEFT_BUTTON)
+		if (button == Input.LMB)
 			keys = ReplayFrame.KEY_M1;
-		else if (button == Input.MOUSE_RIGHT_BUTTON)
+		else if (button == Input.RMB)
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
 			gameKeyPressed(keys, x, y, MusicController.getPosition());
@@ -1373,14 +1381,14 @@ public class Game extends ComplexOpsuState {
 			return true;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+		if (button == Input.MMB) {
 			return true;
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (button == Input.MOUSE_LEFT_BUTTON)
+		if (button == Input.LMB)
 			keys = ReplayFrame.KEY_M1;
-		else if (button == Input.MOUSE_RIGHT_BUTTON)
+		else if (button == Input.RMB)
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
 			gameKeyReleased(keys, x, y, MusicController.getPosition());
@@ -1409,7 +1417,7 @@ public class Game extends ComplexOpsuState {
 			keys = ReplayFrame.KEY_K2;
 		}
 		if (keys != ReplayFrame.KEY_NONE) {
-			gameKeyReleased(keys, input.getMouseX(), input.getMouseY(), MusicController.getPosition());
+			gameKeyReleased(keys, mouseX, mouseY, MusicController.getPosition());
 		}
 
 		return true;
