@@ -753,6 +753,7 @@ public class OptionsOverlay
 		}
 		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
 
+		final boolean externalSuppressHover = displayContainer.suppressHover;
 		if (this.active && mouseX <= this.currentWidth) {
 			displayContainer.suppressHover = true;
 		}
@@ -761,11 +762,19 @@ public class OptionsOverlay
 			updateIndicatorAlpha();
 			return;
 		}
-		updateActiveSection();
-		updateHoverNavigation(mouseX, mouseY);
-		prevMouseX = mouseX;
-		prevMouseY = mouseY;
-		updateHoverOption(mouseX, mouseY);
+
+		if (externalSuppressHover) {
+			cancelAdjustingSlider();
+			hoverOption = null;
+			indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME - 1;
+		} else {
+			updateActiveSection();
+			updateHoverNavigation(mouseX, mouseY);
+			prevMouseX = mouseX;
+			prevMouseY = mouseY;
+			updateHoverOption(mouseX, mouseY);
+		}
+
 		updateIndicatorAlpha();
 		if (isAdjustingSlider) {
 			int sliderValue = ((NumericOption) hoverOption).val;
@@ -779,7 +788,7 @@ public class OptionsOverlay
 
 	private void updateHoverNavigation(int mouseX, int mouseY) {
 		hoveredNavigationEntry = null;
-		if (mouseX >= navWidth || displayContainer.suppressHover) {
+		if (mouseX >= navWidth) {
 			return;
 		}
 		int y = navStartY;
@@ -1116,7 +1125,8 @@ public class OptionsOverlay
 		}
 	}
 
-	private void updateHoverOption(int mouseX, int mouseY) {
+	private void updateHoverOption(int mouseX, int mouseY)
+	{
 		if (mouseX < navWidth) {
 			cancelAdjustingSlider();
 			hoverOption = null;
