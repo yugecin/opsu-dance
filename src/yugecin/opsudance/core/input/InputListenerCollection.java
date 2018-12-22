@@ -40,6 +40,7 @@ public class InputListenerCollection<T> implements Iterable<T>
 				for (; i < size; i++) {
 					this.array[i] = this.array[i + 1];
 				}
+				this.array[size] = null;
 				return;
 			}
 		}
@@ -52,6 +53,9 @@ public class InputListenerCollection<T> implements Iterable<T>
 	{
 		if (this.size > 0) {
 			this.array[0] = this.array[this.size - 1];
+		}
+		for (int i = 1; i < size; i++) {
+			this.array[i] = null;
 		}
 		this.size = 1;
 	}

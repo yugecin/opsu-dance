@@ -109,13 +109,45 @@ public class InputListenerCollectionTests
 
 	public void remove_listener_while_backing_array_is_full()
 	{
+		final int[] number = { 0 };
+
 		Runnable last = null;
 		for (int i = 0; i < 10; i++) {
-			last = () -> {};
+			last = () -> number[0]++;
 			this.collection.add(last);
 		}
-		
+
 		this.collection.remove(last);
+
+		for (Runnable l : this.collection) {
+			l.run();
+		}
+
+		assertTrue(number[0] == 9);
+	}
+
+	public void double_remove_should_have_no_effect()
+	{
+		final Runnable one = () -> fail("this listener should've been removed");
+		final Runnable two = () -> fail("this listener should've been removed");
+		final Runnable tri = () -> fail("this listener should've been removed");
+
+		this.collection.add(one);
+		this.collection.add(two);
+		this.collection.add(tri);
+
+		this.collection.remove(two);
+		this.collection.remove(two);
+		this.collection.remove(two);
+		this.collection.remove(two);
+		this.collection.remove(two);
+		this.collection.remove(two);
+
+		for (Runnable l : this.collection) {
+			l.run();
+		}
+
+		assertTrue(this.primaryListenerWasCalled);
 	}
 
 	@Test
