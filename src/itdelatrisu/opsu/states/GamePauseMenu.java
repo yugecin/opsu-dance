@@ -29,7 +29,8 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
+
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static itdelatrisu.opsu.GameImage.*;

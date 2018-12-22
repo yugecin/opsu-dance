@@ -29,6 +29,7 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;

@@ -39,7 +39,8 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
+
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -365,7 +366,7 @@ public class ButtonMenu extends BaseOpsuState {
 
 		/**
 		 * Processes a key press action.
-		 * @param key the key code that was pressed (see {@link org.newdawn.slick.Input})
+		 * @param key the key code that was pressed (see {@link org.lwjgl.input.Keyboard})
 		 * @param c the character of the key that was pressed
 		 */
 		public void keyPressed(int key, char c) {

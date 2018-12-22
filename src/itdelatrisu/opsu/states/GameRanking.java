@@ -35,8 +35,9 @@ import java.io.IOException;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.util.Log;
+
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static yugecin.opsudance.core.InstanceContainer.*;

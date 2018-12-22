@@ -19,7 +19,8 @@ package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.UI;
-import org.newdawn.slick.Input;
+import yugecin.opsudance.core.input.Input;
+
 import org.newdawn.slick.InputListener;
 
 import static org.lwjgl.input.Keyboard.*;

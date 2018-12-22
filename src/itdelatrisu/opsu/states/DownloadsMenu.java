@@ -48,10 +48,11 @@ import javax.sound.sampled.LineListener;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.util.Log;
+
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 
 import static org.lwjgl.input.Keyboard.*;

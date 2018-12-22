@@ -26,13 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.newdawn.slick;
+package yugecin.opsudance.core.input;
 
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import org.newdawn.slick.InputListener;
+import org.newdawn.slick.KeyListener;
+import org.newdawn.slick.MouseListener;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;

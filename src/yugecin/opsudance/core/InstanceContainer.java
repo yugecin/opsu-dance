@@ -8,10 +8,11 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
-import org.newdawn.slick.Input;
+
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
 
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;

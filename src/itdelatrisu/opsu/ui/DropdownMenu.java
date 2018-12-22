@@ -27,9 +27,9 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.UnicodeFont;
 import yugecin.opsudance.core.components.Component;
+import yugecin.opsudance.core.input.Input;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 

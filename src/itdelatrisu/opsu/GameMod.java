@@ -339,7 +339,7 @@ public enum GameMod {
 	/**
 	 * Returns the shortcut key for the mod.
 	 * @return the key
-	 * @see org.newdawn.slick.Input
+	 * @see org.lwjgl.input.Keyboard
 	 */
 	public int getKey() { return key; }
 
