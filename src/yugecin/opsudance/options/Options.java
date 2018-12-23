@@ -452,7 +452,13 @@ public class Options
 	};
 	public static final ToggleOption OPTION_DISABLE_CURSOR = new ToggleOption("Disable Cursor", "DisableCursor", "Hide the cursor sprite.", false);
 	public static final ToggleOption OPTION_DANCE_REMOVE_BG = new ToggleOption("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", true);
-	public static final ToggleOption OPTION_FORCE_DEFAULT_PLAYFIELD = new ToggleOption("Force Default Playfield", "ForceDefaultPlayfield", "Override the song background with the default playfield background.", false);
+	public static final ToggleOption OPTION_FORCE_DEFAULT_PLAYFIELD =
+		new ToggleOption(
+			"Force Default Background Image",
+			"ForceDefaultPlayfield",
+			"Override the song background with the default playfield background.",
+			false
+		);
 	public static final ToggleOption OPTION_IGNORE_BEATMAP_SKINS = new ToggleOption("Ignore All Beatmap Skins", "IgnoreBeatmapSkins", "Never use skin element overrides provided by beatmaps.", false);
 	public static final ToggleOption OPTION_SNAKING_SLIDERS = new ToggleOption("Snaking sliders", "SnakingSliders", "Sliders gradually snake out from their starting point.", true);
 	public static final ToggleOption OPTION_SHRINKING_SLIDERS = new ToggleOption("Shrinking sliders", "ShrinkingSliders", "Sliders shrinks when sliderball passes (aka knorkesliders)", true);
