@@ -141,6 +141,11 @@ public class DropdownMenu<E> extends Component {
 		return (x > this.x && x < this.x + width && y > this.y && y < this.y + baseHeight);
 	}
 
+	public boolean isClosing()
+	{
+		return !expanded && expandProgress.getValue() >= 0.0001f;
+	}
+
 	@Override
 	public void render(Graphics g) {
 		int delta = renderDelta;

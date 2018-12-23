@@ -102,6 +102,7 @@ public class OptionsOverlay
 	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
 	private int dropdownMenuPaddingY;
 	private DropdownMenu<Object> openDropdownMenu;
+	private DropdownMenu<Object> closingDropdownMenu;
 	private int openDropdownVirtualY;
 
 	private int targetWidth;
@@ -248,6 +249,7 @@ public class OptionsOverlay
 		}
 
 		int navTotalHeight = 0;
+		openDropdownMenu = closingDropdownMenu = null;
 		dropdownMenus.clear();
 		for (OptionTab section : sections) {
 			if (section.options == null) {
@@ -265,6 +267,7 @@ public class OptionsOverlay
 					public void itemSelected(int index, Object item) {
 						listOption.clickListItem(index);
 						openDropdownMenu = null;
+						closingDropdownMenu = this;
 					}
 				};
 				final Runnable observer = () -> {
@@ -324,6 +327,7 @@ public class OptionsOverlay
 		if (openDropdownMenu != null) {
 			openDropdownMenu.render(g);
 			if (!openDropdownMenu.isOpen()) {
+				closingDropdownMenu = openDropdownMenu;
 				openDropdownMenu = null;
 			}
 		}
@@ -471,8 +475,9 @@ public class OptionsOverlay
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight || (option instanceof ListOption && openDropdownMenu != null
-						&& openDropdownMenu.equals(dropdownMenus.get(option)))) {
+				if (y > -optionHeight ||
+					this.shouldOutOfBoundsOptionBeRendered(option))
+				{
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
@@ -515,6 +520,26 @@ public class OptionsOverlay
 			maxScrollOffset = 0;
 		}
 		scrollHandler.setMinMax(0, maxScrollOffset);
+	}
+
+	private boolean shouldOutOfBoundsOptionBeRendered(Option option)
+	{
+		if (!(option instanceof ListOption)) {
+			return false;
+		}
+
+		if (closingDropdownMenu != null &&
+			closingDropdownMenu.equals(dropdownMenus.get(option)))
+		{
+			if (!closingDropdownMenu.isClosing()) {
+				closingDropdownMenu = null;
+				return false;
+			}
+			return true;
+		}
+
+		return openDropdownMenu != null &&
+			openDropdownMenu.equals(dropdownMenus.get(option));
 	}
 
 	private void renderOption(Graphics g, Option option, int y) {
