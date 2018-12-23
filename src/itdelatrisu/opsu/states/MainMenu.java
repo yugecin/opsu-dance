@@ -668,7 +668,9 @@ public class MainMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public void leave() {
+	public void leave()
+	{
+		optionsOverlay.hide();
 		super.leave();
 		if (MusicController.isTrackDimmed())
 			MusicController.toggleTrackDimmed(1f);
@@ -914,7 +916,6 @@ public class MainMenu extends BaseOpsuState {
 	 */
 	private void enterSongMenu()
 	{
-		optionsOverlay.hide();
 		OpsuState state = songMenuState;
 		if (BeatmapSetList.get().getMapSetCount() == 0) {
 			barNotifs.send("Download some beatmaps to get started!");
