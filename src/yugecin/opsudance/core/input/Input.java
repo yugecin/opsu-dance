@@ -88,8 +88,11 @@ public class Input
 				e = new KeyEvent(keyCode, Keyboard.getEventCharacter());
 				keyEvents[keyCode] = e;
 				this.dispatch(this.keyListeners, KeyListener::keyPressed, e);
-			} else {
-				e = keyEvents[keyCode];
+				continue;
+			}
+
+			e = keyEvents[keyCode];
+			if (e != null) {
 				e.consumed = false;
 				this.dispatch(this.keyListeners, KeyListener::keyReleased, e);
 				keyEvents[keyCode] = null; // allow GC
