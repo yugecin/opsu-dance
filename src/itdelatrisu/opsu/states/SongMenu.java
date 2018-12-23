@@ -826,12 +826,13 @@ public class SongMenu extends BaseOpsuState
 
 		// tooltips
 		if (displayContainer.suppressHover) {
+			if (this.sortMenu.isHovered() && !this.sortMenu.isOpen()) {
+				UI.updateTooltip(delta, "Sort by...", false);
+			}
 			return;
 		}
 
-		if (this.sortMenu.baseContains(mouseX, mouseY)) {
-			UI.updateTooltip(delta, "Sort by...", false);
-		} else if (focusScores != null && ScoreData.areaContains(mouseX, mouseY)) {
+		if (focusScores != null && ScoreData.areaContains(mouseX, mouseY)) {
 			int startScore = (int) (startScorePos.getPosition() / ScoreData.getButtonOffset());
 			int offset = (int) (-startScorePos.getPosition() + startScore * ScoreData.getButtonOffset());
 			int scoreButtons = Math.min(focusScores.length - startScore, MAX_SCORE_BUTTONS);
