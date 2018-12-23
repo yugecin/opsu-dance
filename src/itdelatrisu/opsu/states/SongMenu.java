@@ -1768,7 +1768,8 @@ public class SongMenu extends ComplexOpsuState {
 	/**
 	 * Starts the game.
 	 */
-	private void startGame() {
+	private void startGame()
+	{
 		if (MusicController.isTrackLoading())
 			return;
 
@@ -1782,6 +1783,8 @@ public class SongMenu extends ComplexOpsuState {
 		if (input.isControlDown() && !GameMod.AUTO.isActive()) {
 			GameMod.AUTO.toggle(true);
 		}
+
+		optionsOverlay.hide();
 
 		SoundController.playSound(SoundEffect.MENUHIT);
 		MultiClip.destroyExtraClips();
