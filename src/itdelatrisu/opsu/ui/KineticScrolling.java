@@ -200,9 +200,16 @@ public class KineticScrolling {
 	 * @param min the minimum bound
 	 * @param max the maximum bound
 	 */
-	public void setMinMax(float min, float max) {
+	public void setMinMax(float min, float max)
+	{
 		this.min = min;
 		this.max = max;
+		if (this.getTargetPosition() > max) {
+			this.scrollToPosition(max);
+		}
+		if (this.getTargetPosition() < min) {
+			this.scrollToPosition(min);
+		}
 	}
 
 	/**
