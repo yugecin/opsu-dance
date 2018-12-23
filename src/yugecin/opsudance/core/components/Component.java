@@ -6,7 +6,7 @@ import org.newdawn.slick.Graphics;
 
 import yugecin.opsudance.core.input.*;
 
-public abstract class Component implements KeyListener
+public abstract class Component implements InputListener
 {
 	public int width;
 	public int height;
@@ -35,17 +35,12 @@ public abstract class Component implements KeyListener
 
 	public abstract void render(Graphics g);
 
-	@Override
-	public void keyPressed(KeyEvent e)
-	{
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e)
-	{
-	}
-
 	public void setFocused(boolean focused) {
 		this.focused = focused;
+	}
+
+	public boolean isFocused()
+	{
+		return this.focused;
 	}
 }

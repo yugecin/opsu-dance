@@ -33,8 +33,8 @@ import yugecin.opsudance.core.input.*;
 import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class DropdownMenu<E> extends Component {
-
+public class DropdownMenu<E> extends Component
+{
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
 
 	private E[] items;
@@ -77,15 +77,6 @@ public class DropdownMenu<E> extends Component {
 
 	public boolean isOpen() {
 		return expanded;
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e)
-	{
-		if (e.keyCode == Keyboard.KEY_ESCAPE) {
-			this.expanded = false;
-			e.consume();
-		}
 	}
 
 	/**
@@ -133,11 +124,19 @@ public class DropdownMenu<E> extends Component {
 	}
 
 	@Override
-	public void updateHover(int x, int y) {
-		this.hovered = this.x <= x && x <= this.x + width && this.y <= y && y <= this.y + (expanded ? height : baseHeight);
+	public void updateHover(int x, int y)
+	{
+		if (displayContainer.suppressHover) {
+			this.hovered = false;
+			return;
+		}
+		displayContainer.suppressHover = this.hovered =
+			this.x <= x && x <= this.x + width && this.y <= y && y <= this.y +
+			(expanded ? height : baseHeight);
 	}
 
-	public boolean baseContains(int x, int y) {
+	public boolean baseContains(int x, int y)
+	{
 		return (x > this.x && x < this.x + width && y > this.y && y < this.y + baseHeight);
 	}
 
@@ -230,6 +229,19 @@ public class DropdownMenu<E> extends Component {
 		expandProgress.setTime(0);
 	}
 
+	public void openGrabFocus()
+	{
+		this.setFocused(true);
+		input.addListener(this);
+	}
+
+	public void closeReleaseFocus()
+	{
+		if (this.focused) {
+			this.setFocused(false);
+			input.removeListener(this);
+		}
+	}
 
 	@Override
 	public void setFocused(boolean focused) {
@@ -245,17 +257,14 @@ public class DropdownMenu<E> extends Component {
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		if (e.button == Input.MMB) {
+		if (e.button == Input.MMB || input.dragDistanceExceeds(e.x, e.y, 10)) {
 			return;
-		}
-
-		if (this.isOpen()) {
-			e.consume();
 		}
 
 		int idx = getIndexAt(mouseY);
 		if (idx == -2) {
-			this.expanded = false;
+			this.closeReleaseFocus();
+			// no consume
 			return;
 		}
 		e.consume();
@@ -266,7 +275,40 @@ public class DropdownMenu<E> extends Component {
 		if (0 <= idx && idx < items.length && selectedItemIndex != idx) {
 			this.selectedItemIndex = idx;
 			itemSelected(idx, items[selectedItemIndex]);
+			if (!this.expanded) {
+				e.consume();
+			}
 		}
+		this.closeReleaseFocus();
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseDragged(MouseDragEvent e)
+	{
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
+			this.closeReleaseFocus();
+			e.consume();
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
 	}
 
 	protected boolean canSelect(int index) {
@@ -303,5 +345,4 @@ public class DropdownMenu<E> extends Component {
 	public void setTextColor(Color c) {
 		this.textColor = c;
 	}
-
 }

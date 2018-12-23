@@ -249,6 +249,9 @@ public class OptionsOverlay
 		}
 
 		int navTotalHeight = 0;
+		if (this.openDropdownMenu != null) {
+			this.openDropdownMenu.closeReleaseFocus();
+		}
 		openDropdownMenu = closingDropdownMenu = null;
 		dropdownMenus.clear();
 		for (OptionTab section : sections) {
@@ -700,6 +703,10 @@ public class OptionsOverlay
 
 	public void hide()
 	{
+		if (this.openDropdownMenu != null) {
+			this.openDropdownMenu.closeReleaseFocus();
+			this.openDropdownMenu = this.closingDropdownMenu = null;
+		}
 		if (!this.active) {
 			return;
 		}
@@ -951,16 +958,11 @@ public class OptionsOverlay
 		sliderOptionLength = 0;
 
 		if (e.x > navWidth) {
-			if (openDropdownMenu != null) {
-				openDropdownMenu.mouseReleased(e);
-				updateHoverOption(e.x, e.y);
-				return;
-			} else {
-				for (DropdownMenu<Object> menu : visibleDropdownMenus) {
-					menu.mouseReleased(e);
-					if (menu.isOpen()) {
-						return;
-					}
+			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+				if (menu.baseContains(mouseX, mouseY)) {
+					openDropdownMenu = menu;
+					menu.openGrabFocus();
+					return;
 				}
 			}
 		}
@@ -1071,10 +1073,6 @@ public class OptionsOverlay
 			if (isAdjustingSlider) {
 				cancelAdjustingSlider();
 			}
-			if (openDropdownMenu != null) {
-				openDropdownMenu.keyPressed(e);
-				return;
-			}
 			if (lastSearchText.length() != 0) {
 				resetSearch();
 				updateHoverOption(prevMouseX, prevMouseY);
@@ -1161,7 +1159,7 @@ public class OptionsOverlay
 			hoverOption = null;
 			return;
 		}
-		if (openDropdownMenu != null || keyEntryLeft || keyEntryRight) {
+		if (keyEntryLeft || keyEntryRight) {
 			return;
 		}
 		if (selectedOption != null) {

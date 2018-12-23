@@ -179,4 +179,24 @@ public class TextField extends Component
 			}
 		}
 	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseDragged(MouseDragEvent e)
+	{
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+	}
 }
