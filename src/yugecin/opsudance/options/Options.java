@@ -913,7 +913,25 @@ public class Options
 		}
 	};
 
-	public static final ToggleOption OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL = new ToggleOption("Only color cursor trail", "OnlyColorTrail", "Don't color the cursor, only the trail", false);
+	public static final ToggleOption
+		OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL = new ToggleOption(
+			"Only color cursor trail",
+			"OnlyColorTrail",
+			"Don't color the cursor, only the trail",
+			true
+		),
+		OPTION_TRAIL_COLOR_PARTS = new ToggleOption(
+			"Color trail segments individially",
+			"TrailSegmentColors",
+			"Give each trail segment a color instead of one color for the entire trail",
+			true)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
+		};
 	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", 100, -2000, 2000) {
 		@Override
 		public String getValueString () {

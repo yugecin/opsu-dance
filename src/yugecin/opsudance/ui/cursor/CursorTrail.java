@@ -5,6 +5,8 @@ package yugecin.opsudance.ui.cursor;
 import java.awt.Point;
 import java.util.Iterator;
 
+import org.newdawn.slick.Color;
+
 import yugecin.opsudance.options.NumericOption;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -52,11 +54,11 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 		this.size = 0;
 	}
 
-	void lineTo(int x, int y)
+	void lineTo(int x, int y, Color color)
 	{
 		nowtime = System.currentTimeMillis();
 
-		this.addAllInbetween(lastPosition.x, lastPosition.y, x, y);
+		this.addAllInbetween(lastPosition.x, lastPosition.y, x, y, color);
 		lastPosition.move(x, y);
 
 		int removecount = 0;
@@ -73,7 +75,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	}
 
 	// from http://rosettacode.org/wiki/Bitmap/Bresenham's_line_algorithm#Java
-	private void addAllInbetween(int x1, int y1, int x2, int y2)
+	private void addAllInbetween(int x1, int y1, int x2, int y2, Color color)
 	{
 		// delta of exact value and rounded value of the dependent variable
 		int d = 0;
@@ -87,7 +89,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 		if (dy <= dx) {
 			while (x1 != x2) {
-				this.add(new Part(x1, y1));
+				this.add(new Part(x1, y1, color));
 				x1 += ix;
 				d += dy2;
 				if (d > dx) {
@@ -99,7 +101,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 		}
 
 		while (y1 != y2) {
-			this.add(new Part(x1, y1));
+			this.add(new Part(x1, y1, color));
 			y1 += iy;
 			d += dx2;
 			if (d > dy) {
@@ -154,12 +156,14 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 	static class Part
 	{
-		int x, y;
-		long time;
-		Part(int x, int y)
+		final int x, y;
+		final long time;
+		Color color;
+		Part(int x, int y, Color color)
 		{
 			this.x = x;
 			this.y = y;
+			this.color = color;
 			this.time = nowtime;
 		}
 	}

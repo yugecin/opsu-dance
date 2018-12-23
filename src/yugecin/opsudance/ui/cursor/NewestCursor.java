@@ -59,7 +59,6 @@ public class NewestCursor implements Cursor
 		}
 
 		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
-		Color filter = Dancer.cursorColorOverride.getColor();
 
 		// stuff copied from CurveRenderState and stuff, I don't know what I'm doing
 		int oldFb = glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
@@ -79,7 +78,7 @@ public class NewestCursor implements Cursor
 		glBegin(GL_QUADS);
 		for (CursorTrail.Part p : this.trail) {
 			alpha += alphaIncrease;
-			glColor4f(filter.r, filter.g, filter.b, alpha);
+			glColor4f(p.color.r, p.color.g, p.color.b, alpha);
 			glTexCoord2f(0f, 0f);
 			glVertex2f(p.x + -td.width2, p.y + -td.height2);
 			glTexCoord2f(td.txtw, 0);
@@ -117,7 +116,7 @@ public class NewestCursor implements Cursor
 		int cy = trail.lastPosition.y;
 
 		if (!OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
-			filter.bind();
+			Dancer.cursorColorOverride.getColor().bind();
 		}
 
 		glPushMatrix();
@@ -141,7 +140,13 @@ public class NewestCursor implements Cursor
 	@Override
 	public void setCursorPosition(int x, int y)
 	{
-		this.trail.lineTo(x, y);
+		final Color color = Dancer.cursorColorOverride.getColor();
+		if (!OPTION_TRAIL_COLOR_PARTS.state) {
+			for (CursorTrail.Part p : this.trail) {
+				p.color = color;
+			}
+		}
+		this.trail.lineTo(x, y, color);
 	}
 
 	@Override
