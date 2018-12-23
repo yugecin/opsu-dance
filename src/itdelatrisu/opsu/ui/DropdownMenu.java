@@ -240,13 +240,12 @@ public class DropdownMenu<E> extends Component {
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		super.mouseReleased(e);
-		if (e.isConsumed()) {
+		if (e.button == Input.MMB) {
 			return;
 		}
 
-		if (e.button == Input.MMB) {
-			return;
+		if (this.isOpen()) {
+			e.consume();
 		}
 
 		int idx = getIndexAt(mouseY);
@@ -254,6 +253,7 @@ public class DropdownMenu<E> extends Component {
 			this.expanded = false;
 			return;
 		}
+		e.consume();
 		if (!canSelect(selectedItemIndex)) {
 			return;
 		}
