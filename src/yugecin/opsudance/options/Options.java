@@ -857,31 +857,47 @@ public class Options
 		}
 	};
 
-	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption("Color", "CursorColorOverride", "Override cursor color") {
+	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption(
+		"Color",
+		"CursorColorOverride",
+		"Override cursor color")
+	{
 		@Override
-		public String getValueString () {
+		public void setDefaultValue()
+		{
+			Dancer.cursorColorOverride = CursorColorOverrides.RAINBOW;
+		}
+
+		@Override
+		public String getValueString()
+		{
 			return Dancer.cursorColorOverride.toString();
 		}
 
 		@Override
-		public Object[] getListItems () {
+		public Object[] getListItems()
+		{
 			return CursorColorOverrides.values();
 		}
 
 		@Override
-		public void clickListItem(int index){
+		public void clickListItem(int index)
+		{
 			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
 			this.notifyListeners();
 		}
 
 		@Override
-		public String write () {
-			return "" + Dancer.cursorColorOverride.nr;
+		public String write ()
+		{
+			return String.valueOf(Dancer.cursorColorOverride.nr);
 		}
 
 		@Override
-		public void read (String s){
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+		public void read(String s)
+		{
+			final int idx = Integer.parseInt(s);
+			Dancer.cursorColorOverride = CursorColorOverrides.values()[idx];
 		}
 	};
 
@@ -932,7 +948,15 @@ public class Options
 				return OPTION_NEWEST_CURSOR.state;
 			}
 		};
-	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", 100, -2000, 2000) {
+
+	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption(
+		"RGB cursor increment",
+		"RGBCursorInc",
+		"Amount of hue to shift, used for rainbow cursor override",
+		800,
+		-2000,
+		2000)
+	{
 		@Override
 		public String getValueString () {
 			return String.format("%.2f°", val / 1000f);

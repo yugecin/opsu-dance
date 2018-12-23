@@ -4,8 +4,14 @@ package yugecin.opsudance.options;
 
 public abstract class ListOption extends Option
 {
-	public ListOption(String name, String configurationName, String description) {
+	public ListOption(String name, String configurationName, String description)
+	{
 		super(name, configurationName, description);
+		this.setDefaultValue();
+	}
+
+	public void setDefaultValue()
+	{
 	}
 
 	@Override
