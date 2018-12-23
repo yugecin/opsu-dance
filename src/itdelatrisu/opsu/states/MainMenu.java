@@ -575,7 +575,7 @@ public class MainMenu extends BaseOpsuState {
 		}
 		this.logoClickScale.update(delta);
 		final boolean logoHovered = this.logo.contains(mouseX, mouseY, 0.25f);
-		if (logoHovered) {
+		if (logoHovered && !displayContainer.suppressHover) {
 			this.logoHover.update(delta);
 		} else {
 			this.logoHover.update(-delta);
