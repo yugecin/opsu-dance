@@ -158,7 +158,7 @@ public class GamePauseMenu extends BaseOpsuState {
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		if (!OPTION_DISABLE_MOUSE_WHEEL.state) {
-			volumeControl.changeVolume(e.delta);
+			volumeControl.changeVolume(e.direction);
 		}
 	}
 

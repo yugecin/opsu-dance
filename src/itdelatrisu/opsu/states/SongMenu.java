@@ -1228,17 +1228,15 @@ public class SongMenu extends ComplexOpsuState {
 			return;
 		}
 
-		int shift = (e.delta < 0) ? 1 : -1;
-
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&
 			ScoreData.areaContains(mouseX, mouseY))
 		{
 			// score buttons
-			startScorePos.scrollOffset(ScoreData.getButtonOffset() * shift);
+			startScorePos.scrollOffset(ScoreData.getButtonOffset() * -e.direction);
 		} else {
 			// song buttons
-			changeIndex(shift);
+			changeIndex(-e.direction);
 		}
 	}
 

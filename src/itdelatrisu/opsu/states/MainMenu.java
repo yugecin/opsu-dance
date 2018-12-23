@@ -818,7 +818,7 @@ public class MainMenu extends BaseOpsuState {
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		volumeControl.changeVolume(e.delta);
+		volumeControl.changeVolume(e.direction);
 	}
 
 	@Override

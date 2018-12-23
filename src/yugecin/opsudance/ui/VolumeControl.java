@@ -185,11 +185,11 @@ public class VolumeControl implements ResolutionChangedListener
 
 	/**
 	 * This changes either master, music or effect volume
-	 * @param direction any number, positive means up and negative means down
+	 * @param value should be either {@code 1} or {@code -1}
 	 */
-	public void changeVolume(int direction)
+	public void changeVolume(int value)
 	{
-		this.hoveredDial.changeVolume(5 * (1 - ((direction & 0x80000000) >>> 30)));
+		this.hoveredDial.changeVolume(value * 5);
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
 

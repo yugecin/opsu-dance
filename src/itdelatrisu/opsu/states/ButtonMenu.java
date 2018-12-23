@@ -390,7 +390,8 @@ public class ButtonMenu extends BaseOpsuState {
 
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
-			volumeControl.changeVolume(e.delta);
+			volumeControl.changeVolume(e.direction);
+			e.consume();
 		}
 
 		/**

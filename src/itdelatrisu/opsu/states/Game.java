@@ -1481,7 +1481,7 @@ public class Game extends ComplexOpsuState {
 			return;
 		}
 
-		volumeControl.changeVolume(e.delta);
+		volumeControl.changeVolume(e.direction);
 	}
 
 	@Override

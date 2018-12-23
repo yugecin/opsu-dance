@@ -253,7 +253,6 @@ public class CursorImpl implements Cursor
 	/**
 	 * Rotates the cursor by a degree determined by a delta interval.
 	 * If the old style cursor is being used, this will do nothing.
-	 * @param delta the delta interval since the last call
 	 */
 	private void updateAngle() {
 		cursorAngle += renderDelta / 40f;

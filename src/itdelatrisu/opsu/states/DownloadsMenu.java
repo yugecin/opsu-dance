@@ -855,8 +855,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 			return;
 		}
 
-		int shift = (e.delta < 0) ? 1 : -1;
-		scrollLists(mouseX, mouseY, shift);
+		scrollLists(mouseX, mouseY, -e.direction);
 	}
 
 	@Override

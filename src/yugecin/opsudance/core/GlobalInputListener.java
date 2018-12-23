@@ -48,7 +48,7 @@ public class GlobalInputListener implements InputListener
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		if (input.isAltDown()) {
-			volumeControl.changeVolume(e.delta);
+			volumeControl.changeVolume(e.direction);
 			e.consume();
 		}
 	}
