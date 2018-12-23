@@ -142,7 +142,8 @@ public class VolumeControl implements ResolutionChangedListener
 
 	private final Dial music, effects, master;
 
-	private Dial hoveredDial;
+	private Dial activeDial;
+	private boolean isHovered;
 	private int bgsize;
 	private int bgxpad, bgypad;
 	private int displayTimeLeft;
@@ -174,25 +175,31 @@ public class VolumeControl implements ResolutionChangedListener
 	 */
 	public void changeVolume(int direction)
 	{
-		this.hoveredDial.changeVolume(direction * 5);
+		this.activeDial.changeVolume(direction * 5);
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
 
 	public void updateHover()
 	{
-		this.hoveredDial = this.master;
+		this.activeDial = this.master;
 		if (displayTimeLeft <= 0) {
 			return;
 		}
 		if (this.effects.contains(mouseX, mouseY)) {
-			this.hoveredDial = this.effects;
+			this.activeDial = this.effects;
 		}
 		if (this.music.contains(mouseX, mouseY)) {
-			this.hoveredDial = this.music;
+			this.activeDial = this.music;
 		}
 
 		int dx = width - mouseX, dy = height - mouseY;
-		displayContainer.suppressHover |= dx * dx + dy * dy < this.bgsize * this.bgsize;
+		displayContainer.suppressHover |=
+			this.isHovered = dx * dx + dy * dy < this.bgsize * this.bgsize;
+	}
+
+	public boolean isHovered()
+	{
+		return this.displayTimeLeft > 0 && this.isHovered;
 	}
 
 	public void draw()
@@ -229,9 +236,9 @@ public class VolumeControl implements ResolutionChangedListener
 		glPopMatrix();
 		glUseProgram(0);
 
-		this.master.draw(this.master == this.hoveredDial);
-		this.effects.draw(this.effects == this.hoveredDial);
-		this.music.draw(this.music == this.hoveredDial);
+		this.master.draw(this.master == this.activeDial);
+		this.effects.draw(this.effects == this.activeDial);
+		this.music.draw(this.music == this.activeDial);
 	}
 
 	private void drawFallback()
