@@ -876,6 +876,7 @@ public class SongMenu extends BaseOpsuState
 		if (this.sortMenu.baseContains(e.x, e.y))
 		{
 			this.sortMenu.openGrabFocus();
+			optionsOverlay.hide();
 			e.consume();
 			return;
 		}
