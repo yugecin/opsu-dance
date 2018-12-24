@@ -442,10 +442,6 @@ public class SongMenu extends BaseOpsuState
 	{
 		g.setBackground(Color.black);
 
-		if (this.sortMenu.isFocused()) {
-			displayContainer.suppressHover = true;
-		}
-
 		// background
 		if (focusNode != null) {
 			Beatmap focusNodeBeatmap = focusNode.getSelectedBeatmap();
