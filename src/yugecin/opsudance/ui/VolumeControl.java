@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -157,7 +142,8 @@ public class VolumeControl implements ResolutionChangedListener
 
 	private final Dial music, effects, master;
 
-	private Dial hoveredDial;
+	private Dial activeDial;
+	private boolean isHovered;
 	private int bgsize;
 	private int bgxpad, bgypad;
 	private int displayTimeLeft;
@@ -185,26 +171,35 @@ public class VolumeControl implements ResolutionChangedListener
 
 	/**
 	 * This changes either master, music or effect volume
-	 * @param direction any number, positive means up and negative means down
+	 * @param direction should be either {@code 1} or {@code -1}
 	 */
 	public void changeVolume(int direction)
 	{
-		this.hoveredDial.changeVolume(5 * (1 - ((direction & 0x80000000) >>> 30)));
+		this.activeDial.changeVolume(direction * 5);
 		this.displayTimeLeft = DISPLAY_TIME;
 	}
 
 	public void updateHover()
 	{
-		this.hoveredDial = this.master;
+		this.activeDial = this.master;
 		if (displayTimeLeft <= 0) {
 			return;
 		}
 		if (this.effects.contains(mouseX, mouseY)) {
-			this.hoveredDial = this.effects;
+			this.activeDial = this.effects;
 		}
 		if (this.music.contains(mouseX, mouseY)) {
-			this.hoveredDial = this.music;
+			this.activeDial = this.music;
 		}
+
+		int dx = width - mouseX, dy = height - mouseY;
+		displayContainer.suppressHover |=
+			this.isHovered = dx * dx + dy * dy < this.bgsize * this.bgsize;
+	}
+
+	public boolean isHovered()
+	{
+		return this.displayTimeLeft > 0 && this.isHovered;
 	}
 
 	public void draw()
@@ -241,9 +236,9 @@ public class VolumeControl implements ResolutionChangedListener
 		glPopMatrix();
 		glUseProgram(0);
 
-		this.master.draw(this.master == this.hoveredDial);
-		this.effects.draw(this.effects == this.hoveredDial);
-		this.music.draw(this.music == this.hoveredDial);
+		this.master.draw(this.master == this.activeDial);
+		this.effects.draw(this.effects == this.activeDial);
+		this.music.draw(this.music == this.activeDial);
 	}
 
 	private void drawFallback()

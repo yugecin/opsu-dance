@@ -17,8 +17,9 @@
  */
 package yugecin.opsudance;
 
-import itdelatrisu.opsu.ui.Cursor;
 import org.newdawn.slick.Color;
+
+import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import static yugecin.opsudance.options.Options.*;
 
@@ -60,18 +61,18 @@ public enum CursorColorOverrides {
 		@Override
 		public Color getColor(boolean mirrored) {
 			if (mirrored) {
-				return Cursor.lastMirroredObjColor;
+				return CursorImpl.lastMirroredObjColor;
 			}
-			return Cursor.lastObjColor;
+			return CursorImpl.lastObjColor;
 		}
 	},
 	NEXTOBJ ("Use next object's colors", 13) {
 		@Override
 		public Color getColor(boolean mirrored) {
 			if (mirrored) {
-				return Cursor.nextMirroredObjColor;
+				return CursorImpl.nextMirroredObjColor;
 			}
-			return Cursor.nextObjColor;
+			return CursorImpl.nextObjColor;
 		}
 	};
 

@@ -16,7 +16,7 @@
  * along with opsu!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package itdelatrisu.opsu.ui;
+package itdelatrisu.opsu.ui.cursor;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import org.newdawn.slick.*;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.ui.cursor.Cursor;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -35,10 +36,10 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 /**
  * Updates and draws the cursor.
  */
-public class Cursor {
-
+public class CursorImpl implements Cursor
+{
 	/** Last cursor coordinates. */
-	private Point lastPosition;
+	private final Point lastPosition;
 
 	/** Cursor rotation angle. */
 	private static float cursorAngle = 0f;
@@ -68,23 +69,23 @@ public class Cursor {
 
 	private boolean isMirrored;
 
-	public Cursor() {
+	public CursorImpl() {
 		this(false);
 	}
 
-	public Cursor(boolean isMirrored) {
-		resetLocations(0, 0);
+	public CursorImpl(boolean isMirrored) {
+		this.lastPosition = new Point(mouseX, mouseY);
 		this.isMirrored = isMirrored;
 	}
 
-	/**
-	 * Draws the cursor.
-	 * @param mousePressed whether or not the mouse button is pressed
-	 */
-	public void draw(boolean mousePressed) {
+	@Override
+	public void draw(boolean expanded)
+	{
 		if (OPTION_DISABLE_CURSOR.state) {
 			return;
 		}
+
+		this.updateAngle();
 
 		// determine correct cursor image
 		Image cursor, cursorMiddle = null, cursorTrail;
@@ -109,14 +110,14 @@ public class Cursor {
 		// scale cursor
 		float cursorScaleAnimated = 1f;
 		if (SkinService.skin.isCursorExpanded()) {
-			if (lastCursorPressState != mousePressed) {
-				lastCursorPressState = mousePressed;
+			if (lastCursorPressState != expanded) {
+				lastCursorPressState = expanded;
 				lastCursorPressTime = System.currentTimeMillis();
 			}
 
 			float cursorScaleChange = CURSOR_SCALE_CHANGE * AnimationEquation.IN_OUT_CUBIC.calc(
 					Utils.clamp(System.currentTimeMillis() - lastCursorPressTime, 0, CURSOR_SCALE_TIME) / CURSOR_SCALE_TIME);
-			cursorScaleAnimated = 1f + ((mousePressed) ? cursorScaleChange : CURSOR_SCALE_CHANGE - cursorScaleChange);
+			cursorScaleAnimated = 1f + (expanded ? cursorScaleChange : CURSOR_SCALE_CHANGE - cursorScaleChange);
 		}
 		float cursorScale = cursorScaleAnimated * OPTION_CURSOR_SIZE.val / 100f;
 		if (cursorScale != 1f) {
@@ -164,10 +165,11 @@ public class Cursor {
 	 * @param mouseX x coordinate to set position to
 	 * @param mouseY y coordinate to set position to
 	 */
-	public void setCursorPosition(int delta, int mouseX, int mouseY) {
+	@Override
+	public void setCursorPosition(int mouseX, int mouseY) {
 		// TODO: use an image buffer
 		int removeCount = 0;
-		float FPSmod = Math.max(1000 / Math.max(delta, 1), 1) / 30f; // TODO
+		float FPSmod = Math.max(1000 / Math.max(displayContainer.delta, 1), 1) / 30f; // TODO
 		if (newStyle) {
 			// new style: add all points between cursor movements
 			if ((lastPosition.x == 0 && lastPosition.y == 0) || !addCursorPoints(lastPosition.x, lastPosition.y, mouseX, mouseY)) {
@@ -251,9 +253,8 @@ public class Cursor {
 	/**
 	 * Rotates the cursor by a degree determined by a delta interval.
 	 * If the old style cursor is being used, this will do nothing.
-	 * @param delta the delta interval since the last call
 	 */
-	public void updateAngle() {
+	private void updateAngle() {
 		cursorAngle += renderDelta / 40f;
 		cursorAngle %= 360;
 	}
@@ -261,14 +262,15 @@ public class Cursor {
 	/**
 	 * Resets all cursor data and beatmap skins.
 	 */
-	public void reset(int mouseX, int mouseY) {
+	@Override
+	public void reset() {
 		// destroy skin images
 		GameImage.CURSOR.destroyBeatmapSkinImage();
 		GameImage.CURSOR_MIDDLE.destroyBeatmapSkinImage();
 		GameImage.CURSOR_TRAIL.destroyBeatmapSkinImage();
 
 		// reset locations
-		resetLocations(mouseX, mouseY);
+		this.resetLocations(mouseX, mouseY);
 
 		// reset angles
 		cursorAngle = 0f;
@@ -277,9 +279,9 @@ public class Cursor {
 	/**
 	 * Resets all cursor location data.
 	 */
-	public void resetLocations(int mouseX, int mouseY) {
+	public void resetLocations(int x, int y) {
 		trail.clear();
-		lastPosition = new Point(mouseX, mouseY);
+		this.lastPosition.move(x, y);
 		for (int i = 0; i < 50; i++) {
 			trail.add(new Point(lastPosition));
 		}
@@ -288,10 +290,15 @@ public class Cursor {
 	/**
 	 * Returns whether or not the cursor is skinned.
 	 */
+	@Override
 	public boolean isBeatmapSkinned() {
 		return (GameImage.CURSOR.hasBeatmapSkinImage() ||
 		        GameImage.CURSOR_MIDDLE.hasBeatmapSkinImage() ||
 		        GameImage.CURSOR_TRAIL.hasBeatmapSkinImage());
 	}
 
+	@Override
+	public void destroy()
+	{
+	}
 }

@@ -33,36 +33,24 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
-import yugecin.opsudance.core.components.ActionListener;
 import yugecin.opsudance.core.components.Component;
+import yugecin.opsudance.core.input.*;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * A single text field supporting text entry
- * 
- * @author kevin
+ * based on {@link org.newdawn.slick.gui.TextField}
  */
-public class TextField extends Component {
-
-	private static final int INITIAL_KEY_REPEAT_INTERVAL = 400;
-	private static final int KEY_REPEAT_INTERVAL = 50;
-
+public class TextField extends Component
+{
 	private String value = "";
 	private Font font;
-	private int maxCharacter = 10000;
+	private int maxCharacters = 10000;
 
 	private Color borderCol = Color.white;
 	private Color textCol = Color.white;
 	private Color backgroundCol = new Color(0, 0, 0, 0.5f);
-
-	private int cursorPos;
-	private int lastKey = -1;
-	private char lastChar = 0;
-	private long repeatTimer;
-
-	private ActionListener listener;
 
 	public TextField(Font font, int x, int y, int width, int height) {
 		this.font = font;
@@ -70,10 +58,6 @@ public class TextField extends Component {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-	}
-
-	public void setListener(ActionListener listener) {
-		this.listener = listener;
 	}
 
 	public void setBorderColor(Color border) {
@@ -93,17 +77,8 @@ public class TextField extends Component {
 		return true;
 	}
 
-	public void render(Graphics g) {
-		if (lastKey != -1) {
-			if (isKeyDown(lastKey)) {
-				if (repeatTimer < System.currentTimeMillis()) {
-					repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-					keyPressed(lastKey, lastChar);
-				}
-			} else {
-				lastKey = -1;
-			}
-		}
+	public void render(Graphics g)
+	{
 		Rectangle oldClip = g.getClip();
 		g.setWorldClip(x,y,width, height);
 		
@@ -117,10 +92,10 @@ public class TextField extends Component {
 		g.setColor(textCol.multiply(clr));
 		Font temp = g.getFont();
 
-		int cpos = font.getWidth(value.substring(0, cursorPos));
+		int cursorpos = font.getWidth(value);
 		int tx = 0;
-		if (cpos > width) {
-			tx = width - cpos - font.getWidth("_");
+		if (cursorpos > width) {
+			tx = width - cursorpos - font.getWidth("_");
 		}
 
 		g.translate(tx + 2, 0);
@@ -128,7 +103,7 @@ public class TextField extends Component {
 		g.drawString(value, x + 1, y + 1);
 
 		if (focused) {
-			g.drawString("|", x + 1 + cpos + 2, y + 1);
+			g.drawString("|", x + cursorpos, y + 1);
 		}
 
 		g.translate(-tx - 2, 0);
@@ -149,111 +124,79 @@ public class TextField extends Component {
 
 	public void setText(String value) {
 		this.value = value;
-		if (cursorPos > value.length()) {
-			cursorPos = value.length();
-		}
 	}
 
 	public void setMaxLength(int length) {
-		maxCharacter = length;
-		if (value.length() > maxCharacter) {
-			value = value.substring(0, maxCharacter);
+		maxCharacters = length;
+		if (value.length() > maxCharacters) {
+			value = value.substring(0, maxCharacters);
 		}
 	}
 
-	protected void doPaste(String text) {
-		for (int i=0;i<text.length();i++) {
-			keyPressed(-1, text.charAt(i));
-		}
-	}
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		e.consume();
 
-	public void keyPressed(int key, char c) {
-		if (key != -1) {
-			if (key == KEY_V && input.isControlDown()) {
-				String text = Sys.getClipboard();
-				if (text != null) {
-					doPaste(text);
-				}
+		if (e.keyCode == KEY_V && input.isControlDown()) {
+			String text = Sys.getClipboard();
+			if (text != null) {
+				value += text;
+				this.setMaxLength(this.maxCharacters);
+			}
+			return;
+		}
+
+		switch (e.keyCode) {
+		case KEY_BACK:
+			final int len = value.length();
+			if (len == 0) {
+				break;
+			}
+			if (!input.isControlDown() || len == 1) {
+				value = value.substring(0, len - 1);
 				return;
 			}
-		}
-
-		if (lastKey != key) {
-			lastKey = key;
-			repeatTimer = System.currentTimeMillis() + INITIAL_KEY_REPEAT_INTERVAL;
-		} else {
-			repeatTimer = System.currentTimeMillis() + KEY_REPEAT_INTERVAL;
-		}
-		lastChar = c;
-
-		if (key == KEY_LEFT) { /*
-			if (cursorPos > 0) {
-				cursorPos--;
-			}
-			// Nobody more will be notified
-			if (consume) {
-				container.getInput().consumeEvent();
-			}
-		*/ } else if (key == KEY_RIGHT) { /*
-			if (cursorPos < value.length()) {
-				cursorPos++;
-			}
-			// Nobody more will be notified
-			if (consume) {
-				container.getInput().consumeEvent();
-			}
-		*/ } else if (key == KEY_BACK) {
-			if ((cursorPos > 0) && (value.length() > 0)) {
-				if (input.isControlDown()) {
-					int sp = 0;
-					boolean startSpace = Character.isWhitespace(value.charAt(cursorPos - 1));
-					boolean charSeen = false;
-					for (int i = cursorPos - 1; i >= 0; i--) {
-						boolean isSpace = Character.isWhitespace(value.charAt(i));
-						if (!startSpace && isSpace) {
-							sp = i;
-							break;
-						} else if (startSpace) {
-							if (charSeen && isSpace) {
-								sp = i + 1;
-								break;
-							} else if (!charSeen && !isSpace)
-								charSeen = true;
-						}
+			int lastindex = len - 2;
+			while (true) {
+				if (Character.isWhitespace(value.charAt(lastindex))) {
+					while (lastindex > 0 &&
+						Character.isWhitespace(value.charAt(lastindex - 1)))
+					{
+						lastindex--;
 					}
-					if (cursorPos < value.length())
-						value = value.substring(0, sp) + value.substring(cursorPos);
-					else
-						value = value.substring(0, sp);
-					cursorPos = sp;
-				} else {
-					if (cursorPos < value.length()) {
-						value = value.substring(0, cursorPos - 1)
-								+ value.substring(cursorPos);
-					} else {
-						value = value.substring(0, cursorPos - 1);
-					}
-					cursorPos--;
+					value = value.substring(0, lastindex);
+					break;
+				}
+				if (--lastindex == 0) {
+					value = "";
+					break;
 				}
 			}
-		} else if (key == KEY_DELETE) {
-			if (value.length() > cursorPos) {
-				value = value.substring(0,cursorPos) + value.substring(cursorPos+1);
-			}
-		} else if ((c < 127) && (c > 31) && (value.length() < maxCharacter)) {
-			if (cursorPos < value.length()) {
-				value = value.substring(0, cursorPos) + c
-						+ value.substring(cursorPos);
-			} else {
-				value = value.substring(0, cursorPos) + c;
-			}
-			cursorPos++;
-		} else if (key == KEY_RETURN) {
-			if (listener != null) {
-				listener.onAction();
+		default:
+			if (31 < e.chr && e.chr < 127 && value.length() < maxCharacters) {
+				value += e.chr;
 			}
 		}
-
 	}
 
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseDragged(MouseDragEvent e)
+	{
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+	}
 }

@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.NativeLoader;
@@ -23,10 +8,11 @@ import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
 import itdelatrisu.opsu.states.*;
-import org.newdawn.slick.Input;
+
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
 
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.specialstates.BarNotificationState;
 import yugecin.opsudance.core.state.specialstates.BubNotifState;
 import yugecin.opsudance.core.state.specialstates.FpsRenderState;
@@ -58,7 +44,6 @@ public class InstanceContainer {
 	public static BeatmapParser beatmapParser;
 	public static Updater updater;
 
-	public static BackButton backButton;
 	public static VolumeControl volumeControl;
 	public static DisplayContainer displayContainer;
 	public static Input input;
@@ -69,6 +54,7 @@ public class InstanceContainer {
 	public static BubNotifState bubNotifs;
 	public static FpsRenderState fpsDisplay;
 	
+	static BackButton backButton;
 	public static OptionsOverlay optionsOverlay;
 
 	public static Splash splashState;
@@ -82,6 +68,7 @@ public class InstanceContainer {
 	
 	public static int width, width2, height, height2;
 	public static boolean isWidescreen;
+	public static int mousePressX, mousePressY;
 	public static int mouseX, mouseY;
 	public static int renderDelta;
 
@@ -105,6 +92,8 @@ public class InstanceContainer {
 
 		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
 
+		input = new Input();
+
 		optionservice = new OptionsService();
 		skinservice = new SkinService();
 		oszunpacker = new OszUnpacker();
@@ -120,6 +109,7 @@ public class InstanceContainer {
 
 		gameObjectRenderer = new GameObjectRenderer();
 
+		backButton = new BackButton();
 		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 
 		splashState = new Splash();
@@ -130,6 +120,7 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 		pauseState = new GamePauseMenu();
+
 	}
 
 	@Nullable

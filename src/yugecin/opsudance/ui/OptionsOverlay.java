@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2016-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
@@ -28,11 +13,15 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.gui.TextField;
 
 import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.core.input.*;
+import yugecin.opsudance.core.input.InputListener;
+import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
@@ -41,8 +30,9 @@ import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
-public class OptionsOverlay implements ResolutionChangedListener, SkinChangedListener {
-
+public class OptionsOverlay
+	implements Renderable, ResolutionChangedListener, SkinChangedListener, InputListener
+{
 	private static final float BG_ALPHA = 0.7f;
 	private static final float LINEALPHA = 0.8f;
 	private static final Color COL_BG = new Color(Color.black);
@@ -63,7 +53,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private static final Color COL_INDICATOR = new Color(Color.black);
 
 	private boolean active;
-	private boolean acceptInput;
 	private boolean dirty;
 
 	/** Duration, in ms, of the show (slide-in) animation. */
@@ -113,6 +102,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
 	private int dropdownMenuPaddingY;
 	private DropdownMenu<Object> openDropdownMenu;
+	private DropdownMenu<Object> closingDropdownMenu;
 	private int openDropdownVirtualY;
 
 	private int targetWidth;
@@ -143,6 +133,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private int textChangeY;
 	private int posSearchY;
 	private int textSearchYOffset;
+	private int searchBoxHeight;
 
 	private final KineticScrolling scrollHandler;
 	private int maxScrollOffset;
@@ -169,8 +160,12 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	private int invalidSearchTextRotation;
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
+	
+	private final Runnable backButtonListener = this::exit;
+	private final ArrayList<MyOptionListener> installedOptionListeners;
 
 	public OptionsOverlay(OptionTab[] sections) {
+		this.installedOptionListeners = new ArrayList<>();
 		this.sections = sections;
 		this.dirty = true;
 
@@ -206,10 +201,6 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	public boolean isActive() {
 		return this.active;
 	}
-	
-	public boolean containsMouse() {
-		return this.active && mouseX <= this.currentWidth;
-	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
@@ -234,6 +225,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		textChangeY = textOptionsY + Fonts.LARGE.getLineHeight();
 		posSearchY = textChangeY + Fonts.MEDIUM.getLineHeight() * 2;
 		textSearchYOffset = Fonts.MEDIUM.getLineHeight() / 2;
+		searchBoxHeight = textSearchYOffset * 2 + Fonts.LARGE.getLineHeight();
 		optionStartY = posSearchY + Fonts.MEDIUM.getLineHeight() + Fonts.LARGE.getLineHeight();
 		sectionLineHeight = (int) (Fonts.LARGE.getLineHeight() * 1.5f);
 
@@ -252,7 +244,15 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		checkOnImg = CONTROL_CHECK_ON.getScaledImage(s, s);
 		checkOffImg = CONTROL_CHECK_OFF.getScaledImage(s, s);
 
+		for (MyOptionListener listener : this.installedOptionListeners) {
+			listener.uninstall();
+		}
+
 		int navTotalHeight = 0;
+		if (this.openDropdownMenu != null) {
+			this.openDropdownMenu.closeReleaseFocus();
+		}
+		openDropdownMenu = closingDropdownMenu = null;
 		dropdownMenus.clear();
 		for (OptionTab section : sections) {
 			if (section.options == null) {
@@ -270,6 +270,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 					public void itemSelected(int index, Object item) {
 						listOption.clickListItem(index);
 						openDropdownMenu = null;
+						closingDropdownMenu = this;
 					}
 				};
 				final Runnable observer = () -> {
@@ -285,7 +286,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 					menu.setSelectedIndex(idx);
 				};
 				observer.run();
-				listOption.observer = observer;
+				listOption.addListener(observer);
+				final MyOptionListener optionlistener;
+				optionlistener = new MyOptionListener(listOption, observer);
+				this.installedOptionListeners.add(optionlistener);
+
 				menu.setBackgroundColor(COL_BG);
 				menu.setBorderColor(Color.transparent);
 				menu.setChevronDownColor(COL_WHITE);
@@ -302,7 +307,9 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		searchImg = GameImage.SEARCH.getImage().getScaledCopy(searchImgSize, searchImgSize);
 	}
 
-	public void render(Graphics g) {
+	@Override
+	public void render(Graphics g)
+	{
 		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
@@ -323,6 +330,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		if (openDropdownMenu != null) {
 			openDropdownMenu.render(g);
 			if (!openDropdownMenu.isOpen()) {
+				closingDropdownMenu = openDropdownMenu;
 				openDropdownMenu = null;
 			}
 		}
@@ -470,8 +478,9 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight || (option instanceof ListOption && openDropdownMenu != null
-						&& openDropdownMenu.equals(dropdownMenus.get(option)))) {
+				if (y > -optionHeight ||
+					this.shouldOutOfBoundsOptionBeRendered(option))
+				{
 					renderOption(g, option, y);
 				}
 				y += optionHeight;
@@ -516,6 +525,26 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		scrollHandler.setMinMax(0, maxScrollOffset);
 	}
 
+	private boolean shouldOutOfBoundsOptionBeRendered(Option option)
+	{
+		if (!(option instanceof ListOption)) {
+			return false;
+		}
+
+		if (closingDropdownMenu != null &&
+			closingDropdownMenu.equals(dropdownMenus.get(option)))
+		{
+			if (!closingDropdownMenu.isClosing()) {
+				closingDropdownMenu = null;
+				return false;
+			}
+			return true;
+		}
+
+		return openDropdownMenu != null &&
+			openDropdownMenu.equals(dropdownMenus.get(option));
+	}
+
 	private void renderOption(Graphics g, Option option, int y) {
 		if (option instanceof ListOption) {
 			renderListOption(g, (ListOption) option, y);
@@ -523,8 +552,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			renderCheckOption((ToggleOption) option, y);
 		} else if (option instanceof NumericOption) {
 			renderSliderOption(g, (NumericOption) option, y);
-		} else if (option instanceof GenericOption) {
-			renderGenericOption((GenericOption) option, y);
+		} else if (option instanceof KeyOption) {
+			renderKeyOption((KeyOption) option, y);
 		}
 	}
 
@@ -601,7 +630,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
-	private void renderGenericOption(GenericOption option, int y) {
+	private void renderKeyOption(KeyOption option, int y)
+	{
 		String value = option.getValueString();
 		int valueLen = Fonts.MEDIUM.getWidth(value);
 		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
@@ -632,7 +662,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
-			g.fillRect(navButtonSize, 0, currentWidth, textSearchYOffset * 2 + Fonts.LARGE.getLineHeight());
+			g.fillRect(navButtonSize, 0, currentWidth, searchBoxHeight);
 		}
 		Color searchCol = COL_WHITE;
 		float invalidProgress = 0f;
@@ -662,32 +692,62 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		g.resetTransform();
 	}
 
-	public void hide() {
+	/**
+	 * when user actively choses to leave (not external)
+	 */
+	private void exit()
+	{
+		SoundController.playSound(SoundEffect.MENUBACK);
+		this.hide();
+	}
+
+	public void hide()
+	{
+		if (this.openDropdownMenu != null) {
+			this.openDropdownMenu.closeReleaseFocus();
+			this.openDropdownMenu = this.closingDropdownMenu = null;
+		}
 		if (!this.active) {
 			return;
 		}
-		acceptInput = active = false;
+		active = false;
 		searchField.setFocused(false);
 		hideAnimationTime = animationtime;
 		hideAnimationStartProgress = (float) animationtime / SHOWANIMATIONTIME;
 		hoverOption = null;
+		displayContainer.removeBackButtonListener(this.backButtonListener);
+		input.removeListener(this);
+		if (this.listener != null) {
+			this.listener.onLeaveOptionsMenu();
+		}
 	}
 
-	public void show() {
+	public void show()
+	{
 		navHoverTime = 0;
 		indicatorPos = -optionHeight;
 		indicatorOffsetToNextPos = 0;
 		indicatorMoveAnimationTime = 0;
 		indicatorHideAnimationTime = 0;
-		acceptInput = active = true;
+		active = true;
+		if (animationtime == 0) {
+			// if it wasn't zero, it wasn't fully hidden yet,
+			// thus not unregistered as an overlay yet
+			displayContainer.addOverlay(this);
+		}
 		animationtime = 0;
 		resetSearch();
+		isDraggingFromOutside = false;
+		displayContainer.addBackButtonListener(this.backButtonListener);
+		input.addListener(this);
 		if (this.dirty) {
 			this.revalidate();
 		}
 	}
 
-	public void preRenderUpdate() {
+	@Override
+	public void preRenderUpdate()
+	{
 		if (!this.active && this.currentWidth == this.navButtonSize) {
 			return;
 		}
@@ -711,16 +771,12 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 
 		updateShowHideAnimation(delta);
-		if (animationtime <= 0) {
-			active = false;
-			return;
-		}
 
 		if (sliderSoundDelay > 0) {
 			sliderSoundDelay -= delta;
 		}
 
-		if (mouseX < navWidth) {
+		if (active && mouseX < navWidth && !displayContainer.suppressHover) {
 			if (navHoverTime < 600) {
 				navHoverTime += delta;
 			}
@@ -729,15 +785,28 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
 
+		final boolean externalSuppressHover = displayContainer.suppressHover;
+		if (this.active && mouseX <= this.currentWidth) {
+			displayContainer.suppressHover = true;
+		}
+
 		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
 			return;
 		}
-		updateActiveSection();
-		updateHoverNavigation(mouseX, mouseY);
-		prevMouseX = mouseX;
-		prevMouseY = mouseY;
-		updateHoverOption(mouseX, mouseY);
+
+		if (externalSuppressHover) {
+			cancelAdjustingSlider();
+			hoverOption = null;
+			indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME - 1;
+		} else {
+			updateActiveSection();
+			updateHoverNavigation(mouseX, mouseY);
+			prevMouseX = mouseX;
+			prevMouseY = mouseY;
+			updateHoverOption(mouseX, mouseY);
+		}
+
 		updateIndicatorAlpha();
 		if (isAdjustingSlider) {
 			int sliderValue = ((NumericOption) hoverOption).val;
@@ -789,7 +858,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	}
 
 	private void updateShowHideAnimation(int delta) {
-		if (acceptInput && animationtime >= SHOWANIMATIONTIME) {
+		if (active && animationtime >= SHOWANIMATIONTIME) {
 			// animation already finished
 			currentWidth = targetWidth;
 			showHideProgress = 1f;
@@ -799,8 +868,8 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 
 		// navigation elemenst fade out with a different animation
 		float navProgress;
-		// if acceptInput is false, it means that we're currently hiding ourselves
-		if (acceptInput) {
+		// if active is false, it means that we're currently hiding ourselves
+		if (active) {
 			animationtime += delta;
 			if (animationtime >= SHOWANIMATIONTIME) {
 				animationtime = SHOWANIMATIONTIME;
@@ -812,6 +881,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			animationtime -= delta;
 			if (animationtime < 0) {
 				animationtime = 0;
+				displayContainer.removeOverlay(this);
 			}
 			showHideProgress = (float) animationtime / hideAnimationTime;
 			navProgress = hideAnimationStartProgress * AnimationEquation.IN_CIRC.calc(showHideProgress);
@@ -829,48 +899,52 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		COL_COMBOBOX_HOVER.a = showHideProgress;
 	}
 
-	public boolean mousePressed(int button, int x, int y) {
-		if (!this.active) {
-			return false;
-		}
-		if (x > this.currentWidth) {
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+		if (e.x > this.currentWidth) {
 			this.isDraggingFromOutside = true;
-			return false;
+			return;
 		}
-		
+
+		e.consume();
+
 		wasPressed = true;
 
 		if (keyEntryLeft || keyEntryRight) {
 			keyEntryLeft = keyEntryRight = false;
-			return true;
+			return;
 		}
 
-		if (x > currentWidth) {
-			return false;
+		if (e.x > currentWidth) {
+			e.unconsume();
+			return;
 		}
 
 		scrollHandler.pressed();
 
-		mousePressY = y;
+		mousePressY = e.y;
 		selectedOption = hoverOption;
 
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
-			isAdjustingSlider = sliderOptionStartX <= x && x < sliderOptionStartX + sliderOptionLength;
+			isAdjustingSlider = sliderOptionStartX <= e.x && e.x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
 				unchangedSliderValue = ((NumericOption) hoverOption).val;
 				updateSliderOption();
 			}
 		}
-
-		return true;
 	}
 
-	public boolean mouseReleased(int button, int x, int y) {
-		this.isDraggingFromOutside = false;
-		if (!this.active || (!wasPressed && x > this.currentWidth)) {
-			return false;
+	@Override
+	public void mouseReleased(MouseEvent e)
+	{
+		if (!wasPressed && e.x > this.currentWidth) {
+			return;
 		}
-		
+
+		e.consume();
+
+		isDraggingFromOutside = false;
 		wasPressed = false;
 
 		selectedOption = null;
@@ -878,31 +952,17 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			if (listener != null) {
 				listener.onSaveOption(hoverOption);
 			}
-			updateHoverOption(x, y);
+			updateHoverOption(e.x, e.y);
 			isAdjustingSlider = false;
 		}
 		sliderOptionLength = 0;
 
-		if (backButton.contains(x, y)){
-			SoundController.playSound(SoundEffect.MENUBACK);
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
-			return true;
-		}
-
-		if (x > navWidth) {
-			if (openDropdownMenu != null) {
-				openDropdownMenu.mouseReleased(button);
-				updateHoverOption(x, y);
-				return true;
-			} else {
-				for (DropdownMenu<Object> menu : visibleDropdownMenus) {
-					menu.mouseReleased(button);
-					if (menu.isOpen()) {
-						return true;
-					}
+		if (e.x > navWidth) {
+			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+				if (menu.baseContains(mouseX, mouseY)) {
+					openDropdownMenu = menu;
+					menu.openGrabFocus();
+					return;
 				}
 			}
 		}
@@ -910,12 +970,13 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		scrollHandler.released();
 
 		// check if clicked, not dragged
-		if (Math.abs(y - mousePressY) >= 5) {
-			return true;
+		if (Math.abs(e.y - mousePressY) >= 5) {
+			return;
 		}
 
-		if (x > targetWidth) {
-			return false;
+		if (e.x > targetWidth) {
+			e.unconsume();
+			return;
 		}
 
 		if (hoverOption != null) {
@@ -925,7 +986,7 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 					listener.onSaveOption(hoverOption);
 				}
 				SoundController.playSound(SoundEffect.MENUHIT);
-				return true;
+				return;
 			} else if (hoverOption == OPTION_KEY_LEFT) {
 				keyEntryLeft = true;
 			} else if (hoverOption == OPTION_KEY_RIGHT) {
@@ -955,77 +1016,73 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 			sectionPosition = Utils.clamp(sectionPosition, (int) scrollHandler.min, (int) scrollHandler.max);
 			scrollHandler.scrollToPosition(sectionPosition);
 		}
-		return true;
 	}
 
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (!this.active || this.isDraggingFromOutside) {
-			return false;
+	@Override
+	public void mouseDragged(MouseDragEvent e)
+	{
+		if (this.isDraggingFromOutside) {
+			return;
 		}
 
+		e.consume();
+
 		if (!isAdjustingSlider) {
-			int diff = newy - oldy;
-			if (diff != 0) {
-				scrollHandler.dragged(-diff);
+			if (e.dy != 0) {
+				scrollHandler.dragged(-e.dy);
 			}
 		}
-		return true;
 	}
 
-	public boolean mouseWheelMoved(int delta) {
-		if (!this.active || mouseX > this.currentWidth) {
-			return false;
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (mouseX > this.currentWidth) {
+			return;
 		}
+
+		e.consume();
 
 		if (!isAdjustingSlider) {
-			scrollHandler.scrollOffset(-delta);
+			scrollHandler.scrollOffset(-e.delta);
 		}
-		return true;
 	}
 
-	public boolean keyPressed(int key, char c) {
-		if (!this.active) {
-			return false;
-		}
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		e.consume();
 
 		if (keyEntryRight) {
-			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_RIGHT.intval = key;
+			if (Utils.isValidGameKey(e.keyCode)) {
+				OPTION_KEY_RIGHT.setKeycode(e.keyCode);
 			}
 			keyEntryRight = false;
-			return true;
+			return;
 		}
 
 		if (keyEntryLeft) {
-			if (Utils.isValidGameKey(key)) {
-				OPTION_KEY_LEFT.intval = key;
+			if (Utils.isValidGameKey(e.keyCode)) {
+				OPTION_KEY_LEFT.setKeycode(e.keyCode);
 			}
 			keyEntryLeft = false;
-			return true;
+			return;
 		}
 
-		if (key == Keyboard.KEY_ESCAPE) {
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
 			if (isAdjustingSlider) {
 				cancelAdjustingSlider();
-			}
-			if (openDropdownMenu != null) {
-				openDropdownMenu.keyPressed(key, c);
-				return true;
 			}
 			if (lastSearchText.length() != 0) {
 				resetSearch();
 				updateHoverOption(prevMouseX, prevMouseY);
-				return true;
+				return;
 			}
-			SoundController.playSound(SoundEffect.MENUBACK);
-			hide();
-			if (listener != null) {
-				listener.onLeaveOptionsMenu();
-			}
-			return true;
+			this.exit();
+			return;
 		}
 
-		searchField.keyPressed(key, c);
+		searchField.keyPressed(e);
 		if (!searchField.getText().equals(lastSearchText)) {
 			String newSearchText = searchField.getText().toLowerCase();
 			if (!hasSearchResults(newSearchText)) {
@@ -1045,12 +1102,11 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 				updateSearch();
 			}
 		}
-
-		return true;
 	}
 
-	public boolean keyReleased(int key, char c) {
-		return false;
+	public void keyReleased(KeyEvent e)
+	{
+		e.consume();
 	}
 
 	private void cancelAdjustingSlider() {
@@ -1092,13 +1148,18 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 		}
 	}
 
-	private void updateHoverOption(int mouseX, int mouseY) {
+	private void updateHoverOption(int mouseX, int mouseY)
+	{
 		if (mouseX < navWidth) {
 			cancelAdjustingSlider();
 			hoverOption = null;
 			return;
 		}
-		if (openDropdownMenu != null || keyEntryLeft || keyEntryRight) {
+		if (mouseY < searchBoxHeight) {
+			hoverOption = null;
+			return;
+		}
+		if (keyEntryLeft || keyEntryRight) {
 			return;
 		}
 		if (selectedOption != null) {
@@ -1212,5 +1273,22 @@ public class OptionsOverlay implements ResolutionChangedListener, SkinChangedLis
 	public interface Listener {
 		void onLeaveOptionsMenu();
 		void onSaveOption(Option option);
+	}
+	
+	private static class MyOptionListener
+	{
+		private ListOption option;
+		private Runnable listener;
+		
+		public MyOptionListener(ListOption option, Runnable listener)
+		{
+			this.option = option;
+			this.listener = listener;
+		}
+		
+		public void uninstall()
+		{
+			this.option.removeListener(this.listener);
+		}
 	}
 }

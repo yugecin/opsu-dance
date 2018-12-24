@@ -18,7 +18,6 @@
 
 package itdelatrisu.opsu.ui;
 
-import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -27,14 +26,15 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.UnicodeFont;
 import yugecin.opsudance.core.components.Component;
+import yugecin.opsudance.core.input.*;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class DropdownMenu<E> extends Component {
-
+public class DropdownMenu<E> extends Component
+{
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
 
 	private E[] items;
@@ -79,13 +79,6 @@ public class DropdownMenu<E> extends Component {
 		return expanded;
 	}
 
-	@Override
-	public void keyPressed(int key, char c) {
-		if (key == Keyboard.KEY_ESCAPE) {
-			this.expanded = false;
-		}
-	}
-
 	/**
 	 * Selects the item at the given index.
 	 * @param index the list item index
@@ -109,7 +102,6 @@ public class DropdownMenu<E> extends Component {
 		return maxWidth;
 	}
 
-	@SuppressWarnings("SuspiciousNameCombination")
 	private void init(E[] items, int x, int y, int width) {
 		this.items = items;
 		this.itemNames = new String[items.length];
@@ -121,22 +113,36 @@ public class DropdownMenu<E> extends Component {
 		this.baseHeight = fontNormal.getLineHeight();
 		this.offsetY = baseHeight + baseHeight * PADDING_Y;
 		this.height = (int) (offsetY * (items.length + 1));
-		int chevronDownSize = baseHeight * 4 / 5;
-		this.chevronDown = GameImage.CHEVRON_DOWN.getImage().getScaledCopy(chevronDownSize, chevronDownSize);
-		int chevronRightSize = baseHeight * 2 / 3;
-		this.chevronRight = GameImage.CHEVRON_RIGHT.getImage().getScaledCopy(chevronRightSize, chevronRightSize);
+		int downChevronSize = baseHeight * 4 / 5;
+		this.chevronDown = CHEVRON_DOWN.getScaledImage(downChevronSize, downChevronSize);
+		int rightChevronSize = baseHeight * 2 / 3;
+		//noinspection SuspiciousNameCombination
+		this.chevronRight = CHEVRON_RIGHT.getScaledImage(rightChevronSize, rightChevronSize);
 		int maxItemWidth = getMaxItemWidth();
 		int minWidth = maxItemWidth + chevronRight.getWidth() * 2;
 		this.width = Math.max(width, minWidth);
 	}
 
 	@Override
-	public void updateHover(int x, int y) {
-		this.hovered = this.x <= x && x <= this.x + width && this.y <= y && y <= this.y + (expanded ? height : baseHeight);
+	public void updateHover(int x, int y)
+	{
+		if (displayContainer.suppressHover) {
+			this.hovered = false;
+			return;
+		}
+		displayContainer.suppressHover = this.hovered =
+			this.x <= x && x <= this.x + width && this.y <= y && y <= this.y +
+			(expanded ? height : baseHeight);
 	}
 
-	public boolean baseContains(int x, int y) {
+	public boolean baseContains(int x, int y)
+	{
 		return (x > this.x && x < this.x + width && y > this.y && y < this.y + baseHeight);
+	}
+
+	public boolean isClosing()
+	{
+		return !expanded && expandProgress.getValue() >= 0.0001f;
 	}
 
 	@Override
@@ -223,6 +229,19 @@ public class DropdownMenu<E> extends Component {
 		expandProgress.setTime(0);
 	}
 
+	public void openGrabFocus()
+	{
+		this.setFocused(true);
+		input.addListener(this);
+	}
+
+	public void closeReleaseFocus()
+	{
+		if (this.focused) {
+			this.setFocused(false);
+			input.removeListener(this);
+		}
+	}
 
 	@Override
 	public void setFocused(boolean focused) {
@@ -236,18 +255,19 @@ public class DropdownMenu<E> extends Component {
 	}
 
 	@Override
-	public void mouseReleased(int button) {
-		super.mouseReleased(button);
-
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
+	public void mouseReleased(MouseEvent e)
+	{
+		if (e.button == Input.MMB || input.dragDistanceExceeds(e.x, e.y, 10)) {
 			return;
 		}
 
 		int idx = getIndexAt(mouseY);
 		if (idx == -2) {
-			this.expanded = false;
+			this.closeReleaseFocus();
+			// no consume
 			return;
 		}
+		e.consume();
 		if (!canSelect(selectedItemIndex)) {
 			return;
 		}
@@ -255,7 +275,40 @@ public class DropdownMenu<E> extends Component {
 		if (0 <= idx && idx < items.length && selectedItemIndex != idx) {
 			this.selectedItemIndex = idx;
 			itemSelected(idx, items[selectedItemIndex]);
+			if (!this.expanded) {
+				e.consume();
+			}
 		}
+		this.closeReleaseFocus();
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseDragged(MouseDragEvent e)
+	{
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.keyCode == Keyboard.KEY_ESCAPE) {
+			this.closeReleaseFocus();
+			e.consume();
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
 	}
 
 	protected boolean canSelect(int index) {
@@ -292,5 +345,4 @@ public class DropdownMenu<E> extends Component {
 	public void setTextColor(Color c) {
 		this.textColor = c;
 	}
-
 }

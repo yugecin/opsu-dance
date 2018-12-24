@@ -1,28 +1,16 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core.state;
 
 import org.newdawn.slick.Graphics;
 
+import yugecin.opsudance.core.input.*;
+
 import java.io.StringWriter;
 
-public abstract class OverlayOpsuState implements OpsuState {
-
+@Deprecated
+public abstract class OverlayOpsuState implements OpsuState
+{
 	protected boolean active;
 	protected boolean acceptInput;
 
@@ -76,46 +64,63 @@ public abstract class OverlayOpsuState implements OpsuState {
 		return true;
 	}
 
-	protected abstract boolean onKeyPressed(int key, char c);
+	protected abstract void onKeyPressed(KeyEvent e);
 
 	@Override
-	public final boolean keyPressed(int key, char c) {
-		return acceptInput && onKeyPressed(key, c);
+	public final void keyPressed(KeyEvent e) {
+		if (this.acceptInput) {
+			this.onKeyPressed(e);
+		}
 	}
 
-	protected abstract boolean onKeyReleased(int key, char c);
+	protected abstract void onKeyReleased(KeyEvent e);
 
 	@Override
-	public final boolean keyReleased(int key, char c) {
-		return acceptInput && onKeyReleased(key, c);
+	public final void keyReleased(KeyEvent e)
+	{
+		if (this.acceptInput) {
+			this.onKeyReleased(e);
+		}
 	}
 
-	protected abstract boolean onMouseWheelMoved(int delta);
+	protected abstract void onMouseWheelMoved(MouseWheelEvent e);
 
 	@Override
-	public final boolean mouseWheelMoved(int delta) {
-		return acceptInput && onMouseWheelMoved(delta);
+	public final void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (this.acceptInput) {
+			this.onMouseWheelMoved(e);
+		}
 	}
 
-	protected abstract boolean onMousePressed(int button, int x, int y);
+	protected abstract void onMousePressed(MouseEvent e);
 
 	@Override
-	public final boolean mousePressed(int button, int x, int y) {
-		return acceptInput && onMousePressed(button, x, y);
+	public final void mousePressed(MouseEvent e)
+	{
+		if (this.acceptInput) {
+			this.onMousePressed(e);
+		}
 	}
 
-	protected abstract boolean onMouseReleased(int button, int x, int y);
+	protected abstract void onMouseReleased(MouseEvent e);
 
 	@Override
-	public final boolean mouseReleased(int button, int x, int y) {
-		return acceptInput && onMouseReleased(button, x, y);
+	public final void mouseReleased(MouseEvent e)
+	{
+		if (this.acceptInput) {
+			this.onMouseReleased(e);
+		}
 	}
 
-	protected abstract boolean onMouseDragged(int oldx, int oldy, int newx, int newy);
+	protected abstract void onMouseDragged(MouseDragEvent e);
 
 	@Override
-	public final boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		return acceptInput && onMouseDragged(oldx, oldy, newx, newy);
+	public final void mouseDragged(MouseDragEvent e)
+	{
+		if (this.acceptInput) {
+			this.onMouseDragged(e);
+		}
 	}
 
 	@Override

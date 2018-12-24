@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.options;
 
 import awlex.ospu.polymover.factory.PolyMoverFactory;
@@ -39,10 +24,11 @@ import java.util.concurrent.TimeUnit;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from itdelatrisu.opsu.Options.java
+ * @author itdelatrisu (https://github.com/itdelatrisu) most functions are copied from
+ *                     itdelatrisu/opsu/Options.java
  */
-public class Options {
-
+public class Options
+{
 	// internal options (not displayed in-game)
 	static {
 		new Option("BeatmapDirectory") {
@@ -168,7 +154,7 @@ public class Options {
 		public void clickListItem(int index){
 			idx = index;
 			displayContainer.updateDisplayMode(resolutions[idx]);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -211,7 +197,7 @@ public class Options {
 		public void clickListItem(int index){
 			skinservice.usedSkinName = skinservice.availableSkinDirectories[index];
 			skinservice.reloadSkin();
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -294,7 +280,7 @@ public class Options {
 					}
 				}
 			}
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -356,7 +342,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			this.index = index;
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -392,7 +378,23 @@ public class Options {
 		}
 	};
 
-	public static final ToggleOption OPTION_NEW_CURSOR = new ToggleOption("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true);
+	public static final ToggleOption OPTION_NEW_CURSOR = new ToggleOption("Enable New Cursor", "NewCursor", "Use the new cursor style (may cause higher CPU usage).", true)
+	{
+		@Override
+		public boolean showCondition()
+		{
+			return !OPTION_NEWEST_CURSOR.state;
+		}
+	};
+	public static final ToggleOption OPTION_NEWEST_CURSOR = new ToggleOption("Enable Newest Cursor", "NewestCursor", "Completely smooth cursortrail,  maybe more intensive", true)
+	{
+		@Override
+		public void toggle()
+		{
+			super.toggle();
+			displayContainer.reinitCursor();
+		}
+	};
 	public static final ToggleOption OPTION_DYNAMIC_BACKGROUND = new ToggleOption("Enable Dynamic Backgrounds", "DynamicBackground", "The song background will be used as the main menu background.", true);
 	public static final ToggleOption OPTION_LOAD_VERBOSE = new ToggleOption("Show Detailed Loading Progress", "LoadVerbose", "Display more specific loading information in the splash screen.", false);
 	public static final ToggleOption OPTION_COLOR_MAIN_MENU_LOGO = new ToggleOption("Use cursor color as main menu logo tint", "ColorMainMenuLogo", "Colorful main menu logo", false);
@@ -434,45 +436,10 @@ public class Options {
 	};
 
 	public static final ToggleOption OPTION_DISABLE_SOUNDS = new ToggleOption("Disable All Sound Effects", "DisableSound", "May resolve Linux sound driver issues.  Requires a restart.", (System.getProperty("os.name").toLowerCase().contains("linux")));
-	public static final GenericOption OPTION_KEY_LEFT = new GenericOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z, null, false) {
-		@Override
-		public String getValueString () {
-			return Keyboard.getKeyName(intval);
-		}
 
-		@Override
-		public String write () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public void read(String s){
-			intval = Keyboard.getKeyIndex(s);
-			if (intval == Keyboard.KEY_NONE) {
-				intval = Keyboard.KEY_Y;
-			}
-		}
-	};
-
-	public static final GenericOption OPTION_KEY_RIGHT = new GenericOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X, null, false) {
-		@Override
-		public String getValueString () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public String write () {
-			return Keyboard.getKeyName(intval);
-		}
-
-		@Override
-		public void read(String s){
-			intval = Keyboard.getKeyIndex(s);
-			if (intval == Keyboard.KEY_NONE) {
-				intval = Keyboard.KEY_X;
-			}
-		}
-	};
+	public static final KeyOption
+		OPTION_KEY_LEFT = new KeyOption("Left Game Key", "keyOsuLeft", "Select this option to input a key.", Keyboard.KEY_Z),
+		OPTION_KEY_RIGHT = new KeyOption("Right Game Key", "keyOsuRight", "Select this option to input a key.", Keyboard.KEY_X);
 
 	public static final NumericOption OPTION_BACKGROUND_DIM = new NumericOption("Background Dim", "DimLevel", "Percentage to dim the background image during gameplay.", 50, 0, 100);
 	public static final ToggleOption OPTION_DISABLE_MOUSE_WHEEL = new ToggleOption("Disable mouse wheel in play mode", "MouseDisableWheel", "During play, you can use the mouse wheel to adjust the volume and pause the game. This will disable that functionality.", false);
@@ -485,7 +452,13 @@ public class Options {
 	};
 	public static final ToggleOption OPTION_DISABLE_CURSOR = new ToggleOption("Disable Cursor", "DisableCursor", "Hide the cursor sprite.", false);
 	public static final ToggleOption OPTION_DANCE_REMOVE_BG = new ToggleOption("Use black background instead of image", "RemoveBG", "Hello darkness my old friend", true);
-	public static final ToggleOption OPTION_FORCE_DEFAULT_PLAYFIELD = new ToggleOption("Force Default Playfield", "ForceDefaultPlayfield", "Override the song background with the default playfield background.", false);
+	public static final ToggleOption OPTION_FORCE_DEFAULT_PLAYFIELD =
+		new ToggleOption(
+			"Force Default Background Image",
+			"ForceDefaultPlayfield",
+			"Override the song background with the default playfield background.",
+			false
+		);
 	public static final ToggleOption OPTION_IGNORE_BEATMAP_SKINS = new ToggleOption("Ignore All Beatmap Skins", "IgnoreBeatmapSkins", "Never use skin element overrides provided by beatmaps.", false);
 	public static final ToggleOption OPTION_SNAKING_SLIDERS = new ToggleOption("Snaking sliders", "SnakingSliders", "Sliders gradually snake out from their starting point.", true);
 	public static final ToggleOption OPTION_SHRINKING_SLIDERS = new ToggleOption("Shrinking sliders", "ShrinkingSliders", "Sliders shrinks when sliderball passes (aka knorkesliders)", true);
@@ -652,7 +625,7 @@ public class Options {
 				return;
 			}
 			Dancer.instance.setMoverFactoryIndex(index);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -742,7 +715,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.moverDirection = MoverDirection.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -773,7 +746,7 @@ public class Options {
 		public void clickListItem(int index){
 			val = index;
 			Dancer.sliderMoverController = Dancer.sliderMovers[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -796,7 +769,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.instance.setSpinnerIndex(index);
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -841,7 +814,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorOverride = ObjectColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -869,7 +842,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.colorMirrorOverride = ObjectColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -890,31 +863,47 @@ public class Options {
 		}
 	};
 
-	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption("Color", "CursorColorOverride", "Override cursor color") {
+	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption(
+		"Color",
+		"CursorColorOverride",
+		"Override cursor color")
+	{
 		@Override
-		public String getValueString () {
+		public void setDefaultValue()
+		{
+			Dancer.cursorColorOverride = CursorColorOverrides.RAINBOW;
+		}
+
+		@Override
+		public String getValueString()
+		{
 			return Dancer.cursorColorOverride.toString();
 		}
 
 		@Override
-		public Object[] getListItems () {
+		public Object[] getListItems()
+		{
 			return CursorColorOverrides.values();
 		}
 
 		@Override
-		public void clickListItem(int index){
+		public void clickListItem(int index)
+		{
 			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
-		public String write () {
-			return "" + Dancer.cursorColorOverride.nr;
+		public String write ()
+		{
+			return String.valueOf(Dancer.cursorColorOverride.nr);
 		}
 
 		@Override
-		public void read (String s){
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+		public void read(String s)
+		{
+			final int idx = Integer.parseInt(s);
+			Dancer.cursorColorOverride = CursorColorOverrides.values()[idx];
 		}
 	};
 
@@ -932,7 +921,7 @@ public class Options {
 		@Override
 		public void clickListItem(int index){
 			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
-			this.onChange();
+			this.notifyListeners();
 		}
 
 		@Override
@@ -946,8 +935,34 @@ public class Options {
 		}
 	};
 
-	public static final ToggleOption OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL = new ToggleOption("Only color cursor trail", "OnlyColorTrail", "Don't color the cursor, only the trail", false);
-	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption("RGB cursor increment", "RGBCursorInc", "Amount of hue to shift, used for rainbow cursor override", 100, -2000, 2000) {
+	public static final ToggleOption
+		OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL = new ToggleOption(
+			"Only color cursor trail",
+			"OnlyColorTrail",
+			"Don't color the cursor, only the trail",
+			true
+		),
+		OPTION_TRAIL_COLOR_PARTS = new ToggleOption(
+			"Color trail segments individially",
+			"TrailSegmentColors",
+			"Give each trail segment a color instead of one color for the entire trail",
+			true)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
+		};
+
+	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption(
+		"RGB cursor increment",
+		"RGBCursorInc",
+		"Amount of hue to shift, used for rainbow cursor override",
+		800,
+		-2000,
+		2000)
+	{
 		@Override
 		public String getValueString () {
 			return String.format("%.2f°", val / 1000f);
@@ -998,5 +1013,4 @@ public class Options {
 
 	public static final ToggleOption OPTION_PIPPI_SLIDER_FOLLOW_EXPAND = new ToggleOption("Followcircle expand", "PippiFollowExpand", "Increase radius in followcircles", false);
 	public static final ToggleOption OPTION_PIPPI_PREVENT_WOBBLY_STREAMS = new ToggleOption("Prevent wobbly streams", "PippiPreventWobblyStreams", "Force linear mover while doing streams to prevent wobbly pippi", true);
-
 }

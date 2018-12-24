@@ -43,21 +43,24 @@ import itdelatrisu.opsu.replay.ReplayFrame;
 import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import java.io.File;
 import java.util.*;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
+import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.DisplayContainer;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
 import yugecin.opsudance.options.OptionGroups;
@@ -305,7 +308,7 @@ public class Game extends ComplexOpsuState {
 		MUSICBAR_HOVER  = new Color(12, 9, 10, 0.35f),
 		MUSICBAR_FILL   = new Color(255, 255, 255, 0.75f);
 
-	private final Cursor mirrorCursor;
+	private final CursorImpl mirrorCursor;
 	private final MoveStoryboard moveStoryboardOverlay;
 	private final StoryboardOverlay storyboardOverlay;
 	private final OptionsOverlay optionsOverlay;
@@ -316,7 +319,7 @@ public class Game extends ComplexOpsuState {
 
 	public Game() {
 		super();
-		mirrorCursor = new Cursor(true);
+		mirrorCursor = new CursorImpl(true);
 		this.moveStoryboardOverlay = new MoveStoryboard();
 		this.optionsOverlay = new OptionsOverlay(OptionGroups.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(moveStoryboardOverlay, optionsOverlay, this);
@@ -711,16 +714,20 @@ public class Game extends ComplexOpsuState {
 				mirrorCursor.draw(autoMousePressed);
 			}
 		} else {
-			displayContainer.cursor.draw(Utils.isGameKeyPressed());
+			final boolean expandCursor =
+				Keyboard.isKeyDown(OPTION_KEY_LEFT.keycode) ||
+				Keyboard.isKeyDown(OPTION_KEY_RIGHT.keycode) ||
+				(!OPTION_DISABLE_MOUSE_BUTTONS.state && (
+				Mouse.isButtonDown(Input.LMB) ||
+				Mouse.isButtonDown(Input.RMB)));
+
+			displayContainer.cursor.draw(expandCursor);
 		}
 		
 		super.render(g);
 
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.render(g);
-			if (optionsOverlay.isActive()) {
-				backButton.draw(g);
-			}
 		}
 	}
 
@@ -730,9 +737,6 @@ public class Game extends ComplexOpsuState {
 		
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.preRenderUpdate();
-			if (optionsOverlay.isActive()) {
-				backButton.hoverUpdate();
-			}
 		}
 
 		int delta = renderDelta;
@@ -913,20 +917,20 @@ public class Game extends ComplexOpsuState {
 		}
 
 		if (isReplay) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, replayX, replayY);
+			displayContainer.cursor.setCursorPosition(replayX, replayY);
 		} else if (GameMod.AUTO.isActive()) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 			if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
 				double dx = autoMousePosition.x - width2;
 				double dy = autoMousePosition.y - height2;
 				double d = Math.sqrt(dx * dx + dy * dy);
 				double a = Math.atan2(dy, dx) + Math.PI;
-				mirrorCursor.setCursorPosition(displayContainer.delta, (int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
+				mirrorCursor.setCursorPosition((int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
 			}
 		} else if (GameMod.AUTOPILOT.isActive()) {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, (int) autoMousePosition.x, (int) autoMousePosition.y);
+			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 		} else {
-			displayContainer.cursor.setCursorPosition(displayContainer.delta, mouseX, mouseY);
+			displayContainer.cursor.setCursorPosition(mouseX, mouseY);
 		}
 	}
 
@@ -989,11 +993,11 @@ public class Game extends ComplexOpsuState {
 		GameObject g = gameObjects[objectIndex];
 		if (g.isCircle() || g.isSlider()) {
 			if (g.getTime() <= trackPosition) {
-				Cursor.lastObjColor = g.getColor();
-				Cursor.lastMirroredObjColor = g.getMirroredColor();
+				CursorImpl.lastObjColor = g.getColor();
+				CursorImpl.lastMirroredObjColor = g.getMirroredColor();
 			} else {
-				Cursor.nextObjColor = g.getColor();
-				Cursor.nextMirroredObjColor = g.getMirroredColor();
+				CursorImpl.nextObjColor = g.getColor();
+				CursorImpl.nextMirroredObjColor = g.getMirroredColor();
 			}
 		}
 
@@ -1104,17 +1108,24 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyPressed(key, c)) {
-			return true;
+	public void keyPressed(KeyEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.keyPressed(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.keyPressed(key, c)) {
-			return true;
+		super.keyPressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		int trackPosition = MusicController.getPosition();
@@ -1122,9 +1133,9 @@ public class Game extends ComplexOpsuState {
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
 			int keys = ReplayFrame.KEY_NONE;
-			if (key == OPTION_KEY_LEFT.intval) {
+			if (e.keyCode == OPTION_KEY_LEFT.keycode) {
 				keys = ReplayFrame.KEY_K1;
-			} else if (key == OPTION_KEY_RIGHT.intval) {
+			} else if (e.keyCode == OPTION_KEY_RIGHT.keycode) {
 				keys = ReplayFrame.KEY_K2;
 			}
 			if (keys != ReplayFrame.KEY_NONE) {
@@ -1132,7 +1143,7 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		switch (key) {
+		switch (e.keyCode) {
 		case KEY_ESCAPE:
 			// "auto" mod or watching replay: go back to song menu
 			if (GameMod.AUTO.isActive() || isReplay) {
@@ -1235,42 +1246,53 @@ public class Game extends ComplexOpsuState {
 			adjustLocalMusicOffset(-5);
 			break;
 		}
-		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+		if (e.keyCode == KEY_EQUALS || e.keyCode == KEY_ADD || e.chr == '+') {
 			adjustLocalMusicOffset(5);
 		}
-
-		return true;
 	}
 
 	@Override
-	public boolean mouseDragged(int oldx, int oldy, int newx, int newy) {
-		if (OPTION_DANCE_ENABLE_SB.state &&
-			optionsOverlay.mouseDragged(oldx, oldy, newx, newy))
-		{
-			return true;
+	public void mouseDragged(MouseDragEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			this.optionsOverlay.mouseDragged(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		return super.mouseDragged(oldx, oldy, newx, newy);
+		super.mouseDragged(e);
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mousePressed(button, x, y)) {
-			return true;
+	public void mousePressed(MouseEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mousePressed(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.mousePressed(button, x, y)) {
-			return true;
+		super.mousePressed(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
+
+		final int button = e.button;
+		final int x = e.x;
+		final int y = e.y;
 
 		// watching replay
 		if (isReplay || GameMod.AUTO.isActive()) {
-			if (button == Input.MOUSE_MIDDLE_BUTTON) {
-				return true;
+			if (button == Input.MMB) {
+				return;
 			}
 
 			// skip button
@@ -1290,15 +1312,15 @@ public class Game extends ComplexOpsuState {
 				MusicController.setPosition((int) pos);
 				isSeeking = true;
 			}
-			return true;
+			return;
 		}
 
 		if (OPTION_DISABLE_MOUSE_BUTTONS.state) {
-			return true;
+			return;
 		}
 
 		// mouse wheel: pause the game
-		if (button == Input.MOUSE_MIDDLE_BUTTON && !OPTION_DISABLE_MOUSE_WHEEL.state) {
+		if (button == Input.MMB && !OPTION_DISABLE_MOUSE_WHEEL.state) {
 			int trackPosition = MusicController.getPosition();
 			if (pauseTime < 0 && breakTime <= 0 && trackPosition >= beatmap.objects[0].getTime()) {
 				pausedMousePosition = new Vec2f(x, y);
@@ -1308,19 +1330,17 @@ public class Game extends ComplexOpsuState {
 				pauseTime = trackPosition;
 			}
 			displayContainer.switchStateInstantly(pauseState);
-			return true;
+			return;
 		}
 
 		// game keys
 		int keys = ReplayFrame.KEY_NONE;
-		if (button == Input.MOUSE_LEFT_BUTTON)
+		if (button == Input.LMB)
 			keys = ReplayFrame.KEY_M1;
-		else if (button == Input.MOUSE_RIGHT_BUTTON)
+		else if (button == Input.RMB)
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
 			gameKeyPressed(keys, x, y, MusicController.getPosition());
-
-		return true;
 	}
 
 	/**
@@ -1363,63 +1383,70 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean mouseReleased(int button, int x, int y) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseReleased(button, x, y)) {
-			return true;
+	public void mouseReleased(MouseEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mouseReleased(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
 
-		if (super.mouseReleased(button, x, y)) {
-			return true;
+		super.mouseReleased(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		if (OPTION_DISABLE_MOUSE_BUTTONS.state) {
-			return true;
+			return;
 		}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
-			return true;
+		if (e.button == Input.MMB) {
+			return;
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (button == Input.MOUSE_LEFT_BUTTON)
+		if (e.button == Input.LMB)
 			keys = ReplayFrame.KEY_M1;
-		else if (button == Input.MOUSE_RIGHT_BUTTON)
+		else if (e.button == Input.RMB)
 			keys = ReplayFrame.KEY_M2;
 		if (keys != ReplayFrame.KEY_NONE)
-			gameKeyReleased(keys, x, y, MusicController.getPosition());
-
-		return true;
+			gameKeyReleased(keys, e.x, e.y, MusicController.getPosition());
 	}
 
 	@Override
-	public boolean keyReleased(int key, char c) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.keyReleased(key, c)) {
-			return true;
+	public void keyReleased(KeyEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			return;
 		}
 
-		if (super.keyReleased(key, c)) {
-			return true;
+		super.keyReleased(e);
+		if (e.isConsumed()) {
+			return;
 		}
-		
+
+		e.consume();
+
 		if (gameFinished) {
-			return true;
+			return;
 		}
 
 		int keys = ReplayFrame.KEY_NONE;
-		if (key == OPTION_KEY_LEFT.intval) {
+		if (e.keyCode == OPTION_KEY_LEFT.keycode) {
 			keys = ReplayFrame.KEY_K1;
-		} else if (key == OPTION_KEY_RIGHT.intval) {
+		} else if (e.keyCode == OPTION_KEY_RIGHT.keycode) {
 			keys = ReplayFrame.KEY_K2;
 		}
 		if (keys != ReplayFrame.KEY_NONE) {
-			gameKeyReleased(keys, input.getMouseX(), input.getMouseY(), MusicController.getPosition());
+			gameKeyReleased(keys, mouseX, mouseY, MusicController.getPosition());
 		}
-
-		return true;
 	}
 
 	/**
@@ -1437,25 +1464,32 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		if (OPTION_DANCE_ENABLE_SB.state && optionsOverlay.mouseWheelMoved(newValue)) {
-			return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (OPTION_DANCE_ENABLE_SB.state) {
+			optionsOverlay.mouseWheelMoved(e);
+			if (e.isConsumed()) {
+				return;
+			}
 		}
-		
-		if (super.mouseWheelMoved(newValue)) {
-			return true;
+
+		super.mouseWheelMoved(e);
+		if (e.isConsumed()) {
+			return;
 		}
+
+		e.consume();
 
 		if (OPTION_DISABLE_MOUSE_WHEEL.state) {
-			return true;
+			return;
 		}
 
-		volumeControl.changeVolume(newValue);
-		return true;
+		volumeControl.changeVolume(e.direction);
 	}
 
 	@Override
-	public void enter() {
+	public void enter()
+	{
 		overlays.clear();
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			overlays.add(moveStoryboardOverlay);
@@ -1477,6 +1511,8 @@ public class Game extends ComplexOpsuState {
 			displayContainer.switchStateInstantly(songMenuState);
 			return;
 		}
+
+		Display.setTitle(String.format("%s - %s", Constants.PROJECT_NAME, beatmap.toString()));
 
 		Dancer.instance.reset();
 		MoverDirection.reset(beatmap.beatmapID);
@@ -1727,10 +1763,13 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public void leave() {
+	public void leave()
+	{
 		super.leave();
 
-		displayContainer.resetCursor();
+		Display.setTitle(Constants.PROJECT_NAME);
+
+		displayContainer.cursor.reset();
 		displayContainer.drawCursor = true;
 
 		MusicController.pause();
@@ -1751,10 +1790,10 @@ public class Game extends ComplexOpsuState {
 
 		Dancer.instance.setGameObjects(null);
 
-		Cursor.lastObjColor = Color.white;
-		Cursor.lastMirroredObjColor = Color.white;
-		Cursor.nextObjColor = Color.white;
-		Cursor.nextMirroredObjColor = Color.white;
+		CursorImpl.lastObjColor = Color.white;
+		CursorImpl.lastMirroredObjColor = Color.white;
+		CursorImpl.nextObjColor = Color.white;
+		CursorImpl.nextMirroredObjColor = Color.white;
 
 		// re-hide cursor
 		if (GameMod.AUTO.isActive() || isReplay) {
@@ -1937,7 +1976,6 @@ public class Game extends ComplexOpsuState {
 	 */
 	public void loadBeatmap(Beatmap beatmap) {
 		this.beatmap = beatmap;
-		Display.setTitle(String.format("opsu!dance - %s", beatmap.toString()));
 		if (beatmap.breaks == null) {
 			BeatmapDB.load(beatmap, BeatmapDB.LOAD_ARRAY);
 		}

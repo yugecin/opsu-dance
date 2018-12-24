@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.*;
@@ -27,12 +12,13 @@ import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.render.FrameBufferCache;
 import itdelatrisu.opsu.replay.PlaybackSpeed;
-import itdelatrisu.opsu.ui.Cursor;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.UI;
+import itdelatrisu.opsu.ui.cursor.CursorImpl;
+
 import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -44,17 +30,21 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
+import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
+import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
-import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
+import yugecin.opsudance.ui.cursor.Cursor;
+import yugecin.opsudance.ui.cursor.NewestCursor;
 import yugecin.opsudance.utils.GLHelper;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static itdelatrisu.opsu.ui.Colors.*;
@@ -65,8 +55,8 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * based on org.newdawn.slick.AppGameContainer
  */
-public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
-
+public class DisplayContainer implements ErrorDumpable, SkinChangedListener
+{
 	private static SGL GL = Renderer.get();
 
 	private OpsuState state;
@@ -97,7 +87,21 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	private long exitconfirmation;
 
-	public final Cursor cursor;
+	private final ArrayList<Renderable> overlays;
+
+	private final LinkedList<Runnable> backButtonListeners;
+	/**
+	 * set to {@code false} to disable back button next update
+	 * has to be set every rendered frame to be effective
+	 */
+	public boolean disableBackButton;
+
+	/**
+	 * set to {@code true} if something is hovered and none other thing should be marked as such
+	 */
+	public boolean suppressHover;
+
+	public Cursor cursor;
 	public boolean drawCursor;
 	
 	private final List<ResolutionChangedListener> resolutionChangedListeners;
@@ -112,8 +116,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	public DisplayContainer()
 	{
+		this.overlays = new ArrayList<>();
 		this.resolutionChangedListeners = new ArrayList<>();
-		this.cursor = new Cursor();
+		this.backButtonListeners = new LinkedList<>();
 		drawCursor = true;
 
 		skinservice.addSkinChangedListener(this);
@@ -151,13 +156,27 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 		}
 
-		backButton = new BackButton();
+		backButton.revalidate();
+		this.reinitCursor();
 
 		// TODO clean this up
 		GameMod.init(width, height);
 		PlaybackSpeed.init(width, height);
 		HitObject.init(width, height);
 		DownloadNode.init(width, height);
+	}
+	
+	public void reinitCursor()
+	{
+		if (this.cursor != null) {
+			this.cursor.destroy();
+		}
+
+		if (OPTION_NEWEST_CURSOR.state) {
+			this.cursor = new NewestCursor();
+		} else {
+			this.cursor = new CursorImpl();
+		}
 	}
 
 	public void setUPS(int ups) {
@@ -181,18 +200,19 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 	boolean wasingame = false;
 	int xsx = 8, xsy = 27;
 	int ofx = -4, ofy = -23;
-	public static int tx, ty;
+	public int tx, ty;
 
 	public void run() throws Exception {
+		input.poll();
+		this.cursor.reset();
+
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
 
 			timeSinceLastRender += delta;
 
-			input.poll(width, height);
+			input.poll();
 			Music.poll(delta);
-			mouseX = input.getMouseX();
-			mouseY = input.getMouseY();
 
 			boolean doflx = state == gameState;
 
@@ -239,10 +259,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 			}
 			fpsDisplay.update();
 
+			this.suppressHover = false; // put here for volume control
+
 			volumeControl.updateHover();
 			state.update();
 			if (drawCursor) {
-				cursor.setCursorPosition(delta, mouseX, mouseY);
+				cursor.setCursorPosition(mouseX, mouseY);
 			}
 
 			int maxRenderInterval;
@@ -269,17 +291,34 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				rendering = true;
 				GL.glClear(SGL.GL_COLOR_BUFFER_BIT);
 
-				/*
-				graphics.resetTransform();
-				graphics.resetFont();
-				graphics.resetLineWidth();
-				graphics.resetTransform();
-				*/
-
 				renderDelta = timeSinceLastRender;
+
+				this.disableBackButton = this.backButtonListeners.isEmpty();
+
+				// clone overlays to have a consistent list in this block
+				Renderable[] overlays = Renderable.EMPTY_ARRAY;
+				if (!this.overlays.isEmpty()) {
+					overlays = this.overlays.toArray(Renderable.EMPTY_ARRAY);
+				}
+
+				if (!this.disableBackButton) {
+					backButton.preRenderUpdate();
+				}
+
+				for (Renderable overlay : overlays) {
+					overlay.preRenderUpdate();
+				}
 
 				state.preRenderUpdate();
 				state.render(graphics);
+
+				for (Renderable overlay : overlays) {
+					overlay.render(graphics);
+				}
+
+				if (!this.disableBackButton) {
+					backButton.draw(graphics);
+				}
 
 				volumeControl.draw();
 				fpsDisplay.render(graphics);
@@ -287,10 +326,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 				bubNotifs.render(graphics);
 				barNotifs.render(graphics);
 
-				cursor.updateAngle();
 				if (drawCursor) {
-					cursor.draw(Mouse.isButtonDown(Input.MOUSE_LEFT_BUTTON) ||
-						Mouse.isButtonDown(Input.MOUSE_RIGHT_BUTTON));
+					cursor.draw(Mouse.isButtonDown(Input.LMB) || Mouse.isButtonDown(Input.RMB));
 				}
 				UI.drawTooltip(graphics);
 
@@ -323,7 +360,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 
 	public void setup() throws Exception {
 		width = height = width2 = height2 = -1;
-		Display.setTitle("opsu!dance");
+		Display.setTitle(Constants.PROJECT_NAME);
 		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		frame = new JFrame();
@@ -368,10 +405,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		GameData.Grade.destroyImages();
 		Beatmap.destroyBackgroundImageCache();
 		FrameBufferCache.shutdown();
-	}
-
-	public void teardownAL() {
-		AL.destroy();
 	}
 
 	public void pause() {
@@ -494,17 +527,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		if (input == null) {
-			input = new Input(height);
-			input.enableKeyRepeat();
-			input.addListener(new GlobalInputListener());
-			input.addMouseListener(bubNotifs);
-		}
+		input.mouseListeners.clear();
+		input.keyListeners.clear();
 		input.addListener(state);
+		Keyboard.enableRepeatEvents(true);
 
 		sout("GL ready");
 
-		GameImage.init(width, height);
+		GameImage.onResolutionChanged();
 		Fonts.init();
 
 		if (volumeControl == null) {
@@ -521,10 +551,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		for (ResolutionChangedListener l : this.resolutionChangedListeners) {
 			l.onResolutionChanged(width, height);
 		}
-	}
-
-	public void resetCursor() {
-		cursor.reset(mouseX, mouseY);
 	}
 
 	private int getDelta() {
@@ -549,9 +575,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		state.writeErrorDump(dump);
 	}
 
-	// TODO change this
-	public boolean isInState(Class<? extends OpsuState> state) {
-		return state.isInstance(state);
+	public boolean isIn(OpsuState state)
+	{
+		return this.state == state;
 	}
 
 	public void switchState(OpsuState state) {
@@ -589,7 +615,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		this.state = state;
 		this.state.enter();
 		input.addListener(this.state);
-		backButton.resetHover();
 		if (this.rendering) {
 			// state might be changed in preRenderUpdate,
 			// in that case the new state will be rendered without having
@@ -598,4 +623,30 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener {
 		}
 	}
 
+	public void addBackButtonListener(Runnable listener)
+	{
+		this.backButtonListeners.add(listener);
+		backButton.activeListener = listener;
+	}
+
+	public void removeBackButtonListener(Runnable listener)
+	{
+		this.backButtonListeners.remove(listener);
+		if (this.backButtonListeners.isEmpty()) {
+			backButton.resetHover();
+			this.disableBackButton = true;
+		} else {
+			backButton.activeListener = this.backButtonListeners.getLast();
+		}
+	}
+
+	public void addOverlay(Renderable overlay)
+	{
+		this.overlays.add(overlay);
+	}
+
+	public void removeOverlay(Renderable overlay)
+	{
+		this.overlays.remove(overlay);
+	}
 }

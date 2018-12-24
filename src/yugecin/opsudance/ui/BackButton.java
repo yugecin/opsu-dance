@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
@@ -22,12 +7,14 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import yugecin.opsudance.core.input.MouseEvent;
+
 import org.newdawn.slick.*;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class BackButton {
-
+public class BackButton
+{
 	/** Skinned back button. */
 	private MenuButton backButton;
 
@@ -54,8 +41,8 @@ public class BackButton {
 	/** The width of the second part of the button. */
 	private int secondButtonSize;
 
-	/** Variable to hold the hovered state, to not recalculate it twice per frame. */
-	private boolean isHovered;
+	private boolean wasHoveredLastFrame;
+	private boolean isHoveredLastFrame;
 
 	/** The width of the "back" text to draw. */
 	private int textWidth;
@@ -81,7 +68,10 @@ public class BackButton {
 	/** The real button with, determined by the size and animations. */
 	private int realButtonWidth;
 
-	public BackButton() {
+	public Runnable activeListener;
+
+	public void revalidate()
+	{
 		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
 			backButton = null;
 			textWidth = Fonts.MEDIUM.getWidth("back");
@@ -112,34 +102,60 @@ public class BackButton {
 		backButton.setHoverExpand(MenuButton.Expand.UP_RIGHT);
 	}
 
+	public void preRenderUpdate()
+	{
+		if (backButton != null) {
+			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
+			return;
+		}
+
+		wasHoveredLastFrame = isHoveredLastFrame;
+		isHoveredLastFrame = buttonYpos - paddingY < mouseY && mouseX < realButtonWidth;
+		displayContainer.suppressHover |= isHoveredLastFrame;
+	}
+
 	/**
 	 * Draws the backbutton.
 	 */
-	public void draw(Graphics g) {
+	public void draw(Graphics g)
+	{
 		// draw image if it's skinned
 		if (backButton != null) {
 			backButton.draw();
 			return;
 		}
 
+		AnimationEquation anim;
+		if (isHoveredLastFrame) {
+			if (!wasHoveredLastFrame) {
+				animationTime = 0;
+			}
+			animationTime += renderDelta;
+			if (animationTime > ANIMATION_TIME) {
+				animationTime = ANIMATION_TIME;
+			}
+			anim = AnimationEquation.OUT_ELASTIC;
+		} else {
+			if (wasHoveredLastFrame) {
+				animationTime = ANIMATION_TIME;
+			}
+			animationTime -= renderDelta;
+			if (animationTime < 0) {
+				animationTime = 0;
+			}
+			anim = AnimationEquation.IN_ELASTIC;
+		}
+
 		// calc chevron size
-		Float beatProgress = MusicController.getBeatProgress();
-		if (beatProgress == null) {
-			beatProgress = 0f;
-		} else if (beatProgress < 0.2f) {
+		float beatProgress = MusicController.getBeatProgressOrDefault(0f);
+		if (beatProgress < 0.2f) {
 			beatProgress = AnimationEquation.IN_QUINT.calc(beatProgress * 5f);
 		} else {
 			beatProgress = 1f - AnimationEquation.OUT_QUAD.calc((beatProgress - 0.2f) * 1.25f);
 		}
-		int chevronSize = (int) (chevronBaseSize - (isHovered ? 6f : 3f) * beatProgress);
+		int chevronSize = (int) (chevronBaseSize - (isHoveredLastFrame ? 6f : 3f) * beatProgress);
 
 		// calc button sizes
-		AnimationEquation anim;
-		if (isHovered) {
-			anim = AnimationEquation.OUT_ELASTIC;
-		} else {
-			anim = AnimationEquation.IN_ELASTIC;
-		}
 		float progress = anim.calc((float) animationTime / ANIMATION_TIME);
 		float firstSize = firstButtonWidth + (firstButtonWidth - slopeImageSlopeWidth * 2) * progress;
 		float secondSize = secondButtonSize + secondButtonSize * 0.25f * progress;
@@ -170,39 +186,6 @@ public class BackButton {
 	}
 
 	/**
-	 * Processes a hover action depending on whether or not the cursor
-	 * is hovering over the button.
-	 */
-	public void hoverUpdate() {
-		final int delta = renderDelta;
-		final int cx = mouseX;
-		final int cy = mouseY;
-		if (backButton != null) {
-			backButton.hoverUpdate(delta, cx, cy);
-			return;
-		}
-		boolean wasHovered = isHovered;
-		isHovered = buttonYpos - paddingY < cy && cx < realButtonWidth;
-		if (isHovered) {
-			if (!wasHovered) {
-				animationTime = 0;
-			}
-			animationTime += delta;
-			if (animationTime > ANIMATION_TIME) {
-				animationTime = ANIMATION_TIME;
-			}
-		} else {
-			if (wasHovered) {
-				animationTime = ANIMATION_TIME;
-			}
-			animationTime -= delta;
-			if (animationTime < 0) {
-				animationTime = 0;
-			}
-		}
-	}
-
-	/**
 	 * Returns true if the coordinates are within the button bounds.
 	 * @param cx the x coordinate
 	 * @param cy the y coordinate
@@ -222,8 +205,19 @@ public class BackButton {
 			backButton.resetHover();
 			return;
 		}
-		isHovered = false;
+		isHoveredLastFrame = false;
 		animationTime = 0;
 	}
 
+	public boolean mouseReleased(MouseEvent e)
+	{
+		if (!displayContainer.disableBackButton &&
+			this.contains(e.x, e.y) &&
+			this.contains(mousePressX, mousePressY))
+		{
+			this.activeListener.run();
+			return true;
+		}
+		return false;
+	}
 }

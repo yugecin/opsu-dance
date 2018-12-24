@@ -289,7 +289,7 @@ public enum GameImage {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			img.setAlpha(0.9f);
-			return img.getScaledCopy(w, h);
+			return img;
 		}
 	},
 	MENU_LOGO ("logo2", "png", false, true) {
@@ -442,9 +442,6 @@ public enum GameImage {
 	/** The beatmap skin image array (optional, temporary). */
 	private Image[] skinImages;
 
-	/** Container dimensions. */
-	private static int containerWidth, containerHeight;
-
 	/** Value to scale UI components by. */
 	private static float uiscale;
 
@@ -459,15 +456,9 @@ public enum GameImage {
 		SUFFIXES_HD = new String[] { HD_SUFFIX, "" },
 		SUFFIXES_SD = new String[] { "" };
 
-	/**
-	 * Initializes the GameImage class with container dimensions.
-	 * @param width the container width
-	 * @param height the container height
-	 */
-	public static void init(int width, int height) {
-		containerWidth = width;
-		containerHeight = height;
-		uiscale = (float) containerHeight / UNSCALED_HEIGHT;
+	public static void onResolutionChanged()
+	{
+		uiscale = (float) height / UNSCALED_HEIGHT;
 	}
 
 	/**
@@ -914,8 +905,8 @@ public enum GameImage {
 	/**
 	 * Sub-method for image processing actions (via an override).
 	 * @param img the image to process
-	 * @param w the container width
-	 * @param h the container height
+	 * @param w scaled container width
+	 * @param h scaled container height
 	 * @return the processed image
 	 */
 	protected Image process_sub(Image img, int w, int h) { return img; }
@@ -924,14 +915,14 @@ public enum GameImage {
 	 * Performs individual post-loading actions on the image.
 	 */
 	private void process() {
-		int unscaledWidth = UNSCALED_HEIGHT * containerWidth / containerHeight;
+		int unscaledWidth = (int) (UNSCALED_HEIGHT * (float) width / height);
 		if (skinImages != null) {
 			for (int i = 0; i < skinImages.length; i++)
-				setImage(process_sub(getImages()[i], unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(getUIscale()), i);
+				setImage(process_sub(getImages()[i], unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(uiscale), i);
 		} else if (defaultImages != null && skinImage == null) {
 			for (int i = 0; i < defaultImages.length; i++)
-				setImage(process_sub(getImages()[i], unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(getUIscale()), i);
+				setImage(process_sub(getImages()[i], unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(uiscale), i);
 		} else
-			setImage(process_sub(getImage(), unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(getUIscale()));
+			setImage(process_sub(getImage(), unscaledWidth, UNSCALED_HEIGHT).getScaledCopy(uiscale));
 	}
 }

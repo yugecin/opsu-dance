@@ -29,6 +29,8 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Image;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * A convenience class for menu buttons, consisting of an image or animation
  * and coordinates. Multi-part images currently do not support effects.
@@ -99,6 +101,8 @@ public class MenuButton {
 
 	/** The default max rotation angle of the button. */
 	private static final float DEFAULT_ANGLE_MAX = 30f;
+
+	private boolean hovered;
 
 	/**
 	 * Creates a new button from an Image.
@@ -245,9 +249,11 @@ public class MenuButton {
 				xScaleOffset = image.getWidth() / 2f - xRadius;
 				yScaleOffset = image.getHeight() / 2f - yRadius;
 			}
-			if (hoverEffect == 0)
-				image.draw(x - xRadius, y - yRadius, filter);
-			else {
+			if (hoverEffect == 0) {
+				float x = this.x - xRadius - xScaleOffset;
+				float y = this.y - yRadius - yScaleOffset;
+				image.draw(x, y, filter);
+			} else {
 				float oldAlpha = image.getAlpha();
 				float oldAngle = image.getRotation();
 				if ((hoverEffect & EFFECT_EXPAND) > 0) {
@@ -264,7 +270,9 @@ public class MenuButton {
 					image.setAlpha(alpha.getValue());
 				if ((hoverEffect & EFFECT_ROTATE) > 0)
 					image.setRotation(angle.getValue());
-				image.draw(x - xRadius - xScaleOffset, y - yRadius - yScaleOffset, filter);
+				float x = this.x - xRadius - xScaleOffset;
+				float y = this.y - yRadius - yScaleOffset;
+				image.draw(x, y, filter);
 				if (image == this.img) {
 					image.setAlpha(oldAlpha);
 					image.setRotation(oldAngle);
@@ -466,7 +474,12 @@ public class MenuButton {
 	 * @param delta the delta interval
 	 * @param isHover true if the cursor is currently hovering over the button
 	 */
-	public void hoverUpdate(int delta, boolean isHover) {
+	public void hoverUpdate(int delta, boolean isHover)
+	{
+		displayContainer.suppressHover |= isHover &= !displayContainer.suppressHover;
+
+		this.hovered = isHover;
+
 		if (hoverEffect == 0)
 			return;
 
@@ -485,6 +498,11 @@ public class MenuButton {
 		// rotate the button
 		if ((hoverEffect & EFFECT_ROTATE) > 0)
 			angle.update(d);
+	}
+
+	public boolean isHovered()
+	{
+		return this.hovered;
 	}
 
 	/**

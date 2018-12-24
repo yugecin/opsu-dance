@@ -42,6 +42,12 @@ Resolve dependencies first by doing `ant mvnresolve` or `mvn initialize`
 
 Then do `ant run`
 
+#### Running tests
+
+Requires `junit.jar` (I use junit 4) in your `ANT_HOME/lib`
+
+`ant test`
+
 Building a JAR
 --------------
 

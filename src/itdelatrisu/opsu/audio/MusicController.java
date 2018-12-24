@@ -21,8 +21,6 @@ package itdelatrisu.opsu.audio;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
-import itdelatrisu.opsu.states.Game;
-import yugecin.opsudance.options.Options;
 
 import java.io.File;
 import java.io.IOException;
@@ -216,6 +214,15 @@ public class MusicController {
 		if (trackPosition < beatTime)
 			trackPosition += (beatLength / 100.0) * (beatTime / lastTimingPoint.getBeatLength());
 		return (float) ((((trackPosition - beatTime) * 100.0) % beatLength) / beatLength);
+	}
+
+	public static float getBeatProgressOrDefault(float def)
+	{
+		final Float progress = getBeatProgress();
+		if (progress != null) {
+			return (float) progress;
+		}
+		return def;
 	}
 
 	/**

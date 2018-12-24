@@ -29,7 +29,8 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
+
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
 
 import static itdelatrisu.opsu.GameImage.*;
@@ -80,21 +81,18 @@ public class GamePauseMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public boolean keyPressed(int key, char c) {
-		if (super.keyPressed(key, c)) {
-			return true;
-		}
-
+	public void keyPressed(KeyEvent e)
+	{
 		// game keys
 		if (!Keyboard.isRepeatEvent()) {
-			if (key == OPTION_KEY_LEFT.intval) {
-				mousePressed(Input.MOUSE_LEFT_BUTTON, mouseX, mouseY);
-			} else if (key == OPTION_KEY_RIGHT.intval) {
-				mousePressed(Input.MOUSE_RIGHT_BUTTON, mouseX, mouseY);
+			if (e.keyCode == OPTION_KEY_LEFT.keycode) {
+				this.onClick(mouseX, mouseY);
+			} else if (e.keyCode == OPTION_KEY_RIGHT.keycode) {
+				this.onClick(mouseX, mouseY);
 			}
 		}
 
-		if (key == KEY_ESCAPE) {
+		if (e.keyCode == KEY_ESCAPE) {
 			// 'esc' will normally unpause, but will return to song menu if health is zero
 			if (gameState.getRestart() == Game.Restart.LOSE) {
 				SoundController.playSound(SoundEffect.MENUBACK);
@@ -106,37 +104,32 @@ public class GamePauseMenu extends BaseOpsuState {
 				gameState.setRestart(Game.Restart.FALSE);
 				displayContainer.switchState(gameState);
 			}
-			return true;
 		}
 
-		if (key == KEY_R && input.isControlDown()) {
+		if (e.keyCode == KEY_R && input.isControlDown()) {
 			gameState.setRestart(Game.Restart.MANUAL);
 			displayContainer.switchState(gameState);
-			return true;
 		}
 
-		if (key == KEY_SUBTRACT || key == KEY_MINUS) {
+		if (e.keyCode == KEY_SUBTRACT || e.keyCode == KEY_MINUS) {
 			gameState.adjustLocalMusicOffset(-5);
-			return true;
+			return;
 		}
-		if (key == KEY_EQUALS || key == KEY_ADD || c == '+') {
+		if (e.keyCode == KEY_EQUALS || e.keyCode == KEY_ADD || e.chr == '+') {
 			gameState.adjustLocalMusicOffset(5);
-			return true;
 		}
-
-		return false;
 	}
 
 	@Override
-	public boolean mousePressed(int button, int x, int y) {
-		if (super.mousePressed(button, x, y)) {
-			return true;
+	public void mousePressed(MouseEvent e)
+	{
+		if (e.button != Input.MMB) {
+			this.onClick(e.x, e.y);
 		}
+	}
 
-		if (button == Input.MOUSE_MIDDLE_BUTTON) {
-			return true;
-		}
-
+	private void onClick(int x, int y)
+	{
 		boolean loseState = (gameState.getRestart() == Game.Restart.LOSE);
 		if (continueButton.contains(x, y) && !loseState) {
 			SoundController.playSound(SoundEffect.MENUBACK);
@@ -154,27 +147,19 @@ public class GamePauseMenu extends BaseOpsuState {
 			else
 				MusicController.resume();
 			if (displayContainer.cursor.isBeatmapSkinned()) {
-				displayContainer.resetCursor();
+				displayContainer.cursor.reset();
 			}
 			MusicController.setPitch(1.0f);
 			displayContainer.switchState(songMenuState);
 		}
-
-		return true;
 	}
 
 	@Override
-	public boolean mouseWheelMoved(int newValue) {
-		if (super.mouseWheelMoved(newValue)) {
-			return true;
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		if (!OPTION_DISABLE_MOUSE_WHEEL.state) {
+			volumeControl.changeVolume(e.direction);
 		}
-
-		if (OPTION_DISABLE_MOUSE_WHEEL.state) {
-			return true;
-		}
-
-		volumeControl.changeVolume(newValue);
-		return true;
 	}
 
 	@Override
