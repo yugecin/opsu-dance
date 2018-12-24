@@ -73,7 +73,6 @@ public class NewestCursor implements Cursor
 		final TextureData td = this.cursorTrailTexture;
 		float alpha = 0f;
 		float alphaIncrease = .4f / trail.size;
-		glPushMatrix();
 		glBindTexture(GL_TEXTURE_2D, td.id);
 		glBegin(GL_QUADS);
 		for (CursorTrail.Part p : this.trail) {
@@ -89,7 +88,6 @@ public class NewestCursor implements Cursor
 			glVertex2f(p.x +-td.width2, p.y + td.height2);
 		}
 		glEnd();
-		glPopMatrix();
 
 		glBindTexture(GL_TEXTURE_2D, oldTex);
 		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
@@ -99,6 +97,8 @@ public class NewestCursor implements Cursor
 		//glEnable(GL_TEXTURE_2D);
 		//glDisable(GL_TEXTURE_1D);
 		glBindTexture(GL_TEXTURE_2D, fbo.getTextureID());
+		glPushMatrix();
+		glTranslatef(-displayContainer.tx, -displayContainer.ty, 0f);
 		glBegin(GL_QUADS);
 		glColor4f(1f, 1f, 1f, 1f);
 		glTexCoord2f(1f, 1f);
@@ -110,6 +110,7 @@ public class NewestCursor implements Cursor
 		glTexCoord2f(1f, 0f);
 		glVertex2i(fbo.width, fbo.height);
 		glEnd();
+		glPopMatrix();
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		
 		int cx = trail.lastPosition.x;
