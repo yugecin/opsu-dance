@@ -469,7 +469,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		sout("GL ready");
 
-		GameImage.init(width, height);
+		GameImage.onResolutionChanged();
 		Fonts.init();
 
 		if (volumeControl == null) {
