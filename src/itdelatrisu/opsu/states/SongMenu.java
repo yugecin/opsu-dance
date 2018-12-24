@@ -268,7 +268,7 @@ public class SongMenu extends BaseOpsuState
 	private File lastBackgroundImage;
 
 	/** Background alpha level (for fade-in effect). */
-	private AnimatedValue bgAlpha = new AnimatedValue(800, 0f, 1f, AnimationEquation.OUT_QUAD);
+	private AnimatedValue bgAlpha = new AnimatedValue(800, 0f, .5f, AnimationEquation.OUT_QUAD);
 
 	/** Timer for animations when a new song node is selected. */
 	private AnimatedValue songChangeTimer = new AnimatedValue(900, 0f, 1f, AnimationEquation.LINEAR);
