@@ -58,6 +58,7 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.*;
+import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
 import yugecin.opsudance.objects.curves.FakeCombinedCurve;
@@ -1485,7 +1486,8 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public void enter() {
+	public void enter()
+	{
 		overlays.clear();
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			overlays.add(moveStoryboardOverlay);
@@ -1507,6 +1509,8 @@ public class Game extends ComplexOpsuState {
 			displayContainer.switchStateInstantly(songMenuState);
 			return;
 		}
+
+		Display.setTitle(String.format("%s - %s", Constants.PROJECT_NAME, beatmap.toString()));
 
 		Dancer.instance.reset();
 		MoverDirection.reset(beatmap.beatmapID);
@@ -1757,8 +1761,11 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public void leave() {
+	public void leave()
+	{
 		super.leave();
+
+		Display.setTitle(Constants.PROJECT_NAME);
 
 		displayContainer.cursor.reset();
 		displayContainer.drawCursor = true;
@@ -1967,7 +1974,6 @@ public class Game extends ComplexOpsuState {
 	 */
 	public void loadBeatmap(Beatmap beatmap) {
 		this.beatmap = beatmap;
-		Display.setTitle(String.format("opsu!dance - %s", beatmap.toString()));
 		if (beatmap.breaks == null) {
 			BeatmapDB.load(beatmap, BeatmapDB.LOAD_ARRAY);
 		}

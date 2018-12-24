@@ -303,7 +303,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	public void setup() throws Exception {
 		width = height = width2 = height2 = -1;
-		Display.setTitle("opsu!dance");
+		Display.setTitle(Constants.PROJECT_NAME);
 		setupResolutionOptionlist(nativeDisplayMode.getWidth(), nativeDisplayMode.getHeight());
 		updateDisplayMode(OPTION_SCREEN_RESOLUTION.getValueString());
 		Display.create();
