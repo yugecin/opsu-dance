@@ -290,7 +290,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				timeSinceLastRender = 0;
 
 				Display.update(false);
-				GL11.glFlush();
 				rendering = false;
 			}
 
