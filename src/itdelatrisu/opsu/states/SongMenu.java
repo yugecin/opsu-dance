@@ -1159,7 +1159,7 @@ public class SongMenu extends BaseOpsuState
 
 		// random track, add previous to stack
 		randomStack.push(new SongNode(BeatmapSetList.get().getBaseNode(focusNode.index), focusNode.beatmapIndex));
-		this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+		this.setFocusToRandom();
 	}
 
 	private void showMapOptions()
@@ -1253,7 +1253,7 @@ public class SongMenu extends BaseOpsuState
 		if (songFolderChanged && stateAction != MenuState.RELOAD) {
 			reloadBeatmaps(false);
 		} else if (focusNode == null && BeatmapSetList.get().size() > 0) {
-			this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+			this.setFocusToRandom();
 		}
 
 		// reset music track
@@ -1394,7 +1394,7 @@ public class SongMenu extends BaseOpsuState
 					focusScores = null;
 					BeatmapSetList.get().reset();
 					BeatmapSetList.get().init();
-					this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+					this.setFocusToRandom();
 				}
 				break;
 			default:
@@ -1484,8 +1484,13 @@ public class SongMenu extends BaseOpsuState
 				return true;
 			}
 		}
-		this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+		this.setFocusToRandom();
 		return false;
+	}
+
+	public void setFocusToRandom()
+	{
+		this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
 	}
 
 	/**
