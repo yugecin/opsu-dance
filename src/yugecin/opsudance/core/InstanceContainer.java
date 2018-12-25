@@ -27,12 +27,15 @@ import yugecin.opsudance.ui.VolumeControl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import static yugecin.opsudance.utils.SyntacticSugar.closeAndSwallow;
 
 public class InstanceContainer {
+
+	public static Random rand;
 
 	public static Environment env;
 	public static Configuration config;
@@ -72,7 +75,9 @@ public class InstanceContainer {
 	public static int mouseX, mouseY;
 	public static int renderDelta;
 
-	public static void kickstart() {
+	public static void kickstart()
+	{
+		rand = new Random();
 		updater = new Updater();
 		env = new Environment();
 

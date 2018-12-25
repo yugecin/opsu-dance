@@ -34,12 +34,15 @@ public class BeatmapSet implements Iterable<Beatmap> {
 	/** List of associated beatmaps. */
 	private final ArrayList<Beatmap> beatmaps;
 
+	public final int setId;
+
 	/**
 	 * Constructor.
-	 * @param beatmaps the beatmaps in this set
+	 * @param beatmaps the beatmaps in this set, should not be empty
 	 */
 	public BeatmapSet(ArrayList<Beatmap> beatmaps) {
 		this.beatmaps = beatmaps;
+		this.setId = beatmaps.get(0).beatmapSetID;
 	}
 
 	/**

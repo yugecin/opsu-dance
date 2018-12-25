@@ -21,6 +21,7 @@ package itdelatrisu.opsu.beatmap;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.db.BeatmapDB;
+import yugecin.opsudance.core.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,6 +112,27 @@ public class BeatmapSetList {
 	 * Returns the number of elements.
 	 */
 	public int size() { return nodes.size(); }
+
+	public boolean isEmpty()
+	{
+		return this.nodes.isEmpty();
+	}
+
+	/**
+	 * @return the node corresponding to the given map, or {@code null} if not visible
+	 */
+	@Nullable
+	public BeatmapSetNode findSet(BeatmapSet set)
+	{
+		int idx = this.nodes.size();
+		while (--idx >= 0) {
+			final BeatmapSetNode node = this.nodes.get(idx);
+			if (node.getBeatmapSet().setId == set.setId) {
+				return node;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Adds a song group.

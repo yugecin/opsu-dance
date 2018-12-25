@@ -139,11 +139,11 @@ public class SongMenu extends BaseOpsuState
 	/** The number of Nodes to offset from the top to the startNode. */
 	private int startNodeOffset;
 
+	/** Node of the song that's currently played, aka last focused node. */
+	private BeatmapSetNode currentNode;
+
 	/** Current focused (selected) node. */
 	private BeatmapSetNode focusNode;
-
-	/** The base node of the previous focus node. */
-	private SongNode oldFocusNode = null;
 
 	/** Stack of previous "random" (F2) focus nodes. */
 	private Stack<SongNode> randomStack = new Stack<SongNode>();
@@ -697,10 +697,10 @@ public class SongMenu extends BaseOpsuState
 			BeatmapSetList.get().reset();
 			BeatmapSetList.get().init();
 			if (BeatmapSetList.get().size() > 0) {
-				// initialize song list
-				setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-			} else
+				this.restoreFocusOrFocusRandom();
+			} else {
 				MusicController.playThemeSong(config.themeBeatmap);
+			}
 			reloadThread = null;
 		}
 		selectModeButton.hoverUpdate(delta, mouseX, mouseY);
@@ -746,10 +746,6 @@ public class SongMenu extends BaseOpsuState
 		if (searchTimer >= SEARCH_DELAY && reloadThread == null && beatmapMenuTimer == -1) {
 			searchTimer = 0;
 
-			// store the start/focus nodes
-			if (focusNode != null)
-				oldFocusNode = new SongNode(BeatmapSetList.get().getBaseNode(focusNode.index), focusNode.beatmapIndex);
-
 			if (BeatmapSetList.get().search(searchTextField.getText())) {
 				// reset song stack
 				randomStack = new Stack<>();
@@ -764,19 +760,12 @@ public class SongMenu extends BaseOpsuState
 				focusScores = null;
 				if (BeatmapSetList.get().size() > 0) {
 					BeatmapSetList.get().init();
-					if (searchTextField.getText().isEmpty()) {  // cleared search
-						// use previous start/focus if possible
-						if (oldFocusNode != null)
-							setFocus(oldFocusNode.getNode(), oldFocusNode.getIndex(), true, true);
-						else
-							setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
-					} else {
+					if (!searchTextField.getText().isEmpty()) {
 						int size = BeatmapSetList.get().size();
 						searchResultString = String.format("%d match%s found!",
 								size, (size == 1) ? "" : "es");
-						setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
 					}
-					oldFocusNode = null;
+					this.restoreFocusOrFocusRandom();
 				} else if (!searchTextField.getText().isEmpty())
 					searchResultString = "No matches found. Hit ESC to reset.";
 			}
@@ -910,10 +899,11 @@ public class SongMenu extends BaseOpsuState
 			if (group == BeatmapGroup.current()) {
 				return;
 			}
+			if (this.focusNode != null) {
+			}
 			BeatmapGroup.set(group);
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			startNode = focusNode = null;
-			oldFocusNode = null;
 			randomStack = new Stack<SongNode>();
 			songInfo = null;
 			scoreMap = null;
@@ -924,9 +914,9 @@ public class SongMenu extends BaseOpsuState
 			searchResultString = null;
 			BeatmapSetList.get().reset();
 			BeatmapSetList.get().init();
-			setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+			this.restoreFocusOrFocusRandom();
 
-			if (BeatmapSetList.get().size() < 1 && group.getEmptyMessage() != null) {
+			if (BeatmapSetList.get().isEmpty() && group.getEmptyMessage() != null) {
 				barNotifs.send(group.getEmptyMessage());
 			}
 			return;
@@ -1345,7 +1335,6 @@ public class SongMenu extends BaseOpsuState
 						setFocus(next, -1, true, true);
 					else {
 						startNode = focusNode = null;
-						oldFocusNode = null;
 						randomStack = new Stack<SongNode>();
 						songInfo = null;
 						scoreMap = null;
@@ -1393,7 +1382,6 @@ public class SongMenu extends BaseOpsuState
 			case BEATMAP_FAVORITE:  // removed favorite, reset beatmap list
 				if (BeatmapGroup.current() == BeatmapGroup.FAVORITE) {
 					startNode = focusNode = null;
-					oldFocusNode = null;
 					randomStack = new Stack<SongNode>();
 					songInfo = null;
 					scoreMap = null;
@@ -1477,6 +1465,19 @@ public class SongMenu extends BaseOpsuState
 			startNode = BeatmapSetList.get().getBaseNode(startNodeIndex);
 	}
 
+	private void restoreFocusOrFocusRandom()
+	{
+		if (currentNode != null) {
+			final BeatmapSet set = currentNode.getBeatmapSet();
+			BeatmapSetNode setNode = BeatmapSetList.get().findSet(set);
+			if (setNode != null) {
+				this.setFocus(setNode, currentNode.beatmapIndex, true, true);
+				return;
+			}
+		}
+		this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+	}
+
 	/**
 	 * Sets a new focus node.
 	 * @param node the base node; it will be expanded if it isn't already
@@ -1514,7 +1515,7 @@ public class SongMenu extends BaseOpsuState
 		if (beatmapIndex < 0 || beatmapIndex > length - 1)  // set a random index
 			beatmapIndex = (int) (Math.random() * length);
 
-		focusNode = BeatmapSetList.get().getNode(node, beatmapIndex);
+		currentNode = focusNode = BeatmapSetList.get().getNode(node, beatmapIndex);
 		Beatmap beatmap = focusNode.getSelectedBeatmap();
 		if (beatmap.timingPoints == null) {
 			// parse timing points so we can pulse the logo
@@ -1679,7 +1680,6 @@ public class SongMenu extends BaseOpsuState
 		startNode = focusNode = null;
 		scoreMap = null;
 		focusScores = null;
-		oldFocusNode = null;
 		randomStack = new Stack<SongNode>();
 		songInfo = null;
 		hoverOffset.setTime(0);
