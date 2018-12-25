@@ -1270,6 +1270,8 @@ public class SongMenu extends BaseOpsuState
 		if (MusicController.isTrackDimmed())
 			MusicController.toggleTrackDimmed(1f);
 
+		this.centerFocusedNode();
+
 		// reset game data
 		if (resetGame) {
 			gameState.resetGameData();
@@ -1554,10 +1556,7 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		updateDrawnSongPosition();
-
-		// Centers selected node
-		int val = focusNode.index + focusNode.beatmapIndex - MAX_SONG_BUTTONS/2;
-		songScrolling.scrollToPosition(val * buttonOffset);
+		this.centerFocusedNode();
 
 		/*
 		// Attempts to make all nodes in the set at least visible
@@ -1576,6 +1575,12 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		return oldFocus;
+	}
+
+	private void centerFocusedNode()
+	{
+		int val = focusNode.index + focusNode.beatmapIndex - MAX_SONG_BUTTONS / 2;
+		this.songScrolling.scrollToPosition(val * buttonOffset);
 	}
 
 	/**
