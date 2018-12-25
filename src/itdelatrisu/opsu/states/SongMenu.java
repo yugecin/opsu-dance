@@ -914,7 +914,9 @@ public class SongMenu extends BaseOpsuState
 			searchResultString = null;
 			BeatmapSetList.get().reset();
 			BeatmapSetList.get().init();
-			this.restoreFocusOrFocusRandom();
+			if (this.restoreFocusOrFocusRandom()) {
+				this.centerFocusedNodeNow();
+			}
 
 			if (BeatmapSetList.get().isEmpty() && group.getEmptyMessage() != null) {
 				barNotifs.send(group.getEmptyMessage());
@@ -1270,7 +1272,7 @@ public class SongMenu extends BaseOpsuState
 		if (MusicController.isTrackDimmed())
 			MusicController.toggleTrackDimmed(1f);
 
-		this.centerFocusedNode();
+		this.centerFocusedNodeNow();
 
 		// reset game data
 		if (resetGame) {
@@ -1469,17 +1471,21 @@ public class SongMenu extends BaseOpsuState
 			startNode = BeatmapSetList.get().getBaseNode(startNodeIndex);
 	}
 
-	private void restoreFocusOrFocusRandom()
+	/**
+	 * @return {@code true} if focus was restored
+	 */
+	private boolean restoreFocusOrFocusRandom()
 	{
 		if (currentNode != null) {
 			final BeatmapSet set = currentNode.getBeatmapSet();
 			BeatmapSetNode setNode = BeatmapSetList.get().findSet(set);
 			if (setNode != null) {
 				this.setFocus(setNode, currentNode.beatmapIndex, true);
-				return;
+				return true;
 			}
 		}
 		this.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+		return false;
 	}
 
 	/**
@@ -1556,7 +1562,7 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		updateDrawnSongPosition();
-		this.centerFocusedNode();
+		this.centerFocusedNodeSmooth();
 
 		/*
 		// Attempts to make all nodes in the set at least visible
@@ -1577,10 +1583,22 @@ public class SongMenu extends BaseOpsuState
 		return oldFocus;
 	}
 
-	private void centerFocusedNode()
+	private void centerFocusedNodeSmooth()
 	{
+		if (focusNode == null) {
+			return;
+		}
 		int val = focusNode.index + focusNode.beatmapIndex - MAX_SONG_BUTTONS / 2;
 		this.songScrolling.scrollToPosition(val * buttonOffset);
+	}
+
+	private void centerFocusedNodeNow()
+	{
+		if (focusNode == null) {
+			return;
+		}
+		int val = focusNode.index + focusNode.beatmapIndex - MAX_SONG_BUTTONS / 2;
+		this.songScrolling.setPosition(val * buttonOffset);
 	}
 
 	/**
