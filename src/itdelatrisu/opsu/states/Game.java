@@ -434,9 +434,6 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		if (GameMod.FLASHLIGHT.isActive())
-			Graphics.setCurrent(g);
-
 		// "flashlight" mod: restricted view of hit objects around cursor
 		if (GameMod.FLASHLIGHT.isActive()) {
 			// render hit objects offscreen
