@@ -205,10 +205,18 @@ public class KineticScrolling {
 		this.min = min;
 		this.max = max;
 		if (this.getTargetPosition() > max) {
-			this.scrollToPosition(max);
+			if (this.allowOverScroll) {
+				this.scrollToPosition(max);
+			} else {
+				this.setPosition(max);
+			}
 		}
 		if (this.getTargetPosition() < min) {
-			this.scrollToPosition(min);
+			if (this.allowOverScroll) {
+				this.scrollToPosition(min);
+			} else {
+				this.setPosition(min);
+			}
 		}
 	}
 
