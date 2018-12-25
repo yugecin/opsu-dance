@@ -71,6 +71,9 @@ public class StarStream {
 	/** Random number generator instance. */
 	private final Random random;
 
+	private boolean allowInOutQuad;
+	private boolean isPaused;
+
 	/** Contains data for a single star. */
 	private class Star {
 		/** The star position offset. */
@@ -134,12 +137,36 @@ public class StarStream {
 	 * @param k the maximum number of stars to draw at once (excluding bursts)
 	 */
 	public StarStream(float x, float y, float dirX, float dirY, int k) {
+		this.allowInOutQuad = true;
 		this.position = new Vec2f(x, y);
 		this.direction = new Vec2f(dirX, dirY);
 		this.maxStars = k;
 		this.starImg = GameImage.STAR2.getImage().copy();
 		this.stars = new ArrayList<Star>(k);
 		this.random = new Random();
+	}
+
+	/**
+	 * By default, stars will randomly get either OUT_QUAD or IN_OUT_QUAD animation
+	 * 
+	 * @param flag set to {@code false} to only allow OUT_QUAD
+	 */
+	public void allowInOutQuad(boolean flag)
+	{
+		this.allowInOutQuad = flag;
+	}
+
+	/**
+	 * don't spawn new stars
+	 */
+	public void pause()
+	{
+		this.isPaused = true;
+	}
+
+	public void resume()
+	{
+		this.isPaused = false;
 	}
 
 	/**
@@ -181,6 +208,12 @@ public class StarStream {
 		this.scaleSpread = spread;
 	}
 
+	public void setPosition(float x, float y)
+	{
+		this.position.x = x;
+		this.position.y = y;
+	}
+
 	/**
 	 * Draws the star stream.
 	 */
@@ -207,6 +240,10 @@ public class StarStream {
 				iter.remove();
 		}
 
+		if (this.isPaused) {
+			return;
+		}
+
 		// create new stars
 		for (int i = stars.size(); i < maxStars; i++) {
 			if (Math.random() < ((i < maxStars / 4) ? 0.25 : 0.66))
@@ -226,7 +263,10 @@ public class StarStream {
 		int angle = (int) getGaussian(0, 22.5);
 		float scale = (float) getGaussian(scaleBase, scaleSpread);
 		int duration = Math.max(0, (int) (distanceRatio * getGaussian(durationBase, durationSpread)));
-		AnimationEquation eqn = random.nextBoolean() ? AnimationEquation.IN_OUT_QUAD : AnimationEquation.OUT_QUAD;
+		AnimationEquation eqn = AnimationEquation.OUT_QUAD;
+		if (this.allowInOutQuad && random.nextBoolean()) {
+			eqn = AnimationEquation.IN_OUT_QUAD;
+		}
 
 		return new Star(offset, dir, angle, scale, duration, eqn);
 	}
