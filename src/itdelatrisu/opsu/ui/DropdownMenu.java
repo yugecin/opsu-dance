@@ -258,6 +258,7 @@ public class DropdownMenu<E> extends Component
 	public void mouseReleased(MouseEvent e)
 	{
 		if (e.button == Input.MMB || input.dragDistanceExceeds(e.x, e.y, 10)) {
+			e.consume();
 			return;
 		}
 
