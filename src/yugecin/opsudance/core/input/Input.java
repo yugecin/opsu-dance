@@ -76,13 +76,6 @@ public class Input
 		return Keyboard.isKeyDown(KEY_RSHIFT) || Keyboard.isKeyDown(KEY_LSHIFT);
 	}
 
-	public boolean dragDistanceExceeds(int releaseX, int releaseY, int distance)
-	{
-		final int dx = releaseX - mousePressX;
-		final int dy = releaseY - mousePressY;
-		return dx * dx + dy * dy > distance * distance;
-	}
-
 	public void poll()
 	{
 		mouseX = Mouse.getX();
