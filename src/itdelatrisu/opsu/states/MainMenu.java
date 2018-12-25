@@ -698,7 +698,7 @@ public class MainMenu extends BaseOpsuState {
 		if (musicPrev.contains(x, y)) {
 			lastMeasureProgress = 0f;
 			if (!previous.isEmpty()) {
-				songMenuState.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, true, false);
+				songMenuState.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, false);
 				if (OPTION_DYNAMIC_BACKGROUND.state) {
 					bgAlpha.setTime(0);
 				}
@@ -899,7 +899,7 @@ public class MainMenu extends BaseOpsuState {
 			MusicController.playAt(0, false);
 			return;
 		}
-		BeatmapSetNode node = songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, false);
+		BeatmapSetNode node = songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, false);
 		boolean sameAudio = false;
 		if (node != null) {
 			sameAudio = MusicController.getBeatmap().audioFilename.equals(node.getBeatmapSet().get(0).audioFilename);

@@ -533,7 +533,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.
-				songMenuState.setFocus(importedNode, -1, true, true);
+				songMenuState.setFocus(importedNode, -1, true);
 			}
 			importThread = null;
 		}

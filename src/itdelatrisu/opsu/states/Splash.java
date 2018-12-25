@@ -101,7 +101,7 @@ public class Splash extends BaseOpsuState {
 		if (OPTION_ENABLE_THEME_SONG.state) {
 			MusicController.playThemeSong(config.themeBeatmap);
 		} else {
-			songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+			songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
 		}
 		displayContainer.switchStateInstantly(mainmenuState);
 	}
