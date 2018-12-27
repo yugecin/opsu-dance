@@ -859,13 +859,18 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (e.button == Input.LMB) {
-			songScrolling.pressed();
-		} else if (e.button == Input.RMB && headerY < e.y && e.y < footerY) {
+		if (e.button == Input.RMB) {
 			this.isFastScrollingSongs = true;
 			songScrolling.setSpeedMultiplier(5f);
 			this.updateFastSongScrollingPosition();
+			return;
 		}
+
+		if (e.y <= headerY || footerY <= e.y) {
+			return;
+		}
+
+		songScrolling.pressed();
 		startScorePos.pressed();
 	}
 
@@ -892,8 +897,11 @@ public class SongMenu extends BaseOpsuState
 			this.isFastScrollingSongs = false;
 			songScrolling.setSpeedMultiplier(1f);
 		}
-		songScrolling.released();
-		startScorePos.released();
+
+		if (headerY < mousePressY && mousePressY < footerY) {
+			songScrolling.released();
+			startScorePos.released();
+		}
 
 		if (isInputBlocked()) {
 			return;
@@ -1211,6 +1219,15 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
+		if (this.isFastScrollingSongs) {
+			this.updateFastSongScrollingPosition();
+			return;
+		}
+
+		if (mousePressY < headerY || footerY < mousePressY) {
+			return;
+		}
+
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&
 			ScoreData.areaContains(mousePressX, mousePressY))
@@ -1219,12 +1236,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (!this.isFastScrollingSongs) {
-			songScrolling.dragged(-e.dy);
-			return;
-		}
-
-		this.updateFastSongScrollingPosition();
+		songScrolling.dragged(-e.dy);
 	}
 
 	private void updateFastSongScrollingPosition()
