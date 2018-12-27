@@ -135,6 +135,7 @@ public class SongMenu extends BaseOpsuState
 
 	/** The first node is about this high above the header. */
 	private KineticScrolling songScrolling = new KineticScrolling();
+	private boolean isFastScrollingSongs = true;
 
 	/** The number of Nodes to offset from the top to the startNode. */
 	private int startNodeOffset;
@@ -858,7 +859,13 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		songScrolling.pressed();
+		if (e.button == Input.LMB) {
+			songScrolling.pressed();
+		} else if (e.button == Input.RMB && headerY < e.y && e.y < footerY) {
+			this.isFastScrollingSongs = true;
+			songScrolling.setSpeedMultiplier(5f);
+			this.updateFastSongScrollingPosition();
+		}
 		startScorePos.pressed();
 	}
 
@@ -881,6 +888,10 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
+		if (this.isFastScrollingSongs) {
+			this.isFastScrollingSongs = false;
+			songScrolling.setSpeedMultiplier(1f);
+		}
 		songScrolling.released();
 		startScorePos.released();
 
@@ -1188,6 +1199,7 @@ public class SongMenu extends BaseOpsuState
 		buttonState.setMenuState(state, focusNode);
 		displayContainer.switchState(buttonState);
 	}
+
 	@Override
 	public void mouseDragged(MouseDragEvent e)
 	{
@@ -1199,24 +1211,26 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		// check mouse button (right click scrolls faster on songs)
-		int multiplier;
-		if (Mouse.isButtonDown(Input.RMB)) {
-			multiplier = 10;
-		} else if (Mouse.isButtonDown(Input.LMB)) {
-			multiplier = 1;
-		} else {
-			return;
-		}
-
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&
 			ScoreData.areaContains(mousePressX, mousePressY))
 		{
-			startScorePos.dragged(-e.dy * multiplier);
-		} else {
-			songScrolling.dragged(-e.dy * multiplier);
+			startScorePos.dragged(-e.dy * (Mouse.isButtonDown(Input.RMB) ? 10 : 1));
+			return;
 		}
+
+		if (!this.isFastScrollingSongs) {
+			songScrolling.dragged(-e.dy);
+			return;
+		}
+
+		this.updateFastSongScrollingPosition();
+	}
+
+	private void updateFastSongScrollingPosition()
+	{
+		final float pos = -.05f + 1.1f * (mouseY - headerY) / (footerY - headerY);
+		this.songScrolling.setPercentualPosition(pos);
 	}
 
 	@Override

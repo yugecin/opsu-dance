@@ -157,6 +157,11 @@ public class KineticScrolling {
 		position = target;
 	}
 
+	public void setPercentualPosition(float position)
+	{
+		this.scrollToPosition((1f - position) * this.min + position * this.max);
+	}
+
 	/**
 	 * Set the position relative to an offset.
 	 * @param offset the offset from the position
