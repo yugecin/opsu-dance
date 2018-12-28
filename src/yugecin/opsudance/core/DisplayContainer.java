@@ -461,9 +461,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
 
-		input.mouseListeners.clear();
-		input.keyListeners.clear();
-		input.addListener(state);
 		Keyboard.enableRepeatEvents(true);
 
 		sout("GL ready");
