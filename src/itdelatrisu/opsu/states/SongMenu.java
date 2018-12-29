@@ -865,6 +865,7 @@ public class SongMenu extends BaseOpsuState
 			this.updateFastSongScrollingPosition();
 			return;
 		}
+		songScrolling.setSpeedMultiplier(1f);
 
 		if (e.y <= headerY || footerY <= e.y) {
 			return;
@@ -894,8 +895,10 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (this.isFastScrollingSongs) {
-			this.isFastScrollingSongs = false;
-			songScrolling.setSpeedMultiplier(1f);
+			if (e.button == Input.RMB) {
+				this.isFastScrollingSongs = false;
+			}
+			return;
 		}
 
 		if (headerY < mousePressY && mousePressY < footerY) {
@@ -1211,6 +1214,10 @@ public class SongMenu extends BaseOpsuState
 	@Override
 	public void mouseDragged(MouseDragEvent e)
 	{
+		if (e.button == Input.MMB) {
+			return;
+		}
+
 		if (isInputBlocked()) {
 			return;
 		}
@@ -1220,7 +1227,9 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (this.isFastScrollingSongs) {
-			this.updateFastSongScrollingPosition();
+			if (e.button == Input.RMB) {
+				this.updateFastSongScrollingPosition();
+			}
 			return;
 		}
 
@@ -1251,6 +1260,11 @@ public class SongMenu extends BaseOpsuState
 		if (isInputBlocked()) {
 			return;
 		}
+
+		if (this.isFastScrollingSongs) {
+			return;
+		}
+		songScrolling.setSpeedMultiplier(1f);
 
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&

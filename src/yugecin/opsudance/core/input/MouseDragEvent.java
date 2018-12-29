@@ -4,10 +4,11 @@ package yugecin.opsudance.core.input;
 
 public class MouseDragEvent extends Event
 {
-	public final int dx, dy;
+	public final int button, dx, dy;
 
-	MouseDragEvent(int dx, int dy)
+	MouseDragEvent(int button, int dx, int dy)
 	{
+		this.button = button;
 		this.dx = dx;
 		this.dy = dy;
 	}

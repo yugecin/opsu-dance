@@ -56,11 +56,6 @@ public class Input
 		this.keyListeners.remove(listener);
 	}
 
-	public boolean isAnyMouseButtonDown()
-	{
-		return Mouse.isButtonDown(0) || Mouse.isButtonDown(1) || Mouse.isButtonDown(2);
-	}
-
 	public boolean isAltDown()
 	{
 		return Keyboard.isKeyDown(KEY_LMENU) || Keyboard.isKeyDown(KEY_RMENU);
@@ -123,11 +118,19 @@ public class Input
 
 			if (Mouse.isGrabbed() &&
 				displayActive &&
-				isAnyMouseButtonDown() &&
 				(dx != 0 && dy != 0))
 			{
-				final MouseDragEvent e = new MouseDragEvent(dx, -dy);
-				this.dispatch(this.mouseListeners, MouseListener::mouseDragged, e);
+				for (int i = 0; i < 3; i++) {
+					if (!Mouse.isButtonDown(i)) {
+						continue;
+					}
+					final MouseDragEvent e = new MouseDragEvent(i, dx, -dy);
+					this.dispatch(
+						this.mouseListeners,
+						MouseListener::mouseDragged,
+						e
+					);
+				}
 			}
 
 			final int dwheel = Mouse.getEventDWheel();
@@ -144,13 +147,21 @@ public class Input
 			lastMouseX = mouseX;
 			lastMouseY = mouseY;
 		} else {
-			if (isAnyMouseButtonDown() &&
-				(lastMouseX != mouseX || lastMouseY != mouseY))
+			if (lastMouseX != mouseX || lastMouseY != mouseY)
 			{
 				final int dx = mouseX - lastMouseX;
 				final int dy = mouseY - lastMouseY;
-				final MouseDragEvent e = new MouseDragEvent(dx, dy);
-				this.dispatch(this.mouseListeners, MouseListener::mouseDragged, e);
+				for (int i = 0; i < 3; i++) {
+					if (!Mouse.isButtonDown(i)) {
+						continue;
+					}
+					final MouseDragEvent e = new MouseDragEvent(i, dx, dy);
+					this.dispatch(
+						this.mouseListeners,
+						MouseListener::mouseDragged,
+						e
+					);
+				}
 				lastMouseX = mouseX;
 				lastMouseY = mouseY;
 			}
