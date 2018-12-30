@@ -136,7 +136,7 @@ public class SongMenu extends BaseOpsuState
 
 	/** The first node is about this high above the header. */
 	private KineticScrolling songScrolling = new KineticScrolling();
-	private boolean isFastScrollingSongs = true;
+	private boolean isFastScrollingSongs;
 
 	/** The number of Nodes to offset from the top to the startNode. */
 	private int startNodeOffset;
