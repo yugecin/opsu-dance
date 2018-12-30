@@ -304,9 +304,6 @@ public class SongMenu extends BaseOpsuState
 	/** The star stream. */
 	private StarStream starStream;
 
-	/** The maximum number of stars in the star stream. */
-	private static final int MAX_STREAM_STARS = 20;
-
 	/** Whether the menu is currently scrolling to the focus node (blocks other actions). */
 	private boolean isScrollingToFocusNode = false;
 
@@ -434,10 +431,11 @@ public class SongMenu extends BaseOpsuState
 		});
 
 		// star stream
-		starStream = new StarStream(width, 0, -width, 0, MAX_STREAM_STARS);
+		starStream = new StarStream(width, 0, -width, 0, 75);
 		starStream.setPositionSpread(buttonOffset / 5);
 		starStream.setDirectionSpread(10f);
 		starStream.allowInOutQuad(false);
+		starStream.staggerSpawn(false);
 	}
 
 	@Override

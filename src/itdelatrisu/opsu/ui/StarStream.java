@@ -73,6 +73,7 @@ public class StarStream {
 
 	private boolean allowInOutQuad;
 	private boolean isPaused;
+	private boolean staggerSpawn;
 
 	/** Contains data for a single star. */
 	private class Star {
@@ -138,6 +139,7 @@ public class StarStream {
 	 */
 	public StarStream(float x, float y, float dirX, float dirY, int k) {
 		this.allowInOutQuad = true;
+		this.staggerSpawn = true;
 		this.position = new Vec2f(x, y);
 		this.direction = new Vec2f(dirX, dirY);
 		this.maxStars = k;
@@ -154,6 +156,16 @@ public class StarStream {
 	public void allowInOutQuad(boolean flag)
 	{
 		this.allowInOutQuad = flag;
+	}
+
+	/**
+	 * By default, spawning stars is determined by some random factor (staggering)
+	 * 
+	 * @param flag set to {@code false} to always spawn to have {@code maxStars} stars
+	 */
+	public void staggerSpawn(boolean flag)
+	{
+		this.staggerSpawn = flag;
 	}
 
 	/**
@@ -246,8 +258,11 @@ public class StarStream {
 
 		// create new stars
 		for (int i = stars.size(); i < maxStars; i++) {
-			if (Math.random() < ((i < maxStars / 4) ? 0.25 : 0.66))
+			if (this.staggerSpawn &&
+				Math.random() < ((i < maxStars / 4) ? 0.25 : 0.66))
+			{
 				break;  // stagger spawning new stars
+			}
 
 			stars.add(createStar());
 		}
