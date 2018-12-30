@@ -16,7 +16,7 @@
  * along with opsu!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package itdelatrisu.opsu.states;
+package itdelatrisu.opsu.states.game;
 
 import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.audio.HitSound;
@@ -1602,11 +1602,11 @@ public class Game extends ComplexOpsuState {
 
 				try {
 					if (hitObject.isCircle()) {
-						gameObjects[i] = new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
+						gameObjects[i] = new Circle(hitObject, data, hitObject.getComboIndex(), comboEnd);
 					} else if (hitObject.isSlider()) {
-						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
+						gameObjects[i] = new Slider(hitObject, data, hitObject.getComboIndex(), comboEnd);
 					} else if (hitObject.isSpinner()) {
-						gameObjects[i] = new Spinner(hitObject, this, data);
+						gameObjects[i] = new Spinner(hitObject, data);
 					}
 				} catch (Exception e) {
 					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());

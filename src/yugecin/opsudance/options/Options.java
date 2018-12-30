@@ -5,7 +5,7 @@ package yugecin.opsudance.options;
 import awlex.ospu.polymover.factory.PolyMoverFactory;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
-import itdelatrisu.opsu.states.Game;
+import itdelatrisu.opsu.states.game.Game;
 import itdelatrisu.opsu.ui.Fonts;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.SlickException;
