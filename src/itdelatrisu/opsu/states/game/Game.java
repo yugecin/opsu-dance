@@ -1412,15 +1412,13 @@ public class Game extends ComplexOpsuState {
 
 	private void pauseGame()
 	{
-		if (this.pauseOverlay.requireMousePositionBeforeResume =
-			(!GameMod.RELAX.isActive() && !GameMod.AUTOPILOT.isActive() &&
-			breakTime == 0 &&
-			this.firstObjectTime - SKIP_OFFSET < MusicController.getPosition()))
-		{
-			this.pauseOverlay.mousePauseX = mouseX;
-			this.pauseOverlay.mousePauseY = mouseY;
-		}
-
+		this.pauseOverlay.mousePauseX = mouseX;
+		this.pauseOverlay.mousePauseY = mouseY;
+		this.pauseOverlay.requireMousePositionBeforeResume =
+			this.firstObjectTime - SKIP_OFFSET < MusicController.getPosition() &&
+			!GameMod.RELAX.isActive() &&
+			!GameMod.AUTOPILOT.isActive() &&
+			breakTime == 0;
 		this.pauseOverlay.engagePause();
 	}
 
