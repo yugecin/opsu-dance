@@ -341,7 +341,7 @@ public class VolumeControl implements ResolutionChangedListener
 
 		private boolean contains(int x, int y)
 		{
-			final int size2 = this.size / 2;
+			final int size2 = (int) (this.size * 0.6f);
 			final int dx = this.xpad + size2 - x;
 			final int dy = this.ypad + size2 - y;
 			return dx * dx + dy * dy < size2 * size2;
@@ -354,7 +354,7 @@ public class VolumeControl implements ResolutionChangedListener
 			final float targetAngle = (1f - val.getValue()) * 6.2831853071795864f;
 			glUseProgram(programId);
 			glUniform1f(program_uniform_tang, targetAngle);
-			glUniform1f(program_uniform_bgalpha, isHovered ? .3f : .15f);
+			glUniform1f(program_uniform_bgalpha, isHovered ? .7f : .3f);
 			glPushMatrix();
 			glTranslatef(this.xpad, this.ypad, 0f);
 			glBegin(GL_QUADS);
