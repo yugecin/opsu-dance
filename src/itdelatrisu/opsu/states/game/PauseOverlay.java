@@ -96,6 +96,7 @@ class PauseOverlay
 	{
 		SoundController.playSound(SoundEffect.MENUBACK);
 		songMenuState.resetGameDataOnLoad();
+		MusicController.stopFade();
 		MusicController.setPitch(1.0f);
 		displayContainer.switchState(songMenuState);
 	}
@@ -281,13 +282,14 @@ class PauseOverlay
 		}
 
 		glDisable(GL_TEXTURE_2D);
-		glColor4f(0f, 0f, 0f, .8f);
+		glColor4f(0f, 0f, 0f, .6f);
 		glBegin(GL_QUADS);
-		glVertex3f(0, 0, 0);
-		glVertex3f(width, 0, 0);
-		glVertex3f(width, height, 0);
-		glVertex3f(0, height, 0);
+		glVertex2f(0, 0);
+		glVertex2f(width, 0);
+		glVertex2f(width, height);
+		glVertex2f(0, height);
 		glEnd();
+		glEnable(GL_TEXTURE_2D);
 
 		this.background.draw();
 
