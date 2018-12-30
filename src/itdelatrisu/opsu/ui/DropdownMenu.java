@@ -262,9 +262,13 @@ public class DropdownMenu<E> extends Component
 		}
 
 		int idx = getIndexAt(mouseY);
-		if (idx == -2) {
+		if (idx < 0) {
+			// -1: base clicked
+			// -2: somewhere else clicked
+			if (idx == -1) {
+				e.consume();
+			}
 			this.closeReleaseFocus();
-			// no consume
 			return;
 		}
 		e.consume();
