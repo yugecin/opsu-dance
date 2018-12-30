@@ -68,7 +68,6 @@ public class InstanceContainer {
 	public static DownloadsMenu downloadState;
 	public static Game gameState;
 	public static GameRanking gameRankingState;
-	public static GamePauseMenu pauseState;
 	
 	public static int width, width2, height, height2;
 	public static boolean isWidescreen;
@@ -125,8 +124,6 @@ public class InstanceContainer {
 		downloadState = new DownloadsMenu();
 		gameState = new Game();
 		gameRankingState = new GameRanking();
-		pauseState = new GamePauseMenu();
-
 	}
 
 	@Nullable

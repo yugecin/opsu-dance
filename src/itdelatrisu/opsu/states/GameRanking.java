@@ -214,9 +214,6 @@ public class GameRanking extends BaseOpsuState {
 			songMenuState.resetTrackOnLoad();
 		}
 		songMenuState.resetGameDataOnLoad();
-		if (displayContainer.cursor.isBeatmapSkinned()) {
-			displayContainer.cursor.reset();
-		}
 		displayContainer.switchState(songMenuState);
 	}
 

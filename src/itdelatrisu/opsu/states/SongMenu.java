@@ -1283,6 +1283,10 @@ public class SongMenu extends BaseOpsuState
 	public void enter() {
 		super.enter();
 
+		if (displayContainer.cursor.isBeatmapSkinned()) {
+			displayContainer.cursor.reset();
+		}
+
 		UI.enter();
 		selectModeButton.resetHover();
 		selectModsButton.resetHover();

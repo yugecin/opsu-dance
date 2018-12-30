@@ -352,6 +352,12 @@ public class MusicController {
 			player.fade(duration, 0f, true);
 	}
 
+	public static void stopFade()
+	{
+		player.fade(0, 0f, false);
+		player.pitchFade(0, 0f);
+	}
+
 	/**
 	 * Fades out the pitch (and speed) of the track.
 	 * @param duration the pitch fade time (in ms)

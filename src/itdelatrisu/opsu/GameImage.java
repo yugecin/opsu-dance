@@ -666,6 +666,11 @@ public enum GameImage {
 		return this.getImage().getScaledCopy(width, height);
 	}
 
+	public Image absScale(int dimension)
+	{
+		return this.getImage().getScaledCopy(dimension, dimension);
+	}
+
 	/**
 	 * Returns an Animation based on the image array.
 	 * If no image array exists, returns the single image as an animation.
