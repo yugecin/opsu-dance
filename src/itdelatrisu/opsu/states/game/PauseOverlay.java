@@ -9,6 +9,7 @@ import org.newdawn.slick.Image;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
+import itdelatrisu.opsu.states.game.Game.RestartReason;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import yugecin.opsudance.core.state.*;
@@ -155,9 +156,8 @@ class PauseOverlay
 
 		if (this.retryButton.contains(x, y)) {
 			SoundController.playSound(SoundEffect.MENUHIT);
-			gameState.setRestart(Game.Restart.MANUAL);
-			gameState.enter();
 			this.disengage();
+			gameState.restart(RestartReason.USER);
 			return;
 		}
 

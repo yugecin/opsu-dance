@@ -83,13 +83,13 @@ public class Game extends ComplexOpsuState {
 
 	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
-	public enum Restart {
+	public enum RestartReason {
 		/** First time loading the song. */
-		NEW,
+		NEWGAME,
 		/** Manual retry. */
-		MANUAL,
+		USER,
 		/** Replay. */
-		REPLAY,
+		WATCHREPLAY,
 		/** Health is zero: no-continue/force restart. */
 		LOSE
 	}
@@ -151,8 +151,7 @@ public class Game extends ComplexOpsuState {
 	/** Time offsets for obtaining each hit result (indexed by HIT_* constants). */
 	private int[] hitResultOffset;
 
-	/** Current restart state. */
-	private Restart restart;
+	private RestartReason restartReason;
 
 	/** Current break index in breaks ArrayList. */
 	private int breakIndex;
@@ -363,7 +362,7 @@ public class Game extends ComplexOpsuState {
 	}
 
 	public void loadCheckpoint(int checkpoint) {
-		restart = Restart.MANUAL;
+		restartReason = RestartReason.USER;
 		checkpointLoaded = true;
 		skippedToCheckpoint = true;
 		enter();
@@ -1019,8 +1018,8 @@ public class Game extends ComplexOpsuState {
 
 			// game over, force a restart
 			if (!isReplay) {
-				if (restart != Restart.LOSE) {
-					restart = Restart.LOSE;
+				if (restartReason != RestartReason.LOSE) {
+					restartReason = RestartReason.LOSE;
 					failTime = System.currentTimeMillis();
 					failTrackTime = MusicController.getPosition();
 					MusicController.fadeOut(MUSIC_FADEOUT_TIME);
@@ -1035,7 +1034,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		// don't process hit results when already lost
-		if (restart != Restart.LOSE) {
+		if (restartReason != RestartReason.LOSE) {
 			// update objects (loop in unlikely event of any skipped indexes)
 			boolean keyPressed = keys != ReplayFrame.KEY_NONE;
 			while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
@@ -1126,7 +1125,7 @@ public class Game extends ComplexOpsuState {
 				if (trackPosition < beatmap.objects[0].getTime()) {
 					retries--;  // don't count this retry (cancel out later increment)
 				}
-				restart = Restart.MANUAL;
+				restartReason = RestartReason.USER;
 				enter();
 				skipIntro();
 			}
@@ -1425,6 +1424,19 @@ public class Game extends ComplexOpsuState {
 		this.pauseOverlay.engagePause();
 	}
 
+	/**
+	 * restarts the game, will switch to game state if not already in it
+	 */
+	public void restart(RestartReason reason)
+	{
+		this.restartReason = reason;
+		if (displayContainer.isIn(this)) {
+			this.enter();
+			return;
+		}
+		displayContainer.switchState(this);
+	}
+
 	@Override
 	public void enter()
 	{
@@ -1473,7 +1485,7 @@ public class Game extends ComplexOpsuState {
 //		container.setMouseGrabbed(true);
 
 		// update play stats
-		if (restart == Restart.NEW) {
+		if (restartReason == RestartReason.NEWGAME) {
 			beatmap.incrementPlayCounter();
 			BeatmapDB.updatePlayStatistics(beatmap);
 		}
@@ -1496,15 +1508,15 @@ public class Game extends ComplexOpsuState {
 		data.setGameplay(true);
 
 		// check restart state
-		if (restart == Restart.NEW) {
+		if (restartReason == RestartReason.NEWGAME) {
 			// new game
 			loadImages();
 			setMapModifiers();
 			retries = 0;
-		} else if (restart == Restart.MANUAL && !GameMod.AUTO.isActive()) {
+		} else if (restartReason == RestartReason.USER && !GameMod.AUTO.isActive()) {
 			// retry
 			retries++;
-		} else if (restart == Restart.REPLAY || GameMod.AUTO.isActive()) {
+		} else if (restartReason == RestartReason.WATCHREPLAY || GameMod.AUTO.isActive()) {
 			// replay
 			retries = 0;
 		}
@@ -1793,7 +1805,7 @@ public class Game extends ComplexOpsuState {
 		    trackPosition < beatmap.objects[objectIndex].getTime() && !beatmap.objects[objectIndex - 1].isSpinner())
 			lastObjectIndex = objectIndex - 1;
 
-		boolean loseState = (restart == Restart.LOSE);
+		boolean loseState = (restartReason == RestartReason.LOSE);
 		if (loseState)
 			trackPosition = failTrackTime + (int) (System.currentTimeMillis() - failTime);
 
@@ -2086,17 +2098,6 @@ public class Game extends ComplexOpsuState {
 		hiddenDecayTime = (int) (approachTime / 3.6f);
 		hiddenTimeDiff = (int) (approachTime / 3.3f);
 	}
-
-	/**
-	 * Sets the restart state.
-	 * @param restart the new restart state
-	 */
-	public void setRestart(Restart restart) { this.restart = restart; }
-
-	/**
-	 * Returns the current restart state.
-	 */
-	public Restart getRestart() { return restart; }
 
 	/**
 	 * Returns whether or not the track is in the lead-in time state.

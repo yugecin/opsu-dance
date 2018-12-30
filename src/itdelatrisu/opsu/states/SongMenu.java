@@ -39,7 +39,7 @@ import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.db.ScoreDB;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
-import itdelatrisu.opsu.states.game.Game;
+import itdelatrisu.opsu.states.game.Game.RestartReason;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.DropdownMenu;
 import itdelatrisu.opsu.ui.Fonts;
@@ -1846,8 +1846,7 @@ public class SongMenu extends BaseOpsuState
 		SoundController.playSound(SoundEffect.MENUHIT);
 		MultiClip.destroyExtraClips();
 		gameState.loadBeatmap(beatmap);
-		gameState.setRestart(Game.Restart.NEW);
 		gameState.setReplay(null);
-		displayContainer.switchState(gameState);
+		gameState.restart(RestartReason.NEWGAME);
 	}
 }
