@@ -358,9 +358,8 @@ public class SongMenu extends BaseOpsuState
 				return true;
 			}
 		};
-		sortMenu.setBackgroundColor(Colors.BLACK_BG_HOVER);
+		sortMenu.setBackgroundColor(Colors.BLACK_BG_FOCUS);
 		sortMenu.setBorderColor(Colors.BLUE_DIVIDER);
-		sortMenu.setChevronRightColor(Color.white);
 
 		// initialize group tabs
 		for (BeatmapGroup group : BeatmapGroup.values())
