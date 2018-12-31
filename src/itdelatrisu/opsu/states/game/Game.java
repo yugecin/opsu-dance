@@ -71,6 +71,7 @@ import yugecin.opsudance.utils.GLHelper;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static java.lang.System.arraycopy;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
@@ -99,6 +100,8 @@ public class Game extends ComplexOpsuState {
 
 	/** Game element fade-out time, in milliseconds, when the game ends. */
 	private static final int FINISHED_FADEOUT_TIME = 400;
+
+	private static final int LOSE_FADEOUT_TIME = 2000;
 
 	/** Maximum rotation, in degrees, over fade out upon death. */
 	private static final float MAX_ROTATION = 90f;
@@ -400,6 +403,20 @@ public class Game extends ComplexOpsuState {
 		if (GameMod.FLASHLIGHT.isActive()) {
 			gOffscreen.clear();
 			Graphics.setCurrent(gOffscreen);
+		}
+
+		Colors.WHITE_FADE.a = 1f;
+		final boolean loseState = (restartReason == RestartReason.LOSE);
+		if (loseState) {
+			final int extratime = (int) (System.currentTimeMillis() - failTime);
+			if (extratime > LOSE_FADEOUT_TIME) {
+				trackPosition = failTrackTime + LOSE_FADEOUT_TIME;
+				Colors.WHITE_FADE.a = 0f;
+			} else {
+				trackPosition = failTrackTime + extratime;
+				final float progress = (float) extratime / LOSE_FADEOUT_TIME;
+				Colors.WHITE_FADE.a = 1f - IN_QUAD.calc(progress);
+			}
 		}
 
 		// background
@@ -1803,13 +1820,19 @@ public class Game extends ComplexOpsuState {
 		    trackPosition < beatmap.objects[objectIndex].getTime() && !beatmap.objects[objectIndex - 1].isSpinner())
 			lastObjectIndex = objectIndex - 1;
 
-		boolean loseState = (restartReason == RestartReason.LOSE);
-		if (loseState)
-			trackPosition = failTrackTime + (int) (System.currentTimeMillis() - failTime);
+
+		final boolean loseState = (restartReason == RestartReason.LOSE);
 
 		// get hit objects in reverse order, or else overlapping objects are unreadable
 		Stack<Integer> stack = new Stack<>();
 		for (int index = objectIndex; index < gameObjects.length && beatmap.objects[index].getTime() < trackPosition + approachTime; index++) {
+			final int LOSE_LASTOBJ_TIME = failTrackTime + LOSE_FADEOUT_TIME - 1000;
+			if (loseState &&
+				beatmap.objects[index].getTime() > LOSE_LASTOBJ_TIME)
+			{
+				break;
+			}
+
 			stack.add(index);
 
 			// draw follow points

@@ -18,6 +18,7 @@ import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.core.input.*;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static itdelatrisu.opsu.Utils.clamp;
 import static org.lwjgl.input.Keyboard.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -26,6 +27,11 @@ import static yugecin.opsudance.options.Options.*;
 class PauseOverlay
 	implements Renderable, InputListener, SkinChangedListener, ResolutionChangedListener
 {
+	private static final int
+		LOSE_WAIT_TIME = 2000,
+		LOSE_FADEIN_TIME = 500,
+		INVALID_FADE_TIME = 20000;
+
 	private Image background;
 	private MenuButton continueButton, retryButton, backButton;
 	private boolean dirty, active;
@@ -33,6 +39,7 @@ class PauseOverlay
 	private boolean readyToResume;
 	private boolean wasCursorVisible;
 	private boolean isLose;
+	private int fadeInTime;
 
 	int mousePauseX, mousePauseY;
 	float pausePulseTiming;
@@ -50,6 +57,7 @@ class PauseOverlay
 		this.isLose = false;
 		this.background = PAUSE_OVERLAY.getImage();
 		MusicController.pause();
+		this.fadeInTime = INVALID_FADE_TIME;
 		this.engage();
 	}
 
@@ -57,6 +65,7 @@ class PauseOverlay
 	{
 		this.isLose = true;
 		this.background = FAIL_BACKGROUND.getImage();
+		this.fadeInTime = -LOSE_WAIT_TIME;
 		this.engage();
 	}
 
@@ -249,6 +258,11 @@ class PauseOverlay
 				return;
 			}
 
+			if (this.fadeInTime < LOSE_FADEIN_TIME) {
+				this.fadeInTime = LOSE_FADEIN_TIME;
+				return;
+			}
+
 			this.readyToResume();
 		}
 	}
@@ -261,6 +275,10 @@ class PauseOverlay
 			this.pausePulseTiming = 0f;
 		}
 
+		if (this.fadeInTime < INVALID_FADE_TIME) {
+			this.fadeInTime += renderDelta;
+		}
+
 		this.continueButton.hoverUpdate(renderDelta, mouseX, mouseY);
 		this.retryButton.hoverUpdate(renderDelta, mouseX, mouseY);
 		this.backButton.hoverUpdate(renderDelta, mouseX, mouseY);
@@ -269,6 +287,10 @@ class PauseOverlay
 	@Override
 	public void render(Graphics g)
 	{
+		if (this.fadeInTime < 0) {
+			return;
+		}
+
 		if (this.readyToResume) {
 			// draw glowing hit select circle and pulse effect
 			Image cursorCircle = HITCIRCLE_SELECT.absScale(HITCIRCLE.getWidth());
@@ -281,8 +303,9 @@ class PauseOverlay
 			return;
 		}
 
+		final float fadein = clamp((float) this.fadeInTime / LOSE_FADEIN_TIME, 0f, 1f);
 		glDisable(GL_TEXTURE_2D);
-		glColor4f(0f, 0f, 0f, .6f);
+		glColor4f(0f, 0f, 0f, .6f * fadein);
 		glBegin(GL_QUADS);
 		glVertex2f(0, 0);
 		glVertex2f(width, 0);
@@ -291,12 +314,16 @@ class PauseOverlay
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
 
-		this.background.draw();
+		glColor4f(1f, 1f, 1f, fadein);
+		this.background.draw(0, 0, null);
 
 		if (!this.isLose) {
-			this.continueButton.draw();
+			glColor4f(1f, 1f, 1f, fadein);
+			this.continueButton.draw(null);
 		}
-		this.retryButton.draw();
-		this.backButton.draw();
+		glColor4f(1f, 1f, 1f, fadein);
+		this.retryButton.draw(null);
+		glColor4f(1f, 1f, 1f, fadein);
+		this.backButton.draw(null);
 	}
 }
