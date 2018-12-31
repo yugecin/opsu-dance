@@ -1826,7 +1826,7 @@ public class Game extends ComplexOpsuState {
 		// get hit objects in reverse order, or else overlapping objects are unreadable
 		Stack<Integer> stack = new Stack<>();
 		for (int index = objectIndex; index < gameObjects.length && beatmap.objects[index].getTime() < trackPosition + approachTime; index++) {
-			final int LOSE_LASTOBJ_TIME = failTrackTime + LOSE_FADEOUT_TIME - 1000;
+			final int LOSE_LASTOBJ_TIME = failTrackTime + LOSE_FADEOUT_TIME - 500;
 			if (loseState &&
 				beatmap.objects[index].getTime() > LOSE_LASTOBJ_TIME)
 			{
@@ -2426,5 +2426,10 @@ public class Game extends ComplexOpsuState {
 	private boolean musicPositionBarContains(float cx, float cy) {
 		return ((cx > musicBarX && cx < musicBarX + musicBarWidth) &&
 		        (cy > musicBarY && cy < musicBarY + musicBarHeight));
+	}
+
+	public boolean isLosing()
+	{
+		return this.restartReason == RestartReason.LOSE;
 	}
 }

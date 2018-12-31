@@ -459,7 +459,10 @@ public class Slider extends GameObject {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
-		if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
+		if (!OPTION_FALLBACK_SLIDERS.state &&
+			OPTION_MERGING_SLIDERS.state &&
+			!gameState.isLosing())
+		{
 			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0d) {
 				if (hitObject.getRepeatCount() % 2 == 0) {
 					gameState.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + (int) ((1d - curveIntervalFrom) * curvelen));
