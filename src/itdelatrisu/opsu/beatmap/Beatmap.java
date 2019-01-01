@@ -19,6 +19,7 @@
 package itdelatrisu.opsu.beatmap;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -27,6 +28,8 @@ import java.util.Map;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
+
+import itdelatrisu.opsu.GameMod;
 
 import static yugecin.opsudance.options.Options.*;
 
@@ -91,6 +94,8 @@ public class Beatmap implements Comparable<Beatmap> {
 
 	/** The local music offset. */
 	public int localMusicOffset = 0;
+
+	public BeatmapSet beatmapSet;
 
 	/**
 	 * [General]
@@ -335,8 +340,9 @@ public class Beatmap implements Comparable<Beatmap> {
 	 * @return true if successful, false if any errors were produced
 	 */
 	public boolean drawBackground(int width, int height, float alpha, boolean stretch) {
-		if (bg == null)
+		if (bg == null) {
 			return false;
+		}
 
 		ImageLoader imageLoader = bgImageCache.get(bg);
 		if (imageLoader == null)
@@ -530,5 +536,68 @@ public class Beatmap implements Comparable<Beatmap> {
 	public void incrementPlayCounter() {
 		this.playCount++;
 		this.lastPlayed = System.currentTimeMillis();
+	}
+
+	/**
+	 * Returns an array of strings containing beatmap information.
+	 * <ul>
+	 * <li>0: {Artist} - {Title} [{Version}]
+	 * <li>1: Mapped by {Creator}
+	 * <li>2: Length: {}  BPM: {}  Objects: {}
+	 * <li>3: Circles: {}  Sliders: {}  Spinners: {}
+	 * <li>4: CS:{} HP:{} AR:{} OD:{} Stars:{}
+	 * </ul>
+	 */
+	public String[] getInfo()
+	{
+		final float speedModifier = GameMod.getSpeedMultiplier();
+		final long endTime = (long) (this.endTime / speedModifier);
+		final int bpmMin = (int) (this.bpmMin * speedModifier);
+		final int bpmMax = (int) (this.bpmMax * speedModifier);
+		final float multiplier = GameMod.getDifficultyMultiplier();
+		final DecimalFormat nf = new DecimalFormat("##.#");
+		final int minutes = (int) (endTime / 60000);
+		final String bpm;
+		final String starRating;
+		if (this.starRating >= 0) {
+			starRating = String.format(" Stars:%.2f", this.starRating);
+		} else {
+			starRating = "";
+		}
+		if (bpmMax <= 0) {
+			bpm = "--";
+		} else {
+			if (bpmMin == bpmMax) {
+				bpm = Integer.toString(bpmMin);
+			} else {
+				bpm = Integer.toString(bpmMin) + "-" + Integer.toString(bpmMax);
+			}
+		}
+
+		final String[] info = new String[5];
+		info[0] = this.toString();
+		info[1] = "Mapped by " + this.creator;
+		info[2] = String.format(
+			"Length: %d:%02d  BPM: %s  Objects: %d",
+			minutes,
+			(endTime - minutes * 60000) / 1000,
+			bpm,
+			this.hitObjectCircle + this.hitObjectSlider + this.hitObjectSpinner
+		);
+		info[3] = String.format(
+			"Circles: %d  Sliders: %d  Spinners: %d",
+			this.hitObjectCircle,
+			this.hitObjectSlider,
+			this.hitObjectSpinner
+		);
+		info[4] = String.format(
+			"CS:%s HP:%s AR:%s OD:%s%s",
+			nf.format(Math.min(this.circleSize * multiplier, 10f)),
+			nf.format(Math.min(this.HPDrainRate * multiplier, 10f)),
+			nf.format(Math.min(this.approachRate * multiplier, 10f)),
+			nf.format(Math.min(this.overallDifficulty * multiplier, 10f)),
+			starRating
+		);
+		return info;
 	}
 }

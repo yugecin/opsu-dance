@@ -35,19 +35,19 @@ public enum BeatmapGroup {
 		}
 
 		@Override
-		public ArrayList<BeatmapSetNode> filter(ArrayList<BeatmapSetNode> list) {
+		public ArrayList<Beatmap> filter(ArrayList<Beatmap> list) {
 			// find top K elements
-			PriorityQueue<BeatmapSetNode> pq = new PriorityQueue<BeatmapSetNode>(K, new Comparator<BeatmapSetNode>() {
+			PriorityQueue<Beatmap> pq = new PriorityQueue<Beatmap>(K, new Comparator<Beatmap>() {
 				@Override
-				public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-					return Long.compare(lastPlayed(v.getBeatmapSet()), lastPlayed(w.getBeatmapSet()));
+				public int compare(Beatmap v, Beatmap w) {
+					return Long.compare(lastPlayed(v.beatmapSet), lastPlayed(w.beatmapSet));
 				}
 			});
-			for (BeatmapSetNode node : list) {
-				long timestamp = lastPlayed(node.getBeatmapSet());
+			for (Beatmap node : list) {
+				long timestamp = lastPlayed(node.beatmapSet);
 				if (timestamp == 0)
 					continue;  // skip unplayed beatmaps
-				if (pq.size() < K || timestamp > lastPlayed(pq.peek().getBeatmapSet())) {
+				if (pq.size() < K || timestamp > lastPlayed(pq.peek().beatmapSet)) {
 					if (pq.size() == K)
 						pq.poll();
 					pq.add(node);
@@ -55,9 +55,10 @@ public enum BeatmapGroup {
 			}
 
 			// return as list
-			ArrayList<BeatmapSetNode> filteredList = new ArrayList<BeatmapSetNode>();
-			for (BeatmapSetNode node : pq)
+			ArrayList<Beatmap> filteredList = new ArrayList<>();
+			for (Beatmap node : pq) {
 				filteredList.add(node);
+			}
 			return filteredList;
 		}
 	},
@@ -65,11 +66,11 @@ public enum BeatmapGroup {
 	/** "Favorite" beatmaps. */
 	FAVORITE (2, "Favorites", "Right-click a beatmap to add it to your Favorites!") {
 		@Override
-		public ArrayList<BeatmapSetNode> filter(ArrayList<BeatmapSetNode> list) {
+		public ArrayList<Beatmap> filter(ArrayList<Beatmap> list) {
 			// find "favorite" beatmaps
-			ArrayList<BeatmapSetNode> filteredList = new ArrayList<BeatmapSetNode>();
-			for (BeatmapSetNode node : list) {
-				if (node.getBeatmapSet().isFavorite())
+			ArrayList<Beatmap> filteredList = new ArrayList<Beatmap>();
+			for (Beatmap node : list) {
+				if (node.beatmapSet.isFavorite())
 					filteredList.add(node);
 			}
 			return filteredList;
@@ -131,12 +132,8 @@ public enum BeatmapGroup {
 	 */
 	public String getEmptyMessage() { return emptyMessage; }
 
-	/**
-	 * Returns a filtered list of beatmap set nodes.
-	 * @param list the unfiltered list
-	 * @return the filtered list
-	 */
-	public ArrayList<BeatmapSetNode> filter(ArrayList<BeatmapSetNode> list) {
+	public ArrayList<Beatmap> filter(ArrayList<Beatmap> list)
+	{
 		return list;
 	}
 

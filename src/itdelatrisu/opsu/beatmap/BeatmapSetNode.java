@@ -32,39 +32,11 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * Node in an BeatmapSetList representing a beatmap set.
  */
-public class BeatmapSetNode {
-	/** The associated beatmap set. */
-	private final BeatmapSet beatmapSet;
-
-	/** Index of the selected beatmap (-1 if not focused). */
-	public int beatmapIndex = -1;
-
-	/** Index of this node. */
-	public int index = 0;
-
-	/** Links to other nodes. */
-	public BeatmapSetNode prev, next;
-
-	/**
-	 * Constructor.
-	 * @param beatmapSet the beatmap set
-	 */
-	public BeatmapSetNode(BeatmapSet beatmapSet) {
-		this.beatmapSet = beatmapSet;
-	}
-
-	/**
-	 * Returns the associated beatmap set.
-	 * @return the beatmap set
-	 */
-	public BeatmapSet getBeatmapSet() { return beatmapSet; }
-
-	/**
-	 * Returns the selected beatmap (based on {@link #beatmapIndex}).
-	 * @return the beatmap, or null if the index is invalid
-	 */
-	public Beatmap getSelectedBeatmap() {
-		return (beatmapIndex < 0 || beatmapIndex >= beatmapSet.size()) ? null : beatmapSet.get(beatmapIndex);
+public class BeatmapSetNode extends BeatmapNode
+{
+	BeatmapSetNode(BeatmapSet beatmapSet)
+	{
+		super(beatmapSet);
 	}
 
 	/**
@@ -161,13 +133,6 @@ public class BeatmapSetNode {
 			}
 		}
 	}
-
-	/**
-	 * Returns an array of strings containing beatmap information for the
-	 * selected beatmap, or null if none selected.
-	 * @see BeatmapSet#getInfo(int)
-	 */
-	public String[] getInfo() { return (beatmapIndex < 0) ? null : beatmapSet.getInfo(beatmapIndex); }
 
 	/**
 	 * Returns a formatted string for the beatmap at {@code beatmapIndex}:

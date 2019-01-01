@@ -68,9 +68,6 @@ public class MusicController {
 	/** Whether or not the current track has ended. */
 	private static boolean trackEnded;
 
-	/** Whether the theme song is currently playing. */
-	private static boolean themePlaying = false;
-
 	/** Track pause time. */
 	private static float pauseTime = 0f;
 
@@ -105,6 +102,7 @@ public class MusicController {
 				return;
 			}
 
+			final Beatmap previousMap = lastBeatmap; // persist over reset call below
 			reset();
 			System.gc();
 
@@ -122,13 +120,40 @@ public class MusicController {
 			default:
 				break;
 			}
+			updateSongHistory(previousMap, beatmap);
+		} else if (beatmap.previewTime != lastBeatmap.previewTime) {
+			playAt(beatmap.previewTime, loop);
 		}
 
-		// new track position: play at position
-		else if (beatmap.previewTime != lastBeatmap.previewTime)
-			playAt(beatmap.previewTime, loop);
-
 		lastBeatmap = beatmap;
+	}
+
+	private static void updateSongHistory(Beatmap prev, Beatmap next)
+	{
+		boolean historyJustPopped = false;
+
+		if (!songHistory.isEmpty() &&
+			next.audioFilename.equals(songHistory.peek().audioFilename))
+		{
+			songHistory.pop();
+			nextSongs.push(prev);
+			historyJustPopped = true;
+		} else if (prev != null && prev != themeBeatmap){
+			songHistory.push(prev);
+		}
+
+		if (nextSongs.isEmpty()) {
+			return;
+		}
+
+		if (next.audioFilename.equals(nextSongs.peek().audioFilename)) {
+			nextSongs.pop();
+			return;
+		}
+
+		if (!historyJustPopped) {
+			nextSongs.clear();
+		}
 	}
 
 	/**
@@ -472,17 +497,18 @@ public class MusicController {
 			playAt((preview) ? lastBeatmap.previewTime : 0, false);
 	}
 
-	public static void playThemeSong(Beatmap themeBeatmap) {
-		if (themeBeatmap != null) {
-			play(themeBeatmap, false, false);
-			themePlaying = true;
-		}
+	public static void playThemeSong()
+	{
+		play(themeBeatmap, false, false);
 	}
 
 	/**
 	 * Returns whether or not the theme song is playing.
 	 */
-	public static boolean isThemePlaying() { return themePlaying; }
+	public static boolean isThemePlaying()
+	{
+		return lastBeatmap == themeBeatmap;
+	}
 
 	/**
 	 * Returns whether or not the volume of the current track, if any,
@@ -534,7 +560,6 @@ public class MusicController {
 		lastBeatmap = null;
 		duration = 0;
 		trackEnded = false;
-		themePlaying = false;
 		pauseTime = 0f;
 		trackDimmed = false;
 		resetTimingPoint();

@@ -31,6 +31,8 @@ import java.util.Random;
 
 import org.newdawn.slick.Image;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
+
 /**
  * Star stream.
  */
@@ -63,7 +65,7 @@ public class StarStream {
 	private float scaleSpread = 0f;
 
 	/** The star image. */
-	private final Image starImg;
+	private Image starImg;
 
 	/** The current list of stars. */
 	private final List<Star> stars;
@@ -143,9 +145,16 @@ public class StarStream {
 		this.position = new Vec2f(x, y);
 		this.direction = new Vec2f(dirX, dirY);
 		this.maxStars = k;
-		this.starImg = GameImage.STAR2.getImage().copy();
 		this.stars = new ArrayList<Star>(k);
 		this.random = new Random();
+		this.reinitStarImage();
+	}
+
+	public void reinitStarImage()
+	{
+		if (displayContainer.glReady) {
+			this.starImg = GameImage.STAR2.getImage().copy();
+		}
 	}
 
 	/**

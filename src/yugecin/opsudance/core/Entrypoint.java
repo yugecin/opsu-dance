@@ -22,6 +22,8 @@ import yugecin.opsudance.OpsuDance;
 
 import javax.swing.*;
 
+import org.newdawn.slick.util.Log;
+
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -35,6 +37,7 @@ public class Entrypoint {
 		try {
 			InstanceContainer.kickstart();
 		} catch (Exception e) {
+			Log.error("cannot start", e);
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Cannot start " + PROJECT_NAME, JOptionPane.ERROR_MESSAGE);
 			// TODO replace with errorhandler
 		}

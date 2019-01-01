@@ -4,6 +4,8 @@ package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.NativeLoader;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapList;
 import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.replay.ReplayImporter;
@@ -25,6 +27,8 @@ import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
+import yugecin.opsudance.ui.nodelist.NodeList;
+import yugecin.opsudance.utils.Stack;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +42,17 @@ public class InstanceContainer {
 
 	public static Random rand;
 
+	/**
+	 * top entry should always be the song currently playing
+	 */
+	public static Stack<Beatmap> songHistory;
+	/**
+	 * songs popped from the {@link #songHistory} that* are now queued for when pressing the
+	 * 'next' button in the main menu.
+	 */
+	public static Stack<Beatmap> nextSongs;
+	public static Beatmap themeBeatmap;
+
 	public static Environment env;
 	public static Configuration config;
 
@@ -45,6 +60,7 @@ public class InstanceContainer {
 	public static SkinService skinservice;
 	public static OszUnpacker oszunpacker;
 	public static ReplayImporter replayImporter;
+	public static BeatmapList beatmapList;
 	public static BeatmapParser beatmapParser;
 	public static Updater updater;
 
@@ -60,6 +76,8 @@ public class InstanceContainer {
 	
 	static BackButton backButton;
 	public static OptionsOverlay optionsOverlay;
+
+	public static NodeList nodeList;
 
 	public static Splash splashState;
 	public static MainMenu mainmenuState;
@@ -80,6 +98,9 @@ public class InstanceContainer {
 		rand = new Random();
 		updater = new Updater();
 		env = new Environment();
+
+		songHistory = new Stack<>();
+		nextSongs = new Stack<>();
 
 		JarFile jarfile = getJarfile();
 		config = new Configuration();
@@ -116,6 +137,8 @@ public class InstanceContainer {
 
 		backButton = new BackButton();
 		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
+
+		nodeList = new NodeList();
 
 		splashState = new Splash();
 		mainmenuState = new MainMenu();

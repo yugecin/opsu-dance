@@ -59,7 +59,7 @@ public enum BeatmapSortOrder {
 	private static class TitleOrder implements Comparator<BeatmapSetNode> {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.getBeatmapSet().get(0).title.compareToIgnoreCase(w.getBeatmapSet().get(0).title);
+			return v.beatmapSet.get(0).title.compareToIgnoreCase(w.beatmapSet.get(0).title);
 		}
 	}
 
@@ -69,7 +69,7 @@ public enum BeatmapSortOrder {
 	private static class ArtistOrder implements Comparator<BeatmapSetNode> {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.getBeatmapSet().get(0).artist.compareToIgnoreCase(w.getBeatmapSet().get(0).artist);
+			return v.beatmapSet.get(0).artist.compareToIgnoreCase(w.beatmapSet.get(0).artist);
 		}
 	}
 
@@ -79,7 +79,7 @@ public enum BeatmapSortOrder {
 	private static class CreatorOrder implements Comparator<BeatmapSetNode> {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.getBeatmapSet().get(0).creator.compareToIgnoreCase(w.getBeatmapSet().get(0).creator);
+			return v.beatmapSet.get(0).creator.compareToIgnoreCase(w.beatmapSet.get(0).creator);
 		}
 	}
 
@@ -89,7 +89,7 @@ public enum BeatmapSortOrder {
 	private static class BPMOrder implements Comparator<BeatmapSetNode> {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return Integer.compare(v.getBeatmapSet().get(0).bpmMax, w.getBeatmapSet().get(0).bpmMax);
+			return Integer.compare(v.beatmapSet.get(0).bpmMax, w.beatmapSet.get(0).bpmMax);
 		}
 	}
 
@@ -101,11 +101,11 @@ public enum BeatmapSortOrder {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
 			int vMax = 0, wMax = 0;
-			for (Beatmap beatmap : v.getBeatmapSet()) {
+			for (Beatmap beatmap : v.beatmapSet) {
 				if (beatmap.endTime > vMax)
 					vMax = beatmap.endTime;
 			}
-			for (Beatmap beatmap : w.getBeatmapSet()) {
+			for (Beatmap beatmap : w.beatmapSet) {
 				if (beatmap.endTime > wMax)
 					wMax = beatmap.endTime;
 			}
@@ -121,11 +121,11 @@ public enum BeatmapSortOrder {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
 			long vMax = 0, wMax = 0;
-			for (Beatmap beatmap : v.getBeatmapSet()) {
+			for (Beatmap beatmap : v.beatmapSet) {
 				if (beatmap.dateAdded > vMax)
 					vMax = beatmap.dateAdded;
 			}
-			for (Beatmap beatmap : w.getBeatmapSet()) {
+			for (Beatmap beatmap : w.beatmapSet) {
 				if (beatmap.dateAdded > wMax)
 					wMax = beatmap.dateAdded;
 			}
@@ -141,9 +141,9 @@ public enum BeatmapSortOrder {
 		@Override
 		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
 			int vTotal = 0, wTotal = 0;
-			for (Beatmap beatmap : v.getBeatmapSet())
+			for (Beatmap beatmap : v.beatmapSet)
 				vTotal += beatmap.playCount;
-			for (Beatmap beatmap : w.getBeatmapSet())
+			for (Beatmap beatmap : w.beatmapSet)
 				wTotal += beatmap.playCount;
 			return Integer.compare(vTotal, wTotal);
 		}

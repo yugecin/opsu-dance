@@ -22,7 +22,7 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
+import itdelatrisu.opsu.beatmap.BeatmapList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadList;
@@ -528,8 +528,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				SoundController.stopTrack();
 
 				// initialize song list
-				BeatmapSetList.get().reset();
-				BeatmapSetList.get().init();
+				beatmapList.reset();
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.
@@ -628,7 +627,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 						final DownloadNode node = nodes[index];
 
 						// check if map is already loaded
-						boolean isLoaded = BeatmapSetList.get().containsBeatmapSetID(node.getID());
+						boolean isLoaded = beatmapList.containsBeatmapSetID(node.getID());
 
 						// track preview
 						if (DownloadNode.resultIconContains(x, y - offset, i)) {

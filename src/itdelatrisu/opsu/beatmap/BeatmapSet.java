@@ -18,14 +18,10 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.GameMod;
 import itdelatrisu.opsu.db.BeatmapDB;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Data type containing all beatmaps in a beatmap set.
@@ -34,6 +30,9 @@ public class BeatmapSet implements Iterable<Beatmap> {
 	/** List of associated beatmaps. */
 	private final ArrayList<Beatmap> beatmaps;
 
+	/**
+	 * Can be negative when it's improperly parsed for older maps.
+	 */
 	public final int setId;
 
 	/**
@@ -67,46 +66,6 @@ public class BeatmapSet implements Iterable<Beatmap> {
 
 	@Override
 	public Iterator<Beatmap> iterator() { return beatmaps.iterator(); }
-
-	/**
-	 * Returns an array of strings containing beatmap information.
-	 * <ul>
-	 * <li>0: {Artist} - {Title} [{Version}]
-	 * <li>1: Mapped by {Creator}
-	 * <li>2: Length: {}  BPM: {}  Objects: {}
-	 * <li>3: Circles: {}  Sliders: {}  Spinners: {}
-	 * <li>4: CS:{} HP:{} AR:{} OD:{} Stars:{}
-	 * </ul>
-	 * @param index the beatmap index
-	 * @throws IndexOutOfBoundsException if the index is out of range
-	 */
-	public String[] getInfo(int index) {
-		Beatmap beatmap = beatmaps.get(index);
-		float speedModifier = GameMod.getSpeedMultiplier();
-		long endTime = (long) (beatmap.endTime / speedModifier);
-		int bpmMin = (int) (beatmap.bpmMin * speedModifier);
-		int bpmMax = (int) (beatmap.bpmMax * speedModifier);
-		float multiplier = GameMod.getDifficultyMultiplier();
-		NumberFormat nf = new DecimalFormat("##.#");
-		String[] info = new String[5];
-		info[0] = beatmap.toString();
-		info[1] = String.format("Mapped by %s", beatmap.creator);
-		info[2] = String.format("Length: %d:%02d  BPM: %s  Objects: %d",
-				TimeUnit.MILLISECONDS.toMinutes(endTime),
-				TimeUnit.MILLISECONDS.toSeconds(endTime) -
-				TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(endTime)),
-				(bpmMax <= 0) ? "--" : ((bpmMin == bpmMax) ? bpmMin : String.format("%d-%d", bpmMin, bpmMax)),
-				(beatmap.hitObjectCircle + beatmap.hitObjectSlider + beatmap.hitObjectSpinner));
-		info[3] = String.format("Circles: %d  Sliders: %d  Spinners: %d",
-				beatmap.hitObjectCircle, beatmap.hitObjectSlider, beatmap.hitObjectSpinner);
-		info[4] = String.format("CS:%s HP:%s AR:%s OD:%s%s",
-				nf.format(Math.min(beatmap.circleSize * multiplier, 10f)),
-				nf.format(Math.min(beatmap.HPDrainRate * multiplier, 10f)),
-				nf.format(Math.min(beatmap.approachRate * multiplier, 10f)),
-				nf.format(Math.min(beatmap.overallDifficulty * multiplier, 10f)),
-				(beatmap.starRating >= 0) ? String.format(" Stars:%.2f", beatmap.starRating) : "");
-		return info;
-	}
 
 	/**
 	 * Returns a formatted string for the beatmap set:

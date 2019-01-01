@@ -264,7 +264,12 @@ public enum GameImage {
 	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
-	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
+	MENU_BUTTON_BG ("menu-button-background", "png", false, false) {
+		@Override
+		protected Image process_sub(Image img, int w, int h) {
+			return img.getScaledCopy((height * 0.13f) / img.getHeight());
+		}
+	},
 	MENU_TAB ("selection-tab", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

@@ -78,6 +78,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	private boolean wasMusicPlaying;
 
+	public boolean glReady;
 	private String glVersion;
 	private String glVendor;
 
@@ -308,8 +309,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		Display.create();
 		GLHelper.setIcons(new String[] { "icon16.png", "icon32.png" });
 		postInitGL();
-		glVersion = GL11.glGetString(GL11.GL_VERSION);
-		glVendor = GL11.glGetString(GL11.GL_VENDOR);
 		GLHelper.hideNativeCursor();
 	}
 
@@ -331,6 +330,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		CurveRenderState.shutdown();
 		VolumeControl.destroyProgram();
 		Display.destroy();
+		this.glReady = false;
 	}
 
 	public void destroyImages() {
@@ -457,6 +457,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	{
 		GL.initDisplay(width, height);
 		GL.enterOrtho(width, height);
+
+		this.glReady = true;
+		this.glVersion = GL11.glGetString(GL11.GL_VERSION);
+		this.glVendor = GL11.glGetString(GL11.GL_VENDOR);
 
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);

@@ -21,7 +21,6 @@ package itdelatrisu.opsu.states;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
@@ -90,18 +89,11 @@ public class Splash extends BaseOpsuState {
 			return;
 		}
 
-		// initialize song list
-		if (BeatmapSetList.get().size() == 0) {
-			MusicController.playThemeSong(config.themeBeatmap);
-			displayContainer.switchStateInstantly(mainmenuState);
-			return;
-		}
-
-		BeatmapSetList.get().init();
-		if (OPTION_ENABLE_THEME_SONG.state) {
-			MusicController.playThemeSong(config.themeBeatmap);
+		nodeList.recreate();
+		if (OPTION_ENABLE_THEME_SONG.state || beatmapList.getBeatmapSetCount() == 0) {
+			MusicController.playThemeSong();
 		} else {
-			songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true);
+			mainmenuState.playRandomNextTrack();
 		}
 		displayContainer.switchStateInstantly(mainmenuState);
 	}

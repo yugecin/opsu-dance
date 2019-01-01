@@ -74,9 +74,9 @@ public class BeatmapParser {
 	 * Invokes parser for each OSU file in a root directory and
 	 * adds the beatmaps to a new BeatmapSetList.
 	 */
-	public void parseAll() {
-		// create a new BeatmapSetList
-		BeatmapSetList.create();
+	public void parseAll()
+	{
+		beatmapList = new BeatmapList();
 
 		// create a new watch service
 		if (OPTION_ENABLE_WATCH_SERVICE.state) {
@@ -196,7 +196,7 @@ public class BeatmapParser {
 		// add group entries to BeatmapSetList
 		for (ArrayList<Beatmap> beatmaps : allBeatmaps) {
 			Collections.sort(beatmaps);
-			lastNode = BeatmapSetList.get().addSongGroup(beatmaps);
+			beatmapList.addBeatmapSet(beatmaps);
 		}
 
 		// clear string DB
