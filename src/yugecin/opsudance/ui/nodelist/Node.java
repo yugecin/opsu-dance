@@ -9,12 +9,16 @@ import org.newdawn.slick.Image;
 import itdelatrisu.opsu.beatmap.Beatmap;
 
 import static itdelatrisu.opsu.GameImage.*;
-import static itdelatrisu.opsu.ui.animations.AnimationEquation.IN_QUAD;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 abstract class Node
 {
 	static Image button;
 	static int buttonWidth, buttonHeight;
+
+	public static float buttonIndent;
+	private static float buttonHoverIndent;
 
 	protected static float cx, cy;
 
@@ -25,6 +29,8 @@ abstract class Node
 		button =  MENU_BUTTON_BG.getImage();
 		buttonWidth = button.getWidth();
 		buttonHeight = button.getHeight();
+		buttonIndent = width * (isWidescreen ? 0.00875f : 0.0125f);
+		buttonHoverIndent = buttonIndent * 6.6666f;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
 
@@ -67,15 +73,20 @@ abstract class Node
 			mouseY < node.y + hitboxYbot;
 	}
 
-	private static final int HOVER_HIGHLIGHT_TIME = 400;
-
 	Node prev, next;
 
 	float height;
+	float targetX;
 	float x, y;
 
 	private boolean isHovered;
-	private int hovertime = HOVER_HIGHLIGHT_TIME;
+	private int hoverHighlightTime = HOVER_HIGHLIGHT_TIME;
+	private static final int HOVER_HIGHLIGHT_TIME = 400;
+	private int hoverIndentTime = HOVER_INDENT_TIME;
+	private static final int HOVER_INDENT_TIME = 1000;
+	private float hoverIndentValue;
+	private float hoverIndentFrom;
+	private float hoverIndentTo;
 
 	/**
 	 * @return {@code null} if this map is not in this node, or the node that was focused
@@ -85,16 +96,32 @@ abstract class Node
 
 	void update(int delta)
 	{
-		if (this.hovertime < HOVER_HIGHLIGHT_TIME) {
-			this.hovertime += delta;
+		if (this.hoverHighlightTime < HOVER_HIGHLIGHT_TIME) {
+			this.hoverHighlightTime += delta;
 		}
+
+		if (this.hoverIndentTime < HOVER_INDENT_TIME) {
+			if ((this.hoverIndentTime += delta) > HOVER_INDENT_TIME) {
+				this.hoverIndentTime = HOVER_INDENT_TIME;
+			}
+			this.hoverIndentValue = OUT_QUART.calc(
+				(float) this.hoverIndentTime / HOVER_INDENT_TIME
+			) * (this.hoverIndentTo - this.hoverIndentFrom) + this.hoverIndentFrom;
+		}
+
+		this.x = this.targetX + this.hoverIndentValue;
 	}
 
 	void toggleHovered()
 	{
 		if (this.isHovered = !this.isHovered) {
-			this.hovertime = 0;
+			this.hoverHighlightTime = 0;
+			this.hoverIndentTo = -buttonHoverIndent;
+		} else {
+			this.hoverIndentTo = 0f;
 		}
+		this.hoverIndentFrom = this.hoverIndentValue;
+		this.hoverIndentTime = 0;
 	}
 
 	protected void drawButton(Color color)
@@ -104,10 +131,10 @@ abstract class Node
 
 	private Color mixBackgroundColor(Color baseColor)
 	{
-		if (this.hovertime >= HOVER_HIGHLIGHT_TIME) {
+		if (this.hoverHighlightTime >= HOVER_HIGHLIGHT_TIME) {
 			return baseColor;
 		}
-		final float progress = IN_QUAD.calc((float) this.hovertime / HOVER_HIGHLIGHT_TIME);
+		final float progress = IN_QUAD.calc((float) this.hoverHighlightTime / HOVER_HIGHLIGHT_TIME);
 		return baseColor.brighter(.25f * (1f - progress));
 	}
 }

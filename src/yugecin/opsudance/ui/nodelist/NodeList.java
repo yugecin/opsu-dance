@@ -28,7 +28,7 @@ public class NodeList
 	private float areaHeight, areaHeight2;
 	private float headerY, footerY;
 
-	private float buttonMinX, buttonIndent;
+	private float buttonMinX;
 	private float buttonOffset, buttonOffset2;
 	private float maxVisibleButtons;
 
@@ -65,7 +65,6 @@ public class NodeList
 		this.starStream.reinitStarImage();
 
 		this.buttonMinX = width * (isWidescreen ? 0.55f : 0.35f);
-		this.buttonIndent = width * (isWidescreen ? 0.00875f : 0.0125f);
 		this.buttonOffset = Node.buttonHeight * 0.65f;
 		this.buttonOffset2 = this.buttonOffset / 2f;
 		this.maxVisibleButtons = areaHeight / buttonOffset;
@@ -122,7 +121,8 @@ public class NodeList
 
 			n.y = position + idx * this.buttonOffset;
 			final float midoffset = Math.abs(n.y - midY);
-			n.x = this.buttonMinX + midoffset / this.buttonOffset * this.buttonIndent;
+			n.targetX =
+				this.buttonMinX + midoffset / this.buttonOffset * Node.buttonIndent;
 
 			n = n.next;
 			idx++;
