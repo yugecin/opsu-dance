@@ -100,21 +100,29 @@ public class NodeList
 		final float position = -this.scrolling.getPosition() + areaHeight2 + buttonOffset2;
 		final float midY = headerY + areaHeight2 - buttonOffset2;
 		final float invisibleYOffset = this.headerY - this.buttonOffset * 2f;
+		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
 		Node n = this.first;
 		int idx = 0;
 		while (n != null) {
 			n.update(delta);
 
-			if (n.y > invisibleYOffset && this.firstNodeToDraw == null) {
-				this.firstNodeToDraw = n;
+			if (n.y > invisibleYOffset) {
+				if (this.firstNodeToDraw == null) {
+					this.firstNodeToDraw = n;
+				}
+
+				if (mouseYInHoverRange &&
+					n.y < footerY &&
+					!displayContainer.suppressHover &&
+					Node.isHovered(n, mouseX, mouseY))
+				{
+					this.hoverNode = n;
+				}
 			}
+
 			n.y = position + idx * this.buttonOffset;
 			final float midoffset = Math.abs(n.y - midY);
 			n.x = this.buttonMinX + midoffset / this.buttonOffset * this.buttonIndent;
-
-			if (Node.isHovered(n, mouseX, mouseY)) {
-				this.hoverNode = n;
-			}
 
 			n = n.next;
 			idx++;
