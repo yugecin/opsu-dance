@@ -169,7 +169,8 @@ abstract class Node
 		if (this.hoverHighlightTime >= HOVER_HIGHLIGHT_TIME) {
 			return baseColor;
 		}
-		final float progress = IN_QUAD.calc((float) this.hoverHighlightTime / HOVER_HIGHLIGHT_TIME);
-		return baseColor.brighter(.25f * (1f - progress));
+		return baseColor.brighter((1f - IN_QUAD.calc(
+			(float) this.hoverHighlightTime / HOVER_HIGHLIGHT_TIME
+		)) * .25f);
 	}
 }
