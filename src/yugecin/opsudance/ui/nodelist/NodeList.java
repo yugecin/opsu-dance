@@ -98,6 +98,7 @@ public class NodeList
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
 		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
+		this.starStream.pause();
 		Node n = this.first;
 		int idx = 0;
 		while (n != null) {
@@ -114,6 +115,12 @@ public class NodeList
 					Node.isHovered(n, mouseX, mouseY))
 				{
 					this.hoverNode = n;
+				}
+
+				if (n == this.focusNode)
+				{
+					this.starStream.setPosition(width, n.y + Node.buttonOffset2);
+					this.starStream.resume();
 				}
 			}
 
@@ -137,6 +144,7 @@ public class NodeList
 
 	public void render(Graphics g)
 	{
+		this.starStream.draw();
 		Node node = this.firstNodeToDraw;
 		while (node != null && node.y < footerY) {
 			node.draw(g, this.focusNode);
