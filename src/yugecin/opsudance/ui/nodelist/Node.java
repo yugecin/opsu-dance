@@ -16,6 +16,7 @@ abstract class Node
 {
 	static Image button;
 	static int buttonWidth, buttonHeight;
+	static float buttonOffset, buttonOffset2;
 
 	public static float buttonIndent;
 	private static float buttonHoverIndent;
@@ -31,6 +32,8 @@ abstract class Node
 		buttonHeight = button.getHeight();
 		buttonIndent = width * (isWidescreen ? 0.00875f : 0.0125f);
 		buttonHoverIndent = buttonIndent * 6.6666f;
+		buttonOffset = buttonHeight * 0.65f;
+		buttonOffset2 = buttonOffset / 2f;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
 
@@ -74,9 +77,10 @@ abstract class Node
 	}
 
 	Node prev, next;
+	int idx;
 
 	float height;
-	float targetX;
+	float targetX, targetY;
 	float x, y;
 
 	private boolean isHovered;
@@ -87,6 +91,11 @@ abstract class Node
 	private float hoverIndentValue;
 	private float hoverIndentFrom;
 	private float hoverIndentTo;
+	private int hoverSpreadTime = HOVER_INDENT_TIME;
+	private static final int HOVER_SPREAD_TIME = HOVER_INDENT_TIME;
+	private float hoverSpreadValue;
+	private float hoverSpreadFrom;
+	private float hoverSpreadTo;
 
 	/**
 	 * @return {@code null} if this map is not in this node, or the node that was focused
@@ -94,7 +103,7 @@ abstract class Node
 	abstract BeatmapNode attemptFocusMap(Beatmap beatmap);
 	abstract void draw(Graphics g, Node focusNode);
 
-	void update(int delta)
+	void update(int delta, Node hoveredNode)
 	{
 		if (this.hoverHighlightTime < HOVER_HIGHLIGHT_TIME) {
 			this.hoverHighlightTime += delta;
@@ -109,7 +118,30 @@ abstract class Node
 			) * (this.hoverIndentTo - this.hoverIndentFrom) + this.hoverIndentFrom;
 		}
 
+		final float lastTo = this.hoverSpreadTo;
+		if (hoveredNode == null || hoveredNode.idx == this.idx) {
+			this.hoverSpreadTo = 0f;
+		} else if (hoveredNode.idx < this.idx) {
+			this.hoverSpreadTo = (buttonHeight - buttonOffset) / 2f;
+		} else if (hoveredNode.idx > this.idx) {
+			this.hoverSpreadTo = -(buttonHeight - buttonOffset) / 2f;
+		}
+		if (this.hoverSpreadTo != lastTo) {
+			this.hoverSpreadFrom = this.hoverSpreadValue;
+			this.hoverSpreadTime = 0;
+		}
+
+		if (this.hoverSpreadTime < HOVER_SPREAD_TIME) {
+			if ((this.hoverSpreadTime += delta) > HOVER_SPREAD_TIME) {
+				this.hoverSpreadTime = HOVER_SPREAD_TIME;
+			}
+			this.hoverSpreadValue = OUT_QUART.calc(
+				(float) this.hoverSpreadTime / HOVER_SPREAD_TIME
+			) * (this.hoverSpreadTo - this.hoverSpreadFrom) + this.hoverSpreadFrom;
+		}
+
 		this.x = this.targetX + this.hoverIndentValue;
+		this.y = this.targetY + this.hoverSpreadValue;
 	}
 
 	void toggleHovered()
