@@ -72,7 +72,10 @@ abstract class Node
 	static boolean isHovered(Node node, int mouseX, int mouseY)
 	{
 		return mouseX > node.x + hitboxXleft &&
-			mouseY > node.y + hitboxYtop &&
+			(mouseY > node.y + hitboxYtop ||
+				// TODO: I don't like that this uses prev.
+				(node.prev != null && mouseY > node.prev.y + hitboxYbot &&
+				mouseY > node.prev.y + hitboxYtop)) &&
 			mouseY < node.y + hitboxYbot;
 	}
 

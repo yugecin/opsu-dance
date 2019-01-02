@@ -103,7 +103,7 @@ public class NodeList
 		while (n != null) {
 			n.update(delta, lastHoverNode);
 
-			if (n.y > invisibleYOffset) {
+			if (n.y > invisibleYOffset && n.y < footerY) {
 				if (this.firstNodeToDraw == null) {
 					this.firstNodeToDraw = n;
 				}
