@@ -11,7 +11,7 @@ import org.newdawn.slick.Graphics;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
-import itdelatrisu.opsu.ui.KineticScrolling;
+import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.utils.FloatConsumer;
@@ -25,7 +25,7 @@ public class NodeList
 {
 	private final StarStream starStream;
 
-	public final KineticScrolling scrolling;
+	public final Scrolling scrolling;
 
 	private float areaHeight, areaHeight2;
 	private float headerY, footerY;
@@ -46,8 +46,7 @@ public class NodeList
 	{
 		this.nodes = new ArrayList<>();
 
-		this.scrolling = new KineticScrolling();
-		this.scrolling.setAllowOverScroll(true);
+		this.scrolling = new Scrolling();
 
 		this.starStream = new StarStream(0, 0, 0, 0, 75);
 		this.starStream.setDirectionSpread(10f);
@@ -101,10 +100,9 @@ public class NodeList
 		final Node lastHoverNode = hoverNode;
 		this.hoverNode = null;
 		this.firstNodeToDraw = null;
-		this.scrolling.setMinMax(0, this.nodes.size() * Node.buttonOffset);
+		this.scrolling.setMax(this.nodes.size() * Node.buttonOffset);
 		this.scrolling.update(delta);
-		final float position =
-			-this.scrolling.getPosition() + areaHeight2 + Node.buttonOffset2;
+		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
 		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
@@ -162,7 +160,7 @@ public class NodeList
 		}
 
 		final float scrollerY =
-			this.scrolling.normPos() * (this.scrollBarHeight - this.scrollerHeight);
+			this.scrolling.positionNorm * (this.scrollBarHeight - this.scrollerHeight);
 		final float scrollerEnd = scrollerY + this.scrollerHeight;
 		glDisable(GL_TEXTURE_2D);
 		glPushMatrix();
@@ -180,6 +178,9 @@ public class NodeList
 		glVertex2f(0f, scrollerEnd);
 		glEnd();
 		glPopMatrix();
+		
+		//Fonts.MEDIUM.drawString(20, height2, scrolling.currentSpeed + "");
+		Fonts.MEDIUM.drawString(20, height2, scrolling.scrollProgress + "");
 	}
 
 	public void recreate()
@@ -290,18 +291,18 @@ public class NodeList
 	public void scrollButtonAmount(float amountOfButtons)
 	{
 		if (amountOfButtons != 0) {
-			scrolling.scrollOffset(amountOfButtons * Node.buttonOffset);
+			scrolling.addOffset(amountOfButtons * Node.buttonOffset);
 		}
 	}
 
 	public void centerFocusedNodeSmooth()
 	{
-		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::scrollToPosition);
+		//this.scrollMakeNodeVisible(this.focusNode, this.scrolling::scrollToPosition);
 	}
 
 	public void centerFocusedNodeNow()
 	{
-		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::setPosition);
+		//this.scrollMakeNodeVisible(this.focusNode, this.scrolling::setPosition);
 	}
 
 	private void scrollMakeNodeVisible(Node node, FloatConsumer scrollMethod)
