@@ -16,6 +16,8 @@ import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.utils.FloatConsumer;
 
+import static org.lwjgl.opengl.GL11.*;
+
 /**
  * manages nodes to display in {@link itdelatrisu.opsu.states.SongMenu}
  */
@@ -27,6 +29,7 @@ public class NodeList
 
 	private float areaHeight, areaHeight2;
 	private float headerY, footerY;
+	private float scrollBarTopY, scrollBarHeight, scrollerHeight;
 
 	private float buttonMinX;
 	private float maxVisibleButtons;
@@ -52,7 +55,11 @@ public class NodeList
 		this.starStream.staggerSpawn(false);
 	}
 
-	public void revalidate(final float headerY, final float footerY)
+	public void revalidate(
+		float headerY,
+		float footerY,
+		float scrollBarTopY,
+		float scrollBarBotY)
 	{
 		Node.revalidate();
 
@@ -60,6 +67,9 @@ public class NodeList
 		this.footerY = footerY;
 		this.areaHeight = footerY - headerY;
 		this.areaHeight2 = areaHeight / 2f;
+		this.scrollBarTopY = scrollBarTopY;
+		this.scrollBarHeight = scrollBarBotY - scrollBarTopY;
+		this.scrollerHeight = 0.0422f * height;
 
 		this.starStream.reinitStarImage();
 
@@ -150,6 +160,26 @@ public class NodeList
 			node.draw(g, this.focusNode);
 			node = node.next;
 		}
+
+		final float scrollerY =
+			this.scrolling.normPos() * (this.scrollBarHeight - this.scrollerHeight);
+		final float scrollerEnd = scrollerY + this.scrollerHeight;
+		glDisable(GL_TEXTURE_2D);
+		glPushMatrix();
+		glTranslatef(width - 8f, this.scrollBarTopY, 0f);
+		glColor4f(0f, 0f, 0f, .3f);
+		glBegin(GL_QUADS);
+		glVertex2f(0f, 0f);
+		glVertex2f(8f, 0f);
+		glVertex2f(8f, this.scrollBarHeight);
+		glVertex2f(0f, this.scrollBarHeight);
+		glColor3f(1f, 1f, 1f);
+		glVertex2f(0f, scrollerY);
+		glVertex2f(8f, scrollerY);
+		glVertex2f(8f, scrollerEnd);
+		glVertex2f(0f, scrollerEnd);
+		glEnd();
+		glPopMatrix();
 	}
 
 	public void recreate()

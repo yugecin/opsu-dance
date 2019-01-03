@@ -111,6 +111,8 @@ public class SongMenu extends BaseOpsuState
 	 */
 	private int searchTimer = 0;
 
+	private float searchRectHeight;
+
 	/** Information text to display based on the search query. */
 	private String searchResultString = null;
 
@@ -267,6 +269,8 @@ public class SongMenu extends BaseOpsuState
 		logo = logo.getScaledCopy(footerLogoSize / logo.getWidth());
 		footerLogoButton = new MenuButton(logo, width - footerHeight * 0.8f, height - footerHeight * 0.65f);
 
+		this.searchRectHeight = Fonts.BOLD.getLineHeight() * 2;
+
 		// initialize sorts
 		int sortWidth = (int) (width * 0.12f);
 		int posX = (int) (width * 0.87f);
@@ -309,7 +313,16 @@ public class SongMenu extends BaseOpsuState
 		// initialize score data buttons
 		ScoreData.init(width, headerY + height * 0.01f);
 
-		nodeList.revalidate(headerY, footerY);
+		final float shls = (footerLogoSize * .85f) / 2f; // small half logo size
+		// distance logo center to border :)
+		final float dlctb = (width - this.footerLogoButton.getX());
+		nodeList.revalidate(
+			headerY,
+			footerY,
+			headerY + this.searchRectHeight,
+			this.footerLogoButton.getY() + shls * .01f -
+				(float) Math.sqrt(shls * shls - dlctb * dlctb)
+		);
 
 		// search
 		int textFieldX = (int) (width * 0.7125f + Fonts.BOLD.getWidth("Search: "));
@@ -591,7 +604,7 @@ public class SongMenu extends BaseOpsuState
 		int searchY = searchTextField.y;
 		float searchBaseX = width * 0.7f;
 		float searchTextX = width * 0.7125f;
-		float searchRectHeight = Fonts.BOLD.getLineHeight() * 2;
+		float searchRectHeight = this.searchRectHeight;
 		float searchExtraHeight = Fonts.DEFAULT.getLineHeight() * 0.7f;
 		float searchProgress = (searchTransitionTimer < SEARCH_TRANSITION_TIME) ?
 				((float) searchTransitionTimer / SEARCH_TRANSITION_TIME) : 1f;

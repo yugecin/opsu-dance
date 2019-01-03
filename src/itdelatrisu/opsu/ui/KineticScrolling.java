@@ -78,6 +78,11 @@ public class KineticScrolling {
 	 */
 	public float getPosition() { return position; }
 
+	public float normPos()
+	{
+		return (position - this.min) / (this.max - this.min);
+	}
+
 	/**
 	 * Returns the current position as an int.
 	 * @return the position
