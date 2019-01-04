@@ -1167,7 +1167,7 @@ public class SongMenu extends BaseOpsuState
 			// score buttons
 			startScorePos.scrollOffset(ScoreData.getButtonOffset() * -e.direction);
 		} else {
-			nodeList.scrollButtonAmount(-e.direction * 2);
+			nodeList.mouseWheelScroll(-e.direction);
 		}
 	}
 

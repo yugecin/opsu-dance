@@ -5,20 +5,23 @@ package yugecin.opsudance.ui.nodelist;
 import static itdelatrisu.opsu.Utils.clamp;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 
+/**
+ * main formula from {@link itdelatrisu.opsu.ui.KineticScrolling}
+ */
 class Scrolling
 {
 	private float max;
 
-	private float positionTo;
-	private float positionFrom;
-	private int updateTime;
-	private static final int UPDATE_TIME = 1500;
 	private boolean lastDirection;
 	private long lastOffsetTime;
 
 	float position;
 	float positionNorm;
 	float scrollProgress;
+
+	private float target, amplitude;
+	private int totalDelta;
+	private static final int TIME_CONST = 200;
 
 	void setMax(float max)
 	{
@@ -28,37 +31,28 @@ class Scrolling
 	void addOffset(float offset)
 	{
 		final long time = System.currentTimeMillis();
-		this.positionFrom = this.position;
 		final boolean newDirection = offset > 0;
 		if (newDirection ^ this.lastDirection) {
 			this.lastDirection = newDirection;
-			this.positionTo = this.position + offset;
+			this.target = this.position + offset;
+			this.lastOffsetTime = 0l;
 		} else {
-			if (time - lastOffsetTime < 100) {
-				//offset *= (1f - IN_EXPO.calc((time - lastOffsetTime) / 100)) * this.max * 0.00003f;
+			if (time - lastOffsetTime < 75) {
+				final float boost = (1f - ((time - lastOffsetTime) / 75f));
+				offset *= 1f + IN_CIRC.calc(boost) * 7.5f;
 			}
-			this.positionTo += offset;
+			this.target += offset;
+			this.lastOffsetTime = time;
 		}
-		lastOffsetTime = time;
-		this.updateTime = UPDATE_TIME;
+		this.totalDelta = 0;
+		this.target = clamp(this.target, 0f, this.max);
+		this.amplitude = this.target - this.position;
 	}
 
 	void update(int delta)
 	{
-		if (this.updateTime > 0) {
-			if ((this.updateTime -= delta) < 0) {
-				this.updateTime = 0;
-			}
-			final float dpos = (this.positionTo - this.positionFrom);
-			this.scrollProgress = OUT_EXPO.calc(
-				(float) (UPDATE_TIME - this.updateTime) / UPDATE_TIME
-			);
-			this.position = clamp(
-				this.positionFrom + this.scrollProgress * dpos,
-				0f,
-				this.max
-			);
-			this.positionNorm = this.position / this.max;
-		}
+		final float progress = (float) (this.totalDelta += delta) / TIME_CONST;
+		this.position = this.target + (float) (-this.amplitude * Math.exp(-progress));
+		this.positionNorm = this.position / this.max;
 	}
 }

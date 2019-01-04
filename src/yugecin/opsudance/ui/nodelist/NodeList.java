@@ -285,6 +285,11 @@ public class NodeList
 		this.scrollButtonAmount(maxVisibleButtons);
 	}
 
+	public void mouseWheelScroll(int direction)
+	{
+		this.scrolling.addOffset(direction * Node.buttonOffset * 1.5f);
+	}
+
 	/**
 	 * Scrolls through the song list.
 	 */
