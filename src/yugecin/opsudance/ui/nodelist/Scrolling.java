@@ -38,6 +38,9 @@ class Scrolling
 			this.lastOffsetTime = 0l;
 		} else {
 			if (time - lastOffsetTime < 75) {
+				// boost is only actually intended for mouse wheel invocations,
+				// but updates this fast are pretty much only possible when using
+				// the mousewheel, soooo...
 				final float boost = (1f - ((time - lastOffsetTime) / 75f));
 				offset *= 1f + IN_CIRC.calc(boost) * 7.5f;
 			}
