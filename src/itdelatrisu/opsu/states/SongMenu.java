@@ -386,7 +386,7 @@ public class SongMenu extends BaseOpsuState
 		if (focusedMap != null &&
 			!focusedMap.drawBackground(width, height, bgAlpha.getValue(), true))
 		{
-			GameImage.PLAYFIELD.getImage().draw();
+			GameImage.PLAYFIELD.getImage().draw(0, 0, Colors.WHITE_ALPHA);
 		}
 
 		/*
