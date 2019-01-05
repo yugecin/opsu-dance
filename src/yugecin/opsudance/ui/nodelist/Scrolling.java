@@ -56,6 +56,7 @@ class Scrolling
 	{
 		this.target = position;
 		this.position = target;
+		this.amplitude = 0f;
 	}
 
 	 void scrollToPosition(float position)

@@ -265,6 +265,9 @@ public class NodeList
 		return false;
 	}
 
+	/**
+	 * Will scroll to node if in song menu state 
+	 */
 	private void focusNode(BeatmapNode node, boolean playAtPreviewTime)
 	{
 		this.focusNode = node;
@@ -273,6 +276,9 @@ public class NodeList
 			BeatmapParser.parseTimingPoints(beatmap);
 		}
 		MusicController.play(beatmap, /*loop*/ false, playAtPreviewTime);
+		if (displayContainer.isIn(songMenuState)) {
+			this.centerFocusedNodeSmooth();
+		}
 	}
 
 	public void scrollPageUp()
