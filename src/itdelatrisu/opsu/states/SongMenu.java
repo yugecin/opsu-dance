@@ -1083,6 +1083,12 @@ public class SongMenu extends BaseOpsuState
 		SoundController.playSound(SoundEffect.MENUHIT);
 
 		if (!input.isShiftDown()) {
+			while (!nextSongs.isEmpty()) {
+				final Beatmap map = nextSongs.peek();
+				if (nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true)) {
+					return;
+				}
+			}
 			this.setFocusToRandom();
 			return;
 		}
