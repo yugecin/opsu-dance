@@ -302,12 +302,12 @@ public class NodeList
 
 	public void centerFocusedNodeSmooth()
 	{
-		//this.scrollMakeNodeVisible(this.focusNode, this.scrolling::scrollToPosition);
+		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::scrollToPosition);
 	}
 
 	public void centerFocusedNodeNow()
 	{
-		//this.scrollMakeNodeVisible(this.focusNode, this.scrolling::setPosition);
+		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::setPosition);
 	}
 
 	private void scrollMakeNodeVisible(Node node, FloatConsumer scrollMethod)

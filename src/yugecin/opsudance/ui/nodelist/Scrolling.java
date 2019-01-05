@@ -52,6 +52,19 @@ class Scrolling
 		this.amplitude = this.target - this.position;
 	}
 
+	void setPosition(float position)
+	{
+		this.target = position;
+		this.position = target;
+	}
+
+	 void scrollToPosition(float position)
+	 {
+		this.amplitude = position - this.position;
+		this.target = position;
+		this.totalDelta = 0;
+	}
+
 	void update(int delta)
 	{
 		final float progress = (float) (this.totalDelta += delta) / TIME_CONST;
