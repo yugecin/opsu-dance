@@ -133,7 +133,7 @@ public class NodeList
 			}
 
 			n.targetY = position + idx * Node.buttonOffset;
-			final float midoffset = Math.abs(n.y - midY);
+			final float midoffset = Math.abs(n.targetY - midY);
 			n.targetX =
 				this.buttonMinX + midoffset / Node.buttonOffset * Node.buttonIndent;
 
