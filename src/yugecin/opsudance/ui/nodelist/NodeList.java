@@ -31,7 +31,7 @@ public class NodeList
 	private float headerY, footerY;
 	private float scrollBarTopY, scrollBarHeight, scrollerHeight;
 
-	private float buttonMinX;
+	private float buttonMaxOffset;
 	private float maxVisibleButtons;
 
 	private final ArrayList<Node> nodes;
@@ -72,7 +72,7 @@ public class NodeList
 
 		this.starStream.reinitStarImage();
 
-		this.buttonMinX = width * (isWidescreen ? 0.55f : 0.35f);
+		this.buttonMaxOffset = width * (isWidescreen ? 0.45f : 0.65f);
 		this.maxVisibleButtons = areaHeight / Node.buttonOffset;
 
 		this.starStream.setDirection(-width, 0);
@@ -97,6 +97,7 @@ public class NodeList
 		final int delta = (int) (time - this.lastNodeUpdate);
 		this.lastNodeUpdate = time;
 
+		Node.update(delta);
 		final Node lastHoverNode = hoverNode;
 		this.hoverNode = null;
 		this.firstNodeToDraw = null;
@@ -133,9 +134,8 @@ public class NodeList
 			}
 
 			n.targetY = position + idx * Node.buttonOffset;
-			final float midoffset = Math.abs(n.targetY - midY);
-			n.targetX =
-				this.buttonMinX + midoffset / Node.buttonOffset * Node.buttonIndent;
+			final float midoffset = -Math.abs(n.targetY - midY);
+			n.targetXOffset = this.buttonMaxOffset + midoffset / Node.indentPerOffset;
 
 			n = n.next;
 			idx++;
@@ -203,6 +203,11 @@ public class NodeList
 			before = newnode;
 			this.nodes.add(newnode);
 		}
+	}
+
+	public void reFadeIn()
+	{
+		Node.fadeInTime = 0;
 	}
 
 	@Nullable

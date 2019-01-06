@@ -1222,6 +1222,7 @@ public class SongMenu extends BaseOpsuState
 		if (MusicController.isTrackDimmed())
 			MusicController.toggleTrackDimmed(1f);
 
+		nodeList.reFadeIn();
 		nodeList.centerFocusedNodeNow();
 
 		// reset game data

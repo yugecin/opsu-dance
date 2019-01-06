@@ -18,12 +18,16 @@ abstract class Node
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
 
-	public static float buttonIndent;
+	public static float buttonIndent, indentPerOffset;
 	private static float buttonHoverIndent;
 
 	protected static float cx, cy;
 
 	private static int hitboxYtop, hitboxYbot, hitboxXleft;
+
+	static int fadeInTime;
+	private static final int FADE_IN_TIME = 2000;
+	private static float fadeInXMod;
 
 	static void revalidate()
 	{
@@ -34,6 +38,7 @@ abstract class Node
 		buttonHoverIndent = buttonIndent * 6.6666f;
 		buttonOffset = buttonHeight * 0.65f;
 		buttonOffset2 = buttonOffset / 2f;
+		indentPerOffset = buttonOffset / buttonIndent;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
 
@@ -78,11 +83,21 @@ abstract class Node
 			mouseY < node.y + hitboxYbot;
 	}
 
+	static void update(int delta)
+	{
+		if (fadeInTime < FADE_IN_TIME) {
+			if ((fadeInTime += delta) > FADE_IN_TIME) {
+				fadeInTime = FADE_IN_TIME;
+			}
+			fadeInXMod = 2f * OUT_CUBIC.calc((float) fadeInTime / FADE_IN_TIME) - 1f;
+		}
+	}
+
 	Node prev, next;
 	int idx;
 
 	float height;
-	float targetX, targetY;
+	float targetXOffset, targetY;
 	float x, y;
 
 	private boolean isHovered;
@@ -142,7 +157,7 @@ abstract class Node
 			) * (this.hoverSpreadTo - this.hoverSpreadFrom) + this.hoverSpreadFrom;
 		}
 
-		this.x = this.targetX + this.hoverIndentValue;
+		this.x = width - (this.targetXOffset - this.hoverIndentValue) * fadeInXMod;
 		this.y = this.targetY + this.hoverSpreadValue;
 	}
 
