@@ -3,17 +3,21 @@
 package yugecin.opsudance.ui.nodelist;
 
 import static itdelatrisu.opsu.Utils.clamp;
+import static itdelatrisu.opsu.ui.KineticScrolling.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 
 /**
- * main formula from {@link itdelatrisu.opsu.ui.KineticScrolling}
+ * based on {@link itdelatrisu.opsu.ui.KineticScrolling}
  */
-class Scrolling
+public class Scrolling
 {
 	private float max;
 
+	private boolean mouseDown;
 	private boolean lastDirection;
 	private long lastOffsetTime;
+	private float avgVelocity;
+	private int dragOffset;
 
 	float position;
 	float positionNorm;
@@ -67,6 +71,16 @@ class Scrolling
 
 	void update(int delta)
 	{
+		if (this.mouseDown) {
+			final float avg_not_so_const = AVG_CONST * delta / 16f;
+			this.avgVelocity =
+				(1f - avg_not_so_const) * avgVelocity
+				+ avg_not_so_const * (this.dragOffset * 1000f / delta);
+			this.target = this.position += this.dragOffset;
+			this.dragOffset = 0;
+			return;
+		}
+
 		final float progress = (float) (this.totalDelta += delta) / TIME_CONST;
 		this.position = clamp(
 			this.target + (float) (-this.amplitude * Math.exp(-progress)),
@@ -74,5 +88,31 @@ class Scrolling
 			this.max
 		);
 		this.positionNorm = this.position / this.max;
+	}
+
+	public void pressed()
+	{
+		if (!this.mouseDown) {
+			this.mouseDown = true;
+			this.avgVelocity = 0;
+			this.dragOffset = 0;
+		}
+	}
+
+	public void released()
+	{
+		if (this.mouseDown) {
+			this.mouseDown = false;
+			this.amplitude = AMPLITUDE_CONST * this.avgVelocity;
+			this.target += amplitude;
+			this.totalDelta = 0;
+		}
+	}
+
+	public void dragged(int ydistance)
+	{
+		if (this.mouseDown) {
+			this.dragOffset += ydistance;
+		}
 	}
 }

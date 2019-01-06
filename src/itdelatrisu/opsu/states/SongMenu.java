@@ -240,9 +240,6 @@ public class SongMenu extends BaseOpsuState
 		}
 	};
 
-	/** Whether the menu is currently scrolling to the focus node (blocks other actions). */
-	private boolean isScrollingToFocusNode = false;
-
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
@@ -740,21 +737,6 @@ public class SongMenu extends BaseOpsuState
 			startScorePos.update(delta);
 		}
 
-		// scrolling
-		songScrolling.update(delta);
-		/*
-		if (isScrollingToFocusNode) {
-			float distanceDiff = Math.abs(songScrolling.getPosition() - songScrolling.getTargetPosition());
-			if (distanceDiff <= buttonOffset / 8f) {  // close enough, stop blocking input
-				songScrolling.scrollToPosition(songScrolling.getTargetPosition());
-				songScrolling.setSpeedMultiplier(1f);
-				isScrollingToFocusNode = false;
-			}
-		}
-		*/
-
-		this.updateSongListPosition();
-
 		// nodes mouse hover
 
 		// tooltips
@@ -787,10 +769,6 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (isScrollingToFocusNode) {
-			return;
-		}
-
 		if (e.button == Input.RMB) {
 			this.isFastScrollingSongs = true;
 			songScrolling.setSpeedMultiplier(5f);
@@ -803,7 +781,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		songScrolling.pressed();
+		nodeList.scrolling.pressed();
 		startScorePos.pressed();
 	}
 
@@ -814,9 +792,8 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (isScrollingToFocusNode) {
-			return;
-		}
+		nodeList.scrolling.released();
+		startScorePos.released();
 
 		if (this.sortMenu.baseContains(e.x, e.y))
 		{
@@ -833,10 +810,8 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		final boolean inSongList = headerY < mousePressY && mousePressY < footerY;
-		if (inSongList) {
-			songScrolling.released();
-			startScorePos.released();
+		if (e.dragDistanceExceeds(5)) {
+			return;
 		}
 
 		if (isInputBlocked()) {
@@ -904,7 +879,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (inSongList && e.button == Input.LMB) {
+		if (headerY < mousePressY && mousePressY < footerY && e.button == Input.LMB) {
 			nodeList.updateNodePositionsNow(e.x, e.y);
 			nodeList.focusHoveredNode();
 		}
@@ -971,8 +946,7 @@ public class SongMenu extends BaseOpsuState
 	public void keyPressed(KeyEvent e)
 	{
 		// block input
-		if ((reloadThread != null && e.keyCode != KEY_ESCAPE) ||
-			beatmapMenuTimer > -1 || isScrollingToFocusNode)
+		if ((reloadThread != null && e.keyCode != KEY_ESCAPE) || beatmapMenuTimer > -1)
 		{
 			return;
 		}
@@ -1151,7 +1125,9 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		songScrolling.dragged(-e.dy);
+		if (e.button == Input.LMB) {
+			nodeList.scrolling.dragged(-e.dy);
+		}
 	}
 
 	private void updateFastSongScrollingPosition()
@@ -1196,7 +1172,6 @@ public class SongMenu extends BaseOpsuState
 		selectModsButton.resetHover();
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
-		isScrollingToFocusNode = false;
 		songScrolling.released();
 		songScrolling.setSpeedMultiplier(1f);
 		startScorePos.setPosition(0);
@@ -1348,13 +1323,6 @@ public class SongMenu extends BaseOpsuState
 	{
 		SoundController.playSound(SoundEffect.MENUBACK);
 		displayContainer.switchState(mainmenuState);
-	}
-
-	/**
-	 * Updates the song list data required for drawing.
-	 */
-	private void updateSongListPosition()
-	{
 	}
 
 	/**
@@ -1559,7 +1527,7 @@ public class SongMenu extends BaseOpsuState
 	 * @return true if blocking input
 	 */
 	private boolean isInputBlocked() {
-		return (reloadThread != null || beatmapMenuTimer > -1 || isScrollingToFocusNode);
+		return (reloadThread != null || beatmapMenuTimer > -1);
 	}
 
 	/**
