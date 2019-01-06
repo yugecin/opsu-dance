@@ -31,7 +31,6 @@ public class NodeList
 	private float headerY, footerY;
 	private float scrollBarTopY, scrollBarHeight, scrollerHeight;
 
-	private float buttonMaxOffset;
 	private float maxVisibleButtons;
 
 	private final ArrayList<Node> nodes;
@@ -72,7 +71,6 @@ public class NodeList
 
 		this.starStream.reinitStarImage();
 
-		this.buttonMaxOffset = width * (isWidescreen ? 0.45f : 0.65f);
 		this.maxVisibleButtons = areaHeight / Node.buttonOffset;
 
 		this.starStream.setDirection(-width, 0);
@@ -144,8 +142,7 @@ public class NodeList
 			}
 
 			n.targetY = position + idx * Node.buttonOffset;
-			final float midoffset = -Math.abs(n.targetY - midY);
-			n.targetXOffset = this.buttonMaxOffset + midoffset / Node.indentPerOffset;
+			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
 			n = n.next;
 			idx++;

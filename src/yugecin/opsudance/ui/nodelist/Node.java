@@ -17,6 +17,7 @@ abstract class Node
 	static Image button;
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
+	private static float buttonBaseX;
 
 	public static float buttonIndent, indentPerOffset;
 	private static float buttonHoverIndent;
@@ -39,6 +40,7 @@ abstract class Node
 		buttonOffset = buttonHeight * 0.65f;
 		buttonOffset2 = buttonOffset / 2f;
 		indentPerOffset = buttonOffset / buttonIndent;
+		buttonBaseX = width * (isWidescreen ? 0.55f : 0.35f) + buttonHoverIndent;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
 
@@ -143,9 +145,9 @@ abstract class Node
 			if ((this.focusIndentTime += delta) > HOVER_INDENT_TIME) {
 				this.focusIndentTime = HOVER_INDENT_TIME;
 			}
-			this.focusIndentValue = -OUT_QUART.calc(
+			this.focusIndentValue = OUT_QUART.calc(
 				(float) this.focusIndentTime / HOVER_INDENT_TIME
-			) * (this.focusIndentTo - this.focusIndentFrom) - this.focusIndentFrom;
+			) * (this.focusIndentTo - this.focusIndentFrom) + this.focusIndentFrom;
 		}
 
 		final float lastTo = this.hoverSpreadTo;
@@ -170,8 +172,8 @@ abstract class Node
 			) * (this.hoverSpreadTo - this.hoverSpreadFrom) + this.hoverSpreadFrom;
 		}
 
-		this.x = width - (this.targetXOffset - this.hoverIndentValue) * fadeInXMod +
-			this.focusIndentValue;
+		this.x = (buttonBaseX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
+			- this.focusIndentValue;
 		this.y = this.targetY + this.hoverSpreadValue;
 	}
 
@@ -179,7 +181,7 @@ abstract class Node
 	{
 		if (this.isHovered = !this.isHovered) {
 			this.hoverHighlightTime = 0;
-			this.hoverIndentTo = -buttonHoverIndent;
+			this.hoverIndentTo = buttonHoverIndent;
 		} else {
 			this.hoverIndentTo = 0f;
 		}
@@ -190,9 +192,9 @@ abstract class Node
 	void focusChanged(Node focusedNode)
 	{
 		if (focusedNode == this) {
-			this.focusIndentTo = 0f;
+			this.focusIndentTo = buttonHoverIndent;
 		} else {
-			this.focusIndentTo = -buttonHoverIndent;
+			this.focusIndentTo = 0;
 		}
 		this.focusIndentFrom = this.focusIndentValue;
 		this.focusIndentTime = 0;
