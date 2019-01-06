@@ -99,7 +99,7 @@ public class NodeList
 	}
 
 	private long lastNodeUpdate;
-	private void updateNodePositionsNow(int mouseX, int mouseY)
+	public void updateNodePositionsNow(int mouseX, int mouseY)
 	{
 		// own deltas because this function can get called multiple times per update
 		// TODO do this in a better way
@@ -227,6 +227,16 @@ public class NodeList
 			return this.focusNode.beatmap;
 		}
 		return null;
+	}
+
+	/**
+	 * Call {@link #updateNodePositionsNow(int, int)} first.
+	 */
+	public void focusHoveredNode()
+	{
+		if (this.hoverNode != null && hoverNode instanceof BeatmapNode) {
+			this.focusNode((BeatmapNode) this.hoverNode, /*playAtPreviewTime*/ true);
+		}
 	}
 
 	/**

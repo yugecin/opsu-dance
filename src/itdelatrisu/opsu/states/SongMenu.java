@@ -833,7 +833,8 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (headerY < mousePressY && mousePressY < footerY) {
+		final boolean inSongList = headerY < mousePressY && mousePressY < footerY;
+		if (inSongList) {
 			songScrolling.released();
 			startScorePos.released();
 		}
@@ -901,6 +902,11 @@ public class SongMenu extends BaseOpsuState
 		if (footerLogoButton.contains(x, y, 0.25f)) {
 			startGame();
 			return;
+		}
+
+		if (inSongList && e.button == Input.LMB) {
+			nodeList.updateNodePositionsNow(e.x, e.y);
+			nodeList.focusHoveredNode();
 		}
 
 		// song buttons
