@@ -89,7 +89,7 @@ abstract class Node
 			if ((fadeInTime += delta) > FADE_IN_TIME) {
 				fadeInTime = FADE_IN_TIME;
 			}
-			fadeInXMod = 2f * OUT_CUBIC.calc((float) fadeInTime / FADE_IN_TIME) - 1f;
+			fadeInXMod = OUT_EXPO.calc((float) fadeInTime / FADE_IN_TIME);
 		}
 	}
 

@@ -81,6 +81,16 @@ public class NodeList
 		this.lastNodeUpdate = System.currentTimeMillis();
 	}
 
+	/**
+	 * Called by SongMenu#enter
+	 */
+	public void enter()
+	{
+		this.reFadeIn();
+		this.centerFocusedNodeNow();
+		this.lastNodeUpdate = System.currentTimeMillis();
+	}
+
 	public void preRenderUpdate()
 	{
 		this.starStream.update(renderDelta);
