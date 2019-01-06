@@ -294,6 +294,9 @@ public class NodeList
 		if (displayContainer.isIn(songMenuState)) {
 			this.centerFocusedNodeSmooth();
 		}
+		for (int i = this.nodes.size(); i > 0;) {
+			this.nodes.get(--i).focusChanged(node);
+		}
 	}
 
 	public void scrollPageUp()

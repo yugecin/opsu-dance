@@ -113,6 +113,10 @@ abstract class Node
 	private float hoverSpreadValue;
 	private float hoverSpreadFrom;
 	private float hoverSpreadTo;
+	private float focusIndentTime = HOVER_INDENT_TIME;
+	private float focusIndentValue;
+	private float focusIndentFrom;
+	private float focusIndentTo;
 
 	/**
 	 * @return {@code null} if this map is not in this node, or the node that was focused
@@ -133,6 +137,15 @@ abstract class Node
 			this.hoverIndentValue = OUT_QUART.calc(
 				(float) this.hoverIndentTime / HOVER_INDENT_TIME
 			) * (this.hoverIndentTo - this.hoverIndentFrom) + this.hoverIndentFrom;
+		}
+
+		if (this.focusIndentTime < HOVER_INDENT_TIME) {
+			if ((this.focusIndentTime += delta) > HOVER_INDENT_TIME) {
+				this.focusIndentTime = HOVER_INDENT_TIME;
+			}
+			this.focusIndentValue = -OUT_QUART.calc(
+				(float) this.focusIndentTime / HOVER_INDENT_TIME
+			) * (this.focusIndentTo - this.focusIndentFrom) - this.focusIndentFrom;
 		}
 
 		final float lastTo = this.hoverSpreadTo;
@@ -157,7 +170,8 @@ abstract class Node
 			) * (this.hoverSpreadTo - this.hoverSpreadFrom) + this.hoverSpreadFrom;
 		}
 
-		this.x = width - (this.targetXOffset - this.hoverIndentValue) * fadeInXMod;
+		this.x = width - (this.targetXOffset - this.hoverIndentValue) * fadeInXMod +
+			this.focusIndentValue;
 		this.y = this.targetY + this.hoverSpreadValue;
 	}
 
@@ -171,6 +185,17 @@ abstract class Node
 		}
 		this.hoverIndentFrom = this.hoverIndentValue;
 		this.hoverIndentTime = 0;
+	}
+
+	void focusChanged(Node focusedNode)
+	{
+		if (focusedNode == this) {
+			this.focusIndentTo = 0f;
+		} else {
+			this.focusIndentTo = -buttonHoverIndent;
+		}
+		this.focusIndentFrom = this.focusIndentValue;
+		this.focusIndentTime = 0;
 	}
 
 	protected void drawButton(Color color)
