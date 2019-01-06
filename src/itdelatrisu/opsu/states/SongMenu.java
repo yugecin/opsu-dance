@@ -1211,16 +1211,12 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// reset music track
-		else if (resetTrack) {
+		else if (resetTrack || MusicController.isPaused()) {
 			MusicController.pause();
 			MusicController.playAt(MusicController.getBeatmap().previewTime, true);
 			MusicController.setPitch(1.0f);
 			resetTrack = false;
 		}
-
-		// unpause track
-		else if (MusicController.isPaused())
-			MusicController.resume();
 
 		// undim track
 		if (MusicController.isTrackDimmed())
