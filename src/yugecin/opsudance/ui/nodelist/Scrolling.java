@@ -2,9 +2,12 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.nodelist;
 
+import yugecin.opsudance.core.input.*;
+
 import static itdelatrisu.opsu.Utils.clamp;
 import static itdelatrisu.opsu.ui.KineticScrolling.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
  * based on {@link itdelatrisu.opsu.ui.KineticScrolling}
@@ -15,6 +18,7 @@ public class Scrolling
 
 	private boolean mouseDown;
 	private boolean lastDirection;
+	private boolean isFastScrolling;
 	private long lastOffsetTime;
 	private float avgVelocity;
 	private int dragOffset;
@@ -62,11 +66,6 @@ public class Scrolling
 		this.amplitude = 0f;
 	}
 
-	public void scrollToNorm(float norm)
-	{
-		this.scrollToPosition(clamp(norm * this.max, 0f, this.max));
-	}
-
 	void scrollToPosition(float position)
 	{
 		this.amplitude = position - this.position;
@@ -86,9 +85,8 @@ public class Scrolling
 			return;
 		}
 
-
 		final float progress = (float) ((this.totalDelta += delta)
-			* Math.log10(Math.abs(this.amplitude)) / 2f / TIME_CONST);
+			* Math.log10(Math.abs(this.amplitude) + 0.00001f) / 2f / TIME_CONST);
 		this.position = clamp(
 			this.target + (float) (-this.amplitude * Math.exp(-progress)),
 			0f,
@@ -97,29 +95,82 @@ public class Scrolling
 		this.positionNorm = this.position / this.max;
 	}
 
-	public void pressed()
+	private void fastScroll()
 	{
-		if (!this.mouseDown) {
+		this.scrollToPosition(clamp(
+			(mouseY - nodeList.headerY) / (nodeList.footerY - nodeList.headerY),
+			0f,
+			1f
+		) * this.max);
+	}
+
+	public boolean mousePressed(MouseEvent e)
+	{
+		if (e.button == Input.LMB &&
+			nodeList.headerY < e.y && e.y < nodeList.footerY &&
+			!this.mouseDown)
+		{
 			this.mouseDown = true;
 			this.avgVelocity = 0;
 			this.dragOffset = 0;
+			e.consume();
+			return true;
 		}
+
+		if (e.button == Input.RMB) {
+			this.isFastScrolling = true;
+			this.fastScroll();
+			e.consume();
+			return true;
+		}
+
+		return false;
 	}
 
-	public void released()
+	public boolean mouseDragged(MouseDragEvent e)
 	{
-		if (this.mouseDown) {
+		if (this.mouseDown && e.button == Input.LMB) {
+			this.dragOffset -= e.dy;
+			e.consume();
+			return true;
+		}
+
+		if (!this.isFastScrolling) {
+			return false;
+		}
+
+		this.fastScroll();
+		e.consume();
+		return true;
+	}
+
+	public boolean mouseReleased(MouseEvent e)
+	{
+		if (this.mouseDown && e.button == Input.LMB) {
 			this.mouseDown = false;
 			this.amplitude = AMPLITUDE_CONST * this.avgVelocity;
 			this.target += amplitude;
 			this.totalDelta = 0;
+			e.consume();
+			return true;
 		}
+
+		if (e.button == Input.RMB) {
+			this.isFastScrolling = false;
+			e.consume();
+			return true;
+		}
+
+		return false;
 	}
 
-	public void dragged(int ydistance)
+	public void mouseWheelMoved(MouseWheelEvent e)
 	{
-		if (this.mouseDown) {
-			this.dragOffset += ydistance;
-		}
+		this.addOffset(-e.direction * Node.buttonOffset * 1.5f);
+	}
+
+	void resetState()
+	{
+		this.mouseDown = this.isFastScrolling = false;
 	}
 }

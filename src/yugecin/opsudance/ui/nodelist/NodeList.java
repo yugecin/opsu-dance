@@ -27,8 +27,8 @@ public class NodeList
 
 	public final Scrolling scrolling;
 
+	float headerY, footerY;
 	private float areaHeight, areaHeight2;
-	private float headerY, footerY;
 	private float scrollBarTopY, scrollBarHeight, scrollerHeight;
 
 	private float maxVisibleButtons;
@@ -87,6 +87,7 @@ public class NodeList
 		this.reFadeIn();
 		this.centerFocusedNodeNow();
 		this.lastNodeUpdate = System.currentTimeMillis();
+		this.scrolling.resetState();
 	}
 
 	public void preRenderUpdate()
@@ -318,7 +319,6 @@ public class NodeList
 
 	public void mouseWheelScroll(int direction)
 	{
-		this.scrolling.addOffset(direction * Node.buttonOffset * 1.5f);
 	}
 
 	/**

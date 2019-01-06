@@ -92,8 +92,6 @@ public class SongMenu extends BaseOpsuState
 	/** Line width of the header/footer divider. */
 	private static final int DIVIDER_LINE_WIDTH = 3;
 
-	private boolean isFastScrollingSongs;
-
 	/** Current focus node's song information. */
 	private String[] songInfo;
 
@@ -750,17 +748,9 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (e.button == Input.RMB) {
-			this.isFastScrollingSongs = true;
-			this.updateFastSongScrollingPosition();
+		if (nodeList.scrolling.mousePressed(e)) {
 			return;
 		}
-
-		if (e.y <= headerY || footerY <= e.y) {
-			return;
-		}
-
-		nodeList.scrolling.pressed();
 		startScorePos.pressed();
 	}
 
@@ -771,7 +761,10 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		nodeList.scrolling.released();
+		if (nodeList.scrolling.mouseReleased(e)) {
+			return;
+		}
+
 		startScorePos.released();
 
 		if (this.sortMenu.baseContains(e.x, e.y))
@@ -779,13 +772,6 @@ public class SongMenu extends BaseOpsuState
 			this.sortMenu.openGrabFocus();
 			optionsOverlay.hide();
 			e.consume();
-			return;
-		}
-
-		if (this.isFastScrollingSongs) {
-			if (e.button == Input.RMB) {
-				this.isFastScrollingSongs = false;
-			}
 			return;
 		}
 
@@ -1081,14 +1067,11 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (e.dy == 0) {
+		if (nodeList.scrolling.mouseDragged(e)) {
 			return;
 		}
 
-		if (this.isFastScrollingSongs) {
-			if (e.button == Input.RMB) {
-				this.updateFastSongScrollingPosition();
-			}
+		if (e.dy == 0) {
 			return;
 		}
 
@@ -1105,23 +1088,14 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (e.button == Input.LMB) {
-			nodeList.scrolling.dragged(-e.dy);
+			nodeList.scrolling.mouseDragged(e);
 		}
-	}
-
-	private void updateFastSongScrollingPosition()
-	{
-		nodeList.scrolling.scrollToNorm((mouseY - headerY) / (footerY - headerY));
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		if (isInputBlocked()) {
-			return;
-		}
-
-		if (this.isFastScrollingSongs) {
 			return;
 		}
 
@@ -1132,7 +1106,7 @@ public class SongMenu extends BaseOpsuState
 			// score buttons
 			startScorePos.scrollOffset(ScoreData.getButtonOffset() * -e.direction);
 		} else {
-			nodeList.mouseWheelScroll(-e.direction);
+			nodeList.scrolling.mouseWheelMoved(e);
 		}
 	}
 
@@ -1150,7 +1124,6 @@ public class SongMenu extends BaseOpsuState
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
 		startScorePos.setPosition(0);
-		nodeList.scrolling.released();
 		beatmapMenuTimer = -1;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		songInfo = null;
