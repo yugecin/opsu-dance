@@ -317,10 +317,6 @@ public class NodeList
 		this.scrollButtonAmount(maxVisibleButtons);
 	}
 
-	public void mouseWheelScroll(int direction)
-	{
-	}
-
 	/**
 	 * Scrolls through the song list.
 	 */
