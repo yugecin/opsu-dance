@@ -46,7 +46,7 @@ public class Scrolling
 				// but updates this fast are pretty much only possible when using
 				// the mousewheel, soooo...
 				final float boost = (1f - ((time - lastOffsetTime) / 75f));
-				offset *= 1f + IN_CIRC.calc(boost) * 7.5f;
+				offset *= 1f + IN_CIRC.calc(boost) * 10f;
 			}
 			this.target += offset;
 			this.lastOffsetTime = time;
@@ -64,7 +64,7 @@ public class Scrolling
 
 	public void scrollToNorm(float norm)
 	{
-		this.scrollToPosition(norm * this.max);
+		this.scrollToPosition(clamp(norm * this.max, 0f, this.max));
 	}
 
 	void scrollToPosition(float position)
@@ -77,7 +77,7 @@ public class Scrolling
 	void update(int delta)
 	{
 		if (this.mouseDown) {
-			final float avg_not_so_const = AVG_CONST * delta / 16f;
+			final float avg_not_so_const = .3f * delta / 16f;
 			this.avgVelocity =
 				(1f - avg_not_so_const) * avgVelocity
 				+ avg_not_so_const * (this.dragOffset * 1000f / delta);
@@ -86,7 +86,9 @@ public class Scrolling
 			return;
 		}
 
-		final float progress = (float) (this.totalDelta += delta) / TIME_CONST;
+
+		final float progress = (float) ((this.totalDelta += delta)
+			* Math.log10(Math.abs(this.amplitude)) / 2f / TIME_CONST);
 		this.position = clamp(
 			this.target + (float) (-this.amplitude * Math.exp(-progress)),
 			0f,
