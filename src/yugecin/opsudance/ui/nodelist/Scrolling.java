@@ -48,7 +48,6 @@ class Scrolling
 			this.lastOffsetTime = time;
 		}
 		this.totalDelta = 0;
-		this.target = clamp(this.target, 0f, this.max);
 		this.amplitude = this.target - this.position;
 	}
 
@@ -69,7 +68,11 @@ class Scrolling
 	void update(int delta)
 	{
 		final float progress = (float) (this.totalDelta += delta) / TIME_CONST;
-		this.position = this.target + (float) (-this.amplitude * Math.exp(-progress));
+		this.position = clamp(
+			this.target + (float) (-this.amplitude * Math.exp(-progress)),
+			0f,
+			this.max
+		);
 		this.positionNorm = this.position / this.max;
 	}
 }
