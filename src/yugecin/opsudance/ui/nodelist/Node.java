@@ -17,7 +17,7 @@ abstract class Node
 	static Image button;
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
-	private static float buttonBaseX;
+	private static float buttonOffsetX;
 
 	public static float buttonIndent, indentPerOffset;
 	private static float buttonHoverIndent;
@@ -40,7 +40,7 @@ abstract class Node
 		buttonOffset = buttonHeight * 0.65f;
 		buttonOffset2 = buttonOffset / 2f;
 		indentPerOffset = buttonOffset / buttonIndent;
-		buttonBaseX = width * (isWidescreen ? 0.55f : 0.35f) + buttonHoverIndent;
+		buttonOffsetX = width - width * (isWidescreen ? 0.55f : 0.35f) - buttonHoverIndent;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
 
@@ -172,7 +172,8 @@ abstract class Node
 			) * (this.hoverSpreadTo - this.hoverSpreadFrom) + this.hoverSpreadFrom;
 		}
 
-		this.x = (buttonBaseX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
+		this.x = width
+			+ (-buttonOffsetX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
 			- this.focusIndentValue;
 		this.y = this.targetY + this.hoverSpreadValue;
 	}
