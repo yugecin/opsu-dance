@@ -92,8 +92,6 @@ public class SongMenu extends BaseOpsuState
 	/** Line width of the header/footer divider. */
 	private static final int DIVIDER_LINE_WIDTH = 3;
 
-	/** The first node is about this high above the header. */
-	private KineticScrolling songScrolling = new KineticScrolling();
 	private boolean isFastScrollingSongs;
 
 	/** Current focus node's song information. */
@@ -428,23 +426,6 @@ public class SongMenu extends BaseOpsuState
 		}
 		*/
 
-		/*
-		// scroll bar
-		if (focusNode != null && firstVisibleMapnode != null) {
-			int focusNodes = focusNode.beatmapSet.size();
-			int totalNodes = beatmapSetList.getBeatmapSetCount() + focusNodes - 1;
-			if (totalNodes > MAX_SONG_BUTTONS) {
-				UI.drawScrollbar(g,
-						songScrolling.getPosition(),
-						totalNodes * buttonOffset,
-						MAX_SONG_BUTTONS * buttonOffset,
-						width, headerY + DIVIDER_LINE_WIDTH / 2,
-						0, MAX_SONG_BUTTONS * buttonOffset,
-						Colors.BLACK_ALPHA, Color.white, true);
-			}
-		}
-		*/
-
 		// song nodes
 		nodeList.render(g);
 
@@ -771,11 +752,9 @@ public class SongMenu extends BaseOpsuState
 
 		if (e.button == Input.RMB) {
 			this.isFastScrollingSongs = true;
-			songScrolling.setSpeedMultiplier(5f);
 			this.updateFastSongScrollingPosition();
 			return;
 		}
-		songScrolling.setSpeedMultiplier(1f);
 
 		if (e.y <= headerY || footerY <= e.y) {
 			return;
@@ -1132,8 +1111,7 @@ public class SongMenu extends BaseOpsuState
 
 	private void updateFastSongScrollingPosition()
 	{
-		final float pos = -.05f + 1.1f * (mouseY - headerY) / (footerY - headerY);
-		this.songScrolling.setPercentualPosition(pos);
+		nodeList.scrolling.scrollToNorm((mouseY - headerY) / (footerY - headerY));
 	}
 
 	@Override
@@ -1146,7 +1124,6 @@ public class SongMenu extends BaseOpsuState
 		if (this.isFastScrollingSongs) {
 			return;
 		}
-		songScrolling.setSpeedMultiplier(1f);
 
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&
@@ -1172,9 +1149,8 @@ public class SongMenu extends BaseOpsuState
 		selectModsButton.resetHover();
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
-		songScrolling.released();
-		songScrolling.setSpeedMultiplier(1f);
 		startScorePos.setPosition(0);
+		nodeList.scrolling.released();
 		beatmapMenuTimer = -1;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		songInfo = null;

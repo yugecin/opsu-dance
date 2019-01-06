@@ -62,8 +62,13 @@ public class Scrolling
 		this.amplitude = 0f;
 	}
 
-	 void scrollToPosition(float position)
-	 {
+	public void scrollToNorm(float norm)
+	{
+		this.scrollToPosition(norm * this.max);
+	}
+
+	void scrollToPosition(float position)
+	{
 		this.amplitude = position - this.position;
 		this.target = position;
 		this.totalDelta = 0;
