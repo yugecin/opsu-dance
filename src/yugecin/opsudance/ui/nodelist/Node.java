@@ -196,6 +196,9 @@ abstract class Node
 		}
 		this.focusIndentFrom = this.focusIndentValue;
 		this.focusIndentTime = 0;
+		if (!displayContainer.isIn(songMenuState)) {
+			this.focusIndentTime = HOVER_INDENT_TIME - 1;
+		}
 	}
 
 	protected void drawButton(Color color)
