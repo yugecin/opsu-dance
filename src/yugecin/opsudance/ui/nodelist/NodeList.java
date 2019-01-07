@@ -14,6 +14,7 @@ import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
+import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.utils.FloatConsumer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -38,6 +39,7 @@ public class NodeList
 
 	private Node hoverNode;
 	private BeatmapNode focusNode;
+	private boolean keepHover;
 
 	private Node firstNodeToDraw;
 
@@ -148,7 +150,7 @@ public class NodeList
 			n = n.next;
 			idx++;
 		}
-		if (this.hoverNode != lastHoverNode) {
+		if (!this.keepHover && this.hoverNode != lastHoverNode) {
 			if (lastHoverNode != null) {
 				lastHoverNode.toggleHovered();
 			}
@@ -307,6 +309,36 @@ public class NodeList
 		for (int i = this.nodes.size(); i > 0;) {
 			this.nodes.get(--i).focusChanged(node);
 		}
+	}
+
+	public boolean mousePressed(MouseEvent e)
+	{
+		if (e.button == Input.LMB) {
+			this.keepHover = true;
+		}
+		return this.scrolling.mousePressed(e);
+	}
+
+	public boolean mouseDragged(MouseDragEvent e)
+	{
+		return this.scrolling.mouseDragged(e);
+	}
+
+	public boolean mouseReleased(MouseEvent e)
+	{
+		if (e.button == Input.LMB) {
+			this.keepHover = false;
+			if (this.hoverNode != null) {
+				this.hoverNode.toggleHovered();
+				this.hoverNode = null;
+			}
+		}
+		return this.scrolling.mouseReleased(e);
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent e)
+	{
+		this.scrolling.mouseWheelMoved(e);
 	}
 
 	public void scrollPageUp()

@@ -12,7 +12,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 /**
  * based on {@link itdelatrisu.opsu.ui.KineticScrolling}
  */
-public class Scrolling
+class Scrolling
 {
 	private float max;
 
@@ -104,7 +104,7 @@ public class Scrolling
 		) * this.max);
 	}
 
-	public boolean mousePressed(MouseEvent e)
+	boolean mousePressed(MouseEvent e)
 	{
 		if (e.button == Input.LMB &&
 			nodeList.headerY < e.y && e.y < nodeList.footerY &&
@@ -127,7 +127,7 @@ public class Scrolling
 		return false;
 	}
 
-	public boolean mouseDragged(MouseDragEvent e)
+	boolean mouseDragged(MouseDragEvent e)
 	{
 		if (this.mouseDown && e.button == Input.LMB) {
 			this.dragOffset -= e.dy;
@@ -144,7 +144,7 @@ public class Scrolling
 		return true;
 	}
 
-	public boolean mouseReleased(MouseEvent e)
+	boolean mouseReleased(MouseEvent e)
 	{
 		if (this.mouseDown && e.button == Input.LMB) {
 			this.mouseDown = false;
@@ -166,7 +166,7 @@ public class Scrolling
 		return false;
 	}
 
-	public void mouseWheelMoved(MouseWheelEvent e)
+	void mouseWheelMoved(MouseWheelEvent e)
 	{
 		this.addOffset(-e.direction * Node.buttonOffset * 1.5f);
 	}

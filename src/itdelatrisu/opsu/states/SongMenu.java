@@ -748,7 +748,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (nodeList.scrolling.mousePressed(e)) {
+		if (nodeList.mousePressed(e)) {
 			return;
 		}
 		startScorePos.pressed();
@@ -761,7 +761,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (nodeList.scrolling.mouseReleased(e)) {
+		if (nodeList.mouseReleased(e)) {
 			return;
 		}
 
@@ -1072,7 +1072,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (nodeList.scrolling.mouseDragged(e)) {
+		if (nodeList.mouseDragged(e)) {
 			return;
 		}
 
@@ -1091,10 +1091,6 @@ public class SongMenu extends BaseOpsuState
 			startScorePos.dragged(-e.dy * (Mouse.isButtonDown(Input.RMB) ? 10 : 1));
 			return;
 		}
-
-		if (e.button == Input.LMB) {
-			nodeList.scrolling.mouseDragged(e);
-		}
 	}
 
 	@Override
@@ -1111,7 +1107,7 @@ public class SongMenu extends BaseOpsuState
 			// score buttons
 			startScorePos.scrollOffset(ScoreData.getButtonOffset() * -e.direction);
 		} else {
-			nodeList.scrolling.mouseWheelMoved(e);
+			nodeList.mouseWheelMoved(e);
 		}
 	}
 
