@@ -120,6 +120,9 @@ public class NodeList
 		Node n = this.first;
 		int idx = 0;
 		while (n != null) {
+			n.targetY = position + idx * Node.buttonOffset;
+			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
+
 			n.update(delta, lastHoverNode);
 
 			if (n.y > invisibleYOffset && n.y < footerY) {
@@ -141,9 +144,6 @@ public class NodeList
 					this.starStream.resume();
 				}
 			}
-
-			n.targetY = position + idx * Node.buttonOffset;
-			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
 			n = n.next;
 			idx++;
