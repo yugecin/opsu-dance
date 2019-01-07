@@ -230,11 +230,13 @@ public class NodeList
 	/**
 	 * Call {@link #updateNodePositionsNow(int, int)} first.
 	 */
-	public void focusHoveredNode()
+	public boolean focusHoveredNode()
 	{
 		if (this.hoverNode != null && hoverNode instanceof BeatmapNode) {
 			this.focusNode((BeatmapNode) this.hoverNode, /*playAtPreviewTime*/ true);
+			return true;
 		}
+		return false;
 	}
 
 	/**

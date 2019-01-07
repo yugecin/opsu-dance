@@ -844,8 +844,9 @@ public class SongMenu extends BaseOpsuState
 
 		if (headerY < mousePressY && mousePressY < footerY && e.button == Input.LMB) {
 			nodeList.updateNodePositionsNow(e.x, e.y);
-			nodeList.focusHoveredNode();
-			SoundController.playSound(SoundEffect.MENUCLICK);
+			if (nodeList.focusHoveredNode()) {
+				SoundController.playSound(SoundEffect.MENUCLICK);
+			}
 			return;
 		}
 
