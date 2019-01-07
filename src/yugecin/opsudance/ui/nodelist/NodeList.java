@@ -109,8 +109,7 @@ public class NodeList
 		this.lastNodeUpdate = time;
 
 		Node.update(delta);
-		final Node lastHoverNode = hoverNode;
-		this.hoverNode = null;
+		Node newHoverNode = null;
 		this.firstNodeToDraw = null;
 		this.scrolling.setMax(this.nodes.size() * Node.buttonOffset);
 		this.scrolling.update(delta);
@@ -125,7 +124,7 @@ public class NodeList
 			n.targetY = position + idx * Node.buttonOffset;
 			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
-			n.update(delta, lastHoverNode);
+			n.update(delta, this.hoverNode);
 
 			if (n.y > invisibleYOffset && n.y < footerY) {
 				if (this.firstNodeToDraw == null) {
@@ -137,7 +136,7 @@ public class NodeList
 					!displayContainer.suppressHover &&
 					Node.isHovered(n, mouseX, mouseY))
 				{
-					this.hoverNode = n;
+					newHoverNode = n;
 				}
 
 				if (n == this.focusNode)
@@ -150,12 +149,12 @@ public class NodeList
 			n = n.next;
 			idx++;
 		}
-		if (!this.keepHover && this.hoverNode != lastHoverNode) {
-			if (lastHoverNode != null) {
-				lastHoverNode.toggleHovered();
-			}
+		if (!this.keepHover && this.hoverNode != newHoverNode) {
 			if (this.hoverNode != null) {
-				this.hoverNode.toggleHovered();
+				this.hoverNode.setHovered(false);
+			}
+			if ((this.hoverNode = newHoverNode) != null) {
+				this.hoverNode.setHovered(true);
 			}
 		}
 	}
@@ -329,7 +328,7 @@ public class NodeList
 		if (e.button == Input.LMB) {
 			this.keepHover = false;
 			if (this.hoverNode != null) {
-				this.hoverNode.toggleHovered();
+				this.hoverNode.setHovered(false);
 				this.hoverNode = null;
 			}
 		}

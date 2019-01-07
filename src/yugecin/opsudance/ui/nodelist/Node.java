@@ -178,9 +178,9 @@ abstract class Node
 		this.y = this.targetY + this.hoverSpreadValue;
 	}
 
-	void toggleHovered()
+	void setHovered(boolean flag)
 	{
-		if (this.isHovered = !this.isHovered) {
+		if (this.isHovered = flag) {
 			this.hoverHighlightTime = 0;
 			this.hoverIndentTo = buttonHoverIndent;
 		} else {
