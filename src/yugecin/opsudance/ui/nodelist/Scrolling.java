@@ -86,7 +86,9 @@ class Scrolling
 		}
 
 		final float progress = (float) ((this.totalDelta += delta)
-			* Math.log10(Math.abs(this.amplitude) + 0.00001f) / 2f / TIME_CONST);
+			// make sure value is at least 1f to keep log10 from huge values
+			* Math.log10(Math.abs(this.amplitude) + 1f)
+			/ 400d);
 		this.position = clamp(
 			this.target + (float) (-this.amplitude * Math.exp(-progress)),
 			0f,
