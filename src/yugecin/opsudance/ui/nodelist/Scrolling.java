@@ -81,6 +81,7 @@ class Scrolling
 				(1f - avg_not_so_const) * avgVelocity
 				+ avg_not_so_const * (this.dragOffset * 1000f / delta);
 			this.target = this.position += this.dragOffset;
+			this.amplitude = 0f;
 			this.dragOffset = 0;
 			return;
 		}
