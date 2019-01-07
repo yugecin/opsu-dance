@@ -89,7 +89,6 @@ public class InstanceContainer {
 	
 	public static int width, width2, height, height2;
 	public static boolean isWidescreen;
-	public static int mousePressX, mousePressY;
 	public static int mouseX, mouseY;
 	public static int renderDelta;
 

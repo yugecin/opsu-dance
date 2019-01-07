@@ -4,7 +4,7 @@ package yugecin.opsudance.core.input;
 
 public class MouseDragEvent extends Event
 {
-	public final int button, dx, dy;
+	public final int button, dx, dy, downX, downY;
 	public final float distance;
 
 	MouseDragEvent(MouseEvent downEvent, int button, int dx, int dy)
@@ -13,6 +13,8 @@ public class MouseDragEvent extends Event
 		this.dx = dx;
 		this.dy = dy;
 		this.distance = (float) Math.hypot(dx, dy);
+		this.downX = downEvent.x;
+		this.downY = downEvent.y;
 		downEvent.dragDistance += this.distance;
 	}
 }

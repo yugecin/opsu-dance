@@ -775,7 +775,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (e.dragDistanceExceeds(5)) {
+		if (e.dragDistance > 5f) {
 			return;
 		}
 
@@ -842,7 +842,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (headerY < mousePressY && mousePressY < footerY && e.button == Input.LMB) {
+		if (headerY < e.downY && e.downY < footerY && e.button == Input.LMB) {
 			nodeList.updateNodePositionsNow(e.x, e.y);
 			if (nodeList.focusHoveredNode()) {
 				SoundController.playSound(SoundEffect.MENUCLICK);
@@ -1080,13 +1080,13 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (mousePressY < headerY || footerY < mousePressY) {
+		if (e.downY < headerY || footerY < e.downY) {
 			return;
 		}
 
 		if (focusScores != null &&
 			focusScores.length >= MAX_SCORE_BUTTONS &&
-			ScoreData.areaContains(mousePressX, mousePressY))
+			ScoreData.areaContains(e.downX, e.downY))
 		{
 			startScorePos.dragged(-e.dy * (Mouse.isButtonDown(Input.RMB) ? 10 : 1));
 			return;

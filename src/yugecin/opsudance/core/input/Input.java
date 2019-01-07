@@ -108,8 +108,8 @@ public class Input
 				final MouseEvent e = new MouseEvent(mouseButton, eventX, eventY);
 				final BiConsumer<MouseListener, MouseEvent> consumer;
 				if (Mouse.getEventButtonState()) {
-					lastMouseX = mousePressX = eventX;
-					lastMouseY = mousePressY = eventY;
+					lastMouseX = eventX;
+					lastMouseY = eventY;
 					consumer = MouseListener::mousePressed;
 					this.mouseEvents[mouseButton] = e;
 				} else {
