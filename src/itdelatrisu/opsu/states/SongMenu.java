@@ -834,12 +834,10 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
-		if (nodeList.getFocusedMap() == null) {
-			return;
-		}
+		final Beatmap map = nodeList.getFocusedMap();
 
 		// logo: start game
-		if (footerLogoButton.contains(x, y, 0.25f)) {
+		if (map != null && footerLogoButton.contains(x, y, 0.25f)) {
 			startGame();
 			return;
 		}
@@ -847,6 +845,11 @@ public class SongMenu extends BaseOpsuState
 		if (headerY < mousePressY && mousePressY < footerY && e.button == Input.LMB) {
 			nodeList.updateNodePositionsNow(e.x, e.y);
 			nodeList.focusHoveredNode();
+			return;
+		}
+
+		if (map == null) {
+			return;
 		}
 
 		// song buttons

@@ -148,11 +148,13 @@ public class Scrolling
 	{
 		if (this.mouseDown && e.button == Input.LMB) {
 			this.mouseDown = false;
-			this.amplitude = AMPLITUDE_CONST * this.avgVelocity;
-			this.target += amplitude;
-			this.totalDelta = 0;
-			e.consume();
-			return true;
+			if (e.dragDistance > 5f) {
+				this.amplitude = AMPLITUDE_CONST * this.avgVelocity;
+				this.target += amplitude;
+				this.totalDelta = 0;
+				e.consume();
+				return true;
+			}
 		}
 
 		if (e.button == Input.RMB) {
