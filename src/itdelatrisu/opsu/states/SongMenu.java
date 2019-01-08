@@ -843,6 +843,10 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (headerY < e.downY && e.downY < footerY && e.button == Input.LMB) {
+			if (nodeList.isHoveredNodeFocusedNode()) {
+				this.startGame();
+				return;
+			}
 			nodeList.updateNodePositionsNow(e.x, e.y);
 			if (nodeList.focusHoveredNode()) {
 				SoundController.playSound(SoundEffect.MENUCLICK);

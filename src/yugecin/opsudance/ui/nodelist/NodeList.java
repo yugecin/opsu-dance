@@ -228,6 +228,11 @@ public class NodeList
 		return null;
 	}
 
+	public boolean isHoveredNodeFocusedNode()
+	{
+		return this.focusNode == this.hoverNode && this.focusNode != null;
+	}
+
 	/**
 	 * Call {@link #updateNodePositionsNow(int, int)} first.
 	 */
@@ -327,9 +332,9 @@ public class NodeList
 	{
 		if (e.button == Input.LMB) {
 			this.keepHover = false;
+			// flash hovered node again after hold
 			if (this.hoverNode != null) {
-				this.hoverNode.setHovered(false);
-				this.hoverNode = null;
+				this.hoverNode.hoverHighlightTime = 0;
 			}
 		}
 		return this.scrolling.mouseReleased(e);

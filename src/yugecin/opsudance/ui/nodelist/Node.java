@@ -102,8 +102,7 @@ abstract class Node
 	float targetXOffset, targetY;
 	float x, y;
 
-	private boolean isHovered;
-	private int hoverHighlightTime = HOVER_HIGHLIGHT_TIME;
+	int hoverHighlightTime = HOVER_HIGHLIGHT_TIME;
 	private static final int HOVER_HIGHLIGHT_TIME = 400;
 	private int hoverIndentTime = HOVER_INDENT_TIME;
 	private static final int HOVER_INDENT_TIME = 1000;
@@ -180,7 +179,7 @@ abstract class Node
 
 	void setHovered(boolean flag)
 	{
-		if (this.isHovered = flag) {
+		if (flag) {
 			this.hoverHighlightTime = 0;
 			this.hoverIndentTo = buttonHoverIndent;
 		} else {
