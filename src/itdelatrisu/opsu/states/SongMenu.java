@@ -849,6 +849,8 @@ public class SongMenu extends BaseOpsuState
 			}
 			nodeList.updateNodePositionsNow(e.x, e.y);
 			if (nodeList.focusHoveredNode()) {
+				this.songInfo = null;
+				this.songChangeTimer.setTime(0);
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
@@ -1034,6 +1036,8 @@ public class SongMenu extends BaseOpsuState
 
 	private void selectRandomMap()
 	{
+		this.songInfo = null;
+		this.songChangeTimer.setTime(0);
 		SoundController.playSound(SoundEffect.MENUHIT);
 
 		if (!input.isShiftDown()) {
