@@ -339,7 +339,8 @@ public class OptionsOverlay
 
 		// scrollbar
 		g.setColor(COL_WHITE);
-		g.fillRect(currentWidth - 5, scrollHandler.getPosition() / maxScrollOffset * (height - 45), 5, 45);
+		final float scrollY = scrollHandler.getPosition() / maxScrollOffset * (height - 45);
+		g.fillRect(currentWidth - 8, scrollY, 8, 45);
 		g.clearClip();
 
 		renderNavigation(g);
