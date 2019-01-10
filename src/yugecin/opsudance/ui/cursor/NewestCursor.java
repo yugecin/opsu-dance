@@ -1,4 +1,4 @@
-// Copyright 2018 yugecin - this source is licensed under GPL
+// Copyright 2018-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.cursor;
 
@@ -7,10 +7,6 @@ import yugecin.opsudance.Dancer;
 import yugecin.opsudance.render.TextureData;
 import yugecin.opsudance.skinning.SkinService;
 
-import java.nio.IntBuffer;
-
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.EXTFramebufferObject;
 import org.newdawn.slick.Color;
 
 import static itdelatrisu.opsu.GameImage.*;
@@ -60,16 +56,7 @@ public class NewestCursor implements Cursor
 
 		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 
-		// stuff copied from CurveRenderState and stuff, I don't know what I'm doing
-		int oldFb = glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
-		int oldTex = glGetInteger(GL_TEXTURE_BINDING_2D);
-		IntBuffer oldViewport = BufferUtils.createIntBuffer(16);
-		glGetInteger(GL_VIEWPORT, oldViewport);
-		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbo.getID());
-		glViewport(0, 0, fbo.width, fbo.height);
-		glClearColor(0f, 0f, 0f, 0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		final TextureData td = this.cursorTrailTexture;
 		float alpha = 0f;
 		float alphaIncrease = .4f / trail.size;
@@ -88,32 +75,19 @@ public class NewestCursor implements Cursor
 			glVertex2f(p.x +-td.width2, p.y + td.height2);
 		}
 		glEnd();
+		glBlendFuncSeparate(
+			GL_SRC_ALPHA,
+			GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE,
+			GL_ONE_MINUS_SRC_ALPHA
+		);
 
-		glBindTexture(GL_TEXTURE_2D, oldTex);
-		EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldFb);
-		glViewport(oldViewport.get(0), oldViewport.get(1), oldViewport.get(2), oldViewport.get(3));
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		//glEnable(GL_TEXTURE_2D);
-		//glDisable(GL_TEXTURE_1D);
-		glBindTexture(GL_TEXTURE_2D, fbo.getTextureID());
-		glBegin(GL_QUADS);
-		glColor4f(1f, 1f, 1f, 1f);
-		glTexCoord2f(1f, 1f);
-		glVertex2i(fbo.width, 0);
-		glTexCoord2f(0f, 1f);
-		glVertex2i(0, 0);
-		glTexCoord2f(0f, 0f);
-		glVertex2i(0, fbo.height);
-		glTexCoord2f(1f, 0f);
-		glVertex2i(fbo.width, fbo.height);
-		glEnd();
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		
 		int cx = trail.lastPosition.x;
 		int cy = trail.lastPosition.y;
 
-		if (!OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
+		if (OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
+			glColor3f(1f, 1f, 1f);
+		} else {
 			Dancer.cursorColorOverride.getColor().bind();
 		}
 
