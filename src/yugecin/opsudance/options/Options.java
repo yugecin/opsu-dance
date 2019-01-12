@@ -943,7 +943,7 @@ public class Options
 			true
 		),
 		OPTION_TRAIL_COLOR_PARTS = new ToggleOption(
-			"Color trail segments individially",
+			"Color trail segments individually",
 			"TrailSegmentColors",
 			"Give each trail segment a color instead of one color for the entire trail",
 			true)
