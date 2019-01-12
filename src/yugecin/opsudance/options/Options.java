@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.options;
 
@@ -28,6 +28,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  *                     itdelatrisu/opsu/Options.java
  */
 public class Options
+
 {
 	// internal options (not displayed in-game)
 	static {
@@ -807,7 +808,7 @@ public class Options
 		}
 
 		@Override
-		public Object[] getListItems () {
+		public ObjectColorOverrides[] getListItems () {
 			return ObjectColorOverrides.values();
 		}
 
@@ -856,10 +857,29 @@ public class Options
 		}
 	};
 
-	public static final NumericOption OPTION_DANCE_RGB_OBJECT_INC = new NumericOption("RGB increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", 70, -1800, 1800) {
+	public static final NumericOption OPTION_DANCE_RGB_OBJECT_INC = new NumericOption(
+		"RGB object increment",
+		"RGBInc",
+		"Amount of hue to shift, used for rainbow object override",
+		800,
+		-6000,
+		6000)
+	{
 		@Override
 		public String getValueString () {
-			return String.format("%.1f°", val / 10f);
+			return String.format("%.1f°/object", val / 100f);
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			Object val;
+			return
+				(val = Dancer.colorOverride) == ObjectColorOverrides.RAINBOW ||
+				val == ObjectColorOverrides.RAINBOWSHIFT ||
+				(val = Dancer.colorMirrorOverride)
+					== ObjectColorOverrides.RAINBOW ||
+				val == ObjectColorOverrides.RAINBOWSHIFT;
 		}
 	};
 
@@ -959,13 +979,26 @@ public class Options
 		"RGB cursor increment",
 		"RGBCursorInc",
 		"Amount of hue to shift, used for rainbow cursor override",
-		800,
-		-2000,
-		2000)
+		80,
+		-360,
+		360)
 	{
 		@Override
 		public String getValueString () {
-			return String.format("%.2f°", val / 1000f);
+			return String.format("%d°/s", val);
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			Object val;
+			return
+				(val = Dancer.cursorColorOverride)
+					== CursorColorOverrides.RAINBOW ||
+				val == CursorColorOverrides.RAINBOWSHIFT ||
+				(val = Dancer.cursorColorMirrorOverride)
+					== CursorColorOverrides.RAINBOW ||
+				val == CursorColorOverrides.RAINBOWSHIFT;
 		}
 	};
 

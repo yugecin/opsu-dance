@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2016 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2016-2019 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance;
 
 import org.newdawn.slick.Color;
@@ -23,8 +8,9 @@ import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import static yugecin.opsudance.options.Options.*;
 
-public enum CursorColorOverrides {
-
+// TODO: code duplication with ObjectColorOverrides
+public enum CursorColorOverrides
+{
 	NONE ("Do not override", 0) {
 		@Override
 		public Color getColor(boolean mirrored) {
@@ -39,16 +25,18 @@ public enum CursorColorOverrides {
 	COMBO6 ("Combo6", 6),
 	COMBO7 ("Combo7", 7),
 	COMBO8 ("Combo8", 8),
-	RAINBOW ("Rainbow", 9) {
+	RAINBOW ("Rainbow (time based)", 9) {
 		@Override
 		public Color getColor(boolean mirrored) {
-			return nextRainbowColor();
+			return new Color(java.awt.Color.HSBtoRGB(hue, 1.0f, 1.0f));
 		}
 	},
-	RAINBOWSHIFT ("Rainbow + 180° hue shift", 10) {
+	RAINBOWSHIFT ("Rainbow (time based) + 180° hue shift", 10) {
 		@Override
 		public Color getColor(boolean mirrored) {
-			return nextMirrorRainbowColor();
+			float val = hue + .5f;
+			val = val - (float) Math.floor(val);
+			return new Color(java.awt.Color.HSBtoRGB(val, 1.0f, 1.0f));
 		}
 	},
 	BLACK ("Black", 11) {
@@ -76,20 +64,35 @@ public enum CursorColorOverrides {
 		}
 	};
 
-	public int nr;
-	private String displayText;
+	private static float hue;
 
 	public static Color[] comboColors;
 
-	public static float hue;
-
-	CursorColorOverrides(String displayText, int nr) {
-		this.displayText = displayText;
-		this.nr = nr;
+	/**
+	 * Sets hue value for rainbow cursor to a value based on the given seed
+	 * to make the rainbow color somewhat deterministic.
+	 */
+	public static void resetRainbowHue(int seed)
+	{
+		hue = (seed % 360) / 360f;
 	}
 
-	public static void reset(int mapID) {
-		hue = mapID % 360;
+	/**
+	 * required to advance the rainbow hue
+	 */
+	public static void update(int delta)
+	{
+		hue += OPTION_DANCE_RGB_CURSOR_INC.val / 360f / 1000f * delta;
+		hue = hue - (float) Math.floor(hue);
+	}
+
+	public int nr;
+	private String displayText;
+
+	CursorColorOverrides(String displayText, int nr)
+	{
+		this.displayText = displayText;
+		this.nr = nr;
 	}
 
 	@Override
@@ -97,29 +100,22 @@ public enum CursorColorOverrides {
 		return displayText;
 	}
 
-	public Color getColor(boolean mirrored) {
+	public Color getColor(boolean mirrored)
+	{
+		// default impl is based on combo colors
 		if (comboColors == null || comboColors.length == 0) {
 			return Color.white;
 		}
 		return comboColors[nr % comboColors.length];
 	}
 
-	public Color getColor() {
-		return getColor(false);
+	public Color getColor()
+	{
+		return this.getColor(false);
 	}
 
-	public Color getMirrorColor() {
-		return getColor(true);
+	public Color getMirrorColor()
+	{
+		return this.getColor(true);
 	}
-
-	private static Color nextRainbowColor() {
-		hue += OPTION_DANCE_RGB_CURSOR_INC.val / 1000f;
-		return new Color(java.awt.Color.getHSBColor(hue / 360f, 1.0f, 1.0f).getRGB());
-	}
-
-	private static Color nextMirrorRainbowColor() {
-		hue += OPTION_DANCE_RGB_CURSOR_INC.val / 1000f;
-		return new Color(java.awt.Color.getHSBColor((hue + 180f) / 360f, 1.0f, 1.0f).getRGB());
-	}
-
 }

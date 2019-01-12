@@ -27,6 +27,8 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
+
+import yugecin.opsudance.CursorColorOverrides;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
@@ -216,6 +218,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 			}
 			fpsDisplay.update();
+			CursorColorOverrides.update(delta);
 
 			this.suppressHover = false; // put here for volume control
 

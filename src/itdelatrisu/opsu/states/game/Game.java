@@ -1490,8 +1490,8 @@ public class Game extends ComplexOpsuState {
 		Dancer.instance.reset();
 		MoverDirection.reset(beatmap.beatmapID);
 
-		ObjectColorOverrides.reset(beatmap.beatmapID);
-		CursorColorOverrides.reset(beatmap.beatmapID);
+		ObjectColorOverrides.resetRainbowHue(beatmap.beatmapID);
+		CursorColorOverrides.resetRainbowHue(beatmap.beatmapID);
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
