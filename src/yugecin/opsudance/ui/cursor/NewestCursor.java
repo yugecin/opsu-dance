@@ -2,7 +2,6 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.cursor;
 
-import itdelatrisu.opsu.render.Rendertarget;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.render.TextureData;
 import yugecin.opsudance.skinning.SkinService;
@@ -18,7 +17,6 @@ import static yugecin.opsudance.utils.GLHelper.*;
 
 public class NewestCursor implements Cursor
 {
-	private final Rendertarget fbo;
 	private final CursorTrail trail;
 	private final Runnable cursorSizeListener;
 
@@ -27,7 +25,6 @@ public class NewestCursor implements Cursor
 
 	public NewestCursor()
 	{
-		this.fbo = Rendertarget.createRTTFramebuffer(width, height);
 		this.trail = new CursorTrail();
 
 		this.cursorTexture = new TextureData(CURSOR);
@@ -137,7 +134,6 @@ public class NewestCursor implements Cursor
 	@Override
 	public void destroy()
 	{
-		this.fbo.destroyRTT();
 		this.trail.dispose();
 		OPTION_CURSOR_SIZE.removeListener(this.cursorSizeListener);
 	}
