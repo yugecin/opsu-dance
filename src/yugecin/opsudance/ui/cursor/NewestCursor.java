@@ -50,7 +50,9 @@ public class NewestCursor implements Cursor
 
 		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		if (OPTION_BLEND_TRAIL.state) { 
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		}
 		final TextureData td = this.cursorTrailTexture;
 		float alpha = 0f;
 		float alphaIncrease = .4f / trail.size;
@@ -73,12 +75,14 @@ public class NewestCursor implements Cursor
 			glVertex2f(p.x +-td.width2, p.y + td.height2);
 		}
 		glEnd();
-		glBlendFuncSeparate(
-			GL_SRC_ALPHA,
-			GL_ONE_MINUS_SRC_ALPHA,
-			GL_ONE,
-			GL_ONE_MINUS_SRC_ALPHA
-		);
+		if (!OPTION_BLEND_CURSOR.state) {
+			glBlendFuncSeparate(
+				GL_SRC_ALPHA,
+				GL_ONE_MINUS_SRC_ALPHA,
+				GL_ONE,
+				GL_ONE_MINUS_SRC_ALPHA
+			);
+		}
 
 		int cx = trail.lastX;
 		int cy = trail.lastY;
@@ -105,6 +109,13 @@ public class NewestCursor implements Cursor
 		simpleTexturedQuad(cursorMiddleTexture);
 
 		glPopMatrix();
+
+		glBlendFuncSeparate(
+			GL_SRC_ALPHA,
+			GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE,
+			GL_ONE_MINUS_SRC_ALPHA
+		);
 	}
 
 	@Override

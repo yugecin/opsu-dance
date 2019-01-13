@@ -946,6 +946,30 @@ public class Options
 			{
 				return OPTION_NEWEST_CURSOR.state;
 			}
+		},
+		OPTION_BLEND_TRAIL = new ToggleOption(
+			"Additively blend trail",
+			"cursor.blend.trail",
+			"Add trail color so an orange trail over a cyan trail becomes white.",
+			true)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
+		},
+		OPTION_BLEND_CURSOR = new ToggleOption(
+			"Additively blend cursor",
+			"cursor.blend.cursor",
+			null,
+			false)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
 		};
 
 	public static final NumericOption OPTION_DANCE_RGB_CURSOR_INC = new NumericOption(
@@ -981,7 +1005,7 @@ public class Options
 	public static final ToggleOption OPTION_DANCE_HIDE_OBJECTS = new ToggleOption("Don't draw objects", "HideObj", "If you only want to see cursors :)", false);
 	public static final ToggleOption OPTION_DANCE_CIRLCE_IN_SLOW_SLIDERS = new ToggleOption("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false);
 	public static final ToggleOption OPTION_DANCE_CIRLCE_IN_LAZY_SLIDERS = new ToggleOption("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false);
-	public static final ToggleOption OPTION_DANCE_HIDE_UI = new ToggleOption("Hide all UI", "HideUI", ".", true);
+	public static final ToggleOption OPTION_DANCE_HIDE_UI = new ToggleOption("Hide all UI", "HideUI", null, true);
 	public static final ToggleOption OPTION_DANCE_ENABLE_SB = new ToggleOption("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false);
 	public static final ToggleOption OPTION_PIPPI_ENABLE = new ToggleOption("Enable", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false);
 	public static final NumericOption OPTION_PIPPI_RADIUS_PERCENT = new NumericOption("Radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
