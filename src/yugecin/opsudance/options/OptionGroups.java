@@ -69,10 +69,12 @@ public class OptionGroups {
 		new OptionTab("CURSOR", new Option[]{
 			OPTION_CURSOR_SIZE,
 			OPTION_NEWEST_CURSOR,
+			WARNING_DISTANCE_RAINBOW_COLOR,
 			OPTION_NEW_CURSOR,
 			OPTION_DISABLE_CURSOR,
 			// TODO use combo colour as tint for slider ball option
 			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
+			WARNING_DISTANCE_RAINBOW_COLOR,
 			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
 			OPTION_BLEND_TRAIL,
 			OPTION_BLEND_CURSOR,
@@ -185,7 +187,13 @@ public class OptionGroups {
 	public static final OptionTab[] storyboardOptions = new OptionTab[] {
 		new OptionTab("Skin", GameImage.MENU_NAV_SKIN),
 		new OptionTab("CURSOR", new Option[]{
+			OPTION_CURSOR_SIZE,
+			OPTION_NEWEST_CURSOR,
+			WARNING_DISTANCE_RAINBOW_COLOR,
+			OPTION_NEW_CURSOR,
+			OPTION_DISABLE_CURSOR,
 			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
+			WARNING_DISTANCE_RAINBOW_COLOR,
 			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
 			OPTION_BLEND_TRAIL,
 			OPTION_BLEND_CURSOR,
@@ -216,12 +224,6 @@ public class OptionGroups {
 			OPTION_DANCE_HIDE_UI,
 			OPTION_DANCE_REMOVE_BG,
 			OPTION_DANCE_ENABLE_SB,
-		}),
-		new OptionTab("Input", GameImage.MENU_NAV_INPUT),
-		new OptionTab("INPUT", new Option[] {
-			OPTION_CURSOR_SIZE,
-			OPTION_NEW_CURSOR,
-			OPTION_DISABLE_CURSOR
 		}),
 		new OptionTab("Dance", GameImage.MENU_NAV_DANCE),
 		new OptionTab("MOVER", new Option[]{

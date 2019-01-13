@@ -71,4 +71,9 @@ public class CursorColorManager
 	{
 		return cursorColor instanceof TimeRainbow || cursorColor instanceof DistanceRainbow;
 	}
+
+	public static boolean needsNewestCursor()
+	{
+		return cursorColor instanceof DistanceRainbow;
+	}
 }

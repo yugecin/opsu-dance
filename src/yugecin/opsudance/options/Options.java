@@ -15,6 +15,7 @@ import yugecin.opsudance.*;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.CachedVariable;
 import yugecin.opsudance.utils.CachedVariable.Getter;
@@ -925,6 +926,46 @@ public class Options
 			if (0 <= idx && idx < CursorColorManager.impls.length) {
 				cursorColor = CursorColorManager.impls[idx];
 			}
+		}
+	};
+
+	public static final Option WARNING_DISTANCE_RAINBOW_COLOR = new CustomRenderedOption(
+		"",
+		null,
+		null)
+	{
+		@Override
+		protected void registerOption()
+		{
+			// nulled
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			return
+				!OPTION_NEWEST_CURSOR.state &&
+				CursorColorManager.needsNewestCursor();
+		}
+
+		@Override
+		public int getHeight(int baseHeight)
+		{
+			return baseHeight * 2;
+		}
+
+		@Override
+		public void render(int baseHeight, int x, int y, int textOffsetY, int width)
+		{
+			final String line1 = "Distance-based rainbow cursor color only";
+			final String line2 = "works with newest cursor enabled!";
+			int _y, _x;
+			_y = y + textOffsetY + textOffsetY / 2;
+			_x = x + (width - Fonts.MEDIUM.getWidth(line1)) / 2;
+			Fonts.MEDIUM.drawString(_x , _y, line1, OptionsOverlay.COL_PINK);
+			_y += baseHeight - textOffsetY;
+			_x = x + (width - Fonts.MEDIUM.getWidth(line2)) / 2;
+			Fonts.MEDIUM.drawString(_x , _y, line2, OptionsOverlay.COL_PINK);
 		}
 	};
 

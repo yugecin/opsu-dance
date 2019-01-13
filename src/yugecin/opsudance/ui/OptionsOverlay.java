@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -37,7 +38,7 @@ public class OptionsOverlay
 	private static final float LINEALPHA = 0.8f;
 	private static final Color COL_BG = new Color(Color.black);
 	private static final Color COL_WHITE = new Color(1f, 1f, 1f);
-	private static final Color COL_PINK = new Color(235, 117, 139);
+	public static final Color COL_PINK = new Color(235, 117, 139);
 	private static final Color COL_CYAN = new Color(88, 218, 254);
 	private static final Color COL_GREY = new Color(55, 55, 57);
 	private static final Color COL_BLUE = new Color(Colors.BLUE_BACKGROUND);
@@ -68,6 +69,7 @@ public class OptionsOverlay
 	private static final int INDICATORMOVEANIMATIONTIME = 166;
 	/**  Selected option indicator virtual position. */
 	private int indicatorPos;
+	private float indicatorHeight, indicatorHeightFrom, indicatorHeightTo;
 	/** Selected option indicator offset to next position. */
 	private int indicatorOffsetToNextPos;
 	/** Selected option indicator move to next position animation time past. */
@@ -406,7 +408,8 @@ public class OptionsOverlay
 		g.clearClip();
 	}
 
-	private void renderIndicator(Graphics g) {
+	private void renderIndicator(Graphics g)
+	{
 		g.setColor(COL_INDICATOR);
 		int indicatorPos = this.indicatorPos;
 		if (indicatorMoveAnimationTime > 0) {
@@ -416,11 +419,19 @@ public class OptionsOverlay
 				indicatorPos += indicatorOffsetToNextPos;
 				indicatorOffsetToNextPos = 0;
 				this.indicatorPos = indicatorPos;
+				this.indicatorHeight = this.indicatorHeightTo;
 			} else {
-				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
+				float progress = (float) indicatorMoveAnimationTime;
+				progress /= INDICATORMOVEANIMATIONTIME;
+				indicatorPos += OUT_BACK.calc(progress) * indicatorOffsetToNextPos;
+				this.indicatorHeight = this.indicatorHeightFrom;
+				final float heightdiff;
+				heightdiff = (this.indicatorHeightTo - this.indicatorHeightFrom);
+				this.indicatorHeight += LINEAR.calc(progress) * heightdiff;
 			}
 		}
-		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), currentWidth, optionHeight);
+		final float y = indicatorPos - scrollHandler.getPosition();
+		g.fillRect(navButtonSize, y, currentWidth, this.indicatorHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
@@ -478,20 +489,21 @@ public class OptionsOverlay
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight ||
+				final int actualHeight = option.getHeight(optionHeight);
+				if (y > -actualHeight ||
 					this.shouldOutOfBoundsOptionBeRendered(option))
 				{
 					renderOption(g, option, y);
 				}
-				y += optionHeight;
-				maxScrollOffset += optionHeight;
-				lineHeight += optionHeight;
+				y += actualHeight;
+				maxScrollOffset += actualHeight;
+				lineHeight += actualHeight;
 				if (y > height) {
 					render = false;
 					while (++optionIndex < section.options.length) {
 						option = section.options[optionIndex];
 						if (option.showCondition() && !option.isFiltered()) {
-							maxScrollOffset += optionHeight;
+							maxScrollOffset += actualHeight;
 						}
 					}
 				}
@@ -554,6 +566,8 @@ public class OptionsOverlay
 			renderSliderOption(g, (NumericOption) option, y);
 		} else if (option instanceof KeyOption) {
 			renderKeyOption((KeyOption) option, y);
+		} else if (option instanceof CustomRenderedOption) {
+			renderCustomOption((CustomRenderedOption) option, y);
 		}
 	}
 
@@ -636,6 +650,11 @@ public class OptionsOverlay
 		int valueLen = Fonts.MEDIUM.getWidth(value);
 		Fonts.MEDIUM.drawString(optionStartX, y + optionTextOffsetY, option.name, COL_WHITE);
 		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y + optionTextOffsetY, value, COL_BLUE);
+	}
+
+	private void renderCustomOption(CustomRenderedOption option, int y)
+	{
+		option.render(optionHeight, optionStartX, y, optionTextOffsetY, optionWidth);
 	}
 
 	private void renderTitle() {
@@ -1186,7 +1205,8 @@ public class OptionsOverlay
 				if (option.isFiltered() || !option.showCondition()) {
 					continue;
 				}
-				if (mouseVirtualY <= optionHeight) {
+				final int actualHeight = option.getHeight(optionHeight);
+				if (mouseVirtualY <= actualHeight) {
 					if (mouseVirtualY >= 0) {
 						int indicatorPos = scrollHandler.getIntPosition() + mouseY - mouseVirtualY;
 						if (indicatorPos != this.indicatorPos + indicatorOffsetToNextPos) {
@@ -1194,11 +1214,15 @@ public class OptionsOverlay
 							indicatorOffsetToNextPos = indicatorPos - this.indicatorPos;
 							indicatorMoveAnimationTime = 1; // starts animation
 						}
+						if (hoverOption != option) {
+							indicatorHeightFrom = indicatorHeight;
+							indicatorHeightTo = actualHeight;
+						}
 						hoverOption = option;
 					}
 					return;
 				}
-				mouseVirtualY -= optionHeight;
+				mouseVirtualY -= actualHeight;
 			}
 		}
 	}
@@ -1237,8 +1261,10 @@ public class OptionsOverlay
 				}
 				if (!option.filter(lastSearchText)) {
 					section.filtered = false;
-					//noinspection ConstantConditions
-					lastBigSection.filtered = false;
+					// unnecessary if to stop IDEs from complaining...
+					if (lastBigSection != null) {
+						lastBigSection.filtered = false;
+					}
 				}
 			}
 		}
