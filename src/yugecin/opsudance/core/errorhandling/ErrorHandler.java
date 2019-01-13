@@ -5,6 +5,7 @@ package yugecin.opsudance.core.errorhandling;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
+import yugecin.opsudance.core.Environment;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
@@ -23,8 +24,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static yugecin.opsudance.core.Constants.*;
-import static yugecin.opsudance.core.InstanceContainer.*;
+// no wildcards here because everything has to be checked before use
+import static yugecin.opsudance.core.Constants.PROJECT_NAME;
+import static yugecin.opsudance.core.InstanceContainer.config;
+import static yugecin.opsudance.core.InstanceContainer.displayContainer;
+import static yugecin.opsudance.core.InstanceContainer.env;
 
 /**
  * based on itdelatrisu.opsu.ErrorHandler
@@ -327,7 +331,16 @@ public class ErrorHandler
 		StringWriter dump = new StringWriter();
 
 		dump.append(customMessage).append("\n\n");
-		dump.append("**ver** ").append(MiscUtils.buildProperties.get().getProperty("version")).append('\n');
+		String version;
+		try {
+			version = MiscUtils.buildProperties.get().getProperty("version");
+		} catch (Throwable t) {
+			version = t.toString();
+		}
+		dump.append("**ver** ").append(version).append('\n');
+		if (env == null) {
+			env = new Environment();
+		}
 		if (env.gitHash != null) {
 			dump.append("**rev** ").append(env.gitHash).append('\n');
 		}

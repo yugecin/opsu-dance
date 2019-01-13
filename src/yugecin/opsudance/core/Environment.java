@@ -17,7 +17,7 @@ public class Environment
 	 */
 	public final String gitHash;
 
-	Environment()
+	public Environment()
 	{
 		if (Entrypoint.isJarRunning) {
 			this.gitHash = null;
