@@ -650,27 +650,36 @@ public class OptionsOverlay
 		option.render(optionHeight, optionStartX, y, optionTextOffsetY, optionWidth);
 	}
 
-	private void renderTitle() {
-		int textWidth = currentWidth - navButtonSize;
-		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize,
-			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
+	private void renderTitle()
+	{
+		int x = this.navButtonSize;
+		int y;
+		int w = this.currentWidth - x;
+		String txt;
 
-		int y = lastOptionHeight - scrollHandler.getIntPosition();
+		y = textOptionsY - Math.max(0, this.scrollHandler.getIntPosition());
+		txt = "Options";
+		FontUtil.drawCentered(Fonts.LARGE, w, x, y, txt, COL_WHITE);
+		y = textChangeY - Math.max(0, this.scrollHandler.getIntPosition());
+		txt = "Change the way " + Constants.PROJECT_NAME + " behaves";
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_PINK);
+
+		y = lastOptionHeight;
+		y -= Math.min(this.scrollHandler.max, this.scrollHandler.getIntPosition());
 		y += Fonts.LARGE.getLineHeight() * 2.5f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.PROJECT_NAME + " " + updater.getCurrentVersion(), COL_WHITE);
+		txt = Constants.PROJECT_NAME + " " + updater.getCurrentVersion();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
 		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.DANCE_REPOSITORY_URI.toString(), COL_WHITE);
+		txt = Constants.DANCE_REPOSITORY_URI.toString();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
 		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.REPOSITORY_URI.toString(), COL_WHITE);
+		txt = Constants.REPOSITORY_URI.toString();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
 	}
 
 	private void renderSearch(Graphics g) {
-		int ypos = posSearchY + textSearchYOffset - scrollHandler.getIntPosition();
+		int ypos = posSearchY + textSearchYOffset;
+		ypos -= Math.max(0, scrollHandler.getIntPosition());
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
