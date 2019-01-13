@@ -158,6 +158,8 @@ public class OptionsOverlay
 
 	private int sectionLineHeight;
 
+	private boolean externalSuppressHover;
+
 	private final TextField searchField;
 	private String lastSearchText;
 	private int invalidSearchImgRotation;
@@ -801,7 +803,7 @@ public class OptionsOverlay
 		}
 		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
 
-		final boolean externalSuppressHover = displayContainer.suppressHover;
+		externalSuppressHover = displayContainer.suppressHover;
 		if (this.active && mouseX <= this.currentWidth) {
 			displayContainer.suppressHover = true;
 		}
@@ -970,7 +972,7 @@ public class OptionsOverlay
 			if (listener != null) {
 				listener.onSaveOption(hoverOption);
 			}
-			updateHoverOption(e.x, e.y, displayContainer.suppressHover);
+			updateHoverOption(e.x, e.y, externalSuppressHover);
 			isAdjustingSlider = false;
 		}
 		sliderOptionLength = 0;
