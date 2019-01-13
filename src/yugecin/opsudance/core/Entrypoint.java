@@ -35,8 +35,20 @@ public class Entrypoint
 		Log.info("working directory: " + workingdir.getAbsolutePath());
 
 		try {
+			NativeLoader.loadNatives();
+		} catch (Throwable e) {
+			explode(
+				"Failed to unpack natives. " + PROJECT_NAME + " will close.",
+				e,
+				FORCE_TERMINATE
+			);
+			logImpl.close();
+			return;
+		}
+
+		try {
 			InstanceContainer.kickstart();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			explode(
 				"Failed to kickstart. " + PROJECT_NAME + " will close.",
 				e,

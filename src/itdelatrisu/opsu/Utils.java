@@ -28,7 +28,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Scanner;
-import java.util.jar.JarFile;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -473,20 +472,4 @@ public class Utils {
 			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
 			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
 	}
-
-	public static void unpackFromJar(@NotNull JarFile jarfile, @NotNull File unpackedFile,
-			@NotNull String filename) throws IOException {
-		InputStream in = jarfile.getInputStream(jarfile.getEntry(filename));
-		OutputStream out = new FileOutputStream(unpackedFile);
-
-		byte[] buffer = new byte[65536];
-		int bufferSize;
-		while ((bufferSize = in.read(buffer, 0, buffer.length)) != -1) {
-			out.write(buffer, 0, bufferSize);
-		}
-
-		in.close();
-		out.close();
-	}
-
 }

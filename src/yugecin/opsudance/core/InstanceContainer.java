@@ -2,7 +2,6 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
-import itdelatrisu.opsu.NativeLoader;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.OszUnpacker;
 import itdelatrisu.opsu.downloads.Updater;
@@ -28,15 +27,10 @@ import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.colors.CursorColor;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Random;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
-import static yugecin.opsudance.utils.SyntacticSugar.closeAndSwallow;
-
-public class InstanceContainer {
-
+public class InstanceContainer
+{
 	public static Random rand;
 
 	public static Environment env;
@@ -82,20 +76,7 @@ public class InstanceContainer {
 		rand = new Random();
 		updater = new Updater();
 		env = new Environment();
-
-		JarFile jarfile = getJarfile();
 		config = new Configuration();
-		if (jarfile != null) {
-			try {
-				NativeLoader.loadNatives(jarfile);
-			} catch (IOException e) {
-				String msg = String.format("Could not unpack native(s): %s", e.getMessage());
-				throw new RuntimeException(msg, e);
-			} finally {
-				closeAndSwallow(jarfile);
-			}
-		}
-		NativeLoader.setNativePath();
 
 		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
 
@@ -127,36 +108,4 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 	}
-
-	@Nullable
-	private static JarFile getJarfile()
-	{
-		if (Entrypoint.jarfile == null) {
-			return null;
-		}
-		try {
-			return new JarFile(Entrypoint.jarfile);
-		} catch (IOException e) {
-			String msg = String.format(
-				"Cannot read from jarfile (%s): %s",
-				Entrypoint.jarfile.getAbsolutePath(),
-				e.getMessage()
-			);
-			throw new RuntimeException(msg, e);
-		}
-	}
-
-	@Nullable
-	private static Manifest getJarManifest(@Nullable JarFile jarfile) {
-		if (jarfile == null) {
-			return null;
-		}
-		try {
-			return jarfile.getManifest();
-		} catch (IOException e) {
-			String msg = String.format("Cannot read manifest from jarfile: %s", e.getMessage());
-			throw new RuntimeException(msg, e);
-		}
-	}
-
 }
