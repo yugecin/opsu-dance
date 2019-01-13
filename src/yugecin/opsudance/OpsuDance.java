@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance;
 
@@ -16,7 +16,6 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
-import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -29,15 +28,15 @@ public class OpsuDance
 
 	public void start(String[] args) {
 		try {
-			sout("initialized");
+			Log.info("initialized");
 
 			optionservice.loadOptions();
 			ensureSingleInstance();
-			sout("prechecks done and options parsed");
+			Log.info("prechecks done and options parsed");
 
 			initDatabase();
 			initUpdater(args);
-			sout("database & updater initialized");
+			Log.info("database & updater initialized");
 
 			displayContainer.init(splashState);
 		} catch (Exception e) {

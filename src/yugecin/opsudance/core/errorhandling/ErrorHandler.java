@@ -4,6 +4,7 @@ package yugecin.opsudance.core.errorhandling;
 
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
+import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
@@ -58,9 +59,8 @@ public class ErrorHandler
 		dump.append("\n").append(errorDump);
 		String messageBody = dump.toString();
 
-		Log.error("====== start unhandled exception dump");
-		Log.error(messageBody);
-		Log.error("====== end unhandled exception dump");
+		Log.error("==== START UNHANDLED EXCEPTION DUMP ====\n\n" + messageBody);
+		Log.error("==== CLOSE UNHANDLED EXCEPTION DUMP ====");
 
 		int result = show(messageBody, customMessage, cause, errorDump, flags);
 
@@ -131,7 +131,7 @@ public class ErrorHandler
 			return;
 		}
 		try {
-			Desktop.getDesktop().open(config.LOG_FILE);
+			Desktop.getDesktop().open(Entrypoint.LOGFILE);
 		} catch (IOException e) {
 			Log.warn("Could not open log file", e);
 			JOptionPane.showMessageDialog(null, "whoops could not open log file",

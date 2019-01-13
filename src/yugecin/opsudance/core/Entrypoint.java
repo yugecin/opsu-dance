@@ -7,21 +7,39 @@ import yugecin.opsudance.OpsuDance;
 
 import javax.swing.*;
 
+import org.newdawn.slick.util.Log;
+
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
 import static yugecin.opsudance.core.InstanceContainer.*;
+
+import java.awt.Component;
+import java.io.File;
+import java.nio.file.Paths;
 
 public class Entrypoint
 {
 	public static final long startTime = System.currentTimeMillis();
 
-	public static void main(String[] args) {
-		sout("launched");
+	public static File workingdir;
+	public static boolean isJarRunning;
+	public static File jarfile;
+	public static File LOGFILE;
+
+	public static void main(String[] args)
+	{
+		setRuntimeInfo();
+		LOGFILE = new File(workingdir, ".opsu.log");
+		final LogImpl logImpl = new LogImpl();
+		Log.setLogSystem(logImpl);
+		Log.info("launched");
+		Log.info("working directory: " + workingdir.getAbsolutePath());
 
 		try {
 			InstanceContainer.kickstart();
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Cannot start " + PROJECT_NAME, JOptionPane.ERROR_MESSAGE);
+			logImpl.close();
 			return;
 			// TODO replace with errorhandler (but stuff may not have kickstarted yet?)
 		}
@@ -31,13 +49,55 @@ public class Entrypoint
 		if (updater.getStatus() == Updater.Status.UPDATE_FINAL) {
 			updater.runUpdate();
 		}
+
+		logImpl.close();
 	}
 
-	public static long runtime() {
+	private static void setRuntimeInfo()
+	{
+		final Class<Entrypoint> thiz = Entrypoint.class;
+		final String loc = thiz.getResource(thiz.getSimpleName() + ".class").toString();
+		isJarRunning = loc.startsWith("jar:");
+
+		if (!isJarRunning) {
+			workingdir = Paths.get(".").toAbsolutePath().normalize().toFile();
+			jarfile = null;
+			return;
+		}
+
+		final String wdir = loc.substring(9); // remove jar:file:
+		final String separator = "!/";
+		final int separatorIdx = wdir.indexOf(separator);
+		final int lastSeparatorIdx = wdir.lastIndexOf(separator);
+		if (separatorIdx != lastSeparatorIdx) {
+			setLAF();
+			JOptionPane.showMessageDialog(
+				(Component) null,
+				"Cannot run from paths containing '!/', please move the jar file."
+				+ "\nCurrent directory: " + wdir.substring(0, lastSeparatorIdx)
+				+ "\n" + PROJECT_NAME + " will exit.",
+				"Cannot start " + PROJECT_NAME,
+				JOptionPane.ERROR_MESSAGE
+			);
+			System.exit(0x688);
+		}
+		jarfile = new File(wdir.substring(0, separatorIdx));
+		workingdir = jarfile.getParentFile();
+	}
+
+	public static void setLAF()
+	{
+		if (UIManager.getLookAndFeel().isNativeLookAndFeel()) {
+			return;
+		}
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Throwable t) {
+		}
+	}
+
+	public static long runtime()
+	{
 		return System.currentTimeMillis() - startTime;
-	}
-
-	public static void sout(String message) {
-		System.out.println(String.format("[%8d] %s", runtime(), message));
 	}
 }

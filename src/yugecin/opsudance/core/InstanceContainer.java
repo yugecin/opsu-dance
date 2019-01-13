@@ -129,15 +129,19 @@ public class InstanceContainer {
 	}
 
 	@Nullable
-	private static JarFile getJarfile() {
-		if (env.jarfile == null) {
+	private static JarFile getJarfile()
+	{
+		if (Entrypoint.jarfile == null) {
 			return null;
 		}
 		try {
-			return new JarFile(env.jarfile);
+			return new JarFile(Entrypoint.jarfile);
 		} catch (IOException e) {
-			String msg = String.format("Cannot read from jarfile (%s): %s", env.jarfile.getAbsolutePath(),
-				e.getMessage());
+			String msg = String.format(
+				"Cannot read from jarfile (%s): %s",
+				Entrypoint.jarfile.getAbsolutePath(),
+				e.getMessage()
+			);
 			throw new RuntimeException(msg, e);
 		}
 	}

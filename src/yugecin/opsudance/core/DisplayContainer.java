@@ -45,7 +45,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static itdelatrisu.opsu.ui.Colors.*;
-import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -465,7 +464,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		Keyboard.enableRepeatEvents(true);
 
-		sout("GL ready");
+		Log.info("GL ready");
 
 		GameImage.onResolutionChanged();
 		Fonts.init();

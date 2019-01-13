@@ -9,50 +9,28 @@ import java.nio.file.Paths;
 
 import org.newdawn.slick.util.Log;
 
-import static yugecin.opsudance.core.Constants.PROJECT_NAME;
-
 public class Environment
 {
-	public final boolean isJarRunning;
-	public final File workingdir;
-	public final File jarfile;
-
 	/**
 	 * a 40-character SHA-1 hash denoting the revision the current branch is on,
-	 * or {@code null} if it could not be determined
+	 * or {@code null} if a jar is running or it could not be determined
 	 */
 	public final String gitHash;
 
-	public Environment()
+	Environment()
 	{
-		final Class<Environment> thiz = Environment.class;
-		String thisClassLocation = thiz.getResource(thiz.getSimpleName() + ".class").toString();
-		this.isJarRunning = thisClassLocation.startsWith("jar:");
-		if (!isJarRunning) {
-			this.workingdir = Paths.get(".").toAbsolutePath().normalize().toFile();
-			this.jarfile = null;
-			this.gitHash = this.findGitHash();
-		} else {
-			String wdir = thisClassLocation.substring(9); // remove jar:file:
-			String separator = "!/";
-			int separatorIdx = wdir.indexOf(separator);
-			int lastSeparatorIdx = wdir.lastIndexOf(separator);
-			if (separatorIdx != lastSeparatorIdx) {
-				String msg = String.format("%s cannot run from paths containing '!/', please move the file. Current directory: %s",
-					PROJECT_NAME, thisClassLocation.substring(0, lastSeparatorIdx));
-				throw new RuntimeException(msg);
-			}
-			this.jarfile = new File(wdir.substring(0, separatorIdx));
-			this.workingdir = jarfile.getParentFile();
+		if (Entrypoint.isJarRunning) {
 			this.gitHash = null;
+		} else {
+			this.gitHash = this.findGitHash();
+			Log.info("rev: " + this.gitHash);
 		}
-		Log.info("working directory: " + this.workingdir.getAbsolutePath());
 	}
 
 	@Nullable
 	private String findGitHash()
 	{
-		File root = this.workingdir;
+		File root = Entrypoint.workingdir;
 		File gitdir;
 		for (int i = 4;;) {
 			gitdir = new File(root, ".git");
