@@ -96,6 +96,7 @@ public class OptionsOverlay
 	private Option selectedOption;
 
 	private int sliderOptionStartX;
+	private int sliderOptionPrecisionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
 	private int unchangedSliderValue;
@@ -825,12 +826,7 @@ public class OptionsOverlay
 
 		updateIndicatorAlpha();
 		if (isAdjustingSlider) {
-			int sliderValue = ((NumericOption) hoverOption).val;
-			updateSliderOption();
-			if (((NumericOption) hoverOption).val - sliderValue != 0 && sliderSoundDelay <= 0) {
-				this.sliderSoundDelay = SLIDER_SOUND_DELAY;
-				SoundController.playSound(SoundEffect.MENUHIT);
-			}
+			this.updateSliderOptionPlaySound();
 		}
 	}
 
@@ -943,14 +939,21 @@ public class OptionsOverlay
 		selectedOption = hoverOption;
 
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
-			isAdjustingSlider = sliderOptionStartX <= e.x && e.x < sliderOptionStartX + sliderOptionLength;
+			isAdjustingSlider =
+				sliderOptionStartX <= e.x &&
+				e.x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
-				unchangedSliderValue = ((NumericOption) hoverOption).val;
-				updateSliderOption();
-				if (unchangedSliderValue != ((NumericOption) hoverOption).val) {
-					SoundController.playSound(SoundEffect.MENUHIT);
-					this.sliderSoundDelay = SLIDER_SOUND_DELAY;
+				NumericOption s = (NumericOption) hoverOption;
+				if (input.isShiftDown()) {
+					this.sliderOptionPrecisionStartX =
+						this.sliderOptionStartX +
+						(int) ((float) (s.val - s.min) / (s.max - s.min)
+							* this.sliderOptionLength);
+				} else {
+					this.sliderOptionPrecisionStartX = -1;
 				}
+				this.unchangedSliderValue = s.val;
+				this.updateSliderOptionPlaySound();
 			}
 		}
 	}
@@ -1106,6 +1109,13 @@ public class OptionsOverlay
 			return;
 		}
 
+		if ((e.keyCode == Keyboard.KEY_RSHIFT || e.keyCode == Keyboard.KEY_LSHIFT) &&
+			!Keyboard.isRepeatEvent() &&
+			this.isAdjustingSlider)
+		{
+			this.sliderOptionPrecisionStartX = mouseX;
+		}
+
 		searchField.keyPressed(e);
 		if (!searchField.getText().equals(lastSearchText)) {
 			String newSearchText = searchField.getText().toLowerCase();
@@ -1130,6 +1140,10 @@ public class OptionsOverlay
 
 	public void keyReleased(KeyEvent e)
 	{
+		if (!input.isShiftDown() && this.isAdjustingSlider) {
+			this.sliderOptionPrecisionStartX = -1;
+			this.updateSliderOptionPlaySound();
+		}
 		e.consume();
 	}
 
@@ -1140,10 +1154,25 @@ public class OptionsOverlay
 		}
 	}
 
-	private void updateSliderOption() {
+	private void updateSliderOptionPlaySound()
+	{
+		final int prevVal = ((NumericOption) hoverOption).val;
 		NumericOption o = (NumericOption) hoverOption;
-		int value = o.min + Math.round((float) (o.max - o.min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
-		o.setValue(Utils.clamp(value, o.min, o.max));
+
+		final float p;
+		if (this.sliderOptionPrecisionStartX == -1) {
+			p = (mouseX - this.sliderOptionStartX) / (float) this.sliderOptionLength;
+		} else {
+			p =
+				((this.sliderOptionPrecisionStartX - this.sliderOptionStartX)
+				+ (mouseX - this.sliderOptionPrecisionStartX) / 12f)
+				/ (float) this.sliderOptionLength;
+		}
+		o.setValue(Utils.clamp(o.min + Math.round((o.max - o.min) * p), o.min, o.max));
+		if (this.sliderSoundDelay <= 0 && prevVal != ((NumericOption) hoverOption).val) {
+			SoundController.playSound(SoundEffect.MENUHIT);
+			this.sliderSoundDelay = SLIDER_SOUND_DELAY;
+		}
 	}
 
 	private void updateActiveSection() {
