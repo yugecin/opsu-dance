@@ -319,6 +319,11 @@ public class BeatmapParser {
 										audioFileName = groupAudioFileName;
 								}
 								if (!audioFileName.isFile()) {
+									if ("virtual".equals(audioFileName.getName())) {
+										// beatmap without sound
+										// TODO: these can be legal (circusgallop)
+										return null;
+									}
 									// try to find the file with a case-insensitive match
 									boolean match = false;
 									for (String s : dir.list()) {
