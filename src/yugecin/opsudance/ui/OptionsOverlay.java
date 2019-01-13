@@ -154,6 +154,7 @@ public class OptionsOverlay
 	private int prevMouseY;
 
 	private int sliderSoundDelay;
+	private static final int SLIDER_SOUND_DELAY = 90;
 
 	private int sectionLineHeight;
 
@@ -825,7 +826,7 @@ public class OptionsOverlay
 			int sliderValue = ((NumericOption) hoverOption).val;
 			updateSliderOption();
 			if (((NumericOption) hoverOption).val - sliderValue != 0 && sliderSoundDelay <= 0) {
-				sliderSoundDelay = 90;
+				this.sliderSoundDelay = SLIDER_SOUND_DELAY;
 				SoundController.playSound(SoundEffect.MENUHIT);
 			}
 		}
@@ -944,6 +945,10 @@ public class OptionsOverlay
 			if (isAdjustingSlider) {
 				unchangedSliderValue = ((NumericOption) hoverOption).val;
 				updateSliderOption();
+				if (unchangedSliderValue != ((NumericOption) hoverOption).val) {
+					SoundController.playSound(SoundEffect.MENUHIT);
+					this.sliderSoundDelay = SLIDER_SOUND_DELAY;
+				}
 			}
 		}
 	}
