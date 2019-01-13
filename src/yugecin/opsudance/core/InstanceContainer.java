@@ -26,7 +26,6 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.colors.CursorColor;
 
-import java.io.File;
 import java.util.Random;
 
 public class InstanceContainer
@@ -78,7 +77,10 @@ public class InstanceContainer
 		env = new Environment();
 		config = new Configuration();
 
-		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
+		if (Entrypoint.RESOURCES != null) {
+			final FileSystemLocation loc = new FileSystemLocation(Entrypoint.RESOURCES);
+			ResourceLoader.addResourceLocation(loc);
+		}
 
 		input = new Input();
 

@@ -24,6 +24,7 @@ public class Entrypoint
 	public static boolean isJarRunning;
 	public static File jarfile;
 	public static File LOGFILE;
+	public static File RESOURCES;
 
 	public static void main(String[] args)
 	{
@@ -33,6 +34,22 @@ public class Entrypoint
 		Log.setLogSystem(logImpl);
 		Log.info("launched");
 		Log.info("working directory: " + workingdir.getAbsolutePath());
+		if (!isJarRunning) {
+			File root = workingdir;
+			for (int i = 4;;) {
+				File res = new File(root, "res");
+				if (res.exists()) {
+					RESOURCES = res;
+					Log.info("resources directory: " + res.getAbsolutePath());
+					break;
+				}
+				root = root.getParentFile();
+				if (root == null || --i < 0) {
+					Log.warn("no resources directory found!");
+					break;
+				}
+			}
+		}
 
 		try {
 			NativeLoader.loadNatives();

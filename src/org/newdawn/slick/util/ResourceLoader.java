@@ -1,10 +1,12 @@
+// modified by yugecin, see the git history information for details
+// if no git history information is available, please refer to https://github.com/yugecin/opsu-dance
 package org.newdawn.slick.util;
 
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+
+import yugecin.opsudance.core.Entrypoint;
 
 /**
  * A simple wrapper around resource loading should anyone decide to change
@@ -14,11 +16,11 @@ import java.util.ArrayList;
  */
 public class ResourceLoader {
 	/** The list of locations to be searched */
-	private static ArrayList locations = new ArrayList();
+	private static ArrayList<ResourceLocation> locations = new ArrayList<>();
 	
 	static {
 		locations.add(new ClasspathLocation());
-		locations.add(new FileSystemLocation(new File(".")));
+		locations.add(new FileSystemLocation(Entrypoint.workingdir));
 	}
 	
 	/**
@@ -46,30 +48,31 @@ public class ResourceLoader {
 	public static void removeAllResourceLocations() {
 		locations.clear();
 	}
-	
+
+	/**
+	 * Adds the given location at the first position so the loader will check this
+	 * location first.
+	 */
+	public static void addPrimaryResourceLocation(ResourceLocation location)
+	{
+		locations.add(0, location);
+	}
+
 	/**
 	 * Get a resource
 	 * 
 	 * @param ref The reference to the resource to retrieve
 	 * @return A stream from which the resource can be read
 	 */
-	public static InputStream getResourceAsStream(String ref) {
-		InputStream in = null;
-		
+	public static InputStream getResourceAsStream(String ref)
+	{
 		for (int i=0;i<locations.size();i++) {
-			ResourceLocation location = (ResourceLocation) locations.get(i);
-			in = location.getResourceAsStream(ref);
+			InputStream in = locations.get(i).getResourceAsStream(ref);
 			if (in != null) {
-				break;
+				return in;
 			}
 		}
-		
-		if (in == null)
-		{
-			throw new RuntimeException("Resource not found: "+ref);
-		}
-			
-		return new BufferedInputStream(in);
+		throw new RuntimeException("Resource not found: " + ref);
 	}
 	
 	/**
@@ -78,17 +81,13 @@ public class ResourceLoader {
 	 * @param ref A reference to the resource that should be checked
 	 * @return True if the resource can be located
 	 */
-	public static boolean resourceExists(String ref) {
-		URL url = null;
-		
+	public static boolean resourceExists(String ref)
+	{
 		for (int i=0;i<locations.size();i++) {
-			ResourceLocation location = (ResourceLocation) locations.get(i);
-			url = location.getResource(ref);
-			if (url != null) {
+			if (locations.get(i).getResource(ref) != null) {
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
@@ -98,23 +97,14 @@ public class ResourceLoader {
 	 * @param ref The reference to the resource to retrieve
 	 * @return A URL from which the resource can be read
 	 */
-	public static URL getResource(String ref) {
-
-		URL url = null;
-		
+	public static URL getResource(String ref)
+	{
 		for (int i=0;i<locations.size();i++) {
-			ResourceLocation location = (ResourceLocation) locations.get(i);
-			url = location.getResource(ref);
+			URL url = locations.get(i).getResource(ref);
 			if (url != null) {
-				break;
+				return url;
 			}
 		}
-		
-		if (url == null)
-		{
-			throw new RuntimeException("Resource not found: "+ref);
-		}
-			
-		return url;
+		throw new RuntimeException("Resource not found: " + ref);
 	}
 }
