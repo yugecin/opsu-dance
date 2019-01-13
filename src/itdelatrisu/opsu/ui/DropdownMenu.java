@@ -37,7 +37,7 @@ public class DropdownMenu<E> extends Component
 {
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
 
-	private E[] items;
+	public final E[] items;
 	private String[] itemNames;
 	private int selectedItemIndex;
 	private boolean expanded;
@@ -60,8 +60,10 @@ public class DropdownMenu<E> extends Component
 	private Image chevronDown;
 	private Image chevronRight;
 
-	public DropdownMenu(E[] items, int x, int y, int width) {
-		init(items, x, y, width);
+	public DropdownMenu(E[] items, int x, int y, int width)
+	{
+		this.items = items;
+		init(x, y, width);
 	}
 
 	public void setWidth(int width) {
@@ -102,8 +104,7 @@ public class DropdownMenu<E> extends Component
 		return maxWidth;
 	}
 
-	private void init(E[] items, int x, int y, int width) {
-		this.items = items;
+	private void init(int x, int y, int width) {
 		this.itemNames = new String[items.length];
 		for (int i = 0; i < itemNames.length; i++) {
 			itemNames[i] = items[i].toString();
