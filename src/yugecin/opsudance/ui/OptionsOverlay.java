@@ -539,10 +539,6 @@ public class OptionsOverlay
 		if (closingDropdownMenu != null &&
 			closingDropdownMenu.equals(dropdownMenus.get(option)))
 		{
-			if (!closingDropdownMenu.isClosing()) {
-				closingDropdownMenu = null;
-				return false;
-			}
 			return true;
 		}
 
@@ -768,7 +764,7 @@ public class OptionsOverlay
 
 		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
-		boolean scrollPositionChanged = prevscrollpos != scrollHandler.getIntPosition();
+		boolean updateHover = prevscrollpos != scrollHandler.getIntPosition();
 
 		this.hoveredDropdownMenu = null;
 		if (openDropdownMenu == null) {
@@ -777,6 +773,12 @@ public class OptionsOverlay
 			}
 		} else {
 			openDropdownMenu.updateHover(mouseX, mouseY);
+		}
+
+		if (this.closingDropdownMenu != null && !this.closingDropdownMenu.isClosing()) {
+			this.closingDropdownMenu = null;
+			this.selectedOption = null;
+			updateHover = true;
 		}
 
 		if (invalidSearchAnimationProgress > 0) {
@@ -803,7 +805,7 @@ public class OptionsOverlay
 			displayContainer.suppressHover = true;
 		}
 
-		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
+		if (!updateHover && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
 			return;
 		}
