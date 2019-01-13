@@ -70,8 +70,15 @@ public class OptionGroups {
 			OPTION_CURSOR_SIZE,
 			OPTION_NEWEST_CURSOR,
 			OPTION_NEW_CURSOR,
-			OPTION_DISABLE_CURSOR
+			OPTION_DISABLE_CURSOR,
 			// TODO use combo colour as tint for slider ball option
+			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
+			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
+			OPTION_BLEND_TRAIL,
+			OPTION_BLEND_CURSOR,
+			OPTION_TRAIL_COLOR_PARTS,
+			OPTION_DANCE_RGB_CURSOR_INC,
+			OPTION_DANCE_CURSOR_TRAIL_OVERRIDE,
 		}),
 		new OptionTab("Audio", GameImage.MENU_NAV_AUDIO),
 		new OptionTab("VOLUME", new Option[]{
@@ -100,6 +107,18 @@ public class OptionGroups {
 			OPTION_MAP_START_DELAY,
 			OPTION_MAP_END_DELAY,
 			OPTION_EPILEPSY_WARNING,
+		}),
+		new OptionTab("OBJECTS", new Option[]{
+			OPTION_DANCE_DRAW_APPROACH,
+			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
+			OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
+			OPTION_DANCE_RGB_OBJECT_INC,
+			OPTION_DANCE_HIDE_OBJECTS,
+		}),
+		new OptionTab("MISC", new Option[] {
+			OPTION_DANCE_HIDE_UI,
+			OPTION_DANCE_REMOVE_BG,
+			OPTION_DANCE_ENABLE_SB,
 		}),
 		new OptionTab("Input", GameImage.MENU_NAV_INPUT),
 		new OptionTab("KEY MAPPING", new Option[]{
@@ -148,28 +167,6 @@ public class OptionGroups {
 		new OptionTab("MIRROR", new Option[] {
 			OPTION_DANCE_MIRROR,
 		}),
-		new OptionTab("Advanced Display", GameImage.MENU_NAV_ADVANCED),
-		new OptionTab("OBJECTS", new Option[]{
-			OPTION_DANCE_DRAW_APPROACH,
-			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
-			OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
-			OPTION_DANCE_RGB_OBJECT_INC,
-			OPTION_DANCE_HIDE_OBJECTS,
-		}),
-		new OptionTab("CURSOR", new Option[]{
-			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
-			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
-			OPTION_BLEND_TRAIL,
-			OPTION_BLEND_CURSOR,
-			OPTION_TRAIL_COLOR_PARTS,
-			OPTION_DANCE_RGB_CURSOR_INC,
-			OPTION_DANCE_CURSOR_TRAIL_OVERRIDE,
-		}),
-		new OptionTab("MISC", new Option[] {
-			OPTION_DANCE_HIDE_UI,
-			OPTION_DANCE_REMOVE_BG,
-			OPTION_DANCE_ENABLE_SB,
-		}),
 		new OptionTab ("Pippi", GameImage.MENU_NAV_PIPPI),
 		new OptionTab ("GENERAL", new Option[]{
 			OPTION_PIPPI_ENABLE,
@@ -186,6 +183,16 @@ public class OptionGroups {
 	};
 
 	public static final OptionTab[] storyboardOptions = new OptionTab[] {
+		new OptionTab("Skin", GameImage.MENU_NAV_SKIN),
+		new OptionTab("CURSOR", new Option[]{
+			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
+			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
+			OPTION_BLEND_TRAIL,
+			OPTION_BLEND_CURSOR,
+			OPTION_TRAIL_COLOR_PARTS,
+			OPTION_DANCE_RGB_CURSOR_INC,
+			OPTION_DANCE_CURSOR_TRAIL_OVERRIDE,
+		}),
 		new OptionTab("Gameplay", GameImage.MENU_NAV_GAMEPLAY),
 		new OptionTab("GENERAL", new Option[] {
 			OPTION_BACKGROUND_DIM,
@@ -197,6 +204,18 @@ public class OptionGroups {
 			OPTION_SHOW_COMBO_BURSTS,
 			OPTION_SHOW_PERFECT_HIT,
 			OPTION_SHOW_FOLLOW_POINTS,
+		}),
+		new OptionTab("OBJECTS", new Option[]{
+			OPTION_DANCE_DRAW_APPROACH,
+			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
+			OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
+			OPTION_DANCE_RGB_OBJECT_INC,
+			OPTION_DANCE_HIDE_OBJECTS,
+		}),
+		new OptionTab("MISC", new Option[] {
+			OPTION_DANCE_HIDE_UI,
+			OPTION_DANCE_REMOVE_BG,
+			OPTION_DANCE_ENABLE_SB,
 		}),
 		new OptionTab("Input", GameImage.MENU_NAV_INPUT),
 		new OptionTab("INPUT", new Option[] {
@@ -230,28 +249,6 @@ public class OptionGroups {
 		}),
 		new OptionTab("MIRROR", new Option[] {
 			OPTION_DANCE_MIRROR,
-		}),
-		new OptionTab("Advanced Display", GameImage.MENU_NAV_ADVANCED),
-		new OptionTab("OBJECTS", new Option[]{
-			OPTION_DANCE_DRAW_APPROACH,
-			OPTION_DANCE_OBJECT_COLOR_OVERRIDE,
-			OPTION_DANCE_OBJECT_COLOR_OVERRIDE_MIRRORED,
-			OPTION_DANCE_RGB_OBJECT_INC,
-			OPTION_DANCE_HIDE_OBJECTS,
-		}),
-		new OptionTab("CURSOR", new Option[]{
-			OPTION_DANCE_CURSOR_COLOR_OVERRIDE,
-			OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL,
-			OPTION_BLEND_TRAIL,
-			OPTION_BLEND_CURSOR,
-			OPTION_TRAIL_COLOR_PARTS,
-			OPTION_DANCE_RGB_CURSOR_INC,
-			OPTION_DANCE_CURSOR_TRAIL_OVERRIDE,
-		}),
-		new OptionTab("MISC", new Option[] {
-			OPTION_DANCE_HIDE_UI,
-			OPTION_DANCE_REMOVE_BG,
-			OPTION_DANCE_ENABLE_SB,
 		}),
 		new OptionTab ("Pippi", GameImage.MENU_NAV_PIPPI),
 		new OptionTab ("GENERAL", new Option[]{

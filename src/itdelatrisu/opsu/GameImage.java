@@ -258,7 +258,6 @@ public enum GameImage {
 	MENU_NAV_GRAPHICS ("menu-nav-graphics", "png", false, false),
 	MENU_NAV_INPUT ("menu-nav-input", "png", false, false),
 	MENU_NAV_SKIN ("menu-nav-skin", "png", false, false),
-	MENU_NAV_ADVANCED ("menu-nav-advanced", "png", false, false),
 	MENU_NAV_DANCE ("menu-nav-dance", "png", false, false),
 	MENU_NAV_PIPPI ("menu-nav-pippi", "png", false, false),
 	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
