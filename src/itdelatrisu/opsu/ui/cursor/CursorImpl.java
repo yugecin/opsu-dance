@@ -64,7 +64,6 @@ public class CursorImpl implements Cursor
 	public static Color lastMirroredObjColor = Color.white;
 	public static Color nextObjColor = Color.white;
 	public static Color nextMirroredObjColor = Color.white;
-	public static Color lastCursorColor = Color.white;
 
 	private boolean isMirrored;
 
@@ -128,7 +127,7 @@ public class CursorImpl implements Cursor
 		//if (isMirrored) {
 		//	filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
 		//} else {
-		lastCursorColor = filter = new Color(0xFF000000 | cursorColor.getCurrentColor());
+			filter = new Color(0xFF000000 | cursorColor.getCurrentColor());
 		//}
 
 		// draw a fading trail

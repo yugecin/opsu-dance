@@ -324,7 +324,7 @@ public class MainMenu extends BaseOpsuState {
 		// pulse ripples
 		final Color logoColor;
 		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
-			logoColor = CursorImpl.lastCursorColor;
+			logoColor = new Color(0xFF000000 | cursorColor.getCurrentColor());
 		} else {
 			logoColor = Color.white;
 		}
