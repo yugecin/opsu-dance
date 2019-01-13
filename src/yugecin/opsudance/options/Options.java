@@ -15,6 +15,7 @@ import yugecin.opsudance.*;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.CachedVariable;
 import yugecin.opsudance.utils.CachedVariable.Getter;
 
@@ -28,7 +29,6 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  *                     itdelatrisu/opsu/Options.java
  */
 public class Options
-
 {
 	// internal options (not displayed in-game)
 	static {
@@ -884,74 +884,47 @@ public class Options
 	};
 
 	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption(
-		"Color",
+		"Trail color",
 		"CursorColorOverride",
 		"Override cursor color")
 	{
 		@Override
-		public void setDefaultValue()
-		{
-			Dancer.cursorColorOverride = CursorColorOverrides.RAINBOW;
-		}
-
-		@Override
 		public String getValueString()
 		{
-			return Dancer.cursorColorOverride.toString();
+			return cursorColor.name;
 		}
 
 		@Override
 		public Object[] getListItems()
 		{
-			return CursorColorOverrides.values();
+			return CursorColorManager.impls;
 		}
 
 		@Override
 		public void clickListItem(int index)
 		{
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
+			cursorColor = CursorColorManager.impls[index];
 			this.notifyListeners();
 		}
 
 		@Override
 		public String write ()
 		{
-			return String.valueOf(Dancer.cursorColorOverride.nr);
+			for (int i = CursorColorManager.impls.length; i > 0;) {
+				if (CursorColorManager.impls[--i] == cursorColor) {
+					return String.valueOf(i);
+				}
+			}
+			return "0";
 		}
 
 		@Override
 		public void read(String s)
 		{
 			final int idx = Integer.parseInt(s);
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[idx];
-		}
-	};
-
-	public static final ListOption OPTION_DANCE_CURSOR_MIRROR_COLOR_OVERRIDE = new ListOption("Mirror color", "CursorMirrorColorOverride", "Override mirror cursor color") {
-		@Override
-		public String getValueString () {
-			return Dancer.cursorColorMirrorOverride.toString();
-		}
-
-		@Override
-		public Object[] getListItems () {
-			return CursorColorOverrides.values();
-		}
-
-		@Override
-		public void clickListItem(int index){
-			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
-			this.notifyListeners();
-		}
-
-		@Override
-		public String write () {
-			return "" + Dancer.cursorColorMirrorOverride.nr;
-		}
-
-		@Override
-		public void read (String s){
-			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+			if (0 <= idx && idx < CursorColorManager.impls.length) {
+				cursorColor = CursorColorManager.impls[idx];
+			}
 		}
 	};
 
@@ -979,7 +952,7 @@ public class Options
 		"RGB cursor increment",
 		"RGBCursorInc",
 		"Amount of hue to shift, used for rainbow cursor override",
-		80,
+		180,
 		-360,
 		360)
 	{
@@ -991,14 +964,7 @@ public class Options
 		@Override
 		public boolean showCondition()
 		{
-			Object val;
-			return
-				(val = Dancer.cursorColorOverride)
-					== CursorColorOverrides.RAINBOW ||
-				val == CursorColorOverrides.RAINBOWSHIFT ||
-				(val = Dancer.cursorColorMirrorOverride)
-					== CursorColorOverrides.RAINBOW ||
-				val == CursorColorOverrides.RAINBOWSHIFT;
+			return CursorColorManager.shouldShowCursorHueIncOption();
 		}
 	};
 

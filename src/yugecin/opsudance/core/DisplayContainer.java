@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
@@ -28,7 +28,6 @@ import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
 
-import yugecin.opsudance.CursorColorOverrides;
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
@@ -218,7 +217,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 			}
 			fpsDisplay.update();
-			CursorColorOverrides.update(delta);
+			cursorColor.update();
 
 			this.suppressHover = false; // put here for volume control
 

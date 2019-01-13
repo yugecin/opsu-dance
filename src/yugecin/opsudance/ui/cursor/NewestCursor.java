@@ -2,11 +2,8 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.cursor;
 
-import yugecin.opsudance.Dancer;
 import yugecin.opsudance.render.TextureData;
 import yugecin.opsudance.skinning.SkinService;
-
-import org.newdawn.slick.Color;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -61,7 +58,11 @@ public class NewestCursor implements Cursor
 		glBegin(GL_QUADS);
 		for (CursorTrail.Part p : this.trail) {
 			alpha += alphaIncrease;
-			glColor4f(p.color.r, p.color.g, p.color.b, alpha);
+			glColor4f(
+				((p.color >>> 16) & 0xFF) / 255f,
+				((p.color >>> 8) & 0xFF) / 255f,
+				(p.color & 0xFF) / 255f, alpha
+			);
 			glTexCoord2f(0f, 0f);
 			glVertex2f(p.x + -td.width2, p.y + -td.height2);
 			glTexCoord2f(td.txtw, 0);
@@ -79,13 +80,13 @@ public class NewestCursor implements Cursor
 			GL_ONE_MINUS_SRC_ALPHA
 		);
 
-		int cx = trail.lastPosition.x;
-		int cy = trail.lastPosition.y;
+		int cx = trail.lastX;
+		int cy = trail.lastY;
 
 		if (OPTION_DANCE_CURSOR_ONLY_COLOR_TRAIL.state) {
 			glColor3f(1f, 1f, 1f);
 		} else {
-			Dancer.cursorColorOverride.getColor().bind();
+			cursorColor.bindCurrentColor();
 		}
 
 		glPushMatrix();
@@ -109,13 +110,14 @@ public class NewestCursor implements Cursor
 	@Override
 	public void setCursorPosition(int x, int y)
 	{
-		final Color color = Dancer.cursorColorOverride.getColor();
 		if (!OPTION_TRAIL_COLOR_PARTS.state) {
+			final int currentColor = cursorColor.getCurrentColor();
 			for (CursorTrail.Part p : this.trail) {
-				p.color = color;
+				p.color = currentColor;
 			}
 		}
-		this.trail.lineTo(x, y, color);
+		cursorColor.onMovement(this.trail.lastX, this.trail.lastY, x, y);
+		this.trail.lineTo(x, y);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
@@ -25,6 +25,7 @@ import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
+import yugecin.opsudance.ui.cursor.colors.CursorColor;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class InstanceContainer {
 	public static Environment env;
 	public static Configuration config;
 
+	public static CursorColor cursorColor;
 	public static OptionsService optionservice;
 	public static SkinService skinservice;
 	public static OszUnpacker oszunpacker;

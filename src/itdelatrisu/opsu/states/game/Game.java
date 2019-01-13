@@ -67,6 +67,7 @@ import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
+import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.GLHelper;
 
 import static itdelatrisu.opsu.GameImage.*;
@@ -1491,7 +1492,7 @@ public class Game extends ComplexOpsuState {
 		MoverDirection.reset(beatmap.beatmapID);
 
 		ObjectColorOverrides.resetRainbowHue(beatmap.beatmapID);
-		CursorColorOverrides.resetRainbowHue(beatmap.beatmapID);
+		CursorColorManager.resetColorChange(beatmap.beatmapID);
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
@@ -1556,7 +1557,8 @@ public class Game extends ComplexOpsuState {
 		if (comboColors == null) {
 			comboColors = SkinService.skin.getComboColors();
 		}
-		CursorColorOverrides.comboColors = ObjectColorOverrides.comboColors = comboColors;
+		CursorColorManager.setComboColors(comboColors);
+		ObjectColorOverrides.comboColors = comboColors;
 		for (int i = 0; i < beatmap.objects.length; i++) {
 			HitObject hitObject = beatmap.objects[i];
 
