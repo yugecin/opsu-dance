@@ -156,6 +156,7 @@ then run (code is compiled automatically when you run)
 				<exclude name="org/newdawn/slick/openal/OpenALStreamPlayer*" />
 				<exclude name="org/newdawn/slick/openal/SoundStore*" />
 				<exclude name="org/newdawn/slick/opengl/PNGDecoder*" />
+				<exclude name="org/newdawn/slick/util/ResourceLoader.*" />
 				<!-- sqlite contains sources for some reason -->
 				<exclude name="**/*.java" />
 				<exclude name="**/*.c" />
