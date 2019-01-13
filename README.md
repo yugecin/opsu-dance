@@ -70,3 +70,5 @@ License
 -------
 **This software is licensed under GNU GPL version 3.**
 You can find the full text of the license in [the LICENSE file](LICENSE).
+
+NB: Some source files in this repository are authored by others who are not associated with this project. See the copyright headers in those files for more details, if applicable. Those files may be modified, with modifications either annotated in source and/or visible in revision information.
