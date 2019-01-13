@@ -26,7 +26,6 @@ import java.util.Base64;
 
 // no wildcards here because everything has to be checked before use
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
-import static yugecin.opsudance.core.InstanceContainer.config;
 import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 import static yugecin.opsudance.core.InstanceContainer.env;
 
@@ -211,13 +210,6 @@ public class ErrorHandler
 
 	private static void showLog()
 	{
-		if (config == null) {
-			JOptionPane.showMessageDialog(
-				(Component) null,
-				"Cannot open logfile, check your opsu! installation folder for .opsu.cfg",
-				"errorception", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
 		try {
 			Desktop.getDesktop().open(Entrypoint.LOGFILE);
 		} catch (IOException e) {
