@@ -157,6 +157,7 @@ class LogImpl implements LogSystem
 			primaryOutput.print(c);
 			this.fileOut.print(c);
 		}
+		primaryOutput.flush();
 		this.fileOut.flush();
 	}
 }

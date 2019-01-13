@@ -31,16 +31,21 @@ public class OpsuDance
 			Log.info("initialized");
 
 			optionservice.loadOptions();
-			ensureSingleInstance();
+			if (this.isOtherInstanceRunning()) {
+				return;
+			}
 			Log.info("prechecks done and options parsed");
 
-			initDatabase();
+			if (!this.initDatabase()) {
+				return;
+			}
 			initUpdater(args);
 			Log.info("database & updater initialized");
 
 			displayContainer.init(splashState);
 		} catch (Exception e) {
-			errorAndExit("startup failure", e);
+			explode("startup failure", e, PREVENT_CONTINUE);
+			return;
 		}
 
 		while (rungame());
@@ -75,11 +80,16 @@ public class OpsuDance
 		return caughtException != null && explode("update/render error", caughtException, ALLOW_TERMINATE);
 	}
 
-	private void initDatabase() {
+	/**
+	 * @return {@code false} on failure
+	 */
+	private boolean initDatabase() {
 		try {
 			DBController.init();
+			return true;
 		} catch (UnsatisfiedLinkError e) {
-			errorAndExit("Could not initialize database.", e);
+			explode("Could not initialize database.", e, PREVENT_CONTINUE);
+			return false;
 		}
 	}
 
@@ -105,19 +115,25 @@ public class OpsuDance
 		}.start();
 	}
 
-	private void ensureSingleInstance() {
+	private boolean isOtherInstanceRunning()
+	{
 		if (OPTION_NOSINGLEINSTANCE.state) {
-			return;
+			return false;
 		}
+
 		try {
 			singleInstanceSocket = new ServerSocket(OPTION_PORT.val, 1, InetAddress.getLocalHost());
+			return false;
 		} catch (UnknownHostException e) {
 			// shouldn't happen
+			return false;
 		} catch (IOException e) {
-			errorAndExit(String.format(
-					"Could not launch. Either opsu! is already running or a different program uses port %d.\n" +
-					"You can change the port opsu! uses by editing the 'Port' field in the .opsu.cfg configuration file.\n" +
-					"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", OPTION_PORT.val), e);
+			final String message = String.format(
+				"Could not launch. Either opsu! is already running or a different program uses port %d.\n" +
+				"You can change the port opsu! uses by editing the 'Port' field in the .opsu.cfg configuration file.\n" +
+				"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", OPTION_PORT.val);
+			explode(message, e, PREVENT_CONTINUE);
+			return true;
 		}
 	}
 
@@ -130,10 +146,5 @@ public class OpsuDance
 		} catch (IOException e) {
 			Log.error("Single instance socket was not closed!", e);
 		}
-	}
-
-	private void errorAndExit(String errstr, Throwable cause) {
-		explode(errstr, cause, PREVENT_CONTINUE);
-		System.exit(1);
 	}
 }

@@ -8,22 +8,22 @@ import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.utils.MiscUtils;
 
 import javax.swing.*;
-import java.awt.Desktop;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+
+import java.awt.*;
+import java.awt.Desktop.Action;
 import java.awt.Dialog.ModalityType;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Window;
-import java.awt.Cursor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
+import static yugecin.opsudance.core.Constants.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
@@ -31,12 +31,37 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  */
 public class ErrorHandler
 {
-	public final static int DEFAULT_OPTIONS = 0;
-	public final static int PREVENT_CONTINUE = 1;
-	public final static int PREVENT_REPORT = 2;
-	public final static int ALLOW_TERMINATE = 4;
+	public static final int DEFAULT_OPTIONS = 0;
+	public static final int PREVENT_CONTINUE = 1;
+	public static final int PREVENT_REPORT = 2;
+	public static final int ALLOW_TERMINATE = 4;
+	public static final int FORCE_TERMINATE = ALLOW_TERMINATE | PREVENT_CONTINUE;
 
-	public static boolean explode(String customMessage, Throwable cause, int flags) {
+	public static final Image dialogIcon;
+
+	private static final int RESULT_CONTINUE = 0;
+	private static final int RESULT_TERMINATE = 1;
+
+	static
+	{
+		final byte[] bytes =
+			("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAACXBIWXMAAA3WAAAN1gGQb3mcA"
+			+"AAAXVBMVEVHcExxcXFnZ2czMzRQUFFGRkhbW1wvLzArKyw+Pj+bm5z///93d3f////+/v57e3"
+			+"z+/v7W1tb+/v7v7+/t7e3+/v7+/v7+/v7+/v6FhYXc3Nz+/v7+/v7+/v7+/v6/rNyxAAAAH3R"
+			+"STlMAwb6ms7m5p6avzQK/evjDHeeo9fOFgsLiw+ncvMjo3EyqYAAAALJJREFUGNMtT1cWgzAM"
+			+"ix3HI2QQVqHr/sdsgOr5x3qWJTnXMeb36/XOo7sx5PKMxxGfJQ/XPs3Ji1fVNE8nk2fy56oiN"
+			+"OeuL0m9F5V+JVBGl5saExqSmWnL7hE9cA01MCP6+HB79USshgwYpO6d0IpoB2MClrR3iUACqB"
+			+"GoE12yNWUj7h+JSNvWbVEt2Dl22bptofAHLdsVfQGRMxos011mLS2mFFtZh3/fcf18v5/1qv8"
+			+"DBMMJdZb3ELQAAAAASUVORK5CYII=").getBytes(StandardCharsets.US_ASCII);
+
+		dialogIcon = new ImageIcon(Base64.getDecoder().decode(bytes)).getImage();
+	}
+
+	/**
+	 * @return {@code true} if user wants to keep running
+	 */
+	public static boolean explode(String customMessage, Throwable cause, int flags)
+	{
 		StringWriter dump = new StringWriter();
 		if (displayContainer == null) {
 			dump.append("displayContainer is null!\n");
@@ -54,78 +79,137 @@ public class ErrorHandler
 		String errorDump = dump.toString();
 
 		dump = new StringWriter();
-		dump.append(customMessage).append("\n");
 		cause.printStackTrace(new PrintWriter(dump));
 		dump.append("\n").append(errorDump);
-		String messageBody = dump.toString();
-
-		Log.error("==== START UNHANDLED EXCEPTION DUMP ====\n\n" + messageBody);
+		final String messageBody = dump.toString();
+		final String logdump = customMessage + "\n\n" + messageBody;
+		Log.error("==== START UNHANDLED EXCEPTION DUMP ====\n\n" + logdump);
 		Log.error("==== CLOSE UNHANDLED EXCEPTION DUMP ====");
 
 		int result = show(messageBody, customMessage, cause, errorDump, flags);
-
-		return (flags & ALLOW_TERMINATE) == 0 || result == 1;
+		return result == RESULT_CONTINUE;
 	}
 
-	private static int show(final String messageBody, final String customMessage, final Throwable cause,
-		       final String errorDump, final int flags) {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			Log.warn("Unable to set look and feel for error dialog");
+	private static int show(
+		String messageBody,
+		String customMessage,
+		Throwable cause,
+		String errorDump,
+		int flags)
+	{
+		if ((flags & PREVENT_CONTINUE) != 0 && (flags & ALLOW_TERMINATE) == 0) {
+			Log.warn(
+				"illegal combination of PREVENT_CONTINUE and ALLOW_TERMINATE",
+				new Exception("stacktrace")
+			);
+			flags |= ALLOW_TERMINATE;
 		}
 
-		String title = "opsu!dance error - " + customMessage;
+		Entrypoint.setLAF();
 
-		String messageText = "opsu!dance has encountered an error.";
+		JButton defaultbtn = null;
+		final int[] result = { RESULT_TERMINATE };
+		final JDialog d = new JDialog((Window) null, PROJECT_NAME + " error");
+		d.setIconImage(dialogIcon);
+		d.setModal(true);
+		d.setLayout(new GridBagLayout());
+		final GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.CENTER;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = new Insets(12, 18, 0, 5);
+		c.weightx = 0d;
+		c.weighty = 0d;
+		c.gridx = 1;
+		c.gridy = 1;
+
+		class ResultButton extends JButton
+		{
+			ResultButton(String text, int res)
+			{
+				super(text);
+				this.addActionListener(e -> {
+					result[0] = res;
+					d.dispose();
+				});
+			}
+		}
+
+		final JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		if ((flags & ALLOW_TERMINATE) != 0) {
+			buttonPanel.add(defaultbtn = new ResultButton("Exit", RESULT_TERMINATE));
+		}
+		if ((flags & PREVENT_CONTINUE) == 0) {
+			// if continuing is allowed, default action is to continue
+			result[0] = RESULT_CONTINUE;
+			defaultbtn = new ResultButton("Ignore & continue", RESULT_CONTINUE);
+			buttonPanel.add(defaultbtn, 0);
+		}
+
+		// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
+		final Icon icon = UIManager.getIcon("OptionPane.errorIcon");
+		if (icon != null) {
+			c.gridheight = 2;
+			d.add(new JLabel(icon), c);
+			c.gridheight = 1;
+			c.insets.left = 5;
+		}
+		c.insets.right = 18;
+		c.gridx = 2;
+		c.weightx = 1d;
+
+		// inner content
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.BOTH;
+		String messageText = PROJECT_NAME + " has encountered an error.";
 		if ((flags & PREVENT_REPORT) == 0) {
 			messageText += " Please report this!";
 		}
-		JLabel message = new JLabel(messageText);
-
-		ActionListener reportAction = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				Window parent = SwingUtilities.getWindowAncestor(message);
-				showCreateIssueDialog(parent, errorDump, customMessage, cause);
-			}
-		};
-
-		Object[] messageComponents = new Object[] { message, readonlyTextarea(messageBody), createViewLogButton(),
-			createReportButton(flags, reportAction) };
-
-		String[] buttons;
-		if ((flags & (ALLOW_TERMINATE | PREVENT_CONTINUE)) == 0) {
-			buttons = new String[] { "Ignore & continue" };
-		} else if ((flags & PREVENT_CONTINUE) == 0) {
-			buttons = new String[] { "Terminate" };
-		} else {
-			buttons = new String[] { "Terminate", "Ignore & continue" };
+		d.add(new JLabel(messageText), c);
+		c.insets.top = 3;
+		c.gridy++;
+		final String txt = "<html>" + customMessage.replaceAll("\n", "<br/>") + "</html>";
+		d.add(new JLabel(txt), c);
+		c.insets.top = 6;
+		c.weighty = 1d;
+		c.gridy++;
+		d.add(readonlyTextarea(messageBody), c);
+		c.weighty = 0d;
+		c.gridy++;
+		d.add(actionButton("View log file", Action.OPEN, ErrorHandler::showLog), c);
+		c.gridy++;
+		if ((flags & PREVENT_REPORT) == 0) {
+			c.insets.top = 2;
+			d.add(defaultbtn = actionButton("Report error", Action.BROWSE, () ->
+				showCreateIssueDialog(d, errorDump, customMessage, cause)
+			), c);
+			c.insets.top = 6;
+			c.gridy++;
 		}
 
-		JFrame frame = new JFrame(title);
-		frame.setUndecorated(true);
-		frame.setVisible(true);
-		frame.setLocationRelativeTo(null);
-		int result = JOptionPane.showOptionDialog(frame, messageComponents, title, JOptionPane.DEFAULT_OPTION,
-			JOptionPane.ERROR_MESSAGE, null, buttons, buttons[buttons.length - 1]);
-		frame.dispose();
+		// buttons
+		c.gridx = 1;
+		c.gridwidth = 2;
+		c.insets.left = 18;
+		c.insets.top = 12;
+		d.add(buttonPanel, c);
+		if (defaultbtn != null) {
+			d.getRootPane().setDefaultButton(defaultbtn);
+		}
 
-		return result;
+		d.pack();
+		d.setMinimumSize(d.getSize());
+		center(d);
+		d.setVisible(true);
+		d.dispose();
+
+		return result[0];
 	}
 
-	private static JComponent createViewLogButton() {
-		return createButton("View log", Desktop.Action.OPEN, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				openLogfile();
-			}
-		});
-	}
-
-	private static void openLogfile() {
+	private static void showLog()
+	{
 		if (config == null) {
-			JOptionPane.showMessageDialog(null,
+			JOptionPane.showMessageDialog(
+				(Component) null,
 				"Cannot open logfile, check your opsu! installation folder for .opsu.cfg",
 				"errorception", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -139,17 +223,11 @@ public class ErrorHandler
 		}
 	}
 
-	private static JComponent createReportButton(int flags, ActionListener reportAction) {
-		if ((flags & PREVENT_REPORT) > 0) {
-			return new JLabel();
-		}
-		return createButton("Report error", Desktop.Action.BROWSE, reportAction);
-	}
-
-	private static JButton createButton(String buttonText, Desktop.Action action, ActionListener listener) {
-		JButton button = new JButton(buttonText);
+	private static JButton actionButton(String text, Desktop.Action action, Runnable listener)
+	{
+		final JButton button = new JButton(text);
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(action)) {
-			button.addActionListener(listener);
+			button.addActionListener(e -> listener.run());
 			return button;
 		}
 		button.setEnabled(false);
@@ -168,28 +246,44 @@ public class ErrorHandler
 		JDialog d = new JDialog(parent, title, ModalityType.APPLICATION_MODAL);
 		d.setLayout(new GridBagLayout());
 		final GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.CENTER;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = new Insets(18, 18, 4, 8);
 		c.gridx = 1;
 		c.gridy = 1;
-		c.weightx = 1d;
+		c.weightx = 0d;
 		c.weighty = 0d;
-		c.fill = GridBagConstraints.BOTH;
-		c.insets = new Insets(4, 8, 4, 8);
 		
+		// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
+		final Icon icon = UIManager.getIcon("OptionPane.informationIcon");
+		if (icon != null) {
+			d.add(new JLabel(icon), c);
+			c.insets.left = 8;
+		}
+		c.insets.right = 18;
+		c.gridx = 2;
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1d;
+
 		d.add(new JLabel(
 			"<html>Copy the text in the box below.<br/>"
 			+ "Then click the button below.<br/>"
-			+ "Your browser should open a page where you can report the issue.<br/>"
-			+ "Please paste the dump below in the issue box."
+			+ "Your browser should open a web page where you can report the issue.<br/>"
+			+ "Please paste the text below in the issue box on the opened web page."
 		), c);
+		c.insets.top = 4;
 
 		c.gridy++;
 		c.weighty = 1d;
 		d.add(readonlyTextarea(dump), c);
 		c.gridy++;
-		c.weighty = c.weightx = 0d;
+		c.weighty = 0d;
 		c.fill = GridBagConstraints.NONE;
-		JButton btn = new JButton("Report");
-		btn.addActionListener(e -> {
+		c.gridx = 1;
+		c.gridwidth = 2;
+		final JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		final JButton report = new JButton("Report");
+		report.addActionListener(e -> {
 			try {
 				URI url = createGithubIssueUrl(customMessage, cause);
 				Desktop.getDesktop().browse(url);
@@ -200,7 +294,13 @@ public class ErrorHandler
 					"errorception", JOptionPane.ERROR_MESSAGE);
 			}
 		});
-		d.add(btn, c);
+		final JButton cancel = new JButton("Cancel");
+		cancel.addActionListener(e -> d.dispose());
+		btnPanel.add(report);
+		btnPanel.add(cancel);
+		c.insets.top = 12;
+		d.add(btnPanel, c);
+		d.getRootPane().setDefaultButton(report);
 		d.pack();
 		d.setLocationRelativeTo(parent);
 		d.setVisible(true);
@@ -219,20 +319,25 @@ public class ErrorHandler
 		return URI.create(String.format(Constants.ISSUES_URL, issueTitle, issueBody));
 	}
 	
-	private static String createIssueDump(String customMessage, Throwable cause, String errorDump) {
+	private static String createIssueDump(
+		String customMessage,
+		Throwable cause,
+		String errorDump)
+	{
 		StringWriter dump = new StringWriter();
 
-		dump.append(customMessage).append("\n");
-
+		dump.append(customMessage).append("\n\n");
 		dump.append("**ver** ").append(MiscUtils.buildProperties.get().getProperty("version")).append('\n');
 		if (env.gitHash != null) {
-			dump.append("**git hash** ")
-				.append(env.gitHash.substring(0, 12)).append('\n');
+			dump.append("**rev** ").append(env.gitHash).append('\n');
 		}
 
 		dump.append("**os** ").append(System.getProperty("os.name"))
 			.append(" (").append(System.getProperty("os.arch")).append(")\n");
-		dump.append("**jre** ").append(System.getProperty("java.version")).append('\n');
+		dump.append("**jre** ");
+		dump.append(System.getProperty("java.version"));
+		dump.append(" (").append(System.getProperty("java.vendor")).append(")");
+		dump.append('\n');
 
 		dump.append("**trace**").append("\n```\n");
 		cause.printStackTrace(new PrintWriter(dump));
@@ -243,8 +348,9 @@ public class ErrorHandler
 		return dump.toString();
 	}
 
-	private static JComponent readonlyTextarea(String contents) {
-		JTextArea textArea = new JTextArea(15, 100);
+	private static JComponent readonlyTextarea(String contents)
+	{
+		JTextArea textArea = new JTextArea(15, 80);
 		textArea.setEditable(false);
 		textArea.setBackground(UIManager.getColor("Panel.background"));
 		textArea.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -253,6 +359,16 @@ public class ErrorHandler
 		textArea.setWrapStyleWord(true);
 		textArea.setFont(new JLabel().getFont());
 		textArea.setText(contents);
+		final EmptyBorder padding = new EmptyBorder(5, 5, 5, 5);
+		textArea.setBorder(new CompoundBorder(textArea.getBorder(), padding));
 		return new JScrollPane(textArea);
+	}
+
+	private static void center(Window w)
+	{
+		final Rectangle r = w.getGraphicsConfiguration().getBounds();
+		final int x = r.x + (r.width - w.getWidth()) / 2;
+		final int y = r.y + (r.height - w.getHeight()) / 2;
+		w.setLocation(x, y);
 	}
 }

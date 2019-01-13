@@ -10,9 +10,9 @@ import javax.swing.*;
 import org.newdawn.slick.util.Log;
 
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-import java.awt.Component;
 import java.io.File;
 import java.nio.file.Paths;
 
@@ -37,11 +37,13 @@ public class Entrypoint
 		try {
 			InstanceContainer.kickstart();
 		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Cannot start " + PROJECT_NAME, JOptionPane.ERROR_MESSAGE);
+			explode(
+				"Failed to kickstart. " + PROJECT_NAME + " will close.",
+				e,
+				FORCE_TERMINATE
+			);
 			logImpl.close();
 			return;
-			// TODO replace with errorhandler (but stuff may not have kickstarted yet?)
 		}
 
 		new OpsuDance().start(args);
@@ -71,13 +73,12 @@ public class Entrypoint
 		final int lastSeparatorIdx = wdir.lastIndexOf(separator);
 		if (separatorIdx != lastSeparatorIdx) {
 			setLAF();
-			JOptionPane.showMessageDialog(
-				(Component) null,
+			explode(
 				"Cannot run from paths containing '!/', please move the jar file."
 				+ "\nCurrent directory: " + wdir.substring(0, lastSeparatorIdx)
 				+ "\n" + PROJECT_NAME + " will exit.",
-				"Cannot start " + PROJECT_NAME,
-				JOptionPane.ERROR_MESSAGE
+				new Exception(),
+				FORCE_TERMINATE | PREVENT_REPORT
 			);
 			System.exit(0x688);
 		}
@@ -93,6 +94,7 @@ public class Entrypoint
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Throwable t) {
+			Log.warn("Unable to set native LAF", t);
 		}
 	}
 
