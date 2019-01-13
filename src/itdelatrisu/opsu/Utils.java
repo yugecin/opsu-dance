@@ -45,7 +45,6 @@ import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.NotNull;
-import yugecin.opsudance.core.Nullable;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -383,34 +382,6 @@ public class Utils {
 	 */
 	public static boolean parseBoolean(String s) {
 		return (Integer.parseInt(s) == 1);
-	}
-
-	/**
-	 * Returns the git hash of the remote-tracking branch 'origin/master' from the
-	 * most recent update to the working directory (e.g. fetch or successful push).
-	 * @return the 40-character SHA-1 hash, or null if it could not be determined
-	 */
-	@Nullable
-	public static String getGitHash() {
-		if (env.isJarRunning)
-			return null;
-		File f = new File(".git/refs/remotes/origin/master");
-		if (!f.isFile())
-			f = new File("../.git/refs/remotes/origin/master");
-		if (!f.isFile())
-			return null;
-		try (BufferedReader in = new BufferedReader(new FileReader(f))) {
-			char[] sha = new char[40];
-			if (in.read(sha, 0, sha.length) < sha.length)
-				return null;
-			for (int i = 0; i < sha.length; i++) {
-				if (Character.digit(sha[i], 16) == -1)
-					return null;
-			}
-			return String.valueOf(sha);
-		} catch (IOException e) {
-			return null;
-		}
 	}
 
 	/**

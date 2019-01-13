@@ -1,23 +1,7 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.core.errorhandling;
 
-import itdelatrisu.opsu.Utils;
 import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.utils.MiscUtils;
@@ -44,8 +28,8 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 /**
  * based on itdelatrisu.opsu.ErrorHandler
  */
-public class ErrorHandler {
-
+public class ErrorHandler
+{
 	public final static int DEFAULT_OPTIONS = 0;
 	public final static int PREVENT_CONTINUE = 1;
 	public final static int PREVENT_REPORT = 2;
@@ -241,9 +225,9 @@ public class ErrorHandler {
 		dump.append(customMessage).append("\n");
 
 		dump.append("**ver** ").append(MiscUtils.buildProperties.get().getProperty("version")).append('\n');
-		String gitHash = Utils.getGitHash();
-		if (gitHash != null) {
-			dump.append("**git hash** ").append(gitHash.substring(0, 12)).append('\n');
+		if (env.gitHash != null) {
+			dump.append("**git hash** ")
+				.append(env.gitHash.substring(0, 12)).append('\n');
 		}
 
 		dump.append("**os** ").append(System.getProperty("os.name"))

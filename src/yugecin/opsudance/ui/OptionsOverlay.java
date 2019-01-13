@@ -669,6 +669,11 @@ public class OptionsOverlay
 		y += Fonts.LARGE.getLineHeight() * 2.5f;
 		txt = Constants.PROJECT_NAME + " " + updater.getCurrentVersion();
 		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
+		if (env.gitHash != null) {
+			y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+			txt = "rev: " + env.gitHash;
+			FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
+		}
 		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
 		txt = Constants.DANCE_REPOSITORY_URI.toString();
 		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
