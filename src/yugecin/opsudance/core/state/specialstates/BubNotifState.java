@@ -1,9 +1,9 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core.state.specialstates;
 
 import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.animations.AnimationEquation;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import static itdelatrisu.opsu.Utils.clamp;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BubNotifState implements ResolutionChangedListener
@@ -47,7 +49,9 @@ public class BubNotifState implements ResolutionChangedListener
 		do {
 			Notification next = iter.next();
 			if (animateUp && addAnimationTime < IN_TIME) {
-				next.y = next.baseY - (int) (addAnimationHeight * AnimationEquation.OUT_QUINT.calc((float) addAnimationTime / IN_TIME));
+				float progress = clamp(addAnimationTime * 2f / IN_TIME, 0f, 1f);
+				progress = OUT_QUAD.calc(progress);
+				next.y = next.baseY - (int) (addAnimationHeight * progress);
 			}
 			if (next.render(g, mouseX, mouseY, renderDelta)) {
 				iter.remove();
@@ -58,7 +62,7 @@ public class BubNotifState implements ResolutionChangedListener
 
 	private void calculatePositions() {
 		// if width is 0, attempting to wrap it will result in infinite loop
-		Notification.width = Math.max(50, (int) (width * 0.1703125f));
+		Notification.width = Math.max(50, (int) (width * 0.25));
 		Notification.baseLine = (int) (height * 0.9645f);
 		Notification.paddingY = (int) (height * 0.0144f);
 		Notification.finalX = width - Notification.width - (int) (width * 0.01);
@@ -206,25 +210,40 @@ public class BubNotifState implements ResolutionChangedListener
 			borderColor.r = targetBorderColor.r + (0.977f - targetBorderColor.r) * hoverProgress;
 			borderColor.g = targetBorderColor.g + (0.977f - targetBorderColor.g) * hoverProgress;
 			borderColor.b = targetBorderColor.b + (0.977f - targetBorderColor.b) * hoverProgress;
-			if (timeShown < BubNotifState.IN_TIME) {
-				float progress = (float) timeShown / BubNotifState.IN_TIME;
-				this.x = finalX + (int) ((1 - AnimationEquation.OUT_BACK.calc(progress)) * width / 2);
-				textColor.a = borderColor.a = bgcol.a = progress;
+			if (timeShown < IN_TIME) {
+				float p = (float) timeShown / IN_TIME;
+				this.x = finalX + (int) ((1 - animateX(p)) * width / 2);
+				final float alpha = clamp(p * 1.8f, 0f, 1f);
+				textColor.a = borderColor.a = bgcol.a = alpha;
 				bgcol.a = borderColor.a * 0.8f;
 				return;
 			}
 			x = Notification.finalX;
-			if (timeShown > BubNotifState.DISPLAY_TIME) {
+			if (timeShown > DISPLAY_TIME) {
 				isFading = true;
-				float progress = (float) (timeShown - BubNotifState.DISPLAY_TIME) / BubNotifState.OUT_TIME;
+				float progress = (float) (timeShown - DISPLAY_TIME) / OUT_TIME;
 				textColor.a = borderColor.a = 1f - progress;
 				bgcol.a = borderColor.a * 0.8f;
 			}
 		}
 
+		/**
+		 * ease X position like OUT_ELASTIC, but less intensive
+		 */
+		public float animateX(float t)
+		{
+			if (t == 0 || t == 1)
+				return t;
+			float period = .5f;
+			return
+				(float) Math.pow(2, -13 * t)
+				* (float) Math.sin((t - period / 4)
+				* (Math.PI * 3) / period) + 1;
+		}
+
 		private boolean mouseReleased(int x, int y) {
 			if (!isFading && isMouseHovered(x, y)) {
-				timeShown = BubNotifState.DISPLAY_TIME;
+				timeShown = DISPLAY_TIME;
 				return true;
 			}
 			return false;

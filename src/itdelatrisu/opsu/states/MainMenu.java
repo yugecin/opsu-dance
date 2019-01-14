@@ -32,7 +32,6 @@ import itdelatrisu.opsu.ui.*;
 import itdelatrisu.opsu.ui.MenuButton.Expand;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
-import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import java.awt.Desktop;
 import java.io.IOException;
