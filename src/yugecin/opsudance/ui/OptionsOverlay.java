@@ -311,10 +311,6 @@ public class OptionsOverlay
 	@Override
 	public void render(Graphics g)
 	{
-		if (!this.active && this.currentWidth == this.navButtonSize) {
-			return;
-		}
-
 		g.setClip(navButtonSize, 0, currentWidth - navButtonSize, height);
 
 		// bg
@@ -776,10 +772,6 @@ public class OptionsOverlay
 	@Override
 	public void preRenderUpdate()
 	{
-		if (!this.active && this.currentWidth == this.navButtonSize) {
-			return;
-		}
-
 		int delta = renderDelta;
 
 		int prevscrollpos = scrollHandler.getIntPosition();
