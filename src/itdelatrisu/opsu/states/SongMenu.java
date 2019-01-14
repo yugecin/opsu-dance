@@ -67,6 +67,7 @@ import org.newdawn.slick.gui.TextField;
 
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
+import yugecin.opsudance.ui.BackButton.Listener;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
@@ -310,7 +311,7 @@ public class SongMenu extends BaseOpsuState
 	/** Sort order dropdown menu. */
 	private DropdownMenu<BeatmapSortOrder> sortMenu;
 
-	private final Runnable backButtonListener = this::exit;
+	private final Listener backButtonListener = Listener.fromState(this::exit);
 
 	@Override
 	public void revalidate()

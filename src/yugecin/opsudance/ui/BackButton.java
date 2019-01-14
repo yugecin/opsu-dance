@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
@@ -13,6 +13,7 @@ import yugecin.opsudance.core.input.MouseEvent;
 
 import org.newdawn.slick.*;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BackButton
@@ -70,27 +71,23 @@ public class BackButton
 	/** The real button with, determined by the size and animations. */
 	private int realButtonWidth;
 
-	public Runnable activeListener;
+	public Listener activeListener;
 
 	public void revalidate()
 	{
-		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
-			backButton = null;
-			textWidth = Fonts.MEDIUM.getWidth("back");
-			paddingY = Fonts.MEDIUM.getHeight("back");
-			// getHeight doesn't seem to be so accurate
-			textOffset = paddingY * 0.264f;
-			paddingY *= 0.736f;
-			paddingX = paddingY / 2f;
-			chevronBaseSize = paddingY * 3f / 2f;
-			buttonYpos = height - (int) (paddingY * 4f);
-			slopeImageSize = (int) (paddingY * 3f);
-			slopeImageSlopeWidth = (int) (slopeImageSize * 0.295f);
-			firstButtonWidth = slopeImageSize;
-			secondButtonSize = (int) (slopeImageSlopeWidth + paddingX * 2 + textWidth);
-			slopeImage = GameImage.MENU_BACK_SLOPE.getImage().getScaledCopy(slopeImageSize, slopeImageSize);
-			return;
-		}
+		textWidth = Fonts.MEDIUM.getWidth("back");
+		paddingY = Fonts.MEDIUM.getHeight("back");
+		// getHeight doesn't seem to be so accurate
+		textOffset = paddingY * 0.264f;
+		paddingY *= 0.736f;
+		paddingX = paddingY / 2f;
+		chevronBaseSize = paddingY * 3f / 2f;
+		buttonYpos = height - (int) (paddingY * 4f);
+		slopeImageSize = (int) (paddingY * 3f);
+		slopeImageSlopeWidth = (int) (slopeImageSize * 0.295f);
+		firstButtonWidth = slopeImageSize;
+		secondButtonSize = (int) (slopeImageSlopeWidth + paddingX * 2 + textWidth);
+		slopeImage = MENU_BACK_SLOPE.getScaledImage(slopeImageSize, slopeImageSize);
 
 		if (GameImage.MENU_BACK.getImages() != null) {
 			Animation back = GameImage.MENU_BACK.getAnimation(120);
@@ -101,9 +98,18 @@ public class BackButton
 		}
 	}
 
-	public void preRenderUpdate()
+	public boolean hasSkinnedVariant()
 	{
-		if (backButton != null) {
+		return this.backButton != null;
+	}
+
+	/**
+	 * @param skinned should be {@code true} if the skinned button should be updated,
+	 *                default button otherwise
+	 */
+	public void preRenderUpdate(boolean skinned)
+	{
+		if (backButton != null && skinned) {
 			final boolean wasHovered = this.backButton.isHovered();
 			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
 			if (!wasHovered && this.backButton.isHovered()) {
@@ -121,16 +127,15 @@ public class BackButton
 	}
 
 	/**
-	 * Draws the backbutton.
+	 * unchecked!
 	 */
-	public void draw(Graphics g)
+	public void drawSkinned()
 	{
-		// draw image if it's skinned
-		if (backButton != null) {
-			backButton.draw();
-			return;
-		}
+		backButton.draw();
+	}
 
+	public void drawDefault(Graphics g)
+	{
 		AnimationEquation anim;
 		if (isHoveredLastFrame) {
 			if (!wasHoveredLastFrame) {
@@ -191,13 +196,9 @@ public class BackButton
 		Fonts.MEDIUM.drawString(textX, textY, "back", Color.white);
 	}
 
-	/**
-	 * Returns true if the coordinates are within the button bounds.
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
-	 */
-	public boolean contains(float cx, float cy) {
-		if (backButton != null) {
+	private boolean contains(float cx, float cy)
+	{
+		if (backButton != null && !displayContainer.hasActiveOverlays()) {
 			return backButton.contains(cx, cy);
 		}
 		return buttonYpos - paddingY < cy && cx < realButtonWidth;
@@ -206,10 +207,10 @@ public class BackButton
 	/**
 	 * Resets the hover fields for the button.
 	 */
-	public void resetHover() {
+	public void resetHover()
+	{
 		if (backButton != null) {
 			backButton.resetHover();
-			return;
 		}
 		isHoveredLastFrame = false;
 		animationTime = 0;
@@ -221,9 +222,31 @@ public class BackButton
 			this.contains(e.x, e.y) &&
 			this.contains(mousePressX, mousePressY))
 		{
-			this.activeListener.run();
+			this.activeListener.callback.run();
 			return true;
 		}
 		return false;
+	}
+
+	public static class Listener
+	{
+		public static Listener fromState(Runnable callback)
+		{
+			return new Listener(callback, false);
+		}
+
+		public static Listener fromOverlay(Runnable callback)
+		{
+			return new Listener(callback, true);
+		}
+
+		public final Runnable callback;
+		public final boolean isFromOverlay;
+
+		private Listener(Runnable callback, boolean isFromOverlay)
+		{
+			this.callback = callback;
+			this.isFromOverlay = isFromOverlay;
+		}
 	}
 }

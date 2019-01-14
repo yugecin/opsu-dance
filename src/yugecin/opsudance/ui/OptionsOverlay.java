@@ -168,10 +168,12 @@ public class OptionsOverlay
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 	
-	private final Runnable backButtonListener = this::exit;
+	private final BackButton.Listener backButtonListener;
 	private final ArrayList<MyOptionListener> installedOptionListeners;
 
-	public OptionsOverlay(OptionTab[] sections) {
+	public OptionsOverlay(OptionTab[] sections)
+	{
+		this.backButtonListener = BackButton.Listener.fromOverlay(this::exit);
 		this.installedOptionListeners = new ArrayList<>();
 		this.sections = sections;
 		this.dirty = true;

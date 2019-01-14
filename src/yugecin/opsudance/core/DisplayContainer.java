@@ -34,6 +34,7 @@ import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
+import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
@@ -85,10 +86,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	private final ArrayList<Renderable> overlays;
 
-	private final LinkedList<Runnable> backButtonListeners;
+	private final LinkedList<BackButton.Listener> backButtonListeners;
 	/**
 	 * set to {@code false} to disable back button next update
 	 * has to be set every rendered frame to be effective
+	 * for states: in either {@link OpsuState#render} or {@link OpsuState#preRenderUpdate}
+	 * for overlays: only effective in {@link Renderable#preRenderUpdate()}
 	 */
 	public boolean disableBackButton;
 
@@ -240,6 +243,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				renderDelta = timeSinceLastRender;
 
 				this.disableBackButton = this.backButtonListeners.isEmpty();
+				boolean overlayNeedsBackButton = false;
+				boolean stateNeedsBackButton = false;
 
 				// clone overlays to have a consistent list in this block
 				Renderable[] overlays = Renderable.EMPTY_ARRAY;
@@ -248,7 +253,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 
 				if (!this.disableBackButton) {
-					backButton.preRenderUpdate();
+					for (BackButton.Listener l : this.backButtonListeners) {
+						overlayNeedsBackButton |= l.isFromOverlay;
+						stateNeedsBackButton |= !l.isFromOverlay;
+					}
+					backButton.preRenderUpdate(!overlayNeedsBackButton);
 				}
 
 				for (Renderable overlay : overlays) {
@@ -258,12 +267,18 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				state.preRenderUpdate();
 				state.render(graphics);
 
+				if (stateNeedsBackButton && backButton.hasSkinnedVariant()) {
+					backButton.drawSkinned();
+				}
+
 				for (Renderable overlay : overlays) {
 					overlay.render(graphics);
 				}
 
-				if (!this.disableBackButton) {
-					backButton.draw(graphics);
+				if (overlayNeedsBackButton ||
+					(stateNeedsBackButton && !backButton.hasSkinnedVariant()))
+				{
+					backButton.drawDefault(graphics);
 				}
 
 				volumeControl.draw();
@@ -555,15 +570,17 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		}
 	}
 
-	public void addBackButtonListener(Runnable listener)
+	public void addBackButtonListener(BackButton.Listener listener)
 	{
 		this.backButtonListeners.add(listener);
 		backButton.activeListener = listener;
 	}
 
-	public void removeBackButtonListener(Runnable listener)
+	public void removeBackButtonListener(BackButton.Listener listener)
 	{
-		this.backButtonListeners.remove(listener);
+		if (!this.backButtonListeners.remove(listener)) {
+			return;
+		}
 		if (this.backButtonListeners.isEmpty()) {
 			backButton.resetHover();
 			this.disableBackButton = true;
@@ -580,5 +597,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	public void removeOverlay(Renderable overlay)
 	{
 		this.overlays.remove(overlay);
+	}
+
+	public boolean hasActiveOverlays()
+	{
+		return !this.overlays.isEmpty();
 	}
 }

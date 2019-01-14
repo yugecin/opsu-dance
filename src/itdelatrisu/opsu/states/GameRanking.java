@@ -40,6 +40,7 @@ import org.newdawn.slick.util.Log;
 
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
+import yugecin.opsudance.ui.BackButton.Listener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -61,7 +62,7 @@ public class GameRanking extends BaseOpsuState {
 	/** Button coordinates. */
 	private float retryY, replayY;
 
-	private final Runnable backButtonListener = this::returnToSongMenu;
+	private final Listener backButtonListener = Listener.fromState(this::returnToSongMenu);
 
 	@Override
 	public void revalidate() {
