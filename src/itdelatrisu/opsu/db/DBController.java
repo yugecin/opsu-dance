@@ -22,8 +22,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
-
 /**
  * Database controller.
  */
@@ -39,7 +37,7 @@ public class DBController {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			explode("Could not load sqlite-JDBC driver.", e, DEFAULT_OPTIONS);
+			throw new RuntimeException("Could not load sqlite driver", e);
 		}
 
 		// initialize the databases
@@ -64,9 +62,9 @@ public class DBController {
 		try {
 			return DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
 		} catch (SQLException e) {
-			// if the error message is "out of memory", it probably means no database file is found
-			explode(String.format("Could not connect to database: '%s'.", path), e, DEFAULT_OPTIONS);
-			return null;
+			// if the error message is "out of memory",
+			// it probably means no database file is found
+			throw new RuntimeException("Could not connect to db " + path, e);
 		}
 	}
 }

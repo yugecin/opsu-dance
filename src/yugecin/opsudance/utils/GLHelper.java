@@ -79,21 +79,23 @@ public class GLHelper {
 		Display.setIcon(bufs);
 	}
 
-	public static void hideNativeCursor() {
+	public static void hideNativeCursor()
+	{
 		try {
 			int min = Cursor.getMinCursorSize();
 			IntBuffer tmp = BufferUtils.createIntBuffer(min * min);
 			Mouse.setNativeCursor(new Cursor(min, min, min / 2, min / 2, 1, tmp, null));
 		} catch (LWJGLException e) {
-			explode("Cannot hide native cursor", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not hide native cursor");
 		}
 	}
 
-	public static void showNativeCursor() {
+	public static void showNativeCursor()
+	{
 		try {
 			Mouse.setNativeCursor(null);
 		} catch (LWJGLException e) {
-			explode("Cannot show native cursor", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not re-show native cursor");
 		}
 	}
 

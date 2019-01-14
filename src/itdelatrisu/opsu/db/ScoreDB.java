@@ -122,7 +122,7 @@ public class ScoreDB {
 				// TODO: extra playerName checks not needed if name is guaranteed not null
 			);
 		} catch (SQLException e) {
-			explode("Failed to prepare score statements.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to prepare score statements");
 		}
 	}
 
@@ -155,7 +155,7 @@ public class ScoreDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', %d)", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			explode("Could not create score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not create score db");
 		}
 	}
 
@@ -207,7 +207,7 @@ public class ScoreDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			explode("Failed to update score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to update score database");
 		}
 	}
 
@@ -225,7 +225,7 @@ public class ScoreDB {
 			insertStmt.setString(19, data.playerName);
 			insertStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to save score to database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to save score to db");
 		}
 	}
 
@@ -245,7 +245,7 @@ public class ScoreDB {
 			deleteScoreStmt.setString(21, data.playerName);
 			deleteScoreStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to delete score from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete score from db");
 		}
 	}
 
@@ -265,7 +265,7 @@ public class ScoreDB {
 			deleteSongStmt.setString(5, beatmap.version);
 			deleteSongStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to delete scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete scores from db");
 		}
 	}
 
@@ -333,7 +333,7 @@ public class ScoreDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to read scores from db");
 			return null;
 		}
 		return getSortedArray(list);
@@ -375,7 +375,7 @@ public class ScoreDB {
 				map.put(version, getSortedArray(list));
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to read scores from db");
 			return null;
 		}
 		return map;
@@ -404,7 +404,7 @@ public class ScoreDB {
 			connection.close();
 			connection = null;
 		} catch (SQLException e) {
-			explode("Failed to close score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to close score db");
 		}
 	}
 }

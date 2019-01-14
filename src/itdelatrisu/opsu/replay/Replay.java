@@ -343,7 +343,11 @@ public class Replay {
 							compressedOut.write(bytes);
 						} catch (IOException e) {
 							// possible OOM: https://github.com/jponge/lzma-java/issues/9
-							explode("LZMA compression failed (possible out-of-memory error).", e, DEFAULT_OPTIONS);
+							softErr(
+								e,
+								"LZMA compression failed "
+								+"(possible out-of-memory error)"
+							);
 						}
 						compressedOut.close();
 						bout.close();

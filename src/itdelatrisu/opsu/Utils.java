@@ -293,7 +293,7 @@ public class Utils {
 			try {
 				json = new JSONObject(s);
 			} catch (JSONException e) {
-				explode("Failed to create JSON object.", e, DEFAULT_OPTIONS);
+				throw new IOException(s);
 			}
 		}
 		return json;
@@ -312,7 +312,7 @@ public class Utils {
 			try {
 				json = new JSONArray(s);
 			} catch (JSONException e) {
-				explode("Failed to create JSON array.", e, DEFAULT_OPTIONS);
+				throw new IOException(s);
 			}
 		}
 		return json;
@@ -331,6 +331,7 @@ public class Utils {
 
 	/**
 	 * Returns the md5 hash of a file in hex form.
+	 * TODO: this is unused?
 	 * @param file the file to hash
 	 * @return the md5 hash
 	 */
@@ -354,7 +355,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			explode("Failed to calculate MD5 hash.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to calculate MD5 hash.");
 		}
 		return null;
 	}

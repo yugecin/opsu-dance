@@ -3,6 +3,8 @@
 package yugecin.opsudance.core.errorhandling;
 
 import org.newdawn.slick.util.Log;
+
+import itdelatrisu.opsu.ui.Colors;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.Environment;
@@ -23,9 +25,11 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Formatter;
 
 // no wildcards here because everything has to be checked before use
 import static yugecin.opsudance.core.Constants.PROJECT_NAME;
+import static yugecin.opsudance.core.InstanceContainer.bubNotifs;
 import static yugecin.opsudance.core.InstanceContainer.displayContainer;
 import static yugecin.opsudance.core.InstanceContainer.env;
 
@@ -58,6 +62,28 @@ public class ErrorHandler
 			+"DBMMJdZb3ELQAAAAASUVORK5CYII=").getBytes(StandardCharsets.US_ASCII);
 
 		dialogIcon = new ImageIcon(Base64.getDecoder().decode(bytes)).getImage();
+	}
+
+	/**
+	 * Shows a warning in the form of a bubble notification. Also sends message to the log.
+	 */
+	@SuppressWarnings("resource")
+	public static void softWarn(String format, Object... args)
+	{
+		format = new Formatter().format(format, args).toString();
+		Log.warn(format);
+		bubNotifs.send(Colors.BUB_ORANGE, format);
+	}
+
+	/**
+	 * Shows an error in the form of a bubble notification. Also sends message to the log.
+	 */
+	@SuppressWarnings("resource")
+	public static void softErr(Throwable e, String format, Object... args)
+	{
+		format = new Formatter().format(format, args).toString();
+		Log.error(format, e);
+		bubNotifs.send(Colors.BUB_RED, format + "\nSee opsu.log for details.");
 	}
 
 	/**
