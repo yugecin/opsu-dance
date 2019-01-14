@@ -4,6 +4,8 @@ package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.audio.SoundController;
+import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
@@ -97,21 +99,25 @@ public class BackButton
 			Image back = GameImage.MENU_BACK.getImage();
 			backButton = new MenuButton(back, back.getWidth() / 2f, height - (back.getHeight() / 2f));
 		}
-		backButton.setHoverAnimationDuration(350);
-		backButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-		backButton.setHoverExpand(MenuButton.Expand.UP_RIGHT);
 	}
 
 	public void preRenderUpdate()
 	{
 		if (backButton != null) {
+			final boolean wasHovered = this.backButton.isHovered();
 			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
+			if (!wasHovered && this.backButton.isHovered()) {
+				SoundController.playSound(SoundEffect.MENUCLICK);
+			}
 			return;
 		}
 
 		wasHoveredLastFrame = isHoveredLastFrame;
 		isHoveredLastFrame = buttonYpos - paddingY < mouseY && mouseX < realButtonWidth;
 		displayContainer.suppressHover |= isHoveredLastFrame;
+		if (!wasHoveredLastFrame && isHoveredLastFrame) {
+			SoundController.playSound(SoundEffect.MENUCLICK);
+		}
 	}
 
 	/**
