@@ -101,7 +101,6 @@ public class Entrypoint
 		final int separatorIdx = wdir.indexOf(separator);
 		final int lastSeparatorIdx = wdir.lastIndexOf(separator);
 		if (separatorIdx != lastSeparatorIdx) {
-			setLAF();
 			explode(
 				"Cannot run from paths containing '!/', please move the jar file."
 				+ "\nCurrent directory: " + wdir.substring(0, lastSeparatorIdx)
