@@ -119,7 +119,7 @@ public class ErrorHandler
 		final GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.NONE;
-		c.insets = new Insets(12, 18, 0, 5);
+		c.insets = new Insets(12, 18, 4, 5);
 		c.weightx = 0d;
 		c.weighty = 0d;
 		c.gridx = 1;
@@ -178,7 +178,15 @@ public class ErrorHandler
 		d.add(readonlyTextarea(messageBody), c);
 		c.weighty = 0d;
 		c.gridy++;
-		d.add(actionButton("View log file", Action.OPEN, ErrorHandler::showLog), c);
+		d.add(actionButton("View log file", Action.OPEN, () ->
+		{
+			try {
+				Desktop.getDesktop().open(Entrypoint.LOGFILE);
+			} catch (IOException e) {
+				Log.warn("Could not open log file", e);
+				simpleError(d, "Failed to open log file: " + e.toString());
+			}
+		}), c);
 		c.gridy++;
 		if ((flags & PREVENT_REPORT) == 0) {
 			c.insets.top = 2;
@@ -206,17 +214,6 @@ public class ErrorHandler
 		d.dispose();
 
 		return result[0];
-	}
-
-	private static void showLog()
-	{
-		try {
-			Desktop.getDesktop().open(Entrypoint.LOGFILE);
-		} catch (IOException e) {
-			Log.warn("Could not open log file", e);
-			JOptionPane.showMessageDialog(null, "whoops could not open log file",
-				"errorception", JOptionPane.ERROR_MESSAGE);
-		}
 	}
 
 	private static JButton actionButton(String text, Desktop.Action action, Runnable listener)
@@ -279,15 +276,15 @@ public class ErrorHandler
 		c.gridwidth = 2;
 		final JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		final JButton report = new JButton("Report");
-		report.addActionListener(e -> {
+		report.addActionListener(e ->
+		{
 			try {
 				URI url = createGithubIssueUrl(customMessage, cause);
 				Desktop.getDesktop().browse(url);
 				d.dispose();
 			} catch (IOException t) {
 				Log.warn("Could not open browser to report issue", t);
-				JOptionPane.showMessageDialog(null, "whoops could not launch a browser",
-					"errorception", JOptionPane.ERROR_MESSAGE);
+				simpleError(d, "Failed to launch a browser: " + t.toString());
 			}
 		});
 		final JButton cancel = new JButton("Cancel");
@@ -375,5 +372,43 @@ public class ErrorHandler
 		final int x = r.x + (r.width - w.getWidth()) / 2;
 		final int y = r.y + (r.height - w.getHeight()) / 2;
 		w.setLocation(x, y);
+	}
+
+	private static void simpleError(Window parent, String message)
+	{
+		final JDialog d = new JDialog(parent, PROJECT_NAME + " error");
+		d.setIconImage(dialogIcon);
+		d.setModal(true);
+		d.setLayout(new GridBagLayout());
+		final GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.CENTER;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = new Insets(12, 18, 4, 5);
+		c.gridx = 1;
+		c.gridy = 1;
+		// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
+		final Icon icon = UIManager.getIcon("OptionPane.errorIcon");
+		if (icon != null) {
+			d.add(new JLabel(icon), c);
+			c.insets.left = 5;
+		}
+		c.insets.right = 18;
+		c.gridx = 2;
+		d.add(new JLabel(message), c);
+		c.insets.top = 3;
+		c.gridx = 1;
+		c.gridy = 2;
+		c.gridwidth = 2;
+		c.insets.top = 12;
+		c.insets.left = 18;
+		JButton btn = new JButton("Close");
+		btn.addActionListener(e -> d.dispose());
+		d.add(btn, c);
+		d.getRootPane().setDefaultButton(btn);
+		d.pack();
+		d.setResizable(false);
+		d.setLocationRelativeTo(parent);
+		d.setVisible(true);
+		d.dispose();
 	}
 }
