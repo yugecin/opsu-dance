@@ -100,6 +100,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	 */
 	public boolean suppressHover;
 
+	/**
+	 * Timestamp when the skin changed, used to prevent a huge update delta after the skin
+	 * just changed. Should be {@code 0} when no skin changed last update.
+	 */
+	public long skinChangeTimestamp;
+
 	public Cursor cursor;
 	public boolean drawCursor;
 	
@@ -133,7 +139,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	}
 
 	@Override
-	public void onSkinChanged(String stringName) {
+	public void onSkinChanged(String stringName)
+	{
+		this.skinChangeTimestamp = System.currentTimeMillis();
 		destroyImages();
 		reinit();
 	}
@@ -201,6 +209,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
+
+			if (this.skinChangeTimestamp != 0) {
+				delta = this.targetUpdateInterval;
+				this.skinChangeTimestamp = 0;
+			}
 
 			timeSinceLastRender += delta;
 
