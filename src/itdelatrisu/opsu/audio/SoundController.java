@@ -103,7 +103,7 @@ public class SoundController {
 			AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
 			return loadClip(ref, audioIn, isMP3);
 		} catch (Exception e) {
-			explode(String.format("Failed to load file '%s'.", ref), e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to load clip %s", ref);
 			return null;
 		}
 	}
@@ -286,7 +286,7 @@ public class SoundController {
 			try {
 				clip.start(volume, listener);
 			} catch (LineUnavailableException e) {
-				explode(String.format("Could not start a clip '%s'.", clip.getName()), e, DEFAULT_OPTIONS);
+				softErr(e, "Could not start clip %s", clip.getName());
 			}
 		}
 	}

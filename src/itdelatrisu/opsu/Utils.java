@@ -28,7 +28,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Scanner;
-import java.util.jar.JarFile;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -45,7 +44,6 @@ import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.NotNull;
-import yugecin.opsudance.core.Nullable;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -295,7 +293,7 @@ public class Utils {
 			try {
 				json = new JSONObject(s);
 			} catch (JSONException e) {
-				explode("Failed to create JSON object.", e, DEFAULT_OPTIONS);
+				throw new IOException(s);
 			}
 		}
 		return json;
@@ -314,7 +312,7 @@ public class Utils {
 			try {
 				json = new JSONArray(s);
 			} catch (JSONException e) {
-				explode("Failed to create JSON array.", e, DEFAULT_OPTIONS);
+				throw new IOException(s);
 			}
 		}
 		return json;
@@ -333,6 +331,7 @@ public class Utils {
 
 	/**
 	 * Returns the md5 hash of a file in hex form.
+	 * TODO: this is unused?
 	 * @param file the file to hash
 	 * @return the md5 hash
 	 */
@@ -356,7 +355,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			explode("Failed to calculate MD5 hash.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to calculate MD5 hash.");
 		}
 		return null;
 	}
@@ -383,34 +382,6 @@ public class Utils {
 	 */
 	public static boolean parseBoolean(String s) {
 		return (Integer.parseInt(s) == 1);
-	}
-
-	/**
-	 * Returns the git hash of the remote-tracking branch 'origin/master' from the
-	 * most recent update to the working directory (e.g. fetch or successful push).
-	 * @return the 40-character SHA-1 hash, or null if it could not be determined
-	 */
-	@Nullable
-	public static String getGitHash() {
-		if (env.isJarRunning)
-			return null;
-		File f = new File(".git/refs/remotes/origin/master");
-		if (!f.isFile())
-			f = new File("../.git/refs/remotes/origin/master");
-		if (!f.isFile())
-			return null;
-		try (BufferedReader in = new BufferedReader(new FileReader(f))) {
-			char[] sha = new char[40];
-			if (in.read(sha, 0, sha.length) < sha.length)
-				return null;
-			for (int i = 0; i < sha.length; i++) {
-				if (Character.digit(sha[i], 16) == -1)
-					return null;
-			}
-			return String.valueOf(sha);
-		} catch (IOException e) {
-			return null;
-		}
 	}
 
 	/**
@@ -502,20 +473,4 @@ public class Utils {
 			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
 			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
 	}
-
-	public static void unpackFromJar(@NotNull JarFile jarfile, @NotNull File unpackedFile,
-			@NotNull String filename) throws IOException {
-		InputStream in = jarfile.getInputStream(jarfile.getEntry(filename));
-		OutputStream out = new FileOutputStream(unpackedFile);
-
-		byte[] buffer = new byte[65536];
-		int bufferSize;
-		while ((bufferSize = in.read(buffer, 0, buffer.length)) != -1) {
-			out.write(buffer, 0, bufferSize);
-		}
-
-		in.close();
-		out.close();
-	}
-
 }

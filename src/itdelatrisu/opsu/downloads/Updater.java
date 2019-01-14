@@ -289,7 +289,7 @@ public class Updater {
 			pb.start();
 		} catch (IOException e) {
 			status = Status.INTERNAL_ERROR;
-			explode("Failed to start new process.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to start new process");
 		}
 	}
 }

@@ -36,7 +36,6 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.skinning.SkinService;
 
-import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -159,8 +158,12 @@ public class BeatmapParser {
 				try {
 					beatmap = parseFile(file, dir, beatmaps, false);
 				} catch(Exception e) {
-					logAndShowErrorNotification(e, "Could not parse beatmap %s: %s",
-						file.getName(), e.getMessage());
+					softErr(
+						e,
+						"Could not parse beatmap %s: %s",
+						file.getName(),
+						e.getMessage()
+					);
 				}
 
 				// add to parsed beatmap list
@@ -247,9 +250,9 @@ public class BeatmapParser {
 			}
 			map.timingPoints.trimToSize();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.", map.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", map.getFile().getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to get MD5 hash stream");
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -319,6 +322,11 @@ public class BeatmapParser {
 										audioFileName = groupAudioFileName;
 								}
 								if (!audioFileName.isFile()) {
+									if ("virtual".equals(audioFileName.getName())) {
+										// beatmap without sound
+										// TODO: these can be legal (circusgallop)
+										return null;
+									}
 									// try to find the file with a case-insensitive match
 									boolean match = false;
 									for (String s : dir.list()) {
@@ -650,9 +658,9 @@ public class BeatmapParser {
 			if (md5stream != null)
 				beatmap.md5Hash = md5stream.getMD5();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.", file.getAbsolutePath());
+			softErr(e, "Failed to read file'%s", file.getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to get MD5 hash stream");
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -731,8 +739,7 @@ public class BeatmapParser {
 			}
 			beatmap.timingPoints.trimToSize();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.",
-				beatmap.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", beatmap.getFile().getAbsolutePath());
 		}
 	}
 
@@ -810,12 +817,14 @@ public class BeatmapParser {
 
 			// check that all objects were parsed
 			if (objectIndex != beatmap.objects.length)
-				explode(String.format("Parsed %d objects for beatmap '%s', %d objects expected.",
-					objectIndex, beatmap.toString(), beatmap.objects.length), new Exception("no"),
-					DEFAULT_OPTIONS);
+				softWarn(
+					"Expected %d objects for beatmap '%s', but parsed %d",
+					beatmap.objects.length,
+					beatmap.toString(),
+					objectIndex
+				);
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.",
-				beatmap.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", beatmap.getFile().getAbsolutePath());
 		}
 	}
 
@@ -885,11 +894,4 @@ public class BeatmapParser {
 		} else
 			return DBString;
 	}
-
-	private static void logAndShowErrorNotification(Exception e, String message, Object... formatArgs) {
-		message = String.format(message, formatArgs);
-		Log.error(message, e);
-		bubNotifs.send(BUB_RED, message);
-	}
-
 }

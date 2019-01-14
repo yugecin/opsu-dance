@@ -1,9 +1,11 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.audio.SoundController;
+import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
@@ -11,6 +13,7 @@ import yugecin.opsudance.core.input.MouseEvent;
 
 import org.newdawn.slick.*;
 
+import static itdelatrisu.opsu.GameImage.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BackButton
@@ -44,6 +47,8 @@ public class BackButton
 	private boolean wasHoveredLastFrame;
 	private boolean isHoveredLastFrame;
 
+	private boolean wasSkinnedLastUpdate;
+
 	/** The width of the "back" text to draw. */
 	private int textWidth;
 
@@ -68,27 +73,23 @@ public class BackButton
 	/** The real button with, determined by the size and animations. */
 	private int realButtonWidth;
 
-	public Runnable activeListener;
+	public Listener activeListener;
 
 	public void revalidate()
 	{
-		if (!GameImage.MENU_BACK.hasGameSkinImage()) {
-			backButton = null;
-			textWidth = Fonts.MEDIUM.getWidth("back");
-			paddingY = Fonts.MEDIUM.getHeight("back");
-			// getHeight doesn't seem to be so accurate
-			textOffset = paddingY * 0.264f;
-			paddingY *= 0.736f;
-			paddingX = paddingY / 2f;
-			chevronBaseSize = paddingY * 3f / 2f;
-			buttonYpos = height - (int) (paddingY * 4f);
-			slopeImageSize = (int) (paddingY * 3f);
-			slopeImageSlopeWidth = (int) (slopeImageSize * 0.295f);
-			firstButtonWidth = slopeImageSize;
-			secondButtonSize = (int) (slopeImageSlopeWidth + paddingX * 2 + textWidth);
-			slopeImage = GameImage.MENU_BACK_SLOPE.getImage().getScaledCopy(slopeImageSize, slopeImageSize);
-			return;
-		}
+		textWidth = Fonts.MEDIUM.getWidth("back");
+		paddingY = Fonts.MEDIUM.getHeight("back");
+		// getHeight doesn't seem to be so accurate
+		textOffset = paddingY * 0.264f;
+		paddingY *= 0.736f;
+		paddingX = paddingY / 2f;
+		chevronBaseSize = paddingY * 3f / 2f;
+		buttonYpos = height - (int) (paddingY * 4f);
+		slopeImageSize = (int) (paddingY * 3f);
+		slopeImageSlopeWidth = (int) (slopeImageSize * 0.295f);
+		firstButtonWidth = slopeImageSize;
+		secondButtonSize = (int) (slopeImageSlopeWidth + paddingX * 2 + textWidth);
+		slopeImage = MENU_BACK_SLOPE.getScaledImage(slopeImageSize, slopeImageSize);
 
 		if (GameImage.MENU_BACK.getImages() != null) {
 			Animation back = GameImage.MENU_BACK.getAnimation(120);
@@ -97,34 +98,46 @@ public class BackButton
 			Image back = GameImage.MENU_BACK.getImage();
 			backButton = new MenuButton(back, back.getWidth() / 2f, height - (back.getHeight() / 2f));
 		}
-		backButton.setHoverAnimationDuration(350);
-		backButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-		backButton.setHoverExpand(MenuButton.Expand.UP_RIGHT);
 	}
 
-	public void preRenderUpdate()
+	public boolean hasSkinnedVariant()
 	{
-		if (backButton != null) {
+		return MENU_BACK.getWidth() > 2;
+	}
+
+	/**
+	 * @param skinned should be {@code true} if the skinned button should be updated,
+	 *                default button otherwise
+	 */
+	public void preRenderUpdate(boolean skinned)
+	{
+		if (this.wasSkinnedLastUpdate = (this.hasSkinnedVariant() && skinned)) {
+			final boolean wasHovered = this.backButton.isHovered();
 			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
+			if (!wasHovered && this.backButton.isHovered()) {
+				SoundController.playSound(SoundEffect.MENUCLICK);
+			}
 			return;
 		}
 
 		wasHoveredLastFrame = isHoveredLastFrame;
 		isHoveredLastFrame = buttonYpos - paddingY < mouseY && mouseX < realButtonWidth;
 		displayContainer.suppressHover |= isHoveredLastFrame;
+		if (!wasHoveredLastFrame && isHoveredLastFrame) {
+			SoundController.playSound(SoundEffect.MENUCLICK);
+		}
 	}
 
 	/**
-	 * Draws the backbutton.
+	 * unchecked!
 	 */
-	public void draw(Graphics g)
+	public void drawSkinned()
 	{
-		// draw image if it's skinned
-		if (backButton != null) {
-			backButton.draw();
-			return;
-		}
+		backButton.draw();
+	}
 
+	public void drawDefault(Graphics g)
+	{
 		AnimationEquation anim;
 		if (isHoveredLastFrame) {
 			if (!wasHoveredLastFrame) {
@@ -185,13 +198,9 @@ public class BackButton
 		Fonts.MEDIUM.drawString(textX, textY, "back", Color.white);
 	}
 
-	/**
-	 * Returns true if the coordinates are within the button bounds.
-	 * @param cx the x coordinate
-	 * @param cy the y coordinate
-	 */
-	public boolean contains(float cx, float cy) {
-		if (backButton != null) {
+	private boolean contains(float cx, float cy)
+	{
+		if (this.wasSkinnedLastUpdate) {
 			return backButton.contains(cx, cy);
 		}
 		return buttonYpos - paddingY < cy && cx < realButtonWidth;
@@ -200,10 +209,10 @@ public class BackButton
 	/**
 	 * Resets the hover fields for the button.
 	 */
-	public void resetHover() {
-		if (backButton != null) {
+	public void resetHover()
+	{
+		if (this.hasSkinnedVariant()) {
 			backButton.resetHover();
-			return;
 		}
 		isHoveredLastFrame = false;
 		animationTime = 0;
@@ -215,9 +224,31 @@ public class BackButton
 			this.contains(e.x, e.y) &&
 			this.contains(e.downX, e.downY))
 		{
-			this.activeListener.run();
+			this.activeListener.callback.run();
 			return true;
 		}
 		return false;
+	}
+
+	public static class Listener
+	{
+		public static Listener fromState(Runnable callback)
+		{
+			return new Listener(callback, false);
+		}
+
+		public static Listener fromOverlay(Runnable callback)
+		{
+			return new Listener(callback, true);
+		}
+
+		public final Runnable callback;
+		public final boolean isFromOverlay;
+
+		private Listener(Runnable callback, boolean isFromOverlay)
+		{
+			this.callback = callback;
+			this.isFromOverlay = isFromOverlay;
+		}
 	}
 }

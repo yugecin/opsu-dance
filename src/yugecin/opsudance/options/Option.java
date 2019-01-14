@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.options;
 
@@ -33,9 +33,17 @@ public abstract class Option
 		this.name = name;
 		this.configurationName = configurationName;
 		this.description = description;
+		this.registerOption();
+	}
+
+	/**
+	 * registers this option in the options service so it will be stored/loaded in the config
+	 */
+	protected void registerOption()
+	{
 		optionservice.registerOption(this);
 	}
-	
+
 	public void addListener(Runnable listener)
 	{
 		if (this.listeners == EMPTY_LISTENER_COLLECTION) {
@@ -88,7 +96,9 @@ public abstract class Option
 			filtered = false;
 			return false;
 		}
-		filtered = !name.toLowerCase().contains(searchString) && !description.toLowerCase().contains(searchString);
+		filtered =
+			!name.toLowerCase().contains(searchString) &&
+			(description == null || !description.toLowerCase().contains(searchString));
 		if (this instanceof ListOption) {
 			for (Object itm : ((ListOption) this).getListItems()) {
 				if (itm != null && itm.toString().toLowerCase().contains(searchString)) {
@@ -111,5 +121,10 @@ public abstract class Option
 	 */
 	public boolean isFiltered() {
 		return filtered;
+	}
+
+	public int getHeight(int baseHeight)
+	{
+		return baseHeight;
 	}
 }

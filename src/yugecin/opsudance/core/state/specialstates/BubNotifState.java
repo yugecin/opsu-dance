@@ -1,9 +1,9 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core.state.specialstates;
 
 import itdelatrisu.opsu.ui.Fonts;
-import itdelatrisu.opsu.ui.animations.AnimationEquation;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import static itdelatrisu.opsu.Utils.clamp;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 public class BubNotifState implements ResolutionChangedListener
@@ -24,6 +26,10 @@ public class BubNotifState implements ResolutionChangedListener
 	public static final int OUT_TIME = 433;
 	public static final int TOTAL_TIME = DISPLAY_TIME + OUT_TIME;
 
+	/**
+	 * access should be synchronized because {@link #send} and {@link #sendf} can be called
+	 * from any thread
+	 */
 	private final LinkedList<Notification> bubbles;
 
 	private int addAnimationTime;
@@ -34,31 +40,38 @@ public class BubNotifState implements ResolutionChangedListener
 		this.addAnimationTime = IN_TIME;
 	}
 
-	public void render(Graphics g) {
-		ListIterator<Notification> iter = bubbles.listIterator();
-		if (!iter.hasNext()) {
+	public void render(Graphics g)
+	{
+		if (bubbles.isEmpty()) {
 			return;
 		}
-		addAnimationTime += renderDelta;
-		if (addAnimationTime > IN_TIME) {
-			finishAddAnimation();
+		synchronized (this.bubbles) {
+			ListIterator<Notification> iter = bubbles.listIterator();
+			addAnimationTime += renderDelta;
+			if (addAnimationTime > IN_TIME) {
+				finishAddAnimation();
+			}
+			boolean animateUp = false;
+			do {
+				Notification next = iter.next();
+				if (animateUp && addAnimationTime < IN_TIME) {
+					float progress = addAnimationTime * 2f / IN_TIME;
+					progress = OUT_QUAD.calc(clamp(progress, 0f, 1f));
+					next.y = next.baseY - (int) (addAnimationHeight * progress);
+				}
+				if (next.render(g, mouseX, mouseY, renderDelta)) {
+					iter.remove();
+				}
+				animateUp = true;
+			} while (iter.hasNext());
 		}
-		boolean animateUp = false;
-		do {
-			Notification next = iter.next();
-			if (animateUp && addAnimationTime < IN_TIME) {
-				next.y = next.baseY - (int) (addAnimationHeight * AnimationEquation.OUT_QUINT.calc((float) addAnimationTime / IN_TIME));
-			}
-			if (next.render(g, mouseX, mouseY, renderDelta)) {
-				iter.remove();
-			}
-			animateUp = true;
-		} while (iter.hasNext());
 	}
 
-	private void calculatePositions() {
+	@Override
+	public void onResolutionChanged(int w, int h)
+	{
 		// if width is 0, attempting to wrap it will result in infinite loop
-		Notification.width = Math.max(50, (int) (width * 0.1703125f));
+		Notification.width = Math.max(50, (int) (width * 0.25));
 		Notification.baseLine = (int) (height * 0.9645f);
 		Notification.paddingY = (int) (height * 0.0144f);
 		Notification.finalX = width - Notification.width - (int) (width * 0.01);
@@ -68,17 +81,23 @@ public class BubNotifState implements ResolutionChangedListener
 		if (bubbles.isEmpty()) {
 			return;
 		}
-		finishAddAnimation();
-		int y = Notification.baseLine;
-		for (Notification bubble : bubbles) {
-			bubble.recalculateDimensions();
-			y -= bubble.height;
-			bubble.baseY = bubble.y = y;
-			y -= Notification.paddingY;
+		synchronized (this.bubbles) { 
+			finishAddAnimation();
+			int y = Notification.baseLine;
+			for (Notification bubble : bubbles) {
+				bubble.recalculateDimensions();
+				y -= bubble.height;
+				bubble.baseY = bubble.y = y;
+				y -= Notification.paddingY;
+			}
 		}
 	}
 
-	private void finishAddAnimation() {
+	/**
+	 * synchronize on {@code this.bubbles} before calling!
+	 */
+	private void finishAddAnimation()
+	{
 		if (bubbles.isEmpty()) {
 			addAnimationHeight = 0;
 			addAnimationTime = IN_TIME;
@@ -96,27 +115,26 @@ public class BubNotifState implements ResolutionChangedListener
 	}
 
 	@SuppressWarnings("resource")
-	public void sendf(Color borderColor, String format, Object... args) {
+	public void sendf(Color borderColor, String format, Object... args)
+	{
 		this.send(borderColor, new Formatter().format(format, args).toString());
 	}
 
-	public void send(Color borderColor, String message) {
+	public void send(Color borderColor, String message)
+	{
 		finishAddAnimation();
 		Notification newBubble = new Notification(message, borderColor);
-		bubbles.add(0, newBubble);
-		addAnimationTime = 0;
-		addAnimationHeight = newBubble.height + Notification.paddingY;
-		ListIterator<Notification> iter = bubbles.listIterator();
-		iter.next();
-		while (iter.hasNext()) {
-			Notification next = iter.next();
-			next.baseY = next.y;
+		synchronized (this.bubbles) { 
+			bubbles.add(0, newBubble);
+			addAnimationTime = 0;
+			addAnimationHeight = newBubble.height + Notification.paddingY;
+			ListIterator<Notification> iter = bubbles.listIterator();
+			iter.next();
+			while (iter.hasNext()) {
+				Notification next = iter.next();
+				next.baseY = next.y;
+			}
 		}
-	}
-
-	@Override
-	public void onResolutionChanged(int w, int h) {
-		calculatePositions();
 	}
 
 	public boolean mouseReleased(MouseEvent e)
@@ -124,9 +142,13 @@ public class BubNotifState implements ResolutionChangedListener
 		if (e.x < Notification.finalX) {
 			return false;
 		}
-		for (Notification bubble : bubbles) {
-			if (bubble.mouseReleased(e.x, e.y)) {
-				return true;
+		if (!this.bubbles.isEmpty()) {
+			synchronized (this.bubbles) { 
+				for (Notification bubble : bubbles) {
+					if (bubble.mouseReleased(e.x, e.y)) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -206,25 +228,40 @@ public class BubNotifState implements ResolutionChangedListener
 			borderColor.r = targetBorderColor.r + (0.977f - targetBorderColor.r) * hoverProgress;
 			borderColor.g = targetBorderColor.g + (0.977f - targetBorderColor.g) * hoverProgress;
 			borderColor.b = targetBorderColor.b + (0.977f - targetBorderColor.b) * hoverProgress;
-			if (timeShown < BubNotifState.IN_TIME) {
-				float progress = (float) timeShown / BubNotifState.IN_TIME;
-				this.x = finalX + (int) ((1 - AnimationEquation.OUT_BACK.calc(progress)) * width / 2);
-				textColor.a = borderColor.a = bgcol.a = progress;
+			if (timeShown < IN_TIME) {
+				float p = (float) timeShown / IN_TIME;
+				this.x = finalX + (int) ((1 - animateX(p)) * width / 2);
+				final float alpha = clamp(p * 1.8f, 0f, 1f);
+				textColor.a = borderColor.a = bgcol.a = alpha;
 				bgcol.a = borderColor.a * 0.8f;
 				return;
 			}
 			x = Notification.finalX;
-			if (timeShown > BubNotifState.DISPLAY_TIME) {
+			if (timeShown > DISPLAY_TIME) {
 				isFading = true;
-				float progress = (float) (timeShown - BubNotifState.DISPLAY_TIME) / BubNotifState.OUT_TIME;
+				float progress = (float) (timeShown - DISPLAY_TIME) / OUT_TIME;
 				textColor.a = borderColor.a = 1f - progress;
 				bgcol.a = borderColor.a * 0.8f;
 			}
 		}
 
+		/**
+		 * ease X position like OUT_ELASTIC, but less intensive
+		 */
+		public float animateX(float t)
+		{
+			if (t == 0 || t == 1)
+				return t;
+			float period = .5f;
+			return
+				(float) Math.pow(2, -13 * t)
+				* (float) Math.sin((t - period / 4)
+				* (Math.PI * 3) / period) + 1;
+		}
+
 		private boolean mouseReleased(int x, int y) {
 			if (!isFading && isMouseHovered(x, y)) {
-				timeShown = BubNotifState.DISPLAY_TIME;
+				timeShown = DISPLAY_TIME;
 				return true;
 			}
 			return false;

@@ -122,7 +122,7 @@ public class OsuMirrorServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
+			softErr(e, "Problem loading result list for query: %s", query);
 		}
 		return nodes;
 	}

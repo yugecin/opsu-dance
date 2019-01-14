@@ -22,7 +22,6 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.ui.UI;
-import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
@@ -103,7 +102,7 @@ public class Splash extends BaseOpsuState {
 		g.setBackground(Color.black);
 		final Color col;
 		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
-			col = CursorImpl.lastCursorColor;
+			col = new Color(0xFF000000 | cursorColor.getCurrentColor());
 		} else {
 			col = Color.white;
 		}

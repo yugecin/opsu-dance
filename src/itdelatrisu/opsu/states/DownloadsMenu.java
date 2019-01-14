@@ -54,6 +54,7 @@ import org.newdawn.slick.util.Log;
 
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.ComplexOpsuState;
+import yugecin.opsudance.ui.BackButton.Listener;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -153,7 +154,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 	/** Search query, executed in {@code queryThread}. */
 	private SearchQuery searchQuery;
 
-	private final Runnable backButtonListener = this::exit;
+	private final Listener backButtonListener = Listener.fromState(this::exit);
 
 	/** Search query helper class. */
 	private class SearchQuery implements Runnable {

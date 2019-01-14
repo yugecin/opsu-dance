@@ -628,7 +628,7 @@ public class MusicController {
 
 			player = null;
 		} catch (Exception e) {
-			explode("Failed to destroy OpenAL.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to destroy OpenAL");
 		}
 	}
 

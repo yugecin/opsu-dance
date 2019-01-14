@@ -1,8 +1,7 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
-import itdelatrisu.opsu.NativeLoader;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapList;
@@ -27,19 +26,14 @@ import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
+import yugecin.opsudance.ui.cursor.colors.CursorColor;
 import yugecin.opsudance.ui.nodelist.NodeList;
 import yugecin.opsudance.utils.Stack;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
-import static yugecin.opsudance.utils.SyntacticSugar.closeAndSwallow;
-
-public class InstanceContainer {
-
+public class InstanceContainer
+{
 	public static Random rand;
 
 	/**
@@ -56,6 +50,7 @@ public class InstanceContainer {
 	public static Environment env;
 	public static Configuration config;
 
+	public static CursorColor cursorColor;
 	public static OptionsService optionservice;
 	public static SkinService skinservice;
 	public static OszUnpacker oszunpacker;
@@ -97,25 +92,15 @@ public class InstanceContainer {
 		rand = new Random();
 		updater = new Updater();
 		env = new Environment();
+		config = new Configuration();
 
 		songHistory = new Stack<>();
 		nextSongs = new Stack<>();
 
-		JarFile jarfile = getJarfile();
-		config = new Configuration();
-		if (jarfile != null) {
-			try {
-				NativeLoader.loadNatives(jarfile);
-			} catch (IOException e) {
-				String msg = String.format("Could not unpack native(s): %s", e.getMessage());
-				throw new RuntimeException(msg, e);
-			} finally {
-				closeAndSwallow(jarfile);
-			}
+		if (Entrypoint.RESOURCES != null) {
+			final FileSystemLocation loc = new FileSystemLocation(Entrypoint.RESOURCES);
+			ResourceLoader.addResourceLocation(loc);
 		}
-		NativeLoader.setNativePath();
-
-		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
 
 		input = new Input();
 
@@ -147,32 +132,4 @@ public class InstanceContainer {
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 	}
-
-	@Nullable
-	private static JarFile getJarfile() {
-		if (env.jarfile == null) {
-			return null;
-		}
-		try {
-			return new JarFile(env.jarfile);
-		} catch (IOException e) {
-			String msg = String.format("Cannot read from jarfile (%s): %s", env.jarfile.getAbsolutePath(),
-				e.getMessage());
-			throw new RuntimeException(msg, e);
-		}
-	}
-
-	@Nullable
-	private static Manifest getJarManifest(@Nullable JarFile jarfile) {
-		if (jarfile == null) {
-			return null;
-		}
-		try {
-			return jarfile.getManifest();
-		} catch (IOException e) {
-			String msg = String.format("Cannot read manifest from jarfile: %s", e.getMessage());
-			throw new RuntimeException(msg, e);
-		}
-	}
-
 }

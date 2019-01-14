@@ -1,4 +1,4 @@
-// Copyright 2016-2018 yugecin - this source is licensed under GPL
+// Copyright 2016-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -37,7 +38,7 @@ public class OptionsOverlay
 	private static final float LINEALPHA = 0.8f;
 	private static final Color COL_BG = new Color(Color.black);
 	private static final Color COL_WHITE = new Color(1f, 1f, 1f);
-	private static final Color COL_PINK = new Color(235, 117, 139);
+	public static final Color COL_PINK = new Color(235, 117, 139);
 	private static final Color COL_CYAN = new Color(88, 218, 254);
 	private static final Color COL_GREY = new Color(55, 55, 57);
 	private static final Color COL_BLUE = new Color(Colors.BLUE_BACKGROUND);
@@ -68,6 +69,7 @@ public class OptionsOverlay
 	private static final int INDICATORMOVEANIMATIONTIME = 166;
 	/**  Selected option indicator virtual position. */
 	private int indicatorPos;
+	private float indicatorHeight, indicatorHeightFrom, indicatorHeightTo;
 	/** Selected option indicator offset to next position. */
 	private int indicatorOffsetToNextPos;
 	/** Selected option indicator move to next position animation time past. */
@@ -94,15 +96,17 @@ public class OptionsOverlay
 	private Option selectedOption;
 
 	private int sliderOptionStartX;
+	private int sliderOptionPrecisionStartX;
 	private int sliderOptionLength;
 	private boolean isAdjustingSlider;
 	private int unchangedSliderValue;
 
-	private final HashMap<ListOption, DropdownMenu<Object>> dropdownMenus;
-	private final LinkedList<DropdownMenu<Object>> visibleDropdownMenus;
+	private final HashMap<ListOption, MyDropdownMenu> dropdownMenus;
+	private final LinkedList<MyDropdownMenu> visibleDropdownMenus;
 	private int dropdownMenuPaddingY;
-	private DropdownMenu<Object> openDropdownMenu;
-	private DropdownMenu<Object> closingDropdownMenu;
+	private MyDropdownMenu hoveredDropdownMenu;
+	private MyDropdownMenu openDropdownMenu;
+	private MyDropdownMenu closingDropdownMenu;
 	private int openDropdownVirtualY;
 
 	private int targetWidth;
@@ -151,8 +155,11 @@ public class OptionsOverlay
 	private int prevMouseY;
 
 	private int sliderSoundDelay;
+	private static final int SLIDER_SOUND_DELAY = 90;
 
 	private int sectionLineHeight;
+
+	private boolean externalSuppressHover;
 
 	private final TextField searchField;
 	private String lastSearchText;
@@ -161,10 +168,12 @@ public class OptionsOverlay
 	private int invalidSearchAnimationProgress;
 	private final int INVALID_SEARCH_ANIMATION_TIME = 500;
 	
-	private final Runnable backButtonListener = this::exit;
+	private final BackButton.Listener backButtonListener;
 	private final ArrayList<MyOptionListener> installedOptionListeners;
 
-	public OptionsOverlay(OptionTab[] sections) {
+	public OptionsOverlay(OptionTab[] sections)
+	{
+		this.backButtonListener = BackButton.Listener.fromOverlay(this::exit);
 		this.installedOptionListeners = new ArrayList<>();
 		this.sections = sections;
 		this.dirty = true;
@@ -264,20 +273,12 @@ public class OptionsOverlay
 					continue;
 				}
 				final ListOption listOption = (ListOption) option;
-				Object[] items = listOption.getListItems();
-				DropdownMenu<Object> menu = new DropdownMenu<Object>(items, 0, 0, 0) {
-					@Override
-					public void itemSelected(int index, Object item) {
-						listOption.clickListItem(index);
-						openDropdownMenu = null;
-						closingDropdownMenu = this;
-					}
-				};
+				final MyDropdownMenu menu = new MyDropdownMenu(listOption);
 				final Runnable observer = () -> {
 					// not the best way to determine the selected option AT ALL, but seems like it's the only one right now...
 					String selectedValue = option.getValueString();
 					int idx = 0;
-					for (Object item : items) {
+					for (Object item : menu.items) {
 						if (item.toString().equals(selectedValue)) {
 							break;
 						}
@@ -310,10 +311,6 @@ public class OptionsOverlay
 	@Override
 	public void render(Graphics g)
 	{
-		if (!this.active && this.currentWidth == this.navButtonSize) {
-			return;
-		}
-
 		g.setClip(navButtonSize, 0, currentWidth - navButtonSize, height);
 
 		// bg
@@ -407,7 +404,8 @@ public class OptionsOverlay
 		g.clearClip();
 	}
 
-	private void renderIndicator(Graphics g) {
+	private void renderIndicator(Graphics g)
+	{
 		g.setColor(COL_INDICATOR);
 		int indicatorPos = this.indicatorPos;
 		if (indicatorMoveAnimationTime > 0) {
@@ -417,11 +415,19 @@ public class OptionsOverlay
 				indicatorPos += indicatorOffsetToNextPos;
 				indicatorOffsetToNextPos = 0;
 				this.indicatorPos = indicatorPos;
+				this.indicatorHeight = this.indicatorHeightTo;
 			} else {
-				indicatorPos += AnimationEquation.OUT_BACK.calc((float) indicatorMoveAnimationTime / INDICATORMOVEANIMATIONTIME) * indicatorOffsetToNextPos;
+				float progress = (float) indicatorMoveAnimationTime;
+				progress /= INDICATORMOVEANIMATIONTIME;
+				indicatorPos += OUT_BACK.calc(progress) * indicatorOffsetToNextPos;
+				this.indicatorHeight = this.indicatorHeightFrom;
+				final float heightdiff;
+				heightdiff = (this.indicatorHeightTo - this.indicatorHeightFrom);
+				this.indicatorHeight += LINEAR.calc(progress) * heightdiff;
 			}
 		}
-		g.fillRect(navButtonSize, indicatorPos - scrollHandler.getPosition(), currentWidth, optionHeight);
+		final float y = indicatorPos - scrollHandler.getPosition();
+		g.fillRect(navButtonSize, y, currentWidth, this.indicatorHeight);
 	}
 
 	private void renderKeyEntry(Graphics g) {
@@ -479,20 +485,21 @@ public class OptionsOverlay
 				if (!option.showCondition() || option.isFiltered()) {
 					continue;
 				}
-				if (y > -optionHeight ||
+				final int actualHeight = option.getHeight(optionHeight);
+				if (y > -actualHeight ||
 					this.shouldOutOfBoundsOptionBeRendered(option))
 				{
 					renderOption(g, option, y);
 				}
-				y += optionHeight;
-				maxScrollOffset += optionHeight;
-				lineHeight += optionHeight;
+				y += actualHeight;
+				maxScrollOffset += actualHeight;
+				lineHeight += actualHeight;
 				if (y > height) {
 					render = false;
 					while (++optionIndex < section.options.length) {
 						option = section.options[optionIndex];
 						if (option.showCondition() && !option.isFiltered()) {
-							maxScrollOffset += optionHeight;
+							maxScrollOffset += actualHeight;
 						}
 					}
 				}
@@ -535,10 +542,6 @@ public class OptionsOverlay
 		if (closingDropdownMenu != null &&
 			closingDropdownMenu.equals(dropdownMenus.get(option)))
 		{
-			if (!closingDropdownMenu.isClosing()) {
-				closingDropdownMenu = null;
-				return false;
-			}
 			return true;
 		}
 
@@ -555,6 +558,8 @@ public class OptionsOverlay
 			renderSliderOption(g, (NumericOption) option, y);
 		} else if (option instanceof KeyOption) {
 			renderKeyOption((KeyOption) option, y);
+		} else if (option instanceof CustomRenderedOption) {
+			renderCustomOption((CustomRenderedOption) option, y);
 		}
 	}
 
@@ -568,7 +573,7 @@ public class OptionsOverlay
 		if (comboboxWidth < controlImageSize) {
 			return;
 		}
-		DropdownMenu<Object> dropdown = dropdownMenus.get(option);
+		MyDropdownMenu dropdown = dropdownMenus.get(option);
 		if (dropdown == null) {
 			return;
 		}
@@ -639,27 +644,46 @@ public class OptionsOverlay
 		Fonts.MEDIUM.drawString(optionStartX + optionWidth - valueLen, y + optionTextOffsetY, value, COL_BLUE);
 	}
 
-	private void renderTitle() {
-		int textWidth = currentWidth - navButtonSize;
-		FontUtil.drawCentered(Fonts.LARGE, textWidth, navButtonSize,
-			textOptionsY - scrollHandler.getIntPosition(), "Options", COL_WHITE);
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			textChangeY - scrollHandler.getIntPosition(), "Change the way opsu! behaves", COL_PINK);
+	private void renderCustomOption(CustomRenderedOption option, int y)
+	{
+		option.render(optionHeight, optionStartX, y, optionTextOffsetY, optionWidth);
+	}
 
-		int y = lastOptionHeight - scrollHandler.getIntPosition();
+	private void renderTitle()
+	{
+		int x = this.navButtonSize;
+		int y;
+		int w = this.currentWidth - x;
+		String txt;
+
+		y = textOptionsY - Math.max(0, this.scrollHandler.getIntPosition());
+		txt = "Options";
+		FontUtil.drawCentered(Fonts.LARGE, w, x, y, txt, COL_WHITE);
+		y = textChangeY - Math.max(0, this.scrollHandler.getIntPosition());
+		txt = "Change the way " + Constants.PROJECT_NAME + " behaves";
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_PINK);
+
+		y = lastOptionHeight;
+		y -= Math.min(this.scrollHandler.max, this.scrollHandler.getIntPosition());
 		y += Fonts.LARGE.getLineHeight() * 2.5f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.PROJECT_NAME + " " + updater.getCurrentVersion(), COL_WHITE);
+		txt = Constants.PROJECT_NAME + " " + updater.getCurrentVersion();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
+		if (env.gitHash != null) {
+			y += Fonts.MEDIUM.getLineHeight() * 1.2f;
+			txt = "rev: " + env.gitHash;
+			FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
+		}
 		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.DANCE_REPOSITORY_URI.toString(), COL_WHITE);
+		txt = Constants.DANCE_REPOSITORY_URI.toString();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
 		y += Fonts.MEDIUM.getLineHeight() * 1.2f;
-		FontUtil.drawCentered(Fonts.MEDIUM, textWidth, navButtonSize,
-			y, Constants.REPOSITORY_URI.toString(), COL_WHITE);
+		txt = Constants.REPOSITORY_URI.toString();
+		FontUtil.drawCentered(Fonts.MEDIUM, w, x, y, txt, COL_WHITE);
 	}
 
 	private void renderSearch(Graphics g) {
-		int ypos = posSearchY + textSearchYOffset - scrollHandler.getIntPosition();
+		int ypos = posSearchY + textSearchYOffset;
+		ypos -= Math.max(0, scrollHandler.getIntPosition());
 		if (scrollHandler.getIntPosition() > posSearchY) {
 			ypos = textSearchYOffset;
 			g.setColor(COL_BG);
@@ -749,22 +773,25 @@ public class OptionsOverlay
 	@Override
 	public void preRenderUpdate()
 	{
-		if (!this.active && this.currentWidth == this.navButtonSize) {
-			return;
-		}
-
 		int delta = renderDelta;
 
 		int prevscrollpos = scrollHandler.getIntPosition();
 		scrollHandler.update(delta);
-		boolean scrollPositionChanged = prevscrollpos != scrollHandler.getIntPosition();
+		boolean updateHover = prevscrollpos != scrollHandler.getIntPosition();
 
+		this.hoveredDropdownMenu = null;
 		if (openDropdownMenu == null) {
 			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
 				menu.updateHover(mouseX, mouseY);
 			}
 		} else {
 			openDropdownMenu.updateHover(mouseX, mouseY);
+		}
+
+		if (this.closingDropdownMenu != null && !this.closingDropdownMenu.isClosing()) {
+			this.closingDropdownMenu = null;
+			this.selectedOption = null;
+			updateHover = true;
 		}
 
 		if (invalidSearchAnimationProgress > 0) {
@@ -786,36 +813,29 @@ public class OptionsOverlay
 		}
 		navHoverTime = Utils.clamp(navHoverTime, 0, 600);
 
-		final boolean externalSuppressHover = displayContainer.suppressHover;
+		externalSuppressHover = displayContainer.suppressHover;
 		if (this.active && mouseX <= this.currentWidth) {
 			displayContainer.suppressHover = true;
 		}
 
-		if (!scrollPositionChanged && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
+		if (!updateHover && (mouseX - prevMouseX == 0 && mouseY - prevMouseY == 0)) {
 			updateIndicatorAlpha();
 			return;
 		}
 
 		if (externalSuppressHover) {
 			cancelAdjustingSlider();
-			hoverOption = null;
-			indicatorHideAnimationTime = INDICATORHIDEANIMATIONTIME - 1;
 		} else {
 			updateActiveSection();
 			updateHoverNavigation(mouseX, mouseY);
 			prevMouseX = mouseX;
 			prevMouseY = mouseY;
-			updateHoverOption(mouseX, mouseY);
 		}
+		updateHoverOption(mouseX, mouseY, externalSuppressHover);
 
 		updateIndicatorAlpha();
 		if (isAdjustingSlider) {
-			int sliderValue = ((NumericOption) hoverOption).val;
-			updateSliderOption();
-			if (((NumericOption) hoverOption).val - sliderValue != 0 && sliderSoundDelay <= 0) {
-				sliderSoundDelay = 90;
-				SoundController.playSound(SoundEffect.MENUHIT);
-			}
+			this.updateSliderOptionPlaySound();
 		}
 	}
 
@@ -928,10 +948,21 @@ public class OptionsOverlay
 		selectedOption = hoverOption;
 
 		if (hoverOption != null && hoverOption instanceof NumericOption) {
-			isAdjustingSlider = sliderOptionStartX <= e.x && e.x < sliderOptionStartX + sliderOptionLength;
+			isAdjustingSlider =
+				sliderOptionStartX <= e.x &&
+				e.x < sliderOptionStartX + sliderOptionLength;
 			if (isAdjustingSlider) {
-				unchangedSliderValue = ((NumericOption) hoverOption).val;
-				updateSliderOption();
+				NumericOption s = (NumericOption) hoverOption;
+				if (input.isShiftDown()) {
+					this.sliderOptionPrecisionStartX =
+						this.sliderOptionStartX +
+						(int) ((float) (s.val - s.min) / (s.max - s.min)
+							* this.sliderOptionLength);
+				} else {
+					this.sliderOptionPrecisionStartX = -1;
+				}
+				this.unchangedSliderValue = s.val;
+				this.updateSliderOptionPlaySound();
 			}
 		}
 	}
@@ -953,13 +984,13 @@ public class OptionsOverlay
 			if (listener != null) {
 				listener.onSaveOption(hoverOption);
 			}
-			updateHoverOption(e.x, e.y);
+			updateHoverOption(e.x, e.y, externalSuppressHover);
 			isAdjustingSlider = false;
 		}
 		sliderOptionLength = 0;
 
 		if (e.x > navWidth) {
-			for (DropdownMenu<Object> menu : visibleDropdownMenus) {
+			for (MyDropdownMenu menu : visibleDropdownMenus) {
 				if (menu.baseContains(mouseX, mouseY)) {
 					openDropdownMenu = menu;
 					menu.openGrabFocus();
@@ -1076,11 +1107,22 @@ public class OptionsOverlay
 			}
 			if (lastSearchText.length() != 0) {
 				resetSearch();
-				updateHoverOption(prevMouseX, prevMouseY);
+				updateHoverOption(
+					prevMouseX,
+					prevMouseY,
+					displayContainer.suppressHover
+				);
 				return;
 			}
 			this.exit();
 			return;
+		}
+
+		if ((e.keyCode == Keyboard.KEY_RSHIFT || e.keyCode == Keyboard.KEY_LSHIFT) &&
+			!Keyboard.isRepeatEvent() &&
+			this.isAdjustingSlider)
+		{
+			this.sliderOptionPrecisionStartX = mouseX;
 		}
 
 		searchField.keyPressed(e);
@@ -1107,6 +1149,10 @@ public class OptionsOverlay
 
 	public void keyReleased(KeyEvent e)
 	{
+		if (!input.isShiftDown() && this.isAdjustingSlider) {
+			this.sliderOptionPrecisionStartX = -1;
+			this.updateSliderOptionPlaySound();
+		}
 		e.consume();
 	}
 
@@ -1117,10 +1163,25 @@ public class OptionsOverlay
 		}
 	}
 
-	private void updateSliderOption() {
+	private void updateSliderOptionPlaySound()
+	{
+		final int prevVal = ((NumericOption) hoverOption).val;
 		NumericOption o = (NumericOption) hoverOption;
-		int value = o.min + Math.round((float) (o.max - o.min) * (mouseX - sliderOptionStartX) / (sliderOptionLength));
-		o.setValue(Utils.clamp(value, o.min, o.max));
+
+		final float p;
+		if (this.sliderOptionPrecisionStartX == -1) {
+			p = (mouseX - this.sliderOptionStartX) / (float) this.sliderOptionLength;
+		} else {
+			p =
+				((this.sliderOptionPrecisionStartX - this.sliderOptionStartX)
+				+ (mouseX - this.sliderOptionPrecisionStartX) / 12f)
+				/ (float) this.sliderOptionLength;
+		}
+		o.setValue(Utils.clamp(o.min + Math.round((o.max - o.min) * p), o.min, o.max));
+		if (this.sliderSoundDelay <= 0 && prevVal != ((NumericOption) hoverOption).val) {
+			SoundController.playSound(SoundEffect.MENUHIT);
+			this.sliderSoundDelay = SLIDER_SOUND_DELAY;
+		}
 	}
 
 	private void updateActiveSection() {
@@ -1149,7 +1210,7 @@ public class OptionsOverlay
 		}
 	}
 
-	private void updateHoverOption(int mouseX, int mouseY)
+	private void updateHoverOption(int mouseX, int mouseY, boolean suppressHover)
 	{
 		if (mouseX < navWidth) {
 			cancelAdjustingSlider();
@@ -1187,21 +1248,40 @@ public class OptionsOverlay
 				if (option.isFiltered() || !option.showCondition()) {
 					continue;
 				}
-				if (mouseVirtualY <= optionHeight) {
-					if (mouseVirtualY >= 0) {
-						int indicatorPos = scrollHandler.getIntPosition() + mouseY - mouseVirtualY;
-						if (indicatorPos != this.indicatorPos + indicatorOffsetToNextPos) {
-							this.indicatorPos += indicatorOffsetToNextPos; // finish the current moving animation
-							indicatorOffsetToNextPos = indicatorPos - this.indicatorPos;
-							indicatorMoveAnimationTime = 1; // starts animation
-						}
-						hoverOption = option;
+				final int actualHeight = option.getHeight(optionHeight);
+				if (this.hoveredDropdownMenu != null &&
+					this.hoveredDropdownMenu.option == option)
+				{
+					this.changeHoverOption(option, mouseVirtualY);
+					return;
+				}
+				if (mouseVirtualY <= actualHeight) {
+					if (mouseVirtualY >= 0 && !suppressHover) {
+						this.changeHoverOption(option, mouseVirtualY);
 					}
 					return;
 				}
-				mouseVirtualY -= optionHeight;
+				mouseVirtualY -= actualHeight;
 			}
 		}
+	}
+
+	/**
+	 * Don't call this
+	 */
+	private void changeHoverOption(Option option, int mouseVirtualY)
+	{
+		int indicatorPos = scrollHandler.getIntPosition() + mouseY - mouseVirtualY;
+		if (indicatorPos != this.indicatorPos + indicatorOffsetToNextPos) {
+			this.indicatorPos += indicatorOffsetToNextPos; // finish the current moving animation
+			indicatorOffsetToNextPos = indicatorPos - this.indicatorPos;
+			indicatorMoveAnimationTime = 1; // starts animation
+		}
+		if (hoverOption != option) {
+			indicatorHeightFrom = indicatorHeight;
+			indicatorHeightTo = option.getHeight(this.optionHeight);
+		}
+		hoverOption = option;
 	}
 
 	private void resetSearch() {
@@ -1238,12 +1318,14 @@ public class OptionsOverlay
 				}
 				if (!option.filter(lastSearchText)) {
 					section.filtered = false;
-					//noinspection ConstantConditions
-					lastBigSection.filtered = false;
+					// unnecessary if to stop IDEs from complaining...
+					if (lastBigSection != null) {
+						lastBigSection.filtered = false;
+					}
 				}
 			}
 		}
-		updateHoverOption(prevMouseX, prevMouseY);
+		updateHoverOption(prevMouseX, prevMouseY, displayContainer.suppressHover);
 		updateActiveSection();
 		if (openDropdownMenu != null) {
 			openDropdownMenu.reset();
@@ -1290,6 +1372,34 @@ public class OptionsOverlay
 		public void uninstall()
 		{
 			this.option.removeListener(this.listener);
+		}
+	}
+
+	private class MyDropdownMenu extends DropdownMenu<Object>
+	{
+		private final ListOption option;
+
+		public MyDropdownMenu(ListOption option)
+		{
+			super(option.getListItems(), 0, 0, 0);
+			this.option = option;
+		}
+
+		@Override
+		public void itemSelected(int index, Object item)
+		{
+			this.option.clickListItem(index);
+			openDropdownMenu = null;
+			closingDropdownMenu = this;
+		}
+
+		@Override
+		public void updateHover(int x, int y)
+		{
+			super.updateHover(x, y);
+			if (this.isHovered()) {
+				hoveredDropdownMenu = this;
+			}
 		}
 	}
 }

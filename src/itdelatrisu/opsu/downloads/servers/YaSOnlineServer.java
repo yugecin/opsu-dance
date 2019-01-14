@@ -113,8 +113,11 @@ public class YaSOnlineServer extends DownloadServer {
 			String downloadLink = item.getString("downloadLink");
 			return String.format(DOWNLOAD_FETCH_URL, downloadLink);
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			explode(String.format("Problem retrieving download URL for beatmap '%d'.", beatmapSetID), e,
-				DEFAULT_OPTIONS);
+			softErr(
+				e,
+				"Problem retrieving download URL for beatmapset %d",
+				beatmapSetID
+			);
 			return null;
 		} finally {
 			Utils.setSSLCertValidation(true);
@@ -186,7 +189,7 @@ public class YaSOnlineServer extends DownloadServer {
 			else
 				this.totalResults = maxServerID;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
+			softErr(e, "Problem loading result list for query: %s", query);
 		} finally {
 			Utils.setSSLCertValidation(true);
 		}

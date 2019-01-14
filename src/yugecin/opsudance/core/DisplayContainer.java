@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
@@ -27,12 +27,14 @@ import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.opengl.renderer.SGL;
 import org.newdawn.slick.util.Log;
+
 import yugecin.opsudance.core.errorhandling.ErrorDumpable;
 import yugecin.opsudance.core.input.Input;
 import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.core.state.Renderable;
 import yugecin.opsudance.events.ResolutionChangedListener;
 import yugecin.opsudance.events.SkinChangedListener;
+import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
@@ -44,7 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static itdelatrisu.opsu.ui.Colors.*;
-import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -86,10 +87,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	private final ArrayList<Renderable> overlays;
 
-	private final LinkedList<Runnable> backButtonListeners;
+	private final LinkedList<BackButton.Listener> backButtonListeners;
 	/**
 	 * set to {@code false} to disable back button next update
 	 * has to be set every rendered frame to be effective
+	 * for states: in either {@link OpsuState#render} or {@link OpsuState#preRenderUpdate}
+	 * for overlays: only effective in {@link Renderable#preRenderUpdate()}
 	 */
 	public boolean disableBackButton;
 
@@ -97,6 +100,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	 * set to {@code true} if something is hovered and none other thing should be marked as such
 	 */
 	public boolean suppressHover;
+
+	/**
+	 * Timestamp when the skin changed, used to prevent a huge update delta after the skin
+	 * just changed. Should be {@code 0} when no skin changed last update.
+	 */
+	public long skinChangeTimestamp;
 
 	public Cursor cursor;
 	public boolean drawCursor;
@@ -131,7 +140,9 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	}
 
 	@Override
-	public void onSkinChanged(String stringName) {
+	public void onSkinChanged(String stringName)
+	{
+		this.skinChangeTimestamp = System.currentTimeMillis();
 		destroyImages();
 		reinit();
 	}
@@ -200,6 +211,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
 
+			if (this.skinChangeTimestamp != 0) {
+				delta = this.targetUpdateInterval;
+				this.skinChangeTimestamp = 0;
+			}
+
 			timeSinceLastRender += delta;
 
 			input.poll();
@@ -217,6 +233,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 			}
 			fpsDisplay.update();
+			cursorColor.update();
 
 			this.suppressHover = false; // put here for volume control
 
@@ -240,6 +257,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				renderDelta = timeSinceLastRender;
 
 				this.disableBackButton = this.backButtonListeners.isEmpty();
+				boolean overlayNeedsBackButton = false;
+				boolean stateNeedsBackButton = false;
 
 				// clone overlays to have a consistent list in this block
 				Renderable[] overlays = Renderable.EMPTY_ARRAY;
@@ -248,7 +267,11 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 
 				if (!this.disableBackButton) {
-					backButton.preRenderUpdate();
+					for (BackButton.Listener l : this.backButtonListeners) {
+						overlayNeedsBackButton |= l.isFromOverlay;
+						stateNeedsBackButton |= !l.isFromOverlay;
+					}
+					backButton.preRenderUpdate(!overlayNeedsBackButton);
 				}
 
 				for (Renderable overlay : overlays) {
@@ -258,12 +281,18 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				state.preRenderUpdate();
 				state.render(graphics);
 
+				if (stateNeedsBackButton && backButton.hasSkinnedVariant()) {
+					backButton.drawSkinned();
+				}
+
 				for (Renderable overlay : overlays) {
 					overlay.render(graphics);
 				}
 
-				if (!this.disableBackButton) {
-					backButton.draw(graphics);
+				if (overlayNeedsBackButton ||
+					(stateNeedsBackButton && !backButton.hasSkinnedVariant()))
+				{
+					backButton.drawDefault(graphics);
 				}
 
 				volumeControl.draw();
@@ -467,7 +496,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		Keyboard.enableRepeatEvents(true);
 
-		sout("GL ready");
+		Log.info("GL ready");
 
 		GameImage.onResolutionChanged();
 		Fonts.init();
@@ -558,15 +587,17 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		}
 	}
 
-	public void addBackButtonListener(Runnable listener)
+	public void addBackButtonListener(BackButton.Listener listener)
 	{
 		this.backButtonListeners.add(listener);
 		backButton.activeListener = listener;
 	}
 
-	public void removeBackButtonListener(Runnable listener)
+	public void removeBackButtonListener(BackButton.Listener listener)
 	{
-		this.backButtonListeners.remove(listener);
+		if (!this.backButtonListeners.remove(listener)) {
+			return;
+		}
 		if (this.backButtonListeners.isEmpty()) {
 			backButton.resetHover();
 			this.disableBackButton = true;
@@ -583,5 +614,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	public void removeOverlay(Renderable overlay)
 	{
 		this.overlays.remove(overlay);
+	}
+
+	public boolean hasActiveOverlays()
+	{
+		return !this.overlays.isEmpty();
 	}
 }

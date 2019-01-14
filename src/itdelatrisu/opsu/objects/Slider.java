@@ -34,6 +34,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.skinning.SkinService;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -901,8 +902,10 @@ public class Slider extends GameObject {
 	}
 
 	@Override
-	public void updateColor() {
+	public void updateColor()
+	{
 		super.updateColor();
+		ObjectColorOverrides.updateRainbowHue();
 		color = Dancer.colorOverride.getColor(comboColorIndex);
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}

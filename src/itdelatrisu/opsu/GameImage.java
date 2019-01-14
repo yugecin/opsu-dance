@@ -29,12 +29,12 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
 import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -258,7 +258,6 @@ public enum GameImage {
 	MENU_NAV_GRAPHICS ("menu-nav-graphics", "png", false, false),
 	MENU_NAV_INPUT ("menu-nav-input", "png", false, false),
 	MENU_NAV_SKIN ("menu-nav-skin", "png", false, false),
-	MENU_NAV_ADVANCED ("menu-nav-advanced", "png", false, false),
 	MENU_NAV_DANCE ("menu-nav-dance", "png", false, false),
 	MENU_NAV_PIPPI ("menu-nav-pippi", "png", false, false),
 	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
@@ -907,8 +906,7 @@ public enum GameImage {
 				skinImages = null;
 			}
 		} catch (SlickException e) {
-			String msg = String.format("Failed to destroy beatmap skin images for '%s'.", this.name());
-			ErrorHandler.explode(msg, e, ErrorHandler.DEFAULT_OPTIONS);
+			softErr(e, "Failed to destroy beatmap skin images for '%s'.", this.name());
 		}
 	}
 

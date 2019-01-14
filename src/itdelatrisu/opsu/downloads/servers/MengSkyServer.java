@@ -99,7 +99,7 @@ public class MengSkyServer extends DownloadServer {
 			}
 			this.totalResults = resultCount;
 		} catch (MalformedURLException | UnsupportedEncodingException e) {
-			explode(String.format("Problem loading result list for query '%s'.", query), e, DEFAULT_OPTIONS);
+			softErr(e, "Problem loading result list for query: %s", query);
 		}
 		return nodes;
 	}

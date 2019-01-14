@@ -132,6 +132,8 @@
 								<exclude>org/newdawn/slick/openal/AudioInputStream*</exclude>
 								<exclude>org/newdawn/slick/openal/OpenALStreamPlayer*</exclude>
 								<exclude>org/newdawn/slick/openal/SoundStore*</exclude>
+								<exclude>org/newdawn/slick/opengl/PNGDecoder*</exclude>
+								<exclude>org/newdawn/slick/util/ResourceLoader.*</exclude>
 							</excludes>
 						</filter>
 						<filter>

@@ -145,7 +145,7 @@ public class Download {
 			this.url = new URL(remoteURL);
 		} catch (MalformedURLException e) {
 			this.status = Status.ERROR;
-			explode(String.format("Bad download URL: '%s'", remoteURL), e, DEFAULT_OPTIONS);
+			softErr(e, "Bad download URL: %s", remoteURL);
 			return;
 		}
 		this.localPath = localPath;
@@ -422,7 +422,7 @@ public class Download {
 			}
 		} catch (IOException e) {
 			this.status = Status.ERROR;
-			explode("Failed to cancel download.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to cancel download");
 		}
 	}
 }

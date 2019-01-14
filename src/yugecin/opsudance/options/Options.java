@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.options;
 
@@ -15,6 +15,8 @@ import yugecin.opsudance.*;
 import yugecin.opsudance.movers.factories.ExgonMoverFactory;
 import yugecin.opsudance.movers.factories.QuadraticBezierMoverFactory;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
+import yugecin.opsudance.ui.OptionsOverlay;
+import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.CachedVariable;
 import yugecin.opsudance.utils.CachedVariable.Getter;
 
@@ -807,7 +809,7 @@ public class Options
 		}
 
 		@Override
-		public Object[] getListItems () {
+		public ObjectColorOverrides[] getListItems () {
 			return ObjectColorOverrides.values();
 		}
 
@@ -856,82 +858,114 @@ public class Options
 		}
 	};
 
-	public static final NumericOption OPTION_DANCE_RGB_OBJECT_INC = new NumericOption("RGB increment", "RGBInc", "Amount of hue to shift, used for rainbow object override", 70, -1800, 1800) {
+	public static final NumericOption OPTION_DANCE_RGB_OBJECT_INC = new NumericOption(
+		"RGB object increment",
+		"RGBInc",
+		"Amount of hue to shift, used for rainbow object override",
+		800,
+		-6000,
+		6000)
+	{
 		@Override
 		public String getValueString () {
-			return String.format("%.1f°", val / 10f);
+			return String.format("%.1f°/object", val / 100f);
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			Object val;
+			return
+				(val = Dancer.colorOverride) == ObjectColorOverrides.RAINBOW ||
+				val == ObjectColorOverrides.RAINBOWSHIFT ||
+				(val = Dancer.colorMirrorOverride)
+					== ObjectColorOverrides.RAINBOW ||
+				val == ObjectColorOverrides.RAINBOWSHIFT;
 		}
 	};
 
 	public static final ListOption OPTION_DANCE_CURSOR_COLOR_OVERRIDE = new ListOption(
-		"Color",
+		"Trail color",
 		"CursorColorOverride",
 		"Override cursor color")
 	{
 		@Override
-		public void setDefaultValue()
-		{
-			Dancer.cursorColorOverride = CursorColorOverrides.RAINBOW;
-		}
-
-		@Override
 		public String getValueString()
 		{
-			return Dancer.cursorColorOverride.toString();
+			return cursorColor.name;
 		}
 
 		@Override
 		public Object[] getListItems()
 		{
-			return CursorColorOverrides.values();
+			return CursorColorManager.impls;
 		}
 
 		@Override
 		public void clickListItem(int index)
 		{
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[index];
+			cursorColor = CursorColorManager.impls[index];
 			this.notifyListeners();
 		}
 
 		@Override
 		public String write ()
 		{
-			return String.valueOf(Dancer.cursorColorOverride.nr);
+			for (int i = CursorColorManager.impls.length; i > 0;) {
+				if (CursorColorManager.impls[--i] == cursorColor) {
+					return String.valueOf(i);
+				}
+			}
+			return "0";
 		}
 
 		@Override
 		public void read(String s)
 		{
 			final int idx = Integer.parseInt(s);
-			Dancer.cursorColorOverride = CursorColorOverrides.values()[idx];
+			if (0 <= idx && idx < CursorColorManager.impls.length) {
+				cursorColor = CursorColorManager.impls[idx];
+			}
 		}
 	};
 
-	public static final ListOption OPTION_DANCE_CURSOR_MIRROR_COLOR_OVERRIDE = new ListOption("Mirror color", "CursorMirrorColorOverride", "Override mirror cursor color") {
+	public static final Option WARNING_DISTANCE_RAINBOW_COLOR = new CustomRenderedOption(
+		"",
+		null,
+		null)
+	{
 		@Override
-		public String getValueString () {
-			return Dancer.cursorColorMirrorOverride.toString();
+		protected void registerOption()
+		{
+			// nulled
 		}
 
 		@Override
-		public Object[] getListItems () {
-			return CursorColorOverrides.values();
+		public boolean showCondition()
+		{
+			return
+				!OPTION_NEWEST_CURSOR.state &&
+				CursorColorManager.needsNewestCursor();
 		}
 
 		@Override
-		public void clickListItem(int index){
-			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[index];
-			this.notifyListeners();
+		public int getHeight(int baseHeight)
+		{
+			return baseHeight * 2;
 		}
 
 		@Override
-		public String write () {
-			return "" + Dancer.cursorColorMirrorOverride.nr;
-		}
-
-		@Override
-		public void read (String s){
-			Dancer.cursorColorMirrorOverride = CursorColorOverrides.values()[Integer.parseInt(s)];
+		public void render(int baseHeight, int x, int y, int textOffsetY, int width)
+		{
+			final String line1 = "Distance-based rainbow cursor color only";
+			final String line2 = "works with newest cursor enabled!";
+			int _y, _x;
+			_y = y + textOffsetY + textOffsetY / 2;
+			_x = x + (width - Fonts.MEDIUM.getWidth(line1)) / 2;
+			Fonts.MEDIUM.drawString(_x , _y, line1, OptionsOverlay.COL_PINK);
+			_y += baseHeight - textOffsetY;
+			_x = x + (width - Fonts.MEDIUM.getWidth(line2)) / 2;
+			Fonts.MEDIUM.drawString(_x , _y, line2, OptionsOverlay.COL_PINK);
 		}
 	};
 
@@ -943,10 +977,34 @@ public class Options
 			true
 		),
 		OPTION_TRAIL_COLOR_PARTS = new ToggleOption(
-			"Color trail segments individially",
+			"Color trail segments individually",
 			"TrailSegmentColors",
 			"Give each trail segment a color instead of one color for the entire trail",
 			true)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
+		},
+		OPTION_BLEND_TRAIL = new ToggleOption(
+			"Additively blend trail",
+			"cursor.blend.trail",
+			"Add trail color so an orange trail over a cyan trail becomes white.",
+			true)
+		{
+			@Override
+			public boolean showCondition()
+			{
+				return OPTION_NEWEST_CURSOR.state;
+			}
+		},
+		OPTION_BLEND_CURSOR = new ToggleOption(
+			"Additively blend cursor",
+			"cursor.blend.cursor",
+			null,
+			false)
 		{
 			@Override
 			public boolean showCondition()
@@ -959,13 +1017,19 @@ public class Options
 		"RGB cursor increment",
 		"RGBCursorInc",
 		"Amount of hue to shift, used for rainbow cursor override",
-		800,
-		-2000,
-		2000)
+		180,
+		-360,
+		360)
 	{
 		@Override
 		public String getValueString () {
-			return String.format("%.2f°", val / 1000f);
+			return String.format("%d°/s", val);
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			return CursorColorManager.shouldShowCursorHueIncOption();
 		}
 	};
 
@@ -982,7 +1046,7 @@ public class Options
 	public static final ToggleOption OPTION_DANCE_HIDE_OBJECTS = new ToggleOption("Don't draw objects", "HideObj", "If you only want to see cursors :)", false);
 	public static final ToggleOption OPTION_DANCE_CIRLCE_IN_SLOW_SLIDERS = new ToggleOption("Do circles in slow sliders", "CircleInSlider", "Circle around sliderball in lazy & slow sliders", false);
 	public static final ToggleOption OPTION_DANCE_CIRLCE_IN_LAZY_SLIDERS = new ToggleOption("Do circles in lazy sliders", "CircleInLazySlider", "Circle in hitcircle in lazy sliders", false);
-	public static final ToggleOption OPTION_DANCE_HIDE_UI = new ToggleOption("Hide all UI", "HideUI", ".", true);
+	public static final ToggleOption OPTION_DANCE_HIDE_UI = new ToggleOption("Hide all UI", "HideUI", null, true);
 	public static final ToggleOption OPTION_DANCE_ENABLE_SB = new ToggleOption("Enable storyboard editor", "EnableStoryBoard", "Dance storyboard", false);
 	public static final ToggleOption OPTION_PIPPI_ENABLE = new ToggleOption("Enable", "Pippi", "Move in circles like dancing pippi (osu! april fools joke 2016)", false);
 	public static final NumericOption OPTION_PIPPI_RADIUS_PERCENT = new NumericOption("Radius", "PippiRad", "Radius of pippi, percentage of circle radius", 100, 0, 100) {
