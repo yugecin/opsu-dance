@@ -47,6 +47,8 @@ public class BackButton
 	private boolean wasHoveredLastFrame;
 	private boolean isHoveredLastFrame;
 
+	private boolean wasSkinnedLastUpdate;
+
 	/** The width of the "back" text to draw. */
 	private int textWidth;
 
@@ -100,7 +102,7 @@ public class BackButton
 
 	public boolean hasSkinnedVariant()
 	{
-		return this.backButton != null;
+		return MENU_BACK.getWidth() > 2;
 	}
 
 	/**
@@ -109,7 +111,7 @@ public class BackButton
 	 */
 	public void preRenderUpdate(boolean skinned)
 	{
-		if (backButton != null && skinned) {
+		if (this.wasSkinnedLastUpdate = (this.hasSkinnedVariant() && skinned)) {
 			final boolean wasHovered = this.backButton.isHovered();
 			backButton.hoverUpdate(renderDelta, mouseX, mouseY);
 			if (!wasHovered && this.backButton.isHovered()) {
@@ -198,7 +200,7 @@ public class BackButton
 
 	private boolean contains(float cx, float cy)
 	{
-		if (backButton != null && !displayContainer.hasActiveOverlays()) {
+		if (this.wasSkinnedLastUpdate) {
 			return backButton.contains(cx, cy);
 		}
 		return buttonYpos - paddingY < cy && cx < realButtonWidth;
@@ -209,7 +211,7 @@ public class BackButton
 	 */
 	public void resetHover()
 	{
-		if (backButton != null) {
+		if (this.hasSkinnedVariant()) {
 			backButton.resetHover();
 		}
 		isHoveredLastFrame = false;
