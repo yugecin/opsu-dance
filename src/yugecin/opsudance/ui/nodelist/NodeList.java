@@ -77,8 +77,6 @@ public class NodeList
 
 		this.starStream.setDirection(-width, 0);
 		this.starStream.setPositionSpread(Node.buttonOffset / 5);
-
-		this.lastNodeUpdate = System.currentTimeMillis();
 	}
 
 	/**
@@ -88,7 +86,6 @@ public class NodeList
 	{
 		this.reFadeIn();
 		this.centerFocusedNodeNow();
-		this.lastNodeUpdate = System.currentTimeMillis();
 		this.scrolling.resetState();
 	}
 
@@ -96,23 +93,11 @@ public class NodeList
 	{
 		this.starStream.update(renderDelta);
 
-		this.updateNodePositionsNow(mouseX, mouseY);
-	}
-
-	private long lastNodeUpdate;
-	public void updateNodePositionsNow(int mouseX, int mouseY)
-	{
-		// own deltas because this function can get called multiple times per update
-		// TODO do this in a better way
-		final long time = System.currentTimeMillis();
-		final int delta = (int) (time - this.lastNodeUpdate);
-		this.lastNodeUpdate = time;
-
-		Node.update(delta);
+		Node.update(displayContainer.delta);
 		Node newHoverNode = null;
 		this.firstNodeToDraw = null;
 		this.scrolling.setMax(this.nodes.size() * Node.buttonOffset);
-		this.scrolling.update(delta);
+		this.scrolling.update(displayContainer.delta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
@@ -124,7 +109,7 @@ public class NodeList
 			n.targetY = position + idx * Node.buttonOffset;
 			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
-			n.update(delta, this.hoverNode);
+			n.update(displayContainer.delta, this.hoverNode);
 
 			if (n.y > invisibleYOffset && n.y < footerY) {
 				if (this.firstNodeToDraw == null) {
@@ -233,9 +218,6 @@ public class NodeList
 		return this.focusNode == this.hoverNode && this.focusNode != null;
 	}
 
-	/**
-	 * Call {@link #updateNodePositionsNow(int, int)} first.
-	 */
 	public boolean focusHoveredNode()
 	{
 		if (this.hoverNode != null && hoverNode instanceof BeatmapNode) {

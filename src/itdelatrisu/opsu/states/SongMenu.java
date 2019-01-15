@@ -848,7 +848,6 @@ public class SongMenu extends BaseOpsuState
 				this.startGame();
 				return;
 			}
-			nodeList.updateNodePositionsNow(e.x, e.y);
 			if (nodeList.focusHoveredNode()) {
 				this.songInfo = null;
 				this.songChangeTimer.setTime(0);
