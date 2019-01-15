@@ -29,7 +29,6 @@ class Scrolling
 
 	private float target, amplitude;
 	private int totalDelta;
-	private static final int TIME_CONST = 200;
 
 	void setMax(float max)
 	{

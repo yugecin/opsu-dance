@@ -9,7 +9,6 @@ import org.newdawn.slick.Image;
 import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.skinning.SkinService;
 
@@ -46,7 +45,7 @@ class BeatmapNode extends Node
 			super.drawButton(Color.white);
 			textColor = SkinService.skin.getSongSelectActiveTextColor();
 		} else {
-			super.drawButton(Colors.BLUE_BUTTON);
+			super.drawButton(BUTTON_BLUE);
 		}
 
 		float cx = x + Node.cx;

@@ -14,6 +14,11 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 
 abstract class Node
 {
+	public static final Color
+		BUTTON_ORANGE   = new Color(255, 122, 20),
+		BUTTON_PINK   = new Color(247, 81, 156),
+		BUTTON_BLUE   = new Color(3, 144, 255);
+
 	static Image button;
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
@@ -215,6 +220,6 @@ abstract class Node
 		}
 		return baseColor.brighter((1f - IN_QUAD.calc(
 			(float) this.hoverHighlightTime / HOVER_HIGHLIGHT_TIME
-		)) * .25f);
+		)) * .3f);
 	}
 }
