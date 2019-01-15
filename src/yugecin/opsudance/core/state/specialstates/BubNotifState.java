@@ -2,8 +2,6 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.core.state.specialstates;
 
-import itdelatrisu.opsu.ui.Fonts;
-
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
@@ -16,6 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import static itdelatrisu.opsu.Utils.clamp;
+import static itdelatrisu.opsu.ui.Fonts.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -76,8 +75,8 @@ public class BubNotifState implements ResolutionChangedListener
 		Notification.paddingY = (int) (height * 0.0144f);
 		Notification.finalX = width - Notification.width - (int) (width * 0.01);
 		Notification.fontPaddingX = (int) (Notification.width * 0.02f);
-		Notification.fontPaddingY = (int) (Fonts.SMALLBOLD.getLineHeight() / 4f);
-		Notification.lineHeight = Fonts.SMALLBOLD.getLineHeight();
+		Notification.fontPaddingY = (int) (SMALLBOLD.getLineHeight() / 4f);
+		Notification.lineHeight = SMALLBOLD.getLineHeight();
 		if (bubbles.isEmpty()) {
 			return;
 		}
@@ -195,8 +194,8 @@ public class BubNotifState implements ResolutionChangedListener
 		}
 
 		private void recalculateDimensions() {
-			this.lines = Fonts.wrap(Fonts.SMALLBOLD, message, (int) (width * 0.96f), true);
-			this.height = (int) (Fonts.SMALLBOLD.getLineHeight() * (lines.size() + 0.5f));
+			this.lines = wrap(SMALLBOLD, message, (int) (width * 0.96f), true);
+			this.height = (int) (SMALLBOLD.getLineHeight() * (lines.size() + 0.5f));
 		}
 
 		/**
@@ -212,7 +211,7 @@ public class BubNotifState implements ResolutionChangedListener
 			g.drawRoundRect(x, y, width, height, 6);
 			int y = this.y + fontPaddingY;
 			for (String line : lines) {
-				Fonts.SMALLBOLD.drawString(x + fontPaddingX, y, line, textColor);
+				SMALLBOLD.drawString(x + fontPaddingX, y, line, textColor);
 				y += lineHeight;
 			}
 			return timeShown > BubNotifState.TOTAL_TIME;
@@ -224,13 +223,13 @@ public class BubNotifState implements ResolutionChangedListener
 			} else {
 				hoverTime = Math.max(0, hoverTime - delta);
 			}
-			float hoverProgress = (float) hoverTime / HOVER_ANIM_TIME;
-			borderColor.r = targetBorderColor.r + (0.977f - targetBorderColor.r) * hoverProgress;
-			borderColor.g = targetBorderColor.g + (0.977f - targetBorderColor.g) * hoverProgress;
-			borderColor.b = targetBorderColor.b + (0.977f - targetBorderColor.b) * hoverProgress;
+			float hp = (float) hoverTime / HOVER_ANIM_TIME;
+			borderColor.r = targetBorderColor.r + (0.977f - targetBorderColor.r) * hp;
+			borderColor.g = targetBorderColor.g + (0.977f - targetBorderColor.g) * hp;
+			borderColor.b = targetBorderColor.b + (0.977f - targetBorderColor.b) * hp;
 			if (timeShown < IN_TIME) {
 				float p = (float) timeShown / IN_TIME;
-				this.x = finalX + (int) ((1 - animateX(p)) * width / 2);
+				this.x = finalX + (int) ((1 - this.animateX(p)) * width / 2);
 				final float alpha = clamp(p * 1.8f, 0f, 1f);
 				textColor.a = borderColor.a = bgcol.a = alpha;
 				bgcol.a = borderColor.a * 0.8f;
@@ -246,9 +245,11 @@ public class BubNotifState implements ResolutionChangedListener
 		}
 
 		/**
-		 * ease X position like OUT_ELASTIC, but less intensive
+		 * ease X position
+		 * like {@link itdelatrisu.opsu.ui.animations.AnimationEquation#OUT_ELASTIC},
+		 * but less intensive
 		 */
-		public float animateX(float t)
+		private float animateX(float t)
 		{
 			if (t == 0 || t == 1)
 				return t;
@@ -267,8 +268,11 @@ public class BubNotifState implements ResolutionChangedListener
 			return false;
 		}
 
-		private boolean isMouseHovered(int x, int y) {
-			return this.x <= x && x < this.x + width && this.y <= y && y <= this.y + this.height;
+		private boolean isMouseHovered(int x, int y)
+		{
+			return
+				this.x <= x && x < this.x + width &&
+				this.y <= y && y <= this.y + this.height;
 		}
 
 	}
