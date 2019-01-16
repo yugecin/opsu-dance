@@ -5,12 +5,15 @@ package yugecin.opsudance.ui.nodelist;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.newdawn.slick.Graphics;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
@@ -182,12 +185,31 @@ public class NodeList
 		this.nodes.clear();
 		Node before = this.first = null;
 
+		final ArrayList<Beatmap> temp = new ArrayList<>(10);
 		final ArrayList<Beatmap> maps = beatmapList.maps;
 		this.nodes.ensureCapacity(maps.size());
+		int idx = 0;
 		for (int i = 0, size = maps.size(); i < size; i++) {
 			final Beatmap map = maps.get(i);
-			final Node newnode = new BeatmapNode(map);
-			newnode.idx = i;
+			final BeatmapSet set = map.beatmapSet;
+			Beatmap nextmap;
+			final Node newnode;
+			if (++i < size && (nextmap = maps.get(i)).beatmapSet == set) {
+				temp.clear();
+				temp.add(map);
+				temp.add(nextmap);
+				while (++i < size) {
+					if ((nextmap = maps.get(i)).beatmapSet != set) {
+						break;
+					}
+					temp.add(nextmap);
+				}
+				newnode = new MultiBeatmapNode(temp.toArray(Beatmap.EMPTY_ARRAY));
+			} else {
+				newnode = new BeatmapNode(map);
+			}
+			i--;
+			newnode.idx = idx++;
 			if (before == null) {
 				this.first = newnode;
 			} else {
@@ -196,6 +218,49 @@ public class NodeList
 			}
 			before = newnode;
 			this.nodes.add(newnode);
+		}
+	}
+
+	/**
+	 * {@code nodesToInsert} should be at least of size 2
+	 */
+	void replace(Node node, Node[] nodesToInsert)
+	{
+		final Node replacement = nodesToInsert[0];
+		this.nodes.set(node.idx, replacement);
+		replacement.prev = node.prev;
+		if (node.prev != null) {
+			node.prev.next = replacement;
+		}
+		int idx = replacement.idx = node.idx;
+		Node prev = replacement;
+		for (int i = 1; i < nodesToInsert.length; i++) {
+			nodesToInsert[i].prev = prev;
+			prev = prev.next = nodesToInsert[i];
+			nodesToInsert[i].idx = ++idx;
+		}
+		int inc = nodesToInsert.length - 1;
+		nodesToInsert[inc].next = node.next;
+		if (node.next != null) {
+			node.next.prev = nodesToInsert[inc];
+		}
+		List<Node> l = Arrays.asList(nodesToInsert).subList(1, nodesToInsert.length);
+		if (node.idx == this.nodes.size() - 1) {
+			this.nodes.addAll(l);
+		} else {
+			this.nodes.addAll(node.idx + 1, l);
+		}
+		while (++idx < this.nodes.size() - 1) {
+			this.nodes.get(idx).idx += inc;
+		}
+		if (this.firstNodeToDraw == node) {
+			this.firstNodeToDraw = replacement;
+		}
+		if (this.first == node) {
+			this.first = replacement;
+		}
+		if (replacement instanceof BeatmapNode) {
+			this.focusNode((BeatmapNode) replacement, /*playAtPreviewTime*/ true);
 		}
 	}
 
@@ -220,7 +285,13 @@ public class NodeList
 
 	public boolean focusHoveredNode()
 	{
-		if (this.hoverNode != null && hoverNode instanceof BeatmapNode) {
+		if (this.hoverNode == null) {
+			return false;
+		}
+		if (this.hoverNode instanceof MultiBeatmapNode) {
+			this.replace(this.hoverNode, ((MultiBeatmapNode) this.hoverNode).expand());
+		}
+		if (this.hoverNode instanceof BeatmapNode) {
 			this.focusNode((BeatmapNode) this.hoverNode, /*playAtPreviewTime*/ true);
 			return true;
 		}
@@ -293,7 +364,7 @@ public class NodeList
 			this.centerFocusedNodeSmooth();
 		}
 		for (int i = this.nodes.size(); i > 0;) {
-			this.nodes.get(--i).focusChanged(node);
+			this.nodes.get(--i).focusChanged(node.beatmap.beatmapSet);
 		}
 	}
 

@@ -6,7 +6,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.ui.Colors;
+import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.skinning.SkinService;
 
@@ -31,6 +31,23 @@ class MultiBeatmapNode extends Node
 	}
 
 	@Override
+	protected boolean belongsToSet(BeatmapSet focusedSet)
+	{
+		return this.beatmaps[0].beatmapSet == focusedSet;
+	}
+
+	Node[] expand()
+	{
+		final Node[] nodes = new Node[this.beatmaps.length];
+		for (int i = 0; i < nodes.length; i++) {
+			final BeatmapNode n = new BeatmapNode(this.beatmaps[i]);
+			n.isFromExpandedMultiNode = true;
+			nodes[i] = n;
+		}
+		return nodes;
+	}
+
+	@Override
 	void draw(Graphics g, Node focusNode)
 	{
 		final boolean isFocused = focusNode == this;
@@ -38,12 +55,16 @@ class MultiBeatmapNode extends Node
 		button.setAlpha(0.95f);
 		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
 
+		final Color buttonColor;
 		if (isFocused) {
-			super.drawButton(Color.white);
+			buttonColor = Color.white;
 			textColor = SkinService.skin.getSongSelectActiveTextColor();
+		} else if (this.beatmaps[0].beatmapSet.isPlayed()) {
+			buttonColor = BUTTON_ORANGE;
 		} else {
-			super.drawButton(Colors.ORANGE_BUTTON);
+			buttonColor = BUTTON_PINK;
 		}
+		super.drawButton(buttonColor);
 
 		float cx = x + Node.cx;
 		float cy = y + Node.cy;

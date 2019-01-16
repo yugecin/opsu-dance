@@ -36,7 +36,10 @@ import static yugecin.opsudance.options.Options.*;
 /**
  * Beatmap structure storing data parsed from OSU files.
  */
-public class Beatmap implements Comparable<Beatmap> {
+public class Beatmap implements Comparable<Beatmap>
+{
+	public static final Beatmap[] EMPTY_ARRAY = new Beatmap[0];
+
 	/** Game modes. */
 	public static final byte MODE_OSU = 0, MODE_TAIKO = 1, MODE_CTB = 2, MODE_MANIA = 3;
 

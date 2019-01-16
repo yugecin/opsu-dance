@@ -7,6 +7,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapSet;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
@@ -129,6 +130,7 @@ abstract class Node
 	 */
 	abstract BeatmapNode attemptFocusMap(Beatmap beatmap);
 	abstract void draw(Graphics g, Node focusNode);
+	protected abstract boolean belongsToSet(BeatmapSet focusedSet);
 
 	void update(int delta, Node hoveredNode)
 	{
@@ -194,9 +196,9 @@ abstract class Node
 		this.hoverIndentTime = 0;
 	}
 
-	void focusChanged(Node focusedNode)
+	void focusChanged(BeatmapSet focusedSet)
 	{
-		if (focusedNode == this) {
+		if (this.belongsToSet(focusedSet)) {
 			this.focusIndentTo = buttonHoverIndent;
 		} else {
 			this.focusIndentTo = 0;
@@ -220,6 +222,6 @@ abstract class Node
 		}
 		return baseColor.brighter((1f - IN_QUAD.calc(
 			(float) this.hoverHighlightTime / HOVER_HIGHLIGHT_TIME
-		)) * .3f);
+		)) * .25f);
 	}
 }
