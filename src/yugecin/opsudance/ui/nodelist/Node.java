@@ -126,6 +126,7 @@ abstract class Node
 	private float focusIndentTo;
 
 	/**
+	 * may expand nodes
 	 * @return {@code null} if this map is not in this node, or the node that was focused
 	 */
 	abstract BeatmapNode attemptFocusMap(Beatmap beatmap);

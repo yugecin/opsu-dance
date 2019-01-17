@@ -10,6 +10,7 @@ import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.skinning.SkinService;
 
+import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -27,6 +28,13 @@ class MultiBeatmapNode extends Node
 	@Override
 	BeatmapNode attemptFocusMap(Beatmap beatmap)
 	{
+		for (int i = this.beatmaps.length; i > 0;) {
+			if (beatmaps[--i] == beatmap) {
+				final BeatmapNode[] newnodes = this.expand();
+				nodeList.replace(this, newnodes);
+				return newnodes[i];
+			}
+		}
 		return null;
 	}
 
@@ -36,9 +44,9 @@ class MultiBeatmapNode extends Node
 		return this.beatmaps[0].beatmapSet == focusedSet;
 	}
 
-	Node[] expand()
+	BeatmapNode[] expand()
 	{
-		final Node[] nodes = new Node[this.beatmaps.length];
+		final BeatmapNode[] nodes = new BeatmapNode[this.beatmaps.length];
 		for (int i = 0; i < nodes.length; i++) {
 			final BeatmapNode n = new BeatmapNode(this.beatmaps[i]);
 			n.isFromExpandedMultiNode = true;
