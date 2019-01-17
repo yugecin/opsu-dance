@@ -23,7 +23,7 @@ import yugecin.opsudance.utils.FloatConsumer;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * manages nodes to display in {@link itdelatrisu.opsu.states.SongMenu}
+ * manages nodes UI to display in {@link itdelatrisu.opsu.states.SongMenu}
  */
 public class NodeList
 {
@@ -96,11 +96,11 @@ public class NodeList
 	{
 		this.starStream.update(renderDelta);
 
-		Node.update(displayContainer.delta);
+		Node.update(renderDelta);
 		Node newHoverNode = null;
 		this.firstNodeToDraw = null;
 		this.scrolling.setMax(this.nodes.size() * Node.buttonOffset);
-		this.scrolling.update(displayContainer.delta);
+		this.scrolling.update(renderDelta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
@@ -112,7 +112,7 @@ public class NodeList
 			n.targetY = position + idx * Node.buttonOffset;
 			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
-			n.update(displayContainer.delta, this.hoverNode);
+			n.update(renderDelta, this.hoverNode);
 
 			if (n.y > invisibleYOffset && n.y < footerY) {
 				if (this.firstNodeToDraw == null) {
