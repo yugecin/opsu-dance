@@ -259,9 +259,6 @@ public class NodeList
 		if (this.first == node) {
 			this.first = replacement;
 		}
-		if (replacement instanceof BeatmapNode) {
-			this.focusNode((BeatmapNode) replacement, /*playAtPreviewTime*/ true);
-		}
 	}
 
 	public void reFadeIn()
@@ -289,7 +286,8 @@ public class NodeList
 			return false;
 		}
 		if (this.hoverNode instanceof MultiBeatmapNode) {
-			this.replace(this.hoverNode, ((MultiBeatmapNode) this.hoverNode).expand());
+			((MultiBeatmapNode) this.hoverNode).expand(true);
+			return true;
 		}
 		if (this.hoverNode instanceof BeatmapNode) {
 			this.focusNode((BeatmapNode) this.hoverNode, /*playAtPreviewTime*/ true);
@@ -309,6 +307,10 @@ public class NodeList
 		Node node;
 		out: for (;;) {
 			node = this.nodes.get(rand.nextInt(this.nodes.size()));
+			if (node instanceof MultiBeatmapNode) {
+				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand(false);
+				node = nodes[rand.nextInt(nodes.length)];
+			}
 			if (node instanceof BeatmapNode) {
 				break out;
 			}
@@ -352,7 +354,7 @@ public class NodeList
 	/**
 	 * Will scroll to node if in song menu state 
 	 */
-	private void focusNode(BeatmapNode node, boolean playAtPreviewTime)
+	void focusNode(BeatmapNode node, boolean playAtPreviewTime)
 	{
 		this.focusNode = node;
 		final Beatmap beatmap = node.beatmap;
