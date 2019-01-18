@@ -5,8 +5,6 @@ package yugecin.opsudance.ui.nodelist;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.newdawn.slick.Graphics;
 
@@ -37,7 +35,7 @@ public class NodeList
 
 	private float maxVisibleButtons;
 
-	private final ArrayList<Node> nodes;
+	private final NodeCollection nodes;
 	private Node first;
 
 	private Node hoverNode;
@@ -48,7 +46,7 @@ public class NodeList
 
 	public NodeList()
 	{
-		this.nodes = new ArrayList<>();
+		this.nodes = new NodeCollection(0);
 
 		this.scrolling = new Scrolling();
 
@@ -99,7 +97,7 @@ public class NodeList
 		Node.update(renderDelta);
 		Node newHoverNode = null;
 		this.firstNodeToDraw = null;
-		this.scrolling.setMax(this.nodes.size() * Node.buttonOffset);
+		this.scrolling.setMax(this.nodes.size * Node.buttonOffset);
 		this.scrolling.update(renderDelta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
@@ -226,8 +224,9 @@ public class NodeList
 	 */
 	void replace(Node node, Node[] nodesToInsert)
 	{
+		this.nodes.ensureCapacity(this.nodes.size + nodesToInsert.length - 1);
 		final Node replacement = nodesToInsert[0];
-		this.nodes.set(node.idx, replacement);
+		this.nodes.nodes[node.idx] = replacement;
 		replacement.prev = node.prev;
 		if (node.prev != null) {
 			node.prev.next = replacement;
@@ -244,14 +243,14 @@ public class NodeList
 		if (node.next != null) {
 			node.next.prev = nodesToInsert[inc];
 		}
-		List<Node> l = Arrays.asList(nodesToInsert).subList(1, nodesToInsert.length);
-		if (node.idx == this.nodes.size() - 1) {
-			this.nodes.addAll(l);
-		} else {
-			this.nodes.addAll(node.idx + 1, l);
+		this.nodes.shiftRight(idx + 1, inc);
+		for (int i = 1; i < nodesToInsert.length; i++) {
+			this.nodes.nodes[idx + i] = nodesToInsert[i];
 		}
-		while (++idx < this.nodes.size() - 1) {
-			this.nodes.get(idx).idx += inc;
+		++idx;
+		while (idx < this.nodes.size) {
+			this.nodes.nodes[idx].idx += inc;
+			idx++;
 		}
 		if (this.firstNodeToDraw == node) {
 			this.firstNodeToDraw = replacement;
@@ -306,7 +305,7 @@ public class NodeList
 		}
 		Node node;
 		out: for (;;) {
-			node = this.nodes.get(rand.nextInt(this.nodes.size()));
+			node = this.nodes.nodes[rand.nextInt(this.nodes.size)];
 			if (node instanceof MultiBeatmapNode) {
 				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand(false);
 				node = nodes[rand.nextInt(nodes.length)];
@@ -365,8 +364,8 @@ public class NodeList
 		if (displayContainer.isIn(songMenuState)) {
 			this.centerFocusedNodeSmooth();
 		}
-		for (int i = this.nodes.size(); i > 0;) {
-			this.nodes.get(--i).focusChanged(node.beatmap.beatmapSet);
+		for (int i = this.nodes.size; i > 0;) {
+			this.nodes.nodes[--i].focusChanged(node.beatmap.beatmapSet);
 		}
 	}
 
