@@ -238,10 +238,21 @@ public class NodeList
 		int inc = nodesToInsert.length - 1;
 		++idx;
 		this.shiftNodesRight(idx, inc);
+		final int endIdxExclusive = replacement.idx + nodesToInsert.length;
 		System.arraycopy(nodesToInsert, 1, this.nodes, idx, inc);
 		for (int i = replacement.idx; i < this.size; i++) {
-			this.nodes[i].idx = i;
-			this.nodes[i].onSiblingNodeUpdated();
+			final Node n = this.nodes[i];
+			n.idx = i;
+			if (i < endIdxExclusive) {
+				n.onSiblingNodeUpdated();
+				if (i < endIdxExclusive - 1) {
+					n.appearTime = 0;
+					n.appearValue = 0f;
+				}
+			}
+			if (i >= idx && n instanceof BeatmapNode) {
+				((BeatmapNode) n).doFade = true;
+			}
 		}
 		if (0 < replacement.idx) {
 			this.nodes[replacement.idx].onSiblingNodeUpdated();

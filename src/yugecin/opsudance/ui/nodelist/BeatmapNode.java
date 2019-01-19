@@ -14,6 +14,7 @@ import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.skinning.SkinService;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static yugecin.opsudance.core.InstanceContainer.nodeList;
 import static yugecin.opsudance.options.Options.*;
 
@@ -25,6 +26,7 @@ class BeatmapNode extends Node
 	boolean setFocused;
 	float focusedHeight;
 	float focusedInternalOffset;
+	boolean doFade;
 
 	BeatmapNode(Beatmap beatmap)
 	{
@@ -67,8 +69,8 @@ class BeatmapNode extends Node
 	@Override
 	float getHeight()
 	{
-		if (setFocused) {
-			return this.focusedHeight;
+		if (this.setFocused) {
+			return this.focusedHeight * this.appearValue;
 		}
 		return buttonOffset;
 	}
@@ -77,7 +79,7 @@ class BeatmapNode extends Node
 	float getInternalOffset()
 	{
 		if (this.setFocused) {
-			return this.focusedInternalOffset;
+			return this.focusedInternalOffset * this.appearValue;
 		}
 		return 0f;
 	}
@@ -93,6 +95,16 @@ class BeatmapNode extends Node
 	{
 		final boolean isFocused = focusNode == this;
 
+		float appearProgress = 1f;
+		if (this.doFade && this.appearTime < APPEAR_TIME) {
+			appearProgress = this.appearValue * 2f;
+			if (appearProgress > 1f) {
+				appearProgress = 1f;
+			} else {
+				appearProgress = OUT_QUART.calc(appearProgress);
+			}
+		}
+
 		button.setAlpha(0.9f);
 		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
 
@@ -107,7 +119,14 @@ class BeatmapNode extends Node
 		} else {
 			buttonColor = BUTTON_PINK;
 		}
+
+		float prevAlpha = buttonColor.a;
+		Color gradeStarCol = new Color(1f, 1f, appearProgress);
+		buttonColor.a *= appearProgress;
+		textColor = new Color(textColor);
+		textColor.a *= appearProgress;
 		super.drawButton(buttonColor);
+		buttonColor.a = prevAlpha;
 
 		float cx = x + Node.cx;
 		float cy = y + Node.cy;
@@ -116,7 +135,11 @@ class BeatmapNode extends Node
 		// draw grade
 		if (grade != Grade.NULL) {
 			Image gradeImg = grade.getMenuImage();
-			gradeImg.drawCentered(cx - buttonWidth * 0.01f + gradeImg.getWidth() / 2f, y + buttonHeight / 2.2f);
+			gradeImg.drawCentered(
+				cx - buttonWidth * 0.01f + gradeImg.getWidth() / 2f,
+				y + buttonHeight / 2.2f,
+				gradeStarCol
+			);
 			cx += gradeImg.getWidth();
 		}
 
@@ -149,7 +172,11 @@ class BeatmapNode extends Node
 			if (isFocused)
 				star.drawFlash(starX + (i - 1) * starOffset, starY, star.getWidth(), star.getHeight(), textColor);
 			else
-				star.draw(starX + (i - 1) * starOffset, starY);
+				star.draw(
+					starX + (i - 1) * starOffset,
+					starY,
+					gradeStarCol
+				);
 		}
 
 		if (i <= 5) {
@@ -160,7 +187,11 @@ class BeatmapNode extends Node
 			if (isFocused)
 				partialStar.drawFlash(starX + (i - 1) * starOffset, partialStarY, partialStar.getWidth(), partialStar.getHeight(), textColor);
 			else
-				partialStar.draw(starX + (i - 1) * starOffset, partialStarY);
+				partialStar.draw(
+					starX + (i - 1) * starOffset,
+					partialStarY,
+					gradeStarCol
+				);
 		}
 
 		if (++i <= 5) {
@@ -171,7 +202,11 @@ class BeatmapNode extends Node
 				if (isFocused)
 					smallStar.drawFlash(starX + (i - 1) * starOffset, smallStarY, smallStar.getWidth(), smallStar.getHeight(), textColor);
 				else
-					smallStar.draw(starX + (i - 1) * starOffset, smallStarY);
+					smallStar.draw(
+						starX + (i - 1) * starOffset,
+						smallStarY,
+						gradeStarCol
+					);
 			}
 		}
 	}
