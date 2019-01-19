@@ -129,6 +129,10 @@ abstract class Node
 	private float focusIndentFrom;
 	private float focusIndentTo;
 
+	float appearValue = 1f;
+	int appearTime = APPEAR_TIME;
+	static final int APPEAR_TIME = 1000;
+
 	/**
 	 * may expand nodes (but must unexpand first)
 	 * @return {@code null} if this map is not in this node, or the node that was focused
@@ -141,6 +145,13 @@ abstract class Node
 	{
 		if (this.hoverHighlightTime < HOVER_HIGHLIGHT_TIME) {
 			this.hoverHighlightTime += delta;
+		}
+
+		if (this.appearTime < APPEAR_TIME) {
+			if ((this.appearTime += delta) > APPEAR_TIME) {
+				this.appearTime = APPEAR_TIME;
+			}
+			this.appearValue = OUT_QUART.calc((float) this.appearTime / APPEAR_TIME);
 		}
 
 		if (this.hoverIndentTime < HOVER_INDENT_TIME) {

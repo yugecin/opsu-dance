@@ -291,9 +291,11 @@ public class NodeList
 			}
 			if (newset != lastset || newset == null) {
 				if (len > 1 && lastset != null) {
+					float totalHeight = 0f;
 					final Beatmap[] maps = new Beatmap[len];
 					for (int j = i - len, k = 0; j < i; j++, k++) {
 						final Node n = this.nodes[j];
+						totalHeight += n.getHeight();
 						if (this.hoverNode == n) {
 							this.hoverNode = null;
 						}
@@ -303,6 +305,9 @@ public class NodeList
 						maps[k] = ((BeatmapNode) n).beatmap;
 					}
 					final MultiBeatmapNode mb = new MultiBeatmapNode(maps);
+					mb.appearTime = 0;
+					mb.appearValue = 0f;
+					mb.fromHeight = totalHeight;
 					this.replace(i - len, len, mb);
 				}
 				len = 1;

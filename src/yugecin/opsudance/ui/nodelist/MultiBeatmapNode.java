@@ -20,6 +20,13 @@ class MultiBeatmapNode extends Node
 {
 	final Beatmap[] beatmaps;
 
+	/**
+	 * If this node is the result of collapsing set nodes,
+	 * this was the combined height of the set nodes.
+	 * To be eased in {@link #getHeight()}
+	 */
+	float fromHeight;
+
 	MultiBeatmapNode(Beatmap[] beatmaps)
 	{
 		this.beatmaps = beatmaps;
@@ -35,6 +42,15 @@ class MultiBeatmapNode extends Node
 			}
 		}
 		return null;
+	}
+
+	@Override
+	float getHeight()
+	{
+		if (appearTime < APPEAR_TIME) {
+			return buttonOffset + (fromHeight - buttonOffset) * (1f - appearValue);
+		}
+		return buttonOffset;
 	}
 
 	@Override
