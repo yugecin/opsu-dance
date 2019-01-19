@@ -239,6 +239,8 @@ abstract class Node
 		this.hoverHighlightTime = 0;
 		this.hoverIndentValue = this.hoverIndentFrom = this.hoverIndentTo = 0f;
 		this.hoverIndentTime = 0;
+		this.appearTime = APPEAR_TIME;
+		this.appearValue = 1f;
 	}
 
 	void focusChanged(BeatmapSet focusedSet)
