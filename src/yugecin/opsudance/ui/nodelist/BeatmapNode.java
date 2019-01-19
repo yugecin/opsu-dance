@@ -14,13 +14,17 @@ import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.skinning.SkinService;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static yugecin.opsudance.core.InstanceContainer.nodeList;
 import static yugecin.opsudance.options.Options.*;
 
 class BeatmapNode extends Node
 {
 	final Beatmap beatmap;
 	boolean isFromExpandedMultiNode;
+
 	boolean setFocused;
+	float focusedHeight;
+	float focusedInternalOffset;
 
 	BeatmapNode(Beatmap beatmap)
 	{
@@ -41,6 +45,41 @@ class BeatmapNode extends Node
 	{
 		this.setFocused = this.belongsToSet(focusedSet); // same check is done twice :/
 		super.focusChanged(focusedSet);
+	}
+
+	@Override
+	void onSiblingNodeUpdated()
+	{
+		this.focusedHeight = buttonOffset + buttonInternalOffset;
+		this.focusedInternalOffset = 0f;
+		if (this.idx == 0) {
+			return;
+		}
+		Node prevNode = nodeList.nodes[this.idx - 1];
+		if (!(prevNode instanceof BeatmapNode) ||
+			!((BeatmapNode) prevNode).isFromExpandedMultiNode)
+		{
+			this.focusedHeight += buttonInternalOffset;
+			this.focusedInternalOffset = buttonInternalOffset;
+		}
+	}
+
+	@Override
+	float getHeight()
+	{
+		if (setFocused) {
+			return this.focusedHeight;
+		}
+		return buttonOffset;
+	}
+
+	@Override
+	float getInternalOffset()
+	{
+		if (this.setFocused) {
+			return this.focusedInternalOffset;
+		}
+		return 0f;
 	}
 
 	@Override

@@ -104,18 +104,18 @@ public class NodeList
 		Node.update(renderDelta);
 		Node newHoverNode = null;
 		this.firstIdxToDraw = this.size;
-		this.scrolling.setMax(this.size * Node.buttonOffset);
-		this.scrolling.update(renderDelta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
 		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
 		this.starStream.pause();
+		float offset = 0f;
 		for (int idx = 0; idx < this.size; idx++) {
 			final Node n = this.nodes[idx];
 
-			n.targetY = position + idx * Node.buttonOffset;
+			n.targetY = position + offset;
 			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
+			offset += n.getHeight();
 
 			n.update(renderDelta, this.hoverNode);
 
@@ -139,6 +139,8 @@ public class NodeList
 				}
 			}
 		}
+		this.scrolling.setMax(offset);
+		this.scrolling.update(renderDelta);
 		if (!this.keepHover && this.hoverNode != newHoverNode) {
 			if (this.hoverNode != null) {
 				this.hoverNode.setHovered(false);
@@ -218,6 +220,9 @@ public class NodeList
 			newnode.idx = idx++;
 			this.nodes[this.size++] = newnode;
 		}
+		for (int i = 0; i < this.size; i++) {
+			this.nodes[i].onSiblingNodeUpdated();
+		}
 	}
 
 	/**
@@ -236,6 +241,13 @@ public class NodeList
 		System.arraycopy(nodesToInsert, 1, this.nodes, idx, inc);
 		for (int i = replacement.idx; i < this.size; i++) {
 			this.nodes[i].idx = i;
+			this.nodes[i].onSiblingNodeUpdated();
+		}
+		if (0 < replacement.idx) {
+			this.nodes[replacement.idx].onSiblingNodeUpdated();
+		}
+		if (idx + inc < this.size) {
+			this.nodes[idx + inc].onSiblingNodeUpdated();
 		}
 	}
 
@@ -249,6 +261,13 @@ public class NodeList
 		for (int i = this.size; i > idx;) {
 			--i;
 			this.nodes[i].idx = i;
+		}
+		replacement.onSiblingNodeUpdated();
+		if (0 < idx) {
+			this.nodes[idx - 1].onSiblingNodeUpdated();
+		}
+		if (idx < this.size) {
+			this.nodes[idx + 1].onSiblingNodeUpdated();
 		}
 	}
 

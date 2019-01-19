@@ -23,6 +23,10 @@ abstract class Node
 	static Image button;
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
+	/**
+	 * used for internal y offset, ie offset from y pos to actual button drawing y pos
+	 */
+	static float buttonInternalOffset;
 	private static float buttonOffsetX;
 
 	public static float buttonIndent, indentPerOffset;
@@ -45,6 +49,7 @@ abstract class Node
 		buttonHoverIndent = buttonIndent * 6.6666f;
 		buttonOffset = buttonHeight * 0.65f;
 		buttonOffset2 = buttonOffset / 2f;
+		buttonInternalOffset = (buttonHeight * .935f - buttonOffset) / 2f;
 		indentPerOffset = buttonOffset / buttonIndent;
 		buttonOffsetX = width - width * (isWidescreen ? 0.55f : 0.35f) - buttonHoverIndent;
 		cx = buttonWidth * 0.043f;
@@ -181,7 +186,7 @@ abstract class Node
 		this.x = width
 			+ (-buttonOffsetX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
 			- this.focusIndentValue;
-		this.y = this.targetY + this.hoverSpreadValue;
+		this.y = this.targetY + this.hoverSpreadValue + this.getInternalOffset();
 	}
 
 	void setHovered(boolean flag)
@@ -216,6 +221,28 @@ abstract class Node
 		if (!displayContainer.isIn(songMenuState)) {
 			this.focusIndentTime = HOVER_INDENT_TIME - 1;
 		}
+	}
+
+	/**
+	 * gets called when either:
+	 * <ul>
+	 *   <li>this node was inserted</li>
+	 *   <li>the node preceding this node was changed</li>
+	 *   <li>the node following this node was changed</li>
+	 * </ul>
+	 */
+	void onSiblingNodeUpdated()
+	{
+	}
+
+	float getHeight()
+	{
+		return buttonOffset;
+	}
+
+	float getInternalOffset()
+	{
+		return 0f;
 	}
 
 	protected void drawButton(Color color)
