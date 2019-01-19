@@ -21,7 +21,7 @@ import yugecin.opsudance.utils.FloatConsumer;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * manages nodes UI to display in {@link itdelatrisu.opsu.states.SongMenu}
+ * manages nodes to display in {@link itdelatrisu.opsu.states.SongMenu}
  */
 public class NodeList
 {
@@ -35,7 +35,6 @@ public class NodeList
 
 	private float maxVisibleButtons;
 
-	private final NodeCollection nodes;
 	private Node first;
 
 	private Node hoverNode;
@@ -44,9 +43,12 @@ public class NodeList
 
 	private Node firstNodeToDraw;
 
+	int size;
+	Node[] nodes;
+
 	public NodeList()
 	{
-		this.nodes = new NodeCollection(0);
+		this.nodes = new Node[0];
 
 		this.scrolling = new Scrolling();
 
@@ -90,8 +92,8 @@ public class NodeList
 		this.scrolling.resetState();
 		this.keepHover = false;
 		this.hoverNode = null;
-		for (int i = 0; i < this.nodes.size; i++) {
-			final Node n = this.nodes.nodes[i];
+		for (int i = 0; i < this.size; i++) {
+			final Node n = this.nodes[i];
 			n.setHovered(false);
 			n.redisplayReset();
 		}
@@ -104,7 +106,7 @@ public class NodeList
 		Node.update(renderDelta);
 		Node newHoverNode = null;
 		this.firstNodeToDraw = null;
-		this.scrolling.setMax(this.nodes.size * Node.buttonOffset);
+		this.scrolling.setMax(this.size * Node.buttonOffset);
 		this.scrolling.update(renderDelta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
 		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
@@ -187,12 +189,16 @@ public class NodeList
 
 	public void recreate()
 	{
-		this.nodes.clear();
+		for (int i = this.size; i > 0;) {
+			this.nodes[--i] = null;
+		}
+		this.size = 0;
+
 		Node before = this.first = null;
 
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
 		final ArrayList<Beatmap> maps = beatmapList.maps;
-		this.nodes.ensureCapacity(maps.size());
+		this.ensureCapacity(maps.size());
 		int idx = 0;
 		for (int i = 0, size = maps.size(); i < size; i++) {
 			final Beatmap map = maps.get(i);
@@ -222,7 +228,7 @@ public class NodeList
 				before.next = newnode;
 			}
 			before = newnode;
-			this.nodes.add(newnode);
+			this.nodes[this.size++] = newnode;
 		}
 	}
 
@@ -232,9 +238,9 @@ public class NodeList
 	void replace(Node node, Node[] nodesToInsert)
 	{
 		// though not really needed since the initial size is the beatmap count
-		this.nodes.ensureCapacity(this.nodes.size + nodesToInsert.length - 1);
+		this.ensureCapacity(this.size + nodesToInsert.length - 1);
 		final Node replacement = nodesToInsert[0];
-		this.nodes.nodes[node.idx] = replacement;
+		this.nodes[node.idx] = replacement;
 		replacement.prev = node.prev;
 		if (node.prev != null) {
 			node.prev.next = replacement;
@@ -242,8 +248,8 @@ public class NodeList
 		int idx = replacement.idx = node.idx;
 		int inc = nodesToInsert.length - 1;
 		++idx;
-		this.nodes.shiftRight(idx, inc);
-		System.arraycopy(nodesToInsert, 1, this.nodes.nodes, idx, inc);
+		this.shiftNodesRight(idx, inc);
+		System.arraycopy(nodesToInsert, 1, this.nodes, idx, inc);
 		Node prev = replacement;
 		for (int i = 1; i < nodesToInsert.length; i++) {
 			nodesToInsert[i].prev = prev;
@@ -253,8 +259,8 @@ public class NodeList
 		if (node.next != null) {
 			node.next.prev = nodesToInsert[inc];
 		}
-		for (int i = replacement.idx; i < this.nodes.size; i++) {
-			this.nodes.nodes[i].idx = i;
+		for (int i = replacement.idx; i < this.size; i++) {
+			this.nodes[i].idx = i;
 		}
 		if (this.firstNodeToDraw == node) {
 			this.firstNodeToDraw = replacement;
@@ -269,9 +275,9 @@ public class NodeList
 	 */
 	void replace(int idx, int length, Node replacement)
 	{
-		final Node startnode = this.nodes.nodes[idx];
-		final Node endNode = this.nodes.nodes[idx + length - 1];
-		this.nodes.nodes[idx] = replacement;
+		final Node startnode = this.nodes[idx];
+		final Node endNode = this.nodes[idx + length - 1];
+		this.nodes[idx] = replacement;
 		replacement.prev = startnode.prev;
 		if (startnode.prev != null) {
 			startnode.prev.next = replacement;
@@ -280,10 +286,10 @@ public class NodeList
 		if (endNode.next != null) {
 			endNode.next.prev = replacement;
 		}
-		this.nodes.shiftLeft(idx + length, length - 1);
-		for (int i = this.nodes.size; i > idx;) {
+		this.shiftNodesLeft(idx + length, length - 1);
+		for (int i = this.size; i > idx;) {
 			--i;
-			this.nodes.nodes[i].idx = i;
+			this.nodes[i].idx = i;
 		}
 	}
 
@@ -291,10 +297,10 @@ public class NodeList
 	{
 		int len = 0;
 		BeatmapSet lastset = null;
-		for (int i = 0; i <= this.nodes.size; i++) {
+		for (int i = 0; i <= this.size; i++) {
 			Node node = null;
-			if (i < this.nodes.size) {
-				node = this.nodes.nodes[i];
+			if (i < this.size) {
+				node = this.nodes[i];
 			}
 			BeatmapSet newset = null;
 			if (node instanceof BeatmapNode) {
@@ -309,7 +315,7 @@ public class NodeList
 				if (len > 1 && lastset != null) {
 					final Beatmap[] maps = new Beatmap[len];
 					for (int j = i - len, k = 0; j < i; j++, k++) {
-						final Node n = this.nodes.nodes[j];
+						final Node n = this.nodes[j];
 						if (this.hoverNode == n) {
 							this.hoverNode = null;
 						}
@@ -371,12 +377,12 @@ public class NodeList
 	 */
 	public void focusRandomMap(boolean playAtPreviewTime)
 	{
-		if (this.nodes.isEmpty()) {
+		if (this.size == 0) {
 			return;
 		}
 		Node node;
 		out: for (;;) {
-			node = this.nodes.nodes[rand.nextInt(this.nodes.size)];
+			node = this.nodes[rand.nextInt(this.size)];
 			if (node instanceof MultiBeatmapNode) {
 				this.unexpandAll();
 				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand();
@@ -440,8 +446,8 @@ public class NodeList
 		if (displayContainer.isIn(songMenuState)) {
 			this.centerFocusedNodeSmooth();
 		}
-		for (int i = this.nodes.size; i > 0;) {
-			this.nodes.nodes[--i].focusChanged(node.beatmap.beatmapSet);
+		for (int i = this.size; i > 0;) {
+			this.nodes[--i].focusChanged(node.beatmap.beatmapSet);
 		}
 	}
 
@@ -509,6 +515,32 @@ public class NodeList
 	{
 		if (node != null) {
 			scrollMethod.accept(node.idx * Node.buttonOffset);
+		}
+	}
+
+	// collection methods
+
+	void ensureCapacity(int size)
+	{
+		if (this.nodes.length < size) {
+			final Node[] n = new Node[size];
+			System.arraycopy(this.nodes, 0, n, 0, this.size);
+			this.nodes = n;
+		}
+	}
+
+	void shiftNodesRight(int from, int amount)
+	{
+		System.arraycopy(this.nodes, from, this.nodes, from + amount, this.size - from);
+		this.size += amount;
+	}
+
+	void shiftNodesLeft(int from, int amount)
+	{
+		System.arraycopy(this.nodes, from, this.nodes, from - amount, this.size - from);
+		this.size -= amount;
+		for (int i = this.size + amount; i > this.size;) {
+			this.nodes[--i] = null;
 		}
 	}
 }
