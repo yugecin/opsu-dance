@@ -88,6 +88,13 @@ public class NodeList
 		this.reFadeIn();
 		this.centerFocusedNodeNow();
 		this.scrolling.resetState();
+		this.keepHover = false;
+		this.hoverNode = null;
+		for (int i = 0; i < this.nodes.size; i++) {
+			final Node n = this.nodes.nodes[i];
+			n.setHovered(false);
+			n.redisplayReset();
+		}
 	}
 
 	public void preRenderUpdate()

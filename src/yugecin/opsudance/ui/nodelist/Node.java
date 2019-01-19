@@ -197,6 +197,14 @@ abstract class Node
 		this.hoverIndentTime = 0;
 	}
 
+	void redisplayReset()
+	{
+		this.hoverSpreadValue = this.hoverSpreadFrom = this.hoverSpreadTo = 0f;
+		this.hoverHighlightTime = 0;
+		this.hoverIndentValue = this.hoverIndentFrom = this.hoverIndentTo = 0f;
+		this.hoverIndentTime = 0;
+	}
+
 	void focusChanged(BeatmapSet focusedSet)
 	{
 		if (this.belongsToSet(focusedSet)) {
