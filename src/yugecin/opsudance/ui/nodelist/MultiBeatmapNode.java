@@ -30,7 +30,8 @@ class MultiBeatmapNode extends Node
 	{
 		for (int i = this.beatmaps.length; i > 0;) {
 			if (beatmaps[--i] == beatmap) {
-				return this.expand(false)[i];
+				nodeList.unexpandAll();
+				return this.expand()[i];
 			}
 		}
 		return null;
@@ -42,10 +43,7 @@ class MultiBeatmapNode extends Node
 		return this.beatmaps[0].beatmapSet == focusedSet;
 	}
 
-	/**
-	 * will play at preview time if {@code focusFirstChild} is {@code true}
-	 */
-	BeatmapNode[] expand(boolean focusFirstChild)
+	BeatmapNode[] expand()
 	{
 		final BeatmapNode[] nodes = new BeatmapNode[this.beatmaps.length];
 		for (int i = 0; i < nodes.length; i++) {
@@ -54,9 +52,6 @@ class MultiBeatmapNode extends Node
 			nodes[i] = n;
 		}
 		nodeList.replace(this, nodes);
-		if (focusFirstChild) {
-			nodeList.focusNode(nodes[0], /*playAtPreviewTime*/ true);
-		}
 		return nodes;
 	}
 

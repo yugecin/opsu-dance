@@ -183,7 +183,7 @@ public class NodeList
 		this.nodes.clear();
 		Node before = this.first = null;
 
-		final ArrayList<Beatmap> temp = new ArrayList<>(10);
+		final ArrayList<Beatmap> temp = new ArrayList<>(20);
 		final ArrayList<Beatmap> maps = beatmapList.maps;
 		this.nodes.ensureCapacity(maps.size());
 		int idx = 0;
@@ -224,6 +224,7 @@ public class NodeList
 	 */
 	void replace(Node node, Node[] nodesToInsert)
 	{
+		// though not really needed since the initial size is the beatmap count
 		this.nodes.ensureCapacity(this.nodes.size + nodesToInsert.length - 1);
 		final Node replacement = nodesToInsert[0];
 		this.nodes.nodes[node.idx] = replacement;
@@ -232,31 +233,92 @@ public class NodeList
 			node.prev.next = replacement;
 		}
 		int idx = replacement.idx = node.idx;
+		int inc = nodesToInsert.length - 1;
+		++idx;
+		this.nodes.shiftRight(idx, inc);
+		System.arraycopy(nodesToInsert, 1, this.nodes.nodes, idx, inc);
 		Node prev = replacement;
 		for (int i = 1; i < nodesToInsert.length; i++) {
 			nodesToInsert[i].prev = prev;
 			prev = prev.next = nodesToInsert[i];
-			nodesToInsert[i].idx = ++idx;
 		}
-		int inc = nodesToInsert.length - 1;
 		nodesToInsert[inc].next = node.next;
 		if (node.next != null) {
 			node.next.prev = nodesToInsert[inc];
 		}
-		this.nodes.shiftRight(idx + 1, inc);
-		for (int i = 1; i < nodesToInsert.length; i++) {
-			this.nodes.nodes[idx + i] = nodesToInsert[i];
-		}
-		++idx;
-		while (idx < this.nodes.size) {
-			this.nodes.nodes[idx].idx += inc;
-			idx++;
+		for (int i = replacement.idx; i < this.nodes.size; i++) {
+			this.nodes.nodes[i].idx = i;
 		}
 		if (this.firstNodeToDraw == node) {
 			this.firstNodeToDraw = replacement;
 		}
 		if (this.first == node) {
 			this.first = replacement;
+		}
+	}
+
+	/**
+	 * {@code length} should be at least 2
+	 */
+	void replace(int idx, int length, Node replacement)
+	{
+		final Node startnode = this.nodes.nodes[idx];
+		final Node endNode = this.nodes.nodes[idx + length - 1];
+		this.nodes.nodes[idx] = replacement;
+		replacement.prev = startnode.prev;
+		if (startnode.prev != null) {
+			startnode.prev.next = replacement;
+		}
+		replacement.next = endNode.next;
+		if (endNode.next != null) {
+			endNode.next.prev = replacement;
+		}
+		this.nodes.shiftLeft(idx + length, length - 1);
+		for (int i = this.nodes.size; i > idx;) {
+			--i;
+			this.nodes.nodes[i].idx = i;
+		}
+	}
+
+	void unexpandAll()
+	{
+		int len = 0;
+		BeatmapSet lastset = null;
+		for (int i = 0; i <= this.nodes.size; i++) {
+			Node node = null;
+			if (i < this.nodes.size) {
+				node = this.nodes.nodes[i];
+			}
+			BeatmapSet newset = null;
+			if (node instanceof BeatmapNode) {
+				if (lastset == null) {
+					lastset = ((BeatmapNode) node).beatmap.beatmapSet;
+					len = 1;
+					continue;
+				}
+				newset = ((BeatmapNode) node).beatmap.beatmapSet;
+			}
+			if (newset != lastset || newset == null) {
+				if (len > 1 && lastset != null) {
+					final Beatmap[] maps = new Beatmap[len];
+					for (int j = i - len, k = 0; j < i; j++, k++) {
+						final Node n = this.nodes.nodes[j];
+						if (this.hoverNode == n) {
+							this.hoverNode = null;
+						}
+						if (this.focusNode == n) {
+							this.focusNode = null;
+						}
+						maps[k] = ((BeatmapNode) n).beatmap;
+					}
+					final MultiBeatmapNode mb = new MultiBeatmapNode(maps);
+					this.replace(i - len, len, mb);
+				}
+				len = 1;
+				lastset = newset;
+				continue;
+			}
+			len++;
 		}
 	}
 
@@ -285,7 +347,9 @@ public class NodeList
 			return false;
 		}
 		if (this.hoverNode instanceof MultiBeatmapNode) {
-			((MultiBeatmapNode) this.hoverNode).expand(true);
+			this.unexpandAll();
+			final BeatmapNode[] nodes = ((MultiBeatmapNode) this.hoverNode).expand();
+			this.focusNode(nodes[0], /*playAtPreviewTime*/ true);
 			return true;
 		}
 		if (this.hoverNode instanceof BeatmapNode) {
@@ -307,7 +371,8 @@ public class NodeList
 		out: for (;;) {
 			node = this.nodes.nodes[rand.nextInt(this.nodes.size)];
 			if (node instanceof MultiBeatmapNode) {
-				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand(false);
+				this.unexpandAll();
+				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand();
 				node = nodes[rand.nextInt(nodes.length)];
 			}
 			if (node instanceof BeatmapNode) {
@@ -351,10 +416,14 @@ public class NodeList
 	}
 
 	/**
+	 * Will collapse previous expanded nodes, except if node is an expanded node
 	 * Will scroll to node if in song menu state 
 	 */
 	void focusNode(BeatmapNode node, boolean playAtPreviewTime)
 	{
+		if (!node.isFromExpandedMultiNode) {
+			this.unexpandAll();
+		}
 		this.focusNode = node;
 		final Beatmap beatmap = node.beatmap;
 		if (beatmap.timingPoints == null) {

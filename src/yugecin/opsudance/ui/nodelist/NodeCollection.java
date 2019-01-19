@@ -44,6 +44,16 @@ class NodeCollection
 
 	void shiftRight(int from, int amount)
 	{
-		System.arraycopy(this.nodes, from, this.nodes, from + amount, amount);
+		System.arraycopy(this.nodes, from, this.nodes, from + amount, this.size - from);
+		this.size += amount;
+	}
+
+	void shiftLeft(int from, int amount)
+	{
+		System.arraycopy(this.nodes, from, this.nodes, from - amount, this.size - from);
+		this.size -= amount;
+		for (int i = this.size + amount; i > this.size;) {
+			this.nodes[--i] = null;
+		}
 	}
 }
