@@ -267,7 +267,10 @@ public class NodeList
 			this.nodes[idx - 1].onSiblingNodeUpdated();
 		}
 		if (idx < this.size) {
-			this.nodes[idx + 1].onSiblingNodeUpdated();
+			final Node n = this.nodes[idx + 1];
+			if (n != null) {
+				this.nodes[idx + 1].onSiblingNodeUpdated();
+			}
 		}
 	}
 
