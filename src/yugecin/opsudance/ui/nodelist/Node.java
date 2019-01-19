@@ -200,6 +200,27 @@ abstract class Node
 		this.y = this.targetY + this.hoverSpreadValue + this.getInternalOffset();
 	}
 
+	/**
+	 * takes over animation progress from other node
+	 *
+	 * skips appearTime
+	 */
+	void takeOver(Node other)
+	{
+		this.hoverHighlightTime = other.hoverHighlightTime;
+		this.hoverIndentValue = other.hoverIndentValue;
+		this.hoverIndentFrom = other.hoverIndentFrom;
+		this.hoverIndentTo = other.hoverIndentTo;
+		this.hoverSpreadTime = other.hoverSpreadTime;
+		this.hoverSpreadValue = other.hoverSpreadValue;
+		this.hoverSpreadFrom = other.hoverSpreadFrom;
+		this.hoverSpreadTo = other.hoverSpreadTo;
+		this.focusIndentTime = other.focusIndentTime;
+		this.focusIndentValue = other.focusIndentValue;
+		this.focusIndentFrom = other.focusIndentFrom;
+		this.focusIndentTo = other.focusIndentTo;
+	}
+
 	void setHovered(boolean flag)
 	{
 		if (flag) {

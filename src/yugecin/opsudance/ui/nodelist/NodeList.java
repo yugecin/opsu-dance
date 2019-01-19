@@ -234,6 +234,7 @@ public class NodeList
 		this.ensureCapacity(this.size + nodesToInsert.length - 1);
 		final Node replacement = nodesToInsert[0];
 		this.nodes[node.idx] = replacement;
+		replacement.takeOver(node);
 		int idx = replacement.idx = node.idx;
 		int inc = nodesToInsert.length - 1;
 		++idx;
@@ -267,6 +268,7 @@ public class NodeList
 	 */
 	void replace(int idx, int length, Node replacement)
 	{
+		replacement.takeOver(this.nodes[idx]);
 		this.nodes[idx] = replacement;
 		this.shiftNodesLeft(idx + length, length - 1);
 		for (int i = this.size; i > idx;) {
