@@ -35,13 +35,11 @@ public class NodeList
 
 	private float maxVisibleButtons;
 
-	private Node first;
-
 	private Node hoverNode;
 	private BeatmapNode focusNode;
 	private boolean keepHover;
 
-	private Node firstNodeToDraw;
+	private int firstIdxToDraw;
 
 	int size;
 	Node[] nodes;
@@ -105,7 +103,7 @@ public class NodeList
 
 		Node.update(renderDelta);
 		Node newHoverNode = null;
-		this.firstNodeToDraw = null;
+		this.firstIdxToDraw = this.size;
 		this.scrolling.setMax(this.size * Node.buttonOffset);
 		this.scrolling.update(renderDelta);
 		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
@@ -113,17 +111,17 @@ public class NodeList
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
 		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
 		this.starStream.pause();
-		Node n = this.first;
-		int idx = 0;
-		while (n != null) {
+		for (int idx = 0; idx < this.size; idx++) {
+			final Node n = this.nodes[idx];
+
 			n.targetY = position + idx * Node.buttonOffset;
 			n.targetXOffset = Math.abs(n.targetY - midY) / Node.indentPerOffset;
 
 			n.update(renderDelta, this.hoverNode);
 
 			if (n.y > invisibleYOffset && n.y < footerY) {
-				if (this.firstNodeToDraw == null) {
-					this.firstNodeToDraw = n;
+				if (this.firstIdxToDraw == this.size) {
+					this.firstIdxToDraw = idx;
 				}
 
 				if (mouseYInHoverRange &&
@@ -140,9 +138,6 @@ public class NodeList
 					this.starStream.resume();
 				}
 			}
-
-			n = n.next;
-			idx++;
 		}
 		if (!this.keepHover && this.hoverNode != newHoverNode) {
 			if (this.hoverNode != null) {
@@ -157,10 +152,12 @@ public class NodeList
 	public void render(Graphics g)
 	{
 		this.starStream.draw();
-		Node node = this.firstNodeToDraw;
-		while (node != null && node.y < footerY) {
+		for (int idx = this.firstIdxToDraw; idx < this.size; idx++) {
+			final Node node = this.nodes[idx];
+			if (node.y >= footerY) {
+				break;
+			}
 			node.draw(g, this.focusNode);
-			node = node.next;
 		}
 
 		final float scrollerY =
@@ -194,8 +191,6 @@ public class NodeList
 		}
 		this.size = 0;
 
-		Node before = this.first = null;
-
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
 		final ArrayList<Beatmap> maps = beatmapList.maps;
 		this.ensureCapacity(maps.size());
@@ -221,13 +216,6 @@ public class NodeList
 			}
 			i--;
 			newnode.idx = idx++;
-			if (before == null) {
-				this.first = newnode;
-			} else {
-				newnode.prev = before;
-				before.next = newnode;
-			}
-			before = newnode;
 			this.nodes[this.size++] = newnode;
 		}
 	}
@@ -241,32 +229,13 @@ public class NodeList
 		this.ensureCapacity(this.size + nodesToInsert.length - 1);
 		final Node replacement = nodesToInsert[0];
 		this.nodes[node.idx] = replacement;
-		replacement.prev = node.prev;
-		if (node.prev != null) {
-			node.prev.next = replacement;
-		}
 		int idx = replacement.idx = node.idx;
 		int inc = nodesToInsert.length - 1;
 		++idx;
 		this.shiftNodesRight(idx, inc);
 		System.arraycopy(nodesToInsert, 1, this.nodes, idx, inc);
-		Node prev = replacement;
-		for (int i = 1; i < nodesToInsert.length; i++) {
-			nodesToInsert[i].prev = prev;
-			prev = prev.next = nodesToInsert[i];
-		}
-		nodesToInsert[inc].next = node.next;
-		if (node.next != null) {
-			node.next.prev = nodesToInsert[inc];
-		}
 		for (int i = replacement.idx; i < this.size; i++) {
 			this.nodes[i].idx = i;
-		}
-		if (this.firstNodeToDraw == node) {
-			this.firstNodeToDraw = replacement;
-		}
-		if (this.first == node) {
-			this.first = replacement;
 		}
 	}
 
@@ -275,17 +244,7 @@ public class NodeList
 	 */
 	void replace(int idx, int length, Node replacement)
 	{
-		final Node startnode = this.nodes[idx];
-		final Node endNode = this.nodes[idx + length - 1];
 		this.nodes[idx] = replacement;
-		replacement.prev = startnode.prev;
-		if (startnode.prev != null) {
-			startnode.prev.next = replacement;
-		}
-		replacement.next = endNode.next;
-		if (endNode.next != null) {
-			endNode.next.prev = replacement;
-		}
 		this.shiftNodesLeft(idx + length, length - 1);
 		for (int i = this.size; i > idx;) {
 			--i;
@@ -391,15 +350,14 @@ public class NodeList
 			if (node instanceof BeatmapNode) {
 				break out;
 			}
-			final Node n = node;
-			while ((node = node.prev) != null) {
-				if (node instanceof BeatmapNode) {
+			int idx;
+			for (idx = node.idx + 1; idx < this.size; idx++) {
+				if ((node = this.nodes[idx]) instanceof BeatmapNode) {
 					break out;
 				}
 			}
-			node = n;
-			while ((node = node.next) != null) {
-				if (node instanceof BeatmapNode) {
+			for (idx = node.idx - 1; idx >= 0; idx--) {
+				if ((node = this.nodes[idx]) instanceof BeatmapNode) {
 					break out;
 				}
 			}
@@ -416,14 +374,12 @@ public class NodeList
 	 */
 	public boolean attemptFocusMap(Beatmap map, boolean playAtPreviewTime)
 	{
-		Node n = first;
-		while (n != null) {
-			final BeatmapNode node = n.attemptFocusMap(map);
+		for (int i = 0; i < this.size; i++) {
+			final BeatmapNode node = this.nodes[i].attemptFocusMap(map);
 			if (node != null) {
 				this.focusNode(node, playAtPreviewTime);
 				return true;
 			}
-			n = n.next;
 		}
 		return false;
 	}

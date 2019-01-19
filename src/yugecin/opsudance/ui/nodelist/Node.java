@@ -86,8 +86,8 @@ abstract class Node
 	{
 		return mouseX > node.x + hitboxXleft &&
 			(mouseY > node.y + hitboxYtop ||
-				// TODO: I don't like that this uses prev.
-				(node.prev != null && mouseY > node.prev.y + hitboxYbot)) &&
+				(node.idx < nodeList.size &&
+					mouseY > nodeList.nodes[node.idx - 1].y + hitboxYbot)) &&
 			mouseY < node.y + hitboxYbot;
 	}
 
@@ -101,7 +101,6 @@ abstract class Node
 		}
 	}
 
-	Node prev, next;
 	int idx;
 
 	float height;
