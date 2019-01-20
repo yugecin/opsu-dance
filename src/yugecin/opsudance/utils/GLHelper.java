@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.utils;
 
@@ -99,6 +99,9 @@ public class GLHelper {
 		}
 	}
 
+	/**
+	 * centered!
+	 */
 	public static void simpleTexturedQuad(TextureData td)
 	{
 		glBindTexture(GL_TEXTURE_2D, td.id);
@@ -111,6 +114,21 @@ public class GLHelper {
 		glVertex2f(td.width2, td.height2);
 		glTexCoord2f(0f, td.txth);
 		glVertex2f(-td.width2, td.height2);
+		glEnd();
+	}
+
+	public static void simpleTexturedQuadTopLeft(TextureData td)
+	{
+		glBindTexture(GL_TEXTURE_2D, td.id);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0f, 0f);
+		glVertex2f(0f, 0);
+		glTexCoord2f(td.txtw, 0f);
+		glVertex2f(td.width, 0f);
+		glTexCoord2f(td.txtw, td.txth);
+		glVertex2f(td.width, td.height);
+		glTexCoord2f(0f, td.txth);
+		glVertex2f(0f, td.height);
 		glEnd();
 	}
 }

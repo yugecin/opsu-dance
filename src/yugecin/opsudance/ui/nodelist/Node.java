@@ -15,6 +15,9 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 
 abstract class Node
 {
+	// TODO: (or not) missing stuff: version should fade in/out when (un)expanding,
+	// TODO: (or not) missing stuff: button color should be eased
+
 	public static final Color
 		BUTTON_ORANGE   = new Color(255, 122, 20),
 		BUTTON_PINK   = new Color(247, 81, 156),

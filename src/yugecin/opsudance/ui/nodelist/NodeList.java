@@ -63,6 +63,7 @@ public class NodeList
 		float scrollBarBotY)
 	{
 		Node.revalidate();
+		BeatmapNode.revalidate();
 
 		this.headerY = headerY;
 		this.footerY = footerY;
