@@ -49,7 +49,7 @@ class Scrolling
 				// but updates this fast are pretty much only possible when using
 				// the mousewheel, soooo...
 				final float boost = (1f - ((time - lastOffsetTime) / 75f));
-				offset *= 1f + IN_CIRC.calc(boost) * 10f;
+				offset *= 1f + IN_CIRC.calc(boost) * 6f;
 			}
 			this.target += offset;
 			this.lastOffsetTime = time;
