@@ -208,6 +208,7 @@ abstract class Node
 	void takeOver(Node other)
 	{
 		this.hoverHighlightTime = other.hoverHighlightTime;
+		this.hoverIndentTime = other.hoverIndentTime;
 		this.hoverIndentValue = other.hoverIndentValue;
 		this.hoverIndentFrom = other.hoverIndentFrom;
 		this.hoverIndentTo = other.hoverIndentTo;
