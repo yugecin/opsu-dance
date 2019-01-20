@@ -94,7 +94,7 @@ abstract class Node
 	{
 		return mouseX > node.x + hitboxXleft &&
 			(mouseY > node.y + hitboxYtop ||
-				(node.idx < nodeList.size &&
+				(node.idx > 0 &&
 					mouseY > nodeList.nodes[node.idx - 1].y + hitboxYbot)) &&
 			mouseY < node.y + hitboxYbot;
 	}
