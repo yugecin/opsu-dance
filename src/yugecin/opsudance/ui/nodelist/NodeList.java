@@ -250,13 +250,11 @@ public class NodeList
 			n.idx = i;
 			if (i < endIdxExclusive) {
 				n.onSiblingNodeUpdated();
-				if (i < endIdxExclusive - 1) {
-					n.appearTime = 0;
-					n.appearValue = 0f;
+				n.appearTime = 0;
+				n.appearValue = 0f;
+				if (i >= idx && n instanceof BeatmapNode) {
+					((BeatmapNode) n).doFade = true;
 				}
-			}
-			if (i >= idx && n instanceof BeatmapNode) {
-				((BeatmapNode) n).doFade = true;
 			}
 		}
 		if (0 < replacement.idx) {

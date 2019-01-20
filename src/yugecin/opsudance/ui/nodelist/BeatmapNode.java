@@ -15,6 +15,7 @@ import yugecin.opsudance.render.TextureData;
 import yugecin.opsudance.skinning.SkinService;
 
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static itdelatrisu.opsu.Utils.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.nodeList;
 import static yugecin.opsudance.options.Options.*;
@@ -111,20 +112,14 @@ class BeatmapNode extends Node
 		final boolean isFocused = focusNode == this;
 
 		float starProgress = 1f;
-		float appearProgress = 1f;
+		float fade = 1f;
 		if (this.appearTime < APPEAR_TIME) {
-			starProgress = OUT_QUART.calc(this.appearValue);
+			starProgress = (clamp(this.appearValue, .5f, 1f) - .5f) * 2f;
 			if (this.doFade) {
-				appearProgress = this.appearValue * 2f;
-				if (appearProgress > 1f) {
-					appearProgress = 1f;
-				} else {
-					appearProgress = OUT_QUART.calc(starProgress);
-				}
+				fade = OUT_CUBIC.calc((float) this.appearTime / APPEAR_TIME);
 			}
 		}
 
-		button.setAlpha(0.9f);
 		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
 
 		final Color buttonColor;
@@ -140,10 +135,10 @@ class BeatmapNode extends Node
 		}
 
 		float prevAlpha = buttonColor.a;
-		Color gradeStarCol = new Color(1f, 1f, appearProgress);
-		buttonColor.a *= appearProgress;
+		Color gradeStarCol = new Color(1f, 1f, 1f, fade);
+		buttonColor.a = 0.9f * fade;
 		textColor = new Color(textColor);
-		textColor.a *= appearProgress;
+		textColor.a *= fade;
 		super.drawButton(buttonColor);
 		buttonColor.a = prevAlpha;
 
@@ -183,6 +178,7 @@ class BeatmapNode extends Node
 		glTranslatef(cx, cy + starYoffset, 0f);
 		final float stars = (float) beatmap.starRating * starProgress;
 		int fullStars = (int) Math.floor(stars);
+		glColor3f(1f, 1f, 1f);
 		glBindTexture(GL_TEXTURE_2D, starTexture.id);
 		for (int i = 0; i < fullStars; i++) {
 			simpleTexturedQuadTopLeft(starTexture);
@@ -192,7 +188,7 @@ class BeatmapNode extends Node
 				return;
 			}
 		}
-		float starPercent = (float) stars - fullStars;
+		float starPercent = stars - fullStars;
 		if (starPercent > 0f) {
 			glBegin(GL_QUADS);
 			glTexCoord2f(0f, 0f);
