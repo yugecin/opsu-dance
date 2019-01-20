@@ -235,6 +235,9 @@ public class NodeList
 		final Node replacement = nodesToInsert[0];
 		this.nodes[node.idx] = replacement;
 		replacement.takeOver(node);
+		if (this.hoverNode == node) {
+			this.hoverNode = nodesToInsert[0];
+		}
 		int idx = replacement.idx = node.idx;
 		int inc = nodesToInsert.length - 1;
 		++idx;
@@ -313,6 +316,7 @@ public class NodeList
 						final Node n = this.nodes[j];
 						totalHeight += n.getHeight();
 						if (this.hoverNode == n) {
+							n.setHovered(false);
 							this.hoverNode = null;
 						}
 						if (this.focusNode == n) {
