@@ -140,6 +140,10 @@ public class NodeList
 				}
 			}
 		}
+		if (this.size > 0) {
+			final Node ln = this.nodes[this.size - 1];
+			offset -= ln.getHeight() + ln.getInternalOffset();
+		}
 		this.scrolling.setMax(offset);
 		this.scrolling.update(renderDelta);
 		if (!this.keepHover && this.hoverNode != newHoverNode) {
@@ -512,9 +516,19 @@ public class NodeList
 
 	private void scrollMakeNodeVisible(Node node, FloatConsumer scrollMethod)
 	{
-		if (node != null) {
-			scrollMethod.accept(node.idx * Node.buttonOffset);
+		if (node == null) {
+			return;
 		}
+		float adjustedposition = node.idx * Node.buttonOffset;
+		for (int idx = node.idx - 1; idx >= 0; idx--) {
+			if (!(this.nodes[idx] instanceof BeatmapNode) ||
+				!((BeatmapNode) this.nodes[idx]).isFromExpandedMultiNode)
+			{
+				break;
+			}
+			adjustedposition += Node.buttonInternalOffset;
+		}
+		scrollMethod.accept(adjustedposition);
 	}
 
 	// collection methods

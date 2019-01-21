@@ -70,11 +70,9 @@ class BeatmapNode extends Node
 	{
 		this.focusedHeight = buttonOffset + buttonInternalOffset;
 		this.focusedInternalOffset = 0f;
-		if (this.idx == 0) {
-			return;
-		}
-		Node prevNode = nodeList.nodes[this.idx - 1];
-		if (!(prevNode instanceof BeatmapNode) ||
+		Node prevNode;
+		if (this.idx == 0 ||
+			!((prevNode = nodeList.nodes[this.idx - 1]) instanceof BeatmapNode) ||
 			!((BeatmapNode) prevNode).isFromExpandedMultiNode)
 		{
 			this.focusedHeight += buttonInternalOffset;
