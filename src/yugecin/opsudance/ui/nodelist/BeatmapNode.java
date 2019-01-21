@@ -36,6 +36,8 @@ class BeatmapNode extends Node
 			- GameImage.getUIscale() * 8f;
 	}
 
+	private float normalHeight = buttonOffset, normalOffset;
+
 	final Beatmap beatmap;
 	boolean isFromExpandedMultiNode;
 
@@ -78,6 +80,11 @@ class BeatmapNode extends Node
 			this.focusedHeight += buttonInternalOffset;
 			this.focusedInternalOffset = buttonInternalOffset;
 		}
+		if (this.idx == 0) {
+			// TODO why is this needed? (see NodeList#scrollMakeNodeVisible)
+			this.normalHeight = buttonOffset + buttonInternalOffset;
+			this.normalOffset = buttonInternalOffset;
+		}
 	}
 
 	@Override
@@ -86,7 +93,7 @@ class BeatmapNode extends Node
 		if (this.setFocused) {
 			return this.focusedHeight * this.appearValue;
 		}
-		return buttonOffset;
+		return this.normalHeight;
 	}
 
 	@Override
@@ -95,7 +102,7 @@ class BeatmapNode extends Node
 		if (this.setFocused) {
 			return this.focusedInternalOffset * this.appearValue;
 		}
-		return 0f;
+		return this.normalOffset;
 	}
 
 	@Override

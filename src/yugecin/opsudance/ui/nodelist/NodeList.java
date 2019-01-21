@@ -142,7 +142,7 @@ public class NodeList
 		}
 		if (this.size > 0) {
 			final Node ln = this.nodes[this.size - 1];
-			offset -= ln.getHeight() + ln.getInternalOffset();
+			offset -= ln.getHeight() + Node.buttonInternalOffset;
 		}
 		this.scrolling.setMax(offset);
 		this.scrolling.update(renderDelta);
@@ -526,6 +526,10 @@ public class NodeList
 			{
 				break;
 			}
+			adjustedposition += Node.buttonInternalOffset;
+		}
+		if (node.idx > 0) {
+			// TODO: why is this needed? (see BeatmapNode#onSiblingNodeUpdated)
 			adjustedposition += Node.buttonInternalOffset;
 		}
 		scrollMethod.accept(adjustedposition);
