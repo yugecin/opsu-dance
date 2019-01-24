@@ -5,6 +5,9 @@ package yugecin.opsudance.ui.nodelist;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.UnicodeFont;
+import org.newdawn.slick.font.effects.ColorEffect;
 import org.newdawn.slick.opengl.Texture;
 
 import itdelatrisu.opsu.GameData.Grade;
@@ -26,13 +29,31 @@ class BeatmapNode extends Node
 {
 	static TextureData starTexture;
 	static float starXoffset, starYoffset;
+	static float titleYoffset, authorYoffset, versionYoffset;
+	/**
+	 * font in between {@link Fonts#MEDIUM} and {@link Fonts#LARGE}
+	 */
+	static UnicodeFont titlefont;
 
 	static void revalidate()
 	{
 		starTexture = new TextureData(GameImage.STAR);
 		starXoffset = 0f;
-		starYoffset = hitboxYtop + (hitboxYbot - hitboxYtop) * 0.6055f;
+		titleYoffset = hitboxYtop - titlefont.getLineHeight() * 0.07f;
+		authorYoffset = hitboxYtop + hitboxHeight * 0.25f;
+		versionYoffset = hitboxYtop + hitboxHeight * 0.44f;
+		starYoffset = hitboxYtop + hitboxHeight * 0.58f;
 		calcStarDimensions();
+	}
+
+	@SuppressWarnings("unchecked")
+	static void loadFont() throws SlickException
+	{
+		final float fontBase = 12f * GameImage.getUIscale();
+		titlefont = new UnicodeFont(Fonts.DEFAULT.getFont().deriveFont(fontBase * 1.75f));
+		titlefont.addAsciiGlyphs();
+		titlefont.getEffects().add(new ColorEffect());
+		titlefont.loadGlyphs();
 	}
 
 	static void calcStarDimensions()
@@ -63,7 +84,7 @@ class BeatmapNode extends Node
 		}
 		starTexture.width = t.getImageWidth();
 		starTexture.height = t.getImageHeight();
-		final float desiredSize = (hitboxYbot - hitboxYtop) * 0.26f;
+		final float desiredSize = hitboxHeight * 0.26f;
 		final float visibleHeight = (maxheight - minheight);
 		final float yo = .5f - visibleHeight / starTexture.height / 2f;
 		final float xo = left / starTexture.width;
@@ -189,7 +210,6 @@ class BeatmapNode extends Node
 		buttonColor.a = prevAlpha;
 
 		float cx = x + Node.cx;
-		float cy = y + Node.cy;
 
 		final Grade grade = Grade.B;
 		// draw grade
@@ -205,15 +225,14 @@ class BeatmapNode extends Node
 
 		// draw text
 		if (OPTION_SHOW_UNICODE.state) {
-			Fonts.loadGlyphs(Fonts.MEDIUM, beatmap.titleUnicode);
+			Fonts.loadGlyphs(titlefont, beatmap.titleUnicode);
 			Fonts.loadGlyphs(Fonts.DEFAULT, beatmap.artistUnicode);
 		}
-		Fonts.MEDIUM.drawString(cx, cy, beatmap.getTitle(), textColor);
-		Fonts.DEFAULT.drawString(cx, cy + Fonts.MEDIUM.getLineHeight() - 3,
-				String.format("%s // %s", beatmap.getArtist(), beatmap.creator), textColor);
+		titlefont.drawString(cx, y + titleYoffset, beatmap.getTitle(), textColor);
+		final String author = beatmap.getArtist() + " // " + beatmap.creator;
+		Fonts.DEFAULT.drawString(cx, y + authorYoffset, author, textColor);
 		// difficulty is also faded in, but don't care at this point
-		Fonts.BOLD.drawString(cx, cy + Fonts.MEDIUM.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 6,
-			beatmap.version, textColor);
+		Fonts.BOLD.drawString(cx, y + versionYoffset, beatmap.version, textColor);
 
 		// draw stars
 		if (beatmap.starRating < 0) {

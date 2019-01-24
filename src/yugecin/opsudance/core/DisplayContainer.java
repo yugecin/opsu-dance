@@ -38,6 +38,7 @@ import yugecin.opsudance.ui.BackButton;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
+import yugecin.opsudance.ui.nodelist.NodeList;
 import yugecin.opsudance.utils.GLHelper;
 
 import java.io.StringWriter;
@@ -500,6 +501,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 		GameImage.onResolutionChanged();
 		Fonts.init();
+		NodeList.loadFont();
 
 		if (volumeControl == null) {
 			volumeControl = new VolumeControl();

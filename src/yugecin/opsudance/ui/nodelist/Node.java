@@ -38,6 +38,7 @@ abstract class Node
 	protected static float cx, cy;
 
 	static int hitboxYtop, hitboxYbot, hitboxXleft;
+	static int hitboxHeight;
 
 	static int fadeInTime;
 	private static final int FADE_IN_TIME = 2000;
@@ -88,6 +89,7 @@ abstract class Node
 		if (hitboxXleft > buttonWidth / 2) {
 			hitboxXleft = 0;
 		}
+		hitboxHeight = hitboxYbot - hitboxYtop;
 	}
 
 	static boolean isHovered(Node node, int mouseX, int mouseY)
