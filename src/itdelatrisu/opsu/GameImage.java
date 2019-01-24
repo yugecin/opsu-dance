@@ -335,12 +335,7 @@ public enum GameImage {
 	MENU_BUTTON_MID ("button-middle", "png", false, false),
 	MENU_BUTTON_LEFT ("button-left", "png", false, false),
 	MENU_BUTTON_RIGHT ("button-right", "png", false, false),
-	STAR ("star", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.16f) / img.getHeight());
-		}
-	},
+	STAR ("star", "png", false, false),
 	STAR2 ("star2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

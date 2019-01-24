@@ -37,7 +37,7 @@ abstract class Node
 
 	protected static float cx, cy;
 
-	private static int hitboxYtop, hitboxYbot, hitboxXleft;
+	static int hitboxYtop, hitboxYbot, hitboxXleft;
 
 	static int fadeInTime;
 	private static final int FADE_IN_TIME = 2000;

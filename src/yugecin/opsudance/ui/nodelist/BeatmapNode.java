@@ -5,6 +5,7 @@ package yugecin.opsudance.ui.nodelist;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.opengl.Texture;
 
 import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.GameImage;
@@ -24,16 +25,56 @@ import static yugecin.opsudance.utils.GLHelper.*;
 class BeatmapNode extends Node
 {
 	static TextureData starTexture;
-	static float starSpacing;
-	static float starYoffset;
+	static float starXoffset, starYoffset;
 
 	static void revalidate()
 	{
 		starTexture = new TextureData(GameImage.STAR);
-		starSpacing = starTexture.width * 1.225f;
-		starYoffset =
-			Fonts.MEDIUM.getLineHeight() + Fonts.DEFAULT.getLineHeight() * 2f
-			- GameImage.getUIscale() * 8f;
+		starXoffset = 0f;
+		starYoffset = hitboxYtop + (hitboxYbot - hitboxYtop) * 0.6055f;
+		calcStarDimensions();
+	}
+
+	static void calcStarDimensions()
+	{
+		// inefficient way to get star dimensions minus transparency
+		final Texture t = GameImage.STAR.getImage().getTexture();
+		if (!t.hasAlpha()) {
+			return;
+		}
+
+		final byte[] d = t.getTextureData();
+		final int w = t.getTextureWidth();
+		final int h = t.getTextureHeight();
+
+		int minheight = h, maxheight = 0, left = w;
+		for (int i = 0, x = 3; i < h; i++) {
+			for (int j = 0; j < w; j++, x += 4) {
+				int v = d[x];
+				if (v < 0) {
+					v += 256;
+				}
+				if (v > 30) {
+					minheight = minheight < j ? minheight : j;
+					maxheight = maxheight > j ? maxheight : j;
+					left = left < i ? left : i;
+				}
+			}
+		}
+		starTexture.width = t.getImageWidth();
+		starTexture.height = t.getImageHeight();
+		final float desiredSize = (hitboxYbot - hitboxYtop) * 0.26f;
+		final float visibleHeight = (maxheight - minheight);
+		final float yo = .5f - visibleHeight / starTexture.height / 2f;
+		final float xo = left / starTexture.width;
+		final float scale = starTexture.height / visibleHeight;
+		final float ratio = starTexture.width / starTexture.height;
+		starTexture.height = desiredSize * scale;
+		starTexture.width = starTexture.height * ratio;
+		starTexture.height2 = starTexture.height / 2f;
+		starTexture.width2 = starTexture.width / 2f;
+		starYoffset += yo * starTexture.height;
+		starXoffset += xo * starTexture.width;
 	}
 
 	private float normalHeight = buttonOffset, normalOffset;
@@ -180,14 +221,14 @@ class BeatmapNode extends Node
 		}
 
 		glPushMatrix();
-		glTranslatef(cx, cy + starYoffset, 0f);
+		glTranslatef(cx, y + starYoffset, 0f);
 		final float stars = (float) beatmap.starRating * starProgress;
 		int fullStars = (int) Math.floor(stars);
 		glColor3f(1f, 1f, 1f);
 		glBindTexture(GL_TEXTURE_2D, starTexture.id);
 		for (int i = 0; i < fullStars; i++) {
 			simpleTexturedQuadTopLeft(starTexture);
-			glTranslatef(starSpacing, 0f, 0f);
+			glTranslatef(starTexture.width, 0f, 0f);
 			if (i >= 10) {
 				glPopMatrix();
 				return;
@@ -216,14 +257,14 @@ class BeatmapNode extends Node
 			glTexCoord2f(starPercent * starTexture.txtw, starTexture.txth);
 			glVertex2f(starPercent * starTexture.width, starTexture.height);
 			glEnd();
-			glTranslatef(starSpacing, 0f, 0f);
+			glTranslatef(starTexture.width, 0f, 0f);
 			fullStars++;
 		} else {
 			glColor4f(1f, 1f, 1f, .2f);
 		}
 		for (int i = fullStars; i < 10; i++) {
 			simpleTexturedQuadTopLeft(starTexture);
-			glTranslatef(starSpacing, 0f, 0f);
+			glTranslatef(starTexture.width, 0f, 0f);
 		}
 		glPopMatrix();
 	}
