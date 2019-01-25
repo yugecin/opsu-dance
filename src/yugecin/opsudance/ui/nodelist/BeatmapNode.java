@@ -98,9 +98,9 @@ class BeatmapNode extends Node
 					v += 256;
 				}
 				if (v > 30) {
-					minheight = minheight < j ? minheight : j;
-					maxheight = maxheight > j ? maxheight : j;
-					left = left < i ? left : i;
+					minheight = minheight < i ? minheight : i;
+					maxheight = maxheight > i ? maxheight : i;
+					left = left < j ? left : j;
 				}
 			}
 		}
