@@ -25,21 +25,26 @@ import static yugecin.opsudance.core.InstanceContainer.nodeList;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.utils.GLHelper.*;
 
+import java.awt.Font;
+
 class BeatmapNode extends Node
 {
 	static TextureData starTexture;
 	static float starXoffset, starYoffset;
 	static float titleYoffset, authorYoffset, versionYoffset;
-	/**
-	 * font in between {@link Fonts#MEDIUM} and {@link Fonts#LARGE}
-	 */
-	static UnicodeFont titlefont;
+
+	static UnicodeFont titlefont, artistfont, versionfont;
 
 	static void revalidate()
 	{
+		try {
+			loadFont();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		starTexture = new TextureData(GameImage.STAR);
 		starXoffset = 0f;
-		titleYoffset = hitboxYtop - titlefont.getLineHeight() * 0.07f;
+		titleYoffset = hitboxYtop - titlefont.getLineHeight() * 0.1f;
 		authorYoffset = hitboxYtop + hitboxHeight * 0.25f;
 		versionYoffset = hitboxYtop + hitboxHeight * 0.44f;
 		starYoffset = hitboxYtop + hitboxHeight * 0.58f;
@@ -47,13 +52,30 @@ class BeatmapNode extends Node
 	}
 
 	@SuppressWarnings("unchecked")
-	static void loadFont() throws SlickException
+	private static void loadFont() throws SlickException
 	{
-		final float fontBase = 12f * GameImage.getUIscale();
-		titlefont = new UnicodeFont(Fonts.DEFAULT.getFont().deriveFont(fontBase * 1.75f));
+		if (titlefont != null) {
+			titlefont.destroy();
+		}
+		if (artistfont != null) {
+			artistfont.destroy();
+		}
+		if (versionfont != null) {
+			versionfont.destroy();
+		}
+		final Font deffont = Fonts.DEFAULT.getFont();
+		titlefont = new UnicodeFont(deffont.deriveFont(hitboxHeight * 0.30f));
 		titlefont.addAsciiGlyphs();
 		titlefont.getEffects().add(new ColorEffect());
 		titlefont.loadGlyphs();
+		artistfont = new UnicodeFont(deffont.deriveFont(hitboxHeight * 0.21f));
+		artistfont.addAsciiGlyphs();
+		artistfont.getEffects().add(new ColorEffect());
+		artistfont.loadGlyphs();
+		versionfont = new UnicodeFont(deffont.deriveFont(Font.BOLD, hitboxHeight * 0.21f));
+		versionfont.addAsciiGlyphs();
+		versionfont.getEffects().add(new ColorEffect());
+		versionfont.loadGlyphs();
 	}
 
 	static void calcStarDimensions()
@@ -230,9 +252,9 @@ class BeatmapNode extends Node
 		}
 		titlefont.drawString(cx, y + titleYoffset, beatmap.getTitle(), textColor);
 		final String author = beatmap.getArtist() + " // " + beatmap.creator;
-		Fonts.DEFAULT.drawString(cx, y + authorYoffset, author, textColor);
+		artistfont.drawString(cx, y + authorYoffset, author, textColor);
 		// difficulty is also faded in, but don't care at this point
-		Fonts.BOLD.drawString(cx, y + versionYoffset, beatmap.version, textColor);
+		versionfont.drawString(cx, y + versionYoffset, beatmap.version, textColor);
 
 		// draw stars
 		if (beatmap.starRating < 0) {

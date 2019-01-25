@@ -7,7 +7,6 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import java.util.ArrayList;
 
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
@@ -26,11 +25,6 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class NodeList
 {
-	public static void loadFont() throws SlickException
-	{
-		BeatmapNode.loadFont();
-	}
-
 	private final StarStream starStream;
 
 	public final Scrolling scrolling;
