@@ -60,6 +60,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
+import org.newdawn.slick.opengl.Texture;
 
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
@@ -67,6 +68,7 @@ import yugecin.opsudance.ui.BackButton.Listener;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.input.Keyboard.*;
+import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -242,6 +244,9 @@ public class SongMenu extends BaseOpsuState
 
 	private final Listener backButtonListener = Listener.fromState(this::exit);
 
+	private float headerImgW, headerImgH;
+	private float extraHeaderW;
+
 	public SongMenu()
 	{
 		OPTION_SHOW_UNICODE.addListener(() -> this.songInfo = null);
@@ -253,10 +258,13 @@ public class SongMenu extends BaseOpsuState
 		final float footerHeight = height * 0.116666666666f;
 
 		// header/footer coordinates
-		headerY = height * 0.0075f + GameImage.MENU_MUSICNOTE.getHeight() +
-				Fonts.BOLD.getLineHeight() + Fonts.DEFAULT.getLineHeight() +
-				Fonts.SMALL.getLineHeight();
-		footerY = height - footerHeight;
+		this.headerY =
+			(Fonts.LARGE.getLineHeight() - Fonts.LARGE.getDescent()) * 2
+			+ Fonts.MEDIUM.getLineHeight();
+		this.footerY = height - footerHeight;
+
+		this.headerImgW = 9f * (this.headerImgH = 1.8913f * this.headerY);
+		this.extraHeaderW = (float) Math.floor(width - (int) this.headerImgW);
 
 		// footer logo coordinates
 		footerLogoSize = footerHeight * 3.25f;
@@ -459,12 +467,42 @@ public class SongMenu extends BaseOpsuState
 			}
 		}
 
-		// top/bottom bars
+		// header
+		final Image mh = MENU_HEADER.getImage();
+		final Texture mht = mh.getTexture();
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, mht.getTextureID());
+		glBegin(GL_QUADS);
+		glTexCoord2f(0f, 0f);
+		glVertex2f(0f, 0f);
+		glTexCoord2f(mht.getWidth(), 0f);
+		glVertex2f(this.headerImgW, 0f);
+		glTexCoord2f(mht.getWidth(), mht.getHeight());
+		glVertex2f(this.headerImgW, this.headerImgH);
+		glTexCoord2f(0f, mht.getHeight());
+		glVertex2f(0f, this.headerImgH);
+		glEnd();
+		if (this.extraHeaderW > 0f) {
+			final float mintexx = mht.getWidth() - 0.2f;
+			glPushMatrix();
+			glTranslatef(this.headerImgW, 0f, 0f);
+			glBegin(GL_QUADS);
+			glTexCoord2f(0f, 0f);
+			glVertex2f(mintexx, 0f);
+			glTexCoord2f(mht.getWidth(), 0f);
+			glVertex2f(this.extraHeaderW, 0f);
+			glTexCoord2f(mht.getWidth(), mht.getHeight());
+			glVertex2f(this.extraHeaderW, this.headerImgH);
+			glTexCoord2f(mintexx, mht.getHeight());
+			glVertex2f(0f, this.headerImgH);
+			glEnd();
+			glPopMatrix();
+		}
+
+		// bottom bar
 		g.setColor(Color.black);
-		g.fillRect(0, 0, width, headerY);
 		g.fillRect(0, footerY, width, height - footerY);
 		g.setColor(Colors.BLUE_DIVIDER);
-		g.fillRect(0, headerY, width, DIVIDER_LINE_WIDTH);
 		g.fillRect(0, footerY, width, DIVIDER_LINE_WIDTH);
 
 		// footer logo (pulsing)

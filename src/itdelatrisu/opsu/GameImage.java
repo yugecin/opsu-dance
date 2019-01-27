@@ -264,6 +264,7 @@ public enum GameImage {
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
 	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
+	MENU_HEADER ("menu-header", "png", false, false),
 	MENU_TAB ("selection-tab", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

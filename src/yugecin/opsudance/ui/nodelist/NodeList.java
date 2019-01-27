@@ -28,7 +28,7 @@ public class NodeList
 
 	public final Scrolling scrolling;
 
-	float headerY, footerY;
+	float headerY, footerY, centerOffsetY;
 	private float areaHeight, areaHeight2;
 	private float scrollBarTopY, scrollBarHeight, scrollerHeight;
 
@@ -74,6 +74,7 @@ public class NodeList
 
 		this.headerY = headerY;
 		this.footerY = footerY;
+		this.centerOffsetY = -(height - footerY - headerY) / 2f;
 		this.areaHeight = footerY - headerY;
 		this.areaHeight2 = areaHeight / 2f;
 		this.scrollBarTopY = scrollBarTopY;
@@ -116,8 +117,8 @@ public class NodeList
 		Node.update(renderDelta);
 		Node newHoverNode = null;
 		this.firstIdxToDraw = this.size;
-		final float position = -this.scrolling.position + areaHeight2 + Node.buttonOffset2;
-		final float midY = headerY + areaHeight2 - Node.buttonOffset2;
+		final float position = -this.scrolling.position + areaHeight2;
+		final float midY = headerY + areaHeight2 - Node.buttonOffset2 + this.centerOffsetY;
 		final float invisibleYOffset = this.headerY - Node.buttonOffset * 2f;
 		final boolean mouseYInHoverRange = headerY < mouseY && mouseY < footerY;
 		this.starStream.pause();
