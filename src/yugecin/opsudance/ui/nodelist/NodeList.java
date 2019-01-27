@@ -64,6 +64,14 @@ public class NodeList
 		Node.revalidate();
 		BeatmapNode.revalidate();
 
+		for (int i = 0; i < this.size; i++) {
+			final Node n = this.nodes[i];
+			n.setHovered(false);
+			n.redisplayReset();
+			n.onSiblingNodeUpdated();
+		}
+		this.hoverNode = null;
+
 		this.headerY = headerY;
 		this.footerY = footerY;
 		this.areaHeight = footerY - headerY;
@@ -78,6 +86,10 @@ public class NodeList
 
 		this.starStream.setDirection(-width, 0);
 		this.starStream.setPositionSpread(Node.buttonOffset / 5);
+
+		if (this.focusNode != null) {
+			this.scrollMakeNodeVisible(this.focusNode, scrolling::scrollToPosition);
+		}
 	}
 
 	/**

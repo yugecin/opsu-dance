@@ -124,7 +124,6 @@ abstract class Node
 
 	int idx;
 
-	float height;
 	float targetXOffset, targetY;
 	float x, y;
 

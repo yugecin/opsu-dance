@@ -155,6 +155,8 @@ class BeatmapNode extends Node
 	@Override
 	void onSiblingNodeUpdated()
 	{
+		this.normalHeight = buttonOffset;
+		this.normalOffset = 0f;
 		this.focusedHeight = buttonOffset + buttonInternalOffset;
 		this.focusedInternalOffset = 0f;
 		Node prevNode;
