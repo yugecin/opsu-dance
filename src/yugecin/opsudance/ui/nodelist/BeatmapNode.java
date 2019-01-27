@@ -88,12 +88,17 @@ class BeatmapNode extends Node
 		}
 
 		final byte[] d = t.getTextureData();
-		final int w = t.getTextureWidth();
-		final int h = t.getTextureHeight();
+		final int w = t.getImageWidth();
+		final int h = t.getImageHeight();
+		final int _w = t.getTextureHeight();
+		final int _h = t.getTextureWidth();
 
 		int minheight = h, maxheight = 0, left = w;
-		for (int i = 0, x = 3; i < h; i++) {
-			for (int j = 0; j < w; j++, x += 4) {
+		for (int i = 0, x = 3; i < _h; i++) {
+			for (int j = 0; j < _w; j++, x += 4) {
+				if (i > h || j > w) {
+					continue;
+				}
 				int v = d[x];
 				if (v < 0) {
 					v += 256;
@@ -105,9 +110,12 @@ class BeatmapNode extends Node
 				}
 			}
 		}
-		starTexture.width = t.getImageWidth();
-		starTexture.height = t.getImageHeight();
-		final float desiredSize = hitboxHeight * 0.28f;
+		if (minheight > h / 2) minheight = 0;
+		if (maxheight < h / 2) maxheight = h;
+		if (left > w / 2) left = 0;
+		starTexture.width = w;
+		starTexture.height = h;
+		final float desiredSize = hitboxHeight * 0.26f;
 		final float visibleHeight = (maxheight - minheight);
 		final float yo = .5f - visibleHeight / starTexture.height / 2f;
 		final float xo = left / starTexture.width;
