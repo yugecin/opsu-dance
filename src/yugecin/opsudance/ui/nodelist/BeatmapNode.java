@@ -44,10 +44,10 @@ class BeatmapNode extends Node
 		}
 		starTexture = new TextureData(GameImage.STAR);
 		starXoffset = 0f;
-		titleYoffset = hitboxYtop - titlefont.getLineHeight() * 0.1f;
-		authorYoffset = hitboxYtop + hitboxHeight * 0.25f;
-		versionYoffset = hitboxYtop + hitboxHeight * 0.44f;
-		starYoffset = hitboxYtop + hitboxHeight * 0.58f;
+		titleYoffset = hitboxYtop + hitboxHeight * 0.088f - titlefont.getDescent();
+		authorYoffset = hitboxYtop + hitboxHeight * 0.310f - artistfont.getDescent();
+		versionYoffset = hitboxYtop + hitboxHeight * 0.510f - versionfont.getDescent();
+		starYoffset = hitboxYtop + hitboxHeight * 0.600f;
 		calcStarDimensions();
 	}
 
@@ -64,15 +64,16 @@ class BeatmapNode extends Node
 			versionfont.destroy();
 		}
 		final Font deffont = Fonts.DEFAULT.getFont();
-		titlefont = new UnicodeFont(deffont.deriveFont(hitboxHeight * 0.30f));
+		titlefont = new UnicodeFont(deffont.deriveFont(hitboxHeight * 0.17f * 1.3f));
 		titlefont.addAsciiGlyphs();
 		titlefont.getEffects().add(new ColorEffect());
 		titlefont.loadGlyphs();
-		artistfont = new UnicodeFont(deffont.deriveFont(hitboxHeight * 0.21f));
+		final float xx = 0.14f * 1.3f;
+		artistfont = new UnicodeFont(deffont.deriveFont(hitboxHeight * xx));
 		artistfont.addAsciiGlyphs();
 		artistfont.getEffects().add(new ColorEffect());
 		artistfont.loadGlyphs();
-		versionfont = new UnicodeFont(deffont.deriveFont(Font.BOLD, hitboxHeight * 0.21f));
+		versionfont = new UnicodeFont(deffont.deriveFont(Font.BOLD, hitboxHeight * xx));
 		versionfont.addAsciiGlyphs();
 		versionfont.getEffects().add(new ColorEffect());
 		versionfont.loadGlyphs();
@@ -106,7 +107,7 @@ class BeatmapNode extends Node
 		}
 		starTexture.width = t.getImageWidth();
 		starTexture.height = t.getImageHeight();
-		final float desiredSize = hitboxHeight * 0.26f;
+		final float desiredSize = hitboxHeight * 0.28f;
 		final float visibleHeight = (maxheight - minheight);
 		final float yo = .5f - visibleHeight / starTexture.height / 2f;
 		final float xo = left / starTexture.width;
@@ -117,7 +118,7 @@ class BeatmapNode extends Node
 		starTexture.height2 = starTexture.height / 2f;
 		starTexture.width2 = starTexture.width / 2f;
 		starYoffset += yo * starTexture.height;
-		starXoffset += xo * starTexture.width;
+		starXoffset -= xo * starTexture.width;
 	}
 
 	private float normalHeight = buttonOffset, normalOffset;

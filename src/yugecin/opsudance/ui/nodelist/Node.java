@@ -68,7 +68,7 @@ abstract class Node
 					if (v < 0) {
 						v += 256;
 					}
-					if (v > 30) {
+					if (v > 100) {
 						minheight = minheight < i ? minheight : i;
 						maxheight = maxheight > i ? maxheight : i;
 						left = left < j ? left : j;
