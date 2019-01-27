@@ -253,9 +253,14 @@ class BeatmapNode extends Node
 			Fonts.loadGlyphs(titlefont, beatmap.titleUnicode);
 			Fonts.loadGlyphs(artistfont, beatmap.artistUnicode);
 		}
+		prevAlpha = textColor.a;
+		if (this.setFocused && focusNode != this) {
+			textColor.a *= 0.2f;
+		}
 		titlefont.drawString(cx, y + titleYoffset, beatmap.getTitle(), textColor);
 		final String author = beatmap.getArtist() + " // " + beatmap.creator;
 		artistfont.drawString(cx, y + authorYoffset, author, textColor);
+		textColor.a = prevAlpha;
 		// difficulty is also faded in, but don't care at this point
 		versionfont.drawString(cx, y + versionYoffset, beatmap.version, textColor);
 
