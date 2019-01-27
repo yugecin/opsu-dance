@@ -244,6 +244,7 @@ public class SongMenu extends BaseOpsuState
 
 	public SongMenu()
 	{
+		OPTION_SHOW_UNICODE.addListener(() -> this.songInfo = null);
 	}
 
 	@Override
@@ -500,7 +501,10 @@ public class SongMenu extends BaseOpsuState
 			// song info text
 			if (songInfo == null) {
 				songInfo = focusedMap.getInfo();
-				// no need to load glyphs, since BeatmapNode does that already
+				if (OPTION_SHOW_UNICODE.state) {
+					Fonts.loadGlyphs(Fonts.LARGE, focusedMap.titleUnicode);
+					Fonts.loadGlyphs(Fonts.LARGE, focusedMap.artistUnicode);
+				}
 			}
 			marginX += 5;
 			Color c = Colors.WHITE_FADE;
