@@ -76,7 +76,6 @@ class MultiBeatmapNode extends Node
 	{
 		final boolean isFocused = focusNode == this;
 
-		button.setAlpha(0.95f);
 		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
 
 		final Color buttonColor;
@@ -88,7 +87,10 @@ class MultiBeatmapNode extends Node
 		} else {
 			buttonColor = BUTTON_PINK;
 		}
+		final float oldalpha = buttonColor.a;
+		buttonColor.a = 0.9f;
 		super.drawButton(buttonColor);
+		buttonColor.a = oldalpha;
 
 		float cx = x + Node.cx;
 		float cy = y + Node.cy;

@@ -4,14 +4,18 @@ package yugecin.opsudance.ui.nodelist;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
+import org.newdawn.slick.opengl.Texture;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapSet;
+import yugecin.opsudance.core.InstanceContainer;
+import yugecin.opsudance.render.TextureData;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
+import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.utils.GLHelper.*;
 
 abstract class Node
 {
@@ -23,7 +27,7 @@ abstract class Node
 		BUTTON_PINK   = new Color(247, 81, 156),
 		BUTTON_BLUE   = new Color(3, 144, 255);
 
-	static Image button;
+	private static TextureData button;
 	static int buttonWidth, buttonHeight;
 	static float buttonOffset, buttonOffset2;
 	/**
@@ -46,9 +50,49 @@ abstract class Node
 
 	static void revalidate()
 	{
-		button =  MENU_BUTTON_BG.getImage();
-		buttonWidth = button.getWidth();
-		buttonHeight = button.getHeight();
+		button = new TextureData(MENU_BUTTON_BG.getImage());
+
+		final Texture t = button.image.getTexture();
+		final int w = t.getTextureWidth();
+		final int h = t.getTextureHeight();
+		hitboxYtop = 0;
+		hitboxYbot = h;
+		hitboxXleft = 0;
+		if (t.hasAlpha()) {
+			final byte[] d = t.getTextureData();
+
+			int minheight = h, maxheight = 0, left = w / 7;
+			for (int i = 0, x = 3; i < h; i++) {
+				for (int j = 0; j < w; j++, x += 4) {
+					int v = d[x];
+					if (v < 0) {
+						v += 256;
+					}
+					if (v > 30) {
+						minheight = minheight < i ? minheight : i;
+						maxheight = maxheight > i ? maxheight : i;
+						left = left < j ? left : j;
+					}
+				}
+			}
+			hitboxYtop = minheight;
+			hitboxYbot = maxheight;
+			hitboxXleft = left;
+		}
+
+		final float hbtop = (float) hitboxYtop / h;
+		final float hbbot = (float) hitboxYbot / h;
+		final float scaleup = (float) h / (hitboxYbot - hitboxYtop);
+		final float ratio = button.width / button.height;
+		final float desiredButtonHeight = InstanceContainer.height * 0.117f;
+		button.width = ratio * (button.height = desiredButtonHeight * scaleup);
+		button.height2 = button.height / 2f;
+		button.width2 = button.width / 2f;
+		buttonWidth = (int) button.width;
+		buttonHeight = (int) button.height;
+		hitboxYtop = (int) (hbtop * button.height);
+		hitboxYbot = (int) (hbbot * button.height);
+		hitboxHeight = hitboxYbot - hitboxYtop;
 		buttonIndent = width * (isWidescreen ? 0.00875f : 0.0125f);
 		buttonHoverIndent = buttonIndent * 6.6666f;
 		buttonOffset = buttonHeight * 0.65f;
@@ -58,38 +102,6 @@ abstract class Node
 		buttonOffsetX = width - width * (isWidescreen ? 0.55f : 0.35f) - buttonHoverIndent;
 		cx = buttonWidth * 0.043f;
 		cy = buttonHeight * 0.18f - 3f;
-
-		// button hitboxes, because they usually have lots of transparent margin
-		final int midx = buttonWidth / 2;
-		for (int y = 0; y < buttonHeight / 2; y++) {
-			if (button.getAlphaAt(midx, y) > .7) {
-				hitboxYtop = y;
-				break;
-			}
-		}
-		if (hitboxYtop > buttonHeight / 2) {
-			hitboxYtop = 0;
-		}
-		for (int y = buttonHeight - 1; y > buttonHeight / 2; y--) {
-			if (button.getAlphaAt(midx, y) > .7) {
-				hitboxYbot = y;
-				break;
-			}
-		}
-		if (hitboxYbot < buttonHeight / 2) {
-			hitboxYbot = buttonHeight - 1;
-		}
-		final int midy = buttonHeight * (hitboxYtop + hitboxYbot) / 2;
-		for (int x = 0; x < buttonWidth; x += 2) {
-			if (button.getAlphaAt(x, midy) > .7) {
-				hitboxXleft = x;
-				break;
-			}
-		}
-		if (hitboxXleft > buttonWidth / 2) {
-			hitboxXleft = 0;
-		}
-		hitboxHeight = hitboxYbot - hitboxYtop;
 	}
 
 	static boolean isHovered(Node node, int mouseX, int mouseY)
@@ -287,7 +299,13 @@ abstract class Node
 
 	protected void drawButton(Color color)
 	{
-		button.draw(x, y, this.mixBackgroundColor(color));
+		color = this.mixBackgroundColor(color);
+		glColor4f(color.r, color.g, color.b, color.a);
+		glEnable(GL_TEXTURE_2D);
+		glPushMatrix();
+		glTranslatef(x, y, 0f);
+		simpleTexturedQuadTopLeft(button);
+		glPopMatrix();
 	}
 
 	private Color mixBackgroundColor(Color baseColor)
