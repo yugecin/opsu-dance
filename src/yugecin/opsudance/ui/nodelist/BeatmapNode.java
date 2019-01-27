@@ -249,7 +249,7 @@ class BeatmapNode extends Node
 		// draw text
 		if (OPTION_SHOW_UNICODE.state) {
 			Fonts.loadGlyphs(titlefont, beatmap.titleUnicode);
-			Fonts.loadGlyphs(Fonts.DEFAULT, beatmap.artistUnicode);
+			Fonts.loadGlyphs(artistfont, beatmap.artistUnicode);
 		}
 		titlefont.drawString(cx, y + titleYoffset, beatmap.getTitle(), textColor);
 		final String author = beatmap.getArtist() + " // " + beatmap.creator;

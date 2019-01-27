@@ -12,6 +12,7 @@ import yugecin.opsudance.skinning.SkinService;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
+import static yugecin.opsudance.ui.nodelist.BeatmapNode.*;
 
 /**
  * Node that holds 2 or more beatmaps of the same set
@@ -93,17 +94,16 @@ class MultiBeatmapNode extends Node
 		buttonColor.a = oldalpha;
 
 		float cx = x + Node.cx;
-		float cy = y + Node.cy;
 
 		final Beatmap bm = this.beatmaps[0];
 
 		// draw text
 		if (OPTION_SHOW_UNICODE.state) {
-			Fonts.loadGlyphs(Fonts.MEDIUM, bm.titleUnicode);
-			Fonts.loadGlyphs(Fonts.DEFAULT, bm.artistUnicode);
+			Fonts.loadGlyphs(titlefont, bm.titleUnicode);
+			Fonts.loadGlyphs(artistfont, bm.artistUnicode);
 		}
-		Fonts.MEDIUM.drawString(cx, cy, bm.getTitle(), textColor);
-		Fonts.DEFAULT.drawString(cx, cy + Fonts.MEDIUM.getLineHeight() - 3,
-				String.format("%s // %s", bm.getArtist(), bm.creator), textColor);
+		titlefont.drawString(cx, y + titleYoffset, bm.getTitle(), textColor);
+		final String author = bm.getArtist() + " // " + bm.creator;
+		artistfont.drawString(cx, y + authorYoffset, author, textColor);
 	}
 }

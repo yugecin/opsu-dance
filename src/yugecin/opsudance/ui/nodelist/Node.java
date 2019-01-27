@@ -39,7 +39,7 @@ abstract class Node
 	public static float buttonIndent, indentPerOffset;
 	private static float buttonHoverIndent;
 
-	protected static float cx, cy;
+	protected static float cx;
 
 	static int hitboxYtop, hitboxYbot, hitboxXleft;
 	static int hitboxHeight;
@@ -101,7 +101,6 @@ abstract class Node
 		indentPerOffset = buttonOffset / buttonIndent;
 		buttonOffsetX = width - width * (isWidescreen ? 0.55f : 0.35f) - buttonHoverIndent;
 		cx = buttonWidth * 0.043f;
-		cy = buttonHeight * 0.18f - 3f;
 	}
 
 	static boolean isHovered(Node node, int mouseX, int mouseY)
