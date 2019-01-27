@@ -25,7 +25,6 @@ class Scrolling
 
 	float position;
 	float positionNorm;
-	float scrollProgress;
 
 	private float target, amplitude;
 	private int totalDelta;

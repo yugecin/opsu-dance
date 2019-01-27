@@ -12,7 +12,6 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSet;
-import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.core.input.*;
@@ -186,9 +185,6 @@ public class NodeList
 		glVertex2f(0f, scrollerEnd);
 		glEnd();
 		glPopMatrix();
-		
-		//Fonts.MEDIUM.drawString(20, height2, scrolling.currentSpeed + "");
-		Fonts.MEDIUM.drawString(20, height2, scrolling.scrollProgress + "");
 	}
 
 	public void recreate()
