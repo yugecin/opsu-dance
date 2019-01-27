@@ -53,17 +53,24 @@ abstract class Node
 		button = new TextureData(MENU_BUTTON_BG.getImage());
 
 		final Texture t = button.image.getTexture();
-		final int w = t.getTextureWidth();
-		final int h = t.getTextureHeight();
+		final int w = t.getImageWidth();
+		final int h = t.getImageHeight();
 		hitboxYtop = 0;
 		hitboxYbot = h;
 		hitboxXleft = 0;
+		float hitboxXright = w;
 		if (t.hasAlpha()) {
 			final byte[] d = t.getTextureData();
 
-			int minheight = h, maxheight = 0, left = w / 7;
-			for (int i = 0, x = 3; i < h; i++) {
-				for (int j = 0; j < w; j++, x += 4) {
+			int minheight = h, maxheight = 0, left = w, right = 0;
+			hitboxXright = w - left;
+			int _w = t.getTextureWidth();
+			int _h = t.getTextureHeight();
+			for (int i = 0, x = 3; i < _h; i++) {
+				for (int j = 0; j < _w; j++, x += 4) {
+					if (i > h || j > w) {
+						continue;
+					}
 					int v = d[x];
 					if (v < 0) {
 						v += 256;
@@ -72,14 +79,21 @@ abstract class Node
 						minheight = minheight < i ? minheight : i;
 						maxheight = maxheight > i ? maxheight : i;
 						left = left < j ? left : j;
+						right = right > j ? right : j;
 					}
 				}
 			}
+			if (minheight > h / 2) minheight = 0;
+			if (maxheight < h / 2) maxheight = h;
+			if (left > w / 2) left = 0;
+			if (right < w / 2) right = w;
 			hitboxYtop = minheight;
 			hitboxYbot = maxheight;
 			hitboxXleft = left;
+			hitboxXright = right;
 		}
 
+		hitboxXright = hitboxXright / w;
 		final float hbtop = (float) hitboxYtop / h;
 		final float hbbot = (float) hitboxYbot / h;
 		final float scaleup = (float) h / (hitboxYbot - hitboxYtop);
@@ -99,7 +113,8 @@ abstract class Node
 		buttonOffset2 = buttonOffset / 2f;
 		buttonInternalOffset = (buttonHeight * .935f - buttonOffset) / 2f;
 		indentPerOffset = buttonOffset / buttonIndent;
-		buttonOffsetX = width - width * (isWidescreen ? 0.55f : 0.35f) - buttonHoverIndent;
+		buttonOffsetX = -(hitboxXright * buttonWidth) + buttonHoverIndent * 2;
+		buttonOffsetX += 20; // padding because they're usually rounded
 		cx = buttonWidth * 0.043f;
 	}
 
@@ -210,7 +225,7 @@ abstract class Node
 		}
 
 		this.x = width
-			+ (-buttonOffsetX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
+			+ (buttonOffsetX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
 			- this.focusIndentValue;
 		this.y = this.targetY + this.hoverSpreadValue + this.getInternalOffset();
 	}
