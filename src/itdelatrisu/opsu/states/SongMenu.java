@@ -260,7 +260,7 @@ public class SongMenu extends BaseOpsuState
 		this.footerY = height - footerHeight;
 
 		this.headerImgW = 9f * (this.headerImgH = 1.8913f * this.headerY);
-		this.extraHeaderW = (float) Math.floor(width - (int) this.headerImgW);
+		this.extraHeaderW = (float) Math.ceil(width - (int) this.headerImgW);
 
 		// footer logo coordinates
 		footerLogoSize = footerHeight * 3.25f;
@@ -434,14 +434,14 @@ public class SongMenu extends BaseOpsuState
 		if (this.extraHeaderW > 0f) {
 			final float mintexx = mht.getWidth() - 0.2f;
 			glPushMatrix();
-			glTranslatef(this.headerImgW, 0f, 0f);
+			glTranslated(Math.floor(this.headerImgW) - 1, 0d, 0d);
 			glBegin(GL_QUADS);
 			glTexCoord2f(0f, 0f);
 			glVertex2f(mintexx, 0f);
 			glTexCoord2f(mht.getWidth(), 0f);
-			glVertex2f(this.extraHeaderW, 0f);
+			glVertex2f(this.extraHeaderW + 1f, 0f);
 			glTexCoord2f(mht.getWidth(), mht.getHeight());
-			glVertex2f(this.extraHeaderW, this.headerImgH);
+			glVertex2f(this.extraHeaderW + 1f, this.headerImgH);
 			glTexCoord2f(mintexx, mht.getHeight());
 			glVertex2f(0f, this.headerImgH);
 			glEnd();
