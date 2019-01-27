@@ -392,48 +392,6 @@ public class SongMenu extends BaseOpsuState
 			GameImage.PLAYFIELD.getImage().draw(0, 0, Colors.WHITE_ALPHA);
 		}
 
-		/*
-		// song buttons & star stream
-		BeatmapNode node = firstVisibleMapnode;
-		int songButtonIndex = startNodeOffset;
-		if (node != null && node.prev != null) {
-			node = node.prev;
-			songButtonIndex--;
-		}
-		starStream.pause();
-		int starbtnidx = songButtonIndex;
-		BeatmapNode starnode = node;
-		while (starbtnidx < MAX_SONG_BUTTONS + 1 && starnode != null) {
-			if (starnode == focusNode) {
-				float ypos = buttonY + (starbtnidx * buttonOffset);
-				ypos += buttonOffset / 2f;
-				starStream.setPosition(width, ypos);
-				starStream.resume();
-				break;
-			}
-			
-			starbtnidx++;
-			starnode = starnode.next;
-		}
-		starStream.draw();
-		while (songButtonIndex < MAX_SONG_BUTTONS + 1 && node != null) {
-			// draw the node
-			float offset = (node == hoverIndex) ? hoverOffset.getValue() : 0f;
-			float ypos = buttonY + (songButtonIndex * buttonOffset);
-			float mid = (height / 2) - ypos - (buttonOffset / 2);
-			final float circleRadi = 700 * GameImage.getUIscale();
-			//finds points along a very large circle  (x^2 = h^2 - y^2)
-			float t = circleRadi * circleRadi - (mid * mid);
-			float xpos = (float) ((t > 0) ? Math.sqrt(t) : 0) - circleRadi + 50 * GameImage.getUIscale();
-			ScoreData[] scores = getScoreDataForNode(node, false);
-			node.draw(buttonX - offset - xpos, ypos,
-			          (scores == null) ? Grade.NULL : scores[0].getGrade(), (node == focusNode));
-
-			songButtonIndex++;
-			node = node.next;
-		}
-		*/
-
 		// song nodes
 		nodeList.render(g);
 
