@@ -54,11 +54,9 @@ import java.nio.file.WatchEvent.Kind;
 import java.util.Map;
 
 import org.lwjgl.input.Mouse;
-import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.gui.TextField;
 import org.newdawn.slick.opengl.Texture;
 
@@ -67,6 +65,7 @@ import yugecin.opsudance.core.state.BaseOpsuState;
 import yugecin.opsudance.ui.BackButton.Listener;
 
 import static itdelatrisu.opsu.GameImage.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static org.lwjgl.input.Keyboard.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -114,9 +113,6 @@ public class SongMenu extends BaseOpsuState
 
 	/** Information text to display based on the search query. */
 	private String searchResultString = null;
-
-	/** Loader animation. */
-	private Animation loader;
 
 	/** Whether or not to reset game data upon entering the state. */
 	private boolean resetGame = false;
@@ -358,11 +354,6 @@ public class SongMenu extends BaseOpsuState
 		selectRandomButton.setHoverFade(0f);
 		selectMapOptionsButton.setHoverFade(0f);
 
-		// loader
-		int loaderDim = GameImage.MENU_MUSICNOTE.getWidth();
-		SpriteSheet spr = new SpriteSheet(GameImage.MENU_LOADER.getImage(), loaderDim, loaderDim);
-		loader = new Animation(spr, 50);
-
 		// beatmap watch service listener
 		BeatmapWatchService.addListener(new BeatmapWatchServiceListener() {
 			@Override
@@ -481,18 +472,14 @@ public class SongMenu extends BaseOpsuState
 		// header
 		if (focusedMap != null) {
 			// music/loader icon
-			float marginX = width * 0.005f, marginY = height * 0.005f;
-			Image musicNote = GameImage.MENU_MUSICNOTE.getImage();
-			if (MusicController.isTrackLoading())
-				loader.draw(marginX, marginY);
-			else {
-				float t = musicIconBounceTimer.getValue() * 2f;
-				if (t > 1)
-					t = 2f - t;
-				float musicNoteScale = 1f + 0.3f * t;
-				musicNote.getScaledCopy(musicNoteScale).drawCentered(marginX + musicNote.getWidth() / 2f, marginY + musicNote.getHeight() / 2f);
-			}
-			int iconWidth = musicNote.getWidth();
+			float textY = -Fonts.LARGE.getDescent();
+			final float pad = 6f;
+			float t = IN_OUT_BACK.calc(musicIconBounceTimer.getValue());
+			final float iconsize = Fonts.MEDIUM.getLineHeight();
+			int _size = (int) (iconsize * (.5f + t / 2f));
+			final Image icon = MENU_ICON.getImage().getScaledCopy(_size, _size);
+			icon.drawCentered(pad + iconsize / 2f, textY + Fonts.LARGE.getAscent());
+			float textX = pad + iconsize + pad;
 
 			// song info text
 			if (songInfo == null) {
@@ -502,19 +489,21 @@ public class SongMenu extends BaseOpsuState
 					Fonts.loadGlyphs(Fonts.LARGE, focusedMap.artistUnicode);
 				}
 			}
-			marginX += 5;
+
 			Color c = Colors.WHITE_FADE;
 			float oldAlpha = c.a;
-			float t = AnimationEquation.OUT_QUAD.calc(songChangeTimer.getValue());
-			float headerTextY = marginY * 0.2f;
+			t = OUT_QUAD.calc(songChangeTimer.getValue());
 			c.a = Math.min(t * songInfo.length / 1.5f, 1f);
-			if (c.a > 0)
-				Fonts.LARGE.drawString(marginX + iconWidth * 1.05f, headerTextY, songInfo[0], c);
-			headerTextY += Fonts.LARGE.getLineHeight() - 6;
+			if (c.a > 0) {
+				Fonts.LARGE.drawString(textX, textY, songInfo[0], c);
+			}
+			textY += Fonts.LARGE.getLineHeight() - 6;
 			c.a = Math.min((t - 1f / (songInfo.length * 1.5f)) * songInfo.length / 1.5f, 1f);
-			if (c.a > 0)
-				Fonts.DEFAULT.drawString(marginX + iconWidth * 1.05f, headerTextY, songInfo[1], c);
-			headerTextY += Fonts.DEFAULT.getLineHeight() - 2;
+			if (c.a > 0) {
+				Fonts.DEFAULT.drawString(textX, textY, songInfo[1], c);
+			}
+			textX = pad;
+			textY = Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight();
 			c.a = Math.min((t - 2f / (songInfo.length * 1.5f)) * songInfo.length / 1.5f, 1f);
 			if (c.a > 0) {
 				float speedModifier = GameMod.getSpeedMultiplier();
@@ -522,14 +511,14 @@ public class SongMenu extends BaseOpsuState
 					(speedModifier > 1f) ? Colors.RED_HIGHLIGHT : Colors.BLUE_HIGHLIGHT;
 				float oldAlpha2 = color2.a;
 				color2.a = c.a;
-				Fonts.BOLD.drawString(marginX, headerTextY, songInfo[2], color2);
+				Fonts.BOLD.drawString(textX, textY, songInfo[2], color2);
 				color2.a = oldAlpha2;
 			}
-			headerTextY += Fonts.BOLD.getLineHeight() - 4;
+			textY += Fonts.BOLD.getLineHeight() - 4;
 			c.a = Math.min((t - 3f / (songInfo.length * 1.5f)) * songInfo.length / 1.5f, 1f);
 			if (c.a > 0)
-				Fonts.DEFAULT.drawString(marginX, headerTextY, songInfo[3], c);
-			headerTextY += Fonts.DEFAULT.getLineHeight() - 4;
+				Fonts.DEFAULT.drawString(textX, textY, songInfo[3], c);
+			textY += Fonts.DEFAULT.getLineHeight() - 4;
 			c.a = Math.min((t - 4f / (songInfo.length * 1.5f)) * songInfo.length / 1.5f, 1f);
 			if (c.a > 0) {
 				float multiplier = GameMod.getDifficultyMultiplier();
@@ -537,7 +526,7 @@ public class SongMenu extends BaseOpsuState
 					(multiplier > 1f) ? Colors.RED_HIGHLIGHT : Colors.BLUE_HIGHLIGHT;
 				float oldAlpha4 = color4.a;
 				color4.a = c.a;
-				Fonts.SMALL.drawString(marginX, headerTextY, songInfo[4], color4);
+				Fonts.SMALL.drawString(textX, textY, songInfo[4], color4);
 				color4.a = oldAlpha4;
 			}
 			c.a = oldAlpha;
@@ -851,6 +840,7 @@ public class SongMenu extends BaseOpsuState
 			if (nodeList.focusHoveredNode()) {
 				this.songInfo = null;
 				this.songChangeTimer.setTime(0);
+				this.musicIconBounceTimer.setTime(0);
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;

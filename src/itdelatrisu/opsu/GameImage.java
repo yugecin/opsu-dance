@@ -265,24 +265,11 @@ public enum GameImage {
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
 	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
 	MENU_HEADER ("menu-header", "png", false, false),
+	MENU_ICON ("menu-icon", "png", false, false),
 	MENU_TAB ("selection-tab", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy((h * 0.033f) / img.getHeight());
-		}
-	},
-	MENU_MUSICNOTE ("music-note", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r, r);
-		}
-	},
-	MENU_LOADER ("loader", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r / 48f);
 		}
 	},
 	MENU_BG ("menu-background", "png|jpg", false, true) {
