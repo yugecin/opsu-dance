@@ -1,26 +1,20 @@
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.GameImage;
-import itdelatrisu.opsu.ui.MenuButton;
-import itdelatrisu.opsu.ui.UI;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-
-import org.newdawn.slick.Image;
 
 /**
  * Beatmap groups.
  */
-public enum BeatmapGroup {
-	/** All beatmaps (no filter). */
-	ALL (0, "All Songs", null),
+public class BeatmapGroup
+{
+	public static final BeatmapGroup ALL = new BeatmapGroup("All Songs", null);
 
-	/** Most recently played beatmaps. */
-	RECENT (1, "Last Played", "Your recently played beatmaps will appear in this list!") {
+	public static final BeatmapGroup RECENT = new BeatmapGroup(
+		"Last Played",
+		"Your recently played beatmaps will appear in this list!")
+	{
 		/** Number of elements to show. */
 		private static final int K = 20;
 
@@ -61,10 +55,12 @@ public enum BeatmapGroup {
 			}
 			return filteredList;
 		}
-	},
+	};
 
-	/** "Favorite" beatmaps. */
-	FAVORITE (2, "Favorites", "Right-click a beatmap to add it to your Favorites!") {
+	public static final BeatmapGroup FAVORITE = new BeatmapGroup(
+		"Favorites",
+		"Right-click a beatmap to add it to your Favorites!")
+	{
 		@Override
 		public ArrayList<Beatmap> filter(ArrayList<Beatmap> list) {
 			// find "favorite" beatmaps
@@ -77,100 +73,34 @@ public enum BeatmapGroup {
 		}
 	};
 
-	/** The ID of the group (used for tab positioning). */
-	private final int id;
-
-	/** The name of the group. */
-	private final String name;
-
-	/** The message to display if this list is empty. */
-	private final String emptyMessage;
-
-	/** The tab associated with the group (displayed in Song Menu screen). */
-	private MenuButton tab;
-
-	/** Total number of groups. */
-	private static final int SIZE = values().length;
-
-	/** Array of BeatmapGroup objects in reverse order. */
-	public static final BeatmapGroup[] VALUES_REVERSED;
-	static {
-		VALUES_REVERSED = values();
-		Collections.reverse(Arrays.asList(VALUES_REVERSED));
-	}
-
-	/** Current group. */
-	private static BeatmapGroup currentGroup = ALL;
+	/**
+	 * in reversed order because that's how they're drawn :)
+	 */
+	public static final BeatmapGroup[] GROUPS = {
+		FAVORITE,
+		RECENT,
+		ALL,
+	};
 
 	/**
-	 * Returns the current group.
-	 * @return the current group
+	 * should never be {@code null}
 	 */
-	public static BeatmapGroup current() { return currentGroup; }
+	public static BeatmapGroup current = ALL;
 
-	/**
-	 * Sets a new group.
-	 * @param group the new group
-	 */
-	public static void set(BeatmapGroup group) { currentGroup = group; }
+	public final String name;
+	public final String emptyMessage;
 
-	/**
-	 * Constructor.
-	 * @param id the ID of the group (for tab positioning)
-	 * @param name the group name
-	 * @param emptyMessage the message to display if this list is empty
-	 */
-	BeatmapGroup(int id, String name, String emptyMessage) {
-		this.id = id;
+	private BeatmapGroup(String name, String emptyMessage)
+	{
 		this.name = name;
 		this.emptyMessage = emptyMessage;
 	}
 
 	/**
-	 * Returns the message to display if this list is empty.
-	 * @return the message, or null if none
+	 * may not modify given list
 	 */
-	public String getEmptyMessage() { return emptyMessage; }
-
 	public ArrayList<Beatmap> filter(ArrayList<Beatmap> list)
 	{
 		return list;
-	}
-
-	/**
-	 * Initializes the tab.
-	 * @param containerWidth the container width
-	 * @param bottomY the bottom y coordinate
-	 */
-	public void init(int containerWidth, float bottomY) {
-		Image tab = GameImage.MENU_TAB.getImage();
-		int tabWidth = tab.getWidth();
-		float buttonX = containerWidth / 2f;
-		float tabOffset = (containerWidth - buttonX - tabWidth) / (SIZE - 1);
-		if (tabOffset > tabWidth) {  // prevent tabs from being spaced out
-			tabOffset = tabWidth;
-			buttonX = (containerWidth * 0.99f) - (tabWidth * SIZE);
-		}
-		this.tab = new MenuButton(tab,
-				(buttonX + (tabWidth / 2f)) + (id * tabOffset),
-				bottomY - (tab.getHeight() / 2f)
-		);
-	}
-
-	/**
-	 * Checks if the coordinates are within the image bounds.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @return true if within bounds
-	 */
-	public boolean contains(float x, float y) { return tab.contains(x, y); }
-
-	/**
-	 * Draws the tab.
-	 * @param selected whether the tab is selected (white) or not (red)
-	 * @param isHover whether to include a hover effect (unselected only)
-	 */
-	public void draw(boolean selected, boolean isHover) {
-		UI.drawTab(tab.getX(), tab.getY(), name, selected, isHover);
 	}
 }

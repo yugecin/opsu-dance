@@ -83,7 +83,7 @@ public class BeatmapList
 	 * This does not erase any parsed nodes.
 	 */
 	public void reset() {
-		nodes = groupNodes = BeatmapGroup.current().filter(maps);
+		nodes = groupNodes = BeatmapGroup.current.filter(maps);
 		this.expandedSet = null;
 		this.expandedSetFirstNode = this.expandedSetLastNode = null;
 		lastQuery = "";

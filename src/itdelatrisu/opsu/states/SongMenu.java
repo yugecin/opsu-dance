@@ -243,6 +243,9 @@ public class SongMenu extends BaseOpsuState
 	private float headerImgW, headerImgH;
 	private float extraHeaderW;
 
+	private BeatmapGroup hoveredTab;
+	private float tabW, tabH, tabOverlap, tabRightPadding, tabFontYOffset;
+
 	public SongMenu()
 	{
 		OPTION_SHOW_UNICODE.addListener(() -> this.songInfo = null);
@@ -251,6 +254,14 @@ public class SongMenu extends BaseOpsuState
 	@Override
 	public void revalidate()
 	{
+		this.tabW = width * 0.1f;
+		this.tabOverlap = 0.13f * this.tabW;
+		this.tabH = this.tabW * MENU_TAB.getHeight() / MENU_TAB.getWidth();
+		this.tabRightPadding = width * 0.0125f;
+		this.tabFontYOffset =
+			this.tabH / 2f - Fonts.SMALLBOLD.getDescent()
+			- (Fonts.SMALLBOLD.getAscent() - Fonts.SMALLBOLD.getDescent()) / 2f;
+
 		final float footerHeight = height * 0.116666666666f;
 
 		// header/footer coordinates
@@ -304,10 +315,6 @@ public class SongMenu extends BaseOpsuState
 		};
 		sortMenu.setBackgroundColor(Colors.BLACK_BG_FOCUS);
 		sortMenu.setBorderColor(Colors.BLUE_DIVIDER);
-
-		// initialize group tabs
-		for (BeatmapGroup group : BeatmapGroup.values())
-			group.init(width, headerY - DIVIDER_LINE_WIDTH / 2);
 
 		// initialize score data buttons
 		ScoreData.init(width, headerY + height * 0.01f);
@@ -548,21 +555,82 @@ public class SongMenu extends BaseOpsuState
 		selectMapOptionsButton.draw();
 
 		// group tabs
-		BeatmapGroup currentGroup = BeatmapGroup.current();
-		BeatmapGroup hoverGroup = null;
-		if (!displayContainer.suppressHover) {
-			for (BeatmapGroup group : BeatmapGroup.values()) {
-				if (group.contains(mouseX, mouseY)) {
-					hoverGroup = group;
-					break;
+		if (displayContainer.suppressHover) {
+			this.hoveredTab = null;
+		}
+		final float tabOffset = this.tabW - this.tabOverlap;
+		float tabX = width
+			- this.tabRightPadding - this.tabOverlap
+			- tabOffset * BeatmapGroup.GROUPS.length;
+		float activeTabX = 0f;
+		float tabXHoverOffset = 0f; // because active tab overlaps
+		final float tabTextXOffset = this.tabW / 2f;
+		final boolean tabYhovr = this.headerY - this.tabH < mouseY && mouseY < this.headerY;
+		final Texture textab = MENU_TAB.getImage().getTexture();
+		glPushMatrix();
+		glTranslatef(tabX, this.headerY - this.tabH, 0f);
+		//RED_HOVER       = new Color(255, 112, 112),
+		for (BeatmapGroup group : BeatmapGroup.GROUPS) {
+			if (group != BeatmapGroup.current) {
+				glBindTexture(GL_TEXTURE_2D, textab.getTextureID());
+				if (!displayContainer.suppressHover &&
+					tabYhovr &&
+					tabX + tabXHoverOffset < mouseX && mouseX < tabX + tabOffset)
+				{
+					this.hoveredTab = group;
+					glColor3f(1f, .44f, .44f);
+				} else {
+					glColor3f(1f, 0f, 0f);
 				}
+				glBegin(GL_QUADS);
+				glTexCoord2f(0f, 0f);
+				glVertex2f(0f, 0f);
+				glTexCoord2f(textab.getWidth(), 0f);
+				glVertex2f(this.tabW, 0f);
+				glTexCoord2f(textab.getWidth(), textab.getHeight());
+				glVertex2f(this.tabW, this.tabH);
+				glTexCoord2f(0f, textab.getHeight());
+				glVertex2f(0f, this.tabH);
+				glEnd();
+				tabXHoverOffset = 0f;
+			} else {
+				activeTabX = tabX;
+				tabXHoverOffset = this.tabOverlap;
 			}
+			final float textOff = Fonts.SMALLBOLD.getWidth(group.name) / 2f;
+			Fonts.SMALLBOLD.drawString(
+				tabTextXOffset - textOff,
+				this.tabFontYOffset,
+				group.name
+			);
+			glTranslatef(tabOffset, 0f, 0f);
+			tabX += tabOffset;
 		}
-		for (BeatmapGroup group : BeatmapGroup.VALUES_REVERSED) {
-			if (group != currentGroup)
-				group.draw(false, group == hoverGroup);
-		}
-		currentGroup.draw(true, false);
+		glPopMatrix();
+		glPushMatrix();
+		glTranslatef(activeTabX, this.headerY - this.tabH, 0f);
+		glBindTexture(GL_TEXTURE_2D, textab.getTextureID());
+		// TODO this color should ideally be eased
+		glColor3f(1f, 1f, 1f);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0f, 0f);
+		glVertex2f(0f, 0f);
+		glTexCoord2f(textab.getWidth(), 0f);
+		glVertex2f(this.tabW, 0f);
+		glTexCoord2f(textab.getWidth(), textab.getHeight());
+		glVertex2f(this.tabW, this.tabH);
+		glTexCoord2f(0f, textab.getHeight());
+		glVertex2f(0f, this.tabH);
+		glEnd();
+		final String tabtext = BeatmapGroup.current.name;
+		final float textOff = Fonts.SMALLBOLD.getWidth(tabtext) / 2f;
+		Fonts.SMALLBOLD.drawString(
+			tabTextXOffset - textOff,
+			this.tabFontYOffset,
+			tabtext,
+			Color.black // TODO this color should ideally be eased too
+		);
+		glPopMatrix();
 
 		// search
 		boolean searchEmpty = searchTextField.getText().isEmpty();
@@ -615,7 +683,7 @@ public class SongMenu extends BaseOpsuState
 		if (reloadThread == null)
 			MusicController.loopTrackIfEnded(true);
 		else if (reloadThread.isFinished()) {
-			BeatmapGroup.set(BeatmapGroup.ALL);
+			BeatmapGroup.current = BeatmapGroup.ALL;
 			BeatmapSortOrder.set(BeatmapSortOrder.TITLE);
 			beatmapList.reset();
 			nodeList.recreate();
@@ -792,14 +860,8 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// group tabs
-		for (BeatmapGroup group : BeatmapGroup.values()) {
-			if (!group.contains(x, y)) {
-				continue;
-			}
-			if (group == BeatmapGroup.current()) {
-				return;
-			}
-			BeatmapGroup.set(group);
+		if (this.hoveredTab != null && this.hoveredTab != BeatmapGroup.current) {
+			BeatmapGroup.current = this.hoveredTab;
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			songInfo = null;
 			scoreMap = null;
