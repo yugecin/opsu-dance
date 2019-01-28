@@ -555,9 +555,7 @@ public class SongMenu extends BaseOpsuState
 		selectMapOptionsButton.draw();
 
 		// group tabs
-		if (displayContainer.suppressHover) {
-			this.hoveredTab = null;
-		}
+		this.hoveredTab = null;
 		final float tabOffset = this.tabW - this.tabOverlap;
 		float tabX = width
 			- this.tabRightPadding - this.tabOverlap
@@ -565,7 +563,9 @@ public class SongMenu extends BaseOpsuState
 		float activeTabX = 0f;
 		float tabXHoverOffset = 0f; // because active tab overlaps
 		final float tabTextXOffset = this.tabW / 2f;
-		final boolean tabYhovr = this.headerY - this.tabH < mouseY && mouseY < this.headerY;
+		final boolean tabYhovr =
+			!displayContainer.suppressHover &&
+			this.headerY - this.tabH < mouseY && mouseY < this.headerY;
 		final Texture textab = MENU_TAB.getImage().getTexture();
 		glPushMatrix();
 		glTranslatef(tabX, this.headerY - this.tabH, 0f);
@@ -573,9 +573,9 @@ public class SongMenu extends BaseOpsuState
 		for (BeatmapGroup group : BeatmapGroup.GROUPS) {
 			if (group != BeatmapGroup.current) {
 				glBindTexture(GL_TEXTURE_2D, textab.getTextureID());
-				if (!displayContainer.suppressHover &&
-					tabYhovr &&
-					tabX + tabXHoverOffset < mouseX && mouseX < tabX + tabOffset)
+				if (tabYhovr &&
+					tabX + tabXHoverOffset < mouseX &&
+					mouseX < tabX + tabOffset)
 				{
 					this.hoveredTab = group;
 					glColor3f(1f, .44f, .44f);
@@ -860,8 +860,9 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// group tabs
-		if (this.hoveredTab != null && this.hoveredTab != BeatmapGroup.current) {
+		if (this.hoveredTab != null) {
 			BeatmapGroup.current = this.hoveredTab;
+			this.hoveredTab = null;
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			songInfo = null;
 			scoreMap = null;
