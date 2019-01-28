@@ -503,7 +503,7 @@ public class SongMenu extends BaseOpsuState
 				Fonts.DEFAULT.drawString(textX, textY, songInfo[1], c);
 			}
 			textX = pad;
-			textY = Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight();
+			textY += Fonts.DEFAULT.getLineHeight();
 			c.a = Math.min((t - 2f / (songInfo.length * 1.5f)) * songInfo.length / 1.5f, 1f);
 			if (c.a > 0) {
 				float speedModifier = GameMod.getSpeedMultiplier();
