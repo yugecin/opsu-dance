@@ -246,6 +246,9 @@ public class SongMenu extends BaseOpsuState
 	private BeatmapGroup hoveredTab;
 	private float tabW, tabH, tabOverlap, tabRightPadding, tabFontYOffset;
 
+	private int selectionFlashTime = SELECTION_FLASH_TIME;
+	private static final int SELECTION_FLASH_TIME = 666;
+
 	public SongMenu()
 	{
 		OPTION_SHOW_UNICODE.addListener(() -> this.songInfo = null);
@@ -673,6 +676,26 @@ public class SongMenu extends BaseOpsuState
 
 			UI.drawLoadingProgress(g);
 		}
+
+		if (this.selectionFlashTime < SELECTION_FLASH_TIME) {
+			if ((this.selectionFlashTime += renderDelta) > SELECTION_FLASH_TIME) {
+				this.selectionFlashTime = SELECTION_FLASH_TIME;
+			}
+			float alpha = (float) this.selectionFlashTime / SELECTION_FLASH_TIME;
+			if (alpha < .1f) {
+				alpha = IN_CUBIC.calc(alpha * 10f);
+			} else {
+				alpha = 1f - OUT_QUAD.calc((alpha - .1f) / .9f);
+			}
+			glDisable(GL_TEXTURE_2D);
+			glColor4f(1f, 1f, 1f, alpha * .075f);
+			glBegin(GL_QUADS);
+			glVertex2i(0, 0);
+			glVertex2i(width, 0);
+			glVertex2i(width, height);
+			glVertex2i(0, height);
+			glEnd();
+		}
 	}
 
 	@Override
@@ -904,6 +927,7 @@ public class SongMenu extends BaseOpsuState
 				this.songInfo = null;
 				this.songChangeTimer.setTime(0);
 				this.musicIconBounceTimer.setTime(0);
+				this.selectionFlashTime = 0;
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
