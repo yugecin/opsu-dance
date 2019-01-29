@@ -112,6 +112,7 @@ public class DropdownMenu<E> extends Component
 		this.x = x;
 		this.y = y;
 		this.baseHeight = fontNormal.getLineHeight();
+		this.baseHeight -= 2; // meh.. :/
 		this.offsetY = baseHeight + baseHeight * PADDING_Y;
 		this.height = (int) (offsetY * (items.length + 1));
 		int downChevronSize = baseHeight * 4 / 5;

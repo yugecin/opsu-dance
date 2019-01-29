@@ -42,6 +42,7 @@ public class Colors {
 		LIGHT_GREEN     = new Color(128, 255, 128),
 		LIGHT_BLUE      = new Color(128, 128, 255),
 		GREEN_SEARCH    = new Color(173, 255, 47),
+		GREEN_SORT      = new Color(145, 175, 115),
 		DARK_GRAY       = new Color(0.3f, 0.3f, 0.3f, 1f),
 		RED_HIGHLIGHT   = new Color(246, 154, 161),
 		BLUE_HIGHLIGHT  = new Color(173, 216, 230),

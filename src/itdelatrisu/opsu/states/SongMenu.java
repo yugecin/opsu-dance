@@ -246,6 +246,8 @@ public class SongMenu extends BaseOpsuState
 	private BeatmapGroup hoveredTab;
 	private float tabW, tabH, tabOverlap, tabRightPadding, tabFontYOffset;
 
+	private float sortTextX, sortTextY;
+
 	private int selectionFlashTime = SELECTION_FLASH_TIME;
 	private static final int SELECTION_FLASH_TIME = 666;
 
@@ -286,12 +288,22 @@ public class SongMenu extends BaseOpsuState
 
 		// initialize sorts
 		int sortWidth = (int) (width * 0.12f);
-		int posX = (int) (width * 0.87f);
-		int posY = (int) (headerY - GameImage.MENU_TAB.getHeight() * 2.25f);
+		final float sortMenuX = width - this.tabRightPadding - sortWidth;
+		this.sortTextX = sortMenuX - Fonts.LARGE.getWidth("Sort ");
+		this.sortTextY = this.headerY - this.tabH - 2 - Fonts.LARGE.getAscent();
+		final float sortMenuY =
+			this.sortTextY + Fonts.LARGE.getDescent()
+			+ (Fonts.LARGE.getAscent() - Fonts.LARGE.getDescent()) / 2f
+			- Fonts.MEDIUM.getLineHeight() / 2f;
 		if (this.sortMenu != null) {
 			this.sortMenu.closeReleaseFocus();
 		}
-		sortMenu = new DropdownMenu<BeatmapSortOrder>(BeatmapSortOrder.values(), posX, posY, sortWidth) {
+		this.sortMenu = new DropdownMenu<BeatmapSortOrder>(
+			BeatmapSortOrder.values(),
+			(int) sortMenuX,
+			(int) sortMenuY,
+			sortWidth)
+		{
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
 				/*
@@ -317,7 +329,8 @@ public class SongMenu extends BaseOpsuState
 			}
 		};
 		sortMenu.setBackgroundColor(Colors.BLACK_BG_FOCUS);
-		sortMenu.setBorderColor(Colors.BLUE_DIVIDER);
+		sortMenu.setBorderColor(Colors.GREEN_SORT);
+		sortMenu.setHighlightColor(Colors.GREEN_SORT);
 
 		// initialize score data buttons
 		ScoreData.init(width, headerY + height * 0.01f);
@@ -557,6 +570,9 @@ public class SongMenu extends BaseOpsuState
 		SELECTION_OPTIONS.getImage().draw(c.x, c.y - SELECTION_OPTIONS.getHeight());
 		selectMapOptionsButton.draw();
 
+		// text above tabs
+		Fonts.LARGE.drawString(this.sortTextX, this.sortTextY, "Sort", Colors.GREEN_SORT);
+
 		// group tabs
 		this.hoveredTab = null;
 		final float tabOffset = this.tabW - this.tabOverlap;
@@ -665,6 +681,7 @@ public class SongMenu extends BaseOpsuState
 			Fonts.DEFAULT.drawString(searchTextX, searchY + Fonts.BOLD.getLineHeight(), (searchResultString == null) ? "Searching..." : searchResultString, Color.white);
 		}
 
+		// dropdowns above tabs
 		this.sortMenu.render(g);
 
 		// reloading beatmaps
@@ -800,13 +817,6 @@ public class SongMenu extends BaseOpsuState
 		// nodes mouse hover
 
 		// tooltips
-		if (displayContainer.suppressHover) {
-			if (this.sortMenu.isHovered() && !this.sortMenu.isOpen()) {
-				UI.updateTooltip(delta, "Sort by...", false);
-			}
-			return;
-		}
-
 		if (focusScores != null && ScoreData.areaContains(mouseX, mouseY)) {
 			int startScore = (int) (startScorePos.getPosition() / ScoreData.getButtonOffset());
 			int offset = (int) (-startScorePos.getPosition() + startScore * ScoreData.getButtonOffset());
