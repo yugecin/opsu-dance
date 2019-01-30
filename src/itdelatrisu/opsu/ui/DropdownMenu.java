@@ -302,6 +302,14 @@ public class DropdownMenu<E> extends Component
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		if (e.button == Input.MMB) {
+			return;
+		}
+
+		final int idx = this.getIndexAt(mouseY);
+		if (idx >= -1) {
+			e.consume();
+		}
 	}
 
 	@Override
