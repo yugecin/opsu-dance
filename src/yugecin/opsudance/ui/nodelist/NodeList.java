@@ -208,7 +208,7 @@ public class NodeList
 		this.size = 0;
 
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
-		final ArrayList<Beatmap> maps = beatmapList.maps;
+		final ArrayList<Beatmap> maps = beatmapList.nodes;
 		this.ensureCapacity(maps.size());
 		int idx = 0;
 		for (int i = 0, size = maps.size(); i < size; i++) {
@@ -241,7 +241,7 @@ public class NodeList
 
 	public void processSort()
 	{
-		this.recreate();
+		this.recreate(); // TODO: animate I guess?
 	}
 
 	/**

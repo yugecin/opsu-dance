@@ -55,17 +55,11 @@ public class BeatmapList
 	 */
 	public final ArrayList<Beatmap> maps;
 
-	/** List containing all nodes in the current group. */
-	private ArrayList<Beatmap> groupNodes;
-
 	/** Current list of nodes (subset of parsedNodes, used for searches). */
-	private ArrayList<Beatmap> nodes;
+	public ArrayList<Beatmap> nodes;
 
 	private final HashMap<String, Beatmap> beatmapHashDB;
 	private final HashSet<Integer> beatmapSetDb;
-
-	private BeatmapSetNode expandedSet;
-	private BeatmapNode expandedSetFirstNode, expandedSetLastNode;
 
 	/** The last search query. */
 	private String lastQuery;
@@ -74,19 +68,14 @@ public class BeatmapList
 	{
 		this.sets = new ArrayList<>();
 		this.maps = new ArrayList<>();
+		this.nodes = new ArrayList<>();
 		this.beatmapHashDB = new HashMap<>();
 		this.beatmapSetDb = new HashSet<>();
-		this.reset();
 	}
 
-	/**
-	 * Resets the list's fields.
-	 * This does not erase any parsed nodes.
-	 */
-	public void reset() {
-		nodes = groupNodes = BeatmapGroup.current.filter(maps);
-		this.expandedSet = null;
-		this.expandedSetFirstNode = this.expandedSetLastNode = null;
+	public void reset()
+	{
+		this.nodes = BeatmapGroup.current.filter(this.maps);
 		lastQuery = "";
 	}
 
@@ -126,6 +115,7 @@ public class BeatmapList
 		this.maps.ensureCapacity(this.maps.size() + beatmaps.size());
 		for (Beatmap beatmap : beatmaps) {
 			this.maps.add(beatmap);
+			this.nodes.add(beatmap); // TODO check condition here?
 			beatmap.beatmapSet = set;
 			if (beatmap.md5Hash != null) {
 				beatmapHashDB.put(beatmap.md5Hash, beatmap);

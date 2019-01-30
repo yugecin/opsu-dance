@@ -97,10 +97,10 @@ public class BeatmapGroup
 	}
 
 	/**
-	 * may not modify given list
+	 * may not modify or return given list
 	 */
 	public ArrayList<Beatmap> filter(ArrayList<Beatmap> list)
 	{
-		return list;
+		return new ArrayList<>(list);
 	}
 }
