@@ -70,6 +70,7 @@ public class Splash extends BaseOpsuState {
 			public void run() {
 				oszunpacker.unpackAll();
 				beatmapParser.parseAll();
+				beatmapList.resort();
 				replayImporter.importAll();
 
 				SoundController.init();

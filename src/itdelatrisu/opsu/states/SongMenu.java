@@ -299,24 +299,21 @@ public class SongMenu extends BaseOpsuState
 			this.sortMenu.closeReleaseFocus();
 		}
 		this.sortMenu = new DropdownMenu<BeatmapSortOrder>(
-			BeatmapSortOrder.values(),
+			BeatmapSortOrder.VALUES,
 			(int) sortMenuX,
 			(int) sortMenuY,
 			sortWidth)
 		{
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
-				/*
-				BeatmapSortOrder.set(item);
-				if (focusNode == null)
-					return;
-				BeatmapSetNode oldFocusBase = beatmapSetList.getBeatmapSetNode(focusNode.index);
-				int oldFocusFileIndex = focusNode.beatmapIndex;
-				focusNode = null;
-				beatmapSetList.init();
-				SongMenu.this.setFocus(oldFocusBase, oldFocusFileIndex, true);
-				*/
-				// TODO
+				final Beatmap map = nodeList.getFocusedMap();
+				nodeList.unexpandAll();
+				BeatmapSortOrder.current = item;
+				beatmapList.resort();
+				nodeList.processSort();
+				if (map != null) {
+					nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true);
+				}
 			}
 
 			@Override
@@ -724,7 +721,7 @@ public class SongMenu extends BaseOpsuState
 			MusicController.loopTrackIfEnded(true);
 		else if (reloadThread.isFinished()) {
 			BeatmapGroup.current = BeatmapGroup.ALL;
-			BeatmapSortOrder.set(BeatmapSortOrder.TITLE);
+			BeatmapSortOrder.current = BeatmapSortOrder.TITLE;
 			beatmapList.reset();
 			nodeList.recreate();
 			if (beatmapList.getBeatmapSetCount() > 0) {

@@ -23,154 +23,90 @@ import java.util.Comparator;
 /**
  * Beatmap sorting orders.
  */
-public enum BeatmapSortOrder {
-	TITLE   ("Title",       new TitleOrder()),
-	ARTIST  ("Artist",      new ArtistOrder()),
-	CREATOR ("Creator",     new CreatorOrder()),
-	BPM     ("BPM",         new BPMOrder()),
-	LENGTH  ("Length",      new LengthOrder()),
-	DATE    ("Date Added",  new DateOrder()),
-	PLAYS   ("Most Played", new PlayOrder());
-
-	/** The name of the sort. */
-	private final String name;
-
-	/** The comparator for the sort. */
-	private final Comparator<BeatmapSetNode> comparator;
-
-	/** Current sort. */
-	private static BeatmapSortOrder currentSort = TITLE;
-
-	/**
-	 * Returns the current sort.
-	 * @return the current sort
-	 */
-	public static BeatmapSortOrder current() { return currentSort; }
-
-	/**
-	 * Sets a new sort.
-	 * @param sort the new sort
-	 */
-	public static void set(BeatmapSortOrder sort) { currentSort = sort; }
-
-	/**
-	 * Compares two BeatmapSetNode objects by title.
-	 */
-	private static class TitleOrder implements Comparator<BeatmapSetNode> {
+public abstract class BeatmapSortOrder implements Comparator<Beatmap>
+{
+	public static final BeatmapSortOrder TITLE = new BeatmapSortOrder("Title")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.beatmapSet.get(0).title.compareToIgnoreCase(w.beatmapSet.get(0).title);
+		public int compare(Beatmap v, Beatmap w)
+		{
+			return v.title.compareToIgnoreCase(w.title);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by artist.
-	 */
-	private static class ArtistOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder ARTIST = new BeatmapSortOrder("Artist")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.beatmapSet.get(0).artist.compareToIgnoreCase(w.beatmapSet.get(0).artist);
+		public int compare(Beatmap v, Beatmap w)
+		{
+			return v.artist.compareToIgnoreCase(w.artist);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by creator.
-	 */
-	private static class CreatorOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder CREATOR = new BeatmapSortOrder("Creator")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return v.beatmapSet.get(0).creator.compareToIgnoreCase(w.beatmapSet.get(0).creator);
+		public int compare(Beatmap v, Beatmap w) {
+			return v.creator.compareToIgnoreCase(w.creator);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by BPM.
-	 */
-	private static class BPMOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder BPM = new BeatmapSortOrder("BPM")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			return Integer.compare(v.beatmapSet.get(0).bpmMax, w.beatmapSet.get(0).bpmMax);
+		public int compare(Beatmap v, Beatmap w)
+		{
+			return Integer.compare(v.bpmMax, w.bpmMax);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by length.
-	 * Uses the longest beatmap in each set for comparison.
-	 */
-	private static class LengthOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder LENGTH = new BeatmapSortOrder("Length")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			int vMax = 0, wMax = 0;
-			for (Beatmap beatmap : v.beatmapSet) {
-				if (beatmap.endTime > vMax)
-					vMax = beatmap.endTime;
-			}
-			for (Beatmap beatmap : w.beatmapSet) {
-				if (beatmap.endTime > wMax)
-					wMax = beatmap.endTime;
-			}
-			return Integer.compare(vMax, wMax);
+		public int compare(Beatmap v, Beatmap w)
+		{
+			return Integer.compare(v.endTime, w.endTime);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by date added.
-	 * Uses the latest beatmap added in each set for comparison.
-	 */
-	private static class DateOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder DATE = new BeatmapSortOrder("Date added")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			long vMax = 0, wMax = 0;
-			for (Beatmap beatmap : v.beatmapSet) {
-				if (beatmap.dateAdded > vMax)
-					vMax = beatmap.dateAdded;
-			}
-			for (Beatmap beatmap : w.beatmapSet) {
-				if (beatmap.dateAdded > wMax)
-					wMax = beatmap.dateAdded;
-			}
-			return Long.compare(vMax, wMax);
+		public int compare(Beatmap v, Beatmap w) {
+			return Long.compare(v.dateAdded, w.dateAdded);
 		}
-	}
+	};
 
-	/**
-	 * Compares two BeatmapSetNode objects by total plays
-	 * (summed across all beatmaps in each set).
-	 */
-	private static class PlayOrder implements Comparator<BeatmapSetNode> {
+	public static final BeatmapSortOrder PLAYS = new BeatmapSortOrder("Most played")
+	{
 		@Override
-		public int compare(BeatmapSetNode v, BeatmapSetNode w) {
-			int vTotal = 0, wTotal = 0;
-			for (Beatmap beatmap : v.beatmapSet)
-				vTotal += beatmap.playCount;
-			for (Beatmap beatmap : w.beatmapSet)
-				wTotal += beatmap.playCount;
-			return Integer.compare(vTotal, wTotal);
+		public int compare(Beatmap v, Beatmap w)
+		{
+			return Integer.compare(v.playCount, w.playCount);
 		}
-	}
+	};
 
-	/**
-	 * Constructor.
-	 * @param name the sort name
-	 * @param comparator the comparator for the sort
-	 */
-	BeatmapSortOrder(String name, Comparator<BeatmapSetNode> comparator) {
+	public static BeatmapSortOrder[] VALUES = {
+		TITLE,
+		ARTIST,
+		CREATOR,
+		BPM,
+		LENGTH,
+		DATE,
+		PLAYS,
+	};
+	public static BeatmapSortOrder current = TITLE;
+
+	public final String name;
+
+	private BeatmapSortOrder(String name)
+	{
 		this.name = name;
-		this.comparator = comparator;
 	}
-
-	/**
-	 * Returns the sort name.
-	 * @return the name
-	 */
-	public String getName() { return name; }
-
-	/**
-	 * Returns the comparator for the sort.
-	 * @return the comparator
-	 */
-	public Comparator<BeatmapSetNode> getComparator() { return comparator; }
 
 	@Override
-	public String toString() { return name; }
+	public String toString()
+	{
+		return name;
+	}
 }

@@ -239,6 +239,11 @@ public class NodeList
 		}
 	}
 
+	public void processSort()
+	{
+		this.recreate();
+	}
+
 	/**
 	 * {@code nodesToInsert} should be at least of size 2
 	 */
@@ -302,7 +307,7 @@ public class NodeList
 		}
 	}
 
-	void unexpandAll()
+	public void unexpandAll()
 	{
 		int len = 0;
 		BeatmapSet lastset = null;
