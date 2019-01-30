@@ -231,12 +231,18 @@ public class DropdownMenu<E> extends Component
 		expandProgress.setTime(0);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void openGrabFocus()
 	{
 		this.setFocused(true);
 		input.addListener(this);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void closeReleaseFocus()
 	{
 		if (this.focused) {
