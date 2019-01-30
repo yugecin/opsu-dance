@@ -893,7 +893,9 @@ public class SongMenu extends BaseOpsuState
 		if (this.hoveredTab != null) {
 			BeatmapGroup.current = this.hoveredTab;
 			this.hoveredTab = null;
+			final Beatmap focus = nodeList.getFocusedMap();
 			SoundController.playSound(SoundEffect.MENUCLICK);
+			// TODO this
 			songInfo = null;
 			scoreMap = null;
 			focusScores = null;
@@ -904,16 +906,11 @@ public class SongMenu extends BaseOpsuState
 			beatmapList.reset();
 			nodeList.recreate();
 			// TODO group tabs
-			if (this.restoreFocusOrFocusRandom()) {
-				nodeList.centerFocusedNodeNow();
-			}
+			nodeList.attemptFocusMap(focus, /*playAtPreviewTime*/ true);
 
-			/*
-			 // TODO: filter stuff
-			if (beatmapSetList.isEmpty() && group.getEmptyMessage() != null) {
-				barNotifs.send(group.getEmptyMessage());
+			if (beatmapList.isEmpty() && BeatmapGroup.current.emptyMessage != null) {
+				barNotifs.send(BeatmapGroup.current.emptyMessage);
 			}
-			*/
 			return;
 		}
 
