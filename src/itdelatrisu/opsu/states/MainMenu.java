@@ -24,6 +24,7 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
@@ -902,6 +903,9 @@ public class MainMenu extends BaseOpsuState {
 	private void playNextTrack(Beatmap next)
 	{
 		if (!nodeList.attemptFocusMap(next, /*playAtPreviewTime*/ false)) {
+			if (next.timingPoints == null) {
+				BeatmapParser.parseTimingPoints(next);
+			}
 			MusicController.play(next, /*loop*/ false, /*playAtPreviewTime*/ false);
 		}
 		lastMeasureProgress = 0f;
