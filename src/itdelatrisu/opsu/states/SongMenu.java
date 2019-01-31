@@ -904,6 +904,7 @@ public class SongMenu extends BaseOpsuState
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			beatmapList.activeGroupChanged();
 			nodeList.recreate();
+			nodeList.reFadeIn();
 			if (nodeList.getFocusedMap() == null) {
 				scoreMap = null;
 				focusScores = null;
