@@ -38,7 +38,10 @@ import static yugecin.opsudance.core.InstanceContainer.*;
  */
 public class BeatmapList
 {
-	private final ArrayList<BeatmapSet> sets;
+	/**
+	 * public read access only
+	 */
+	public final ArrayList<BeatmapSet> sets;
 	/**
 	 * public read access only
 	 */
@@ -119,17 +122,6 @@ public class BeatmapList
 				beatmapHashDB.put(beatmap.md5Hash, beatmap);
 			}
 		}
-	}
-
-	/**
-	 * @return random map or theme beatmap if there are no maps
-	 */
-	public Beatmap getRandom()
-	{
-		if (this.visibleNodes.isEmpty()) {
-			return themeBeatmap;
-		}
-		return this.visibleNodes.get(rand.nextInt(this.visibleNodes.size()));
 	}
 
 	///**

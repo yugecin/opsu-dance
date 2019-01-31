@@ -24,6 +24,7 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.*;
@@ -35,6 +36,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -889,7 +891,12 @@ public class MainMenu extends BaseOpsuState {
 
 	public void playRandomNextTrack()
 	{
-		this.playNextTrack(beatmapList.getRandom());
+		final ArrayList<BeatmapSet> sets = beatmapList.sets;
+		if (sets.isEmpty()) {
+			this.playNextTrack(themeBeatmap);
+		} else {
+			this.playNextTrack(sets.get(rand.nextInt(sets.size())).get(0));
+		}
 	}
 
 	private void playNextTrack(Beatmap next)
