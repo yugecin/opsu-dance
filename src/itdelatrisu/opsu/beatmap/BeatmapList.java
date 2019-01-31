@@ -81,6 +81,8 @@ public class BeatmapList
 
 	public void resort()
 	{
+		// TODO: I don't like this double sort
+		this.maps.sort(BeatmapSortOrder.current);
 		this.nodesInGroup.sort(BeatmapSortOrder.current);
 		if (this.visibleNodes != this.nodesInGroup) {
 			this.visibleNodes.sort(BeatmapSortOrder.current);
