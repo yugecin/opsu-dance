@@ -334,7 +334,8 @@ public class SongMenu extends BaseOpsuState
 		nodeList.revalidate(
 			headerY,
 			footerY,
-			headerY + this.searchRectHeight,
+			(int) Math.ceil(headerY + this.headerImgH * 0.0287f) - 1
+				+ this.searchRectHeight,
 			this.footerLogoButton.getY() + shls * .01f -
 				(float) Math.sqrt(shls * shls - dlctb * dlctb)
 		);
@@ -663,7 +664,8 @@ public class SongMenu extends BaseOpsuState
 			Colors.BLACK_ALPHA.a = 0.2f + searchProgress * 0.3f;
 		}
 		g.setColor(Colors.BLACK_ALPHA);
-		g.fillRect(searchBaseX, headerY + DIVIDER_LINE_WIDTH / 2, width - searchBaseX, searchRectHeight);
+		final int searchRectY = (int) Math.ceil(headerY + this.headerImgH * 0.0287f) - 1;
+		g.fillRect(searchBaseX, searchRectY, width - searchBaseX, searchRectHeight);
 		Colors.BLACK_ALPHA.a = oldAlpha;
 		Fonts.BOLD.drawString(searchTextX, searchY, "Search:", Colors.GREEN_SEARCH);
 		if (searchEmpty) {
