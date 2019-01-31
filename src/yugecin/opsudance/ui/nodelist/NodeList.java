@@ -7,7 +7,6 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import java.util.ArrayList;
 
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.util.Log;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
@@ -203,13 +202,18 @@ public class NodeList
 
 	public void recreate()
 	{
-		final long start = System.currentTimeMillis();
-
 		for (int i = this.size; i > 0;) {
 			this.nodes[--i] = null;
 		}
 		this.size = 0;
 
+		final Beatmap lastFocusedMap;
+		if (this.focusNode != null) {
+			lastFocusedMap = this.focusNode.beatmap;
+		} else {
+			lastFocusedMap = MusicController.getBeatmap();
+		}
+		this.focusNode = null;
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
 		final ArrayList<Beatmap> maps = beatmapList.visibleNodes;
 		this.ensureCapacity(maps.size());
@@ -240,8 +244,9 @@ public class NodeList
 		for (int i = 0; i < this.size; i++) {
 			this.nodes[i].onSiblingNodeUpdated();
 		}
-
-		Log.debug("recreate nodes " + (System.currentTimeMillis() - start) + "ms");
+		if (lastFocusedMap != null) {
+			this.attemptFocusMap(lastFocusedMap, /*playAtPreviewTime*/ true);
+		}
 	}
 
 	public void processSort()
@@ -453,6 +458,15 @@ public class NodeList
 			}
 		}
 		return false;
+	}
+
+	public void removeFocus()
+	{
+		if (this.focusNode == null) {
+			return;
+		}
+		this.unexpandAll();
+		this.focusNode = null;
 	}
 
 	/**

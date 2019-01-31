@@ -903,6 +903,7 @@ public class MainMenu extends BaseOpsuState {
 	private void playNextTrack(Beatmap next)
 	{
 		if (!nodeList.attemptFocusMap(next, /*playAtPreviewTime*/ false)) {
+			nodeList.removeFocus();
 			if (next.timingPoints == null) {
 				BeatmapParser.parseTimingPoints(next);
 			}

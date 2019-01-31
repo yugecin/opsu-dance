@@ -306,14 +306,10 @@ public class SongMenu extends BaseOpsuState
 		{
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
-				final Beatmap map = nodeList.getFocusedMap();
 				nodeList.unexpandAll();
 				BeatmapSortOrder.current = item;
 				beatmapList.resort();
 				nodeList.processSort();
-				if (map != null) {
-					nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true);
-				}
 			}
 
 			@Override
@@ -396,9 +392,9 @@ public class SongMenu extends BaseOpsuState
 		g.setBackground(Color.black);
 
 		// background
-		final Beatmap focusedMap = nodeList.getFocusedMap();
-		if (focusedMap != null &&
-			!focusedMap.drawBackground(width, height, bgAlpha.getValue(), true))
+		final Beatmap activeMap = MusicController.getBeatmap();
+		if (activeMap != null &&
+			!activeMap.drawBackground(width, height, bgAlpha.getValue(), true))
 		{
 			GameImage.PLAYFIELD.getImage().draw(0, 0, Colors.WHITE_ALPHA);
 		}
@@ -490,7 +486,7 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// header
-		if (focusedMap != null) {
+		if (activeMap != null) {
 			// music/loader icon
 			float textY = -Fonts.LARGE.getDescent();
 			final float pad = 6f;
@@ -503,10 +499,10 @@ public class SongMenu extends BaseOpsuState
 
 			// song info text
 			if (songInfo == null) {
-				songInfo = focusedMap.getInfo();
+				songInfo = activeMap.getInfo();
 				if (OPTION_SHOW_UNICODE.state) {
-					Fonts.loadGlyphs(Fonts.LARGE, focusedMap.titleUnicode);
-					Fonts.loadGlyphs(Fonts.LARGE, focusedMap.artistUnicode);
+					Fonts.loadGlyphs(Fonts.LARGE, activeMap.titleUnicode);
+					Fonts.loadGlyphs(Fonts.LARGE, activeMap.artistUnicode);
 				}
 			}
 
@@ -790,7 +786,6 @@ public class SongMenu extends BaseOpsuState
 					searchResultString = null;
 				}
 
-				final Beatmap map = nodeList.getFocusedMap();
 				if (beatmapList.visibleNodes.isEmpty()) {
 					searchResultString = "No matches found. Hit ESC to reset.";
 					scoreMap = null;
@@ -806,7 +801,7 @@ public class SongMenu extends BaseOpsuState
 					}
 				}
 				nodeList.processSearch();
-				if (!nodeList.attemptFocusMap(map, true)) {
+				if (nodeList.getFocusedMap() == null) {
 					scoreMap = null;
 					focusScores = null;
 				}
@@ -906,12 +901,10 @@ public class SongMenu extends BaseOpsuState
 		if (this.hoveredTab != null) {
 			BeatmapGroup.current = this.hoveredTab;
 			this.hoveredTab = null;
-			final Beatmap focus = nodeList.getFocusedMap();
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			beatmapList.activeGroupChanged();
 			nodeList.recreate();
-			if (!nodeList.attemptFocusMap(focus, /*playAtPreviewTime*/ true)) {
-				songInfo = null;
+			if (nodeList.getFocusedMap() == null) {
 				scoreMap = null;
 				focusScores = null;
 			}
@@ -1233,9 +1226,7 @@ public class SongMenu extends BaseOpsuState
 
 		if (songFolderChanged && stateAction != MenuState.RELOAD) {
 			reloadBeatmaps(false);
-		} else if (nodeList.getFocusedMap() == null &&
-			beatmapList.getBeatmapSetCount() > 0)
-		{
+		} else if (nodeList.getFocusedMap() == null && MusicController.isThemePlaying()) {
 			this.setFocusToRandom();
 		}
 
