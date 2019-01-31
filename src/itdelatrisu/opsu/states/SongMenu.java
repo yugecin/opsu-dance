@@ -742,37 +742,6 @@ public class SongMenu extends BaseOpsuState
 
 		this.sortMenu.updateHover(mouseX, mouseY);
 
-		nodeList.preRenderUpdate();
-		final Beatmap focusedMap = nodeList.getFocusedMap();
-
-		// beatmap menu timer
-		if (beatmapMenuTimer > -1) {
-			beatmapMenuTimer += delta;
-			if (beatmapMenuTimer >= BEATMAP_MENU_DELAY) {
-				beatmapMenuTimer = -1;
-				if (focusedMap != null) {
-					MenuState state = focusedMap.beatmapSet.isFavorite() ?
-						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-					buttonState.setMenuState(state, focusedMap);
-					displayContainer.switchState(buttonState);
-				}
-				return;
-			}
-		}
-
-		if (focusedMap != null) {
-			// fade in background
-			if (!focusedMap.isBackgroundLoading()) {
-				bgAlpha.update(delta);
-			}
-
-			// song change timers
-			songChangeTimer.update(delta);
-			if (!MusicController.isTrackLoading()) {
-				musicIconBounceTimer.update(delta);
-			}
-		}
-
 		// search
 		searchTimer += delta;
 		if (searchTimer >= SEARCH_DELAY && reloadThread == null && beatmapMenuTimer == -1) {
@@ -811,6 +780,37 @@ public class SongMenu extends BaseOpsuState
 			searchTransitionTimer += delta;
 			if (searchTransitionTimer > SEARCH_TRANSITION_TIME)
 				searchTransitionTimer = SEARCH_TRANSITION_TIME;
+		}
+
+		nodeList.preRenderUpdate();
+		final Beatmap focusedMap = nodeList.getFocusedMap();
+
+		// beatmap menu timer
+		if (beatmapMenuTimer > -1) {
+			beatmapMenuTimer += delta;
+			if (beatmapMenuTimer >= BEATMAP_MENU_DELAY) {
+				beatmapMenuTimer = -1;
+				if (focusedMap != null) {
+					MenuState state = focusedMap.beatmapSet.isFavorite() ?
+						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
+					buttonState.setMenuState(state, focusedMap);
+					displayContainer.switchState(buttonState);
+				}
+				return;
+			}
+		}
+
+		if (focusedMap != null) {
+			// fade in background
+			if (!focusedMap.isBackgroundLoading()) {
+				bgAlpha.update(delta);
+			}
+
+			// song change timers
+			songChangeTimer.update(delta);
+			if (!MusicController.isTrackLoading()) {
+				musicIconBounceTimer.update(delta);
+			}
 		}
 
 		// scores
