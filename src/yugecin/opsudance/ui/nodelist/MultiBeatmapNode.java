@@ -38,7 +38,7 @@ class MultiBeatmapNode extends Node
 	{
 		for (int i = this.beatmaps.length; i > 0;) {
 			if (beatmaps[--i] == beatmap) {
-				nodeList.unexpandAll();
+				nodeList.unexpandAllExceptInSet(beatmaps[0].beatmapSet);
 				return this.expand()[i];
 			}
 		}

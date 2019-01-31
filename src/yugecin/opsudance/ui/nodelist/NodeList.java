@@ -322,7 +322,10 @@ public class NodeList
 		}
 	}
 
-	public void unexpandAll()
+	/**
+	 * will not expand nodes that are in the given set
+	 */
+	public void unexpandAllExceptInSet(BeatmapSet set)
 	{
 		int len = 0;
 		BeatmapSet lastset = null;
@@ -333,12 +336,15 @@ public class NodeList
 			}
 			BeatmapSet newset = null;
 			if (node instanceof BeatmapNode) {
-				if (lastset == null) {
-					lastset = ((BeatmapNode) node).beatmap.beatmapSet;
-					len = 1;
-					continue;
+				final BeatmapSet thisset = ((BeatmapNode) node).beatmap.beatmapSet;
+				if (thisset != set) {
+					if (lastset == null) {
+						lastset = thisset;
+						len = 1;
+						continue;
+					}
+					newset = ((BeatmapNode) node).beatmap.beatmapSet;
 				}
-				newset = ((BeatmapNode) node).beatmap.beatmapSet;
 			}
 			if (newset != lastset || newset == null) {
 				if (len > 1 && lastset != null) {
@@ -395,8 +401,9 @@ public class NodeList
 			return false;
 		}
 		if (this.hoverNode instanceof MultiBeatmapNode) {
-			this.unexpandAll();
-			final BeatmapNode[] nodes = ((MultiBeatmapNode) this.hoverNode).expand();
+			final MultiBeatmapNode mbn = ((MultiBeatmapNode) this.hoverNode);
+			this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
+			final BeatmapNode[] nodes = mbn.expand();
 			this.focusNode(nodes[0], /*playAtPreviewTime*/ true);
 			return true;
 		}
@@ -419,8 +426,9 @@ public class NodeList
 		out: for (;;) {
 			node = this.nodes[rand.nextInt(this.size)];
 			if (node instanceof MultiBeatmapNode) {
-				this.unexpandAll();
-				final BeatmapNode[] nodes = ((MultiBeatmapNode) node).expand();
+				final MultiBeatmapNode mbn = ((MultiBeatmapNode) node);
+				this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
+				final BeatmapNode[] nodes = mbn.expand();
 				node = nodes[rand.nextInt(nodes.length)];
 			}
 			if (node instanceof BeatmapNode) {
@@ -465,7 +473,7 @@ public class NodeList
 		if (this.focusNode == null) {
 			return;
 		}
-		this.unexpandAll();
+		this.unexpandAllExceptInSet(null);
 		this.focusNode = null;
 	}
 
@@ -476,10 +484,21 @@ public class NodeList
 	void focusNode(BeatmapNode node, boolean playAtPreviewTime)
 	{
 		if (!node.isFromExpandedMultiNode) {
-			this.unexpandAll();
+			this.unexpandAllExceptInSet(node.beatmap.beatmapSet);
 		}
 		this.focusNode = node;
 		final Beatmap beatmap = node.beatmap;
+		final BeatmapSet set = beatmap.beatmapSet;
+		for (int i = 0; i < this.size; i++) {
+			// TODO I don't like this extra loop
+			// expand fragmented MultiBeatmapNodes of this set
+			if (this.nodes[i] instanceof MultiBeatmapNode) {
+				final MultiBeatmapNode n = ((MultiBeatmapNode) this.nodes[i]);
+				if (n.beatmaps[0].beatmapSet == set) {
+					i += n.expand().length - 1;
+				}
+			}
+		}
 		if (beatmap.timingPoints == null) {
 			BeatmapParser.parseTimingPoints(beatmap);
 		}
