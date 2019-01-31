@@ -32,6 +32,9 @@ class Scrolling
 	void setMax(float max)
 	{
 		this.max = max;
+		if (this.position > max && this.target > max) {
+			this.scrollToPosition(max);
+		}
 	}
 
 	void addOffset(float offset)
@@ -88,11 +91,14 @@ class Scrolling
 			// make sure value is at least 1f to keep log10 from huge values
 			* Math.log10(Math.abs(this.amplitude) + 1f)
 			/ 400d);
-		this.position = clamp(
-			this.target + (float) (-this.amplitude * Math.exp(-progress)),
-			0f,
-			this.max
-		);
+		final float lastPosition = this.position;
+		float newPosition = this.target + (float) (-this.amplitude * Math.exp(-progress));
+		if (newPosition > lastPosition && newPosition > this.max) {
+			newPosition = this.max;
+		} else if (newPosition < lastPosition && newPosition < 0f) {
+			newPosition = 0f;
+		}
+		this.position = newPosition;
 		this.positionNorm = this.position / this.max;
 	}
 
