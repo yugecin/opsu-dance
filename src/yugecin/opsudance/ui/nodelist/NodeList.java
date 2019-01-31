@@ -7,6 +7,7 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import java.util.ArrayList;
 
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.util.Log;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
@@ -202,13 +203,15 @@ public class NodeList
 
 	public void recreate()
 	{
+		final long start = System.currentTimeMillis();
+
 		for (int i = this.size; i > 0;) {
 			this.nodes[--i] = null;
 		}
 		this.size = 0;
 
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
-		final ArrayList<Beatmap> maps = beatmapList.nodes;
+		final ArrayList<Beatmap> maps = beatmapList.visibleNodes;
 		this.ensureCapacity(maps.size());
 		int idx = 0;
 		for (int i = 0, size = maps.size(); i < size; i++) {
@@ -237,9 +240,16 @@ public class NodeList
 		for (int i = 0; i < this.size; i++) {
 			this.nodes[i].onSiblingNodeUpdated();
 		}
+
+		Log.debug("recreate nodes " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	public void processSort()
+	{
+		this.recreate(); // TODO: animate I guess?
+	}
+
+	public void processSearch()
 	{
 		this.recreate(); // TODO: animate I guess?
 	}

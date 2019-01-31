@@ -21,80 +21,72 @@ package itdelatrisu.opsu.beatmap;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.db.BeatmapDB;
+import yugecin.opsudance.beatmap.BeatmapSearcher;
 import yugecin.opsudance.core.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 /**
- * Indexed, expanding, doubly-linked list data type for song groups.
+ * Keeps track of all maps, maps in active group and filtered using search query
  */
 public class BeatmapList
 {
-	/** Search pattern for conditional expressions. */
-	private static final Pattern SEARCH_CONDITION_PATTERN = Pattern.compile(
-		"(ar|cs|od|hp|bpm|length|stars?)(==?|>=?|<=?)((\\d*\\.)?\\d+)"
-	);
-
 	private final ArrayList<BeatmapSet> sets;
 	/**
 	 * public read access only
 	 */
 	public final ArrayList<Beatmap> maps;
 
-	/** Current list of nodes (subset of parsedNodes, used for searches). */
-	public ArrayList<Beatmap> nodes;
+	/**
+	 * nodes in the current group (see {@link BeatmapGroup#current})
+	 */
+	private ArrayList<Beatmap> nodesInGroup;
+	/**
+	 * subcollection of {@link #nodesInGroup} that conforms to search
+	 * may point to {@link #nodesInGroup} itself when no search is active
+	 */
+	public ArrayList<Beatmap> visibleNodes;
 
 	private final HashMap<String, Beatmap> beatmapHashDB;
 	private final HashSet<Integer> beatmapSetDb;
 
-	/** The last search query. */
-	private String lastQuery;
+	private String lastSearchQuery;
 
 	BeatmapList()
 	{
 		this.sets = new ArrayList<>();
 		this.maps = new ArrayList<>();
-		this.nodes = new ArrayList<>();
+		this.visibleNodes = this.nodesInGroup = new ArrayList<>();
 		this.beatmapHashDB = new HashMap<>();
 		this.beatmapSetDb = new HashSet<>();
 	}
 
-	public void reset()
+	public void activeGroupChanged()
 	{
-		this.nodes = BeatmapGroup.current.filter(this.maps);
-		lastQuery = "";
+		this.visibleNodes = this.nodesInGroup = BeatmapGroup.current.filter(this.maps);
+		final String searchQuery = this.lastSearchQuery;
+		this.lastSearchQuery = null;
+		this.search(searchQuery);
 	}
 
 	public void resort()
 	{
-		this.nodes.sort(BeatmapSortOrder.current);
-	}
-
-	/**
-	 * Returns the number of elements.
-	 */
-	public int getVisibleSetsCount()
-	{
-		return this.nodes.size();
+		this.nodesInGroup.sort(BeatmapSortOrder.current);
+		if (this.visibleNodes != this.nodesInGroup) {
+			this.visibleNodes.sort(BeatmapSortOrder.current);
+		}
 	}
 
 	public boolean isEmpty()
 	{
-		return this.nodes.isEmpty();
+		return this.visibleNodes.isEmpty();
 	}
 
 	public int getBeatmapCount()
@@ -115,7 +107,13 @@ public class BeatmapList
 		this.maps.ensureCapacity(this.maps.size() + beatmaps.size());
 		for (Beatmap beatmap : beatmaps) {
 			this.maps.add(beatmap);
-			this.nodes.add(beatmap); // TODO check condition here?
+
+			// TODO this will only work when this method was called in splash,
+			//      since at any later point visibleNodes might not point to
+			//      nodesInGroup
+			// TODO check search condition here then, too
+			this.visibleNodes.add(beatmap);
+
 			beatmap.beatmapSet = set;
 			if (beatmap.md5Hash != null) {
 				beatmapHashDB.put(beatmap.md5Hash, beatmap);
@@ -128,10 +126,10 @@ public class BeatmapList
 	 */
 	public Beatmap getRandom()
 	{
-		if (this.nodes.isEmpty()) {
+		if (this.visibleNodes.isEmpty()) {
 			return themeBeatmap;
 		}
-		return this.nodes.get(rand.nextInt(this.nodes.size()));
+		return this.visibleNodes.get(rand.nextInt(this.visibleNodes.size()));
 	}
 
 	///**
@@ -536,105 +534,27 @@ public class BeatmapList
 //		lastNode.next = null;
 //	}
 //
-//	/**
-//	 * Creates a new list of song groups in which each group contains a match to a search query.
-//	 * @param query the search query (terms separated by spaces)
-//	 * @return false if query is the same as the previous one, true otherwise
-//	 */
-//	public boolean search(String query) {
-//		if (query == null)
-//			return false;
-//
-//		// don't redo the same search
-//		query = query.trim().toLowerCase();
-//		if (lastQuery != null && query.equals(lastQuery))
-//			return false;
-//		lastQuery = query;
-//		LinkedList<String> terms = new LinkedList<String>(Arrays.asList(query.split("\\s+")));
-//
-//		// if empty query, reset to original list
-//		if (query.isEmpty() || terms.isEmpty()) {
-//			nodes = groupNodes;
-//			return true;
-//		}
-//
-//		// find and remove any conditional search terms
-//		LinkedList<String> condType     = new LinkedList<String>();
-//		LinkedList<String> condOperator = new LinkedList<String>();
-//		LinkedList<Float>  condValue    = new LinkedList<Float>();
-//
-//		Iterator<String> termIter = terms.iterator();
-//		while (termIter.hasNext()) {
-//			String term = termIter.next();
-//			Matcher m = SEARCH_CONDITION_PATTERN.matcher(term);
-//			if (m.find()) {
-//				condType.add(m.group(1));
-//				condOperator.add(m.group(2));
-//				condValue.add(Float.parseFloat(m.group(3)));
-//				termIter.remove();
-//			}
-//		}
-//
-//		// build an initial list from first search term
-//		nodes = new ArrayList<BeatmapSetNode>();
-//		if (terms.isEmpty()) {
-//			// conditional term
-//			String type = condType.remove();
-//			String operator = condOperator.remove();
-//			float value = condValue.remove();
-//			for (BeatmapSetNode node : groupNodes) {
-//				if (node.beatmapSet.matches(type, operator, value)) {
-//					nodes.add(node);
-//				}
-//			}
-//		} else {
-//			// normal term
-//			String term = terms.remove();
-//			for (BeatmapSetNode node : groupNodes) {
-//				if (node.beatmapSet.matches(term)) {
-//					nodes.add(node);
-//				}
-//			}
-//		}
-//
-//		// iterate through remaining normal search terms
-//		while (!terms.isEmpty()) {
-//			if (nodes.isEmpty())
-//				return true;
-//
-//			String term = terms.remove();
-//
-//			// remove nodes from list if they don't match all terms
-//			Iterator<BeatmapSetNode> nodeIter = nodes.iterator();
-//			while (nodeIter.hasNext()) {
-//				BeatmapSetNode node = nodeIter.next();
-//				if (!node.beatmapSet.matches(term)) {
-//					nodeIter.remove();
-//				}
-//			}
-//		}
-//
-//		// iterate through remaining conditional terms
-//		while (!condType.isEmpty()) {
-//			if (nodes.isEmpty())
-//				return true;
-//
-//			String type = condType.remove();
-//			String operator = condOperator.remove();
-//			float value = condValue.remove();
-//
-//			// remove nodes from list if they don't match all terms
-//			Iterator<BeatmapSetNode> nodeIter = nodes.iterator();
-//			while (nodeIter.hasNext()) {
-//				BeatmapSetNode node = nodeIter.next();
-//				if (!node.beatmapSet.matches(type, operator, value)) {
-//					nodeIter.remove();
-//				}
-//			}
-//		}
-//
-//		return true;
-//	}
+	/**
+	 * Creates a new list of song groups in which each group contains a match to a search query.
+	 * @param query the search query (terms separated by spaces)
+	 * @return false if query is the same as the previous one, true otherwise
+	 */
+	public boolean search(@Nullable String query)
+	{
+		if (query == null) {
+			return false;
+		}
+
+		query = query.trim();
+		if (this.lastSearchQuery != null && this.lastSearchQuery.equals(query)) {
+			return false;
+		}
+
+		this.lastSearchQuery = query;
+
+		this.visibleNodes = BeatmapSearcher.search(this.nodesInGroup, query);
+		return true;
+	}
 
 	/**
 	 * Returns whether or not the list contains the given beatmap set ID.

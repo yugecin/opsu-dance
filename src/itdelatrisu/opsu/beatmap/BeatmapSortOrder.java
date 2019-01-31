@@ -30,7 +30,7 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 		@Override
 		public int compare(Beatmap v, Beatmap w)
 		{
-			return v.title.compareToIgnoreCase(w.title);
+			return v.searchTitle.compareTo(w.searchTitle);
 		}
 	};
 
@@ -39,7 +39,7 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 		@Override
 		public int compare(Beatmap v, Beatmap w)
 		{
-			return v.artist.compareToIgnoreCase(w.artist);
+			return v.searchArtist.compareTo(w.searchArtist);
 		}
 	};
 
@@ -47,7 +47,7 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 	{
 		@Override
 		public int compare(Beatmap v, Beatmap w) {
-			return v.creator.compareToIgnoreCase(w.creator);
+			return v.searchCreator.compareTo(w.searchCreator);
 		}
 	};
 

@@ -175,6 +175,14 @@ public class Beatmap implements Comparable<Beatmap>
 	/** Song source. */
 	public String source = "";
 
+	/**
+	 * Lowercase variants used for searching
+	 */
+	public String
+		searchTitle = "", searchTitleUnicode = "",
+		searchArtist = "", searchArtistUnicode = "",
+		searchCreator = "", searchVersion = "", searchSource = "";
+
 	/** Song tags (for searching). */
 	public String tags = "";
 

@@ -22,7 +22,6 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapList;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadList;
@@ -529,7 +528,7 @@ public class DownloadsMenu extends ComplexOpsuState {
 				SoundController.stopTrack();
 
 				// initialize song list
-				beatmapList.reset();
+				beatmapList.activeGroupChanged();
 
 				// focus new beatmap
 				// NOTE: This can't be called in another thread because it makes OpenGL calls.

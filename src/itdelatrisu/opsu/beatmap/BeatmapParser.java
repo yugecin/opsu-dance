@@ -438,24 +438,31 @@ public class BeatmapParser {
 							switch (tokens[0]) {
 							case "Title":
 								beatmap.title = getDBString(tokens[1]);
+								beatmap.searchTitle = beatmap.title.toLowerCase();
 								break;
 							case "TitleUnicode":
 								beatmap.titleUnicode = getDBString(tokens[1]);
+								beatmap.searchTitleUnicode = beatmap.titleUnicode.toLowerCase();
 								break;
 							case "Artist":
 								beatmap.artist = getDBString(tokens[1]);
+								beatmap.searchArtist = beatmap.artist.toLowerCase();
 								break;
 							case "ArtistUnicode":
 								beatmap.artistUnicode = getDBString(tokens[1]);
+								beatmap.searchArtistUnicode = beatmap.artistUnicode.toLowerCase();
 								break;
 							case "Creator":
 								beatmap.creator = getDBString(tokens[1]);
+								beatmap.searchCreator = beatmap.creator.toLowerCase();
 								break;
 							case "Version":
 								beatmap.version = getDBString(tokens[1]);
+								beatmap.searchVersion = beatmap.version.toLowerCase();
 								break;
 							case "Source":
 								beatmap.source = getDBString(tokens[1]);
+								beatmap.searchSource = beatmap.source.toLowerCase();
 								break;
 							case "Tags":
 								beatmap.tags = getDBString(tokens[1].toLowerCase());

@@ -675,7 +675,14 @@ public class SongMenu extends BaseOpsuState
 		} else {
 			g.setColor(Color.white);
 			searchTextField.render(g);
-			Fonts.DEFAULT.drawString(searchTextX, searchY + Fonts.BOLD.getLineHeight(), (searchResultString == null) ? "Searching..." : searchResultString, Color.white);
+			final int y = searchY + Fonts.BOLD.getLineHeight();
+			String txt;
+			if ((txt = searchResultString) == null) {
+				txt = "Searching...";
+			}
+			Color.white.a = searchProgress;
+			Fonts.SMALLBOLD.drawString(searchTextX, y, txt, Color.white);
+			Color.white.a = 1f;
 		}
 
 		// dropdowns above tabs
@@ -722,7 +729,7 @@ public class SongMenu extends BaseOpsuState
 		else if (reloadThread.isFinished()) {
 			BeatmapGroup.current = BeatmapGroup.ALL;
 			BeatmapSortOrder.current = BeatmapSortOrder.TITLE;
-			beatmapList.reset();
+			beatmapList.activeGroupChanged();
 			nodeList.recreate();
 			if (beatmapList.getBeatmapSetCount() > 0) {
 				this.restoreFocusOrFocusRandom();
@@ -775,29 +782,35 @@ public class SongMenu extends BaseOpsuState
 		if (searchTimer >= SEARCH_DELAY && reloadThread == null && beatmapMenuTimer == -1) {
 			searchTimer = 0;
 
-			/*
-			 // TODO search
-			if (beatmapSetList.search(searchTextField.getText())) {
+			final String searchText = searchTextField.getText();
+			if (beatmapList.search(searchText)) {
 				// empty search
-				if (searchTextField.getText().isEmpty())
+				final boolean emptysearch = searchText.isEmpty();
+				if (emptysearch) {
 					searchResultString = null;
+				}
 
-				// search produced new list: re-initialize it
-				focusNode = null;
-				scoreMap = null;
-				focusScores = null;
-				if (beatmapSetList.getBeatmapSetCount() > 0) {
-					beatmapSetList.init();
-					if (!searchTextField.getText().isEmpty()) {
-						int size = beatmapSetList.getBeatmapSetCount();
-						searchResultString = String.format("%d match%s found!",
-								size, (size == 1) ? "" : "es");
-					}
-					this.restoreFocusOrFocusRandom();
-				} else if (!searchTextField.getText().isEmpty())
+				final Beatmap map = nodeList.getFocusedMap();
+				if (beatmapList.visibleNodes.isEmpty()) {
 					searchResultString = "No matches found. Hit ESC to reset.";
+					scoreMap = null;
+					focusScores = null;
+				} else {
+					if (!emptysearch) {
+						final int s = beatmapList.visibleNodes.size();
+						if (s == 1) {
+							searchResultString = "1 match found!";
+						} else {
+							searchResultString = s + " matches found!";
+						}
+					}
+				}
+				nodeList.processSearch();
+				if (!nodeList.attemptFocusMap(map, true)) {
+					scoreMap = null;
+					focusScores = null;
+				}
 			}
-			*/
 		}
 		if (searchTransitionTimer < SEARCH_TRANSITION_TIME) {
 			searchTransitionTimer += delta;
@@ -895,19 +908,13 @@ public class SongMenu extends BaseOpsuState
 			this.hoveredTab = null;
 			final Beatmap focus = nodeList.getFocusedMap();
 			SoundController.playSound(SoundEffect.MENUCLICK);
-			// TODO this
-			songInfo = null;
-			scoreMap = null;
-			focusScores = null;
-			searchTextField.setText("");
-			searchTimer = SEARCH_DELAY;
-			searchTransitionTimer = SEARCH_TRANSITION_TIME;
-			searchResultString = null;
-			beatmapList.reset();
+			beatmapList.activeGroupChanged();
 			nodeList.recreate();
-			// TODO group tabs
-			nodeList.attemptFocusMap(focus, /*playAtPreviewTime*/ true);
-
+			if (!nodeList.attemptFocusMap(focus, /*playAtPreviewTime*/ true)) {
+				songInfo = null;
+				scoreMap = null;
+				focusScores = null;
+			}
 			if (beatmapList.isEmpty() && BeatmapGroup.current.emptyMessage != null) {
 				barNotifs.send(BeatmapGroup.current.emptyMessage);
 			}
@@ -1092,8 +1099,10 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// wait for user to finish typing
-		// TODO: accept all characters (current conditions are from TextField class)
-		if ((e.chr > 31 && e.chr < 127) || e.keyCode == KEY_BACK) {
+		if (Character.isLetterOrDigit(e.chr) || e.chr == ' ' || e.keyCode == KEY_BACK) {
+			if (e.chr > 255) {
+				Fonts.loadGlyphs(searchTextField.font, e.chr);
+			}
 			searchTimer = 0;
 			searchTextField.keyPressed(e);
 			int textLength = searchTextField.getText().length();
