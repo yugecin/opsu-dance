@@ -1298,7 +1298,7 @@ public class OptionsOverlay
 	}
 
 	private void updateSearch() {
-		OptionTab lastBigSection = null;
+		OptionTab lastBigSection = sections[0];
 		boolean lastBigSectionMatches = false;
 		for (OptionTab section : sections) {
 			boolean sectionMatches = section.name.toLowerCase().contains(lastSearchText);
@@ -1313,14 +1313,12 @@ public class OptionsOverlay
 				if (lastBigSectionMatches || sectionMatches) {
 					section.filtered = false;
 					option.filter(null);
+					lastBigSection.filtered = false;
 					continue;
 				}
 				if (!option.filter(lastSearchText)) {
 					section.filtered = false;
-					// unnecessary if to stop IDEs from complaining...
-					if (lastBigSection != null) {
-						lastBigSection.filtered = false;
-					}
+					lastBigSection.filtered = false;
 				}
 			}
 		}
