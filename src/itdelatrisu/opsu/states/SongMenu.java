@@ -1122,10 +1122,16 @@ public class SongMenu extends BaseOpsuState
 
 	private void selectRandomMap()
 	{
-		this.songInfo = null;
-		this.songChangeTimer.setTime(0);
 		SoundController.playSound(SoundEffect.MENUHIT);
+		this.selectRandomMap0();
+		if (nodeList.getFocusedMap() != null) {
+			this.songInfo = null;
+			this.songChangeTimer.setTime(0);
+		}
+	}
 
+	private void selectRandomMap0()
+	{
 		if (!input.isShiftDown()) {
 			while (!nextSongs.isEmpty()) {
 				final Beatmap map = nextSongs.peek();
