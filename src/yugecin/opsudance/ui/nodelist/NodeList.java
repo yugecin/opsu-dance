@@ -247,6 +247,13 @@ public class NodeList
 		if (lastFocusedMap != null) {
 			this.attemptFocusMap(lastFocusedMap, /*playAtPreviewTime*/ true);
 		}
+		if (this.focusNode == null &&
+			this.size == 1 &&
+			this.nodes[0] instanceof MultiBeatmapNode)
+		{
+			final BeatmapNode tofocus = ((MultiBeatmapNode) this.nodes[0]).expand()[0];
+			this.focusNode(tofocus, /*playAtPreviewTime*/ true);
+		}
 	}
 
 	public void processSort()
