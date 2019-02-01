@@ -60,7 +60,7 @@ public class BeatmapList
 	private final HashMap<String, Beatmap> beatmapHashDB;
 	private final HashSet<Integer> beatmapSetDb;
 
-	private String lastSearchQuery;
+	private String lastSearchQuery = "";
 
 	BeatmapList()
 	{
@@ -75,7 +75,7 @@ public class BeatmapList
 	{
 		this.visibleNodes = this.nodesInGroup = BeatmapGroup.current.filter(this.maps);
 		final String searchQuery = this.lastSearchQuery;
-		this.lastSearchQuery = null;
+		this.lastSearchQuery = "";
 		this.search(searchQuery);
 	}
 
