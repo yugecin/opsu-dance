@@ -757,20 +757,7 @@ public class SongMenu extends BaseOpsuState
 					searchResultString = null;
 				}
 
-				if (beatmapList.visibleNodes.isEmpty()) {
-					searchResultString = "No matches found. Hit ESC to reset.";
-					scoreMap = null;
-					focusScores = null;
-				} else {
-					if (!emptysearch) {
-						final int s = beatmapList.visibleNodes.size();
-						if (s == 1) {
-							searchResultString = "1 match found!";
-						} else {
-							searchResultString = s + " matches found!";
-						}
-					}
-				}
+				this.updateSearchText();
 				nodeList.processSearch();
 				if (nodeList.getFocusedMap() == null) {
 					scoreMap = null;
@@ -907,6 +894,7 @@ public class SongMenu extends BaseOpsuState
 			beatmapList.activeGroupChanged();
 			nodeList.recreate();
 			nodeList.reFadeIn();
+			this.updateSearchText();
 			if (nodeList.getFocusedMap() == null) {
 				scoreMap = null;
 				focusScores = null;
@@ -1109,6 +1097,25 @@ public class SongMenu extends BaseOpsuState
 				} else if (textLength == 1)
 					searchTransitionTimer = 0;
 				lastSearchTextLength = textLength;
+			}
+		}
+	}
+
+	private void updateSearchText()
+	{
+		if (beatmapList.visibleNodes.isEmpty()) {
+			searchResultString = "No matches found. Hit ESC to reset.";
+			scoreMap = null;
+			focusScores = null;
+			return;
+		}
+
+		if (!searchTextField.getText().isEmpty()) {
+			final int s = beatmapList.visibleNodes.size();
+			if (s == 1) {
+				searchResultString = "1 match found!";
+			} else {
+				searchResultString = s + " matches found!";
 			}
 		}
 	}
