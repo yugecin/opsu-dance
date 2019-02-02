@@ -1083,7 +1083,7 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		// wait for user to finish typing
-		if (Character.isLetterOrDigit(e.chr) || e.chr == ' ' || e.keyCode == KEY_BACK) {
+		if (e.chr > 31 || e.keyCode == KEY_BACK) {
 			if (e.chr > 255) {
 				Fonts.loadGlyphs(searchTextField.font, e.chr);
 			}

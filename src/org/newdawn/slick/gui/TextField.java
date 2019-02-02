@@ -169,15 +169,14 @@ public class TextField extends Component
 					value = value.substring(0, lastindex);
 					break;
 				}
-				if (--lastindex == 0) {
+				if (--lastindex <= 0) {
 					value = "";
 					break;
 				}
 			}
+			break;
 		default:
-			if ((Character.isLetterOrDigit(e.chr) || e.chr == ' ') &&
-				value.length() < maxCharacters)
-			{
+			if (e.chr > 31 && value.length() < maxCharacters) {
 				value += e.chr;
 			}
 		}
