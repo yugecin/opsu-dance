@@ -25,7 +25,6 @@ import itdelatrisu.opsu.io.MD5InputStreamWrapper;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,7 +104,7 @@ public class BeatmapParser {
 		Map<String, Long> map = BeatmapDB.getLastModifiedMap();
 
 		// beatmap lists
-		List<ArrayList<Beatmap>> allBeatmaps = new LinkedList<ArrayList<Beatmap>>();
+		List<Beatmap[]> allBeatmaps = new ArrayList<>();
 		List<Beatmap> cachedBeatmaps = new LinkedList<Beatmap>();  // loaded from database
 		List<Beatmap> parsedBeatmaps = new LinkedList<Beatmap>();  // loaded from parser
 
@@ -131,7 +130,8 @@ public class BeatmapParser {
 				continue;
 
 			// create a new group entry
-			ArrayList<Beatmap> beatmaps = new ArrayList<Beatmap>();
+			final Beatmap[] beatmaps = new Beatmap[files.length];
+			int beatmapc = 0;
 			for (File file : files) {
 				currentFile = file;
 
@@ -144,7 +144,7 @@ public class BeatmapParser {
 						if (lastModified == file.lastModified()) {
 							// add to cached beatmap list
 							Beatmap beatmap = new Beatmap(file);
-							beatmaps.add(beatmap);
+							beatmaps[beatmapc++] = beatmap;
 							cachedBeatmaps.add(beatmap);
 							continue;
 						} else
@@ -156,7 +156,7 @@ public class BeatmapParser {
 				// Change boolean to 'true' to parse them immediately.
 				Beatmap beatmap = null;
 				try {
-					beatmap = parseFile(file, dir, beatmaps, false);
+					beatmap = parseFile(file, dir, false);
 				} catch(Exception e) {
 					softErr(
 						e,
@@ -169,15 +169,20 @@ public class BeatmapParser {
 				// add to parsed beatmap list
 				if (beatmap != null) {
 					beatmap.dateAdded = timestamp;
-					beatmaps.add(beatmap);
+					beatmaps[beatmapc++] = beatmap;
 					parsedBeatmaps.add(beatmap);
 				}
 			}
 
 			// add group entry if non-empty
-			if (!beatmaps.isEmpty()) {
-				beatmaps.trimToSize();
-				allBeatmaps.add(beatmaps);
+			if (beatmapc > 0) {
+				if (beatmapc == beatmaps.length) {
+					allBeatmaps.add(beatmaps);
+				} else {
+					final Beatmap[] bms = new Beatmap[beatmapc];
+					System.arraycopy(beatmaps, 0, bms, 0, beatmapc);
+					allBeatmaps.add(bms);
+				}
 				if (ws != null)
 					ws.registerAll(dir.toPath());
 			}
@@ -197,8 +202,7 @@ public class BeatmapParser {
 		}
 
 		// add group entries to BeatmapSetList
-		for (ArrayList<Beatmap> beatmaps : allBeatmaps) {
-			Collections.sort(beatmaps);
+		for (Beatmap[] beatmaps : allBeatmaps) {
 			beatmapList.addBeatmapSet(beatmaps);
 		}
 
@@ -279,11 +283,11 @@ public class BeatmapParser {
 	 * Parses a beatmap.
 	 * @param file the file to parse
 	 * @param dir the directory containing the beatmap
-	 * @param beatmaps the song group
 	 * @param parseObjects if true, hit objects will be fully parsed now
 	 * @return the new beatmap
 	 */
-	private Beatmap parseFile(File file, File dir, ArrayList<Beatmap> beatmaps, boolean parseObjects) {
+	private Beatmap parseFile(File file, File dir, boolean parseObjects)
+	{
 		Beatmap beatmap = new Beatmap(file);
 		beatmap.timingPoints = new ArrayList<TimingPoint>();
 
@@ -314,13 +318,6 @@ public class BeatmapParser {
 							switch (tokens[0]) {
 							case "AudioFilename":
 								File audioFileName = new File(dir, tokens[1]);
-								if (!beatmaps.isEmpty()) {
-									// if possible, reuse the same File object from another Beatmap in the group
-									File groupAudioFileName = beatmaps.get(0).audioFilename;
-									if (groupAudioFileName != null &&
-									    tokens[1].equalsIgnoreCase(groupAudioFileName.getName()))
-										audioFileName = groupAudioFileName;
-								}
 								if (!audioFileName.isFile()) {
 									if ("virtual".equals(audioFileName.getName())) {
 										// beatmap without sound
@@ -671,7 +668,7 @@ public class BeatmapParser {
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
-			return parseFile(file, dir, beatmaps, parseObjects);
+			return parseFile(file, dir, parseObjects);
 		}
 
 		// no associated audio file?

@@ -1591,7 +1591,8 @@ public class SongMenu extends BaseOpsuState
 	 */
 	private void calculateStarRatings(BeatmapSet beatmapSet)
 	{
-		for (Beatmap beatmap : beatmapSet) {
+		for (int i = 0; i < beatmapSet.beatmaps.length; i++) {
+			final Beatmap beatmap = beatmapSet.beatmaps[i];
 			if (beatmap.starRating >= 0) {  // already calculated
 				beatmapsCalculated.put(beatmap, beatmapsCalculated.get(beatmap));
 				// ^ I guess this makes that it gets added as newest again, since

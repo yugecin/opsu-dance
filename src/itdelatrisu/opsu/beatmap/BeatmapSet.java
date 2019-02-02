@@ -20,15 +20,13 @@ package itdelatrisu.opsu.beatmap;
 
 import itdelatrisu.opsu.db.BeatmapDB;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 /**
  * Data type containing all beatmaps in a beatmap set.
  */
-public class BeatmapSet implements Iterable<Beatmap> {
+public class BeatmapSet
+{
 	/** List of associated beatmaps. */
-	private final ArrayList<Beatmap> beatmaps;
+	public final Beatmap[] beatmaps;
 
 	/**
 	 * Can be negative when it's improperly parsed for older maps.
@@ -39,33 +37,11 @@ public class BeatmapSet implements Iterable<Beatmap> {
 	 * Constructor.
 	 * @param beatmaps the beatmaps in this set, should not be empty
 	 */
-	public BeatmapSet(ArrayList<Beatmap> beatmaps) {
+	public BeatmapSet(Beatmap[] beatmaps)
+	{
 		this.beatmaps = beatmaps;
-		this.setId = beatmaps.get(0).beatmapSetID;
+		this.setId = beatmaps[0].beatmapSetID;
 	}
-
-	/**
-	 * Returns the number of elements.
-	 */
-	public int size() { return beatmaps.size(); }
-
-	/**
-	 * Returns the beatmap at the given index.
-	 * @param index the beatmap index
-	 * @throws IndexOutOfBoundsException if the index is out of range
-	 */
-	public Beatmap get(int index) { return beatmaps.get(index); }
-
-	/**
-	 * Removes the beatmap at the given index.
-	 * @param index the beatmap index
-	 * @return the removed beatmap
-	 * @throws IndexOutOfBoundsException if the index is out of range
-	 */
-	public Beatmap remove(int index) { return beatmaps.remove(index); }
-
-	@Override
-	public Iterator<Beatmap> iterator() { return beatmaps.iterator(); }
 
 	/**
 	 * Returns a formatted string for the beatmap set:
@@ -73,8 +49,9 @@ public class BeatmapSet implements Iterable<Beatmap> {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
-		Beatmap beatmap = beatmaps.get(0);
+	public String toString()
+	{
+		Beatmap beatmap = beatmaps[0];
 		return String.format("%s - %s", beatmap.getArtist(), beatmap.getTitle());
 	}
 

@@ -218,7 +218,6 @@ public class BeatmapSearcher
 		}
 
 		Log.debug("search: " + (System.currentTimeMillis() - start) + "ms");
-
 		return result;
 	}
 

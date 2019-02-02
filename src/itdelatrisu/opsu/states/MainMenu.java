@@ -896,7 +896,7 @@ public class MainMenu extends BaseOpsuState {
 		if (sets.isEmpty()) {
 			this.playNextTrack(themeBeatmap);
 		} else {
-			this.playNextTrack(sets.get(rand.nextInt(sets.size())).get(0));
+			this.playNextTrack(sets.get(rand.nextInt(sets.size())).beatmaps[0]);
 		}
 	}
 

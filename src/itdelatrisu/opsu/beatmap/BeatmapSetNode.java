@@ -49,7 +49,7 @@ public class BeatmapSetNode extends BeatmapNode
 	public void draw(float x, float y, Grade grade, boolean focus) {
 		Image bg = GameImage.MENU_BUTTON_BG.getImage();
 		boolean expanded = (beatmapIndex > -1);
-		Beatmap beatmap = beatmapSet.get(expanded ? beatmapIndex : 0);
+		Beatmap beatmap = beatmapSet.beatmaps[expanded ? beatmapIndex : 0];
 		bg.setAlpha(0.9f);
 		Color bgColor;
 		Color textColor = SkinService.skin.getSongSelectInactiveTextColor();
@@ -86,7 +86,7 @@ public class BeatmapSetNode extends BeatmapNode
 		Fonts.MEDIUM.drawString(cx, cy, beatmap.getTitle(), textColor);
 		Fonts.DEFAULT.drawString(cx, cy + Fonts.MEDIUM.getLineHeight() - 3,
 				String.format("%s // %s", beatmap.getArtist(), beatmap.creator), textColor);
-		if (expanded || beatmapSet.size() == 1)
+		if (expanded || beatmapSet.beatmaps.length == 1)
 			Fonts.BOLD.drawString(cx, cy + Fonts.MEDIUM.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 6,
 					beatmap.version, textColor);
 
@@ -144,6 +144,6 @@ public class BeatmapSetNode extends BeatmapNode
 		if (beatmapIndex == -1)
 			return beatmapSet.toString();
 		else
-			return beatmapSet.get(beatmapIndex).toString();
+			return beatmapSet.beatmaps[beatmapIndex].toString();
 	}
 }

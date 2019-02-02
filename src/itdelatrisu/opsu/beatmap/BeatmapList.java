@@ -104,12 +104,12 @@ public class BeatmapList
 		return this.sets.size();
 	}
 
-	void addBeatmapSet(ArrayList<Beatmap> beatmaps)
+	void addBeatmapSet(Beatmap[] beatmaps)
 	{
 		final BeatmapSet set = new BeatmapSet(beatmaps);
 		this.sets.add(set);
 
-		this.maps.ensureCapacity(this.maps.size() + beatmaps.size());
+		this.maps.ensureCapacity(this.maps.size() + beatmaps.length);
 		for (Beatmap beatmap : beatmaps) {
 			this.maps.add(beatmap);
 

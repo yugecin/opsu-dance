@@ -19,11 +19,13 @@ public class BeatmapGroup
 		private static final int K = 20;
 
 		/** Returns the latest "last played" time in a beatmap set. */
-		private long lastPlayed(BeatmapSet set) {
+		private long lastPlayed(BeatmapSet set)
+		{
 			long max = 0;
-			for (Beatmap beatmap : set) {
-				if (beatmap.lastPlayed > max)
-					max = beatmap.lastPlayed;
+			for (int i = 0; i < set.beatmaps.length; i++) {
+				if (set.beatmaps[i].lastPlayed > max) {
+					max = set.beatmaps[i].lastPlayed;
+				}
 			}
 			return max;
 		}
