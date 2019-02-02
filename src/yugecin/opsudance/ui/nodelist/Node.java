@@ -168,7 +168,7 @@ abstract class Node
 	 * @return {@code null} if this map is not in this node, or the node that was focused
 	 */
 	abstract BeatmapNode attemptFocusMap(Beatmap beatmap);
-	abstract void draw(Graphics g, Node focusNode);
+	abstract void draw(Graphics g, Node focusNode, Node selectedNode);
 	protected abstract boolean belongsToSet(BeatmapSet focusedSet);
 
 	void update(int delta, Node hoveredNode)
@@ -310,9 +310,9 @@ abstract class Node
 		return 0f;
 	}
 
-	protected void drawButton(Color color)
+	protected void drawButton(Color color, boolean isSelected)
 	{
-		color = this.mixBackgroundColor(color);
+		color = this.mixBackgroundColor(color, isSelected);
 		glColor4f(color.r, color.g, color.b, color.a);
 		glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
@@ -321,9 +321,12 @@ abstract class Node
 		glPopMatrix();
 	}
 
-	private Color mixBackgroundColor(Color baseColor)
+	private Color mixBackgroundColor(Color baseColor, boolean isSelected)
 	{
 		if (this.hoverHighlightTime >= HOVER_HIGHLIGHT_TIME) {
+			if (isSelected) {
+				return baseColor.brighter(.4f);
+			}
 			return baseColor;
 		}
 		return baseColor.brighter((1f - IN_QUAD.calc(

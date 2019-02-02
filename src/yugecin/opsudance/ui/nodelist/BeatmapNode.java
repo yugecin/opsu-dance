@@ -207,7 +207,7 @@ class BeatmapNode extends Node
 	}
 
 	@Override
-	void draw(Graphics g, Node focusNode)
+	void draw(Graphics g, Node focusNode, Node selectedNode)
 	{
 		final boolean isFocused = focusNode == this;
 
@@ -239,7 +239,7 @@ class BeatmapNode extends Node
 		buttonColor.a = 0.9f * fade;
 		textColor = new Color(textColor);
 		textColor.a *= fade;
-		super.drawButton(buttonColor);
+		super.drawButton(buttonColor, selectedNode == this);
 		buttonColor.a = prevAlpha;
 
 		float cx = x + Node.cx;

@@ -1047,34 +1047,23 @@ public class SongMenu extends BaseOpsuState
 				displayContainer.switchState(buttonState);
 			}
 			return;
+			*/
 		case KEY_RETURN:
-			if (map != null) {
-				startGame();
+			if (nodeList.pressedEnterShouldGameBeStarted()) {
+				this.startGame();
 			}
 			return;
 		case KEY_DOWN:
-			nodeList.scrollButtonAmount(1f);
-			return;
 		case KEY_UP:
-			nodeList.scrollButtonAmount(-1f);
-			return;
 		case KEY_RIGHT:
-			if (nodeList.focusNextMap()) {
-				SoundController.playSound(SoundEffect.MENUCLICK);
-			}
-			return;
 		case KEY_LEFT:
-			if (nodeList.focusPreviousMap()) {
-				SoundController.playSound(SoundEffect.MENUCLICK);
+		case KEY_NEXT:
+		case KEY_PRIOR:
+			SoundController.playSound(SoundEffect.MENUCLICK);
+			if (nodeList.navigationKeyPressed(e.keyCode)) {
+				this.selectionFlashTime = 0;
 			}
 			return;
-		case KEY_NEXT:
-			nodeList.scrollPageDown();
-			return;
-		case KEY_PRIOR:
-			nodeList.scrollPageUp();
-			return;
-			 */
 		case KEY_O:
 			if (reloadThread == null && input.isControlDown()) {
 				optionsOverlay.show();

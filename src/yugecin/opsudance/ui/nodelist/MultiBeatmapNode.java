@@ -73,7 +73,7 @@ class MultiBeatmapNode extends Node
 	}
 
 	@Override
-	void draw(Graphics g, Node focusNode)
+	void draw(Graphics g, Node focusNode, Node selectedNode)
 	{
 		final boolean isFocused = focusNode == this;
 
@@ -90,7 +90,7 @@ class MultiBeatmapNode extends Node
 		}
 		final float oldalpha = buttonColor.a;
 		buttonColor.a = 0.9f;
-		super.drawButton(buttonColor);
+		super.drawButton(buttonColor, selectedNode == this);
 		buttonColor.a = oldalpha;
 
 		float cx = x + Node.cx;

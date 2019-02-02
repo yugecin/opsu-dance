@@ -15,8 +15,8 @@ import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.ui.StarStream;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.core.input.*;
-import yugecin.opsudance.utils.FloatConsumer;
 
+import static org.lwjgl.input.Keyboard.*;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
@@ -35,6 +35,7 @@ public class NodeList
 	private float maxVisibleButtons;
 
 	private Node hoverNode;
+	private Node selectedNode;
 	private BeatmapNode focusNode;
 	private boolean keepHover;
 
@@ -89,7 +90,7 @@ public class NodeList
 		this.starStream.setPositionSpread(Node.buttonOffset / 5);
 
 		if (this.focusNode != null) {
-			this.scrollMakeNodeVisible(this.focusNode, scrolling::scrollToPosition);
+			this.scrollMakeNodeVisible(this.focusNode, /*smooth*/ true);
 		}
 	}
 
@@ -176,7 +177,7 @@ public class NodeList
 			if (node.y >= footerY) {
 				break;
 			}
-			node.draw(g, this.focusNode);
+			node.draw(g, this.focusNode, this.selectedNode);
 		}
 
 		final float scrollerY =
@@ -366,6 +367,7 @@ public class NodeList
 						}
 						if (this.focusNode == n) {
 							this.focusNode = null;
+							this.selectedNode = null;
 						}
 						maps[k] = ((BeatmapNode) n).beatmap;
 					}
@@ -482,6 +484,7 @@ public class NodeList
 		}
 		this.unexpandAllExceptInSet(null);
 		this.focusNode = null;
+		this.selectedNode = null;
 	}
 
 	/**
@@ -516,6 +519,162 @@ public class NodeList
 		for (int i = this.size; i > 0;) {
 			this.nodes[--i].focusChanged(node.beatmap.beatmapSet);
 		}
+		this.selectedNode = node;
+	}
+
+	/**
+	 * call when user presses enter in song menu
+	 * @return {@code true} if game should start
+	 */
+	public boolean pressedEnterShouldGameBeStarted()
+	{
+		if (this.focusNode == this.selectedNode) {
+			return true;
+		}
+		if (this.selectedNode instanceof BeatmapNode) {
+			final BeatmapNode n = (BeatmapNode) this.selectedNode;
+			this.unexpandAllExceptInSet(n.beatmap.beatmapSet);
+			this.focusNode(n, /*playAtPreviewTime*/ true);
+			return false;
+		}
+		if (this.selectedNode instanceof MultiBeatmapNode) {
+			final MultiBeatmapNode mbn = ((MultiBeatmapNode) this.selectedNode);
+			this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
+			final BeatmapNode n = mbn.expand()[0];
+			this.focusNode(n, /*playAtPreviewTime*/ true);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @return {@code true} if focused beatmap changed
+	 */
+	public boolean navigationKeyPressed(int keyCode)
+	{
+		if (this.size == 0) {
+			return false;
+		}
+
+		if (this.selectedNode == null) {
+			this.selectedNode = this.focusNode;
+		}
+
+		if ((keyCode == KEY_LEFT || keyCode == KEY_RIGHT) &&
+			this.selectedNode != this.focusNode)
+		{
+			if (this.selectedNode instanceof MultiBeatmapNode) {
+				final MultiBeatmapNode mbn;
+				mbn = ((MultiBeatmapNode) this.selectedNode);
+				this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
+				final BeatmapNode[] expand = mbn.expand();
+				this.focusNode(expand[0], /*playAtPreviewTime*/ true);
+				return true;
+			}
+			if (this.selectedNode instanceof BeatmapNode) {
+				final BeatmapNode bn = (BeatmapNode) this.selectedNode;
+				this.focusNode(bn, /*playAtPreviewTime*/ true);
+				return true;
+			}
+		}
+		int rightLeftDirection = 0;
+
+		switch (keyCode) {
+		case KEY_DOWN:
+			if (this.selectedNode == null) {
+				this.selectedNode = this.nodes[0];
+				break;
+			}
+			if (this.selectedNode.idx == this.size - 1) {
+				return false;
+			}
+			this.selectedNode = this.nodes[this.selectedNode.idx + 1];
+			break;
+		case KEY_UP:
+			if (this.selectedNode == null) {
+				this.selectedNode = this.nodes[this.size - 1];
+				break;
+			}
+			if (this.selectedNode.idx == 0) {
+				return false;
+			}
+			this.selectedNode = this.nodes[this.selectedNode.idx - 1];
+			break;
+		case KEY_RIGHT:
+			this.focusNode = null;
+			if (this.selectedNode == null || this.selectedNode.idx == this.size - 1) {
+				this.selectedNode = this.nodes[this.size - 1];
+				break;
+			}
+			rightLeftDirection = 1;
+			break;
+		case KEY_LEFT:
+			this.focusNode = null;
+			if (this.selectedNode == null || this.selectedNode.idx == 0) {
+				this.selectedNode = this.nodes[0];
+				break;
+			}
+			rightLeftDirection = -1;
+			break;
+		case KEY_NEXT:
+			if (this.selectedNode == null) {
+				this.selectedNode = this.nodes[this.size - 1];
+				break;
+			}
+			final int nidxp = this.selectedNode.idx + (int) this.maxVisibleButtons - 1;
+			this.selectedNode = this.nodes[Math.min(this.size - 1, nidxp)];
+			break;
+		case KEY_PRIOR:
+			if (this.selectedNode == null) {
+				this.selectedNode = this.nodes[0];
+				break;
+			}
+			final int nidxn = this.selectedNode.idx - (int) this.maxVisibleButtons + 1;
+			this.selectedNode = this.nodes[Math.max(0, nidxn)];
+			break;
+		default:
+			return false;
+		}
+
+		if (keyCode == KEY_LEFT || keyCode == KEY_RIGHT) {
+			if (rightLeftDirection != 0) {
+				do {
+					final int nidx = this.selectedNode.idx + rightLeftDirection;
+					if (nidx < 0 || nidx >= this.size) {
+						break;
+					}
+					this.selectedNode = this.nodes[nidx];
+				} while (this.selectedNode instanceof BeatmapNode &&
+					((BeatmapNode) this.selectedNode).isFromExpandedMultiNode);
+
+			}
+			BeatmapNode n = null;
+			if (this.selectedNode instanceof MultiBeatmapNode) {
+				n = ((MultiBeatmapNode) this.selectedNode).expand()[0];
+			}
+			if (this.selectedNode instanceof BeatmapNode) {
+				n = (BeatmapNode) this.selectedNode;
+			}
+			if (n != null) {
+				this.unexpandAllExceptInSet(n.beatmap.beatmapSet);
+				this.focusNode(n, /*playAtPreviewTime*/ true);
+				return true;
+			}
+			return false;
+		}
+
+		if (this.selectedNode instanceof BeatmapNode &&
+			this.focusNode != null &&
+			this.focusNode != this.selectedNode &&
+			((BeatmapNode) this.selectedNode).beatmap.beatmapSet ==
+				this.focusNode.beatmap.beatmapSet)
+		{
+			this.focusNode((BeatmapNode) this.selectedNode, /*playAtPreviewTime*/ true);
+			return true;
+		}
+
+		this.scrollMakeNodeVisible(this.selectedNode, /*smooth*/ true);
+		return false;
 	}
 
 	public boolean mousePressed(MouseEvent e)
@@ -548,37 +707,17 @@ public class NodeList
 		this.scrolling.mouseWheelMoved(e);
 	}
 
-	public void scrollPageUp()
-	{
-		this.scrollButtonAmount(-maxVisibleButtons);
-	}
-
-	public void scrollPageDown()
-	{
-		this.scrollButtonAmount(maxVisibleButtons);
-	}
-
-	/**
-	 * Scrolls through the song list.
-	 */
-	public void scrollButtonAmount(float amountOfButtons)
-	{
-		if (amountOfButtons != 0) {
-			scrolling.addOffset(amountOfButtons * Node.buttonOffset);
-		}
-	}
-
 	public void centerFocusedNodeSmooth()
 	{
-		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::scrollToPosition);
+		this.scrollMakeNodeVisible(this.focusNode, /*smooth*/ true);
 	}
 
 	public void centerFocusedNodeNow()
 	{
-		this.scrollMakeNodeVisible(this.focusNode, this.scrolling::setPosition);
+		this.scrollMakeNodeVisible(this.focusNode, /*smooth*/ false);
 	}
 
-	private void scrollMakeNodeVisible(Node node, FloatConsumer scrollMethod)
+	private void scrollMakeNodeVisible(Node node, boolean smooth)
 	{
 		if (node == null) {
 			return;
@@ -596,7 +735,11 @@ public class NodeList
 			// TODO: why is this needed? (see BeatmapNode#onSiblingNodeUpdated)
 			adjustedposition += Node.buttonInternalOffset;
 		}
-		scrollMethod.accept(adjustedposition);
+		if (smooth) {
+			this.scrolling.scrollToPosition(adjustedposition);
+		} else {
+			this.scrolling.setPosition(adjustedposition);
+		}
 	}
 
 	// collection methods
