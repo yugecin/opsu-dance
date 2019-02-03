@@ -215,6 +215,7 @@ public class NodeList
 			lastFocusedMap = MusicController.getBeatmap();
 		}
 		this.focusNode = null;
+		this.selectedNode = null;
 		final ArrayList<Beatmap> temp = new ArrayList<>(20);
 		final ArrayList<Beatmap> maps = beatmapList.visibleNodes;
 		this.ensureCapacity(maps.size());
@@ -528,6 +529,12 @@ public class NodeList
 	 */
 	public boolean pressedEnterShouldGameBeStarted()
 	{
+		if (this.selectedNode == null) {
+			this.selectedNode = this.focusNode;
+			if (this.selectedNode == null) {
+				return false;
+			}
+		}
 		if (this.focusNode == this.selectedNode) {
 			return true;
 		}
