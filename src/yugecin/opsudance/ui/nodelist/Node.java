@@ -305,6 +305,14 @@ abstract class Node
 		return buttonOffset;
 	}
 
+	/**
+	 * @return height that this node will take after all current animations are finished
+	 */
+	float getEventualHeight()
+	{
+		return buttonOffset;
+	}
+
 	float getInternalOffset()
 	{
 		return 0f;

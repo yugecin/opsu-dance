@@ -55,6 +55,12 @@ class MultiBeatmapNode extends Node
 	}
 
 	@Override
+	float getEventualHeight()
+	{
+		return buttonOffset;
+	}
+
+	@Override
 	protected boolean belongsToSet(BeatmapSet focusedSet)
 	{
 		return this.beatmaps[0].beatmapSet == focusedSet;

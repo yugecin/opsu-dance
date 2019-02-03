@@ -192,6 +192,15 @@ class BeatmapNode extends Node
 	}
 
 	@Override
+	float getEventualHeight()
+	{
+		if (this.setFocused) {
+			return this.focusedHeight;
+		}
+		return this.normalHeight;
+	}
+
+	@Override
 	float getInternalOffset()
 	{
 		if (this.setFocused) {

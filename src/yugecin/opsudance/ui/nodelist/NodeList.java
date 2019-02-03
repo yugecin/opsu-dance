@@ -722,23 +722,18 @@ public class NodeList
 		if (node == null) {
 			return;
 		}
-		float adjustedposition = node.idx * Node.buttonOffset;
+		float position = 0f;
 		for (int idx = node.idx - 1; idx >= 0; idx--) {
-			if (!(this.nodes[idx] instanceof BeatmapNode) ||
-				!((BeatmapNode) this.nodes[idx]).isFromExpandedMultiNode)
-			{
-				break;
-			}
-			adjustedposition += Node.buttonInternalOffset;
+			position += this.nodes[idx].getEventualHeight();
 		}
 		if (node.idx > 0) {
 			// TODO: why is this needed? (see BeatmapNode#onSiblingNodeUpdated)
-			adjustedposition += Node.buttonInternalOffset;
+			position += Node.buttonInternalOffset;
 		}
 		if (smooth) {
-			this.scrolling.scrollToPosition(adjustedposition);
+			this.scrolling.scrollToPosition(position);
 		} else {
-			this.scrolling.setPosition(adjustedposition);
+			this.scrolling.setPosition(position);
 		}
 	}
 
