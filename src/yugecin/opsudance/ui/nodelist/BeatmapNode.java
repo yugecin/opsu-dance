@@ -203,8 +203,15 @@ class BeatmapNode extends Node
 	@Override
 	float getInternalOffset()
 	{
+		if (this.appearTime < APPEAR_TIME) {
+			float offset = -buttonOffset * (1f - this.appearValue);
+			if (this.setFocused) {
+				return offset + this.focusedInternalOffset * this.appearValue;
+			}
+			return offset + this.normalOffset * this.appearValue;
+		}
 		if (this.setFocused) {
-			return this.focusedInternalOffset * this.appearValue;
+			return this.focusedInternalOffset;
 		}
 		return this.normalOffset;
 	}

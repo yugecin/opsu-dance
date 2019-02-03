@@ -292,15 +292,15 @@ public class NodeList
 			n.idx = i;
 			if (i < endIdxExclusive) {
 				n.onSiblingNodeUpdated();
-				n.appearTime = 0;
-				n.appearValue = 0f;
 				if (i >= idx && n instanceof BeatmapNode) {
+					n.appearTime = 0;
+					n.appearValue = 0f;
 					((BeatmapNode) n).doFade = true;
 				}
 			}
 		}
 		if (0 < replacement.idx) {
-			this.nodes[replacement.idx].onSiblingNodeUpdated();
+			this.nodes[replacement.idx - 1].onSiblingNodeUpdated();
 		}
 		if (idx + inc < this.size) {
 			this.nodes[idx + inc].onSiblingNodeUpdated();
