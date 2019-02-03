@@ -25,6 +25,7 @@ import itdelatrisu.opsu.io.MD5InputStreamWrapper;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -203,6 +204,7 @@ public class BeatmapParser {
 
 		// add group entries to BeatmapSetList
 		for (Beatmap[] beatmaps : allBeatmaps) {
+			Arrays.sort(beatmaps);
 			beatmapList.addBeatmapSet(beatmaps);
 		}
 
