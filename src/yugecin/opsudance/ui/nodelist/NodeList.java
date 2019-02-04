@@ -515,6 +515,7 @@ public class NodeList
 		}
 		MusicController.play(beatmap, /*loop*/ false, playAtPreviewTime);
 		if (displayContainer.isIn(songMenuState)) {
+			beatmap.loadBackground();
 			this.centerFocusedNodeSmooth();
 		}
 		for (int i = this.size; i > 0;) {

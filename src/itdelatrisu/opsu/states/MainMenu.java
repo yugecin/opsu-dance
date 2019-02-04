@@ -917,7 +917,12 @@ public class MainMenu extends BaseOpsuState {
 	{
 		File newBackgroundFile = null;
 		if (OPTION_DYNAMIC_BACKGROUND.state) {
-			newBackgroundFile = MusicController.getBeatmap().bg;
+			final Beatmap beatmap = MusicController.getBeatmap();
+			newBackgroundFile = null;
+			if (beatmap != null) {
+				beatmap.loadBackground();
+				newBackgroundFile = beatmap.bg;
+			}
 		}
 		if (!Objects.equals(this.currentBackgroundFile, newBackgroundFile)) {
 			this.currentBackgroundFile = newBackgroundFile;
