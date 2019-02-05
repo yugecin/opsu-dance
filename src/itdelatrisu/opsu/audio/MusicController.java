@@ -126,6 +126,7 @@ public class MusicController {
 		}
 
 		lastBeatmap = beatmap;
+		dynBg.songChanged();
 	}
 
 	private static void updateSongHistory(Beatmap prev, Beatmap next)

@@ -24,6 +24,7 @@ import yugecin.opsudance.options.OptionsService;
 import yugecin.opsudance.render.GameObjectRenderer;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.BackButton;
+import yugecin.opsudance.ui.DynamicBackground;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.colors.CursorColor;
@@ -73,6 +74,7 @@ public class InstanceContainer
 	public static OptionsOverlay optionsOverlay;
 
 	public static NodeList nodeList;
+	public static DynamicBackground dynBg;
 
 	public static Splash splashState;
 	public static MainMenu mainmenuState;
@@ -123,6 +125,7 @@ public class InstanceContainer
 		optionsOverlay = new OptionsOverlay(OptionGroups.normalOptions);
 
 		nodeList = new NodeList();
+		dynBg = new DynamicBackground();
 
 		splashState = new Splash();
 		mainmenuState = new MainMenu();

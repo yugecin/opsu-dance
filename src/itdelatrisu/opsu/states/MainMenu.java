@@ -269,14 +269,7 @@ public class MainMenu extends BaseOpsuState {
 	public void render(Graphics g) {
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
-		if (!OPTION_DYNAMIC_BACKGROUND.state ||
-			beatmap == null ||
-			!beatmap.drawBackground(width, height, bgAlpha.getValue(), true))
-		{
-			Image bg = GameImage.MENU_BG.getImage();
-			bg.setAlpha(bgAlpha.getValue());
-			bg.draw();
-		}
+		dynBg.draw();
 
 		// top/bottom horizontal bars
 		float oldAlpha = Colors.BLACK_ALPHA.a;
@@ -480,7 +473,10 @@ public class MainMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public void preRenderUpdate() {
+	public void preRenderUpdate()
+	{
+		dynBg.update();
+
 		int delta = renderDelta;
 		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();

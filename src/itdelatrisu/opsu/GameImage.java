@@ -272,13 +272,7 @@ public enum GameImage {
 			return img.getScaledCopy((h * 0.033f) / img.getHeight());
 		}
 	},
-	MENU_BG ("menu-background", "png|jpg", false, true) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.9f);
-			return img;
-		}
-	},
+	MENU_BG ("menu-background", "png|jpg", false, true),
 	MENU_LOGO ("logo2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

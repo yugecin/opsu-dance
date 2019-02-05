@@ -200,12 +200,6 @@ public class SongMenu extends BaseOpsuState
 	/** Whether the song folder changed (notified via the watch service). */
 	private boolean songFolderChanged = false;
 
-	/** The last background image. */
-	private File lastBackgroundImage;
-
-	/** Background alpha level (for fade-in effect). */
-	private AnimatedValue bgAlpha = new AnimatedValue(800, 0f, .7f, AnimationEquation.OUT_QUAD);
-
 	/** Timer for animations when a new song node is selected. */
 	private AnimatedValue songChangeTimer = new AnimatedValue(900, 0f, 1f, AnimationEquation.LINEAR);
 
@@ -393,12 +387,8 @@ public class SongMenu extends BaseOpsuState
 		g.setBackground(Color.black);
 
 		// background
+		dynBg.draw();
 		final Beatmap activeMap = MusicController.getBeatmap();
-		if (activeMap != null &&
-			!activeMap.drawBackground(width, height, bgAlpha.getValue(), true))
-		{
-			GameImage.PLAYFIELD.getImage().draw(0, 0, Colors.WHITE_ALPHA);
-		}
 
 		// song nodes
 		nodeList.render(g);
@@ -720,6 +710,8 @@ public class SongMenu extends BaseOpsuState
 	@Override
 	public void preRenderUpdate()
 	{
+		dynBg.update();
+
 		int delta = renderDelta;
 		UI.update(delta);
 		if (reloadThread == null)
@@ -790,11 +782,6 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (focusedMap != null) {
-			// fade in background
-			if (!focusedMap.isBackgroundLoading()) {
-				bgAlpha.update(delta);
-			}
-
 			// song change timers
 			songChangeTimer.update(delta);
 			if (!MusicController.isTrackLoading()) {
@@ -923,6 +910,7 @@ public class SongMenu extends BaseOpsuState
 				this.songChangeTimer.setTime(0);
 				this.musicIconBounceTimer.setTime(0);
 				this.selectionFlashTime = 0;
+				this.activeBeatmapMaybeChanged();
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
@@ -1142,6 +1130,31 @@ public class SongMenu extends BaseOpsuState
 		// shift key: previous random track
 		while (!songHistory.isEmpty() &&
 			!nodeList.attemptFocusMap(songHistory.peek(), /*playAtPreviewTime*/ true));
+		this.activeBeatmapMaybeChanged();
+	}
+
+	/**
+	 * to update the background image
+	 */
+	private void activeBeatmapMaybeChanged()
+	{
+		/*
+		final Beatmap beatmap = MusicController.getBeatmap();
+		if (beatmap == this.lastBeatmap) {
+			// no it didn't
+			return;
+		}
+		if (beatmap == null) {
+			bgAlpha.setTime(O);
+		}
+		boolean isBgNull = this.lastBeatmap == null || beatmap.bg == null;
+		if ((isBgNull && lastBackgroundImage != beatmap.bg) ||
+			(!isBgNull && !beatmap.bg.equals(lastBackgroundImage)))
+		{
+			bgAlpha.setTime(0);
+			this.lastBeatmap = beatmap.bg;
+		}
+		*/
 	}
 
 	private void showMapOptions()
@@ -1224,7 +1237,6 @@ public class SongMenu extends BaseOpsuState
 		beatmapMenuTimer = -1;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		songInfo = null;
-		bgAlpha.setTime(bgAlpha.getDuration());
 		songChangeTimer.setTime(songChangeTimer.getDuration());
 		musicIconBounceTimer.setTime(musicIconBounceTimer.getDuration());
 		sortMenu.reset();
@@ -1559,7 +1571,7 @@ public class SongMenu extends BaseOpsuState
 		searchTimer = SEARCH_DELAY;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		searchResultString = null;
-		lastBackgroundImage = null;
+		dynBg.reset();
 
 		// reload songs in new thread
 		reloadThread = new BeatmapReloadThread(fullReload);
