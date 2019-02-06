@@ -384,8 +384,6 @@ public class SongMenu extends BaseOpsuState
 	@Override
 	public void render(Graphics g)
 	{
-		g.setBackground(Color.black);
-
 		// background
 		dynBg.draw();
 		final Beatmap activeMap = MusicController.getBeatmap();

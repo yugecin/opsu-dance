@@ -74,8 +74,9 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 
 	private void drawBeatmapBackgroundOrDefault(Beatmap beatmap, float alpha)
 	{
-		if (beatmap != null && !beatmap.drawBackground(width, height, alpha, true)) {
+		if (beatmap == null || !beatmap.drawBackground(width, height, alpha, true)) {
 			glColor4f(1f, 1f, 1f, alpha);
+			glEnable(GL_TEXTURE_2D);
 			simpleTexturedQuadTopLeft(this.defaultBg);
 		}
 	}
@@ -84,7 +85,11 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 	{
 		this.fadeOutTime = 0;
 		this.fadeInTime = 0;
-		this.oldBeatmap = this.newBeatmap = null;
+		this.oldBeatmap = null;
+		this.newBeatmap = MusicController.getBeatmap();
+		if (this.newBeatmap != null) {
+			this.newBeatmap.loadBackground();
+		}
 	}
 
 	public void songChanged()
