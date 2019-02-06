@@ -47,7 +47,6 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent.Kind;
@@ -908,7 +907,6 @@ public class SongMenu extends BaseOpsuState
 				this.songChangeTimer.setTime(0);
 				this.musicIconBounceTimer.setTime(0);
 				this.selectionFlashTime = 0;
-				this.activeBeatmapMaybeChanged();
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
@@ -1045,9 +1043,13 @@ public class SongMenu extends BaseOpsuState
 		case KEY_LEFT:
 		case KEY_NEXT:
 		case KEY_PRIOR:
+			final Beatmap bm = MusicController.getBeatmap();
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			if (nodeList.navigationKeyPressed(e.keyCode)) {
 				this.selectionFlashTime = 0;
+			}
+			if (bm != MusicController.getBeatmap()) {
+				this.musicIconBounceTimer.setTime(0);
 			}
 			return;
 		case KEY_O:
@@ -1118,6 +1120,7 @@ public class SongMenu extends BaseOpsuState
 			while (!nextSongs.isEmpty()) {
 				final Beatmap map = nextSongs.peek();
 				if (nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true)) {
+					this.musicIconBounceTimer.setTime(0);
 					return;
 				}
 			}
@@ -1128,31 +1131,7 @@ public class SongMenu extends BaseOpsuState
 		// shift key: previous random track
 		while (!songHistory.isEmpty() &&
 			!nodeList.attemptFocusMap(songHistory.peek(), /*playAtPreviewTime*/ true));
-		this.activeBeatmapMaybeChanged();
-	}
-
-	/**
-	 * to update the background image
-	 */
-	private void activeBeatmapMaybeChanged()
-	{
-		/*
-		final Beatmap beatmap = MusicController.getBeatmap();
-		if (beatmap == this.lastBeatmap) {
-			// no it didn't
-			return;
-		}
-		if (beatmap == null) {
-			bgAlpha.setTime(O);
-		}
-		boolean isBgNull = this.lastBeatmap == null || beatmap.bg == null;
-		if ((isBgNull && lastBackgroundImage != beatmap.bg) ||
-			(!isBgNull && !beatmap.bg.equals(lastBackgroundImage)))
-		{
-			bgAlpha.setTime(0);
-			this.lastBeatmap = beatmap.bg;
-		}
-		*/
+		this.musicIconBounceTimer.setTime(0);
 	}
 
 	private void showMapOptions()
@@ -1405,7 +1384,11 @@ public class SongMenu extends BaseOpsuState
 	 */
 	public void setFocusToRandom()
 	{
+		final Beatmap bm = MusicController.getBeatmap();
 		nodeList.focusRandomMap(/*playAtPreviewTime*/ true);
+		if (bm != MusicController.getBeatmap()) {
+			this.musicIconBounceTimer.setTime(0);
+		}
 	}
 
 	/**
