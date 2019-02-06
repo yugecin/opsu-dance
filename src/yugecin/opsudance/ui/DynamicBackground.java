@@ -92,6 +92,12 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 		}
 	}
 
+	public void fadeInNow()
+	{
+		this.fadeOutTime = 0;
+		this.fadeInTime = 0;
+	}
+
 	public void songChanged()
 	{
 		final Beatmap beatmap = MusicController.getBeatmap();

@@ -1226,6 +1226,7 @@ public class SongMenu extends BaseOpsuState
 			displayContainer.cursor.reset();
 		}
 
+		dynBg.fadeInNow();
 		UI.enter();
 		selectModeButton.resetHover();
 		selectModsButton.resetHover();
