@@ -21,7 +21,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
@@ -46,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static itdelatrisu.opsu.ui.Colors.*;
+import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -116,7 +116,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	private int tOut;
 	private int tProgress = -1;
 	private OpsuState tNextState;
-	private final Color tOVERLAY = new Color(Color.black);
+	private float tOVERLAY = 1f;
 
 	public DisplayContainer()
 	{
@@ -309,12 +309,18 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				// transition
 				if (tProgress != -1) {
 					if (tProgress > tOut) {
-						tOVERLAY.a = 1f - (tProgress - tOut) / (float) tIn;
+						tOVERLAY = 1f - (tProgress - tOut) / (float) tIn;
 					} else {
-						tOVERLAY.a = tProgress / (float) tOut;
+						tOVERLAY = tProgress / (float) tOut;
 					}
-					graphics.setColor(tOVERLAY);
-					graphics.fillRect(0, 0, width, height);
+					glColor4f(0f, 0f, 0f, tOVERLAY);
+					glDisable(GL_TEXTURE_2D);
+					glBegin(GL_QUADS);
+					glVertex2i(0, 0);
+					glVertex2i(width, 0);
+					glVertex2i(width, height);
+					glVertex2i(0, height);
+					glEnd();
 				}
 
 				timeSinceLastRender = 0;
@@ -488,8 +494,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		GL.enterOrtho(width, height);
 
 		this.glReady = true;
-		this.glVersion = GL11.glGetString(GL11.GL_VERSION);
-		this.glVendor = GL11.glGetString(GL11.GL_VENDOR);
+		this.glVersion = glGetString(GL_VERSION);
+		this.glVendor = glGetString(GL_VENDOR);
 
 		graphics = new Graphics(width, height);
 		graphics.setAntiAlias(false);
