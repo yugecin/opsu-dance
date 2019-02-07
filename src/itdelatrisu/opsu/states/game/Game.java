@@ -19,12 +19,15 @@
 package itdelatrisu.opsu.states.game;
 
 import itdelatrisu.opsu.*;
+import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.audio.HitSound;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapGroup;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.db.BeatmapDB;
@@ -961,8 +964,22 @@ public class Game extends ComplexOpsuState {
 				data.setGameplay(!isReplay);
 
 				// add score to database
-				if (!unranked && !isReplay)
+				if (!unranked && !isReplay) {
 					ScoreDB.addScore(score);
+					boolean resort = false;
+					final BeatmapSortOrder so = BeatmapSortOrder.current;
+					final Grade grade = score.getGrade();
+					if (grade.compareTo(this.beatmap.topGrade) > 0) {
+						this.beatmap.topGrade = grade;
+						resort = so == BeatmapSortOrder.RANK;
+					}
+					if (BeatmapGroup.current == BeatmapGroup.RECENT) {
+						beatmapList.activeGroupChanged();
+					} else if (resort || so == BeatmapSortOrder.PLAYS) {
+						beatmapList.resort();
+						nodeList.processSort();
+					}
+				}
 			}
 
 			// start timer

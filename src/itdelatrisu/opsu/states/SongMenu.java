@@ -1260,17 +1260,6 @@ public class SongMenu extends BaseOpsuState
 				scoreMap = ScoreDB.getMapSetScores(focusNode.beatmap);
 				focusScores = getScoreDataForNode(focusNode, true);
 			}
-
-			/*
-			 * TODO: resort based on playcount
-			// re-sort (in case play count updated)
-			if (BeatmapSortOrder.current() == BeatmapSortOrder.PLAYS) {
-				BeatmapSetNode oldFocusBase = beatmapist.getBeatmapSetNode(focusNode.index);
-				int oldFocusFileIndex = focusNode.beatmapIndex;
-				focusNode = null;
-				beatmapSetList.init();
-				this.setFocus(oldFocusBase, oldFocusFileIndex, true);
-			}
 			*/
 
 			resetGame = false;
