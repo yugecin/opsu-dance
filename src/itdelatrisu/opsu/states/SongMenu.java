@@ -319,7 +319,7 @@ public class SongMenu extends BaseOpsuState
 		sortMenu.setHighlightColor(Colors.GREEN_SORT);
 
 		// initialize score data buttons
-		ScoreData.init(width, headerY + height * 0.01f);
+		ScoreData.init(width, this.headerImgH + height * 0.01f);
 
 		final float shls = (footerLogoSize * .85f) / 2f; // small half logo size
 		// distance logo center to border :)
@@ -907,6 +907,7 @@ public class SongMenu extends BaseOpsuState
 				this.songChangeTimer.setTime(0);
 				this.musicIconBounceTimer.setTime(0);
 				this.selectionFlashTime = 0;
+				this.reloadFocusedMapScores();
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
@@ -1050,6 +1051,7 @@ public class SongMenu extends BaseOpsuState
 			}
 			if (bm != MusicController.getBeatmap()) {
 				this.musicIconBounceTimer.setTime(0);
+				this.reloadFocusedMapScores();
 			}
 			return;
 		case KEY_O:
@@ -1121,6 +1123,7 @@ public class SongMenu extends BaseOpsuState
 				final Beatmap map = nextSongs.peek();
 				if (nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true)) {
 					this.musicIconBounceTimer.setTime(0);
+					this.reloadFocusedMapScores();
 					return;
 				}
 			}
@@ -1132,6 +1135,7 @@ public class SongMenu extends BaseOpsuState
 		while (!songHistory.isEmpty() &&
 			!nodeList.attemptFocusMap(songHistory.peek(), /*playAtPreviewTime*/ true));
 		this.musicIconBounceTimer.setTime(0);
+		this.reloadFocusedMapScores();
 	}
 
 	private void showMapOptions()
@@ -1253,14 +1257,8 @@ public class SongMenu extends BaseOpsuState
 					img.destroyBeatmapSkinImage();
 			}
 
-			/*
-			 *  TODO: this score stuff
 			// reload scores
-			if (focusNode != null) {
-				scoreMap = ScoreDB.getMapSetScores(focusNode.beatmap);
-				focusScores = getScoreDataForNode(focusNode, true);
-			}
-			*/
+			this.reloadFocusedMapScores();
 
 			resetGame = false;
 		}
@@ -1378,6 +1376,7 @@ public class SongMenu extends BaseOpsuState
 		nodeList.focusRandomMap(/*playAtPreviewTime*/ true);
 		if (bm != MusicController.getBeatmap()) {
 			this.musicIconBounceTimer.setTime(0);
+			this.reloadFocusedMapScores();
 		}
 	}
 
@@ -1445,6 +1444,14 @@ public class SongMenu extends BaseOpsuState
 		*/
 	}
 
+	private void reloadFocusedMapScores()
+	{
+		final Beatmap beatmap = nodeList.getFocusedMap();
+		this.scoreMap = ScoreDB.getMapSetScores(beatmap);
+		this.focusScores = this.getScoreDataForMap(beatmap, true);
+		this.startScorePos.setPosition(0);
+	}
+
 	/**
 	 * Triggers a reset of game data upon entering this state.
 	 */
@@ -1500,16 +1507,16 @@ public class SongMenu extends BaseOpsuState
 	/**
 	 * Returns all the score data for an BeatmapSetNode from scoreMap.
 	 * If no score data is available for the node, return null.
-	 * @param node the BeatmapSetNode
+	 * @param beatmap map
 	 * @param setTimeSince whether or not to set the "time since" field for the scores
 	 * @return the ScoreData array
 	 */
-	private ScoreData[] getScoreDataForNode(BeatmapNode node, boolean setTimeSince) {
+	private ScoreData[] getScoreDataForMap(Beatmap beatmap, boolean setTimeSince)
+	{
 		if (scoreMap == null || scoreMap.isEmpty()) {
 			return null;
 		}
 
-		Beatmap beatmap = node.beatmap;
 		ScoreData[] scores = scoreMap.get(beatmap.version);
 		if (scores == null || scores.length < 1)  // no scores
 			return null;

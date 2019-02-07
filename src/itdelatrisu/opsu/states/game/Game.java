@@ -969,7 +969,7 @@ public class Game extends ComplexOpsuState {
 					boolean resort = false;
 					final BeatmapSortOrder so = BeatmapSortOrder.current;
 					final Grade grade = score.getGrade();
-					if (grade.compareTo(this.beatmap.topGrade) > 0) {
+					if (grade.compareTo(this.beatmap.topGrade) < 0) {
 						this.beatmap.topGrade = grade;
 						resort = so == BeatmapSortOrder.RANK;
 					}
