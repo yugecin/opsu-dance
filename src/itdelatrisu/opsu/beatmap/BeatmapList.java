@@ -186,150 +186,116 @@ public class BeatmapList
 //		return node;
 //	}
 //
-//	/**
-//	 * Deletes a song group from the list, and also deletes the beatmap
-//	 * directory associated with the node.
-//	 * @param node the set to delete
-//	 * @return {@code true} if the song group was deleted
-//	 */
-//	public boolean deleteBeatmapSet(final BeatmapSetNode set)
-//	{
-//		if (this.expandedSet == set) {
-//			this.unexpand();
-//		}
-//
-//		// re-link base nodes and update index
-//		final BeatmapNode prev = set.prev;
-//		final BeatmapNode next = set.next;
-//
-//		if (prev != null) {
-//			prev.next = next;
-//		}
-//
-//		if (next != null) {
-//			next.prev = prev;
-//			final int didx = next.index - set.index;
-//			BeatmapNode n = next;
-//			do {
-//				if (n == this.expandedSetFirstNode) {
-//					n = this.expandedSetLastNode;
-//				} else {
-//					n.index -= didx;
-//				}
-//			} while ((n = n.next) != null);
-//		}
-//
-//		// remove all node references
-//		final BeatmapSet beatmapSet = set.beatmapSet;
-//		final Beatmap beatmap = beatmapSet.get(0);
-//		this.nodes.remove(set);
-//		this.parsedNodes.remove(set);
-//		this.groupNodes.remove(set);
-//		this.mapCount -= beatmapSet.size();
-//		if (beatmap.beatmapSetID > 0) {
-//			MSIDdb.remove(beatmap.beatmapSetID);
-//		}
-//		for (Beatmap bm : beatmapSet) {
-//			if (bm.md5Hash != null) {
-//				this.beatmapHashDB.remove(bm.md5Hash);
-//			}
-//		}
-//
-//		// stop playing the track
-//		if (MusicController.trackExists() || MusicController.isTrackLoading()) {
-//			final File audioFile = MusicController.getBeatmap().audioFilename;
-//			if (audioFile != null && audioFile.equals(beatmap.audioFilename)) {
-//				MusicController.reset();
-//				System.gc(); // files won't be deleted if this wasn't called
-//			}
-//		}
-//
-//		final File dir = beatmap.getFile().getParentFile();
-//
-//		// remove entry from cache
-//		BeatmapDB.delete(dir.getName());
-//
-//		// delete the directory
-//		BeatmapWatchService ws = BeatmapWatchService.get();
-//		if (ws != null) {
-//			ws.pause();
-//		}
-//		try {
-//			Utils.deleteToTrash(dir);
-//		} catch (IOException e) {
-//			bubNotifs.send(BUB_ORANGE, "Failed to delete song group");
-//			return false;
-//		}
-//		if (ws != null) {
-//			ws.resume();
-//		}
-//
-//		return true;
-//	}
-//
-//	/**
-//	 * Deletes a single beatmap from its set, and also deletes the beatmap file.
-//	 * If this causes the song group to be empty, then the song group and
-//	 * beatmap directory will be deleted altogether.
-//	 *
-//	 * @param node the node containing the song group to delete
-//	 * @return {@code true} if the beatmap was deleted
-//	 */
-//	public boolean deleteBeatmap(BeatmapNode node)
-//	{
-//		if (node.setNode.beatmapSet.size() == 1) {
-//			return this.deleteBeatmapSet(node.setNode);
-//		}
-//
-//		// update indices
-//		if (this.expandedSet == node.setNode) {
-//			if (this.expandedSetFirstNode == node) {
-//				this.expandedSetFirstNode = node.next;
-//			} else if (this.expandedSetLastNode == node) {
-//				this.expandedSetLastNode = node.prev;
-//			} else {
-//				BeatmapNode n = this.expandedSetFirstNode.next;
-//				do {
-//					if (n == node) {
-//						BeatmapNode prev = n.prev;
-//						n = n.next;
-//						prev.next = n;
-//						n.prev = prev;
-//						do {
-//							n.beatmapIndex--;
-//						} while ((n = n.next) != null);
-//						break;
-//					}
-//				} while ((n = n.next) != this.expandedSetLastNode);
-//			}
-//		}
-//
-//		// remove song reference
-//		Beatmap beatmap = node.beatmapSet.remove(node.beatmapIndex);
-//		mapCount--;
-//		if (beatmap.md5Hash != null) {
-//			beatmapHashDB.remove(beatmap.md5Hash);
-//		}
-//
-//		// remove entry from cache
-//		File file = beatmap.getFile();
-//		BeatmapDB.delete(file.getParentFile().getName(), file.getName());
-//
-//		// delete the associated file
-//		BeatmapWatchService ws = BeatmapWatchService.get();
-//		if (ws != null) {
-//			ws.pause();
-//		}
-//		try {
-//			Utils.deleteToTrash(file);
-//		} catch (IOException e) {
-//			bubNotifs.send(BUB_ORANGE, "Could not delete song");
-//		}
-//		if (ws != null)
-//			ws.resume();
-//
-//		return true;
-//	}
+	/**
+	 * Deletes a song group from the list, and also deletes the beatmap
+	 * directory associated with the node.
+	 * @return {@code true} if the song group was deleted
+	 */
+	public boolean deleteBeatmapSet(BeatmapSet set)
+	{
+		if (set.setId > 0) {
+			this.beatmapSetDb.remove(set.setId);
+		}
+		for (Beatmap bm : set.beatmaps) {
+			if (bm.md5Hash != null) {
+				this.beatmapHashDB.remove(bm.md5Hash);
+			}
+		}
+
+		// stop playing the track
+		if (MusicController.trackExists() || MusicController.isTrackLoading()) {
+			final File audioFile = MusicController.getBeatmap().audioFilename;
+			if (audioFile != null) {
+				for (Beatmap bm : set.beatmaps) {
+					if (audioFile.equals(bm.audioFilename)) {
+						MusicController.reset();
+						// files won't be deleted if gc wasn't called
+						System.gc();
+						break;
+					}
+				}
+			}
+		}
+
+		final File dir = set.beatmaps[0].getFile().getParentFile();
+
+		// remove entry from cache
+		BeatmapDB.delete(dir.getName());
+
+		// delete the directory
+		BeatmapWatchService ws = BeatmapWatchService.get();
+		if (ws != null) {
+			ws.pause();
+		}
+		try {
+			Utils.deleteMaybeToTrash(dir);
+		} catch (IOException e) {
+			bubNotifs.send(BUB_ORANGE, "Failed to delete song group");
+			return false;
+		}
+		if (ws != null) {
+			ws.resume();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Deletes a single beatmap from its set, and also deletes the beatmap file.
+	 * If this causes the song group to be empty, then the song group and
+	 * beatmap directory will be deleted altogether.
+	 *
+	 * @return {@code true} if the beatmap was deleted
+	 */
+	public boolean deleteBeatmap(Beatmap beatmap)
+	{
+		final BeatmapSet set = beatmap.beatmapSet;
+		if (set.beatmaps.length == 1) {
+			return this.deleteBeatmapSet(set);
+		}
+
+		final Beatmap[] newBeatmapsInSet = new Beatmap[set.beatmaps.length - 1];
+		int idx = 0;
+		for (Beatmap m : set.beatmaps) {
+			if (m != beatmap) {
+				newBeatmapsInSet[idx++] = m;
+			}
+		}
+		set.beatmaps = newBeatmapsInSet;
+
+		if (beatmap.md5Hash != null) {
+			beatmapHashDB.remove(beatmap.md5Hash);
+		}
+
+		// remove entry from cache
+		File file = beatmap.getFile();
+		BeatmapDB.delete(file.getParentFile().getName(), file.getName());
+
+		// stop playing the track
+		if (MusicController.trackExists() || MusicController.isTrackLoading()) {
+			final File audioFile = MusicController.getBeatmap().audioFilename;
+			if (audioFile != null && audioFile.equals(beatmap.audioFilename)) {
+				MusicController.reset();
+				// files won't be deleted if gc wasn't called
+				System.gc();
+			}
+		}
+
+		// delete the associated file
+		BeatmapWatchService ws = BeatmapWatchService.get();
+		if (ws != null) {
+			ws.pause();
+		}
+		try {
+			Utils.deleteMaybeToTrash(file);
+		} catch (IOException e) {
+			bubNotifs.send(BUB_ORANGE, "Could not delete song");
+		}
+		if (ws != null)
+			ws.resume();
+
+		return true;
+	}
 //
 //	/**
 //	 * @param index the beatmap set index, ignoring expanded nodes

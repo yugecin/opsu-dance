@@ -26,6 +26,7 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapDifficultyCalculator;
 import itdelatrisu.opsu.beatmap.BeatmapGroup;
+import itdelatrisu.opsu.beatmap.BeatmapList;
 import itdelatrisu.opsu.beatmap.BeatmapNode;
 import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.beatmap.BeatmapSetNode;
@@ -817,6 +818,14 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 
+		if (e.button == Input.RMB) {
+			final Beatmap map = nodeList.getHoveredMapExpandIfMulti();
+			if (map != null) {
+				this.showMapOptions();
+				return;
+			}
+		}
+
 		if (nodeList.mousePressed(e)) {
 			return;
 		}
@@ -1012,8 +1021,6 @@ public class SongMenu extends BaseOpsuState
 		case KEY_F3:
 			this.showMapOptions();
 			return;
-			/*
-			 * TODO: keystuff
 		case KEY_F5:
 			SoundController.playSound(SoundEffect.MENUHIT);
 			if (songFolderChanged)
@@ -1026,13 +1033,11 @@ public class SongMenu extends BaseOpsuState
 		case KEY_DELETE:
 			if (map != null && input.isShiftDown()) {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				MenuState ms = (focusNode.beatmapIndex == -1 || focusNode.beatmapSet.size() == 1) ?
-						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				buttonState.setMenuState(ms, focusNode);
+				MenuState ms = MenuState.BEATMAP_DELETE_SELECT;
+				buttonState.setMenuState(ms, map);
 				displayContainer.switchState(buttonState);
 			}
 			return;
-			*/
 		case KEY_RETURN:
 			if (nodeList.pressedEnterShouldGameBeStarted()) {
 				this.startGame();
@@ -1265,15 +1270,14 @@ public class SongMenu extends BaseOpsuState
 
 		// state-based action
 		if (stateAction != null) {
-		/*
-		 * TODO: this whole menu thing
 			switch (stateAction) {
 			case BEATMAP:  // clear all scores
-				if (stateActionBeatmap == null || stateActionBeatmap.beatmapIndex == -1)
+				if (stateActionBeatmap == null) {
 					break;
-				Beatmap beatmap = stateActionBeatmap.beatmap;
+				}
+				Beatmap beatmap = stateActionBeatmap;
 				ScoreDB.deleteScore(beatmap);
-				if (stateActionBeatmap == focusNode) {
+				if (stateActionBeatmap == nodeList.getFocusedMap()) {
 					focusScores = null;
 					scoreMap.remove(beatmap.version);
 				}
@@ -1282,50 +1286,39 @@ public class SongMenu extends BaseOpsuState
 				if (stateActionScore == null)
 					break;
 				ScoreDB.deleteScore(stateActionScore);
-				scoreMap = ScoreDB.getMapSetScores(focusNode.beatmap);
-				focusScores = getScoreDataForNode(focusNode, true);
-				startScorePos.setPosition(0);
+				this.reloadFocusedMapScores();
 				break;
 			case BEATMAP_DELETE_CONFIRM:  // delete song group
 				if (stateActionBeatmap == null) {
 					break;
 				}
-				/*
-				 * TODO: delete
-				beatmapList.deleteBeatmapSet(stateActionNode.setNode);
-				this.setFocus(beatmapList.nextSet(stateActionNode), true);
-				this.randomStack.remove(this.stateActionNode);
+				beatmapList.deleteBeatmapSet(stateActionBeatmap.beatmapSet);
+				beatmapList.activeGroupChanged();
+				nodeList.processDeletion();
 				break;
 			case BEATMAP_DELETE_SELECT:  // delete single song
 				if (stateActionBeatmap == null) {
 					break;
 				}
-				/*
-				 * TODO: delete
-				this.setFocus(beatmapSetList.nextInSet(stateActionNode), true);
-				beatmapSetList.deleteBeatmap(stateActionNode);
-				this.randomStack.remove(this.stateActionNode);
+				beatmapList.deleteBeatmap(stateActionBeatmap);
+				beatmapList.activeGroupChanged();
+				nodeList.processDeletion();
 				break;
 			case RELOAD:  // reload beatmaps
 				reloadBeatmaps(true);
 				break;
 			case BEATMAP_FAVORITE:  // removed favorite, reset beatmap list
-				/*
-				 * TODO: favorites
-				if (BeatmapGroup.current() == BeatmapGroup.FAVORITE) {
-					focusNode = null;
+				if (BeatmapGroup.current == BeatmapGroup.FAVORITE) {
 					songInfo = null;
 					scoreMap = null;
 					focusScores = null;
-					beatmapSetList.reset();
-					beatmapSetList.init();
-					this.setFocusToRandom();
+					beatmapList.activeGroupChanged();
+					nodeList.processDeletion();
 				}
 				break;
 			default:
 				break;
 			}
-				 */
 			stateAction = null;
 			stateActionBeatmap = null;
 			stateActionScore = null;

@@ -26,7 +26,7 @@ import itdelatrisu.opsu.db.BeatmapDB;
 public class BeatmapSet
 {
 	/** List of associated beatmaps. */
-	public final Beatmap[] beatmaps;
+	public Beatmap[] beatmaps;
 
 	/**
 	 * Can be negative when it's improperly parsed for older maps.

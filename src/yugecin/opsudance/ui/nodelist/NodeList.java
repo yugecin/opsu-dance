@@ -268,6 +268,11 @@ public class NodeList
 		this.recreate(); // TODO: animate I guess?
 	}
 
+	public void processDeletion()
+	{
+		this.recreate(); // TODO: animate I guess?
+	}
+
 	/**
 	 * {@code nodesToInsert} should be at least of size 2
 	 */
@@ -400,6 +405,21 @@ public class NodeList
 		return null;
 	}
 
+	@Nullable
+	public Beatmap getHoveredMapExpandIfMulti()
+	{
+		if (this.hoverNode != null) {
+			if (this.hoverNode instanceof BeatmapNode) {
+				return ((BeatmapNode) this.hoverNode).beatmap;
+			}
+			if (this.hoverNode instanceof MultiBeatmapNode) {
+				final MultiBeatmapNode mbn = (MultiBeatmapNode) this.hoverNode;
+				return this.expandMultiFocusFirst(mbn).beatmap;
+			}
+		}
+		return null;
+	}
+
 	public boolean isHoveredNodeFocusedNode()
 	{
 		return this.focusNode == this.hoverNode && this.focusNode != null;
@@ -411,10 +431,7 @@ public class NodeList
 			return false;
 		}
 		if (this.hoverNode instanceof MultiBeatmapNode) {
-			final MultiBeatmapNode mbn = ((MultiBeatmapNode) this.hoverNode);
-			this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
-			final BeatmapNode[] nodes = mbn.expand();
-			this.focusNode(nodes[0], /*playAtPreviewTime*/ true);
+			this.expandMultiFocusFirst((MultiBeatmapNode) this.hoverNode);
 			return true;
 		}
 		if (this.hoverNode instanceof BeatmapNode) {
@@ -422,6 +439,14 @@ public class NodeList
 			return true;
 		}
 		return false;
+	}
+
+	private BeatmapNode expandMultiFocusFirst(MultiBeatmapNode mbn)
+	{
+		this.unexpandAllExceptInSet(mbn.beatmaps[0].beatmapSet);
+		final BeatmapNode[] nodes = mbn.expand();
+		this.focusNode(nodes[0], /*playAtPreviewTime*/ true);
+		return nodes[0];
 	}
 
 	/**
