@@ -903,6 +903,10 @@ public class SongMenu extends BaseOpsuState
 				this.musicIconBounceTimer.setTime(0);
 				this.selectionFlashTime = 0;
 				this.reloadFocusedMapScores();
+				final Beatmap bm = nodeList.getFocusedMap();
+				if (bm != null) {
+					this.calculateStarRatings(bm.beatmapSet);
+				}
 				SoundController.playSound(SoundEffect.MENUCLICK);
 			}
 			return;
@@ -1042,6 +1046,7 @@ public class SongMenu extends BaseOpsuState
 			if (bm != MusicController.getBeatmap()) {
 				this.musicIconBounceTimer.setTime(0);
 				this.reloadFocusedMapScores();
+				this.calculateStarRatings(bm.beatmapSet);
 			}
 			return;
 		case KEY_O:
@@ -1114,6 +1119,7 @@ public class SongMenu extends BaseOpsuState
 				if (nodeList.attemptFocusMap(map, /*playAtPreviewTime*/ true)) {
 					this.musicIconBounceTimer.setTime(0);
 					this.reloadFocusedMapScores();
+					this.calculateStarRatings(map.beatmapSet);
 					return;
 				}
 			}
@@ -1126,6 +1132,10 @@ public class SongMenu extends BaseOpsuState
 			!nodeList.attemptFocusMap(songHistory.peek(), /*playAtPreviewTime*/ true));
 		this.musicIconBounceTimer.setTime(0);
 		this.reloadFocusedMapScores();
+		final Beatmap map = nodeList.getFocusedMap();
+		if (map != null) {
+			this.calculateStarRatings(map.beatmapSet);
+		}
 	}
 
 	private void showMapOptions()
@@ -1366,6 +1376,7 @@ public class SongMenu extends BaseOpsuState
 		if (bm != MusicController.getBeatmap()) {
 			this.musicIconBounceTimer.setTime(0);
 			this.reloadFocusedMapScores();
+			this.calculateStarRatings(bm.beatmapSet);
 		}
 	}
 
@@ -1552,6 +1563,14 @@ public class SongMenu extends BaseOpsuState
 	 * @param beatmapSet the set of beatmaps
 	 */
 	private void calculateStarRatings(BeatmapSet beatmapSet)
+	{
+		if (beatmapSet == null) {
+			return;
+		}
+		jobContainer.submitJob(() -> this.calculateStarRatings0(beatmapSet));
+	}
+
+	private void calculateStarRatings0(BeatmapSet beatmapSet)
 	{
 		for (int i = 0; i < beatmapSet.beatmaps.length; i++) {
 			final Beatmap beatmap = beatmapSet.beatmaps[i];

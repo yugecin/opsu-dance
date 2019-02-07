@@ -50,6 +50,7 @@ public class InstanceContainer
 
 	public static Environment env;
 	public static Configuration config;
+	public static JobContainer jobContainer;
 
 	public static CursorColor cursorColor;
 	public static OptionsService optionservice;
@@ -95,6 +96,7 @@ public class InstanceContainer
 		updater = new Updater();
 		env = new Environment();
 		config = new Configuration();
+		jobContainer = new JobContainer();
 
 		songHistory = new Stack<>();
 		nextSongs = new Stack<>();
