@@ -21,6 +21,7 @@ package itdelatrisu.opsu.states;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
+import itdelatrisu.opsu.db.ScoreDB;
 import itdelatrisu.opsu.ui.UI;
 
 import org.lwjgl.input.Keyboard;
@@ -70,6 +71,7 @@ public class Splash extends BaseOpsuState {
 			public void run() {
 				oszunpacker.unpackAll();
 				beatmapParser.parseAll();
+				ScoreDB.loadTopGrades();
 				beatmapList.resort();
 				replayImporter.importAll();
 

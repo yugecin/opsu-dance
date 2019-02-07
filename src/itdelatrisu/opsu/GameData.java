@@ -1089,6 +1089,18 @@ public class GameData {
 		);
 	}
 
+	public static Grade getGrade(int hit300, int hit100, int hit50, int miss, int mods)
+	{
+		return getGrade(
+			hit300,
+			hit100,
+			hit50,
+			miss,
+			((mods & GameMod.HIDDEN.getBit()) > 0 ||
+			(mods & GameMod.FLASHLIGHT.getBit()) > 0)
+		);
+	}
+
 	/**
 	 * Returns letter grade based on score data,
 	 * or Grade.NULL if no objects have been processed.

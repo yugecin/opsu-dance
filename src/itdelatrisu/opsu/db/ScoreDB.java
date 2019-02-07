@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu.db;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.beatmap.Beatmap;
 
@@ -379,6 +380,41 @@ public class ScoreDB {
 			return null;
 		}
 		return map;
+	}
+
+	public static void loadTopGrades()
+	{
+		if (connection == null) {
+			return;
+		}
+
+		try (PreparedStatement stmt = connection.prepareStatement(
+			"SELECT hit300,hit100,hit50,miss,mods,score FROM scores WHERE MID=? AND "
+			+ "MSID=? AND title=? AND artist=? AND creator=? AND version=? ORDER BY "
+			+ "score DESC LIMIT 1"))
+		{
+			for (int i = beatmapList.maps.size() - 1; i >= 0; i--) {
+				final Beatmap bm = beatmapList.maps.get(i);
+				stmt.setInt(1, bm.beatmapID);
+				stmt.setInt(2, bm.beatmapSetID);
+				stmt.setString(3, bm.title);
+				stmt.setString(4, bm.artist);
+				stmt.setString(5, bm.creator);
+				stmt.setString(6, bm.version);
+				final ResultSet res = stmt.executeQuery();
+				if (res.next()) {
+					bm.topGrade = GameData.getGrade(
+						res.getInt(1),
+						res.getInt(2),
+						res.getInt(3),
+						res.getInt(4),
+						res.getInt(5)
+					);
+				}
+			}
+		} catch (SQLException e) {
+			softErr(e, "Failed to load scores from db");
+		}
 	}
 
 	/**

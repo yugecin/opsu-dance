@@ -260,10 +260,9 @@ class BeatmapNode extends Node
 
 		float cx = x + Node.cx;
 
-		final Grade grade = Grade.B;
 		// draw grade
-		if (grade != Grade.NULL) {
-			Image gradeImg = grade.getMenuImage();
+		if (this.beatmap.topGrade != Grade.NULL) {
+			Image gradeImg = this.beatmap.topGrade.getMenuImage();
 			gradeImg.drawCentered(
 				cx - buttonWidth * 0.01f + gradeImg.getWidth() / 2f,
 				y + buttonHeight / 2.2f,

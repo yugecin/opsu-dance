@@ -29,6 +29,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.util.Log;
 
+import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.GameMod;
 
 import static yugecin.opsudance.options.Options.*;
@@ -262,6 +263,8 @@ public class Beatmap implements Comparable<Beatmap>
 
 	/** Last object end time (in ms). */
 	public int endTime = -1;
+
+	public Grade topGrade = Grade.NULL;
 
 	/**
 	 * Constructor.
