@@ -19,6 +19,7 @@
 package itdelatrisu.opsu.states;
 
 import itdelatrisu.opsu.*;
+import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.audio.MultiClip;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -801,9 +802,12 @@ public class SongMenu extends BaseOpsuState
 		}
 
 		if (e.button == Input.RMB) {
-			final Beatmap map = nodeList.getHoveredMapExpandIfMulti();
+			final Beatmap map = nodeList.getHoveredMapExpandIfMultiAndFocus();
 			if (map != null) {
 				this.showMapOptions();
+				return;
+			}
+			if (focusScores != null && ScoreData.areaContains(e.x, e.y)) {
 				return;
 			}
 		}
@@ -1222,6 +1226,8 @@ public class SongMenu extends BaseOpsuState
 			resetTrack = false;
 		}
 
+		this.reloadFocusedMapScores();
+
 		// undim track
 		if (MusicController.isTrackDimmed())
 			MusicController.toggleTrackDimmed(1f);
@@ -1255,16 +1261,27 @@ public class SongMenu extends BaseOpsuState
 					break;
 				}
 				Beatmap beatmap = stateActionBeatmap;
+				beatmap.topGrade = Grade.NULL;
+				if (BeatmapSortOrder.current == BeatmapSortOrder.RANK) {
+					beatmapList.resort();
+					nodeList.processSort();
+				}
 				ScoreDB.deleteScore(beatmap);
 				if (stateActionBeatmap == nodeList.getFocusedMap()) {
 					focusScores = null;
 					scoreMap.remove(beatmap.version);
 				}
+				this.reloadFocusedMapScores();
 				break;
 			case SCORE:  // clear single score
 				if (stateActionScore == null)
 					break;
+				stateActionBeatmap.topGrade = Grade.NULL;
 				ScoreDB.deleteScore(stateActionScore);
+				if (BeatmapSortOrder.current == BeatmapSortOrder.RANK) {
+					beatmapList.resort();
+					nodeList.processSort();
+				}
 				this.reloadFocusedMapScores();
 				break;
 			case BEATMAP_DELETE_CONFIRM:  // delete song group
@@ -1419,6 +1436,9 @@ public class SongMenu extends BaseOpsuState
 	private void reloadFocusedMapScores()
 	{
 		final Beatmap beatmap = nodeList.getFocusedMap();
+		if (beatmap == null) {
+			return;
+		}
 		this.scoreMap = ScoreDB.getMapSetScores(beatmap);
 		this.focusScores = this.getScoreDataForMap(beatmap, true);
 		this.startScorePos.setPosition(0);
@@ -1456,20 +1476,10 @@ public class SongMenu extends BaseOpsuState
 	/**
 	 * Performs an action based on a menu state upon entering this state.
 	 * @param menuState the menu state determining the action
-	 * @param scoreData the score data to perform the action on
-	 */
-	public void doStateActionOnLoad(MenuState menuState, ScoreData scoreData)
-	{
-		doStateActionOnLoad(menuState, (Beatmap) null, scoreData);
-	}
-
-	/**
-	 * Performs an action based on a menu state upon entering this state.
-	 * @param menuState the menu state determining the action
 	 * @param beatmap the song node to perform the action on
 	 * @param scoreData the score data to perform the action on
 	 */
-	private void doStateActionOnLoad(MenuState menuState, Beatmap beatmap, ScoreData scoreData)
+	public void doStateActionOnLoad(MenuState menuState, Beatmap beatmap, ScoreData scoreData)
 	{
 		stateAction = menuState;
 		stateActionBeatmap = beatmap;

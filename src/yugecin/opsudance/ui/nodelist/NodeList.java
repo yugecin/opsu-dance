@@ -406,11 +406,15 @@ public class NodeList
 	}
 
 	@Nullable
-	public Beatmap getHoveredMapExpandIfMulti()
+	public Beatmap getHoveredMapExpandIfMultiAndFocus()
 	{
 		if (this.hoverNode != null) {
 			if (this.hoverNode instanceof BeatmapNode) {
-				return ((BeatmapNode) this.hoverNode).beatmap;
+				final BeatmapNode node = ((BeatmapNode) this.hoverNode);
+				if (this.hoverNode != this.focusNode) {
+					this.focusNode(node, /*playAtPreviewTime*/ true);
+				}
+				return node.beatmap;
 			}
 			if (this.hoverNode instanceof MultiBeatmapNode) {
 				final MultiBeatmapNode mbn = (MultiBeatmapNode) this.hoverNode;

@@ -549,7 +549,8 @@ public class ButtonMenu extends BaseOpsuState {
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				ScoreData scoreData = buttonState.getScoreData();
-				songMenuState.doStateActionOnLoad(MenuState.SCORE, scoreData);
+				Beatmap bm = buttonState.beatmap;
+				songMenuState.doStateActionOnLoad(MenuState.SCORE, bm, scoreData);
 				displayContainer.switchState(songMenuState);
 			}
 		},
