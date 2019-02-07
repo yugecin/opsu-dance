@@ -1205,6 +1205,7 @@ public class SongMenu extends BaseOpsuState
 			displayContainer.cursor.reset();
 		}
 
+		dynBg.songChanged(); // in case dynamic bg in main menu is disabled
 		dynBg.fadeInNow();
 		UI.enter();
 		selectModeButton.resetHover();

@@ -627,6 +627,9 @@ public class MainMenu extends BaseOpsuState {
 	public void enter() {
 		super.enter();
 
+		// when dynamic bg in main menu is disabled and re-entering from song menu
+		dynBg.songChanged();
+
 		logoPosition.setTime(0);
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);

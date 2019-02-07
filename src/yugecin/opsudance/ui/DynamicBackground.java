@@ -11,6 +11,7 @@ import yugecin.opsudance.render.TextureData;
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.utils.GLHelper.*;
 
 import java.util.Objects;
@@ -30,6 +31,7 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 	{
 		skinservice.addSkinChangedListener(this);
 		displayContainer.addResolutionChangedListener(this);
+		OPTION_DYNAMIC_BACKGROUND.addListener(this::songChanged);
 	}
 
 	@Override
@@ -51,8 +53,11 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 				this.fadeOutTime = 0;
 			}
 		}
-		if ((this.newBeatmap.bg == null || !this.newBeatmap.isBackgroundLoading()) &&
-			this.fadeInTime < FADE_TIME) {
+		if (this.fadeInTime < FADE_TIME &&
+			(this.newBeatmap == null ||
+			this.newBeatmap.bg == null ||
+			!this.newBeatmap.isBackgroundLoading()))
+		{
 			if ((this.fadeInTime += renderDelta) > FADE_TIME) {
 				this.fadeInTime = FADE_TIME;
 			}
@@ -86,7 +91,7 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 		this.fadeOutTime = 0;
 		this.fadeInTime = 0;
 		this.oldBeatmap = null;
-		this.newBeatmap = MusicController.getBeatmap();
+		this.newBeatmap = this.getCurrentBeatmap();
 		if (this.newBeatmap != null) {
 			this.newBeatmap.loadBackground();
 		}
@@ -100,7 +105,7 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 
 	public void songChanged()
 	{
-		final Beatmap beatmap = MusicController.getBeatmap();
+		final Beatmap beatmap = this.getCurrentBeatmap();
 		if (beatmap == this.newBeatmap) {
 			return;
 		}
@@ -113,6 +118,14 @@ public class DynamicBackground implements SkinChangedListener, ResolutionChanged
 		this.fadeInTime = 0;
 		this.oldBeatmap = this.newBeatmap;
 		this.newBeatmap = beatmap;
+	}
+
+	private Beatmap getCurrentBeatmap()
+	{
+		if (displayContainer.isIn(mainmenuState) && !OPTION_DYNAMIC_BACKGROUND.state) {
+			return null;
+		}
+		return MusicController.getBeatmap();
 	}
 
 	private void revalidate()
