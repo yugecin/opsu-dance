@@ -197,6 +197,7 @@ public class BeatmapList
 			this.beatmapSetDb.remove(set.setId);
 		}
 		for (Beatmap bm : set.beatmaps) {
+			this.maps.remove(bm);
 			if (bm.md5Hash != null) {
 				this.beatmapHashDB.remove(bm.md5Hash);
 			}
@@ -262,6 +263,7 @@ public class BeatmapList
 			}
 		}
 		set.beatmaps = newBeatmapsInSet;
+		this.maps.remove(beatmap);
 
 		if (beatmap.md5Hash != null) {
 			beatmapHashDB.remove(beatmap.md5Hash);

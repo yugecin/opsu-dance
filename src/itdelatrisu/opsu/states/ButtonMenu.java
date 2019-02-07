@@ -483,14 +483,9 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				// TODO: delete
-				/*
-				BeatmapNode node = buttonState.getNode();
-				MenuState ms = (node.beatmapIndex == -1 || node.beatmapSet.size() == 1) ?
-						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				buttonState.setMenuState(ms, node);
-				displayContainer.switchState(buttonState);
-				*/
+				MenuState ms = MenuState.BEATMAP_DELETE_SELECT;
+				buttonState.setMenuState(ms, buttonState.beatmap);
+				displayContainer.switchStateInstantly(buttonState);
 			}
 		},
 		CANCEL ("Cancel", Color.gray) {
