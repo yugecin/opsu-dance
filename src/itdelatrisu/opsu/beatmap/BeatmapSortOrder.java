@@ -86,6 +86,28 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 		}
 	};
 
+	public static final BeatmapSortOrder RANK = new BeatmapSortOrder("Rank achieved")
+	{
+		@Override
+		public int compare(Beatmap v, Beatmap w)
+		{
+			int r;
+			if ((r = w.topGrade.compareTo(v.topGrade)) != 0) {
+				return r;
+			}
+			if ((r = v.searchTitle.compareTo(w.searchTitle)) != 0) {
+				return r;
+			}
+			if ((r = v.searchArtist.compareTo(w.searchArtist)) != 0) {
+				return r;
+			}
+			if ((r = v.searchCreator.compareTo(w.searchCreator)) != 0) {
+				return r;
+			}
+			return v.compareTo(w);
+		}
+	};
+
 	public static BeatmapSortOrder[] VALUES = {
 		TITLE,
 		ARTIST,
@@ -94,6 +116,7 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 		LENGTH,
 		DATE,
 		PLAYS,
+		RANK,
 	};
 	public static BeatmapSortOrder current = TITLE;
 
