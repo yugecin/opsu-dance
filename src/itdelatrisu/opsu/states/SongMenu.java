@@ -129,9 +129,6 @@ public class SongMenu extends BaseOpsuState
 	/** If non-null, the score data that stateAction acts upon. */
 	private ScoreData stateActionScore;
 
-	/** Timer before moving to the beatmap menu with the current focus node. */
-	private int beatmapMenuTimer = -1;
-
 	/** Beatmap reloading thread. */
 	private BeatmapReloadThread reloadThread;
 
@@ -736,7 +733,7 @@ public class SongMenu extends BaseOpsuState
 
 		// search
 		searchTimer += delta;
-		if (searchTimer >= SEARCH_DELAY && reloadThread == null && beatmapMenuTimer == -1) {
+		if (searchTimer >= SEARCH_DELAY && reloadThread == null) {
 			searchTimer = 0;
 
 			final String searchText = searchTextField.getText();
@@ -763,21 +760,6 @@ public class SongMenu extends BaseOpsuState
 
 		nodeList.preRenderUpdate();
 		final Beatmap focusedMap = nodeList.getFocusedMap();
-
-		// beatmap menu timer
-		if (beatmapMenuTimer > -1) {
-			beatmapMenuTimer += delta;
-			if (beatmapMenuTimer >= BEATMAP_MENU_DELAY) {
-				beatmapMenuTimer = -1;
-				if (focusedMap != null) {
-					MenuState state = focusedMap.beatmapSet.isFavorite() ?
-						MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
-					buttonState.setMenuState(state, focusedMap);
-					displayContainer.switchState(buttonState);
-				}
-				return;
-			}
-		}
 
 		if (focusedMap != null) {
 			// song change timers
@@ -988,8 +970,7 @@ public class SongMenu extends BaseOpsuState
 	public void keyPressed(KeyEvent e)
 	{
 		// block input
-		if ((reloadThread != null && e.keyCode != KEY_ESCAPE) || beatmapMenuTimer > -1)
-		{
+		if (reloadThread != null && e.keyCode != KEY_ESCAPE) {
 			return;
 		}
 
@@ -1150,8 +1131,7 @@ public class SongMenu extends BaseOpsuState
 			return;
 		}
 		SoundController.playSound(SoundEffect.MENUHIT);
-		MenuState state = map.beatmapSet.isFavorite() ?
-			MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
+		MenuState state = map.favorite ? MenuState.BEATMAP_FAVORITE : MenuState.BEATMAP;
 		buttonState.setMenuState(state, map);
 		displayContainer.switchState(buttonState);
 	}
@@ -1222,7 +1202,6 @@ public class SongMenu extends BaseOpsuState
 		selectRandomButton.resetHover();
 		selectMapOptionsButton.resetHover();
 		startScorePos.setPosition(0);
-		beatmapMenuTimer = -1;
 		searchTransitionTimer = SEARCH_TRANSITION_TIME;
 		songInfo = null;
 		songChangeTimer.setTime(songChangeTimer.getDuration());
@@ -1555,7 +1534,7 @@ public class SongMenu extends BaseOpsuState
 	 * @return true if blocking input
 	 */
 	private boolean isInputBlocked() {
-		return (reloadThread != null || beatmapMenuTimer > -1);
+		return reloadThread != null;
 	}
 
 	/**

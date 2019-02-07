@@ -68,8 +68,9 @@ public class BeatmapGroup
 			// find "favorite" beatmaps
 			ArrayList<Beatmap> filteredList = new ArrayList<Beatmap>();
 			for (Beatmap node : list) {
-				if (node.beatmapSet.isFavorite())
+				if (node.favorite) {
 					filteredList.add(node);
+				}
 			}
 			return filteredList;
 		}

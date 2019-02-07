@@ -18,8 +18,6 @@
 
 package itdelatrisu.opsu.beatmap;
 
-import itdelatrisu.opsu.db.BeatmapDB;
-
 /**
  * Data type containing all beatmaps in a beatmap set.
  */
@@ -53,29 +51,6 @@ public class BeatmapSet
 	{
 		Beatmap beatmap = beatmaps[0];
 		return String.format("%s - %s", beatmap.getArtist(), beatmap.getTitle());
-	}
-
-
-	/**
-	 * Returns whether this beatmap set is a "favorite".
-	 */
-	public boolean isFavorite() {
-		for (Beatmap map : beatmaps) {
-			if (map.favorite)
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Sets the "favorite" status of this beatmap set.
-	 * @param flag whether this beatmap set should have "favorite" status
-	 */
-	public void setFavorite(boolean flag) {
-		for (Beatmap map : beatmaps) {
-			map.favorite = flag;
-			BeatmapDB.updateFavoriteStatus(map);
-		}
 	}
 
 	/**

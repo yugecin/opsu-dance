@@ -25,6 +25,7 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
@@ -463,7 +464,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				buttonState.beatmap.beatmapSet.setFavorite(true);
+				buttonState.beatmap.favorite = true;
+				BeatmapDB.updateFavoriteStatus(buttonState.beatmap);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -471,7 +473,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				buttonState.beatmap.beatmapSet.setFavorite(false);
+				buttonState.beatmap.favorite = false;
+				BeatmapDB.updateFavoriteStatus(buttonState.beatmap);
 				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
 				displayContainer.switchState(songMenuState);
 			}
