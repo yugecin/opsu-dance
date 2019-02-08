@@ -301,7 +301,7 @@ public class SongMenu extends BaseOpsuState
 				nodeList.unexpandAllExceptInSet(null);
 				BeatmapSortOrder.current = item;
 				beatmapList.resort();
-				nodeList.processSort();
+				nodeList.persistentRecreate();
 			}
 
 			@Override
@@ -746,7 +746,7 @@ public class SongMenu extends BaseOpsuState
 				}
 
 				this.updateSearchText();
-				nodeList.processSearch();
+				nodeList.persistentRecreate();
 				if (nodeList.getFocusedMap() == null) {
 					scoreMap = null;
 					focusScores = null;
@@ -1274,7 +1274,7 @@ public class SongMenu extends BaseOpsuState
 				beatmap.topGrade = Grade.NULL;
 				if (BeatmapSortOrder.current == BeatmapSortOrder.RANK) {
 					beatmapList.resort();
-					nodeList.processSort();
+					nodeList.persistentRecreate();
 				}
 				ScoreDB.deleteScore(beatmap);
 				if (stateActionBeatmap == nodeList.getFocusedMap()) {
@@ -1290,7 +1290,7 @@ public class SongMenu extends BaseOpsuState
 				ScoreDB.deleteScore(stateActionScore);
 				if (BeatmapSortOrder.current == BeatmapSortOrder.RANK) {
 					beatmapList.resort();
-					nodeList.processSort();
+					nodeList.persistentRecreate();
 				}
 				this.reloadFocusedMapScores();
 				break;
@@ -1300,7 +1300,7 @@ public class SongMenu extends BaseOpsuState
 				}
 				beatmapList.deleteBeatmapSet(stateActionBeatmap.beatmapSet);
 				beatmapList.activeGroupChanged();
-				nodeList.processDeletion();
+				nodeList.persistentRecreate();
 				break;
 			case BEATMAP_DELETE_SELECT:  // delete single song
 				if (stateActionBeatmap == null) {
@@ -1308,7 +1308,7 @@ public class SongMenu extends BaseOpsuState
 				}
 				beatmapList.deleteBeatmap(stateActionBeatmap);
 				beatmapList.activeGroupChanged();
-				nodeList.processDeletion();
+				nodeList.persistentRecreate();
 				break;
 			case RELOAD:  // reload beatmaps
 				reloadBeatmaps(true);
@@ -1319,7 +1319,7 @@ public class SongMenu extends BaseOpsuState
 					scoreMap = null;
 					focusScores = null;
 					beatmapList.activeGroupChanged();
-					nodeList.processDeletion();
+					nodeList.persistentRecreate();
 				}
 				break;
 			default:

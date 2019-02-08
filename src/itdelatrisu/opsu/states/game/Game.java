@@ -977,7 +977,7 @@ public class Game extends ComplexOpsuState {
 						beatmapList.activeGroupChanged();
 					} else if (resort || so == BeatmapSortOrder.PLAYS) {
 						beatmapList.resort();
-						nodeList.processSort();
+						nodeList.persistentRecreate();
 					}
 				}
 			}

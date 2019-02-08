@@ -158,6 +158,9 @@ abstract class Node
 	private float focusIndentValue;
 	private float focusIndentFrom;
 	private float focusIndentTo;
+	float prevPositionOffset;
+	int repositionTime;
+	static final int REPOSITION_TIME = 600;
 
 	float appearValue = 1f;
 	int appearTime = APPEAR_TIME;
@@ -228,6 +231,12 @@ abstract class Node
 			+ (buttonOffsetX - this.hoverIndentValue + this.targetXOffset) * fadeInXMod
 			- this.focusIndentValue;
 		this.y = this.targetY + this.hoverSpreadValue + this.getInternalOffset();
+
+		if (this.repositionTime > 0) {
+			final float progress = 1f - (float) repositionTime / REPOSITION_TIME;
+			this.y += this.prevPositionOffset * (1f - OUT_QUART.calc(progress));
+			this.repositionTime -= delta;
+		}
 	}
 
 	/**

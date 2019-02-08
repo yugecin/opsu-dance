@@ -5,6 +5,7 @@ package yugecin.opsudance.ui.nodelist;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.newdawn.slick.Graphics;
 
@@ -258,19 +259,44 @@ public class NodeList
 		}
 	}
 
-	public void processSort()
+	/**
+	 * recreate nodes but try to match with previous node list (eg when resorting)
+	 */
+	public void persistentRecreate()
 	{
-		this.recreate(); // TODO: animate I guess?
-	}
-
-	public void processSearch()
-	{
-		this.recreate(); // TODO: animate I guess?
-	}
-
-	public void processDeletion()
-	{
-		this.recreate(); // TODO: animate I guess?
+		final HashMap<Beatmap, Node> prevNodes = new HashMap<>();
+		for (int i = 0; i < this.size; i++) {
+			final Node n = this.nodes[i];
+			if (n instanceof BeatmapNode) {
+				prevNodes.put(((BeatmapNode) n).beatmap, n);
+			} else if (n instanceof MultiBeatmapNode) {
+				for (Beatmap bm : ((MultiBeatmapNode) n).beatmaps) {
+					prevNodes.put(bm, n);
+				}
+			}
+		}
+		this.recreate();
+		this.preRenderUpdate();
+		for (int i = 0; i < this.size; i++) {
+			final Node n = this.nodes[i];
+			final Beatmap[] bms;
+			if (n instanceof BeatmapNode) {
+				bms = new Beatmap[] { ((BeatmapNode) n).beatmap };
+			} else if (n instanceof MultiBeatmapNode) {
+				bms = ((MultiBeatmapNode) n).beatmaps;
+			} else {
+				continue;
+			}
+			for (Beatmap bm : bms) {
+				Node prev = prevNodes.get(bm);
+				if (prev != null) {
+					n.prevPositionOffset = prev.y - n.y;
+					n.repositionTime = Node.REPOSITION_TIME;
+					n.takeOver(prev);
+					continue;
+				}
+			}
+		}
 	}
 
 	/**
