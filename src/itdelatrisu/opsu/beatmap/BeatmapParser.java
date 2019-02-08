@@ -90,9 +90,10 @@ public class BeatmapParser {
 	 * Invokes parser for each directory in the given array and
 	 * adds the beatmaps to the existing BeatmapSetList.
 	 * @param dirs the array of directories to parse
-	 * @return the last BeatmapSetNode parsed, or null if none
+	 * @return the last Beatmap parsed, or null if none
 	 */
-	public BeatmapSetNode parseDirectories(@Nullable File[] dirs) {
+	public Beatmap parseDirectories(@Nullable File[] dirs)
+	{
 		if (dirs == null || dirs.length == 0)
 			return null;
 
@@ -113,7 +114,6 @@ public class BeatmapParser {
 		BeatmapWatchService ws = BeatmapWatchService.get();
 
 		// parse directories
-		BeatmapSetNode lastNode = null;
 		long timestamp = System.currentTimeMillis();
 		for (File dir : dirs) {
 			currentDirectoryIndex++;
@@ -202,10 +202,12 @@ public class BeatmapParser {
 			BeatmapDB.load(cachedBeatmaps, BeatmapDB.LOAD_NONARRAY);
 		}
 
+		Beatmap lastBeatmap = null;
 		// add group entries to BeatmapSetList
 		for (Beatmap[] beatmaps : allBeatmaps) {
 			Arrays.sort(beatmaps);
 			beatmapList.addBeatmapSet(beatmaps);
+			lastBeatmap = beatmaps[beatmaps.length - 1];
 		}
 
 		// clear string DB
@@ -221,7 +223,7 @@ public class BeatmapParser {
 		currentFile = null;
 		currentDirectoryIndex = -1;
 		totalDirectories = -1;
-		return lastNode;
+		return lastBeatmap;
 	}
 
 	public void parseOnlyTimingPoints(Beatmap map) {

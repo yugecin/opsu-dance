@@ -22,7 +22,7 @@ import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapSetNode;
+import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.downloads.Download;
 import itdelatrisu.opsu.downloads.DownloadList;
 import itdelatrisu.opsu.downloads.DownloadNode;
@@ -241,16 +241,10 @@ public class DownloadsMenu extends ComplexOpsuState {
 	/** Thread for importing packed beatmaps. */
 	private class BeatmapImportThread extends Thread {
 		/** Whether this thread has completed execution. */
-		private boolean finished = false;
+		public boolean finished = false;
 
-		/** The last imported beatmap set node, if any. */
-		private BeatmapSetNode importedNode;
-
-		/** Returns true only if this thread has completed execution. */
-		public boolean isFinished() { return finished; }
-
-		/** Returns an imported beatmap set node, or null if none. */
-		public BeatmapSetNode getImportedBeatmap() { return importedNode; }
+		/** The last imported beatmap, if any. */
+		public Beatmap lastImportedBeatmap;
 
 		@Override
 		public void run() {
@@ -265,11 +259,11 @@ public class DownloadsMenu extends ComplexOpsuState {
 		private void importBeatmaps() {
 			// invoke unpacker and parser
 			File[] dirs = oszunpacker.unpackAll();
-			this.importedNode = beatmapParser.parseDirectories(dirs);
+			this.lastImportedBeatmap = beatmapParser.parseDirectories(dirs);
 
 			DownloadList.get().clearDownloads(Download.Status.COMPLETE);
 
-			if (this.importedNode == null) {
+			if (this.lastImportedBeatmap == null) {
 				return;
 			}
 
@@ -520,19 +514,19 @@ public class DownloadsMenu extends ComplexOpsuState {
 		UI.update(delta);
 		if (importThread == null)
 			MusicController.loopTrackIfEnded(false);
-		else if (importThread.isFinished()) {
-			BeatmapSetNode importedNode = importThread.getImportedBeatmap();
-			if (importedNode != null) {
+		else if (importThread.finished) {
+			final Beatmap importedMap = importThread.lastImportedBeatmap;
+			if (importedMap != null) {
 				// stop preview
 				previewID = -1;
 				SoundController.stopTrack();
 
 				// initialize song list
 				beatmapList.activeGroupChanged();
+				nodeList.persistentRecreate();
 
 				// focus new beatmap
-				// NOTE: This can't be called in another thread because it makes OpenGL calls.
-				songMenuState.setFocus(importedNode, -1, true);
+				nodeList.attemptFocusMap(importedMap, /*playAtPreviewTime*/ true);
 			}
 			importThread = null;
 		}

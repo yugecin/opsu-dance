@@ -27,10 +27,7 @@ import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapDifficultyCalculator;
 import itdelatrisu.opsu.beatmap.BeatmapGroup;
-import itdelatrisu.opsu.beatmap.BeatmapList;
-import itdelatrisu.opsu.beatmap.BeatmapNode;
 import itdelatrisu.opsu.beatmap.BeatmapSet;
-import itdelatrisu.opsu.beatmap.BeatmapSetNode;
 import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService.BeatmapWatchServiceListener;
@@ -85,9 +82,6 @@ public class SongMenu extends BaseOpsuState
 
 	/** Delay time, in milliseconds, between each search. */
 	private static final int SEARCH_DELAY = 500;
-
-	/** Delay time, in milliseconds, before moving to the beatmap menu after a right click. */
-	private static final int BEATMAP_MENU_DELAY = 600;
 
 	/** Time, in milliseconds, for the search bar to fade in or out. */
 	private static final int SEARCH_TRANSITION_TIME = 250;
@@ -718,7 +712,7 @@ public class SongMenu extends BaseOpsuState
 			beatmapList.activeGroupChanged();
 			nodeList.recreate();
 			if (beatmapList.getBeatmapSetCount() > 0) {
-				this.restoreFocusOrFocusRandom();
+				nodeList.focusRandomMap(/*playAtPreviewTime*/ true);
 			} else {
 				MusicController.playThemeSong();
 			}
@@ -915,41 +909,6 @@ public class SongMenu extends BaseOpsuState
 		if (map == null) {
 			return;
 		}
-
-		// song buttons
-		/*
-		BeatmapNode node = getNodeAtPosition(x, y);
-		if (node != null) {
-			int expandedIndex = beatmapSetList.getExpandedIndex();
-
-			// clicked node is already expanded
-			if (node.index == expandedIndex) {
-				if (node.beatmapIndex == focusNode.beatmapIndex) {
-					// if already focused, load the beatmap
-					if (e.button != Input.RMB)
-						startGame();
-					else
-						SoundController.playSound(SoundEffect.MENUCLICK);
-				} else {
-					// focus the node
-					SoundController.playSound(SoundEffect.MENUCLICK);
-					this.setFocus(node, true);
-				}
-			}
-
-			// clicked node is a new group
-			else {
-				SoundController.playSound(SoundEffect.MENUCLICK);
-				this.setFocus(node, true);
-			}
-
-			// open beatmap menu
-			if (e.button == Input.RMB)
-				beatmapMenuTimer = (node.index == expandedIndex) ? BEATMAP_MENU_DELAY * 4 / 5 : 0;
-
-			return;
-		}
-		*/
 
 		// score buttons
 		if (focusScores != null && ScoreData.areaContains(x, y)) {
@@ -1347,25 +1306,6 @@ public class SongMenu extends BaseOpsuState
 	}
 
 	/**
-	 * @return {@code true} if focus was restored
-	 */
-	private boolean restoreFocusOrFocusRandom()
-	{
-		/*
-		if (currentNode != null) {
-			final BeatmapSet set = currentNode.beatmapSet;
-			BeatmapSetNode setNode = beatmapSetList.findSetNode(set.setId);
-			if (setNode != null) {
-				this.setFocus(setNode, currentNode.beatmapIndex, true);
-				return true;
-			}
-		}
-		this.setFocusToRandom();
-		*/
-		return false;
-	}
-
-	/**
 	 * Plays audio at preview time.
 	 * Also expands.
 	 */
@@ -1378,70 +1318,6 @@ public class SongMenu extends BaseOpsuState
 			this.reloadFocusedMapScores();
 			this.calculateStarRatings(bm.beatmapSet);
 		}
-	}
-
-	/**
-	 * Sets a new focus node.
-	 * @param node the beatmap set node; it will be expanded if it isn't already
-	 * @param beatmapIndex the beatmap element to focus; or random one if out of bounds
-	 * @param startMusicAtPreviewTime whether to start at the preview time
-	 */
-	public void setFocus(
-		final BeatmapSetNode node,
-		int beatmapIndex,
-		boolean startMusicAtPreviewTime)
-	{
-		/*
-		final BeatmapNode firstNode = beatmapSetList.expand(node);
-		final int mapcount = node.beatmapSet.size();
-		if (beatmapIndex < 0 || mapcount <= beatmapIndex) {
-			beatmapIndex = (int) (Math.random() * (mapcount - 1));
-		}
-
-		final BeatmapNode actualNode = firstNode.getRelativeNode(beatmapIndex);
-		this.setFocus(actualNode, startMusicAtPreviewTime);
-		*/
-	}
-
-	/**
-	 * Sets a new focus node.
-	 * @return the old focus node
-	 */
-	public void setFocus(BeatmapNode node, boolean startMusicAtPreviewTime)
-	{
-		/*
-		this.calculateStarRatings(node.beatmapSet);
-
-		songInfo = null;
-		songChangeTimer.setTime(0);
-		musicIconBounceTimer.setTime(0);
-
-		currentNode = focusNode = node;
-		Beatmap beatmap = node.beatmap;
-		if (beatmap.timingPoints == null) {
-			// parse timing points so we can pulse the logo
-			BeatmapParser.parseTimingPoints(beatmap);
-		}
-		MusicController.play(beatmap, false, startMusicAtPreviewTime);
-
-		// load scores
-		scoreMap = ScoreDB.getMapSetScores(beatmap);
-		focusScores = this.getScoreDataForNode(focusNode, true);
-		startScorePos.setPosition(0);
-
-		this.updateSongListPosition();
-		this.beatmapListRenderer.centerFocusedNodeSmooth();
-
-		// load background image
-		beatmap.loadBackground();
-		boolean isBgNull = lastBackgroundImage == null || beatmap.bg == null;
-		if ((isBgNull && lastBackgroundImage != beatmap.bg) ||
-			(!isBgNull && !beatmap.bg.equals(lastBackgroundImage)))
-		{
-			bgAlpha.setTime(0);
-			lastBackgroundImage = beatmap.bg;
-		}
-		*/
 	}
 
 	private void reloadFocusedMapScores()
