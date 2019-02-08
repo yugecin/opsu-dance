@@ -200,7 +200,7 @@ public enum GameMod {
 					baseX + (offsetX * mod.categoryIndex) + img.getWidth() / 2f,
 					mod.category.getY());
 			mod.button.setHoverAnimationDuration(300);
-			mod.button.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
+			mod.button.setHoverAnimationEquation(AnimationEquation.OUT_ELASTIC);
 			mod.button.setHoverExpand(1.2f);
 			mod.button.setHoverRotate(10f);
 
@@ -436,15 +436,6 @@ public enum GameMod {
 	 * Resets the hover fields for the button.
 	 */
 	public void resetHover() { button.resetHover(); }
-
-	/**
-	 * Updates the scale of the button depending on whether or not the cursor
-	 * is hovering over the button.
-	 * @param delta the delta interval
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
-	public void hoverUpdate(int delta, float x, float y) { button.hoverUpdate(delta, x, y); }
 
 	/**
 	 * Updates the scale of the button depending on whether or not the cursor

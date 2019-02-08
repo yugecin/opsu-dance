@@ -241,11 +241,14 @@ public class ButtonMenu extends BaseOpsuState {
 			public void preRenderUpdate() {
 				super.preRenderUpdate();
 				GameMod hoverMod = null;
+				final boolean wasSuppressed = displayContainer.suppressHover;
 				for (GameMod mod : GameMod.values()) {
+					displayContainer.suppressHover = false;
 					mod.hoverUpdate(renderDelta, mod.isActive());
 					if (hoverMod == null && mod.contains(mouseX, mouseY))
 						hoverMod = mod;
 				}
+				displayContainer.suppressHover = wasSuppressed;
 
 				// tooltips
 				if (hoverMod != null) {
