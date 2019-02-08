@@ -20,7 +20,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.*;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
@@ -239,6 +238,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				int minx = (1920 - 1600) / 2;
 				int miny = (1080 - 900) / 2;
 				int radius = Math.max(50, gameState.flashlightRadius);
+				radius = Math.min(height, radius);
 				int radius2 = radius / 2;
 
 				p1.x -= radius2;
@@ -257,6 +257,21 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 				p2.x -= p1.x;
 				p2.y -= p1.y;
+
+				// IF NORESIZE
+				if (p2.x < radius || p2.y < radius) {
+					int difx = radius - p2.x;
+					int dify = radius - p2.y;
+					if (p1.x != minx) {
+						p1.x -= difx;
+					}
+					if (p1.y != miny) {
+						p1.y -= dify;
+					}
+					p2.x = radius;
+					p2.y = radius;
+				}
+
 				tx = minx - p1.x;
 				ty = 900 - p1.y - p2.y + miny;
 			}
