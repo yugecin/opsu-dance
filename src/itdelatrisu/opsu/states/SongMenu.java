@@ -416,6 +416,7 @@ public class SongMenu extends BaseOpsuState
 		final Image mh = MENU_HEADER.getImage();
 		final Texture mht = mh.getTexture();
 		glEnable(GL_TEXTURE_2D);
+		glColor3f(1f, 1f, 1f);
 		glBindTexture(GL_TEXTURE_2D, mht.getTextureID());
 		glBegin(GL_QUADS);
 		glTexCoord2f(0f, 0f);
