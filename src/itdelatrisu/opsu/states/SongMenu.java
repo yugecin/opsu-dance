@@ -1202,6 +1202,10 @@ public class SongMenu extends BaseOpsuState
 			MusicController.toggleTrackDimmed(1f);
 
 		nodeList.enter();
+		final Beatmap map = nodeList.getFocusedMap();
+		if (map != null) {
+			this.calculateStarRatings(map.beatmapSet);
+		}
 
 		// reset game data
 		if (resetGame) {
@@ -1441,6 +1445,16 @@ public class SongMenu extends BaseOpsuState
 	private void calculateStarRatings(BeatmapSet beatmapSet)
 	{
 		if (beatmapSet == null) {
+			return;
+		}
+		boolean needCalc = false;
+		for (int i = 0; i < beatmapSet.beatmaps.length; i++) {
+			if (beatmapSet.beatmaps[i].starRating < 0) {
+				needCalc = true;
+				break;
+			}
+		}
+		if (!needCalc) {
 			return;
 		}
 		jobContainer.submitJob(() -> this.calculateStarRatings0(beatmapSet));
