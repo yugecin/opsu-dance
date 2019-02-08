@@ -81,7 +81,6 @@ public class InstanceContainer
 	public static MainMenu mainmenuState;
 	public static ButtonMenu buttonState;
 	public static SongMenu songMenuState;
-	public static DownloadsMenu downloadState;
 	public static Game gameState;
 	public static GameRanking gameRankingState;
 	
@@ -133,7 +132,6 @@ public class InstanceContainer
 		mainmenuState = new MainMenu();
 		buttonState = new ButtonMenu();
 		songMenuState = new SongMenu();
-		downloadState = new DownloadsMenu();
 		gameState = new Game();
 		gameRankingState = new GameRanking();
 	}

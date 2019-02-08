@@ -29,7 +29,6 @@ import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.*;
-import itdelatrisu.opsu.ui.MenuButton.Expand;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -55,7 +54,6 @@ import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
-import yugecin.opsudance.core.state.OpsuState;
 import yugecin.opsudance.ui.ImagePosition;
 
 import static itdelatrisu.opsu.GameImage.*;
@@ -116,9 +114,6 @@ public class MainMenu extends BaseOpsuState {
 	/** Music control buttons. */
 	private MenuButton musicPlay, musicPause, musicStop, musicNext, musicPrev;
 	private MenuButton[] musicButtons = new MenuButton[5];
-
-	/** Button linking to Downloads menu. */
-	private MenuButton downloadsButton;
 
 	/** Button linking to repository. */
 	private MenuButton repoButton;
@@ -211,13 +206,6 @@ public class MainMenu extends BaseOpsuState {
 		this.musicBarWidth = musicSize + musicSpacing * 4;
 		this.musicBarHeight = (int) (musicSize * 0.3f);
 
-		// initialize downloads button
-		Image dlImg = GameImage.DOWNLOADS.getImage();
-		downloadsButton = new MenuButton(dlImg, width - dlImg.getWidth() / 2f, height2);
-		downloadsButton.setHoverAnimationDuration(350);
-		downloadsButton.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
-		downloadsButton.setHoverExpand(1.03f, Expand.LEFT);
-
 		// initialize repository button (only if a webpage can be opened)
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(BROWSE)) {
 			final Image repoImg = GameImage.REPOSITORY.getImage();
@@ -284,9 +272,6 @@ public class MainMenu extends BaseOpsuState {
 			starFountain.draw();
 		}
 
-		// draw downloads button
-		downloadsButton.draw();
-		
 		// calculate scale stuff for logo
 		final float clickScale = this.logoClickScale.getValue();
 		final Float boxedBeatPosition = MusicController.getBeatProgress();
@@ -500,7 +485,6 @@ public class MainMenu extends BaseOpsuState {
 			updateButton.autoHoverUpdate(delta, true);
 			restartButton.autoHoverUpdate(delta, false);
 		}
-		downloadsButton.hoverUpdate(delta, mouseX, mouseY);
 		for (MenuButton b : this.musicButtons) {
 			b.hoverUpdate(delta, b.contains(mouseX, mouseY));
 		}
@@ -663,8 +647,6 @@ public class MainMenu extends BaseOpsuState {
 			danceRepoButton.resetHover();
 		updateButton.resetHover();
 		restartButton.resetHover();
-		if (!downloadsButton.contains(mouseX, mouseY))
-			downloadsButton.resetHover();
 	}
 
 	@Override
@@ -736,13 +718,6 @@ public class MainMenu extends BaseOpsuState {
 				this.playRandomNextTrack();
 			}
 			barNotifs.send(">> Next");
-			return;
-		}
-
-		// downloads button actions
-		if (downloadsButton.contains(x, y)) {
-			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(downloadState);
 			return;
 		}
 
@@ -847,10 +822,6 @@ public class MainMenu extends BaseOpsuState {
 				enterSongMenu();
 			}
 			return;
-		case KEY_D:
-			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(downloadState);
-			return;
 		case KEY_R:
 			this.playRandomNextTrack();
 			return;
@@ -934,12 +905,11 @@ public class MainMenu extends BaseOpsuState {
 	 */
 	private void enterSongMenu()
 	{
-		OpsuState state = songMenuState;
 		if (beatmapList.getBeatmapCount() == 0) {
-			barNotifs.send("Download some beatmaps to get started!");
-			state = downloadState;
+			barNotifs.send("No beatmaps :(");
+			return;
 		}
-		displayContainer.switchState(state);
+		displayContainer.switchState(songMenuState);
 	}
 	
 	private void openLogo() {

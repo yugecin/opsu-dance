@@ -5,7 +5,6 @@ package yugecin.opsudance;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
-import itdelatrisu.opsu.downloads.DownloadList;
 
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.util.Log;
@@ -54,7 +53,6 @@ public class OpsuDance
 		optionservice.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
-		DownloadList.get().cancelAllDownloads();
 		Utils.deleteDirectory(config.TEMP_DIR);
 		if (!OPTION_ENABLE_WATCH_SERVICE.state) {
 			BeatmapWatchService.destroy();

@@ -330,12 +330,6 @@ public enum GameImage {
 	MUSIC_NOWPLAYING_BG_BLACK ("music-np-bg-black", "png", false, false),
 	MUSIC_NOWPLAYING_BG_WHITE ("music-np-bg-white", "png", false, false),
 
-	DOWNLOADS ("downloads", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((h * 0.45f) / img.getHeight());
-		}
-	},
 	SEARCH_BG ("search-background", "png|jpg", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

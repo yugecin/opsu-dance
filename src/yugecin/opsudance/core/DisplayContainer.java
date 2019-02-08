@@ -6,8 +6,6 @@ import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
-import itdelatrisu.opsu.downloads.DownloadList;
-import itdelatrisu.opsu.downloads.DownloadNode;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.render.FrameBufferCache;
@@ -169,7 +167,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		GameMod.init(width, height);
 		PlaybackSpeed.init(width, height);
 		HitObject.init(width, height);
-		DownloadNode.init(width, height);
 	}
 	
 	public void reinitCursor()
@@ -392,12 +389,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	private boolean confirmExit() {
 		if (System.currentTimeMillis() - exitconfirmation < 10000) {
 			return true;
-		}
-		if (DownloadList.get().hasActiveDownloads()) {
-			bubNotifs.send(BUB_RED, DownloadList.EXIT_CONFIRMATION);
-			exitRequested = false;
-			exitconfirmation = System.currentTimeMillis();
-			return false;
 		}
 		if (updater.getStatus() == Updater.Status.UPDATE_DOWNLOADING) {
 			bubNotifs.send(BUB_PURPLE, Updater.EXIT_CONFIRMATION);

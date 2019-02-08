@@ -26,17 +26,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Scanner;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -283,44 +274,6 @@ public class Utils {
 	}
 
 	/**
-	 * Returns a JSON object from a URL.
-	 * @param url the remote URL
-	 * @return the JSON object, or null if an error occurred
-	 * @throws IOException if an I/O exception occurs
-	 */
-	public static JSONObject readJsonObjectFromUrl(URL url) throws IOException {
-		String s = Utils.readDataFromUrl(url);
-		JSONObject json = null;
-		if (s != null) {
-			try {
-				json = new JSONObject(s);
-			} catch (JSONException e) {
-				throw new IOException(s);
-			}
-		}
-		return json;
-	}
-
-	/**
-	 * Returns a JSON array from a URL.
-	 * @param url the remote URL
-	 * @return the JSON array, or null if an error occurred
-	 * @throws IOException if an I/O exception occurs
-	 */
-	public static JSONArray readJsonArrayFromUrl(URL url) throws IOException {
-		String s = Utils.readDataFromUrl(url);
-		JSONArray json = null;
-		if (s != null) {
-			try {
-				json = new JSONArray(s);
-			} catch (JSONException e) {
-				throw new IOException(s);
-			}
-		}
-		return json;
-	}
-
-	/**
 	 * Converts an input stream to a string.
 	 * @param is the input stream
 	 * @author Pavel Repin, earcam (http://stackoverflow.com/a/5445161)
@@ -384,30 +337,6 @@ public class Utils {
 	 */
 	public static boolean parseBoolean(String s) {
 		return (Integer.parseInt(s) == 1);
-	}
-
-	/**
-	 * Switches validation of SSL certificates on or off by installing a default
-	 * all-trusting {@link TrustManager}.
-	 * @param enabled whether to validate SSL certificates
-	 * @author neu242 (http://stackoverflow.com/a/876785)
-	 */
-	public static void setSSLCertValidation(boolean enabled) {
-		// create a trust manager that does not validate certificate chains
-		TrustManager[] trustAllCerts = new TrustManager[]{
-			new X509TrustManager() {
-				@Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-				@Override public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-				@Override public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-			}
-		};
-
-		// install the all-trusting trust manager
-		try {
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, enabled ? null : trustAllCerts, null);
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {}
 	}
 
 	/**
