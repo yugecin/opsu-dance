@@ -109,8 +109,8 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 	};
 
 	public static BeatmapSortOrder[] VALUES = {
-		TITLE,
 		ARTIST,
+		TITLE,
 		CREATOR,
 		BPM,
 		LENGTH,
@@ -118,7 +118,7 @@ public abstract class BeatmapSortOrder implements Comparator<Beatmap>
 		PLAYS,
 		RANK,
 	};
-	public static BeatmapSortOrder current = TITLE;
+	public static BeatmapSortOrder current = ARTIST;
 
 	public final String name;
 
