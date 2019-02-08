@@ -293,6 +293,8 @@ public class NodeList
 					n.prevPositionOffset = prev.y - n.y;
 					n.repositionTime = Node.REPOSITION_TIME;
 					n.takeOver(prev);
+					n.appearTime = prev.appearTime;
+					n.appearValue = prev.appearValue;
 					continue;
 				}
 			}

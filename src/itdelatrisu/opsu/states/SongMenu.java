@@ -292,7 +292,6 @@ public class SongMenu extends BaseOpsuState
 		{
 			@Override
 			public void itemSelected(int index, BeatmapSortOrder item) {
-				nodeList.unexpandAllExceptInSet(null);
 				BeatmapSortOrder.current = item;
 				beatmapList.resort();
 				nodeList.persistentRecreate();
