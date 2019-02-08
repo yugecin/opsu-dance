@@ -61,7 +61,7 @@ public enum GameMod {
 	SPUN_OUT      (Category.SPECIAL, 2, GameImage.MOD_SPUN_OUT, "SO", 4096, KEY_C, 0.9f,
 	              "SpunOut", "Spinners will be automatically completed."),
 	AUTO          (Category.SPECIAL, 3, GameImage.MOD_AUTO, "", 2048, KEY_V, 1f,
-	              "Autoplay", "Watch a perfect automated play through the song.");
+	              "Auto", "Watch a perfect automated play through the song.");
 
 	static
 	{
@@ -306,11 +306,11 @@ public enum GameMod {
 		for (GameMod mod : GameMod.values()) {
 			if ((state & mod.getBit()) > 0) {
 				sb.append(mod.getName());
-				sb.append(',');
+				sb.append(", ");
 			}
 		}
 		if (sb.length() > 0) {
-			sb.setLength(sb.length() - 1);
+			sb.setLength(sb.length() - 2);
 			return sb.toString();
 		} else
 			return "None";

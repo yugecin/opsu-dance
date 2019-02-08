@@ -382,6 +382,24 @@ public class SongMenu extends BaseOpsuState
 		// song nodes
 		nodeList.render(g);
 
+		{
+			final int mods = GameMod.getModState();
+			if (mods != 0) {
+				final float oldAlpha0 = Colors.WHITE_ALPHA.a;
+				Colors.WHITE_ALPHA.a = .3f;
+				final float yoffset =
+					Fonts.XLARGE.getAscent() +
+					(Fonts.XLARGE.getLineHeight() - Fonts.XLARGE.getAscent()) / 2f;
+				Fonts.XLARGE.drawString(
+					width * .075f,
+					footerY - yoffset,
+					GameMod.getModString(mods),
+					Colors.WHITE_ALPHA
+				);
+				Colors.WHITE_ALPHA.a = oldAlpha0;
+			}
+		}
+
 		// score buttons
 		if (focusScores != null) {
 			ScoreData.clipToArea(g);
