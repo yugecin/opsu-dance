@@ -26,18 +26,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Scanner;
-import java.util.jar.JarFile;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
@@ -45,7 +35,6 @@ import org.newdawn.slick.util.Log;
 
 import com.sun.jna.platform.FileUtils;
 import yugecin.opsudance.core.NotNull;
-import yugecin.opsudance.core.Nullable;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -196,21 +185,23 @@ public class Utils {
 	 * @return true if moved to trash, and false if deleted
 	 * @throws IOException if given file does not exist
 	 */
-	public static boolean deleteToTrash(File file) throws IOException {
+	public static boolean deleteMaybeToTrash(File file) throws IOException
+	{
 		if (file == null)
 			throw new IOException("File cannot be null.");
 		if (!file.exists())
 			throw new IOException(String.format("File '%s' does not exist.", file.getAbsolutePath()));
 
-		// move to system trash, if possible
-		FileUtils fileUtils = FileUtils.getInstance();
-		if (fileUtils.hasTrash()) {
-			try {
+		// FileUtils is com.sun, soooo big ass try around it
+		try {
+			// move to system trash, if possible
+			FileUtils fileUtils = FileUtils.getInstance();
+			if (fileUtils.hasTrash()) {
 				fileUtils.moveToTrash(new File[] { file });
 				return true;
-			} catch (IOException e) {
-				Log.warn(String.format("Failed to move file '%s' to trash.", file.getAbsolutePath()), e);
 			}
+		} catch (Throwable t) {
+			softErr(t, "Failed to move file '%s' to trash.", file.getAbsolutePath());
 		}
 
 		// delete otherwise
@@ -283,44 +274,6 @@ public class Utils {
 	}
 
 	/**
-	 * Returns a JSON object from a URL.
-	 * @param url the remote URL
-	 * @return the JSON object, or null if an error occurred
-	 * @throws IOException if an I/O exception occurs
-	 */
-	public static JSONObject readJsonObjectFromUrl(URL url) throws IOException {
-		String s = Utils.readDataFromUrl(url);
-		JSONObject json = null;
-		if (s != null) {
-			try {
-				json = new JSONObject(s);
-			} catch (JSONException e) {
-				explode("Failed to create JSON object.", e, DEFAULT_OPTIONS);
-			}
-		}
-		return json;
-	}
-
-	/**
-	 * Returns a JSON array from a URL.
-	 * @param url the remote URL
-	 * @return the JSON array, or null if an error occurred
-	 * @throws IOException if an I/O exception occurs
-	 */
-	public static JSONArray readJsonArrayFromUrl(URL url) throws IOException {
-		String s = Utils.readDataFromUrl(url);
-		JSONArray json = null;
-		if (s != null) {
-			try {
-				json = new JSONArray(s);
-			} catch (JSONException e) {
-				explode("Failed to create JSON array.", e, DEFAULT_OPTIONS);
-			}
-		}
-		return json;
-	}
-
-	/**
 	 * Converts an input stream to a string.
 	 * @param is the input stream
 	 * @author Pavel Repin, earcam (http://stackoverflow.com/a/5445161)
@@ -333,6 +286,7 @@ public class Utils {
 
 	/**
 	 * Returns the md5 hash of a file in hex form.
+	 * TODO: this is unused?
 	 * @param file the file to hash
 	 * @return the md5 hash
 	 */
@@ -356,7 +310,7 @@ public class Utils {
 				result.append(String.format("%02x", b));
 			return result.toString();
 		} catch (NoSuchAlgorithmException | IOException e) {
-			explode("Failed to calculate MD5 hash.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to calculate MD5 hash.");
 		}
 		return null;
 	}
@@ -383,58 +337,6 @@ public class Utils {
 	 */
 	public static boolean parseBoolean(String s) {
 		return (Integer.parseInt(s) == 1);
-	}
-
-	/**
-	 * Returns the git hash of the remote-tracking branch 'origin/master' from the
-	 * most recent update to the working directory (e.g. fetch or successful push).
-	 * @return the 40-character SHA-1 hash, or null if it could not be determined
-	 */
-	@Nullable
-	public static String getGitHash() {
-		if (env.isJarRunning)
-			return null;
-		File f = new File(".git/refs/remotes/origin/master");
-		if (!f.isFile())
-			f = new File("../.git/refs/remotes/origin/master");
-		if (!f.isFile())
-			return null;
-		try (BufferedReader in = new BufferedReader(new FileReader(f))) {
-			char[] sha = new char[40];
-			if (in.read(sha, 0, sha.length) < sha.length)
-				return null;
-			for (int i = 0; i < sha.length; i++) {
-				if (Character.digit(sha[i], 16) == -1)
-					return null;
-			}
-			return String.valueOf(sha);
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	/**
-	 * Switches validation of SSL certificates on or off by installing a default
-	 * all-trusting {@link TrustManager}.
-	 * @param enabled whether to validate SSL certificates
-	 * @author neu242 (http://stackoverflow.com/a/876785)
-	 */
-	public static void setSSLCertValidation(boolean enabled) {
-		// create a trust manager that does not validate certificate chains
-		TrustManager[] trustAllCerts = new TrustManager[]{
-			new X509TrustManager() {
-				@Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-				@Override public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-				@Override public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-			}
-		};
-
-		// install the all-trusting trust manager
-		try {
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, enabled ? null : trustAllCerts, null);
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {}
 	}
 
 	/**
@@ -502,20 +404,4 @@ public class Utils {
 			key != Keyboard.KEY_UP && key != Keyboard.KEY_DOWN &&
 			key != Keyboard.KEY_F7 && key != Keyboard.KEY_F10 && key != Keyboard.KEY_F12);
 	}
-
-	public static void unpackFromJar(@NotNull JarFile jarfile, @NotNull File unpackedFile,
-			@NotNull String filename) throws IOException {
-		InputStream in = jarfile.getInputStream(jarfile.getEntry(filename));
-		OutputStream out = new FileOutputStream(unpackedFile);
-
-		byte[] buffer = new byte[65536];
-		int bufferSize;
-		while ((bufferSize = in.read(buffer, 0, buffer.length)) != -1) {
-			out.write(buffer, 0, bufferSize);
-		}
-
-		in.close();
-		out.close();
-	}
-
 }

@@ -1,11 +1,10 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance;
 
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
-import itdelatrisu.opsu.downloads.DownloadList;
 
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.util.Log;
@@ -16,7 +15,6 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
-import static yugecin.opsudance.core.Entrypoint.sout;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
@@ -29,19 +27,24 @@ public class OpsuDance
 
 	public void start(String[] args) {
 		try {
-			sout("initialized");
+			Log.info("initialized");
 
 			optionservice.loadOptions();
-			ensureSingleInstance();
-			sout("prechecks done and options parsed");
+			if (this.isOtherInstanceRunning()) {
+				return;
+			}
+			Log.info("prechecks done and options parsed");
 
-			initDatabase();
+			if (!this.initDatabase()) {
+				return;
+			}
 			initUpdater(args);
-			sout("database & updater initialized");
+			Log.info("database & updater initialized");
 
 			displayContainer.init(splashState);
 		} catch (Exception e) {
-			errorAndExit("startup failure", e);
+			explode("startup failure", e, PREVENT_CONTINUE);
+			return;
 		}
 
 		while (rungame());
@@ -50,7 +53,6 @@ public class OpsuDance
 		optionservice.saveOptions();
 		closeSingleInstanceSocket();
 		DBController.closeConnections();
-		DownloadList.get().cancelAllDownloads();
 		Utils.deleteDirectory(config.TEMP_DIR);
 		if (!OPTION_ENABLE_WATCH_SERVICE.state) {
 			BeatmapWatchService.destroy();
@@ -76,11 +78,16 @@ public class OpsuDance
 		return caughtException != null && explode("update/render error", caughtException, ALLOW_TERMINATE);
 	}
 
-	private void initDatabase() {
+	/**
+	 * @return {@code false} on failure
+	 */
+	private boolean initDatabase() {
 		try {
 			DBController.init();
+			return true;
 		} catch (UnsatisfiedLinkError e) {
-			errorAndExit("Could not initialize database.", e);
+			explode("Could not initialize database.", e, PREVENT_CONTINUE);
+			return false;
 		}
 	}
 
@@ -106,19 +113,25 @@ public class OpsuDance
 		}.start();
 	}
 
-	private void ensureSingleInstance() {
+	private boolean isOtherInstanceRunning()
+	{
 		if (OPTION_NOSINGLEINSTANCE.state) {
-			return;
+			return false;
 		}
+
 		try {
 			singleInstanceSocket = new ServerSocket(OPTION_PORT.val, 1, InetAddress.getLocalHost());
+			return false;
 		} catch (UnknownHostException e) {
 			// shouldn't happen
+			return false;
 		} catch (IOException e) {
-			errorAndExit(String.format(
-					"Could not launch. Either opsu! is already running or a different program uses port %d.\n" +
-					"You can change the port opsu! uses by editing the 'Port' field in the .opsu.cfg configuration file.\n" +
-					"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", OPTION_PORT.val), e);
+			final String message = String.format(
+				"Could not launch. Either opsu! is already running or a different program uses port %d.\n" +
+				"You can change the port opsu! uses by editing the 'Port' field in the .opsu.cfg configuration file.\n" +
+				"If that still does not resolve the problem, you can set 'NoSingleInstance' to 'true', but this is not recommended.", OPTION_PORT.val);
+			explode(message, e, PREVENT_CONTINUE);
+			return true;
 		}
 	}
 
@@ -131,10 +144,5 @@ public class OpsuDance
 		} catch (IOException e) {
 			Log.error("Single instance socket was not closed!", e);
 		}
-	}
-
-	private void errorAndExit(String errstr, Throwable cause) {
-		explode(errstr, cause, PREVENT_CONTINUE);
-		System.exit(1);
 	}
 }

@@ -61,7 +61,22 @@ public enum GameMod {
 	SPUN_OUT      (Category.SPECIAL, 2, GameImage.MOD_SPUN_OUT, "SO", 4096, KEY_C, 0.9f,
 	              "SpunOut", "Spinners will be automatically completed."),
 	AUTO          (Category.SPECIAL, 3, GameImage.MOD_AUTO, "", 2048, KEY_V, 1f,
-	              "Autoplay", "Watch a perfect automated play through the song.");
+	              "Auto", "Watch a perfect automated play through the song.");
+
+	static
+	{
+		EASY.conflicts = new GameMod[] { HARD_ROCK };
+		NO_FAIL.conflicts = new GameMod[] { SUDDEN_DEATH };
+		HALF_TIME.conflicts = new GameMod[] { DOUBLE_TIME };
+		HARD_ROCK.conflicts = new GameMod[] { EASY };
+		SUDDEN_DEATH.conflicts = new GameMod[] { NO_FAIL, AUTO, RELAX, AUTOPILOT };
+		DOUBLE_TIME.conflicts = new GameMod[] { HALF_TIME };
+		HIDDEN.conflicts = FLASHLIGHT.conflicts = new GameMod[0];
+		RELAX.conflicts = new GameMod[] { AUTOPILOT, AUTO, SUDDEN_DEATH };
+		AUTOPILOT.conflicts = new GameMod[] { RELAX, AUTO, SUDDEN_DEATH };
+		SPUN_OUT.conflicts = new GameMod[] { AUTO };
+		AUTO.conflicts = new GameMod[] { SPUN_OUT, AUTOPILOT, RELAX, SUDDEN_DEATH };
+	}
 
 	/** Mod categories. */
 	public enum Category {
@@ -162,6 +177,8 @@ public enum GameMod {
 	/** The button containing the mod image (displayed in OptionsMenu screen). */
 	private MenuButton button;
 
+	private GameMod[] conflicts;
+
 	/** Total number of mods. */
 	public static final int SIZE = values().length;
 
@@ -199,8 +216,8 @@ public enum GameMod {
 			mod.button = new MenuButton(img,
 					baseX + (offsetX * mod.categoryIndex) + img.getWidth() / 2f,
 					mod.category.getY());
-			mod.button.setHoverAnimationDuration(300);
-			mod.button.setHoverAnimationEquation(AnimationEquation.IN_OUT_BACK);
+			mod.button.setHoverAnimationDuration(50);
+			mod.button.setHoverAnimationEquation(AnimationEquation.LINEAR);
 			mod.button.setHoverExpand(1.2f);
 			mod.button.setHoverRotate(10f);
 
@@ -289,11 +306,11 @@ public enum GameMod {
 		for (GameMod mod : GameMod.values()) {
 			if ((state & mod.getBit()) > 0) {
 				sb.append(mod.getName());
-				sb.append(',');
+				sb.append(", ");
 			}
 		}
 		if (sb.length() > 0) {
-			sb.setLength(sb.length() - 1);
+			sb.setLength(sb.length() - 2);
 			return sb.toString();
 		} else
 			return "None";
@@ -311,8 +328,18 @@ public enum GameMod {
 	 * @param name the name
 	 * @param description the description
 	 */
-	GameMod(Category category, int categoryIndex, GameImage image, String abbrev,
-			int bit, int key, float multiplier, String name, String description) {
+	GameMod(
+		Category category,
+		int categoryIndex,
+		GameImage image,
+		String abbrev,
+		int bit,
+		int key,
+		float multiplier,
+		String name,
+		String description,
+		GameMod... conflicts)
+	{
 		this.category = category;
 		this.categoryIndex = categoryIndex;
 		this.image = image;
@@ -322,6 +349,7 @@ public enum GameMod {
 		this.multiplier = multiplier;
 		this.name = name;
 		this.description = description;
+		this.conflicts = conflicts;
 	}
 
 	/**
@@ -370,39 +398,8 @@ public enum GameMod {
 		scoreMultiplier = speedMultiplier = difficultyMultiplier = -1f;
 
 		if (checkInverse) {
-			if (AUTO.isActive()) {
-				if (this == AUTO) {
-					SPUN_OUT.active = false;
-					SUDDEN_DEATH.active = false;
-					RELAX.active = false;
-					AUTOPILOT.active = false;
-				} else if (this == SPUN_OUT || this == SUDDEN_DEATH || this == RELAX || this == AUTOPILOT)
-					this.active = false;
-			}
-			if (active && (this == SUDDEN_DEATH || this == NO_FAIL || this == RELAX || this == AUTOPILOT)) {
-				SUDDEN_DEATH.active = false;
-				NO_FAIL.active = false;
-				RELAX.active = false;
-				AUTOPILOT.active = false;
-				active = true;
-			}
-			if (AUTOPILOT.isActive() && SPUN_OUT.isActive()) {
-				if (this == AUTOPILOT)
-					SPUN_OUT.active = false;
-				else
-					AUTOPILOT.active = false;
-			}
-			if (EASY.isActive() && HARD_ROCK.isActive()) {
-				if (this == EASY)
-					HARD_ROCK.active = false;
-				else
-					EASY.active = false;
-			}
-			if (HALF_TIME.isActive() && DOUBLE_TIME.isActive()) {
-				if (this == HALF_TIME)
-					DOUBLE_TIME.active = false;
-				else
-					HALF_TIME.active = false;
+			for (GameMod c : this.conflicts) {
+				c.active = false;
 			}
 		}
 	}
@@ -436,15 +433,6 @@ public enum GameMod {
 	 * Resets the hover fields for the button.
 	 */
 	public void resetHover() { button.resetHover(); }
-
-	/**
-	 * Updates the scale of the button depending on whether or not the cursor
-	 * is hovering over the button.
-	 * @param delta the delta interval
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
-	public void hoverUpdate(int delta, float x, float y) { button.hoverUpdate(delta, x, y); }
 
 	/**
 	 * Updates the scale of the button depending on whether or not the cursor

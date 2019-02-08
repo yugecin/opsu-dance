@@ -25,7 +25,7 @@ import itdelatrisu.opsu.io.MD5InputStreamWrapper;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +36,6 @@ import org.newdawn.slick.util.Log;
 import yugecin.opsudance.core.Nullable;
 import yugecin.opsudance.skinning.SkinService;
 
-import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -74,9 +73,9 @@ public class BeatmapParser {
 	 * Invokes parser for each OSU file in a root directory and
 	 * adds the beatmaps to a new BeatmapSetList.
 	 */
-	public void parseAll() {
-		// create a new BeatmapSetList
-		BeatmapSetList.create();
+	public void parseAll()
+	{
+		beatmapList = new BeatmapList();
 
 		// create a new watch service
 		if (OPTION_ENABLE_WATCH_SERVICE.state) {
@@ -91,9 +90,10 @@ public class BeatmapParser {
 	 * Invokes parser for each directory in the given array and
 	 * adds the beatmaps to the existing BeatmapSetList.
 	 * @param dirs the array of directories to parse
-	 * @return the last BeatmapSetNode parsed, or null if none
+	 * @return the last Beatmap parsed, or null if none
 	 */
-	public BeatmapSetNode parseDirectories(@Nullable File[] dirs) {
+	public Beatmap parseDirectories(@Nullable File[] dirs)
+	{
 		if (dirs == null || dirs.length == 0)
 			return null;
 
@@ -106,7 +106,7 @@ public class BeatmapParser {
 		Map<String, Long> map = BeatmapDB.getLastModifiedMap();
 
 		// beatmap lists
-		List<ArrayList<Beatmap>> allBeatmaps = new LinkedList<ArrayList<Beatmap>>();
+		List<Beatmap[]> allBeatmaps = new ArrayList<>();
 		List<Beatmap> cachedBeatmaps = new LinkedList<Beatmap>();  // loaded from database
 		List<Beatmap> parsedBeatmaps = new LinkedList<Beatmap>();  // loaded from parser
 
@@ -114,7 +114,6 @@ public class BeatmapParser {
 		BeatmapWatchService ws = BeatmapWatchService.get();
 
 		// parse directories
-		BeatmapSetNode lastNode = null;
 		long timestamp = System.currentTimeMillis();
 		for (File dir : dirs) {
 			currentDirectoryIndex++;
@@ -132,7 +131,8 @@ public class BeatmapParser {
 				continue;
 
 			// create a new group entry
-			ArrayList<Beatmap> beatmaps = new ArrayList<Beatmap>();
+			final Beatmap[] beatmaps = new Beatmap[files.length];
+			int beatmapc = 0;
 			for (File file : files) {
 				currentFile = file;
 
@@ -145,7 +145,7 @@ public class BeatmapParser {
 						if (lastModified == file.lastModified()) {
 							// add to cached beatmap list
 							Beatmap beatmap = new Beatmap(file);
-							beatmaps.add(beatmap);
+							beatmaps[beatmapc++] = beatmap;
 							cachedBeatmaps.add(beatmap);
 							continue;
 						} else
@@ -157,24 +157,33 @@ public class BeatmapParser {
 				// Change boolean to 'true' to parse them immediately.
 				Beatmap beatmap = null;
 				try {
-					beatmap = parseFile(file, dir, beatmaps, false);
+					beatmap = parseFile(file, dir, false);
 				} catch(Exception e) {
-					logAndShowErrorNotification(e, "Could not parse beatmap %s: %s",
-						file.getName(), e.getMessage());
+					softErr(
+						e,
+						"Could not parse beatmap %s: %s",
+						file.getName(),
+						e.getMessage()
+					);
 				}
 
 				// add to parsed beatmap list
 				if (beatmap != null) {
 					beatmap.dateAdded = timestamp;
-					beatmaps.add(beatmap);
+					beatmaps[beatmapc++] = beatmap;
 					parsedBeatmaps.add(beatmap);
 				}
 			}
 
 			// add group entry if non-empty
-			if (!beatmaps.isEmpty()) {
-				beatmaps.trimToSize();
-				allBeatmaps.add(beatmaps);
+			if (beatmapc > 0) {
+				if (beatmapc == beatmaps.length) {
+					allBeatmaps.add(beatmaps);
+				} else {
+					final Beatmap[] bms = new Beatmap[beatmapc];
+					System.arraycopy(beatmaps, 0, bms, 0, beatmapc);
+					allBeatmaps.add(bms);
+				}
 				if (ws != null)
 					ws.registerAll(dir.toPath());
 			}
@@ -193,10 +202,12 @@ public class BeatmapParser {
 			BeatmapDB.load(cachedBeatmaps, BeatmapDB.LOAD_NONARRAY);
 		}
 
+		Beatmap lastBeatmap = null;
 		// add group entries to BeatmapSetList
-		for (ArrayList<Beatmap> beatmaps : allBeatmaps) {
-			Collections.sort(beatmaps);
-			lastNode = BeatmapSetList.get().addSongGroup(beatmaps);
+		for (Beatmap[] beatmaps : allBeatmaps) {
+			Arrays.sort(beatmaps);
+			beatmapList.addBeatmapSet(beatmaps);
+			lastBeatmap = beatmaps[beatmaps.length - 1];
 		}
 
 		// clear string DB
@@ -212,7 +223,7 @@ public class BeatmapParser {
 		currentFile = null;
 		currentDirectoryIndex = -1;
 		totalDirectories = -1;
-		return lastNode;
+		return lastBeatmap;
 	}
 
 	public void parseOnlyTimingPoints(Beatmap map) {
@@ -247,9 +258,9 @@ public class BeatmapParser {
 			}
 			map.timingPoints.trimToSize();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.", map.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", map.getFile().getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to get MD5 hash stream");
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
@@ -276,11 +287,11 @@ public class BeatmapParser {
 	 * Parses a beatmap.
 	 * @param file the file to parse
 	 * @param dir the directory containing the beatmap
-	 * @param beatmaps the song group
 	 * @param parseObjects if true, hit objects will be fully parsed now
 	 * @return the new beatmap
 	 */
-	private Beatmap parseFile(File file, File dir, ArrayList<Beatmap> beatmaps, boolean parseObjects) {
+	private Beatmap parseFile(File file, File dir, boolean parseObjects)
+	{
 		Beatmap beatmap = new Beatmap(file);
 		beatmap.timingPoints = new ArrayList<TimingPoint>();
 
@@ -311,14 +322,12 @@ public class BeatmapParser {
 							switch (tokens[0]) {
 							case "AudioFilename":
 								File audioFileName = new File(dir, tokens[1]);
-								if (!beatmaps.isEmpty()) {
-									// if possible, reuse the same File object from another Beatmap in the group
-									File groupAudioFileName = beatmaps.get(0).audioFilename;
-									if (groupAudioFileName != null &&
-									    tokens[1].equalsIgnoreCase(groupAudioFileName.getName()))
-										audioFileName = groupAudioFileName;
-								}
 								if (!audioFileName.isFile()) {
+									if ("virtual".equals(audioFileName.getName())) {
+										// beatmap without sound
+										// TODO: these can be legal (circusgallop)
+										return null;
+									}
 									// try to find the file with a case-insensitive match
 									boolean match = false;
 									for (String s : dir.list()) {
@@ -430,24 +439,31 @@ public class BeatmapParser {
 							switch (tokens[0]) {
 							case "Title":
 								beatmap.title = getDBString(tokens[1]);
+								beatmap.searchTitle = beatmap.title.toLowerCase();
 								break;
 							case "TitleUnicode":
 								beatmap.titleUnicode = getDBString(tokens[1]);
+								beatmap.searchTitleUnicode = beatmap.titleUnicode.toLowerCase();
 								break;
 							case "Artist":
 								beatmap.artist = getDBString(tokens[1]);
+								beatmap.searchArtist = beatmap.artist.toLowerCase();
 								break;
 							case "ArtistUnicode":
 								beatmap.artistUnicode = getDBString(tokens[1]);
+								beatmap.searchArtistUnicode = beatmap.artistUnicode.toLowerCase();
 								break;
 							case "Creator":
 								beatmap.creator = getDBString(tokens[1]);
+								beatmap.searchCreator = beatmap.creator.toLowerCase();
 								break;
 							case "Version":
 								beatmap.version = getDBString(tokens[1]);
+								beatmap.searchVersion = beatmap.version.toLowerCase();
 								break;
 							case "Source":
 								beatmap.source = getDBString(tokens[1]);
+								beatmap.searchSource = beatmap.source.toLowerCase();
 								break;
 							case "Tags":
 								beatmap.tags = getDBString(tokens[1].toLowerCase());
@@ -650,13 +666,13 @@ public class BeatmapParser {
 			if (md5stream != null)
 				beatmap.md5Hash = md5stream.getMD5();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.", file.getAbsolutePath());
+			softErr(e, "Failed to read file'%s", file.getAbsolutePath());
 		} catch (NoSuchAlgorithmException e) {
-			explode("Failed to get MD5 hash stream.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to get MD5 hash stream");
 
 			// retry without MD5
 			hasNoMD5Algorithm = true;
-			return parseFile(file, dir, beatmaps, parseObjects);
+			return parseFile(file, dir, parseObjects);
 		}
 
 		// no associated audio file?
@@ -731,8 +747,7 @@ public class BeatmapParser {
 			}
 			beatmap.timingPoints.trimToSize();
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.",
-				beatmap.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", beatmap.getFile().getAbsolutePath());
 		}
 	}
 
@@ -810,12 +825,14 @@ public class BeatmapParser {
 
 			// check that all objects were parsed
 			if (objectIndex != beatmap.objects.length)
-				explode(String.format("Parsed %d objects for beatmap '%s', %d objects expected.",
-					objectIndex, beatmap.toString(), beatmap.objects.length), new Exception("no"),
-					DEFAULT_OPTIONS);
+				softWarn(
+					"Expected %d objects for beatmap '%s', but parsed %d",
+					beatmap.objects.length,
+					beatmap.toString(),
+					objectIndex
+				);
 		} catch (IOException e) {
-			logAndShowErrorNotification(e, "Failed to read file '%s'.",
-				beatmap.getFile().getAbsolutePath());
+			softErr(e, "Failed to read file %s", beatmap.getFile().getAbsolutePath());
 		}
 	}
 
@@ -885,11 +902,4 @@ public class BeatmapParser {
 		} else
 			return DBString;
 	}
-
-	private static void logAndShowErrorNotification(Exception e, String message, Object... formatArgs) {
-		message = String.format(message, formatArgs);
-		Log.error(message, e);
-		bubNotifs.send(BUB_RED, message);
-	}
-
 }

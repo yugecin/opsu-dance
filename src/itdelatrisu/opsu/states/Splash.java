@@ -21,9 +21,8 @@ package itdelatrisu.opsu.states;
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
+import itdelatrisu.opsu.db.ScoreDB;
 import itdelatrisu.opsu.ui.UI;
-import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Color;
@@ -72,6 +71,8 @@ public class Splash extends BaseOpsuState {
 			public void run() {
 				oszunpacker.unpackAll();
 				beatmapParser.parseAll();
+				ScoreDB.loadTopGrades();
+				beatmapList.activeGroupChanged();
 				replayImporter.importAll();
 
 				SoundController.init();
@@ -90,18 +91,11 @@ public class Splash extends BaseOpsuState {
 			return;
 		}
 
-		// initialize song list
-		if (BeatmapSetList.get().size() == 0) {
-			MusicController.playThemeSong(config.themeBeatmap);
-			displayContainer.switchStateInstantly(mainmenuState);
-			return;
-		}
-
-		BeatmapSetList.get().init();
-		if (OPTION_ENABLE_THEME_SONG.state) {
-			MusicController.playThemeSong(config.themeBeatmap);
+		nodeList.recreate();
+		if (OPTION_ENABLE_THEME_SONG.state || beatmapList.getBeatmapSetCount() == 0) {
+			MusicController.playThemeSong();
 		} else {
-			songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, true, true);
+			mainmenuState.playRandomNextTrack();
 		}
 		displayContainer.switchStateInstantly(mainmenuState);
 	}
@@ -111,7 +105,7 @@ public class Splash extends BaseOpsuState {
 		g.setBackground(Color.black);
 		final Color col;
 		if (OPTION_COLOR_MAIN_MENU_LOGO.state) {
-			col = CursorImpl.lastCursorColor;
+			col = new Color(0xFF000000 | cursorColor.getCurrentColor());
 		} else {
 			col = Color.white;
 		}

@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.options;
 
@@ -7,11 +7,6 @@ public abstract class ListOption extends Option
 	public ListOption(String name, String configurationName, String description)
 	{
 		super(name, configurationName, description);
-		this.setDefaultValue();
-	}
-
-	public void setDefaultValue()
-	{
 	}
 
 	@Override

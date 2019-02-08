@@ -26,6 +26,7 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.replay.Replay;
+import itdelatrisu.opsu.states.game.Game.RestartReason;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
 
@@ -39,6 +40,7 @@ import org.newdawn.slick.util.Log;
 
 import yugecin.opsudance.core.input.*;
 import yugecin.opsudance.core.state.BaseOpsuState;
+import yugecin.opsudance.ui.BackButton.Listener;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 
@@ -60,7 +62,7 @@ public class GameRanking extends BaseOpsuState {
 	/** Button coordinates. */
 	private float retryY, replayY;
 
-	private final Runnable backButtonListener = this::returnToSongMenu;
+	private final Listener backButtonListener = Listener.fromState(this::returnToSongMenu);
 
 	@Override
 	public void revalidate() {
@@ -120,47 +122,44 @@ public class GameRanking extends BaseOpsuState {
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
-		// check mouse button
 		if (e.button == Input.MMB) {
 			return;
 		}
 
-		// replay
-		boolean returnToGame = false;
+		RestartReason restartReason = null;
 		boolean replayButtonPressed = replayButton.contains(e.x, e.y);
 		if (replayButtonPressed && !(data.isGameplay() && GameMod.AUTO.isActive())) {
 			Replay r = data.getReplay(null, null);
-			if (r != null) {
-				try {
-					r.load();
-					gameState.setReplay(r);
-					gameState.setRestart((data.isGameplay()) ? Game.Restart.REPLAY : Game.Restart.NEW);
-					returnToGame = true;
-				} catch (FileNotFoundException t) {
-					barNotifs.send("Replay file not found.");
-				} catch (IOException t) {
-					Log.error("Failed to load replay data.", t);
-					barNotifs.send("Failed to load replay data. See log for details.");
-				}
-			} else {
+			if (r == null) {
 				barNotifs.send("Replay file not found.");
+				return;
 			}
-		}
-
-		// retry
-		else if (data.isGameplay() &&
+			try {
+				r.load();
+				gameState.setReplay(r);
+				if (data.isGameplay()) {
+					restartReason = RestartReason.WATCHREPLAY;
+				} else {
+					restartReason = RestartReason.NEWGAME;
+				}
+			} catch (FileNotFoundException t) {
+				barNotifs.send("Replay file not found.");
+			} catch (IOException t) {
+				Log.error("Failed to load replay data.", t);
+				barNotifs.send("Failed to load replay data. See log for details.");
+			}
+		} else if (data.isGameplay() &&
 		         (!GameMod.AUTO.isActive() && retryButton.contains(e.x, e.y)) ||
-		         (GameMod.AUTO.isActive() && replayButtonPressed)) {
+		         (GameMod.AUTO.isActive() && replayButtonPressed))
+		{
 			gameState.setReplay(null);
-			gameState.setRestart(Game.Restart.MANUAL);
-			returnToGame = true;
+			restartReason = RestartReason.USER;
 		}
 
-		if (returnToGame) {
-			Beatmap beatmap = MusicController.getBeatmap();
-			gameState.loadBeatmap(beatmap);
+		if (restartReason != null) {
 			SoundController.playSound(SoundEffect.MENUHIT);
-			displayContainer.switchState(gameState);
+			gameState.loadBeatmap(MusicController.getBeatmap());
+			gameState.restart(restartReason);
 		}
 	}
 
@@ -213,9 +212,6 @@ public class GameRanking extends BaseOpsuState {
 			songMenuState.resetTrackOnLoad();
 		}
 		songMenuState.resetGameDataOnLoad();
-		if (displayContainer.cursor.isBeatmapSkinned()) {
-			displayContainer.cursor.reset();
-		}
 		displayContainer.switchState(songMenuState);
 	}
 

@@ -37,7 +37,7 @@ public class DropdownMenu<E> extends Component
 {
 	private static final float PADDING_Y = 0.1f, CHEVRON_X = 0.03f;
 
-	private E[] items;
+	public final E[] items;
 	private String[] itemNames;
 	private int selectedItemIndex;
 	private boolean expanded;
@@ -60,8 +60,10 @@ public class DropdownMenu<E> extends Component
 	private Image chevronDown;
 	private Image chevronRight;
 
-	public DropdownMenu(E[] items, int x, int y, int width) {
-		init(items, x, y, width);
+	public DropdownMenu(E[] items, int x, int y, int width)
+	{
+		this.items = items;
+		init(x, y, width);
 	}
 
 	public void setWidth(int width) {
@@ -102,8 +104,7 @@ public class DropdownMenu<E> extends Component
 		return maxWidth;
 	}
 
-	private void init(E[] items, int x, int y, int width) {
-		this.items = items;
+	private void init(int x, int y, int width) {
 		this.itemNames = new String[items.length];
 		for (int i = 0; i < itemNames.length; i++) {
 			itemNames[i] = items[i].toString();
@@ -111,6 +112,7 @@ public class DropdownMenu<E> extends Component
 		this.x = x;
 		this.y = y;
 		this.baseHeight = fontNormal.getLineHeight();
+		this.baseHeight -= 2; // meh.. :/
 		this.offsetY = baseHeight + baseHeight * PADDING_Y;
 		this.height = (int) (offsetY * (items.length + 1));
 		int downChevronSize = baseHeight * 4 / 5;
@@ -229,12 +231,18 @@ public class DropdownMenu<E> extends Component
 		expandProgress.setTime(0);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void openGrabFocus()
 	{
 		this.setFocused(true);
 		input.addListener(this);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void closeReleaseFocus()
 	{
 		if (this.focused) {
@@ -257,14 +265,18 @@ public class DropdownMenu<E> extends Component
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		if (e.button == Input.MMB || input.dragDistanceExceeds(e.x, e.y, 10)) {
+		if (e.button == Input.MMB || e.dragDistance > 5f) {
 			return;
 		}
 
 		int idx = getIndexAt(mouseY);
-		if (idx == -2) {
+		if (idx < 0) {
+			// -1: base clicked
+			// -2: somewhere else clicked
+			if (idx == -1) {
+				e.consume();
+			}
 			this.closeReleaseFocus();
-			// no consume
 			return;
 		}
 		e.consume();
@@ -290,6 +302,14 @@ public class DropdownMenu<E> extends Component
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		if (e.button == Input.MMB) {
+			return;
+		}
+
+		final int idx = this.getIndexAt(mouseY);
+		if (idx >= -1) {
+			e.consume();
+		}
 	}
 
 	@Override

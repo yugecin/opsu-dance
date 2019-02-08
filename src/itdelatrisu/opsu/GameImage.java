@@ -29,12 +29,12 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.utils.SlickUtil;
 
 import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 /**
@@ -258,40 +258,21 @@ public enum GameImage {
 	MENU_NAV_GRAPHICS ("menu-nav-graphics", "png", false, false),
 	MENU_NAV_INPUT ("menu-nav-input", "png", false, false),
 	MENU_NAV_SKIN ("menu-nav-skin", "png", false, false),
-	MENU_NAV_ADVANCED ("menu-nav-advanced", "png", false, false),
 	MENU_NAV_DANCE ("menu-nav-dance", "png", false, false),
 	MENU_NAV_PIPPI ("menu-nav-pippi", "png", false, false),
 	MENU_BACK ("menu-back", "menu-back-%d", "png", false, true),
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
 	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
+	MENU_HEADER ("menu-header", "png", false, false),
+	MENU_ICON ("menu-icon", "png", false, false),
 	MENU_TAB ("selection-tab", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy((h * 0.033f) / img.getHeight());
 		}
 	},
-	MENU_MUSICNOTE ("music-note", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r, r);
-		}
-	},
-	MENU_LOADER ("loader", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r / 48f);
-		}
-	},
-	MENU_BG ("menu-background", "png|jpg", false, true) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.9f);
-			return img;
-		}
-	},
+	MENU_BG ("menu-background", "png|jpg", false, true),
 	MENU_LOGO ("logo2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
@@ -331,12 +312,7 @@ public enum GameImage {
 	MENU_BUTTON_MID ("button-middle", "png", false, false),
 	MENU_BUTTON_LEFT ("button-left", "png", false, false),
 	MENU_BUTTON_RIGHT ("button-right", "png", false, false),
-	STAR ("star", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.16f) / img.getHeight());
-		}
-	},
+	STAR ("star", "png", false, false),
 	STAR2 ("star2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
@@ -354,12 +330,6 @@ public enum GameImage {
 	MUSIC_NOWPLAYING_BG_BLACK ("music-np-bg-black", "png", false, false),
 	MUSIC_NOWPLAYING_BG_WHITE ("music-np-bg-white", "png", false, false),
 
-	DOWNLOADS ("downloads", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((h * 0.45f) / img.getHeight());
-		}
-	},
 	SEARCH_BG ("search-background", "png|jpg", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
@@ -666,6 +636,11 @@ public enum GameImage {
 		return this.getImage().getScaledCopy(width, height);
 	}
 
+	public Image absScale(int dimension)
+	{
+		return this.getImage().getScaledCopy(dimension, dimension);
+	}
+
 	/**
 	 * Returns an Animation based on the image array.
 	 * If no image array exists, returns the single image as an animation.
@@ -897,8 +872,7 @@ public enum GameImage {
 				skinImages = null;
 			}
 		} catch (SlickException e) {
-			String msg = String.format("Failed to destroy beatmap skin images for '%s'.", this.name());
-			ErrorHandler.explode(msg, e, ErrorHandler.DEFAULT_OPTIONS);
+			softErr(e, "Failed to destroy beatmap skin images for '%s'.", this.name());
 		}
 	}
 

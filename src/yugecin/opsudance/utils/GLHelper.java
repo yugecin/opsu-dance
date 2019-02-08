@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.utils;
 
@@ -79,24 +79,29 @@ public class GLHelper {
 		Display.setIcon(bufs);
 	}
 
-	public static void hideNativeCursor() {
+	public static void hideNativeCursor()
+	{
 		try {
 			int min = Cursor.getMinCursorSize();
 			IntBuffer tmp = BufferUtils.createIntBuffer(min * min);
 			Mouse.setNativeCursor(new Cursor(min, min, min / 2, min / 2, 1, tmp, null));
 		} catch (LWJGLException e) {
-			explode("Cannot hide native cursor", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not hide native cursor");
 		}
 	}
 
-	public static void showNativeCursor() {
+	public static void showNativeCursor()
+	{
 		try {
 			Mouse.setNativeCursor(null);
 		} catch (LWJGLException e) {
-			explode("Cannot show native cursor", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not re-show native cursor");
 		}
 	}
 
+	/**
+	 * centered!
+	 */
 	public static void simpleTexturedQuad(TextureData td)
 	{
 		glBindTexture(GL_TEXTURE_2D, td.id);
@@ -109,6 +114,21 @@ public class GLHelper {
 		glVertex2f(td.width2, td.height2);
 		glTexCoord2f(0f, td.txth);
 		glVertex2f(-td.width2, td.height2);
+		glEnd();
+	}
+
+	public static void simpleTexturedQuadTopLeft(TextureData td)
+	{
+		glBindTexture(GL_TEXTURE_2D, td.id);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0f, 0f);
+		glVertex2f(0f, 0);
+		glTexCoord2f(td.txtw, 0f);
+		glVertex2f(td.width, 0f);
+		glTexCoord2f(td.txtw, td.txth);
+		glVertex2f(td.width, td.height);
+		glTexCoord2f(0f, td.txth);
+		glVertex2f(0f, td.height);
 		glEnd();
 	}
 }

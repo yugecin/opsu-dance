@@ -24,8 +24,8 @@ import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
-import itdelatrisu.opsu.beatmap.BeatmapSetNode;
+import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.db.BeatmapDB;
 import itdelatrisu.opsu.ui.Fonts;
 import itdelatrisu.opsu.ui.MenuButton;
 import itdelatrisu.opsu.ui.UI;
@@ -70,9 +70,14 @@ public class ButtonMenu extends BaseOpsuState {
 		BEATMAP (new Button[] { Button.CLEAR_SCORES, Button.FAVORITE_ADD, Button.DELETE, Button.CANCEL }) {
 			@Override
 			public String[] getTitle() {
-				BeatmapSetNode node = buttonState.getNode();
-				String beatmapString = (node != null) ? BeatmapSetList.get().getBaseNode(node.index).toString() : "";
-				return new String[] { beatmapString, "What do you want to do with this beatmap?" };
+				String beatmapString = "";
+				if (buttonState.beatmap != null) {
+					beatmapString = buttonState.beatmap.toString();
+				}
+				return new String[] {
+					beatmapString,
+					"What do you want to do with this beatmap?"
+				};
 			}
 
 			@Override
@@ -102,9 +107,14 @@ public class ButtonMenu extends BaseOpsuState {
 		BEATMAP_DELETE_SELECT (new Button[] { Button.DELETE_GROUP, Button.DELETE_SONG, Button.CANCEL_DELETE }) {
 			@Override
 			public String[] getTitle() {
-				BeatmapSetNode node = buttonState.getNode();
-				String beatmapString = (node != null) ? node.toString() : "";
-				return new String[] { String.format("Are you sure you wish to delete '%s' from disk?", beatmapString) };
+				String beatmapString = "";
+				if (buttonState.beatmap != null) {
+					beatmapString = buttonState.beatmap.toString();
+				}
+				return new String[] {
+					"Are you sure you wish to delete '" + beatmapString
+					+"' from disk?",
+				};
 			}
 
 			@Override
@@ -231,11 +241,14 @@ public class ButtonMenu extends BaseOpsuState {
 			public void preRenderUpdate() {
 				super.preRenderUpdate();
 				GameMod hoverMod = null;
+				final boolean wasSuppressed = displayContainer.suppressHover;
 				for (GameMod mod : GameMod.values()) {
+					displayContainer.suppressHover = false;
 					mod.hoverUpdate(renderDelta, mod.isActive());
 					if (hoverMod == null && mod.contains(mouseX, mouseY))
 						hoverMod = mod;
 				}
+				displayContainer.suppressHover = wasSuppressed;
 
 				// tooltips
 				if (hoverMod != null) {
@@ -445,8 +458,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				songMenuState.doStateActionOnLoad(MenuState.BEATMAP, node);
+				Beatmap map = buttonState.beatmap;
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP, map);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -454,8 +467,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				node.getBeatmapSet().setFavorite(true);
+				buttonState.beatmap.favorite = true;
+				BeatmapDB.updateFavoriteStatus(buttonState.beatmap);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -463,8 +476,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				node.getBeatmapSet().setFavorite(false);
+				buttonState.beatmap.favorite = false;
+				BeatmapDB.updateFavoriteStatus(buttonState.beatmap);
 				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_FAVORITE);
 				displayContainer.switchState(songMenuState);
 			}
@@ -473,11 +486,9 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				MenuState ms = (node.beatmapIndex == -1 || node.getBeatmapSet().size() == 1) ?
-						MenuState.BEATMAP_DELETE_CONFIRM : MenuState.BEATMAP_DELETE_SELECT;
-				buttonState.setMenuState(ms, node);
-				displayContainer.switchState(buttonState);
+				MenuState ms = MenuState.BEATMAP_DELETE_SELECT;
+				buttonState.setMenuState(ms, buttonState.beatmap);
+				displayContainer.switchStateInstantly(buttonState);
 			}
 		},
 		CANCEL ("Cancel", Color.gray) {
@@ -491,8 +502,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, node);
+				final Beatmap map = buttonState.beatmap;
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_CONFIRM, map);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -506,8 +517,8 @@ public class ButtonMenu extends BaseOpsuState {
 			@Override
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
-				BeatmapSetNode node = buttonState.getNode();
-				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, node);
+				final Beatmap map = buttonState.beatmap;
+				songMenuState.doStateActionOnLoad(MenuState.BEATMAP_DELETE_SELECT, map);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -536,7 +547,8 @@ public class ButtonMenu extends BaseOpsuState {
 			public void click() {
 				SoundController.playSound(SoundEffect.MENUHIT);
 				ScoreData scoreData = buttonState.getScoreData();
-				songMenuState.doStateActionOnLoad(MenuState.SCORE, scoreData);
+				Beatmap bm = buttonState.beatmap;
+				songMenuState.doStateActionOnLoad(MenuState.SCORE, bm, scoreData);
 				displayContainer.switchState(songMenuState);
 			}
 		},
@@ -592,8 +604,7 @@ public class ButtonMenu extends BaseOpsuState {
 	/** The current menu state. */
 	private MenuState menuState;
 
-	/** The song node to process in the state. */
-	private BeatmapSetNode node;
+	public Beatmap beatmap;
 
 	/** The score data to process in the state. */
 	private ScoreData scoreData;
@@ -673,38 +684,43 @@ public class ButtonMenu extends BaseOpsuState {
 	 * Changes the menu state.
 	 * @param menuState the new menu state
 	 */
-	public void setMenuState(MenuState menuState) { setMenuState(menuState, null, null); }
-
-	/**
-	 * Changes the menu state.
-	 * @param menuState the new menu state
-	 * @param node the song node to process in the state
-	 */
-	public void setMenuState(MenuState menuState, BeatmapSetNode node) { setMenuState(menuState, node, null); }
-
-	/**
-	 * Changes the menu state.
-	 * @param menuState the new menu state
-	 * @param scoreData the score scoreData
-	 */
-	public void setMenuState(MenuState menuState, ScoreData scoreData) { setMenuState(menuState, null, scoreData); }
-
-	/**
-	 * Changes the menu state.
-	 * @param menuState the new menu state
-	 * @param node the song node to process in the state
-	 * @param scoreData the score scoreData
-	 */
-	private void setMenuState(MenuState menuState, BeatmapSetNode node, ScoreData scoreData) {
-		this.menuState = menuState;
-		this.node = node;
-		this.scoreData = scoreData;
+	public void setMenuState(MenuState menuState)
+	{
+		this.setMenuState(menuState, (Beatmap) null, (ScoreData) null);
 	}
 
 	/**
-	 * Returns the song node being processed, or null if none.
+	 * Changes the menu state.
+	 * @param menuState the new menu state
+	 * @param node the song node to process in the state
 	 */
-	private BeatmapSetNode getNode() { return node; }
+	public void setMenuState(MenuState menuState, Beatmap beatmap)
+	{
+		this.setMenuState(menuState, beatmap, null);
+	}
+
+	/**
+	 * Changes the menu state.
+	 * @param menuState the new menu state
+	 * @param scoreData the score scoreData
+	 */
+	public void setMenuState(MenuState menuState, ScoreData scoreData)
+	{
+		this.setMenuState(menuState, (Beatmap) null, scoreData);
+	}
+
+	/**
+	 * Changes the menu state.
+	 * @param menuState the new menu state
+	 * @param node the song node to process in the state
+	 * @param scoreData the score scoreData
+	 */
+	private void setMenuState(MenuState menuState, Beatmap beatmap, ScoreData scoreData)
+	{
+		this.menuState = menuState;
+		this.beatmap = beatmap;
+		this.scoreData = scoreData;
+	}
 
 	/**
 	 * Returns the score data being processed, or null if none.

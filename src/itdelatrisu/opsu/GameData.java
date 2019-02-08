@@ -86,15 +86,15 @@ public class GameData {
 
 	/** Letter grades. */
 	public enum Grade {
-		NULL (null, null),
-		SS  (GameImage.RANKING_SS,  GameImage.RANKING_SS_SMALL),
 		SSH (GameImage.RANKING_SSH, GameImage.RANKING_SSH_SMALL), // silver
-		S   (GameImage.RANKING_S,   GameImage.RANKING_S_SMALL),
+		SS  (GameImage.RANKING_SS,  GameImage.RANKING_SS_SMALL),
 		SH  (GameImage.RANKING_SH,  GameImage.RANKING_SH_SMALL),  // silver
+		S   (GameImage.RANKING_S,   GameImage.RANKING_S_SMALL),
 		A   (GameImage.RANKING_A,   GameImage.RANKING_A_SMALL),
 		B   (GameImage.RANKING_B,   GameImage.RANKING_B_SMALL),
 		C   (GameImage.RANKING_C,   GameImage.RANKING_C_SMALL),
-		D   (GameImage.RANKING_D,   GameImage.RANKING_D_SMALL);
+		D   (GameImage.RANKING_D,   GameImage.RANKING_D_SMALL),
+		NULL (null, null);
 
 		/** GameImages associated with this grade (large and small sizes). */
 		private final GameImage large, small;
@@ -1086,6 +1086,18 @@ public class GameData {
 		return getScorePercent(
 			hitResultCount[HIT_300], hitResultCount[HIT_100],
 			hitResultCount[HIT_50], hitResultCount[HIT_MISS]
+		);
+	}
+
+	public static Grade getGrade(int hit300, int hit100, int hit50, int miss, int mods)
+	{
+		return getGrade(
+			hit300,
+			hit100,
+			hit50,
+			miss,
+			((mods & GameMod.HIDDEN.getBit()) > 0 ||
+			(mods & GameMod.FLASHLIGHT.getBit()) > 0)
 		);
 	}
 

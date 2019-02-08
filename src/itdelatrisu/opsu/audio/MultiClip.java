@@ -194,8 +194,7 @@ public class MultiClip {
 			try {
 				audioIn.close();
 			} catch (IOException e) {
-				explode(String.format("Could not close AudioInputStream for MultiClip %s.", name), e,
-					DEFAULT_OPTIONS);
+				softErr(e, "Failed to close MultiClip %s", name);
 			}
 		}
 	}

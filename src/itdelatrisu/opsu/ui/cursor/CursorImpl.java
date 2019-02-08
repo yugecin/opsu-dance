@@ -26,7 +26,6 @@ import java.awt.Point;
 import java.util.LinkedList;
 
 import org.newdawn.slick.*;
-import yugecin.opsudance.Dancer;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.cursor.Cursor;
 
@@ -65,7 +64,6 @@ public class CursorImpl implements Cursor
 	public static Color lastMirroredObjColor = Color.white;
 	public static Color nextObjColor = Color.white;
 	public static Color nextMirroredObjColor = Color.white;
-	public static Color lastCursorColor = Color.white;
 
 	private boolean isMirrored;
 
@@ -126,11 +124,11 @@ public class CursorImpl implements Cursor
 		}
 
 		Color filter;
-		if (isMirrored) {
-			filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
-		} else {
-			lastCursorColor = filter = Dancer.cursorColorOverride.getColor();
-		}
+		//if (isMirrored) {
+		//	filter = Dancer.cursorColorMirrorOverride.getMirrorColor();
+		//} else {
+			filter = new Color(0xFF000000 | cursorColor.getCurrentColor());
+		//}
 
 		// draw a fading trail
 		float alpha = 0f;
@@ -300,5 +298,6 @@ public class CursorImpl implements Cursor
 	@Override
 	public void destroy()
 	{
+		this.trail.clear();
 	}
 }

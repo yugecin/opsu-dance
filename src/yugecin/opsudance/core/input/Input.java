@@ -1,4 +1,4 @@
-// Copyright 2018 yugecin - this source is licensed under GPL
+// Copyright 2018-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core.input;
 
@@ -23,6 +23,7 @@ public class Input
 	private int lastMouseX;
 	private int lastMouseY;
 
+	private final MouseEvent[] mouseEvents;
 	private final KeyEvent[] keyEvents;
 
 	public final InputListenerCollection<KeyListener> keyListeners;
@@ -33,6 +34,7 @@ public class Input
 	public Input()
 	{
 		this.keyEvents = new KeyEvent[Keyboard.KEYBOARD_SIZE];
+		this.mouseEvents = new MouseEvent[3];
 		final GlobalInputListener globalListener = new GlobalInputListener();
 		this.keyListeners = new InputListenerCollection<>(globalListener);
 		this.mouseListeners = new InputListenerCollection<>(globalListener);
@@ -56,11 +58,6 @@ public class Input
 		this.keyListeners.remove(listener);
 	}
 
-	public boolean isAnyMouseButtonDown()
-	{
-		return Mouse.isButtonDown(0) || Mouse.isButtonDown(1) || Mouse.isButtonDown(2);
-	}
-
 	public boolean isAltDown()
 	{
 		return Keyboard.isKeyDown(KEY_LMENU) || Keyboard.isKeyDown(KEY_RMENU);
@@ -74,13 +71,6 @@ public class Input
 	public boolean isShiftDown()
 	{
 		return Keyboard.isKeyDown(KEY_RSHIFT) || Keyboard.isKeyDown(KEY_LSHIFT);
-	}
-
-	public boolean dragDistanceExceeds(int releaseX, int releaseY, int distance)
-	{
-		final int dx = releaseX - mousePressX;
-		final int dy = releaseY - mousePressY;
-		return dx * dx + dy * dy > distance * distance;
 	}
 
 	public void poll()
@@ -110,15 +100,30 @@ public class Input
 			final int mouseButton = Mouse.getEventButton();
 			// button is -1 if no button state was changed in this event
 			if (mouseButton >= 0) {
+				if (mouseButton > 2) {
+					continue;
+				}
 				int eventX = Mouse.getEventX();
 				int eventY = height - Mouse.getEventY();
 				final MouseEvent e = new MouseEvent(mouseButton, eventX, eventY);
 				final BiConsumer<MouseListener, MouseEvent> consumer;
 				if (Mouse.getEventButtonState()) {
-					lastMouseX = mousePressX = eventX - displayContainer.tx;
-					lastMouseY = mousePressY = eventY - displayContainer.ty;
+					lastMouseX = eventX;
+					lastMouseY = eventY;
+					lastMouseX -= displayContainer.tx;
+					lastMouseY -= displayContainer.ty;
 					consumer = MouseListener::mousePressed;
+					this.mouseEvents[mouseButton] = e;
 				} else {
+					final MouseEvent downE = this.mouseEvents[mouseButton];
+					if (downE == null) {
+						// hmm...
+						continue;
+					}
+					e.downX = downE.x;
+					e.downY = downE.y;
+					e.dragDistance = downE.dragDistance;
+					this.mouseEvents[mouseButton] = null;
 					consumer = MouseListener::mouseReleased;
 				}
 				this.dispatch(this.mouseListeners, consumer, e);
@@ -130,11 +135,20 @@ public class Input
 
 			if (Mouse.isGrabbed() &&
 				displayActive &&
-				isAnyMouseButtonDown() &&
 				(dx != 0 && dy != 0))
 			{
-				final MouseDragEvent e = new MouseDragEvent(dx, -dy);
-				this.dispatch(this.mouseListeners, MouseListener::mouseDragged, e);
+				for (int i = 0; i < 3; i++) {
+					final MouseEvent de = this.mouseEvents[i];
+					if (de == null) {
+						continue;
+					}
+					final MouseDragEvent e = new MouseDragEvent(de, i, dx, -dy);
+					this.dispatch(
+						this.mouseListeners,
+						MouseListener::mouseDragged,
+						e
+					);
+				}
 			}
 
 			final int dwheel = Mouse.getEventDWheel();
@@ -151,13 +165,22 @@ public class Input
 			lastMouseX = mouseX;
 			lastMouseY = mouseY;
 		} else {
-			if (isAnyMouseButtonDown() &&
-				(lastMouseX != mouseX || lastMouseY != mouseY))
+			if (lastMouseX != mouseX || lastMouseY != mouseY)
 			{
 				final int dx = mouseX - lastMouseX;
 				final int dy = mouseY - lastMouseY;
-				final MouseDragEvent e = new MouseDragEvent(dx, dy);
-				this.dispatch(this.mouseListeners, MouseListener::mouseDragged, e);
+				for (int i = 0; i < 3; i++) {
+					final MouseEvent de = this.mouseEvents[i];
+					if (de == null) {
+						continue;
+					}
+					final MouseDragEvent e = new MouseDragEvent(de, i, dx, dy);
+					this.dispatch(
+						this.mouseListeners,
+						MouseListener::mouseDragged,
+						e
+					);
+				}
 				lastMouseX = mouseX;
 				lastMouseY = mouseY;
 			}

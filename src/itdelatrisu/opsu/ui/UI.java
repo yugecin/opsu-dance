@@ -26,7 +26,6 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -61,30 +60,6 @@ public class UI {
 	 */
 	public static void enter() {
 		resetTooltip();
-	}
-
-	/**
-	 * Draws a tab image and text centered at a location.
-	 * @param x the center x coordinate
-	 * @param y the center y coordinate
-	 * @param text the text to draw inside the tab
-	 * @param selected whether the tab is selected (white) or not (red)
-	 * @param isHover whether to include a hover effect (unselected only)
-	 */
-	public static void drawTab(float x, float y, String text, boolean selected, boolean isHover) {
-		Image tabImage = GameImage.MENU_TAB.getImage();
-		float tabTextX = x - (Fonts.MEDIUM.getWidth(text) / 2);
-		float tabTextY = y - (tabImage.getHeight() / 2);
-		Color filter, textColor;
-		if (selected) {
-			filter = Color.white;
-			textColor = Color.black;
-		} else {
-			filter = (isHover) ? Colors.RED_HOVER : Color.red;
-			textColor = Color.white;
-		}
-		tabImage.drawCentered(x, y, filter);
-		Fonts.MEDIUM.drawString(tabTextX, tabTextY, text, textColor);
 	}
 
 	/**

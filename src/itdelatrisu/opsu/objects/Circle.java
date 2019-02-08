@@ -24,12 +24,12 @@ import itdelatrisu.opsu.GameMod;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.ObjectColorOverrides;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -44,9 +44,6 @@ public class Circle extends GameObject {
 
 	/** The scaled starting x, y coordinates. */
 	private float x, y;
-
-	/** The associated Game object. */
-	private Game game;
 
 	/** The associated GameData object. */
 	private GameData data;
@@ -63,14 +60,12 @@ public class Circle extends GameObject {
 	/**
 	 * Constructor.
 	 * @param hitObject the associated HitObject
-	 * @param game the associated Game object
 	 * @param data the associated GameData object
 	 * @param comboColorIndex index of the combo color of this circle
 	 * @param comboEnd true if this is the last hit object in the combo
 	 */
-	public Circle(HitObject hitObject, Game game, GameData data, int comboColorIndex, boolean comboEnd) {
+	public Circle(HitObject hitObject, GameData data, int comboColorIndex, boolean comboEnd) {
 		this.hitObject = hitObject;
-		this.game = game;
 		this.data = data;
 		this.comboEnd = comboEnd;
 		this.comboColorIndex = comboColorIndex;
@@ -91,8 +86,8 @@ public class Circle extends GameObject {
 		}
 
 		int timeDiff = hitObject.getTime() - trackPosition;
-		final int approachTime = game.getApproachTime();
-		final int fadeInTime = game.getFadeInTime();
+		final int approachTime = gameState.getApproachTime();
+		final int fadeInTime = gameState.getFadeInTime();
 		float scale = timeDiff / (float) approachTime;
 		float approachScale = 1 + scale * 3;
 		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
@@ -104,8 +99,8 @@ public class Circle extends GameObject {
 		}
 
 		if (GameMod.HIDDEN.isActive()) {
-			final int hiddenDecayTime = game.getHiddenDecayTime();
-			final int hiddenTimeDiff = game.getHiddenTimeDiff();
+			final int hiddenDecayTime = gameState.getHiddenDecayTime();
+			final int hiddenTimeDiff = gameState.getHiddenTimeDiff();
 			if (fadeinScale <= 0f && timeDiff < hiddenTimeDiff + hiddenDecayTime) {
 				float hiddenAlpha = (timeDiff < hiddenTimeDiff) ? 0f : (timeDiff - hiddenTimeDiff) / (float) hiddenDecayTime;
 				alpha = Math.min(alpha, hiddenAlpha);
@@ -134,7 +129,7 @@ public class Circle extends GameObject {
 	private int hitResult(int time) {
 		int timeDiff = Math.abs(time);
 
-		int[] hitResultOffset = game.getHitResultOffsets();
+		int[] hitResultOffset = gameState.getHitResultOffsets();
 		int result = -1;
 		if (timeDiff <= hitResultOffset[GameData.HIT_300])
 			result = GameData.HIT_300;
@@ -169,7 +164,7 @@ public class Circle extends GameObject {
 	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition) {
 		int time = hitObject.getTime();
 
-		int[] hitResultOffset = game.getHitResultOffsets();
+		int[] hitResultOffset = gameState.getHitResultOffsets();
 		boolean isAutoMod = GameMod.AUTO.isActive();
 
 		if (trackPosition > time + hitResultOffset[GameData.HIT_50]) {
@@ -247,8 +242,10 @@ public class Circle extends GameObject {
 	}
 
 	@Override
-	public void updateColor() {
+	public void updateColor()
+	{
 		super.updateColor();
+		ObjectColorOverrides.updateRainbowHue();
 		color = Dancer.colorOverride.getColor(comboColorIndex);
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}

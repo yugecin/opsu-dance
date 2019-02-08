@@ -1,28 +1,14 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.skinning;
 
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.skins.Skin;
 import itdelatrisu.opsu.skins.SkinLoader;
-import org.newdawn.slick.util.ClasspathLocation;
 import org.newdawn.slick.util.FileSystemLocation;
 import org.newdawn.slick.util.ResourceLoader;
+import org.newdawn.slick.util.ResourceLocation;
+
 import yugecin.opsudance.events.SkinChangedListener;
 
 import java.io.File;
@@ -37,6 +23,8 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 public class SkinService
 {
 	private final List<SkinChangedListener> skinChangedListeners;
+
+	private ResourceLocation lastSkinLocation;
 
 	public String[] availableSkinDirectories;
 	public String usedSkinName = "Default";
@@ -80,18 +68,19 @@ public class SkinService
 			availableSkinDirectories[i + 1] = dirs[i].getName();
 		}
 
-		// set skin and modify resource locations
-		ResourceLoader.removeAllResourceLocations();
+		if (this.lastSkinLocation != null) {
+			ResourceLoader.removeResourceLocation(this.lastSkinLocation);
+			this.lastSkinLocation = null;
+		}
 		if (skinDir == null) {
 			skin = new Skin(null);
-		} else {
-			// load the skin
-			skin = SkinLoader.loadSkin(skinDir);
-			ResourceLoader.addResourceLocation(new FileSystemLocation(skinDir));
+			return;
 		}
-		ResourceLoader.addResourceLocation(new ClasspathLocation());
-		ResourceLoader.addResourceLocation(new FileSystemLocation(new File(".")));
-		ResourceLoader.addResourceLocation(new FileSystemLocation(new File("./res/")));
+
+		// load the skin
+		skin = SkinLoader.loadSkin(skinDir);
+		this.lastSkinLocation = new FileSystemLocation(skinDir);
+		ResourceLoader.addPrimaryResourceLocation(this.lastSkinLocation);
 	}
 
 	/**
@@ -107,5 +96,4 @@ public class SkinService
 		File dir = new File(config.skinRootDir, usedSkinName);
 		return (dir.isDirectory()) ? dir : null;
 	}
-
 }

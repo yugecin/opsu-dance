@@ -4,7 +4,7 @@ package yugecin.opsudance.ui;
 
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.objects.GameObject;
-import itdelatrisu.opsu.states.Game;
+import itdelatrisu.opsu.states.game.Game;
 import yugecin.opsudance.options.Option;
 import yugecin.opsudance.options.OptionGroups;
 import itdelatrisu.opsu.ui.Fonts;

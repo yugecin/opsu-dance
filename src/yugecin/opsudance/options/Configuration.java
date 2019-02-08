@@ -1,20 +1,5 @@
-/*
- * opsu!dance - fork of opsu! with cursordance auto
- * Copyright (C) 2017-2018 yugecin
- *
- * opsu!dance is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * opsu!dance is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with opsu!dance.  If not, see <http://www.gnu.org/licenses/>.
- */
+// Copyright 2017-2019 yugecin - this source is licensed under GPL
+// see the LICENSE file for more details
 package yugecin.opsudance.options;
 
 import com.sun.jna.platform.win32.Advapi32Util;
@@ -24,6 +9,8 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.TimingPoint;
+import yugecin.opsudance.core.Entrypoint;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -43,11 +30,8 @@ import static itdelatrisu.opsu.ui.Colors.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
-public class Configuration {
-
-	public final File CONFIG_DIR;
-	public final File DATA_DIR;
-	public final File CACHE_DIR;
+public class Configuration
+{
 	public final File BEATMAP_DIR;
 	public final File SKIN_ROOT_DIR;
 	public final File BEATMAP_DB;
@@ -55,12 +39,9 @@ public class Configuration {
 	public final File NATIVE_DIR;
 	public final File TEMP_DIR;
 
-	public final File LOG_FILE;
 	public final File OPTIONS_FILE;
 
 	public final File osuInstallationDirectory;
-
-	public final Beatmap themeBeatmap;
 
 	public File beatmapDir;
 	public File oszDir;
@@ -69,41 +50,26 @@ public class Configuration {
 	public File replayImportDir;
 	public File skinRootDir;
 
-	public Configuration() {
-		CONFIG_DIR = env.workingdir;
-		DATA_DIR = env.workingdir;
-		CACHE_DIR = env.workingdir;
+	public Configuration()
+	{
+		BEATMAP_DIR = new File(Entrypoint.workingdir, "Songs/");
+		SKIN_ROOT_DIR = new File(Entrypoint.workingdir, "Skins/");
+		BEATMAP_DB = new File(Entrypoint.workingdir, ".opsu.db");
+		SCORE_DB = new File(Entrypoint.workingdir, ".opsu_scores.db");
+		NATIVE_DIR = new File(Entrypoint.workingdir, "Natives/");
+		TEMP_DIR = new File(Entrypoint.workingdir, "Temp/");
 
-		BEATMAP_DIR = new File(DATA_DIR, "Songs/");
-		SKIN_ROOT_DIR = new File(DATA_DIR, "Skins/");
-		BEATMAP_DB = new File(DATA_DIR, ".opsu.db");
-		SCORE_DB = new File(DATA_DIR, ".opsu_scores.db");
-		NATIVE_DIR = new File(CACHE_DIR, "Natives/");
-		TEMP_DIR = new File(CACHE_DIR, "Temp/");
-
-		LOG_FILE = new File(CONFIG_DIR, ".opsu.log");
-		OPTIONS_FILE = new File(CONFIG_DIR, ".opsu.cfg");
+		OPTIONS_FILE = new File(Entrypoint.workingdir, ".opsu.cfg");
 
 		osuInstallationDirectory = loadOsuInstallationDirectory();
 
-		themeBeatmap = createThemeBeatmap();
-	}
-
-	private Beatmap createThemeBeatmap() {
-		try {
-			String[] tokens = {"theme.ogg", "On the Bach", "Jingle Punks", "66000"};
-			Beatmap beatmap = new Beatmap(null);
-			beatmap.audioFilename = new File(tokens[0]);
-			beatmap.title = tokens[1];
-			beatmap.artist = tokens[2];
-			beatmap.endTime = Integer.parseInt(tokens[3]);
-			beatmap.timingPoints = new ArrayList<>(1);
-			beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
-			return beatmap;
-		} catch (Exception e) {
-			return null;
-		}
-
+		themeBeatmap = new Beatmap(null);
+		themeBeatmap.audioFilename = new File("theme.ogg");
+		themeBeatmap.title = "On the Bach";
+		themeBeatmap.artist = "Jingle Punks";
+		themeBeatmap.endTime = 66000;
+		themeBeatmap.timingPoints = new ArrayList<>(1);
+		themeBeatmap.timingPoints.add(new TimingPoint("-44,631.57894736842,4,1,0,100,1,0"));
 	}
 
 	private File loadOsuInstallationDirectory() {
@@ -135,10 +101,10 @@ public class Configuration {
 	}
 
 	public void loadDirectories() {
-		replayImportDir = loadDirectory(replayImportDir, new File(DATA_DIR, "ReplayImport"), "replay import");
-		oszDir = loadDirectory(oszDir, new File(DATA_DIR, "SongPacks"), "song packs");
-		screenshotDir = loadDirectory(screenshotDir, new File(DATA_DIR, "Screenshots"), "screenshots");
-		replayDir = loadDirectory(replayDir, new File(DATA_DIR, "Replays"), "replays");
+		replayImportDir = loadDirectory(replayImportDir, new File(Entrypoint.workingdir, "ReplayImport"), "replay import");
+		oszDir = loadDirectory(oszDir, new File(Entrypoint.workingdir, "SongPacks"), "song packs");
+		screenshotDir = loadDirectory(screenshotDir, new File(Entrypoint.workingdir, "Screenshots"), "screenshots");
+		replayDir = loadDirectory(replayDir, new File(Entrypoint.workingdir, "Replays"), "replays");
 		beatmapDir = loadOsuDirectory(beatmapDir, BEATMAP_DIR, "beatmap");
 		skinRootDir = loadOsuDirectory(skinRootDir, SKIN_ROOT_DIR, "skin root");
 	}
@@ -225,5 +191,4 @@ public class Configuration {
 			}
 		}.start();
 	}
-
 }

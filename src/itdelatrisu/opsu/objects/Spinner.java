@@ -27,7 +27,6 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 
 import org.newdawn.slick.Color;
@@ -66,9 +65,6 @@ public class Spinner extends GameObject {
 
 	/** The associated HitObject. */
 	private HitObject hitObject;
-
-	/** The associated Game object. */
-	private Game game;
 
 	/** The associated GameData object. */
 	private GameData data;
@@ -117,12 +113,10 @@ public class Spinner extends GameObject {
 	/**
 	 * Constructor.
 	 * @param hitObject the associated HitObject
-	 * @param game the associated Game object
 	 * @param data the associated GameData object
 	 */
-	public Spinner(HitObject hitObject, Game game, GameData data) {
+	public Spinner(HitObject hitObject, GameData data) {
 		this.hitObject = hitObject;
-		this.game = game;
 		this.data = data;
 
 /*
@@ -177,7 +171,7 @@ public class Spinner extends GameObject {
 		}
 		// only draw spinners shortly before start time
 		int timeDiff = hitObject.getTime() - trackPosition;
-		final int fadeInTime = game.getFadeInTime();
+		final int fadeInTime = gameState.getFadeInTime();
 		if (timeDiff - fadeInTime > 0)
 			return;
 

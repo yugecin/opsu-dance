@@ -20,7 +20,6 @@ package itdelatrisu.opsu.db;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
-import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.io.File;
 import java.sql.Connection;
@@ -114,7 +113,7 @@ public class BeatmapDB {
 		try {
 			updateSizeStmt = connection.prepareStatement("REPLACE INTO info (key, value) VALUES ('size', ?)");
 		} catch (SQLException e) {
-			explode("Failed to prepare beatmap statements.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to prepare beatmap statements");
 		}
 
 		// retrieve the cache size
@@ -137,7 +136,7 @@ public class BeatmapDB {
 			setFavoriteStmt = connection.prepareStatement("UPDATE beatmaps SET favorite = ? WHERE dir = ? AND file = ?");
 			setLocalOffsetStmt = connection.prepareStatement("UPDATE beatmaps SET localOffset = ? WHERE dir = ? AND file = ?");
 		} catch (SQLException e) {
-			explode("Failed to prepare beatmap statements.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to prepare beatmap statements");
 		}
 	}
 
@@ -175,7 +174,7 @@ public class BeatmapDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', '%s')", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			explode("Could not create beatmap database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not create beatmap db");
 		}
 	}
 
@@ -227,7 +226,7 @@ public class BeatmapDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			explode("Failed to update beatmap database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to update beatmap db");
 		}
 	}
 
@@ -245,7 +244,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			explode("Could not get beatmap cache size.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not get beatmap cache size");
 		}
 	}
 
@@ -260,7 +259,7 @@ public class BeatmapDB {
 			updateSizeStmt.setString(1, Integer.toString(Math.max(cacheSize, 0)));
 			updateSizeStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Could not update beatmap cache size.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not update beatmap cache size");
 		}
 	}
 
@@ -278,7 +277,7 @@ public class BeatmapDB {
 			cacheSize = 0;
 			updateCacheSize();
 		} catch (SQLException e) {
-			explode("Could not drop beatmap database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not drop beatmap db");
 		}
 		createDatabase();
 	}
@@ -296,7 +295,7 @@ public class BeatmapDB {
 			cacheSize += insertStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			explode("Failed to add beatmap to database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to add beatmap to db");
 		}
 	}
 
@@ -349,7 +348,7 @@ public class BeatmapDB {
 			// update cache size
 			updateCacheSize();
 		} catch (SQLException e) {
-			explode("Failed to add beatmaps to database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to add beatmaps to db");
 		}
 	}
 
@@ -438,7 +437,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to load Beatmap from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to load beatmap %s from db", beatmap.toString());
 		}
 	}
 
@@ -501,7 +500,7 @@ public class BeatmapDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to load beatmaps from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to load beatmaps from db");
 		}
 	}
 
@@ -517,12 +516,19 @@ public class BeatmapDB {
 			beatmap.beatmapID = rs.getInt(4);
 			beatmap.beatmapSetID = rs.getInt(5);
 			beatmap.title = BeatmapParser.getDBString(rs.getString(6));
+			beatmap.searchTitle = beatmap.title.toLowerCase();
 			beatmap.titleUnicode = BeatmapParser.getDBString(rs.getString(7));
+			beatmap.searchTitleUnicode = beatmap.titleUnicode.toLowerCase();
 			beatmap.artist = BeatmapParser.getDBString(rs.getString(8));
+			beatmap.searchArtist = beatmap.artist.toLowerCase();
 			beatmap.artistUnicode = BeatmapParser.getDBString(rs.getString(9));
+			beatmap.searchArtistUnicode = beatmap.artistUnicode.toLowerCase();
 			beatmap.creator = BeatmapParser.getDBString(rs.getString(10));
+			beatmap.searchCreator = beatmap.creator.toLowerCase();
 			beatmap.version = BeatmapParser.getDBString(rs.getString(11));
+			beatmap.searchVersion = beatmap.version.toLowerCase();
 			beatmap.source = BeatmapParser.getDBString(rs.getString(12));
+			beatmap.searchSource = beatmap.source.toLowerCase();
 			beatmap.tags = BeatmapParser.getDBString(rs.getString(13));
 			beatmap.hitObjectCircle = rs.getInt(14);
 			beatmap.hitObjectSlider = rs.getInt(15);
@@ -603,7 +609,7 @@ public class BeatmapDB {
 			rs.close();
 			return map;
 		} catch (SQLException e) {
-			explode("Failed to get last modified map from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to get last modified map from db");
 			return null;
 		}
 	}
@@ -623,7 +629,7 @@ public class BeatmapDB {
 			cacheSize -= deleteMapStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			explode("Failed to delete beatmap entry from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete beatmap entry from db.");
 		}
 	}
 
@@ -640,7 +646,7 @@ public class BeatmapDB {
 			cacheSize -= deleteGroupStmt.executeUpdate();
 			updateCacheSize();
 		} catch (SQLException e) {
-			explode("Failed to delete beatmap group entry from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete beatmap group entry from db.");
 		}
 	}
 
@@ -658,8 +664,12 @@ public class BeatmapDB {
 			setStarsStmt.setString(3, beatmap.getFile().getName());
 			setStarsStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode(String.format("Failed to save star rating '%.4f' for beatmap '%s' in database.",
-					beatmap.starRating, beatmap.toString()), e, DEFAULT_OPTIONS);
+			softErr(
+				e,
+				"Failed to save star rating %.4f for beatmap '%s' in db",
+				beatmap.starRating,
+				beatmap.toString()
+			);
 		}
 	}
 
@@ -678,8 +688,11 @@ public class BeatmapDB {
 			updatePlayStatsStmt.setString(4, beatmap.getFile().getName());
 			updatePlayStatsStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode(String.format("Failed to update play statistics for beatmap '%s' in database.",
-					beatmap.toString()), e, DEFAULT_OPTIONS);
+			softErr(
+				e,
+				"Failed to update play statistics for beatmap '%s' in db",
+				beatmap.toString()
+			);
 		}
 	}
 
@@ -697,8 +710,11 @@ public class BeatmapDB {
 			setFavoriteStmt.setString(3, beatmap.getFile().getName());
 			setFavoriteStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode(String.format("Failed to update favorite status for beatmap '%s' in database.",
-					beatmap.toString()), e, DEFAULT_OPTIONS);
+			softErr(
+				e,
+				"Failed to update favorite status for beatmap '%s' in db",
+				beatmap.toString()
+			);
 		}
 	}
 
@@ -715,8 +731,11 @@ public class BeatmapDB {
 			setLocalOffsetStmt.setString(3, beatmap.getFile().getName());
 			setLocalOffsetStmt.executeUpdate();
 		} catch (SQLException e) {
-			ErrorHandler.explode(String.format("Failed to update local music offset for beatmap '%s' in database.",
-					beatmap.toString()), e, ErrorHandler.DEFAULT_OPTIONS);
+			softErr(
+				e,
+				"Failed to update local music offset for beatmap '%s' in db",
+				beatmap.toString()
+			);
 		}
 	}
 
@@ -736,7 +755,7 @@ public class BeatmapDB {
 			connection.close();
 			connection = null;
 		} catch (SQLException e) {
-			explode("Failed to close beatmap database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to close beatmap db");
 		}
 	}
 }

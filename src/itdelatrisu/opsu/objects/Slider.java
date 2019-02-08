@@ -27,7 +27,6 @@ import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import itdelatrisu.opsu.states.Game;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
@@ -35,6 +34,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
+import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.skinning.SkinService;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -62,9 +62,6 @@ public class Slider extends GameObject {
 
 	/** The scaled starting x, y coordinates. */
 	protected float x, y;
-
-	/** The associated Game object. */
-	private Game game;
 
 	/** The associated GameData object. */
 	private GameData data;
@@ -155,14 +152,12 @@ public class Slider extends GameObject {
 	/**
 	 * Constructor.
 	 * @param hitObject the associated HitObject
-	 * @param game the associated Game object
 	 * @param data the associated GameData object
 	 * @param comboColorIndex index of the combo color of this slider
 	 * @param comboEnd true if this is the last hit object in the combo
 	 */
-	public Slider(HitObject hitObject, Game game, GameData data, int comboColorIndex, boolean comboEnd) {
+	public Slider(HitObject hitObject, GameData data, int comboColorIndex, boolean comboEnd) {
 		this.hitObject = hitObject;
-		this.game = game;
 		this.data = data;
 		this.comboEnd = comboEnd;
 		this.comboColorIndex = comboColorIndex;
@@ -172,11 +167,11 @@ public class Slider extends GameObject {
 		this.pixelLength = hitObject.getPixelLength();
 
 		// slider time calculations
-		this.sliderTime = hitObject.getSliderTime(sliderMultiplier, game.getBeatLength());
+		this.sliderTime = hitObject.getSliderTime(sliderMultiplier, gameState.getBeatLength());
 		this.sliderTimeTotal = sliderTime * hitObject.getRepeatCount();
 
 		// ticks
-		float tickLengthDiv = 100f * sliderMultiplier / sliderTickRate / game.getTimingPointMultiplier();
+		float tickLengthDiv = 100f * sliderMultiplier / sliderTickRate / gameState.getTimingPointMultiplier();
 		int tickCount = (int) Math.ceil(hitObject.getPixelLength() / tickLengthDiv) - 1;
 		if (tickCount > 0) {
 			this.ticksT = new float[tickCount];
@@ -201,8 +196,8 @@ public class Slider extends GameObject {
 
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int repeatCount = hitObject.getRepeatCount();
-		final int approachTime = game.getApproachTime();
-		final int fadeInTime = game.getFadeInTime();
+		final int approachTime = gameState.getApproachTime();
+		final int fadeInTime = gameState.getFadeInTime();
 		float scale = timeDiff / (float) approachTime;
 		float approachScale = 1 + scale * 3;
 		float fadeinScale = (timeDiff - approachTime + fadeInTime) / (float) fadeInTime;
@@ -278,8 +273,8 @@ public class Slider extends GameObject {
 		}
 
 		if (GameMod.HIDDEN.isActive()) {
-			final int hiddenDecayTime = game.getHiddenDecayTime();
-			final int hiddenTimeDiff = game.getHiddenTimeDiff();
+			final int hiddenDecayTime = gameState.getHiddenDecayTime();
+			final int hiddenTimeDiff = gameState.getHiddenTimeDiff();
 			if (fadeinScale <= 0f && timeDiff < hiddenTimeDiff + hiddenDecayTime) {
 				float hiddenAlpha = (timeDiff < hiddenTimeDiff) ? 0f : (timeDiff - hiddenTimeDiff) / (float) hiddenDecayTime;
 				alpha = Math.min(alpha, hiddenAlpha);
@@ -465,16 +460,19 @@ public class Slider extends GameObject {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
-		if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
+		if (!OPTION_FALLBACK_SLIDERS.state &&
+			OPTION_MERGING_SLIDERS.state &&
+			!gameState.isLosing())
+		{
 			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0d) {
 				if (hitObject.getRepeatCount() % 2 == 0) {
-					game.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + (int) ((1d - curveIntervalFrom) * curvelen));
+					gameState.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + (int) ((1d - curveIntervalFrom) * curvelen));
 				} else {
-					game.addMergedSliderPointsToRender(curveStartIndex + (int) (curveIntervalFrom * curvelen) + 1, curveStartIndex + (int) (curveIntervalTo * (curvelen - 1)));
+					gameState.addMergedSliderPointsToRender(curveStartIndex + (int) (curveIntervalFrom * curvelen) + 1, curveStartIndex + (int) (curveIntervalTo * (curvelen - 1)));
 				}
 			} else {
 				int to = (int) (curveIntervalTo * (curvelen - 1));
-				game.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + to);
+				gameState.addMergedSliderPointsToRender(curveStartIndex, curveStartIndex + to);
 			}
 		} else {
 			if (OPTION_SHRINKING_SLIDERS.state && curveIntervalFrom > 0 && repeats % 2 == 0) {
@@ -607,7 +605,7 @@ public class Slider extends GameObject {
 		double distance = Math.hypot(this.x - x, this.y - y);
 		if (distance < gameObjectRenderer.circleDiameter / 2) {
 			int timeDiff = Math.abs(trackPosition - hitObject.getTime());
-			int[] hitResultOffset = game.getHitResultOffsets();
+			int[] hitResultOffset = gameState.getHitResultOffsets();
 
 			int result = -1;
 			if (timeDiff < hitResultOffset[GameData.HIT_50]) {
@@ -633,7 +631,7 @@ public class Slider extends GameObject {
 	@Override
 	public boolean update(boolean overlap, int delta, int mouseX, int mouseY, boolean keyPressed, int trackPosition) {
 		int repeatCount = hitObject.getRepeatCount();
-		int[] hitResultOffset = game.getHitResultOffsets();
+		int[] hitResultOffset = gameState.getHitResultOffsets();
 		boolean isAutoMod = GameMod.AUTO.isActive();
 
 		if (!sliderClickedInitial) {
@@ -878,7 +876,10 @@ public class Slider extends GameObject {
 	}
 
 	public Circle[] getTickPositionCircles() {
-		float tickLengthDiv = 100f * sliderMultiplier / sliderTickRate / (game.getBeatLength() / game.getBeatLengthBase());
+		final float tickLengthDiv =
+			100f * sliderMultiplier / sliderTickRate /
+			(gameState.getBeatLength() / gameState.getBeatLengthBase());
+
 		int tickCount = (int) Math.ceil(pixelLength / tickLengthDiv) - 1;
 		Circle[] ticks = new Circle[1 + ( tickCount + 1 ) * repeats];
 		Vec2f pos;
@@ -901,8 +902,10 @@ public class Slider extends GameObject {
 	}
 
 	@Override
-	public void updateColor() {
+	public void updateColor()
+	{
 		super.updateColor();
+		ObjectColorOverrides.updateRainbowHue();
 		color = Dancer.colorOverride.getColor(comboColorIndex);
 		mirrorColor = Dancer.colorMirrorOverride.getColor(comboColorIndex);
 	}

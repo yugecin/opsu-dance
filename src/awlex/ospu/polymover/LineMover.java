@@ -1,11 +1,7 @@
 package awlex.ospu.polymover;
 
-import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
-import itdelatrisu.opsu.states.Game;
 import yugecin.opsudance.movers.LinearMover;
-
-import java.util.Arrays;
 
 /**
  * Created by Awlex on 19.11.2016.

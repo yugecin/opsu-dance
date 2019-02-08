@@ -1,11 +1,8 @@
-// Copyright 2018 yugecin - this source is licensed under GPL
+// Copyright 2018-2019 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui.cursor;
 
-import java.awt.Point;
 import java.util.Iterator;
-
-import org.newdawn.slick.Color;
 
 import yugecin.opsudance.options.NumericOption;
 
@@ -22,13 +19,11 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	private Node last;
 	private int fadeoff;
 
-	final Point lastPosition;
-
+	int lastX, lastY;
 	int size;
 	
 	CursorTrail()
 	{
-		this.lastPosition = new Point();
 		this.reset();
 		
 		this.trailLengthOptionListener = this::updateFadeoff;
@@ -49,17 +44,19 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	
 	void reset()
 	{
-		this.lastPosition.move(mouseX, mouseY);
+		this.lastX = mouseX;
+		this.lastY = mouseY;
 		this.first = this.last = null;
 		this.size = 0;
 	}
 
-	void lineTo(int x, int y, Color color)
+	void lineTo(int x, int y)
 	{
 		nowtime = System.currentTimeMillis();
 
-		this.addAllInbetween(lastPosition.x, lastPosition.y, x, y, color);
-		lastPosition.move(x, y);
+		this.addAllInbetween(this.lastX, this.lastY, x, y);
+		this.lastX = x;
+		this.lastY = y;
 
 		int removecount = 0;
 		Node newfirst = this.first;
@@ -75,7 +72,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	}
 
 	// from http://rosettacode.org/wiki/Bitmap/Bresenham's_line_algorithm#Java
-	private void addAllInbetween(int x1, int y1, int x2, int y2, Color color)
+	private void addAllInbetween(int x1, int y1, int x2, int y2)
 	{
 		// delta of exact value and rounded value of the dependent variable
 		int d = 0;
@@ -88,8 +85,11 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 		int iy = y1 < y2 ? 1 : -1;
 
 		if (dy <= dx) {
+			final float diff = x2 - x1;
+			int i = 0;
 			while (x1 != x2) {
-				this.add(new Part(x1, y1, color));
+				final float progress = (i += ix) / diff;
+				this.add(new Part(x1, y1, cursorColor.getMovementColor(progress)));
 				x1 += ix;
 				d += dy2;
 				if (d > dx) {
@@ -100,8 +100,10 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 			return;
 		}
 
+		final float diff = y2 - y1;
+		int i = 0;
 		while (y1 != y2) {
-			this.add(new Part(x1, y1, color));
+			this.add(new Part(x1, y1, cursorColor.getMovementColor((i += iy) / diff)));
 			y1 += iy;
 			d += dx2;
 			if (d > dy) {
@@ -158,8 +160,8 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 	{
 		final int x, y;
 		final long time;
-		Color color;
-		Part(int x, int y, Color color)
+		int color;
+		Part(int x, int y, int color)
 		{
 			this.x = x;
 			this.y = y;

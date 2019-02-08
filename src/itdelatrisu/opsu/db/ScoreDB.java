@@ -18,6 +18,7 @@
 
 package itdelatrisu.opsu.db;
 
+import itdelatrisu.opsu.GameData;
 import itdelatrisu.opsu.ScoreData;
 import itdelatrisu.opsu.beatmap.Beatmap;
 
@@ -122,7 +123,7 @@ public class ScoreDB {
 				// TODO: extra playerName checks not needed if name is guaranteed not null
 			);
 		} catch (SQLException e) {
-			explode("Failed to prepare score statements.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to prepare score statements");
 		}
 	}
 
@@ -155,7 +156,7 @@ public class ScoreDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', %d)", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			explode("Could not create score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Could not create score db");
 		}
 	}
 
@@ -207,7 +208,7 @@ public class ScoreDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			explode("Failed to update score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to update score database");
 		}
 	}
 
@@ -225,7 +226,7 @@ public class ScoreDB {
 			insertStmt.setString(19, data.playerName);
 			insertStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to save score to database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to save score to db");
 		}
 	}
 
@@ -245,7 +246,7 @@ public class ScoreDB {
 			deleteScoreStmt.setString(21, data.playerName);
 			deleteScoreStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to delete score from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete score from db");
 		}
 	}
 
@@ -265,7 +266,7 @@ public class ScoreDB {
 			deleteSongStmt.setString(5, beatmap.version);
 			deleteSongStmt.executeUpdate();
 		} catch (SQLException e) {
-			explode("Failed to delete scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to delete scores from db");
 		}
 	}
 
@@ -333,7 +334,7 @@ public class ScoreDB {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to read scores from db");
 			return null;
 		}
 		return getSortedArray(list);
@@ -375,10 +376,45 @@ public class ScoreDB {
 				map.put(version, getSortedArray(list));
 			rs.close();
 		} catch (SQLException e) {
-			explode("Failed to read scores from database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to read scores from db");
 			return null;
 		}
 		return map;
+	}
+
+	public static void loadTopGrades()
+	{
+		if (connection == null) {
+			return;
+		}
+
+		try (PreparedStatement stmt = connection.prepareStatement(
+			"SELECT hit300,hit100,hit50,miss,mods,score FROM scores WHERE MID=? AND "
+			+ "MSID=? AND title=? AND artist=? AND creator=? AND version=? ORDER BY "
+			+ "score DESC LIMIT 1"))
+		{
+			for (int i = beatmapList.maps.size() - 1; i >= 0; i--) {
+				final Beatmap bm = beatmapList.maps.get(i);
+				stmt.setInt(1, bm.beatmapID);
+				stmt.setInt(2, bm.beatmapSetID);
+				stmt.setString(3, bm.title);
+				stmt.setString(4, bm.artist);
+				stmt.setString(5, bm.creator);
+				stmt.setString(6, bm.version);
+				final ResultSet res = stmt.executeQuery();
+				if (res.next()) {
+					bm.topGrade = GameData.getGrade(
+						res.getInt(1),
+						res.getInt(2),
+						res.getInt(3),
+						res.getInt(4),
+						res.getInt(5)
+					);
+				}
+			}
+		} catch (SQLException e) {
+			softErr(e, "Failed to load scores from db");
+		}
 	}
 
 	/**
@@ -404,7 +440,7 @@ public class ScoreDB {
 			connection.close();
 			connection = null;
 		} catch (SQLException e) {
-			explode("Failed to close score database.", e, DEFAULT_OPTIONS);
+			softErr(e, "Failed to close score db");
 		}
 	}
 }

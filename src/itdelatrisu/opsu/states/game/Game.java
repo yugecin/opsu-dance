@@ -16,15 +16,18 @@
  * along with opsu!.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package itdelatrisu.opsu.states;
+package itdelatrisu.opsu.states.game;
 
 import itdelatrisu.opsu.*;
+import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.audio.HitSound;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
+import itdelatrisu.opsu.beatmap.BeatmapGroup;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.BeatmapSortOrder;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.beatmap.TimingPoint;
 import itdelatrisu.opsu.db.BeatmapDB;
@@ -68,10 +71,12 @@ import yugecin.opsudance.sbv2.MoveStoryboard;
 import yugecin.opsudance.skinning.SkinService;
 import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
+import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.GLHelper;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
+import static itdelatrisu.opsu.ui.animations.AnimationEquation.*;
 import static java.lang.System.arraycopy;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
@@ -84,15 +89,13 @@ public class Game extends ComplexOpsuState {
 
 	public static boolean isInGame; // TODO delete this when #79 is fixed
 	/** Game restart states. */
-	public enum Restart {
-		/** No restart. */
-		FALSE,
+	public enum RestartReason {
 		/** First time loading the song. */
-		NEW,
+		NEWGAME,
 		/** Manual retry. */
-		MANUAL,
+		USER,
 		/** Replay. */
-		REPLAY,
+		WATCHREPLAY,
 		/** Health is zero: no-continue/force restart. */
 		LOSE
 	}
@@ -100,11 +103,10 @@ public class Game extends ComplexOpsuState {
 	/** Music fade-out time, in milliseconds. */
 	private static final int MUSIC_FADEOUT_TIME = 2000;
 
-	/** Screen fade-out time, in milliseconds, when health hits zero. */
-	private static final int LOSE_FADEOUT_TIME = 500;
-
 	/** Game element fade-out time, in milliseconds, when the game ends. */
 	private static final int FINISHED_FADEOUT_TIME = 400;
+
+	private static final int LOSE_FADEOUT_TIME = 2000;
 
 	/** Maximum rotation, in degrees, over fade out upon death. */
 	private static final float MAX_ROTATION = 90f;
@@ -157,8 +159,7 @@ public class Game extends ComplexOpsuState {
 	/** Time offsets for obtaining each hit result (indexed by HIT_* constants). */
 	private int[] hitResultOffset;
 
-	/** Current restart state. */
-	private Restart restart;
+	private RestartReason restartReason;
 
 	/** Current break index in breaks ArrayList. */
 	private int breakIndex;
@@ -182,15 +183,6 @@ public class Game extends ComplexOpsuState {
 	private boolean
 		countdownReadySound, countdown3Sound, countdown1Sound,
 		countdown2Sound, countdownGoSound;
-
-	/** Mouse coordinates before game paused. */
-	private Vec2f pausedMousePosition;
-
-	/** Track position when game paused. */
-	private int pauseTime = -1;
-
-	/** Value for handling hitCircleSelect pulse effect (expanding, alpha level). */
-	private float pausePulse;
 
 	/** Whether a checkpoint has been loaded during this game. */
 	private boolean checkpointLoaded = false;
@@ -312,10 +304,11 @@ public class Game extends ComplexOpsuState {
 	private final MoveStoryboard moveStoryboardOverlay;
 	private final StoryboardOverlay storyboardOverlay;
 	private final OptionsOverlay optionsOverlay;
-
+	private final PauseOverlay pauseOverlay;
 	private FakeCombinedCurve knorkesliders;
 
 	private boolean skippedToCheckpoint;
+	private int firstObjectTime;
 
 	public Game() {
 		super();
@@ -323,6 +316,7 @@ public class Game extends ComplexOpsuState {
 		this.moveStoryboardOverlay = new MoveStoryboard();
 		this.optionsOverlay = new OptionsOverlay(OptionGroups.storyboardOptions);
 		this.storyboardOverlay = new StoryboardOverlay(moveStoryboardOverlay, optionsOverlay, this);
+		this.pauseOverlay = new PauseOverlay();
 		storyboardOverlay.show();
 		moveStoryboardOverlay.show();
 		optionsOverlay.setListener(storyboardOverlay);
@@ -361,9 +355,22 @@ public class Game extends ComplexOpsuState {
 		gameObjectRenderer.gameData = data = new GameData();
 	}
 
+	void saveCheckpoint()
+	{
+		if (isLeadIn()) {
+			return;
+		}
+
+		int time = MusicController.getPosition() / 1000;
+		if (0 <= time && time < 3600) {
+			OPTION_CHECKPOINT.setValue(time);
+			SoundController.playSound(SoundEffect.MENUCLICK);
+			barNotifs.send("Checkpoint saved.");
+		}
+	}
 
 	public void loadCheckpoint(int checkpoint) {
-		restart = Restart.MANUAL;
+		restartReason = RestartReason.USER;
 		checkpointLoaded = true;
 		skippedToCheckpoint = true;
 		enter();
@@ -391,11 +398,8 @@ public class Game extends ComplexOpsuState {
 		if (isLeadIn()) {
 			trackPosition -= leadInTime - OPTION_MUSIC_OFFSET.val - beatmap.localMusicOffset;
 		}
-		if (pauseTime > -1)  // returning from pause screen
-			trackPosition = pauseTime;
-		else if (deathTime > -1)  // "Easy" mod: health bar increasing
+		if (deathTime > -1)  // "Easy" mod: health bar increasing
 			trackPosition = deathTime;
-		int firstObjectTime = beatmap.objects[0].getTime();
 		int timeDiff = firstObjectTime - trackPosition;
 
 		g.setBackground(Color.black);
@@ -404,6 +408,20 @@ public class Game extends ComplexOpsuState {
 		if (GameMod.FLASHLIGHT.isActive()) {
 			gOffscreen.clear();
 			Graphics.setCurrent(gOffscreen);
+		}
+
+		Colors.WHITE_FADE.a = 1f;
+		final boolean loseState = (restartReason == RestartReason.LOSE);
+		if (loseState) {
+			final int extratime = (int) (System.currentTimeMillis() - failTime);
+			if (extratime > LOSE_FADEOUT_TIME) {
+				trackPosition = failTrackTime + LOSE_FADEOUT_TIME;
+				Colors.WHITE_FADE.a = 0f;
+			} else {
+				trackPosition = failTrackTime + extratime;
+				final float progress = (float) extratime / LOSE_FADEOUT_TIME;
+				Colors.WHITE_FADE.a = 1f - IN_QUAD.calc(progress);
+			}
 		}
 
 		// background
@@ -435,9 +453,6 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		if (GameMod.FLASHLIGHT.isActive())
-			Graphics.setCurrent(g);
-
 		// "flashlight" mod: restricted view of hit objects around cursor
 		if (GameMod.FLASHLIGHT.isActive()) {
 			// render hit objects offscreen
@@ -453,9 +468,9 @@ public class Game extends ComplexOpsuState {
 			g.setDrawMode(Graphics.MODE_ALPHA_MAP);
 			g.clearAlphaMap();
 			int mx, my;
-			if (pauseTime > -1 && pausedMousePosition != null) {
-				mx = (int) pausedMousePosition.x;
-				my = (int) pausedMousePosition.y;
+			if (this.pauseOverlay.isActive()) {
+				mx = this.pauseOverlay.mousePauseX;
+				my = this.pauseOverlay.mousePauseY;
 			} else if (GameMod.AUTO.isActive() || GameMod.AUTOPILOT.isActive()) {
 				mx = (int) autoMousePosition.x;
 				my = (int) autoMousePosition.y;
@@ -690,22 +705,6 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		// returning from pause screen
-		if (pauseTime > -1 && pausedMousePosition != null) {
-			// darken the screen
-			g.setColor(Colors.BLACK_ALPHA);
-			g.fillRect(0, 0, width, height);
-
-			// draw glowing hit select circle and pulse effect
-			int circleDiameter = HITCIRCLE.getWidth();
-			Image cursorCircle = HITCIRCLE_SELECT.getScaledImage(circleDiameter, circleDiameter);
-			cursorCircle.setAlpha(1.0f);
-			cursorCircle.drawCentered(pausedMousePosition.x, pausedMousePosition.y);
-			Image cursorCirclePulse = cursorCircle.getScaledCopy(1f + pausePulse);
-			cursorCirclePulse.setAlpha(1f - pausePulse);
-			cursorCirclePulse.drawCentered(pausedMousePosition.x, pausedMousePosition.y);
-		}
-
 		if (isReplay) {
 			displayContainer.cursor.draw(replayKeyPressed);
 		} else if (GameMod.AUTO.isActive()) {
@@ -751,23 +750,15 @@ public class Game extends ComplexOpsuState {
 		if (isReplay || GameMod.AUTO.isActive())
 			playbackSpeed.getButton().hoverUpdate(delta, mouseX, mouseY);
 		int trackPosition = MusicController.getPosition();
-		int firstObjectTime = beatmap.objects[0].getTime();
 		scoreboardStarStream.update(delta);
 
-		// returning from pause screen: must click previous mouse position
-		if (pauseTime > -1) {
-			// paused during lead-in or break, or "relax" or "autopilot": continue immediately
-			if (pausedMousePosition == null || (GameMod.RELAX.isActive() || GameMod.AUTOPILOT.isActive())) {
-				pauseTime = -1;
-				if (!isLeadIn())
-					MusicController.resume();
-			}
-			// advance pulse animation
-			else {
-				pausePulse += delta / 750f;
-				if (pausePulse > 1f)
-					pausePulse = 0f;
-			}
+		if (this.pauseOverlay.isActive()) {
+			return;
+		}
+
+		// pause game if focus lost
+		if (!Display.isActive() && !GameMod.AUTO.isActive() && !isReplay) {
+			this.pauseGame();
 			return;
 		}
 
@@ -927,7 +918,7 @@ public class Game extends ComplexOpsuState {
 				double a = Math.atan2(dy, dx) + Math.PI;
 				mirrorCursor.setCursorPosition((int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
 			}
-		} else if (GameMod.AUTOPILOT.isActive()) {
+		} else if (GameMod.AUTOPILOT.isActive() && !this.pauseOverlay.isActive()) {
 			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 		} else {
 			displayContainer.cursor.setCursorPosition(mouseX, mouseY);
@@ -975,8 +966,22 @@ public class Game extends ComplexOpsuState {
 				data.setGameplay(!isReplay);
 
 				// add score to database
-				if (!unranked && !isReplay)
+				if (!unranked && !isReplay) {
 					ScoreDB.addScore(score);
+					boolean resort = false;
+					final BeatmapSortOrder so = BeatmapSortOrder.current;
+					final Grade grade = score.getGrade();
+					if (grade.compareTo(this.beatmap.topGrade) < 0) {
+						this.beatmap.topGrade = grade;
+						resort = so == BeatmapSortOrder.RANK;
+					}
+					if (BeatmapGroup.current == BeatmapGroup.RECENT) {
+						beatmapList.activeGroupChanged();
+					} else if (resort || so == BeatmapSortOrder.PLAYS) {
+						beatmapList.resort();
+						nodeList.persistentRecreate();
+					}
+				}
 			}
 
 			// start timer
@@ -1035,18 +1040,6 @@ public class Game extends ComplexOpsuState {
 			}
 		}
 
-		// pause game if focus lost
-		if (!Display.isActive() && !GameMod.AUTO.isActive() && !isReplay) {
-			if (pauseTime < 0) {
-				pausedMousePosition = new Vec2f(mouseX, mouseY);
-				pausePulse = 0f;
-			}
-			if (MusicController.isPlaying() || isLeadIn()) {
-				pauseTime = trackPosition;
-			}
-			displayContainer.switchStateInstantly(pauseState);
-		}
-
 		// drain health
 		data.changeHealth(delta * -1 * GameData.HP_DRAIN_MULTIPLIER);
 		if (!data.isAlive()) {
@@ -1062,8 +1055,8 @@ public class Game extends ComplexOpsuState {
 
 			// game over, force a restart
 			if (!isReplay) {
-				if (restart != Restart.LOSE) {
-					restart = Restart.LOSE;
+				if (restartReason != RestartReason.LOSE) {
+					restartReason = RestartReason.LOSE;
 					failTime = System.currentTimeMillis();
 					failTrackTime = MusicController.getPosition();
 					MusicController.fadeOut(MUSIC_FADEOUT_TIME);
@@ -1071,13 +1064,14 @@ public class Game extends ComplexOpsuState {
 					rotations = new IdentityHashMap<>();
 					SoundController.playSound(SoundEffect.FAIL);
 
-					displayContainer.switchState(pauseState, MUSIC_FADEOUT_TIME - LOSE_FADEOUT_TIME, 300);
+					this.pauseOverlay.engageLose();
+					return;
 				}
 			}
 		}
 
 		// don't process hit results when already lost
-		if (restart != Restart.LOSE) {
+		if (restartReason != RestartReason.LOSE) {
 			// update objects (loop in unlikely event of any skipped indexes)
 			boolean keyPressed = keys != ReplayFrame.KEY_NONE;
 			while (objectIndex < gameObjects.length && trackPosition > beatmap.objects[objectIndex].getTime()) {
@@ -1101,7 +1095,12 @@ public class Game extends ComplexOpsuState {
 	}
 
 	@Override
-	public boolean onCloseRequest() {
+	public boolean onCloseRequest()
+	{
+		if (this.pauseOverlay.isActive()) {
+			this.pauseOverlay.backToSongMenu();
+			return false;
+		}
 		songMenuState.resetGameDataOnLoad();
 		displayContainer.switchState(songMenuState);
 		return false;
@@ -1151,15 +1150,7 @@ public class Game extends ComplexOpsuState {
 				break;
 			}
 
-			// pause game
-			if (pauseTime < 0 && breakTime <= 0 && trackPosition >= beatmap.objects[0].getTime()) {
-				pausedMousePosition = new Vec2f(mouseX, mouseY);
-				pausePulse = 0f;
-			}
-			if (MusicController.isPlaying() || isLeadIn()) {
-				pauseTime = trackPosition;
-			}
-			displayContainer.switchStateInstantly(pauseState);
+			this.pauseGame();
 			break;
 		case KEY_SPACE:
 			// skip intro
@@ -1171,25 +1162,14 @@ public class Game extends ComplexOpsuState {
 				if (trackPosition < beatmap.objects[0].getTime()) {
 					retries--;  // don't count this retry (cancel out later increment)
 				}
-				restart = Restart.MANUAL;
+				restartReason = RestartReason.USER;
 				enter();
 				skipIntro();
 			}
 			break;
 		case KEY_S:
-			// save checkpoint
 			if (input.isControlDown()) {
-				if (isLeadIn()) {
-					break;
-				}
-
-				int time = (pauseTime > -1) ? pauseTime : trackPosition;
-				time /= 1000;
-				if (0 <= time && time < 3600) {
-					OPTION_CHECKPOINT.setValue(time);
-					SoundController.playSound(SoundEffect.MENUCLICK);
-					barNotifs.send("Checkpoint saved.");
-				}
+				this.saveCheckpoint();
 			}
 			break;
 		case KEY_L:
@@ -1241,13 +1221,12 @@ public class Game extends ComplexOpsuState {
 			}
 			OPTION_DANCE_MIRROR.toggle();
 			break;
-		case KEY_SUBTRACT:
-		case KEY_MINUS:
-			adjustLocalMusicOffset(-5);
-			break;
 		}
-		if (e.keyCode == KEY_EQUALS || e.keyCode == KEY_ADD || e.chr == '+') {
-			adjustLocalMusicOffset(5);
+
+		if (e.keyCode == KEY_SUBTRACT || e.keyCode == KEY_MINUS || e.chr == '-') {
+			this.adjustLocalMusicOffset(-5);
+		} else if (e.keyCode == KEY_EQUALS || e.keyCode == KEY_ADD || e.chr == '+') {
+			this.adjustLocalMusicOffset(5);
 		}
 	}
 
@@ -1321,15 +1300,7 @@ public class Game extends ComplexOpsuState {
 
 		// mouse wheel: pause the game
 		if (button == Input.MMB && !OPTION_DISABLE_MOUSE_WHEEL.state) {
-			int trackPosition = MusicController.getPosition();
-			if (pauseTime < 0 && breakTime <= 0 && trackPosition >= beatmap.objects[0].getTime()) {
-				pausedMousePosition = new Vec2f(x, y);
-				pausePulse = 0f;
-			}
-			if (MusicController.isPlaying() || isLeadIn()) {
-				pauseTime = trackPosition;
-			}
-			displayContainer.switchStateInstantly(pauseState);
+			this.pauseGame();
 			return;
 		}
 
@@ -1351,20 +1322,6 @@ public class Game extends ComplexOpsuState {
 	 * @param trackPosition the track position
 	 */
 	private void gameKeyPressed(int keys, int x, int y, int trackPosition) {
-		// returning from pause screen
-		if (pauseTime > -1) {
-			double distance = Math.hypot(pausedMousePosition.x - x, pausedMousePosition.y - y);
-			int circleRadius = GameImage.HITCIRCLE.getWidth() / 2;
-			if (distance < circleRadius) {
-				// unpause the game
-				pauseTime = -1;
-				pausedMousePosition = null;
-				if (!isLeadIn())
-					MusicController.resume();
-			}
-			return;
-		}
-
 		// skip beginning
 		if (skipButton.contains(x, y)) {
 			if (skipIntro())
@@ -1457,7 +1414,10 @@ public class Game extends ComplexOpsuState {
 	 * @param trackPosition the track position
 	 */
 	private void gameKeyReleased(int keys, int x, int y, int trackPosition) {
-		if (!isReplay && keys != ReplayFrame.KEY_NONE && !isLeadIn() && pauseTime == -1) {
+		if (!isReplay &&
+			keys != ReplayFrame.KEY_NONE &&
+			!isLeadIn())
+		{
 			lastKeysPressed &= ~keys;  // clear keys bits
 			addReplayFrameAndRun(x, y, lastKeysPressed, trackPosition);
 		}
@@ -1487,6 +1447,31 @@ public class Game extends ComplexOpsuState {
 		volumeControl.changeVolume(e.direction);
 	}
 
+	private void pauseGame()
+	{
+		this.pauseOverlay.mousePauseX = mouseX;
+		this.pauseOverlay.mousePauseY = mouseY;
+		this.pauseOverlay.requireMousePositionBeforeResume =
+			this.firstObjectTime - SKIP_OFFSET < MusicController.getPosition() &&
+			!GameMod.RELAX.isActive() &&
+			!GameMod.AUTOPILOT.isActive() &&
+			breakTime == 0;
+		this.pauseOverlay.engagePause();
+	}
+
+	/**
+	 * restarts the game, will switch to game state if not already in it
+	 */
+	public void restart(RestartReason reason)
+	{
+		this.restartReason = reason;
+		if (displayContainer.isIn(this)) {
+			this.enter();
+			return;
+		}
+		displayContainer.switchState(this);
+	}
+
 	@Override
 	public void enter()
 	{
@@ -1512,13 +1497,21 @@ public class Game extends ComplexOpsuState {
 			return;
 		}
 
+		if (beatmap.objects.length == 0) {
+			bubNotifs.send(BUB_ORANGE, "Beatmap has no objects");
+			displayContainer.switchStateInstantly(songMenuState);
+			return;
+		}
+
+		this.firstObjectTime = beatmap.objects[0].getTime();
+
 		Display.setTitle(String.format("%s - %s", Constants.PROJECT_NAME, beatmap.toString()));
 
 		Dancer.instance.reset();
 		MoverDirection.reset(beatmap.beatmapID);
 
-		ObjectColorOverrides.reset(beatmap.beatmapID);
-		CursorColorOverrides.reset(beatmap.beatmapID);
+		ObjectColorOverrides.resetRainbowHue(beatmap.beatmapID);
+		CursorColorManager.resetColorChange(beatmap.beatmapID);
 
 		// free all previously cached hitobject to framebuffer mappings if some still exist
 		FrameBufferCache.getInstance().freeMap();
@@ -1526,220 +1519,216 @@ public class Game extends ComplexOpsuState {
 		// grab the mouse (not working for touchscreen)
 //		container.setMouseGrabbed(true);
 
+		// update play stats
+		if (restartReason == RestartReason.NEWGAME) {
+			beatmap.incrementPlayCounter();
+			BeatmapDB.updatePlayStatistics(beatmap);
+		}
 
-		// restart the game
-		if (restart != Restart.FALSE) {
-			// update play stats
-			if (restart == Restart.NEW) {
-				beatmap.incrementPlayCounter();
-				BeatmapDB.updatePlayStatistics(beatmap);
+		// load epilepsy warning img
+		epiImgTime = OPTION_EPILEPSY_WARNING.val * 100;
+		if (epiImgTime > 0) {
+			epiImg = GameImage.EPILEPSY_WARNING.getImage();
+			epiImg = epiImg.getScaledCopy(width2 / epiImg.getWidth());
+			epiImgX = width2 - epiImg.getWidth() / 2;
+			epiImgY = height2 - epiImg.getHeight() / 2;
+		}
+
+		// load mods
+		if (isReplay) {
+			previousMods = GameMod.getModState();
+			GameMod.loadModState(replay.mods);
+		}
+
+		data.setGameplay(true);
+
+		// check restart state
+		if (restartReason == RestartReason.NEWGAME) {
+			// new game
+			loadImages();
+			setMapModifiers();
+			retries = 0;
+		} else if (restartReason == RestartReason.USER && !GameMod.AUTO.isActive()) {
+			// retry
+			retries++;
+		} else if (restartReason == RestartReason.WATCHREPLAY || GameMod.AUTO.isActive()) {
+			// replay
+			retries = 0;
+		}
+
+		gameObjects = new GameObject[beatmap.objects.length];
+		playbackSpeed = PlaybackSpeed.NORMAL;
+
+		// reset game data
+		resetGameData();
+
+		// load the first timingPoint for stacking
+		if (!beatmap.timingPoints.isEmpty()) {
+			TimingPoint timingPoint = beatmap.timingPoints.get(0);
+			if (!timingPoint.isInherited()) {
+				setBeatLength(timingPoint, true);
+				timingPointIndex++;
+			}
+		}
+
+		// initialize object maps
+		Color[] comboColors = beatmap.getComboColors();
+		if (comboColors == null) {
+			comboColors = SkinService.skin.getComboColors();
+		}
+		CursorColorManager.setComboColors(comboColors);
+		ObjectColorOverrides.comboColors = comboColors;
+		for (int i = 0; i < beatmap.objects.length; i++) {
+			HitObject hitObject = beatmap.objects[i];
+
+			// is this the last note in the combo?
+			boolean comboEnd = false;
+			if (i + 1 >= beatmap.objects.length || beatmap.objects[i + 1].isNewCombo())
+				comboEnd = true;
+
+			// pass beatLength to hit objects
+			int hitObjectTime = hitObject.getTime();
+			while (timingPointIndex < beatmap.timingPoints.size()) {
+				TimingPoint timingPoint = beatmap.timingPoints.get(timingPointIndex);
+				if (timingPoint.getTime() > hitObjectTime)
+					break;
+				setBeatLength(timingPoint, false);
+				timingPointIndex++;
 			}
 
-			// load epilepsy warning img
-			epiImgTime = OPTION_EPILEPSY_WARNING.val * 100;
-			if (epiImgTime > 0) {
-				epiImg = GameImage.EPILEPSY_WARNING.getImage();
-				epiImg = epiImg.getScaledCopy(width2 / epiImg.getWidth());
-				epiImgX = width2 - epiImg.getWidth() / 2;
-				epiImgY = height2 - epiImg.getHeight() / 2;
-			}
-
-			// load mods
-			if (isReplay) {
-				previousMods = GameMod.getModState();
-				GameMod.loadModState(replay.mods);
-			}
-
-			data.setGameplay(true);
-
-			// check restart state
-			if (restart == Restart.NEW) {
-				// new game
-				loadImages();
-				setMapModifiers();
-				retries = 0;
-			} else if (restart == Restart.MANUAL && !GameMod.AUTO.isActive()) {
-				// retry
-				retries++;
-			} else if (restart == Restart.REPLAY || GameMod.AUTO.isActive()) {
-				// replay
-				retries = 0;
-			}
-
-			gameObjects = new GameObject[beatmap.objects.length];
-			playbackSpeed = PlaybackSpeed.NORMAL;
-
-			// reset game data
-			resetGameData();
-
-			// load the first timingPoint for stacking
-			if (!beatmap.timingPoints.isEmpty()) {
-				TimingPoint timingPoint = beatmap.timingPoints.get(0);
-				if (!timingPoint.isInherited()) {
-					setBeatLength(timingPoint, true);
-					timingPointIndex++;
+			try {
+				if (hitObject.isCircle()) {
+					gameObjects[i] = new Circle(hitObject, data, hitObject.getComboIndex(), comboEnd);
+				} else if (hitObject.isSlider()) {
+					gameObjects[i] = new Slider(hitObject, data, hitObject.getComboIndex(), comboEnd);
+				} else if (hitObject.isSpinner()) {
+					gameObjects[i] = new Spinner(hitObject, data);
 				}
+			} catch (Exception e) {
+				String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
+				Log.error(message, e);
+				bubNotifs.send(BUB_RED, message);
+				gameObjects[i] = new DummyObject(hitObject);
 			}
+		}
 
-			// initialize object maps
-			Color[] comboColors = beatmap.getComboColors();
-			if (comboColors == null) {
-				comboColors = SkinService.skin.getComboColors();
+		// stack calculations
+		calculateStacks();
+
+		// load the first timingPoint
+		timingPointIndex = 0;
+		beatLengthBase = beatLength = 1;
+		if (!beatmap.timingPoints.isEmpty()) {
+			TimingPoint timingPoint = beatmap.timingPoints.get(0);
+			if (!timingPoint.isInherited()) {
+				setBeatLength(timingPoint, true);
+				timingPointIndex++;
 			}
-			CursorColorOverrides.comboColors = ObjectColorOverrides.comboColors = comboColors;
-			for (int i = 0; i < beatmap.objects.length; i++) {
-				HitObject hitObject = beatmap.objects[i];
+		}
 
-				// is this the last note in the combo?
-				boolean comboEnd = false;
-				if (i + 1 >= beatmap.objects.length || beatmap.objects[i + 1].isNewCombo())
-					comboEnd = true;
+		// unhide cursor for "auto" mod and replays
+		if (GameMod.AUTO.isActive() || isReplay) {
+			GLHelper.showNativeCursor();
+		}
 
-				// pass beatLength to hit objects
-				int hitObjectTime = hitObject.getTime();
-				while (timingPointIndex < beatmap.timingPoints.size()) {
-					TimingPoint timingPoint = beatmap.timingPoints.get(timingPointIndex);
-					if (timingPoint.getTime() > hitObjectTime)
-						break;
-					setBeatLength(timingPoint, false);
-					timingPointIndex++;
-				}
-
-				try {
-					if (hitObject.isCircle()) {
-						gameObjects[i] = new Circle(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
-					} else if (hitObject.isSlider()) {
-						gameObjects[i] = new Slider(hitObject, this, data, hitObject.getComboIndex(), comboEnd);
-					} else if (hitObject.isSpinner()) {
-						gameObjects[i] = new Spinner(hitObject, this, data);
-					}
-				} catch (Exception e) {
-					String message = String.format("Failed to create %s at index %d:\n%s", hitObject.getTypeName(), i, hitObject.toString());
-					Log.error(message, e);
-					bubNotifs.send(BUB_RED, message);
-					gameObjects[i] = new DummyObject(hitObject);
-				}
+		// load replay frames
+		if (isReplay) {
+			// load initial data
+			replayX = width2;
+			replayY = height2;
+			replayKeyPressed = false;
+			replaySkipTime = -1;
+			for (replayIndex = 0; replayIndex < replay.frames.length; replayIndex++) {
+				ReplayFrame frame = replay.frames[replayIndex];
+				if (frame.getY() < 0) {  // skip time (?)
+					if (frame.getTime() >= 0 && replayIndex > 0)
+						replaySkipTime = frame.getTime();
+				} else if (frame.getTime() == 0) {
+					replayX = frame.getScaledX();
+					replayY = frame.getScaledY();
+					replayKeyPressed = frame.isKeyPressed();
+				} else
+					break;
 			}
+		}
 
-			// stack calculations
-			calculateStacks();
+		// initialize replay-recording structures
+		else {
+			lastKeysPressed = ReplayFrame.KEY_NONE;
+			replaySkipTime = -1;
+			replayFrames = new LinkedList<>();
+			replayFrames.add(new ReplayFrame(0, 0, mouseX, mouseY, 0));
+		}
 
-			// load the first timingPoint
-			timingPointIndex = 0;
-			beatLengthBase = beatLength = 1;
-			if (!beatmap.timingPoints.isEmpty()) {
-				TimingPoint timingPoint = beatmap.timingPoints.get(0);
-				if (!timingPoint.isInherited()) {
-					setBeatLength(timingPoint, true);
-					timingPointIndex++;
-				}
+		for (int i = 0; i < gameObjects.length; i++) {
+			gameObjects[i].updateStartEndPositions(beatmap.objects[i].getTime());
+		}
+
+		leadInTime = beatmap.audioLeadIn + approachTime;
+
+		// fetch previous scores
+		previousScores = ScoreDB.getMapScoresExcluding(beatmap, replay == null ? null : replay.getReplayFilename());
+		lastRankUpdateTime = -1000;
+		if (previousScores != null)
+			currentRank = previousScores.length;
+		scoreboardVisible = true;
+		currentScoreboardAlpha = 0f;
+
+		// using local offset?
+		if (beatmap.localMusicOffset != 0)
+			barNotifs.send(String.format("Using local beatmap offset (%dms)", beatmap.localMusicOffset));
+
+		// needs to play before setting position to resume without lag later
+		MusicController.play(false);
+		MusicController.setPosition(0);
+		MusicController.setPitch(GameMod.getSpeedMultiplier());
+		MusicController.pause();
+
+		if (gameObjects.length > 0) {
+			int leadIntime = OPTION_MAP_START_DELAY.val * 100 - gameObjects[0].getTime();
+			if (leadIntime > 0) {
+				this.leadInTime = Math.max(leadIntime, this.leadInTime);
 			}
+		}
+		this.leadInTime += epiImgTime;
+		SoundController.mute(false);
 
-			// unhide cursor for "auto" mod and replays
-			if (GameMod.AUTO.isActive() || isReplay) {
-				GLHelper.showNativeCursor();
+		if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
+			if (!OPTION_SHRINKING_SLIDERS.state) {
+				knorkesliders = null; // workaround for issue-130
 			}
-
-			// load replay frames
-			if (isReplay) {
-				// load initial data
-				replayX = width2;
-				replayY = height2;
-				replayKeyPressed = false;
-				replaySkipTime = -1;
-				for (replayIndex = 0; replayIndex < replay.frames.length; replayIndex++) {
-					ReplayFrame frame = replay.frames[replayIndex];
-					if (frame.getY() < 0) {  // skip time (?)
-						if (frame.getTime() >= 0 && replayIndex > 0)
-							replaySkipTime = frame.getTime();
-					} else if (frame.getTime() == 0) {
-						replayX = frame.getScaledX();
-						replayY = frame.getScaledY();
-						replayKeyPressed = frame.isKeyPressed();
-					} else
-						break;
-				}
-			}
-
-			// initialize replay-recording structures
-			else {
-				lastKeysPressed = ReplayFrame.KEY_NONE;
-				replaySkipTime = -1;
-				replayFrames = new LinkedList<>();
-				replayFrames.add(new ReplayFrame(0, 0, mouseX, mouseY, 0));
-			}
-
-			for (int i = 0; i < gameObjects.length; i++) {
-				gameObjects[i].updateStartEndPositions(beatmap.objects[i].getTime());
-			}
-
-			leadInTime = beatmap.audioLeadIn + approachTime;
-			restart = Restart.FALSE;
-
-			// fetch previous scores
-			previousScores = ScoreDB.getMapScoresExcluding(beatmap, replay == null ? null : replay.getReplayFilename());
-			lastRankUpdateTime = -1000;
-			if (previousScores != null)
-				currentRank = previousScores.length;
-			scoreboardVisible = true;
-			currentScoreboardAlpha = 0f;
-
-			// using local offset?
-			if (beatmap.localMusicOffset != 0)
-				barNotifs.send(String.format("Using local beatmap offset (%dms)", beatmap.localMusicOffset));
-
-			// needs to play before setting position to resume without lag later
-			MusicController.play(false);
-			MusicController.setPosition(0);
-			MusicController.setPitch(GameMod.getSpeedMultiplier());
-			MusicController.pause();
-
-			if (gameObjects.length > 0) {
-				int leadIntime = OPTION_MAP_START_DELAY.val * 100 - gameObjects[0].getTime();
-				if (leadIntime > 0) {
-					this.leadInTime = Math.max(leadIntime, this.leadInTime);
-				}
-			}
-			this.leadInTime += epiImgTime;
-			SoundController.mute(false);
-
-			if (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) {
-				if (!OPTION_SHRINKING_SLIDERS.state) {
-					knorkesliders = null; // workaround for issue-130
-				}
-				if (knorkesliders == null) {
-					// let's create knorkesliders
-					int totalpoints = 0;
-					ArrayList<Slider> sliders = new ArrayList<>();
-					for (GameObject o : gameObjects) {
-						if (o.isSlider()) {
-							final Slider s = (Slider) o;
-							final int len = s.getCurvePointsCount();
-							if (len > 0) {
-								sliders.add(s);
-								s.curveStartIndex = totalpoints;
-								totalpoints += s.getCurvePointsCount();
-							}
+			if (knorkesliders == null) {
+				// let's create knorkesliders
+				int totalpoints = 0;
+				ArrayList<Slider> sliders = new ArrayList<>();
+				for (GameObject o : gameObjects) {
+					if (o.isSlider()) {
+						final Slider s = (Slider) o;
+						final int len = s.getCurvePointsCount();
+						if (len > 0) {
+							sliders.add(s);
+							s.curveStartIndex = totalpoints;
+							totalpoints += s.getCurvePointsCount();
 						}
 					}
-					if (totalpoints > 0) {
-						Vec2f[] combinedcurve = new Vec2f[totalpoints];
-						int idx = 0;
-						for (Slider s : sliders) {
-							int len = s.getCurvePointsCount();
-							arraycopy(s.getCurvePoints(), 0, combinedcurve, idx, len);
-							idx += len;
-						}
-						knorkesliders = new FakeCombinedCurve(combinedcurve);
+				}
+				if (totalpoints > 0) {
+					Vec2f[] combinedcurve = new Vec2f[totalpoints];
+					int idx = 0;
+					for (Slider s : sliders) {
+						int len = s.getCurvePointsCount();
+						arraycopy(s.getCurvePoints(), 0, combinedcurve, idx, len);
+						idx += len;
 					}
-				} else {
-					int startIndex = 0;
-					for (GameObject gameObject : gameObjects) {
-						if (gameObject.isSlider()) {
-							final Slider s = (Slider) gameObject;
-							s.curveStartIndex = startIndex;
-							startIndex += s.getCurvePointsCount();
-						}
+					knorkesliders = new FakeCombinedCurve(combinedcurve);
+				}
+			} else {
+				int startIndex = 0;
+				for (GameObject gameObject : gameObjects) {
+					if (gameObject.isSlider()) {
+						final Slider s = (Slider) gameObject;
+						s.curveStartIndex = startIndex;
+						startIndex += s.getCurvePointsCount();
 					}
 				}
 			}
@@ -1768,6 +1757,8 @@ public class Game extends ComplexOpsuState {
 		super.leave();
 
 		Display.setTitle(Constants.PROJECT_NAME);
+
+		this.pauseOverlay.hide();
 
 		displayContainer.cursor.reset();
 		displayContainer.drawCursor = true;
@@ -1805,11 +1796,8 @@ public class Game extends ComplexOpsuState {
 			GameMod.loadModState(previousMods);
 	}
 	
-	/**
-	 * Adjusts the beatmap's local music offset.
-	 * @param sign the sign (multiplier)
-	 */
-	public void adjustLocalMusicOffset(int amount) {
+	void adjustLocalMusicOffset(int amount)
+	{
 		int newOffset = beatmap.localMusicOffset + amount;
 		barNotifs.send(String.format("Local beatmap offset set to %dms", newOffset));
 		if (beatmap.localMusicOffset != newOffset) {
@@ -1853,13 +1841,19 @@ public class Game extends ComplexOpsuState {
 		    trackPosition < beatmap.objects[objectIndex].getTime() && !beatmap.objects[objectIndex - 1].isSpinner())
 			lastObjectIndex = objectIndex - 1;
 
-		boolean loseState = (restart == Restart.LOSE);
-		if (loseState)
-			trackPosition = failTrackTime + (int) (System.currentTimeMillis() - failTime);
+
+		final boolean loseState = (restartReason == RestartReason.LOSE);
 
 		// get hit objects in reverse order, or else overlapping objects are unreadable
 		Stack<Integer> stack = new Stack<>();
 		for (int index = objectIndex; index < gameObjects.length && beatmap.objects[index].getTime() < trackPosition + approachTime; index++) {
+			final int LOSE_LASTOBJ_TIME = failTrackTime + LOSE_FADEOUT_TIME - 500;
+			if (loseState &&
+				beatmap.objects[index].getTime() > LOSE_LASTOBJ_TIME)
+			{
+				break;
+			}
+
 			stack.add(index);
 
 			// draw follow points
@@ -1996,8 +1990,6 @@ public class Game extends ComplexOpsuState {
 		breakSound = false;
 		timingPointIndex = 0;
 		beatLengthBase = beatLength = 1;
-		pauseTime = -1;
-		pausedMousePosition = null;
 		countdownReadySound = false;
 		countdown3Sound = false;
 		countdown1Sound = false;
@@ -2025,7 +2017,6 @@ public class Game extends ComplexOpsuState {
 	 * @return {@code true} if skipped, {@code false} otherwise
 	 */
 	private synchronized boolean skipIntro() {
-		int firstObjectTime = beatmap.objects[0].getTime();
 		int trackPosition = MusicController.getPosition();
 		if (objectIndex == 0 && (trackPosition < firstObjectTime - SKIP_OFFSET) || isLeadIn()) {
 			if (isLeadIn()) {
@@ -2072,7 +2063,6 @@ public class Game extends ComplexOpsuState {
 		skipButton.setHoverExpand(1.1f, MenuButton.Expand.UP_LEFT);
 
 		// load other images...
-		pauseState.loadImages();
 		data.loadImages();
 	}
 
@@ -2152,20 +2142,19 @@ public class Game extends ComplexOpsuState {
 	}
 
 	/**
-	 * Sets the restart state.
-	 * @param restart the new restart state
-	 */
-	public void setRestart(Restart restart) { this.restart = restart; }
-
-	/**
-	 * Returns the current restart state.
-	 */
-	public Restart getRestart() { return restart; }
-
-	/**
 	 * Returns whether or not the track is in the lead-in time state.
 	 */
 	public boolean isLeadIn() { return leadInTime > 0; }
+
+	public boolean isBreak()
+	{
+		return breakTime > 0;
+	}
+
+	public boolean isLeadInOrBreak()
+	{
+		return leadInTime + breakTime > 0;
+	}
 
 	/**
 	 * Returns the object approach time, in milliseconds.
@@ -2458,5 +2447,10 @@ public class Game extends ComplexOpsuState {
 	private boolean musicPositionBarContains(float cx, float cy) {
 		return ((cx > musicBarX && cx < musicBarX + musicBarWidth) &&
 		        (cy > musicBarY && cy < musicBarY + musicBarHeight));
+	}
+
+	public boolean isLosing()
+	{
+		return this.restartReason == RestartReason.LOSE;
 	}
 }

@@ -26,13 +26,13 @@ package itdelatrisu.opsu.ui;
  */
 public class KineticScrolling {
 	/** The moving averaging constant. */
-	private static final float AVG_CONST = 0.2f, ONE_MINUS_AVG_CONST = 1 - AVG_CONST;
+	public static final float AVG_CONST = 0.2f, ONE_MINUS_AVG_CONST = 1 - AVG_CONST;
 
 	/** The constant used to determine how fast the target position will be reached. */
-	private static final int TIME_CONST = 200;
+	public static final int TIME_CONST = 200;
 
 	/** The constant used to determine how much of the velocity will be used to launch to the target. */
-	private static final float AMPLITUDE_CONST = 0.25f;
+	public static final float AMPLITUDE_CONST = 0.25f;
 
 	/** The current position. */
 	private float position;
@@ -157,6 +157,11 @@ public class KineticScrolling {
 		position = target;
 	}
 
+	public void setPercentualPosition(float position)
+	{
+		this.scrollToPosition((1f - position) * this.min + position * this.max);
+	}
+
 	/**
 	 * Set the position relative to an offset.
 	 * @param offset the offset from the position
@@ -205,10 +210,18 @@ public class KineticScrolling {
 		this.min = min;
 		this.max = max;
 		if (this.getTargetPosition() > max) {
-			this.scrollToPosition(max);
+			if (this.allowOverScroll) {
+				this.scrollToPosition(max);
+			} else {
+				this.setPosition(max);
+			}
 		}
 		if (this.getTargetPosition() < min) {
-			this.scrollToPosition(min);
+			if (this.allowOverScroll) {
+				this.scrollToPosition(min);
+			} else {
+				this.setPosition(min);
+			}
 		}
 	}
 
