@@ -26,13 +26,13 @@ package itdelatrisu.opsu.ui;
  */
 public class KineticScrolling {
 	/** The moving averaging constant. */
-	private static final float AVG_CONST = 0.2f, ONE_MINUS_AVG_CONST = 1 - AVG_CONST;
+	public static final float AVG_CONST = 0.2f, ONE_MINUS_AVG_CONST = 1 - AVG_CONST;
 
 	/** The constant used to determine how fast the target position will be reached. */
-	private static final int TIME_CONST = 200;
+	public static final int TIME_CONST = 200;
 
 	/** The constant used to determine how much of the velocity will be used to launch to the target. */
-	private static final float AMPLITUDE_CONST = 0.25f;
+	public static final float AMPLITUDE_CONST = 0.25f;
 
 	/** The current position. */
 	private float position;

@@ -112,6 +112,7 @@ public class DropdownMenu<E> extends Component
 		this.x = x;
 		this.y = y;
 		this.baseHeight = fontNormal.getLineHeight();
+		this.baseHeight -= 2; // meh.. :/
 		this.offsetY = baseHeight + baseHeight * PADDING_Y;
 		this.height = (int) (offsetY * (items.length + 1));
 		int downChevronSize = baseHeight * 4 / 5;
@@ -230,12 +231,18 @@ public class DropdownMenu<E> extends Component
 		expandProgress.setTime(0);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void openGrabFocus()
 	{
 		this.setFocused(true);
 		input.addListener(this);
 	}
 
+	/**
+	 * only call when not in dispatched input event or when it's being consumed
+	 */
 	public void closeReleaseFocus()
 	{
 		if (this.focused) {
@@ -258,7 +265,7 @@ public class DropdownMenu<E> extends Component
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		if (e.button == Input.MMB || e.dragDistanceExceeds(10)) {
+		if (e.button == Input.MMB || e.dragDistance > 5f) {
 			return;
 		}
 
@@ -295,6 +302,14 @@ public class DropdownMenu<E> extends Component
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		if (e.button == Input.MMB) {
+			return;
+		}
+
+		final int idx = this.getIndexAt(mouseY);
+		if (idx >= -1) {
+			e.consume();
+		}
 	}
 
 	@Override

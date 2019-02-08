@@ -264,33 +264,15 @@ public enum GameImage {
 	MENU_BACK_CHEVRON ("menu-back-chevron", "png"),
 	MENU_BACK_SLOPE("menu-back-slope", "png"),
 	MENU_BUTTON_BG ("menu-button-background", "png", false, false),
+	MENU_HEADER ("menu-header", "png", false, false),
+	MENU_ICON ("menu-icon", "png", false, false),
 	MENU_TAB ("selection-tab", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
 			return img.getScaledCopy((h * 0.033f) / img.getHeight());
 		}
 	},
-	MENU_MUSICNOTE ("music-note", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r, r);
-		}
-	},
-	MENU_LOADER ("loader", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			int r = (int) ((Fonts.LARGE.getLineHeight() + Fonts.DEFAULT.getLineHeight() - 8) / getUIscale());
-			return img.getScaledCopy(r / 48f);
-		}
-	},
-	MENU_BG ("menu-background", "png|jpg", false, true) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			img.setAlpha(0.9f);
-			return img;
-		}
-	},
+	MENU_BG ("menu-background", "png|jpg", false, true),
 	MENU_LOGO ("logo2", "png", false, true) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {
@@ -330,12 +312,7 @@ public enum GameImage {
 	MENU_BUTTON_MID ("button-middle", "png", false, false),
 	MENU_BUTTON_LEFT ("button-left", "png", false, false),
 	MENU_BUTTON_RIGHT ("button-right", "png", false, false),
-	STAR ("star", "png", false, false) {
-		@Override
-		protected Image process_sub(Image img, int w, int h) {
-			return img.getScaledCopy((MENU_BUTTON_BG.getHeight() * 0.16f) / img.getHeight());
-		}
-	},
+	STAR ("star", "png", false, false),
 	STAR2 ("star2", "png", false, false) {
 		@Override
 		protected Image process_sub(Image img, int w, int h) {

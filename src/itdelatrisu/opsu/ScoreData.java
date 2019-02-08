@@ -212,9 +212,9 @@ public class ScoreData implements Comparable<ScoreData> {
 	 * @see GameData#getGrade(int, int, int, int, boolean)
 	 */
 	public Grade getGrade() {
-		if (grade == null)
-			grade = GameData.getGrade(hit300, hit100, hit50, miss,
-					((mods & GameMod.HIDDEN.getBit()) > 0 || (mods & GameMod.FLASHLIGHT.getBit()) > 0));
+		if (grade == null) {
+			return grade = GameData.getGrade(hit300, hit100, hit50, miss, mods);
+		}
 		return grade;
 	}
 

@@ -76,6 +76,12 @@ public class Entrypoint
 		}
 
 		new OpsuDance().start(args);
+		jobContainer.interrupt();
+		try {
+			jobContainer.join(200);
+		} catch (InterruptedException e) {
+			Log.error("failed to join thread " + jobContainer.getName(), e);
+		}
 
 		if (updater.getStatus() == Updater.Status.UPDATE_FINAL) {
 			updater.runUpdate();

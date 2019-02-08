@@ -43,8 +43,6 @@ public class Configuration
 
 	public final File osuInstallationDirectory;
 
-	public final Beatmap themeBeatmap;
-
 	public File beatmapDir;
 	public File oszDir;
 	public File screenshotDir;
@@ -65,24 +63,13 @@ public class Configuration
 
 		osuInstallationDirectory = loadOsuInstallationDirectory();
 
-		themeBeatmap = createThemeBeatmap();
-	}
-
-	private Beatmap createThemeBeatmap() {
-		try {
-			String[] tokens = {"theme.ogg", "On the Bach", "Jingle Punks", "66000"};
-			Beatmap beatmap = new Beatmap(null);
-			beatmap.audioFilename = new File(tokens[0]);
-			beatmap.title = tokens[1];
-			beatmap.artist = tokens[2];
-			beatmap.endTime = Integer.parseInt(tokens[3]);
-			beatmap.timingPoints = new ArrayList<>(1);
-			beatmap.timingPoints.add(new TimingPoint("-44,631.578947368421,4,1,0,100,1,0"));
-			return beatmap;
-		} catch (Exception e) {
-			return null;
-		}
-
+		themeBeatmap = new Beatmap(null);
+		themeBeatmap.audioFilename = new File("theme.ogg");
+		themeBeatmap.title = "On the Bach";
+		themeBeatmap.artist = "Jingle Punks";
+		themeBeatmap.endTime = 66000;
+		themeBeatmap.timingPoints = new ArrayList<>(1);
+		themeBeatmap.timingPoints.add(new TimingPoint("-44,631.57894736842,4,1,0,100,1,0"));
 	}
 
 	private File loadOsuInstallationDirectory() {

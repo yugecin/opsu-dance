@@ -24,8 +24,8 @@ import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.audio.SoundEffect;
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
-import itdelatrisu.opsu.beatmap.BeatmapSetNode;
+import itdelatrisu.opsu.beatmap.BeatmapParser;
+import itdelatrisu.opsu.beatmap.BeatmapSet;
 import itdelatrisu.opsu.downloads.Updater;
 import itdelatrisu.opsu.states.ButtonMenu.MenuState;
 import itdelatrisu.opsu.ui.*;
@@ -34,12 +34,14 @@ import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
 import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Stack;
+import java.util.Objects;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -131,11 +133,9 @@ public class MainMenu extends BaseOpsuState {
 	private int textTopMarginY;
 	private int textLineHeight;
 
-	/** Indexes of previous songs. */
-	private Stack<Integer> previous;
-
 	/** Background alpha level (for fade-in effect). */
 	private AnimatedValue bgAlpha = new AnimatedValue(1100, 0f, BG_MAX_ALPHA, AnimationEquation.LINEAR);
+	private File currentBackgroundFile;
 
 	/** Whether or not a notification was already sent upon entering. */
 	private boolean enterNotification = false;
@@ -155,7 +155,8 @@ public class MainMenu extends BaseOpsuState {
 	private LinkedList<PulseData> pulseData = new LinkedList<>();
 	private float lastPulseProgress;
 	
-	public MainMenu() {
+	public MainMenu()
+	{
 		this.nowPlayingPosition = new AnimatedValue(1000, 0, 0, OUT_QUART);
 		this.logoClickScale = new AnimatedValue(300, .9f, 1f, OUT_QUAD);
 		this.logoHover = new AnimatedValue(350, 1f, 1.096f, IN_OUT_EXPO);
@@ -168,7 +169,7 @@ public class MainMenu extends BaseOpsuState {
 		}
 		this.buttonPositions = new ImagePosition[3];
 		this.timeFormat = new SimpleDateFormat("HH:mm");
-		this.previous = new Stack<>();
+		OPTION_DYNAMIC_BACKGROUND.addListener(this::updateBackground);
 	}
 
 	@Override
@@ -268,14 +269,7 @@ public class MainMenu extends BaseOpsuState {
 	public void render(Graphics g) {
 		// draw background
 		Beatmap beatmap = MusicController.getBeatmap();
-		if (OPTION_DYNAMIC_BACKGROUND.state &&
-			beatmap != null && beatmap.drawBackground(width, height, bgAlpha.getValue(), true))
-			;
-		else {
-			Image bg = GameImage.MENU_BG.getImage();
-			bg.setAlpha(bgAlpha.getValue());
-			bg.draw();
-		}
+		dynBg.draw();
 
 		// top/bottom horizontal bars
 		float oldAlpha = Colors.BLACK_ALPHA.a;
@@ -461,8 +455,8 @@ public class MainMenu extends BaseOpsuState {
 		g.setColor(Color.white);
 		String txt = String.format(
 			"You have %d beatmaps (%d songs) available!",
-			BeatmapSetList.get().getMapCount(),
-			BeatmapSetList.get().getMapSetCount()
+			beatmapList.getBeatmapCount(),
+			beatmapList.getBeatmapSetCount()
 		);
 		g.drawString(txt, textMarginX, textTopMarginY);
 		txt = String.format(
@@ -479,7 +473,10 @@ public class MainMenu extends BaseOpsuState {
 	}
 
 	@Override
-	public void preRenderUpdate() {
+	public void preRenderUpdate()
+	{
+		dynBg.update();
+
 		int delta = renderDelta;
 		
 		final Iterator<PulseData> pulseDataIter = this.pulseData.iterator();
@@ -492,8 +489,9 @@ public class MainMenu extends BaseOpsuState {
 		}
 
 		UI.update(delta);
-		if (MusicController.trackEnded())
-			nextTrack(false);  // end of track: go to next track
+		if (MusicController.trackEnded()) {
+			this.playRandomNextTrack();
+		}
 		if (repoButton != null) {
 			repoButton.hoverUpdate(delta, mouseX, mouseY);
 			danceRepoButton.hoverUpdate(delta, mouseX, mouseY);
@@ -629,6 +627,9 @@ public class MainMenu extends BaseOpsuState {
 	public void enter() {
 		super.enter();
 
+		// when dynamic bg in main menu is disabled and re-entering from song menu
+		dynBg.songChanged();
+
 		logoPosition.setTime(0);
 		logoButtonAlpha.setTime(0);
 		nowPlayingPosition.setTime(0);
@@ -696,11 +697,9 @@ public class MainMenu extends BaseOpsuState {
 		// music button actions
 		if (musicPrev.contains(x, y)) {
 			lastMeasureProgress = 0f;
-			if (!previous.isEmpty()) {
-				songMenuState.setFocus(BeatmapSetList.get().getBaseNode(previous.pop()), -1, false);
-				if (OPTION_DYNAMIC_BACKGROUND.state) {
-					bgAlpha.setTime(0);
-				}
+			if (!songHistory.isEmpty()) {
+				// songHistory will be popped by MusicController#play
+				this.playNextTrack(songHistory.peek());
 			} else {
 				MusicController.setPosition(0);
 			}
@@ -730,7 +729,12 @@ public class MainMenu extends BaseOpsuState {
 			}
 			barNotifs.send("Stop Playing");
 		} else if (musicNext.contains(x, y)) {
-			nextTrack(true);
+			if (!nextSongs.isEmpty()) {
+				// nextSongs is popped by MusicController#play
+				this.playNextTrack(nextSongs.peek());
+			} else {
+				this.playRandomNextTrack();
+			}
 			barNotifs.send(">> Next");
 			return;
 		}
@@ -848,7 +852,7 @@ public class MainMenu extends BaseOpsuState {
 			displayContainer.switchState(downloadState);
 			return;
 		case KEY_R:
-			nextTrack(true);
+			this.playRandomNextTrack();
 			return;
 		case KEY_UP:
 			volumeControl.changeVolume(1);
@@ -885,27 +889,42 @@ public class MainMenu extends BaseOpsuState {
 		        (cy > musicBarY && cy < musicBarY + musicBarHeight));
 	}
 
-	/**
-	 * Plays the next track, and adds the previous one to the stack.
-	 * @param user {@code true} if this was user-initiated, false otherwise (track end)
-	 */
-	private void nextTrack(boolean user) {
+	public void playRandomNextTrack()
+	{
+		final ArrayList<BeatmapSet> sets = beatmapList.sets;
+		if (sets.isEmpty()) {
+			this.playNextTrack(themeBeatmap);
+		} else {
+			this.playNextTrack(sets.get(rand.nextInt(sets.size())).beatmaps[0]);
+		}
+	}
+
+	private void playNextTrack(Beatmap next)
+	{
+		if (!nodeList.attemptFocusMap(next, /*playAtPreviewTime*/ false)) {
+			nodeList.removeFocus();
+			if (next.timingPoints == null) {
+				BeatmapParser.parseTimingPoints(next);
+			}
+			MusicController.play(next, /*loop*/ false, /*playAtPreviewTime*/ false);
+		}
 		lastMeasureProgress = 0f;
-		boolean isTheme = MusicController.isThemePlaying();
-		if (isTheme && !user) {
-			// theme was playing, restart
-			// NOTE: not looping due to inaccurate track positions after loop
-			MusicController.playAt(0, false);
-			return;
+		this.updateBackground();
+	}
+
+	private void updateBackground()
+	{
+		File newBackgroundFile = null;
+		if (OPTION_DYNAMIC_BACKGROUND.state) {
+			final Beatmap beatmap = MusicController.getBeatmap();
+			newBackgroundFile = null;
+			if (beatmap != null) {
+				beatmap.loadBackground();
+				newBackgroundFile = beatmap.bg;
+			}
 		}
-		BeatmapSetNode node = songMenuState.setFocus(BeatmapSetList.get().getRandomNode(), -1, false);
-		boolean sameAudio = false;
-		if (node != null) {
-			sameAudio = MusicController.getBeatmap().audioFilename.equals(node.getBeatmapSet().get(0).audioFilename);
-			if (!isTheme && !sameAudio)
-				previous.add(node.index);
-		}
-		if (OPTION_DYNAMIC_BACKGROUND.state && !sameAudio && !MusicController.isThemePlaying()) {
+		if (!Objects.equals(this.currentBackgroundFile, newBackgroundFile)) {
+			this.currentBackgroundFile = newBackgroundFile;
 			bgAlpha.setTime(0);
 		}
 	}
@@ -916,7 +935,7 @@ public class MainMenu extends BaseOpsuState {
 	private void enterSongMenu()
 	{
 		OpsuState state = songMenuState;
-		if (BeatmapSetList.get().getMapSetCount() == 0) {
+		if (beatmapList.getBeatmapCount() == 0) {
 			barNotifs.send("Download some beatmaps to get started!");
 			state = downloadState;
 		}

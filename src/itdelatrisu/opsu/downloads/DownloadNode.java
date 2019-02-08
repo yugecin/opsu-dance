@@ -20,7 +20,6 @@ package itdelatrisu.opsu.downloads;
 
 import itdelatrisu.opsu.GameImage;
 import itdelatrisu.opsu.Utils;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.downloads.Download.DownloadListener;
 import itdelatrisu.opsu.downloads.Download.Status;
 import itdelatrisu.opsu.downloads.servers.DownloadServer;
@@ -356,7 +355,7 @@ public class DownloadNode {
 		g.fillRect(buttonBaseX, y, buttonWidth, buttonHeight);
 
 		// map is already loaded
-		if (BeatmapSetList.get().containsBeatmapSetID(beatmapSetID)) {
+		if (beatmapList.containsBeatmapSetID(beatmapSetID)) {
 			g.setColor(Colors.BLUE_BUTTON);
 			g.fillRect(buttonBaseX, y, buttonWidth, buttonHeight);
 		}

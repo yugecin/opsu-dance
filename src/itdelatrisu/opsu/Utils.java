@@ -194,21 +194,23 @@ public class Utils {
 	 * @return true if moved to trash, and false if deleted
 	 * @throws IOException if given file does not exist
 	 */
-	public static boolean deleteToTrash(File file) throws IOException {
+	public static boolean deleteMaybeToTrash(File file) throws IOException
+	{
 		if (file == null)
 			throw new IOException("File cannot be null.");
 		if (!file.exists())
 			throw new IOException(String.format("File '%s' does not exist.", file.getAbsolutePath()));
 
-		// move to system trash, if possible
-		FileUtils fileUtils = FileUtils.getInstance();
-		if (fileUtils.hasTrash()) {
-			try {
+		// FileUtils is com.sun, soooo big ass try around it
+		try {
+			// move to system trash, if possible
+			FileUtils fileUtils = FileUtils.getInstance();
+			if (fileUtils.hasTrash()) {
 				fileUtils.moveToTrash(new File[] { file });
 				return true;
-			} catch (IOException e) {
-				Log.warn(String.format("Failed to move file '%s' to trash.", file.getAbsolutePath()), e);
 			}
+		} catch (Throwable t) {
+			softErr(t, "Failed to move file '%s' to trash.", file.getAbsolutePath());
 		}
 
 		// delete otherwise

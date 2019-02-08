@@ -222,7 +222,7 @@ public class BackButton
 	{
 		if (!displayContainer.disableBackButton &&
 			this.contains(e.x, e.y) &&
-			this.contains(mousePressX, mousePressY))
+			this.contains(e.downX, e.downY))
 		{
 			this.activeListener.callback.run();
 			return true;

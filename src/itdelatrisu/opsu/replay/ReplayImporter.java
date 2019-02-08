@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.replay;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
-import itdelatrisu.opsu.beatmap.BeatmapSetList;
 import itdelatrisu.opsu.db.ScoreDB;
 
 import java.io.File;
@@ -85,7 +84,7 @@ public class ReplayImporter {
 				bubNotifs.send(BUB_RED, err);
 				continue;
 			}
-			Beatmap beatmap = BeatmapSetList.get().getBeatmapFromHash(r.beatmapHash);
+			Beatmap beatmap = beatmapList.getBeatmapFromHash(r.beatmapHash);
 			if (beatmap != null) {
 				// add score to database
 				ScoreDB.addScore(r.getScoreData(beatmap));

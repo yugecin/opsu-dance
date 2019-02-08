@@ -32,6 +32,7 @@ import org.lwjgl.Sys;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.geom.Rectangle;
 import yugecin.opsudance.core.components.Component;
 import yugecin.opsudance.core.input.*;
@@ -45,14 +46,14 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 public class TextField extends Component
 {
 	private String value = "";
-	private Font font;
+	public final UnicodeFont font;
 	private int maxCharacters = 10000;
 
 	private Color borderCol = Color.white;
 	private Color textCol = Color.white;
 	private Color backgroundCol = new Color(0, 0, 0, 0.5f);
 
-	public TextField(Font font, int x, int y, int width, int height) {
+	public TextField(UnicodeFont font, int x, int y, int width, int height) {
 		this.font = font;
 		this.x = x;
 		this.y = y;
@@ -168,13 +169,14 @@ public class TextField extends Component
 					value = value.substring(0, lastindex);
 					break;
 				}
-				if (--lastindex == 0) {
+				if (--lastindex <= 0) {
 					value = "";
 					break;
 				}
 			}
+			break;
 		default:
-			if (31 < e.chr && e.chr < 127 && value.length() < maxCharacters) {
+			if (e.chr > 31 && value.length() < maxCharacters) {
 				value += e.chr;
 			}
 		}

@@ -66,7 +66,7 @@ public class Skin {
 	private static final Color DEFAULT_SONG_SELECT_ACTIVE_TEXT = new Color(255, 255, 255);
 
 	/** The default color of the inactive text in the song selection menu. */
-	private static final Color DEFAULT_SONG_SELECT_INACTIVE_TEXT = new Color(178, 178, 178);
+	private static final Color DEFAULT_SONG_SELECT_INACTIVE_TEXT = new Color(255, 255, 255);
 
 	/** The default color of the stars that fall from the cursor during breaks. */
 	private static final Color DEFAULT_STAR_BREAK_ADDITIVE = new Color(255, 182, 193);
