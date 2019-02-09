@@ -228,7 +228,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			input.poll();
 			Music.poll(delta);
 
-			boolean doflx = state == gameState;
+			boolean doflx = state == gameState &&
+				(GameMod.getModState() & GameMod.FLASHLIGHT.getBit()) != 0;
 
 			Point p1 = MouseInfo.getPointerInfo().getLocation();
 			Point p2 = new Point(p1);
