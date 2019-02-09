@@ -238,7 +238,8 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			if (doflx) {
 				int minx = (1920 - 1600) / 2;
 				int miny = (1080 - 900) / 2;
-				int radius = Math.max(50, gameState.flashlightRadius);
+				int flr = (int) (gameState.flashlightRadius * 7f / 8f);
+				int radius = Math.max(50, flr);
 				radius = Math.min(height, radius);
 				int radius2 = radius / 2;
 
