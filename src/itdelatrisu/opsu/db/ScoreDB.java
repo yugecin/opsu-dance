@@ -410,6 +410,7 @@ public class ScoreDB {
 						res.getInt(4),
 						res.getInt(5)
 					);
+					bm.topScore = res.getInt(6);
 				}
 			}
 		} catch (SQLException e) {

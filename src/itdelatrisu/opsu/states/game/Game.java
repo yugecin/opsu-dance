@@ -19,7 +19,6 @@
 package itdelatrisu.opsu.states.game;
 
 import itdelatrisu.opsu.*;
-import itdelatrisu.opsu.GameData.Grade;
 import itdelatrisu.opsu.audio.HitSound;
 import itdelatrisu.opsu.audio.MusicController;
 import itdelatrisu.opsu.audio.SoundController;
@@ -968,9 +967,8 @@ public class Game extends ComplexOpsuState {
 					ScoreDB.addScore(score);
 					boolean resort = false;
 					final BeatmapSortOrder so = BeatmapSortOrder.current;
-					final Grade grade = score.getGrade();
-					if (grade.compareTo(this.beatmap.topGrade) < 0) {
-						this.beatmap.topGrade = grade;
+					if (score.score > this.beatmap.topScore) {
+						this.beatmap.topGrade = score.getGrade();
 						resort = so == BeatmapSortOrder.RANK;
 					}
 					if (BeatmapGroup.current == BeatmapGroup.RECENT) {

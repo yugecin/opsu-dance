@@ -265,6 +265,7 @@ public class Beatmap implements Comparable<Beatmap>
 	public int endTime = -1;
 
 	public Grade topGrade = Grade.NULL;
+	public long topScore;
 
 	/**
 	 * Constructor.
