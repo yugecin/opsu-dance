@@ -4,6 +4,9 @@
 
 * [What](#what) - [Why](#why) - [Downloads](#downloads) - [Running](#running) - [Building a JAR](#building-a-jar) - [Credits](#credits) - [License](#license)
 
+![main menu](https://robin.basdon.net/blog/002/opsu-d-0.5.0-mainmenu-options.png)
+![song list](https://robin.basdon.net/blog/002/opsu-d-0.5.0-songmenu.png)
+
 What
 ----
 Fork of [opsu!](https://github.com/itdelatrisu/opsu), which is a clone of the [osu!](https://osu.ppy.sh/) rythm game.
@@ -33,6 +36,8 @@ Using an IDE is recommended because it is usually faster than the other options 
 ### Using your favorite IDE
 You should know how to do this. It's recommended to use a working directory like `out` to not pollute the project directory with config/db files.
 
+If your IDE has poor maven support, do `mvn intialize` first and link the jars from the `mvnlibs` folder.
+
 ### Using apache maven
 `mvn compile`
 
@@ -53,11 +58,11 @@ Building a JAR
 
 Using ant is recommended. Ant is used since release 0.5.0
 
-### Using apache maven
-`mvn package -Djar`, find it in the `target` folder.
-
 ### Using apache ant
 `ant jar`, find it in the `bin` folder
+
+### Using apache maven
+`mvn package -Djar`, find it in the `target` folder.
 
 
 Credits
