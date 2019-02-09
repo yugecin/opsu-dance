@@ -102,7 +102,7 @@ public class BackButton
 
 	public boolean hasSkinnedVariant()
 	{
-		return MENU_BACK.getWidth() > 2;
+		return MENU_BACK.getImages() != null || MENU_BACK.getWidth() > 2;
 	}
 
 	/**
