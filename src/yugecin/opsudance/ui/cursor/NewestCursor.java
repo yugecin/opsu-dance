@@ -130,6 +130,14 @@ public class NewestCursor implements Cursor
 		cursorColor.onMovement(this.trail.lastX, this.trail.lastY, x, y);
 		this.trail.lineTo(x, y);
 	}
+	public int lastY()
+	{
+		return this.trail.lastY;
+	}
+	public int lastX()
+	{
+		return this.trail.lastX;
+	}
 
 	@Override
 	public void reset()
