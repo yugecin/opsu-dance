@@ -929,6 +929,27 @@ public class Options
 		}
 	};
 
+	public static final NumericOption OPTION_RAINBOWTRAIL_SATURATION = new NumericOption(
+		"Rainbow colors saturation",
+		"DistanceRainbowSaturation",
+		"Saturation for the rainbow trail color",
+		100,
+		0,
+		100)
+	{
+		@Override
+		public String getValueString ()
+		{
+			return String.valueOf(val);
+		}
+
+		@Override
+		public boolean showCondition()
+		{
+			return CursorColorManager.shouldShowCursorHueIncSaturationOption();
+		}
+	};
+
 	public static final Option WARNING_DISTANCE_RAINBOW_COLOR = new CustomRenderedOption(
 		"",
 		null,
@@ -1029,7 +1050,7 @@ public class Options
 		@Override
 		public boolean showCondition()
 		{
-			return CursorColorManager.shouldShowCursorHueIncOption();
+			return CursorColorManager.shouldShowCursorHueIncSaturationOption();
 		}
 	};
 

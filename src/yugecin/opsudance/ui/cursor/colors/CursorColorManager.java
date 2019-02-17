@@ -67,7 +67,7 @@ public class CursorColorManager
 			(color.getBlueByte());
 	}
 
-	public static boolean shouldShowCursorHueIncOption()
+	public static boolean shouldShowCursorHueIncSaturationOption()
 	{
 		return cursorColor instanceof TimeRainbow || cursorColor instanceof DistanceRainbow;
 	}

@@ -9,6 +9,8 @@ import static yugecin.opsudance.options.Options.*;
 
 class DistanceRainbow extends CursorColor
 {
+	static float saturation;
+
 	private float hue;
 
 	private float hueBeforeMove, hueIncrease;
@@ -16,6 +18,13 @@ class DistanceRainbow extends CursorColor
 	DistanceRainbow(String name)
 	{
 		super(name);
+		this.updateSaturation();
+		OPTION_RAINBOWTRAIL_SATURATION.addListener(this::updateSaturation);
+	}
+
+	private void updateSaturation()
+	{
+		saturation = OPTION_RAINBOWTRAIL_SATURATION.val / 100f;
 	}
 
 	@Override
@@ -33,19 +42,19 @@ class DistanceRainbow extends CursorColor
 	{
 		float hue = this.hueBeforeMove + this.hueIncrease * movementProgress;
 		hue = hue - (float) Math.floor(hue);
-		return Color.HSBtoRGB(hue, 1f, 1f);
+		return Color.HSBtoRGB(hue, saturation, 1f);
 	}
 
 	@Override
 	public int getCurrentColor()
 	{
-		return Color.HSBtoRGB(this.hue, 1f, 1f);
+		return Color.HSBtoRGB(this.hue, saturation, 1f);
 	}
 	
 	@Override
 	public void bindCurrentColor()
 	{
-		final int val = Color.HSBtoRGB(this.hue, 1.0f, 1.0f);
+		final int val = Color.HSBtoRGB(this.hue, saturation, 1.0f);
 		glColor3f(
 			((val >> 16) & 0xFF) / 255f,
 			((val >> 8) & 0xFF) / 255f,
