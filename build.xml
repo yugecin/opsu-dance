@@ -72,6 +72,8 @@ then run (code is compiled automatically when you run)
 			source="${lang.src}"
 			target="${lang.target}"
 			includeantruntime="false"
+			debug="true"
+			debuglevel="lines,vars,source"
 			classpathref="classpath.base" />
 
 		<copy todir="${dir.classes}">
