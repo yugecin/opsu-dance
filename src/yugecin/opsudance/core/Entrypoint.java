@@ -14,6 +14,8 @@ import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Paths;
 
 public class Entrypoint
@@ -116,7 +118,15 @@ public class Entrypoint
 			);
 			System.exit(0x688);
 		}
-		jarfile = new File(wdir.substring(0, separatorIdx));
+		final String path = wdir.substring(0, separatorIdx);
+		jarfile = new File(path);
+		if (!jarfile.exists()) {
+			try {
+				jarfile = new File(URLDecoder.decode(path, "utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				System.err.println("failed to decode path url");
+			}
+		}
 		workingdir = jarfile.getParentFile();
 	}
 
