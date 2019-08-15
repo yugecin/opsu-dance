@@ -13,9 +13,7 @@ import itdelatrisu.opsu.objects.DummyObject;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
-import yugecin.opsudance.movers.LinearMover;
-import yugecin.opsudance.movers.Mover;
-import yugecin.opsudance.movers.QuadraticBezierMover;
+import yugecin.opsudance.movers.*;
 import yugecin.opsudance.movers.factories.*;
 import yugecin.opsudance.movers.slidermovers.DefaultSliderMoverController;
 import yugecin.opsudance.movers.slidermovers.InheritedSliderMoverController;
@@ -44,6 +42,7 @@ public class Dancer {
 		//new LinearFactory(),
 		new ArcFactory(),
 		new QuadraticBezierMoverFactory(),
+		new KnorkeMoverFactory(),
 		new ExgonMoverFactory(),
 	};
 
@@ -108,6 +107,7 @@ public class Dancer {
 			s.init();
 		}
 		QuadraticBezierMover.reset();
+		KnorkeMover.reset();
 	}
 
 	public int getSpinnerIndex() {
