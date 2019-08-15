@@ -2,11 +2,14 @@
 // see the LICENSE file for more details
 package yugecin.opsudance.movers;
 
+import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.objects.GameObject;
 import itdelatrisu.opsu.objects.Slider;
 import itdelatrisu.opsu.objects.curves.Vec2f;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
+
+import java.util.Random;
 
 public class KnorkeMover extends Mover {
 
@@ -45,36 +48,95 @@ public class KnorkeMover extends Mover {
 			newAngle -= Math.PI * 2d;
 		}
 
-		if (start instanceof Slider) {
-			Slider ss = (Slider) start;
-			newAngle = ss.getCurve().getEndAngle();
-			if (ss.getRepeats() % 2 == 1) {
-				newAngle = ss.getCurve().getStartAngle();
+		boolean mirrorx = false, mirrory = false;
+		boolean secondpass = false;
+		for (;;) {
+			if (start instanceof Slider) {
+				Slider ss = (Slider) start;
+				newAngle = ss.getCurve().getEndAngle();
+				if (ss.getRepeats() % 2 == 1) {
+					newAngle = ss.getCurve().getStartAngle();
+				}
+
+				ss = (Slider) start;
+				Vec2f startpos = start.end;
+				Vec2f nextpos = ss.getPointAt(ss.getEndTime() - 10);
+				if (ss.getRepeats() % 2 == 0) {
+					startpos = start.start;
+					nextpos = ss.getPointAt(ss.getTime() + 10);
+				}
+				newAngle = Math.atan2(-nextpos.y + startpos.y, -nextpos.x + startpos.x);
 			}
 
-			ss = (Slider) start;
-			Vec2f startpos = start.end;
-			Vec2f nextpos = ss.getPointAt(ss.getEndTime() - 10);
-			if (ss.getRepeats() % 2 == 0) {
-				startpos = start.start;
-				nextpos = ss.getPointAt(ss.getTime() + 10);
+			p1 = new Vec2f(s.x + (float) (Math.cos(newAngle) * scaleddistance), s.y + (float) (Math.sin(newAngle) * scaleddistance));
+			p2 = p1;
+
+			if (end instanceof Slider) {
+				Slider ss = (Slider) end;
+				Vec2f nextpos = ss.getPointAt(ss.getTime() + 10);
+				double angle = Math.atan2(-nextpos.y + end.start.y, -nextpos.x + end.start.x);
+
+				p2 = new Vec2f(e.x + (float) (Math.cos(angle) * scaleddistance), e.y + (float) (Math.sin(angle) * scaleddistance));
 			}
-			newAngle = Math.atan2(-nextpos.y + startpos.y, -nextpos.x + startpos.x);
+
+			if (secondpass) {
+				break;
+			}
+			secondpass = true;
+
+			double maxdist = 0f;
+			double midx = (startX + endX) / 2, midy = (startY + endY) / 2;
+			for (int i = 0; i < 20; i++) {
+				double[] p = getPointAt(i / 20f);
+				if (p[0] < 0 || p[1] < 0 || p[0] > width || p[1] > height) {
+					double d = Utils.distance(midx, midy, p[0], p[1]);
+					if (d > maxdist) {
+						maxdist = d;
+					}
+				}
+			}
+			if (maxdist > 0) {
+				maxdist *= 2;
+				// this  - MATH.PI / 2 modification is to make it less boring,
+				// because when using the unmodified newAngle it just goes too
+				// straight. Maybe find a better way. Random?
+				double d = new Random((long) (newAngle * 1000)).nextDouble() * Math.PI * 2d;
+				double x = e.x + Math.cos(newAngle + d) * maxdist;
+				double y = e.y + Math.sin(newAngle + d) * maxdist;
+				int m = (int) (x / width);
+				int n = (int) (y / height);
+				if (x < 0) {
+					x = -x;
+				}
+				if (y < 0) {
+					y = -y;
+				}
+				if (Math.abs(m) % 2 == 1) {
+					endX = width - e.x;
+					mirrorx = true;
+				}
+				endX += m * width;
+				if (Math.abs(n) % 2 == 1) {
+					endY = height - e.y;
+					mirrory = true;
+				}
+				endY += n * height;
+				e.y = (float) endY;
+				e.x = (float) endX;
+				continue;
+			}
+			break;
 		}
-
-		p1 = new Vec2f(s.x + (float) (Math.cos(newAngle) * scaleddistance), s.y + (float) (Math.sin(newAngle) * scaleddistance));
-		p2 = p1;
 
 		if (scaleddistance > 1) {
-			lastAngle = Math.atan2(-e.y + p1.y, -e.x + p1.x);
-		}
-
-		if (end instanceof Slider) {
-			Slider ss = (Slider) end;
-			Vec2f nextpos = ss.getPointAt(ss.getTime() + 10);
-			double angle = Math.atan2(-nextpos.y + end.start.y, -nextpos.x + end.start.x);
-
-			p2 = new Vec2f(e.x + (float) (Math.cos(angle) * scaleddistance), e.y + (float) (Math.sin(angle) * scaleddistance));
+			float dy = -e.y + p1.y, dx = -e.x + p1.x;
+			if (mirrorx) {
+				dx = -dx;
+			}
+			if (mirrory) {
+				dy = -dy;
+			}
+			lastAngle = Math.atan2(dy, dx);
 		}
 	}
 
