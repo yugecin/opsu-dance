@@ -85,6 +85,21 @@ public class Circle extends GameObject {
 			color = mirrorColor;
 		}
 
+		int cx = displayContainer.cursor.getX();
+		int cy = displayContainer.cursor.getY();
+		
+		float prgs = 1f;
+		if (trackPosition < getTime()) {
+			prgs = Utils.clamp((trackPosition - (getTime() - 300)) / (float) 300, 0f, 1f);
+		}
+		Vec2f n = this.getPointAt(trackPosition);
+		float ox = cx - n.x;
+		float oy = cy - n.y;
+		ox *= prgs;
+		oy *= prgs;
+		g.pushTransform();
+		g.translate(ox, oy);
+
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int approachTime = gameState.getApproachTime();
 		final int fadeInTime = gameState.getFadeInTime();
@@ -119,6 +134,7 @@ public class Circle extends GameObject {
 
 		g.popTransform();
 		color = orig;
+		g.popTransform();
 	}
 
 	/**

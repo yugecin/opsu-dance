@@ -150,4 +150,16 @@ public class NewestCursor implements Cursor
 		this.trail.dispose();
 		OPTION_CURSOR_SIZE.removeListener(this.cursorSizeListener);
 	}
+
+	@Override
+	public int getX()
+	{
+		return this.trail.lastX;
+	}
+
+	@Override
+	public int getY()
+	{
+		return this.trail.lastY;
+	}
 }

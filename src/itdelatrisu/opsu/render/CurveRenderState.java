@@ -143,6 +143,7 @@ public class CurveRenderState {
 		this.pointsToRender = null;
 	}
 
+	public static float ox, oy, oa, ox2, oy2;
 	/**
 	 * Draw a curve to the screen that's tinted with `color`. The first time
 	 * this is called this caches the image result of the curve and on subsequent
@@ -182,6 +183,11 @@ public class CurveRenderState {
 			GL11.glViewport(oldViewport.get(0), oldViewport.get(1), oldViewport.get(2), oldViewport.get(3));
 		}
 
+		GL11.glPushMatrix();
+		GL11.glTranslatef(ox2, oy2, 0f);
+		GL11.glRotatef(oa * 180 / (float) Math.PI, 0f, 0f, 1f);
+		GL11.glTranslatef(ox, oy, 0f);
+
 		// draw a fullscreen quad with the texture that contains the curve
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_TEXTURE_1D);
@@ -197,6 +203,8 @@ public class CurveRenderState {
 		GL11.glTexCoord2f(1.0f, 0.0f);
 		GL11.glVertex2i(fbo.width, fbo.height);
 		GL11.glEnd();
+		
+		GL11.glPopMatrix();
 	}
 
 	/**

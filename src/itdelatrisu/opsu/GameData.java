@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -295,8 +296,10 @@ public class GameData {
 				HitObjectType hitResultType, Curve curve, boolean expand, boolean hideResult) {
 			this.time = time;
 			this.result = result;
-			this.x = x;
-			this.y = y;
+			//this.x = x;
+			//this.y = y;
+			this.x = displayContainer.cursor.getX();
+			this.y = displayContainer.cursor.getY();
 			this.color = color;
 			this.hitResultType = hitResultType;
 			this.curve = curve;
@@ -964,7 +967,7 @@ public class GameData {
 				float oldWhiteAlpha = Colors.WHITE_FADE.a;
 				float oldColorAlpha = hitResult.color.a;
 				Colors.WHITE_FADE.a = hitResult.color.a = alpha;
-				hitResult.curve.draw(hitResult.color, (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) ? 1 : 0, hitResult.curve.getCurvePoints().length);
+				//hitResult.curve.draw(hitResult.color, (!OPTION_FALLBACK_SLIDERS.state && OPTION_MERGING_SLIDERS.state) ? 1 : 0, hitResult.curve.getCurvePoints().length);
 				Colors.WHITE_FADE.a = oldWhiteAlpha;
 				hitResult.color.a = oldColorAlpha;
 			}

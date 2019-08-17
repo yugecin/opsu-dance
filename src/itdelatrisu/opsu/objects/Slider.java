@@ -27,9 +27,11 @@ import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.objects.curves.Curve;
 import itdelatrisu.opsu.objects.curves.Vec2f;
+import itdelatrisu.opsu.render.CurveRenderState;
 import itdelatrisu.opsu.ui.Colors;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -193,6 +195,45 @@ public class Slider extends GameObject {
 		if (mirror) {
 			color = mirrorColor;
 		}
+		
+		int cx = displayContainer.cursor.getX();
+		int cy = displayContainer.cursor.getY();
+		
+		float oangle = 0;
+		float prgs = 1f;
+		if (trackPosition > getTime()) {
+			int p = trackPosition;
+			if (p > getEndTime()) {
+				p = getEndTime();
+			}
+			Vec2f a = this.getPointAt(trackPosition);
+			Vec2f b = this.getPointAt(trackPosition + 10);
+			oangle = (float) (this.curve.getStartAngle()/180*Math.PI - Math.atan2(b.y - a .y, b.x - a .x));
+
+			float t = (trackPosition - hitObject.getTime()) / sliderTime;
+			float floor = (float) Math.floor(t);
+			oangle += (floor % 2 == 0) ? 0 : Math.PI;
+		} else {
+			prgs = Utils.clamp((trackPosition - (getTime() - 300)) / (float) 300, 0f, 1f);
+		}
+		Vec2f n = curve.pointAt(getT(trackPosition, false));
+		float ox = cx - n.x;
+		float oy = cy - n.y;
+		ox *= prgs;
+		oy *= prgs;
+		float glox, gloy, glox2, gloy2, gloa;
+		glox = CurveRenderState.ox = -n.x * prgs;
+		gloy = CurveRenderState.oy = -n.y * prgs;
+		glox2 = CurveRenderState.ox2 = cx * prgs;
+		gloy2 = CurveRenderState.oy2 = cy * prgs;
+		gloa = CurveRenderState.oa = oangle;
+		g.pushTransform();
+		g.translate(ox, oy);
+
+		//g.rotate(1f, 0f, 10f);
+		//g.translate(-n.x * prgs, -n.y * prgs);
+		//g.rotate(1f, 0f, oangle * 180f / (float) Math.PI);
+		//g.translate(ox, oy);
 
 		int timeDiff = hitObject.getTime() - trackPosition;
 		final int repeatCount = hitObject.getRepeatCount();
@@ -216,9 +257,12 @@ public class Slider extends GameObject {
 				Math.max(0f, 1f - ((float) (trackPosition - hitObject.getTime()) / (getEndTime() - hitObject.getTime())) * 1.05f);
 		}
 
+		g.popTransform();
 		curveColor.a = sliderAlpha;
 		boolean isCurveCompletelyDrawn = drawSliderTrack(trackPosition, Utils.clamp(1f - fadeinScale, 0f, 1f));
 		color.a = alpha;
+		g.pushTransform();
+		g.translate(ox, oy);
 
 		// end circle (only draw if ball still has to go there)
 		if (OPTION_DRAW_SLIDER_ENDCIRCLES.state && isCurveCompletelyDrawn && currentRepeats < repeatCount - (repeatCount % 2 == 0 ? 1 : 0)) {
@@ -263,8 +307,16 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
+			g.popTransform();
+			GL11.glPushMatrix();
+			GL11.glTranslatef(glox2, gloy2, 0f);
+			GL11.glRotatef(gloa * 180 / (float) Math.PI, 0f, 0f, 1f);
+			GL11.glTranslatef(glox, gloy, 0f);
 			drawSliderTicks(g, trackPosition, alpha, decorationsAlpha, mirror);
 			Colors.WHITE_FADE.a = oldWhiteFadeAlpha;
+			GL11.glPopMatrix();
+			g.pushTransform();
+			g.translate(ox, oy);
 		}
 
 		g.pushTransform();
@@ -293,6 +345,11 @@ public class Slider extends GameObject {
 
 		g.popTransform();
 
+		g.popTransform();
+		GL11.glPushMatrix();
+		GL11.glTranslatef(glox2, gloy2, 0f);
+		GL11.glRotatef(gloa * 180 / (float) Math.PI, 0f, 0f, 1f);
+		GL11.glTranslatef(glox, gloy, 0f);
 		// repeats
 		if (isCurveCompletelyDrawn) {
 			for (int tcurRepeat = currentRepeats; tcurRepeat <= currentRepeats + 1 && tcurRepeat < repeatCount - 1; tcurRepeat++) {
@@ -317,6 +374,9 @@ public class Slider extends GameObject {
 				}
 			}
 		}
+		GL11.glPopMatrix();
+		g.pushTransform();
+		g.translate(ox, oy);
 
 		if (timeDiff >= 0) {
 			// approach circle
@@ -331,12 +391,16 @@ public class Slider extends GameObject {
 		} else {
 			// Since update() might not have run before drawing during a replay, the
 			// slider time may not have been calculated, which causes NAN numbers and flicker.
-			if (sliderTime == 0)
+			if (sliderTime == 0) {
+				g.popTransform();
 				return;
+			}
 
 			// Don't draw follow ball if already done
-			if (trackPosition > hitObject.getTime() + sliderTimeTotal)
+			if (trackPosition > hitObject.getTime() + sliderTimeTotal) {
+				g.popTransform();
 				return;
+			}
 
 			Vec2f c = curve.pointAt(getT(trackPosition, false));
 			Vec2f c2 = curve.pointAt(getT(trackPosition, false) + 0.01f);
@@ -388,6 +452,7 @@ public class Slider extends GameObject {
 		Colors.WHITE_FADE.a = oldAlpha;
 
 		color = orig;
+		g.popTransform();
 	}
 
 	/**
@@ -756,7 +821,7 @@ public class Slider extends GameObject {
 					posX, posY, hitObject, currentRepeats);
 
 				// fade out reverse arrow
-				data.sendSliderRepeatResult(trackPosition, posX, posY, Color.white, curve, type);
+				//data.sendSliderRepeatResult(trackPosition, posX, posY, Color.white, curve, type);
 			}
 
 			// held during new tick

@@ -6,6 +6,8 @@ public interface Cursor
 {
 	void draw(boolean expanded);
 	void setCursorPosition(int x, int y);
+	int getX();
+	int getY();
 	void reset();
 	void destroy();
 	boolean isBeatmapSkinned();

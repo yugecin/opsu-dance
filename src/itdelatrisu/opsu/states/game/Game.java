@@ -904,6 +904,7 @@ public class Game extends ComplexOpsuState {
 			autoMousePosition.set(autoPoint.x, autoPoint.y);
 		}
 
+		/*
 		if (isReplay) {
 			displayContainer.cursor.setCursorPosition(replayX, replayY);
 		} else if (GameMod.AUTO.isActive()) {
@@ -917,7 +918,7 @@ public class Game extends ComplexOpsuState {
 			}
 		} else if (GameMod.AUTOPILOT.isActive() && !this.pauseOverlay.isActive()) {
 			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
-		} else {
+		} else*/ {
 			displayContainer.cursor.setCursorPosition(mouseX, mouseY);
 		}
 	}
