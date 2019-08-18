@@ -207,8 +207,10 @@ public class Slider extends GameObject {
 				p = getEndTime();
 			}
 			Vec2f a = this.getPointAt(trackPosition);
-			Vec2f b = this.getPointAt(trackPosition + 10);
-			oangle = (float) (this.curve.getStartAngle()/180*Math.PI - Math.atan2(b.y - a .y, b.x - a .x));
+			Vec2f b = this.getPointAt(trackPosition + 150);
+			float aa = (float) Math.atan2(b.y - a.y, b.x - a.x);
+			oangle = (float) (this.curve.getStartAngle()/180*Math.PI - aa);
+
 
 			float t = (trackPosition - hitObject.getTime()) / sliderTime;
 			float floor = (float) Math.floor(t);
