@@ -207,9 +207,35 @@ public class Slider extends GameObject {
 				p = getEndTime();
 			}
 			Vec2f a = this.getPointAt(trackPosition);
-			Vec2f b = this.getPointAt(trackPosition + 150);
+			Vec2f b = null;
+			int m = 150;
+			//if (trackPosition - getTime() < 200) {
+				//m = 10 + (int) (140f * (trackPosition - getTime()) / 200);
+			//}
+			float fff = (float) Math.floor((getTime() - hitObject.getTime()) / sliderTime);
+			float dt = getTime() - hitObject.getTime() - sliderTime * fff;
+			if ((fff % 2) == 0) {
+				dt = sliderTime - dt;
+			}
+			if (dt < 300) {
+				m = 5 + (int) (145f * dt / 300);
+			}
+			for (int i = m; i >= 10; i -= 10) {
+				int t1 = trackPosition;
+				int t2 = trackPosition + i;
+				float f1 = (float) Math.floor((t1 - hitObject.getTime()) / sliderTime);
+				float f2 = (float) Math.floor((t2 - hitObject.getTime()) / sliderTime);
+				if ((f1 % 2) == (f2 % 2)) {
+					b = this.getPointAt(t2);
+					break;
+				}
+			}
+			if (b == null) {
+				a = this.getPointAt(trackPosition - 5);
+				b = this.getPointAt(trackPosition);
+			}
 			float aa = (float) Math.atan2(b.y - a.y, b.x - a.x);
-			oangle = (float) (this.curve.getStartAngle()/180*Math.PI - aa);
+			oangle += (float) (this.curve.getStartAngle()/180*Math.PI - aa);
 
 
 			float t = (trackPosition - hitObject.getTime()) / sliderTime;
@@ -217,6 +243,10 @@ public class Slider extends GameObject {
 			oangle += (floor % 2 == 0) ? 0 : Math.PI;
 		} else {
 			prgs = Utils.clamp((trackPosition - (getTime() - 300)) / (float) 300, 0f, 1f);
+			//Vec2f a = this.getPointAt(getTime());
+			//Vec2f b = this.getPointAt(getTime() + 150);
+			//float aa = (float) Math.atan2(b.y - a.y, b.x - a.x);
+			//oangle = (float) (this.curve.getStartAngle()/180*Math.PI - aa) * prgs;
 		}
 		Vec2f n = curve.pointAt(getT(trackPosition, false));
 		float ox = cx - n.x;
