@@ -1625,7 +1625,7 @@ public class Game extends ComplexOpsuState {
 
 		// unhide cursor for "auto" mod and replays
 		if (GameMod.AUTO.isActive() || isReplay) {
-			GLHelper.showNativeCursor();
+			//GLHelper.showNativeCursor();
 		}
 
 		// load replay frames

@@ -24,6 +24,7 @@ public class FPSMeter {
 	private int[] measurements;
 	private int timeBetweenUpdates;
 	private int currentMeasureIndex;
+	private long lastcall = System.nanoTime();
 
 	public FPSMeter(int measurements) {
 		targetTimeBetweenUpdates = 1000 / measurements;
@@ -34,19 +35,33 @@ public class FPSMeter {
 		timeBetweenUpdates += delta;
 		while (timeBetweenUpdates >= targetTimeBetweenUpdates) {
 			timeBetweenUpdates -= targetTimeBetweenUpdates;
-			measurements[currentMeasureIndex] = 0;
+			//measurements[currentMeasureIndex] = 0;
 			currentMeasureIndex = ++currentMeasureIndex % measurements.length;
 		}
 		for (int i = 0; i < measurements.length; i++) {
+			/*
 			if (i == currentMeasureIndex) {
 				continue;
 			}
 			measurements[i]++;
+			*/
 		}
+		long nownano = System.nanoTime();
+		measurements[currentMeasureIndex] = 1000;
+		if (delta > 0) {
+			measurements[currentMeasureIndex] = 1000 / delta;
+		} else {
+			measurements[currentMeasureIndex] = (int) (1000000000L / (nownano - lastcall));
+		}
+		lastcall = nownano;
 	}
 
 	public int getValue() {
-		return measurements[currentMeasureIndex];
+		int val = 0;
+		for (int i = 0; i < measurements.length; i++) {
+			val += measurements[i];
+		}
+		return val / measurements.length;
 	}
 
 }

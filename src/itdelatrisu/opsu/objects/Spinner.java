@@ -209,12 +209,17 @@ public class Spinner extends GameObject {
 		// main spinner elements
 		GameImage.SPINNER_CIRCLE.getImage().setAlpha(alpha);
 		GameImage.SPINNER_CIRCLE.getImage().setRotation(drawRotation * 360f);
-		GameImage.SPINNER_CIRCLE.getImage().drawCentered(width2, height2);
+		int xx = displayContainer.cursor.getX();
+		int yy = displayContainer.cursor.getY();
+		float ang = trackPosition / 20f;
+		xx += (float) Math.cos(ang) * 50;
+		yy += (float) Math.sin(ang) * 50;
+		GameImage.SPINNER_CIRCLE.getImage().drawCentered(xx, yy);
 		if (!GameMod.HIDDEN.isActive()) {
 			float approachScale = 1 - Utils.clamp(((float) timeDiff / (hitObject.getTime() - hitObject.getEndTime())), 0f, 1f);
 			Image approachCircleScaled = GameImage.SPINNER_APPROACHCIRCLE.getImage().getScaledCopy(approachScale);
 			approachCircleScaled.setAlpha(alpha);
-			approachCircleScaled.drawCentered(width2, height2);
+			approachCircleScaled.drawCentered(xx, yy);
 		}
 		GameImage.SPINNER_SPIN.getImage().setAlpha(alpha);
 		GameImage.SPINNER_SPIN.getImage().drawCentered(width2, height * 3 / 4);
