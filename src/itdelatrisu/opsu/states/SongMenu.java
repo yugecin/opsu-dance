@@ -1020,6 +1020,8 @@ public class SongMenu extends BaseOpsuState
 			SoundController.playSound(SoundEffect.MENUCLICK);
 			if (nodeList.navigationKeyPressed(e.keyCode)) {
 				this.selectionFlashTime = 0;
+				this.songInfo = null;
+				this.songChangeTimer.setTime(0);
 			}
 			if (bm != MusicController.getBeatmap()) {
 				this.musicIconBounceTimer.setTime(0);
