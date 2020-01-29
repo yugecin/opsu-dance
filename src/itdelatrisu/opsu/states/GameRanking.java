@@ -32,6 +32,7 @@ import itdelatrisu.opsu.ui.UI;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
@@ -225,4 +226,10 @@ public class GameRanking extends BaseOpsuState {
 	 * Returns the current GameData object (usually null unless state active).
 	 */
 	public GameData getGameData() { return data; } // TODO why is this unused
+
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.append("> GameRanking dump\n");
+	}
 }

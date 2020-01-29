@@ -35,6 +35,8 @@ import yugecin.opsudance.core.state.BaseOpsuState;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 
+import java.io.StringWriter;
+
 /**
  * "Splash Screen" state.
  * <p>
@@ -54,6 +56,8 @@ public class Splash extends BaseOpsuState {
 	/** Wether the loading progress was inited. */
 	private boolean inited;
 
+	private String progress = "pending";
+
 	@Override
 	protected void revalidate() {
 		super.revalidate();
@@ -69,14 +73,19 @@ public class Splash extends BaseOpsuState {
 		thread = new Thread() {
 			@Override
 			public void run() {
+				progress = "unpacking osz";
 				oszunpacker.unpackAll();
+				progress = "parsing beatmaps";
 				beatmapParser.parseAll();
+				progress = "loading top grades";
 				ScoreDB.loadTopGrades();
+				progress = "poking beatmap list";
 				beatmapList.activeGroupChanged();
+				progress = "importing replays";
 				replayImporter.importAll();
-
+				progress = "initing sound";
 				SoundController.init();
-
+				progress = null;
 				finished = true;
 				thread = null;
 			}
@@ -142,4 +151,12 @@ public class Splash extends BaseOpsuState {
 		}
 	}
 
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.write("> Splash dump\n");
+		dump.write("progress: ");
+		dump.write(this.progress == null ? "done" : this.progress);
+		dump.write("\n");
+	}
 }

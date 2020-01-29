@@ -1,9 +1,10 @@
-// Copyright 2017-2019 yugecin - this source is licensed under GPL
+// Copyright 2017-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
 import itdelatrisu.opsu.*;
 import itdelatrisu.opsu.audio.MusicController;
+import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.HitObject;
 import itdelatrisu.opsu.downloads.Updater;
@@ -529,11 +530,41 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	public void writeErrorDump(StringWriter dump) {
 		dump.append("> DisplayContainer dump\n");
 		dump.append("OpenGL version: ").append(glVersion).append( "(").append(glVendor).append(")\n");
-		if (state == null) {
-			dump.append("state is null!\n");
-			return;
+		dump.append("state is ");
+		if (state != null) {
+			dump.append(state.getClass().getSimpleName());
+			dump.append("\n");
+			state.writeErrorDump(dump);
+			dump.append("\n");
+			dump.append("< DisplayContainer\n");
+		} else {
+			dump.append("null\n");
 		}
-		state.writeErrorDump(dump);
+		dump.append("tNextState is ");
+		if (tNextState != null) {
+			dump.append(tNextState.getClass().getSimpleName());
+			dump.append("\n");
+		} else {
+			dump.append("null\n");
+		}
+		for (Renderable r : overlays) {
+			dump.append("overlay ");
+			dump.append(state.getClass().getSimpleName());
+			dump.append("\n");
+			r.writeErrorDump(dump);
+			dump.append("\n");
+			dump.append("< DisplayContainer");
+		}
+		dump.append("loading sound: ");
+		String loadingsound = SoundController.getCurrentFileName();
+		if (loadingsound != null) {
+			dump.append(loadingsound);
+			dump.append(", progress: ");
+			dump.append(String.valueOf(SoundController.getLoadingProgress()));
+			dump.append("\n");
+		} else {
+			dump.append("none\n");
+		}
 	}
 
 	public boolean isIn(OpsuState state)

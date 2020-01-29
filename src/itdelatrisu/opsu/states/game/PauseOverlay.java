@@ -1,4 +1,4 @@
-// Copyright 2018 yugecin - this source is licensed under GPL
+// Copyright 2018-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package itdelatrisu.opsu.states.game;
 
@@ -23,6 +23,8 @@ import static org.lwjgl.input.Keyboard.*;
 import static org.lwjgl.opengl.GL11.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
+
+import java.io.StringWriter;
 
 class PauseOverlay
 	implements Renderable, InputListener, SkinChangedListener, ResolutionChangedListener
@@ -325,5 +327,11 @@ class PauseOverlay
 		this.retryButton.draw(null);
 		glColor4f(1f, 1f, 1f, fadein);
 		this.backButton.draw(null);
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump)
+	{
+		dump.write("> pause overlay is active\n");
 	}
 }

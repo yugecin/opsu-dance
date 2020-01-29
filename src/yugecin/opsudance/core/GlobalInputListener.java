@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core;
 
@@ -6,6 +6,7 @@ import yugecin.opsudance.core.input.*;
 
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.core.errorhandling.ErrorHandler.*;
 import static yugecin.opsudance.options.Options.*;
 
 public class GlobalInputListener implements InputListener
@@ -37,6 +38,10 @@ public class GlobalInputListener implements InputListener
 				!displayContainer.isIn(gameState))
 			{
 				skinservice.reloadSkin();
+			}
+		case KEY_C:
+			if (input.isControlDown() && input.isShiftDown()) {
+				explode("requested crash", new Exception(), PREVENT_REPORT);
 			}
 		default:
 			return;

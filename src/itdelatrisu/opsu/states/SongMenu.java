@@ -46,6 +46,7 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent.Kind;
@@ -1532,5 +1533,11 @@ public class SongMenu extends BaseOpsuState
 		gameState.loadBeatmap(beatmap);
 		gameState.setReplay(null);
 		gameState.restart(RestartReason.NEWGAME);
+	}
+
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.write("> SongMenu dump\n");
 	}
 }

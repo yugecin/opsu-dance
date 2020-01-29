@@ -48,6 +48,7 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import itdelatrisu.opsu.ui.cursor.CursorImpl;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.util.*;
 
 import org.lwjgl.input.Keyboard;
@@ -2448,5 +2449,11 @@ public class Game extends ComplexOpsuState {
 	public boolean isLosing()
 	{
 		return this.restartReason == RestartReason.LOSE;
+	}
+
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.write("> Game dump\n");
 	}
 }

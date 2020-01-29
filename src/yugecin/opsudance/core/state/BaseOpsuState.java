@@ -1,4 +1,4 @@
-// Copyright 2017-2018 yugecin - this source is licensed under GPL
+// Copyright 2017-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.core.state;
 
@@ -109,8 +109,12 @@ public abstract class BaseOpsuState
 	}
 
 	@Override
-	public void writeErrorDump(StringWriter dump) {
+	public final void writeErrorDump(StringWriter dump)
+	{
 		dump.append("> BaseOpsuState dump\n");
 		dump.append("isDirty: ").append(String.valueOf(isDirty)).append('\n');
+		this.writeStateErrorDump(dump);
 	}
+
+	protected abstract void writeStateErrorDump(StringWriter dump);
 }

@@ -35,6 +35,7 @@ import itdelatrisu.opsu.ui.animations.AnimationEquation;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -922,6 +923,12 @@ public class MainMenu extends BaseOpsuState {
 		buttonAnimation.change(500, 0f, 1f, OUT_QUAD);
 		logoPosition.change(1800, 0, logoPositionOffsetX, IN_QUAD);
 		logoState = LogoState.CLOSING;
+	}
+
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.append("> MainMenu dump\n");
 	}
 	
 	private void drawMenuButton(

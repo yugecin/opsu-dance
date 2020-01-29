@@ -32,6 +32,7 @@ import itdelatrisu.opsu.ui.UI;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -726,4 +727,10 @@ public class ButtonMenu extends BaseOpsuState {
 	 * Returns the score data being processed, or null if none.
 	 */
 	private ScoreData getScoreData() { return scoreData; }
+
+	@Override
+	protected void writeStateErrorDump(StringWriter dump)
+	{
+		dump.append("> ButtonMenu dump\n");
+	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2016-2019 yugecin - this source is licensed under GPL
+// Copyright 2016-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance.ui;
 
@@ -21,6 +21,7 @@ import yugecin.opsudance.events.SkinChangedListener;
 import yugecin.opsudance.options.*;
 import yugecin.opsudance.utils.FontUtil;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1398,6 +1399,19 @@ public class OptionsOverlay
 			if (this.isHovered()) {
 				hoveredDropdownMenu = this;
 			}
+		}
+	}
+
+	@Override
+	public void writeErrorDump(StringWriter dump)
+	{
+		dump.write("> options overlay is active\n");
+		dump.write("hoverOption is ");
+		if (hoverOption != null) {
+			dump.write(hoverOption.configurationName);
+			dump.write("\n");
+		} else {
+			dump.write("null\n");
 		}
 	}
 }
