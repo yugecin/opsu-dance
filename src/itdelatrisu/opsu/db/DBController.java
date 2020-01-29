@@ -32,12 +32,13 @@ public class DBController {
 	/**
 	 * Initializes all databases.
 	 */
-	public static void init() {
+	public static void init() throws Exception
+	{
 		// load the sqlite-JDBC driver using the current class loader
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Could not load sqlite driver", e);
+			throw new Exception("Could not load sqlite driver", e);
 		}
 
 		// initialize the databases
@@ -48,7 +49,8 @@ public class DBController {
 	/**
 	 * Closes all database connections.
 	 */
-	public static void closeConnections() {
+	public static void closeConnections()
+	{
 		BeatmapDB.closeConnection();
 		ScoreDB.closeConnection();
 	}
@@ -58,13 +60,14 @@ public class DBController {
 	 * @param path the database path
 	 * @return the Connection, or null if a connection could not be established
 	 */
-	public static Connection createConnection(String path) {
+	public static Connection createConnection(String path) throws Exception
+	{
 		try {
 			return DriverManager.getConnection(String.format("jdbc:sqlite:%s", path));
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
-			throw new RuntimeException("Could not connect to db " + path, e);
+			throw new Exception("Could not connect to db " + path, e);
 		}
 	}
 }

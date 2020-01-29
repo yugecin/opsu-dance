@@ -20,6 +20,7 @@ package itdelatrisu.opsu.db;
 
 import itdelatrisu.opsu.beatmap.Beatmap;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
+import yugecin.opsudance.core.errorhandling.ErrorHandler;
 
 import java.io.File;
 import java.sql.Connection;
@@ -97,11 +98,10 @@ public class BeatmapDB {
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init() {
+	public static void init() throws Exception
+	{
 		// create a database connection
 		connection = DBController.createConnection(config.BEATMAP_DB.getPath());
-		if (connection == null)
-			return;
 
 		// run any database updates
 		updateDatabase();
@@ -110,40 +110,33 @@ public class BeatmapDB {
 		createDatabase();
 
 		// prepare sql statements (used below)
-		try {
-			updateSizeStmt = connection.prepareStatement("REPLACE INTO info (key, value) VALUES ('size', ?)");
-		} catch (SQLException e) {
-			explode("Failed to prepare beatmap statements", e, PREVENT_CONTINUE);
-		}
+		updateSizeStmt = connection.prepareStatement("REPLACE INTO info (key, value) VALUES ('size', ?)");
 
 		// retrieve the cache size
 		getCacheSize();
 
 		// prepare sql statements (not used here)
-		try {
-			insertStmt = connection.prepareStatement(
-				"INSERT INTO beatmaps VALUES (" +
-					"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
-					"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
-					"?, ?, ?, ?, ?, ?, ?" +
-				")"
-			);
-			selectStmt = connection.prepareStatement("SELECT * FROM beatmaps WHERE dir = ? AND file = ?");
-			deleteMapStmt = connection.prepareStatement("DELETE FROM beatmaps WHERE dir = ? AND file = ?");
-			deleteGroupStmt = connection.prepareStatement("DELETE FROM beatmaps WHERE dir = ?");
-			setStarsStmt = connection.prepareStatement("UPDATE beatmaps SET stars = ? WHERE dir = ? AND file = ?");
-			updatePlayStatsStmt = connection.prepareStatement("UPDATE beatmaps SET playCount = ?, lastPlayed = ? WHERE dir = ? AND file = ?");
-			setFavoriteStmt = connection.prepareStatement("UPDATE beatmaps SET favorite = ? WHERE dir = ? AND file = ?");
-			setLocalOffsetStmt = connection.prepareStatement("UPDATE beatmaps SET localOffset = ? WHERE dir = ? AND file = ?");
-		} catch (SQLException e) {
-			explode("Failed to prepare beatmap statements", e, PREVENT_CONTINUE);
-		}
+		insertStmt = connection.prepareStatement(
+			"INSERT INTO beatmaps VALUES (" +
+				"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
+				"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
+				"?, ?, ?, ?, ?, ?, ?" +
+			")"
+		);
+		selectStmt = connection.prepareStatement("SELECT * FROM beatmaps WHERE dir = ? AND file = ?");
+		deleteMapStmt = connection.prepareStatement("DELETE FROM beatmaps WHERE dir = ? AND file = ?");
+		deleteGroupStmt = connection.prepareStatement("DELETE FROM beatmaps WHERE dir = ?");
+		setStarsStmt = connection.prepareStatement("UPDATE beatmaps SET stars = ? WHERE dir = ? AND file = ?");
+		updatePlayStatsStmt = connection.prepareStatement("UPDATE beatmaps SET playCount = ?, lastPlayed = ? WHERE dir = ? AND file = ?");
+		setFavoriteStmt = connection.prepareStatement("UPDATE beatmaps SET favorite = ? WHERE dir = ? AND file = ?");
+		setLocalOffsetStmt = connection.prepareStatement("UPDATE beatmaps SET localOffset = ? WHERE dir = ? AND file = ?");
 	}
 
 	/**
 	 * Creates the database, if it does not exist.
 	 */
-	private static void createDatabase() {
+	private static void createDatabase() throws Exception
+	{
 		try (Statement stmt = connection.createStatement()) {
 			String sql =
 				"CREATE TABLE IF NOT EXISTS beatmaps (" +
@@ -173,8 +166,6 @@ public class BeatmapDB {
 			// set the version key, if empty
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', '%s')", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
-		} catch (SQLException e) {
-			explode("Could not create beatmap db", e, PREVENT_CONTINUE);
 		}
 	}
 
@@ -182,7 +173,8 @@ public class BeatmapDB {
 	 * Applies any database updates by comparing the current version to the
 	 * stored version.  Does nothing if tables have not been created.
 	 */
-	private static void updateDatabase() {
+	private static void updateDatabase() throws Exception
+	{
 		try (Statement stmt = connection.createStatement()) {
 			int version = 0;
 
@@ -225,8 +217,6 @@ public class BeatmapDB {
 				ps.executeUpdate();
 				ps.close();
 			}
-		} catch (SQLException e) {
-			explode("Failed to update beatmap db", e, PREVENT_CONTINUE);
 		}
 	}
 
@@ -279,7 +269,12 @@ public class BeatmapDB {
 		} catch (SQLException e) {
 			softErr(e, "Could not drop beatmap db");
 		}
-		createDatabase();
+		try {
+			createDatabase();
+		} catch (Exception e) {
+			// TODO better error handling here (can't stop from here)
+			explode("failed to re-create the db", e, ErrorHandler.DEFAULT_OPTIONS);
+		}
 	}
 
 	/**

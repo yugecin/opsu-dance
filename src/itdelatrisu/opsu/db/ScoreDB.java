@@ -82,11 +82,10 @@ public class ScoreDB {
 	/**
 	 * Initializes the database connection.
 	 */
-	public static void init() {
+	public static void init() throws Exception
+	{
 		// create a database connection
 		connection = DBController.createConnection(config.SCORE_DB.getPath());
-		if (connection == null)
-			return;
 
 		// run any database updates
 		updateDatabase();
@@ -95,42 +94,39 @@ public class ScoreDB {
 		createDatabase();
 
 		// prepare sql statements
-		try {
-			insertStmt = connection.prepareStatement(
-				// TODO: There will be problems if multiple replays have the same
-				// timestamp (e.g. when imported) due to timestamp being the primary key.
-				"INSERT OR IGNORE INTO scores VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-			);
-			selectMapStmt = connection.prepareStatement(
-				"SELECT * FROM scores WHERE " +
-				"MID = ? AND title = ? AND artist = ? AND creator = ? AND version = ?"
-			);
-			selectMapSetStmt = connection.prepareStatement(
-				"SELECT * FROM scores WHERE " +
-				"MSID = ? AND title = ? AND artist = ? AND creator = ? ORDER BY version DESC"
-			);
-			deleteSongStmt = connection.prepareStatement(
-				"DELETE FROM scores WHERE " +
-				"MID = ? AND title = ? AND artist = ? AND creator = ? AND version = ?"
-			);
-			deleteScoreStmt = connection.prepareStatement(
-				"DELETE FROM scores WHERE " +
-				"timestamp = ? AND MID = ? AND MSID = ? AND title = ? AND artist = ? AND " +
-				"creator = ? AND version = ? AND hit300 = ? AND hit100 = ? AND hit50 = ? AND " +
-				"geki = ? AND katu = ? AND miss = ? AND score = ? AND combo = ? AND perfect = ? AND mods = ? AND " +
-				"(replay = ? OR (replay IS NULL AND ? IS NULL)) AND " +
-				"(playerName = ? OR (playerName IS NULL AND ? IS NULL))"
-				// TODO: extra playerName checks not needed if name is guaranteed not null
-			);
-		} catch (SQLException e) {
-			softErr(e, "Failed to prepare score statements");
-		}
+		insertStmt = connection.prepareStatement(
+			// TODO: There will be problems if multiple replays have the same
+			// timestamp (e.g. when imported) due to timestamp being the primary key.
+			"INSERT OR IGNORE INTO scores VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		);
+		selectMapStmt = connection.prepareStatement(
+			"SELECT * FROM scores WHERE " +
+			"MID = ? AND title = ? AND artist = ? AND creator = ? AND version = ?"
+		);
+		selectMapSetStmt = connection.prepareStatement(
+			"SELECT * FROM scores WHERE " +
+			"MSID = ? AND title = ? AND artist = ? AND creator = ? ORDER BY version DESC"
+		);
+		deleteSongStmt = connection.prepareStatement(
+			"DELETE FROM scores WHERE " +
+			"MID = ? AND title = ? AND artist = ? AND creator = ? AND version = ?"
+		);
+		deleteScoreStmt = connection.prepareStatement(
+			"DELETE FROM scores WHERE " +
+			"timestamp = ? AND MID = ? AND MSID = ? AND title = ? AND artist = ? AND " +
+			"creator = ? AND version = ? AND hit300 = ? AND hit100 = ? AND hit50 = ? AND " +
+			"geki = ? AND katu = ? AND miss = ? AND score = ? AND combo = ? AND perfect = ? AND mods = ? AND " +
+			"(replay = ? OR (replay IS NULL AND ? IS NULL)) AND " +
+			"(playerName = ? OR (playerName IS NULL AND ? IS NULL))"
+			// TODO: extra playerName checks not needed if name is guaranteed not null
+		);
 	}
 
 	/**
 	 * Creates the database, if it does not exist.
 	 */
-	private static void createDatabase() {
+	private static void createDatabase() throws Exception
+	{
 		try (Statement stmt = connection.createStatement()) {
 			String sql =
 				"CREATE TABLE IF NOT EXISTS scores (" +
@@ -155,8 +151,6 @@ public class ScoreDB {
 			// set the version key, if empty
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', %d)", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
-		} catch (SQLException e) {
-			softErr(e, "Could not create score db");
 		}
 	}
 
@@ -164,7 +158,8 @@ public class ScoreDB {
 	 * Applies any database updates by comparing the current version to the
 	 * stored version.  Does nothing if tables have not been created.
 	 */
-	private static void updateDatabase() {
+	private static void updateDatabase() throws Exception
+	{
 		try (Statement stmt = connection.createStatement()) {
 			int version = 0;
 
@@ -207,8 +202,6 @@ public class ScoreDB {
 				ps.executeUpdate();
 				ps.close();
 			}
-		} catch (SQLException e) {
-			softErr(e, "Failed to update score database");
 		}
 	}
 

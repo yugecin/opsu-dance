@@ -1,4 +1,4 @@
-// Copyright 2017-2019 yugecin - this source is licensed under GPL
+// Copyright 2017-2020 yugecin - this source is licensed under GPL
 // see the LICENSE file for more details
 package yugecin.opsudance;
 
@@ -35,7 +35,10 @@ public class OpsuDance
 			}
 			Log.info("prechecks done and options parsed");
 
-			if (!this.initDatabase()) {
+			try {
+				DBController.init();
+			} catch (Throwable e) {
+				explode("Could not initialize database.", e, PREVENT_CONTINUE);
 				return;
 			}
 			initUpdater(args);
@@ -76,19 +79,6 @@ public class OpsuDance
 		displayContainer.teardown();
 		displayContainer.pause();
 		return caughtException != null && explode("update/render error", caughtException, ALLOW_TERMINATE);
-	}
-
-	/**
-	 * @return {@code false} on failure
-	 */
-	private boolean initDatabase() {
-		try {
-			DBController.init();
-			return true;
-		} catch (UnsatisfiedLinkError e) {
-			explode("Could not initialize database.", e, PREVENT_CONTINUE);
-			return false;
-		}
 	}
 
 	private void initUpdater(String[] args) {
