@@ -5,6 +5,7 @@ package yugecin.opsudance.core.errorhandling;
 import org.newdawn.slick.util.Log;
 
 import itdelatrisu.opsu.ui.Colors;
+import itdelatrisu.opsu.ui.Fonts;
 import yugecin.opsudance.core.Constants;
 import yugecin.opsudance.core.Entrypoint;
 import yugecin.opsudance.core.Environment;
@@ -72,7 +73,10 @@ public class ErrorHandler
 	{
 		format = new Formatter().format(format, args).toString();
 		Log.warn(format);
-		bubNotifs.send(Colors.BUB_ORANGE, format);
+		/*don't send bubble notif when game was not inited*/
+		if (Fonts.BOLD != null) {
+			bubNotifs.send(Colors.BUB_ORANGE, format);
+		}
 	}
 
 	/**
@@ -82,6 +86,11 @@ public class ErrorHandler
 	public static void softErr(Throwable e, String format, Object... args)
 	{
 		format = new Formatter().format(format, args).toString();
+		if (Fonts.BOLD != null) {
+			/*game was not inited yet, so can't show a soft error*/
+			explode(format, e, PREVENT_CONTINUE);
+			return;
+		}
 		Log.error(format, e);
 		bubNotifs.send(Colors.BUB_RED, format + "\nSee opsu.log for details.");
 	}
@@ -126,11 +135,7 @@ public class ErrorHandler
 		String errorDump,
 		int flags)
 	{
-		if ((flags & PREVENT_CONTINUE) != 0 && (flags & ALLOW_TERMINATE) == 0) {
-			Log.warn(
-				"illegal combination of PREVENT_CONTINUE and ALLOW_TERMINATE",
-				new Exception("stacktrace")
-			);
+		if ((flags & PREVENT_CONTINUE) != 0) {
 			flags |= ALLOW_TERMINATE;
 		}
 

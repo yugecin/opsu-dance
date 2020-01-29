@@ -113,7 +113,7 @@ public class BeatmapDB {
 		try {
 			updateSizeStmt = connection.prepareStatement("REPLACE INTO info (key, value) VALUES ('size', ?)");
 		} catch (SQLException e) {
-			softErr(e, "Failed to prepare beatmap statements");
+			explode("Failed to prepare beatmap statements", e, PREVENT_CONTINUE);
 		}
 
 		// retrieve the cache size
@@ -136,7 +136,7 @@ public class BeatmapDB {
 			setFavoriteStmt = connection.prepareStatement("UPDATE beatmaps SET favorite = ? WHERE dir = ? AND file = ?");
 			setLocalOffsetStmt = connection.prepareStatement("UPDATE beatmaps SET localOffset = ? WHERE dir = ? AND file = ?");
 		} catch (SQLException e) {
-			softErr(e, "Failed to prepare beatmap statements");
+			explode("Failed to prepare beatmap statements", e, PREVENT_CONTINUE);
 		}
 	}
 
@@ -174,7 +174,7 @@ public class BeatmapDB {
 			sql = String.format("INSERT OR IGNORE INTO info(key, value) VALUES('version', '%s')", DATABASE_VERSION);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
-			softErr(e, "Could not create beatmap db");
+			explode("Could not create beatmap db", e, PREVENT_CONTINUE);
 		}
 	}
 
@@ -226,7 +226,7 @@ public class BeatmapDB {
 				ps.close();
 			}
 		} catch (SQLException e) {
-			softErr(e, "Failed to update beatmap db");
+			explode("Failed to update beatmap db", e, PREVENT_CONTINUE);
 		}
 	}
 
