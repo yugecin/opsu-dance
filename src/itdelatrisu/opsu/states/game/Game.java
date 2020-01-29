@@ -2455,5 +2455,24 @@ public class Game extends ComplexOpsuState {
 	protected void writeStateErrorDump(StringWriter dump)
 	{
 		dump.write("> Game dump\n");
+		dump.write("beatmap: ");
+		Beatmap map = this.beatmap;
+		if (map != null) {
+			dump.write(" setid ");
+			dump.write(String.valueOf(map.beatmapSetID));
+			dump.write(" beatmapid ");
+			dump.write(String.valueOf(map.beatmapID));
+			dump.write(" name ");
+			dump.write(map.artist);
+			dump.write(" - ");
+			dump.write(map.title);
+			dump.write(" [");
+			dump.write(map.version);
+			dump.write("]\n");
+		} else {
+			dump.write("null\n");
+		}
+		dump.write("objectidx: " + this.objectIndex + "\n");
+		dump.write("time: " + MusicController.getPosition() + "ms\n");
 	}
 }

@@ -1539,5 +1539,22 @@ public class SongMenu extends BaseOpsuState
 	protected void writeStateErrorDump(StringWriter dump)
 	{
 		dump.write("> SongMenu dump\n");
+		dump.write("focused map: ");
+		Beatmap map = nodeList.getFocusedMap();
+		if (map != null) {
+			dump.write(" setid ");
+			dump.write(String.valueOf(map.beatmapSetID));
+			dump.write(" beatmapid ");
+			dump.write(String.valueOf(map.beatmapID));
+			dump.write(" name ");
+			dump.write(map.artist);
+			dump.write(" - ");
+			dump.write(map.title);
+			dump.write(" [");
+			dump.write(map.version);
+			dump.write("]\n");
+		} else {
+			dump.write("null\n");
+		}
 	}
 }

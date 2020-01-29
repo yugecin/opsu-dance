@@ -535,7 +535,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			dump.append(state.getClass().getSimpleName());
 			dump.append("\n");
 			state.writeErrorDump(dump);
-			dump.append("\n");
 			dump.append("< DisplayContainer\n");
 		} else {
 			dump.append("null\n");
@@ -552,7 +551,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			dump.append(state.getClass().getSimpleName());
 			dump.append("\n");
 			r.writeErrorDump(dump);
-			dump.append("\n");
 			dump.append("< DisplayContainer");
 		}
 		dump.append("loading sound: ");
@@ -564,6 +562,25 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			dump.append("\n");
 		} else {
 			dump.append("none\n");
+		}
+
+		dump.append("playing map: ");
+		Beatmap map = MusicController.getBeatmap();
+		if (map != null) {
+			dump.write(" setid ");
+			dump.write(String.valueOf(map.beatmapSetID));
+			dump.write(" beatmapid ");
+			dump.write(String.valueOf(map.beatmapID));
+			dump.write(" name ");
+			dump.write(map.artist);
+			dump.write(" - ");
+			dump.write(map.title);
+			dump.write(" [");
+			dump.write(map.version);
+			dump.write("]\n");
+			dump.write(" at time " + MusicController.getPosition() + " \n");
+		} else {
+			dump.write("null\n");
 		}
 	}
 
