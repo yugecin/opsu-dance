@@ -17,7 +17,6 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
 import java.awt.Desktop.Action;
-import java.awt.Dialog.ModalityType;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -49,6 +48,10 @@ public class ErrorHandler
 
 	private static final int RESULT_CONTINUE = 0;
 	private static final int RESULT_TERMINATE = 1;
+
+	// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
+	private static final String ICONKEY_ERROR = "OptionPane.errorIcon";
+	private static final String ICONKEY_INFO = "OptionPane.informationIcon";
 
 	static
 	{
@@ -206,7 +209,8 @@ public class ErrorHandler
 		c.insets.top = 6;
 		c.weighty = 1d;
 		c.gridy++;
-		d.add(readonlyTextarea(messageBody), c);
+		JTextArea messagebody = readonlyTextarea(messageBody);
+		d.add(new JScrollPane(messagebody), c);
 		c.weighty = 0d;
 		c.gridy++;
 		d.add(actionButton("View log file", Action.OPEN, () ->
@@ -215,15 +219,37 @@ public class ErrorHandler
 				Desktop.getDesktop().open(Entrypoint.LOGFILE);
 			} catch (IOException e) {
 				Log.warn("Could not open log file", e);
-				simpleError(d, "Failed to open log file: " + e.toString());
+				simpleMessage(
+					d,
+					"Failed to open log file: " + e.toString(),
+					ICONKEY_ERROR
+				);
 			}
 		}), c);
 		c.gridy++;
 		if ((flags & PREVENT_REPORT) == 0) {
 			c.insets.top = 2;
-			d.add(defaultbtn = actionButton("Report error", Action.BROWSE, () ->
-				showCreateIssueDialog(d, errorDump, customMessage, cause)
-			), c);
+			d.add(defaultbtn = actionButton("Report error", Action.BROWSE, () -> {
+				String dump = createIssueDump(customMessage, cause, errorDump);
+				messagebody.setText(dump);
+				try {
+					URI url = createGithubIssueUrl(customMessage, cause);
+					Desktop.getDesktop().browse(url);
+					simpleMessage(
+						d,
+						"A browser should have been opened, please copy"
+						+ " ALL the text and paste it into the big box.",
+						ICONKEY_INFO
+					);
+				} catch (IOException t) {
+					Log.warn("Could not open browser to report issue", t);
+					simpleMessage(
+						d,
+						"Failed to launch a browser: " + t.toString(),
+						ICONKEY_ERROR
+					);
+				}
+			}), c);
 			c.insets.top = 6;
 			c.gridy++;
 		}
@@ -240,7 +266,10 @@ public class ErrorHandler
 
 		d.pack();
 		d.setMinimumSize(d.getSize());
-		center(d);
+		final Rectangle r = d.getGraphicsConfiguration().getBounds();
+		final int x = r.x + (r.width - d.getWidth()) / 2;
+		final int y = r.y + (r.height - d.getHeight()) / 2;
+		d.setLocation(x, y);
 		d.setVisible(true);
 		d.dispose();
 
@@ -256,78 +285,6 @@ public class ErrorHandler
 		}
 		button.setEnabled(false);
 		return button;
-	}
-	
-	private static void showCreateIssueDialog(
-		Window parent,
-		String errorDump,
-		String customMessage,
-		Throwable cause)
-	{
-		final String dump = createIssueDump(customMessage, cause, errorDump);
-
-		final String title = "report error";
-		JDialog d = new JDialog(parent, title, ModalityType.APPLICATION_MODAL);
-		d.setLayout(new GridBagLayout());
-		final GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.CENTER;
-		c.fill = GridBagConstraints.NONE;
-		c.insets = new Insets(18, 18, 4, 8);
-		c.gridx = 1;
-		c.gridy = 1;
-		c.weightx = 0d;
-		c.weighty = 0d;
-		
-		// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
-		final Icon icon = UIManager.getIcon("OptionPane.informationIcon");
-		if (icon != null) {
-			d.add(new JLabel(icon), c);
-			c.insets.left = 8;
-		}
-		c.insets.right = 18;
-		c.gridx = 2;
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1d;
-
-		d.add(new JLabel(
-			"<html>Copy the text in the box below.<br/>"
-			+ "Then click the button below.<br/>"
-			+ "Your browser should open a web page where you can report the issue.<br/>"
-			+ "Please paste the text below in the issue box on the opened web page."
-		), c);
-		c.insets.top = 4;
-
-		c.gridy++;
-		c.weighty = 1d;
-		d.add(readonlyTextarea(dump), c);
-		c.gridy++;
-		c.weighty = 0d;
-		c.fill = GridBagConstraints.NONE;
-		c.gridx = 1;
-		c.gridwidth = 2;
-		final JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		final JButton report = new JButton("Report");
-		report.addActionListener(e ->
-		{
-			try {
-				URI url = createGithubIssueUrl(customMessage, cause);
-				Desktop.getDesktop().browse(url);
-				d.dispose();
-			} catch (IOException t) {
-				Log.warn("Could not open browser to report issue", t);
-				simpleError(d, "Failed to launch a browser: " + t.toString());
-			}
-		});
-		final JButton cancel = new JButton("Cancel");
-		cancel.addActionListener(e -> d.dispose());
-		btnPanel.add(report);
-		btnPanel.add(cancel);
-		c.insets.top = 12;
-		d.add(btnPanel, c);
-		d.getRootPane().setDefaultButton(report);
-		d.pack();
-		d.setLocationRelativeTo(parent);
-		d.setVisible(true);
 	}
 
 	private static URI createGithubIssueUrl(String customMessage, Throwable cause) {
@@ -381,7 +338,7 @@ public class ErrorHandler
 		return dump.toString();
 	}
 
-	private static JComponent readonlyTextarea(String contents)
+	private static JTextArea readonlyTextarea(String contents)
 	{
 		JTextArea textArea = new JTextArea(15, 80);
 		textArea.setEditable(false);
@@ -394,18 +351,13 @@ public class ErrorHandler
 		textArea.setText(contents);
 		final EmptyBorder padding = new EmptyBorder(5, 5, 5, 5);
 		textArea.setBorder(new CompoundBorder(textArea.getBorder(), padding));
-		return new JScrollPane(textArea);
+		return textArea;
 	}
 
-	private static void center(Window w)
-	{
-		final Rectangle r = w.getGraphicsConfiguration().getBounds();
-		final int x = r.x + (r.width - w.getWidth()) / 2;
-		final int y = r.y + (r.height - w.getHeight()) / 2;
-		w.setLocation(x, y);
-	}
-
-	private static void simpleError(Window parent, String message)
+	/**
+	 * @param iconkey {@link #ICONKEY_ERROR} or {@link #ICONKEY_INFO}
+	 */
+	private static void simpleMessage(Window parent, String message, String iconkey)
 	{
 		final JDialog d = new JDialog(parent, PROJECT_NAME + " error");
 		d.setIconImage(dialogIcon);
@@ -417,8 +369,7 @@ public class ErrorHandler
 		c.insets = new Insets(12, 18, 4, 5);
 		c.gridx = 1;
 		c.gridy = 1;
-		// see javax.swing.plaf.basic.BasicOptionPaneUI#getIconForType
-		final Icon icon = UIManager.getIcon("OptionPane.errorIcon");
+		final Icon icon = UIManager.getIcon(iconkey);
 		if (icon != null) {
 			d.add(new JLabel(icon), c);
 			c.insets.left = 5;
