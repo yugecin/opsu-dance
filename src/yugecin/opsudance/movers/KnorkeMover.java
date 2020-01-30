@@ -105,12 +105,6 @@ public class KnorkeMover extends Mover {
 				double y = e.y + Math.sin(newAngle + d) * maxdist;
 				int m = (int) (x / width);
 				int n = (int) (y / height);
-				if (x < 0) {
-					x = -x;
-				}
-				if (y < 0) {
-					y = -y;
-				}
 				if (Math.abs(m) % 2 == 1) {
 					endX = width - e.x;
 					mirrorx = true;
