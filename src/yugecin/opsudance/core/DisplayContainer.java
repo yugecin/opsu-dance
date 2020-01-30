@@ -144,6 +144,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		this.skinChangeTimestamp = System.currentTimeMillis();
 		destroyImages();
 		reinit();
+		UI.updateTooltipLocation();
 	}
 
 	private void reinit() {

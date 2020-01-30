@@ -23,9 +23,11 @@ import itdelatrisu.opsu.audio.SoundController;
 import itdelatrisu.opsu.beatmap.BeatmapParser;
 import itdelatrisu.opsu.ui.animations.AnimatedValue;
 import itdelatrisu.opsu.ui.animations.AnimationEquation;
+import yugecin.opsudance.options.Options;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
@@ -154,6 +156,31 @@ public class UI {
 		}
 	}
 
+	private static int tooltipOffset;
+
+	public static void updateTooltipLocation()
+	{
+		int p1 = calcTooltipLocationForImage(GameImage.CURSOR_MIDDLE);
+		int p2 = calcTooltipLocationForImage(GameImage.CURSOR);
+		tooltipOffset = Math.max(p1, p2) + 5;
+	}
+
+	private static int calcTooltipLocationForImage(GameImage gi)
+	{
+		Image img = gi.getImage();
+		int w2 = img.getWidth() / 2;
+		int h2 = img.getHeight() / 2;
+		for (int i = 10; i > 0; i--) {
+			float p = i / 10.0f;
+			float a = img.getAlphaAt(w2 + (int) (w2 * p), h2 + (int) (h2 * p));
+			System.out.printf("%f: %f%n", p, a);
+			if (a > .7f) {
+				return (int) (gi.getWidth() / 2.0f * p);
+			}
+		}
+		return 0;
+	}
+
 	/**
 	 * Draws a tooltip, if any, near the current mouse coordinates,
 	 * bounded by the container dimensions.
@@ -164,7 +191,6 @@ public class UI {
 			return;
 
 		int margin = width / 100, textMarginX = 2;
-		int offset = GameImage.CURSOR_MIDDLE.getWidth() / 2;
 		int lineHeight = Fonts.SMALL.getLineHeight();
 		int textWidth = textMarginX * 2, textHeight = lineHeight;
 		if (tooltipNewlines) {
@@ -181,6 +207,7 @@ public class UI {
 			textWidth += Fonts.SMALL.getWidth(tooltip);
 
 		// get drawing coordinates
+		int offset = (int) (tooltipOffset * Options.OPTION_CURSOR_SIZE.val / 100.0f);
 		int x = mouseX + offset;
 		int y = mouseY + offset;
 		if (x + textWidth > width - margin)

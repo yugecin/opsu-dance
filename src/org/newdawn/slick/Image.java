@@ -1516,6 +1516,9 @@ public class Image implements Renderable {
 			pixelData = texture.getTextureData();
 
 		// scale coordinates based on the image scale
+		if (width == 0 || height == 0) {
+			return 1.0f;
+		}
 		x = x * texture.getImageWidth() / width;
 		y = y * texture.getImageHeight() / height;
 
