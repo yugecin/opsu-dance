@@ -79,9 +79,9 @@ public class Circle extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition, boolean mirror) {
+	public void draw(Graphics g, int trackPosition, float mirrorAngle) {
 		Color orig = color;
-		if (mirror) {
+		if (mirrorAngle != 0f) {
 			color = mirrorColor;
 		}
 
@@ -94,8 +94,8 @@ public class Circle extends GameObject {
 		float alpha = Utils.clamp(1 - fadeinScale, 0, 1);
 
 		g.pushTransform();
-		if (mirror) {
-			g.rotate(x, y, -180f);
+		if (mirrorAngle != 0f) {
+			g.rotate(x, y, mirrorAngle);
 		}
 
 		if (GameMod.HIDDEN.isActive()) {

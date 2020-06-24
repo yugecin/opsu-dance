@@ -36,7 +36,7 @@ public class FakeGameObject extends GameObject {
     }
 
     @Override
-    public void draw(Graphics g, int trackPosition, boolean mirrored) {
+    public void draw(Graphics g, int trackPosition, float mirrorAngle) {
 
     }
 

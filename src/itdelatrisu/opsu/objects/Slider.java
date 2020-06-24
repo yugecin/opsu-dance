@@ -185,12 +185,12 @@ public class Slider extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition, boolean mirror) {
+	public void draw(Graphics g, int trackPosition, float mirrorAngle) {
 		if (trackPosition > getEndTime()) {
 			return;
 		}
 		Color orig = color;
-		if (mirror) {
+		if (mirrorAngle != 0f) {
 			color = mirrorColor;
 		}
 
@@ -239,8 +239,8 @@ public class Slider extends GameObject {
 		}
 
 		g.pushTransform();
-		if (mirror) {
-			g.rotate(x, y, -180f);
+		if (mirrorAngle != 0f) {
+			g.rotate(x, y, mirrorAngle);
 		}
 
 		// set first circle colors to fade in after repeats
@@ -263,13 +263,13 @@ public class Slider extends GameObject {
 
 		// ticks
 		if (ticksT != null) {
-			drawSliderTicks(g, trackPosition, alpha, decorationsAlpha, mirror);
+			drawSliderTicks(g, trackPosition, alpha, decorationsAlpha, mirrorAngle);
 			Colors.WHITE_FADE.a = oldWhiteFadeAlpha;
 		}
 
 		g.pushTransform();
-		if (mirror) {
-			g.rotate(x, y, -180f);
+		if (mirrorAngle != 0f) {
+			g.rotate(x, y, mirrorAngle);
 		}
 
 		if (GameMod.HIDDEN.isActive()) {
@@ -321,8 +321,8 @@ public class Slider extends GameObject {
 		if (timeDiff >= 0) {
 			// approach circle
 			g.pushTransform();
-			if (mirror) {
-				g.rotate(x, y, -180f);
+			if (mirrorAngle != 0f) {
+				g.rotate(x, y, mirrorAngle);
 			}
 			if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
@@ -396,9 +396,8 @@ public class Slider extends GameObject {
 	 * @param trackPosition the track position
 	 * @param curveAlpha the curve alpha level
 	 * @param decorationsAlpha the decorations alpha level
-	 * @param mirror true to draw mirrored
 	 */
-	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, boolean mirror) {
+	private void drawSliderTicks(Graphics g, int trackPosition, float curveAlpha, float decorationsAlpha, float mirrorAngle) {
 		float tickScale = 0.5f + 0.5f * AnimationEquation.OUT_BACK.calc(decorationsAlpha);
 		Image tick = GameImage.SLIDER_TICK.getImage().getScaledCopy(tickScale);
 
@@ -435,8 +434,8 @@ public class Slider extends GameObject {
 		for (int i = min; i < max; i++) {
 			Vec2f c = curve.pointAt(ticksT[i]);
 			g.pushTransform();
-			if (mirror) {
-				g.rotate(c.x, c.y, -180f);
+			if (mirrorAngle != 0f) {
+				g.rotate(c.x, c.y, mirrorAngle);
 			}
 			tick.drawCentered(c.x, c.y, Colors.WHITE_FADE);
 			g.popTransform();

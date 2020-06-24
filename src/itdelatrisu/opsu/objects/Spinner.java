@@ -165,8 +165,8 @@ public class Spinner extends GameObject {
 	}
 
 	@Override
-	public void draw(Graphics g, int trackPosition, boolean mirror) {
-		if (mirror) {
+	public void draw(Graphics g, int trackPosition, float mirrorAngle) {
+		if (mirrorAngle != 0f) {
 			return;
 		}
 		// only draw spinners shortly before start time

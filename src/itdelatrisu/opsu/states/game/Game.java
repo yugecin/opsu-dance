@@ -1920,12 +1920,15 @@ public class Game extends ComplexOpsuState {
 			// normal case
 			if (!loseState) {
 				if (!OPTION_DANCE_HIDE_OBJECTS.state) {
-					gameObj.draw(g, trackPosition, false);
+					gameObj.draw(g, trackPosition, 0f);
 					if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive() && idx < mirrorTo && idx >= mirrorFrom) {
-						g.pushTransform();
-						g.rotate(width2, height2, 180f);
-						gameObj.draw(g, trackPosition, true);
-						g.popTransform();
+						for (int i = 1; i < OPTION_MERGING_SLIDERS_MIRROR_POOL.val; i++) {
+							float angle = 360.0f / OPTION_MERGING_SLIDERS_MIRROR_POOL.val * i;
+							g.pushTransform();
+							g.rotate(width2, height2, -angle);
+							gameObj.draw(g, trackPosition, angle);
+							g.popTransform();
+						}
 					}
 				}
 			}
@@ -1954,7 +1957,7 @@ public class Game extends ComplexOpsuState {
 				g.translate(0, dt * dt * height);
 				Vec2f rotationCenter = gameObj.getPointAt((beatmap.objects[idx].getTime() + beatmap.objects[idx].getEndTime()) / 2);
 				g.rotate(rotationCenter.x, rotationCenter.y, rotSpeed * dt);
-				gameObj.draw(g, trackPosition, false);
+				gameObj.draw(g, trackPosition, 0f);
 
 				g.popTransform();
 			}

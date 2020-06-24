@@ -47,7 +47,7 @@ public abstract class GameObject {
 	 * @param g the graphics context
 	 * @param trackPosition the current track position
 	 */
-	public abstract void draw(Graphics g, int trackPosition, boolean mirrored);
+	public abstract void draw(Graphics g, int trackPosition, float mirrorAngle);
 
 	/**
 	 * Updates the hit object.
