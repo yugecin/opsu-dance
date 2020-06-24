@@ -708,7 +708,13 @@ public class Game extends ComplexOpsuState {
 		} else if (GameMod.AUTO.isActive()) {
 			displayContainer.cursor.draw(autoMousePressed);
 			if (OPTION_DANCE_MIRROR.state) {
-				mirrorCursor.draw(autoMousePressed);
+				for (int i = 1; i < OPTION_MERGING_SLIDERS_MIRROR_POOL.val; i++) {
+					float angle = 360.0f / OPTION_MERGING_SLIDERS_MIRROR_POOL.val * i;
+					g.pushTransform();
+					g.rotate(width2, height2, -angle);
+					mirrorCursor.draw(autoMousePressed);
+					g.popTransform();
+				}
 			}
 		} else {
 			final boolean expandCursor =
@@ -910,11 +916,7 @@ public class Game extends ComplexOpsuState {
 		} else if (GameMod.AUTO.isActive()) {
 			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 			if (OPTION_DANCE_MIRROR.state && GameMod.AUTO.isActive()) {
-				double dx = autoMousePosition.x - width2;
-				double dy = autoMousePosition.y - height2;
-				double d = Math.sqrt(dx * dx + dy * dy);
-				double a = Math.atan2(dy, dx) + Math.PI;
-				mirrorCursor.setCursorPosition((int) (Math.cos(a) * d + width2), (int) (Math.sin(a) * d + height2));
+				mirrorCursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
 			}
 		} else if (GameMod.AUTOPILOT.isActive() && !this.pauseOverlay.isActive()) {
 			displayContainer.cursor.setCursorPosition((int) autoMousePosition.x, (int) autoMousePosition.y);
