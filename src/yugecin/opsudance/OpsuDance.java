@@ -5,6 +5,7 @@ package yugecin.opsudance;
 import itdelatrisu.opsu.Utils;
 import itdelatrisu.opsu.beatmap.BeatmapWatchService;
 import itdelatrisu.opsu.db.DBController;
+import yugecin.opsudance.windows.WindowManager;
 
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.util.Log;
@@ -49,6 +50,8 @@ public class OpsuDance
 			explode("startup failure", e, PREVENT_CONTINUE);
 			return;
 		}
+
+		WindowManager.kickstart();
 
 		while (rungame());
 		AL.destroy();

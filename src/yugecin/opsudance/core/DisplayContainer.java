@@ -20,6 +20,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
@@ -37,8 +38,12 @@ import yugecin.opsudance.ui.VolumeControl;
 import yugecin.opsudance.ui.cursor.Cursor;
 import yugecin.opsudance.ui.cursor.NewestCursor;
 import yugecin.opsudance.utils.GLHelper;
+import yugecin.opsudance.windows.WindowManager;
 
+import java.awt.image.BufferedImage;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,7 +113,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 	public Cursor cursor;
 	public boolean drawCursor;
-	
+
 	private final List<ResolutionChangedListener> resolutionChangedListeners;
 
 	private int tIn;
@@ -170,7 +175,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		PlaybackSpeed.init(width, height);
 		HitObject.init(width, height);
 	}
-	
+
 	public void reinitCursor()
 	{
 		if (this.cursor != null) {
@@ -206,6 +211,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 	public void run() throws Exception {
 		input.poll();
 		this.cursor.reset();
+
+		final int width = Display.getWidth();
+		final int height = Display.getHeight();
+		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 32);
+		IntBuffer intview = buffer.asIntBuffer();
+		IntBuffer buf = IntBuffer.allocate(width * height * 32);
+		WindowManager.a = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		WindowManager.b = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
@@ -324,6 +337,17 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 
 				timeSinceLastRender = 0;
 
+		buffer.rewind();
+		intview.rewind();
+		GL11.glReadBuffer(GL11.GL_FRONT);
+		GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
+		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_BYTE, intview);
+		buf.rewind();
+		buf.put(intview);
+		WindowManager.b.setRGB(0, 0, width, height, buf.array(), 0, width);
+		WindowManager.swapBuffers();
+		WindowManager.lastGLRender = System.currentTimeMillis();
+
 				Display.update(false);
 				rendering = false;
 			}
@@ -417,10 +441,10 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			width = Integer.parseInt(res[0]);
 			height = Integer.parseInt(res[1]);
 		}
-		
+
 		updateDisplayMode(width, height);
 	}
-	
+
 	public void updateDisplayMode(int width, int height) {
 		int screenWidth = nativeDisplayMode.getWidth();
 		int screenHeight = nativeDisplayMode.getHeight();

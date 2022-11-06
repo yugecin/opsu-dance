@@ -4,6 +4,7 @@ package yugecin.opsudance.ui.cursor;
 
 import yugecin.opsudance.render.TextureData;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.windows.WindowManager;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -48,9 +49,17 @@ public class NewestCursor implements Cursor
 			return;
 		}
 
+		int w = (int) this.cursorTexture.width;
+		int h = (int) this.cursorTexture.height;
+		WindowManager.cursorFrame.lastGLUpdate = System.currentTimeMillis();
+		WindowManager.cursorFrame.top = trail.lastY - h;
+		WindowManager.cursorFrame.left = trail.lastX - w;
+		WindowManager.cursorFrame.width = w * 2;
+		WindowManager.cursorFrame.height = h * 2;
+
 		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 
-		if (OPTION_BLEND_TRAIL.state) { 
+		if (OPTION_BLEND_TRAIL.state) {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		}
 		final TextureData td = this.cursorTrailTexture;
