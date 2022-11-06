@@ -43,7 +43,7 @@ public class ObjectFrame extends JFrame
 		@Override
 		protected void paintComponent(Graphics g)
 		{
-			g.drawImage(WindowManager.a, 0, 0, width, height, left, top, width, height, null);
+			g.drawImage(WindowManager.a, 0, 0, width, height, left, top, left + width, top + height, null);
 		}
 	}
 }

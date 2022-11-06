@@ -19,7 +19,7 @@ public class WindowManager
 	{
 		cursorFrame = new ObjectFrame();
 		WindowManager.addFrame(cursorFrame);
-		SwingUtilities.invokeLater(WindowManager::updateWindows);
+		//SwingUtilities.invokeLater(WindowManager::updateWindows);
 	}
 
 	public static void swapBuffers()
@@ -27,6 +27,28 @@ public class WindowManager
 		BufferedImage tmp = a;
 		a = b;
 		b = tmp;
+	}
+
+	public static void updateNow()
+	{
+		try {
+			SwingUtilities.invokeAndWait(WindowManager::updateNow2);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void updateNow2()
+	{
+		synchronized(frames) {
+			frameArray = frames.toArray(frameArray);
+		}
+		for (ObjectFrame frame : frameArray) {
+			if (frame == null) {
+				break;
+			}
+			frame.update();
+		}
 	}
 
 	public static void updateWindows()
@@ -40,7 +62,7 @@ public class WindowManager
 			}
 			frame.update();
 		}
-		SwingUtilities.invokeLater(WindowManager::updateWindows);
+		//SwingUtilities.invokeLater(WindowManager::updateWindows);
 	}
 
 	public static void addFrame(ObjectFrame frame)

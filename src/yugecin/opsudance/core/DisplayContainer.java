@@ -21,6 +21,8 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL21;
 import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
@@ -219,6 +221,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		IntBuffer buf = IntBuffer.allocate(width * height * 32);
 		WindowManager.a = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		WindowManager.b = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		int[] array = new int[width * height];
 
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
@@ -336,19 +339,29 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 				}
 
 				timeSinceLastRender = 0;
+				Display.update(false);
 
 		buffer.rewind();
 		intview.rewind();
 		GL11.glReadBuffer(GL11.GL_FRONT);
 		GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_BYTE, intview);
+		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		buf.rewind();
-		buf.put(intview);
-		WindowManager.b.setRGB(0, 0, width, height, buf.array(), 0, width);
+
+		//buf.put(intview);
+		//WindowManager.b.setRGB(0, 0, width, height, buf.array(), 0, width);
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int v = intview.get(y * width + x) >>> 8;
+				WindowManager.b.setRGB(x, height - (y + 1), 0xFF000000 | v);
+			}
+		}
+
 		WindowManager.swapBuffers();
 		WindowManager.lastGLRender = System.currentTimeMillis();
+		WindowManager.updateNow();
 
-				Display.update(false);
 				rendering = false;
 			}
 
