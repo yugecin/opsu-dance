@@ -42,6 +42,10 @@ import yugecin.opsudance.ui.cursor.NewestCursor;
 import yugecin.opsudance.utils.GLHelper;
 import yugecin.opsudance.windows.WindowManager;
 
+import java.awt.Dimension;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
@@ -221,7 +225,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		IntBuffer buf = IntBuffer.allocate(width * height * 32);
 		WindowManager.a = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		WindowManager.b = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		int[] array = new int[width * height];
 
 		while(!exitRequested && !(Display.isCloseRequested() && state.onCloseRequest()) || !confirmExit()) {
 			delta = getDelta();
@@ -234,6 +237,14 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			timeSinceLastRender += delta;
 
 			input.poll();
+			Point p = MouseInfo.getPointerInfo().getLocation();
+			Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+			mouseX = p.x - (ss.width - width) / 2;
+			mouseY = p.y - (ss.height - height) / 2;
+			// windows borders
+			mouseX -= 1;
+			mouseY -= 31;
+
 			Music.poll(delta);
 
 			// state transition

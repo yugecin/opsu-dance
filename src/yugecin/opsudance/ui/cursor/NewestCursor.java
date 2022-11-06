@@ -13,6 +13,8 @@ import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.utils.GLHelper.*;
 
+import yugecin.opsudance.core.InstanceContainer;
+
 public class NewestCursor implements Cursor
 {
 	private final CursorTrail trail;
@@ -52,8 +54,8 @@ public class NewestCursor implements Cursor
 		int w = (int) this.cursorTexture.width;
 		int h = (int) this.cursorTexture.height;
 		WindowManager.cursorFrame.lastGLUpdate = System.currentTimeMillis();
-		WindowManager.cursorFrame.x = trail.lastX - w;
-		WindowManager.cursorFrame.y = trail.lastY - h * 3 / 4;
+		WindowManager.cursorFrame.x = InstanceContainer.mouseX - w;
+		WindowManager.cursorFrame.y = InstanceContainer.mouseY - h * 3 / 4;
 		WindowManager.cursorFrame.width = w * 2;
 		WindowManager.cursorFrame.height = h * 2;
 

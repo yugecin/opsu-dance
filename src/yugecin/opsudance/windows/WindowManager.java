@@ -1,12 +1,16 @@
 package yugecin.opsudance.windows;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
+
+import yugecin.opsudance.core.InstanceContainer;
 
 public class WindowManager
 {
@@ -17,6 +21,7 @@ public class WindowManager
 	public static ObjectFrame cursorFrame;
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
+	public static int offsetX, offsetY;
 
 	public static void kickstart()
 	{
@@ -59,12 +64,16 @@ public class WindowManager
 		synchronized(frames) {
 			frameArray = frames.toArray(frameArray);
 		}
+		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+		offsetX = (ss.width - InstanceContainer.width) / 2;
+		offsetY = (ss.height - InstanceContainer.height) / 2;
 		for (ObjectFrame frame : frameArray) {
 			if (frame == null) {
 				break;
 			}
 			frame.update();
 		}
+		Toolkit.getDefaultToolkit().sync();
 	}
 
 	public static void updateWindows()

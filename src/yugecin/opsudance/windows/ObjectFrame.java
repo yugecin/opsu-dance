@@ -33,8 +33,10 @@ public class ObjectFrame extends JFrame
 				tp.setSize(width, height);
 			}
 			/*
-			if (this.getX() != x || this.getY() != y) {
-				this.setLocation(x, y);
+			if (this.getX() != x + WindowManager.offsetX ||
+				this.getY() != y + WindowManager.offsetY)
+			{
+				this.setLocation(WindowManager.offsetX + x, WindowManager.offsetY + y);
 			}
 			*/
 			tp.invalidate();
@@ -51,8 +53,10 @@ public class ObjectFrame extends JFrame
 		@Override
 		protected void paintComponent(Graphics g)
 		{
-			if (ObjectFrame.this.getX() != x || ObjectFrame.this.getY() != y) {
-				ObjectFrame.this.setLocation(x, y);
+			if (ObjectFrame.this.getX() != x + WindowManager.offsetX ||
+				ObjectFrame.this.getY() != y + WindowManager.offsetY)
+			{
+				ObjectFrame.this.setLocation(WindowManager.offsetX + x, WindowManager.offsetY + y);
 			}
 			g.drawImage(WindowManager.a, 0, 0, width, height, x, y, x + width, y + height, null);
 			if (y < 0) {
