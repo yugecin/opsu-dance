@@ -17,7 +17,7 @@ public class WindowManager
 
 	public static void kickstart()
 	{
-		cursorFrame = new ObjectFrame();
+		cursorFrame = new ObjectFrame("cursor");
 		WindowManager.addFrame(cursorFrame);
 		//SwingUtilities.invokeLater(WindowManager::updateWindows);
 	}
