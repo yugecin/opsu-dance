@@ -38,8 +38,9 @@ public class GlobalInputListener implements InputListener
 				!displayContainer.isIn(gameState))
 			{
 				skinservice.reloadSkin();
+				break;
 			}
-			break;
+			return;
 		case KEY_C:
 			if (input.isControlDown() && input.isShiftDown()) {
 				explode("requested crash", new Exception(), PREVENT_REPORT);
