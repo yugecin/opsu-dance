@@ -11,6 +11,10 @@ import yugecin.opsudance.core.GlobalInputListener;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 
+import java.awt.Dimension;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
 
@@ -77,6 +81,13 @@ public class Input
 	{
 		mouseX = Mouse.getX();
 		mouseY = height - Mouse.getY();
+		Point p = MouseInfo.getPointerInfo().getLocation();
+		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
+		mouseX = p.x - (ss.width - width) / 2;
+		mouseY = p.y - (ss.height - height) / 2;
+		// windows borders
+		mouseX -= 1;
+		mouseY -= 31;
 
 		while (Keyboard.next()) {
 			final int keyCode = Keyboard.getEventKey();
@@ -105,6 +116,8 @@ public class Input
 				}
 				int eventX = Mouse.getEventX();
 				int eventY = height - Mouse.getEventY();
+				eventX = mouseX; // hack for windows mode
+				eventY = mouseY; // hack for windows mode
 				final MouseEvent e = new MouseEvent(mouseButton, eventX, eventY);
 				final BiConsumer<MouseListener, MouseEvent> consumer;
 				if (Mouse.getEventButtonState()) {

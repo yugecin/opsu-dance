@@ -21,8 +21,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL21;
 import org.newdawn.slick.*;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.renderer.Renderer;
@@ -43,8 +41,6 @@ import yugecin.opsudance.utils.GLHelper;
 import yugecin.opsudance.windows.WindowManager;
 
 import java.awt.Dimension;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.StringWriter;
@@ -237,13 +233,6 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 			timeSinceLastRender += delta;
 
 			input.poll();
-			Point p = MouseInfo.getPointerInfo().getLocation();
-			Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
-			mouseX = p.x - (ss.width - width) / 2;
-			mouseY = p.y - (ss.height - height) / 2;
-			// windows borders
-			mouseX -= 1;
-			mouseY -= 31;
 
 			Music.poll(delta);
 
@@ -376,10 +365,12 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		boolean ingame = state == gameState;
 		if (ingame) {
 			if (!wasingame) {
+				Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 				Display.setLocation(ss.width - 20, Display.getY());
 			}
 		} else {
 			if (wasingame) {
+				Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 				Display.setLocation((ss.width - width) / 2, Display.getY());
 			}
 		}
