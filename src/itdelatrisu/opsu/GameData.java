@@ -48,6 +48,7 @@ import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.windows.WindowManager.hpframe;
 import static yugecin.opsudance.windows.WindowManager.comboframe;
+import static yugecin.opsudance.windows.WindowManager.scoreframe;
 
 /**
  * Holds game data and renders all related elements.
@@ -557,7 +558,7 @@ public class GameData {
 				cx += digit.getWidth() - SkinService.skin.getScoreFontOverlap();
 			}
 		}
-		return cx - x;
+		return Math.abs(cx - x);
 	}
 
 	/**
@@ -569,8 +570,9 @@ public class GameData {
 	 * @param alpha the alpha level
 	 * @param fixedsize the width to use for all symbols
 	 * @param rightAlign align right (true) or left (false)
+	 * @return width that was drawn
 	 */
-	public void drawFixedSizeSymbolString(String str, float x, float y, float scale, float alpha, float fixedsize, boolean rightAlign) {
+	public float drawFixedSizeSymbolString(String str, float x, float y, float scale, float alpha, float fixedsize, boolean rightAlign) {
 		char[] c = str.toCharArray();
 		float cx = x;
 		if (rightAlign) {
@@ -594,6 +596,7 @@ public class GameData {
 				cx += fixedsize;
 			}
 		}
+		return Math.abs(cx - x);
 	}
 
 	/**
@@ -611,17 +614,20 @@ public class GameData {
 		int margin = (int) (width * 0.008f);
 		float uiScale = GameImage.getUIscale();
 
+		float scoresize = 0f;
 		// score
-		if (!relaxAutoPilot)
-			drawFixedSizeSymbolString((scoreDisplay < 100000000) ? String.format("%08d", scoreDisplay) : Long.toString(scoreDisplay),
+		if (!relaxAutoPilot) {
+			scoresize = drawFixedSizeSymbolString((scoreDisplay < 100000000) ? String.format("%08d", scoreDisplay) : Long.toString(scoreDisplay),
 					width - margin, 0, 1f, alpha, getScoreSymbolImage('0').getWidth() - 2, true);
+		}
 
 		// score percentage
 		int symbolHeight = getScoreSymbolImage('0').getHeight();
-		if (!relaxAutoPilot)
+		if (!relaxAutoPilot) {
 			drawSymbolString(
 					String.format((scorePercentDisplay < 10f) ? "0%.2f%%" : "%.2f%%", scorePercentDisplay),
 					width - margin, symbolHeight, 0.60f, alpha, true);
+		}
 
 		// map progress circle
 		Beatmap beatmap = MusicController.getBeatmap();
@@ -656,6 +662,14 @@ public class GameData {
 			}
 			g.setAntiAlias(false);
 			Colors.WHITE_ALPHA.a = oldWhiteAlpha;
+		}
+
+		if (scoresize != 0f) {
+			scoreframe.x = width - margin - (int) scoresize;
+			scoreframe.y = 0;
+			scoreframe.height = (int) (symbolHeight * 1.8f);
+			scoreframe.width = width - scoreframe.x;
+			scoreframe.lastGLUpdate = System.currentTimeMillis();
 		}
 
 		// mod icons
