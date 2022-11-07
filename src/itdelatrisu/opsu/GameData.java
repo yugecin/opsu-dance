@@ -47,6 +47,7 @@ import yugecin.opsudance.utils.SlickUtil;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.windows.WindowManager.hpframe;
+import static yugecin.opsudance.windows.WindowManager.comboframe;
 
 /**
  * Holds game data and renders all related elements.
@@ -530,8 +531,9 @@ public class GameData {
 	 * @param scale the scale to apply
 	 * @param alpha the alpha level
 	 * @param rightAlign align right (true) or left (false)
+	 * @return width that was drawn
 	 */
-	public void drawSymbolString(String str, float x, float y, float scale, float alpha, boolean rightAlign) {
+	public float drawSymbolString(String str, float x, float y, float scale, float alpha, boolean rightAlign) {
 		char[] c = str.toCharArray();
 		float cx = x;
 		if (rightAlign) {
@@ -555,6 +557,7 @@ public class GameData {
 				cx += digit.getWidth() - SkinService.skin.getScoreFontOverlap();
 			}
 		}
+		return cx - x;
 	}
 
 	/**
@@ -780,9 +783,24 @@ public class GameData {
 				float comboPopBack  = 1 + comboPop * 0.45f;
 				float comboPopFront = 1 + comboPop * 0.08f;
 				String comboString = String.format("%dx", combo);
-				if (comboPopTime != COMBO_POP_TIME)
-					drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopBack), comboPopBack, 0.5f * alpha, false);
-				drawSymbolString(comboString, margin, height - margin - (symbolHeight * comboPopFront), comboPopFront, alpha, false);
+				float frontY = height - margin - (symbolHeight * comboPopFront);
+				float y = frontY;
+				float w = 0f;
+				if (comboPopTime != COMBO_POP_TIME) {
+					float backY = height - margin - (symbolHeight * comboPopBack);
+					y = backY;
+					w = drawSymbolString(comboString, margin, backY, comboPopBack, 0.5f * alpha, false);
+				}
+				float w2 = drawSymbolString(comboString, margin, frontY, comboPopFront, alpha, false);
+				if (w == 0f) {
+					w = w2;
+				}
+
+				comboframe.x = margin;
+				comboframe.y = (int) y;
+				comboframe.height = height - comboframe.y;
+				comboframe.width = (int) w;
+				comboframe.lastGLUpdate = System.currentTimeMillis();
 			}
 		} else if (!relaxAutoPilot) {
 			// grade

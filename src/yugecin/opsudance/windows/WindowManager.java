@@ -17,7 +17,7 @@ public class WindowManager
 	private static List<ObjectFrame> frames = new ArrayList<>();
 
 	public static long lastGLRender;
-	public static ObjectFrame cursorFrame, skipbtnframe, hpframe;
+	public static ObjectFrame cursorFrame, skipbtnframe, hpframe, comboframe;
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
 	public static int offsetX, offsetY;
@@ -39,9 +39,11 @@ public class WindowManager
 		g.dispose();
 		cursorFrame = new ObjectFrame("cursor");
 		skipbtnframe = new ObjectFrame("skipbtn");
+		comboframe = new ObjectFrame("combo");
 		hpframe = new ObjectFrame("hp");
 		WindowManager.addFrame(cursorFrame);
 		WindowManager.addFrame(skipbtnframe);
+		WindowManager.addFrame(comboframe);
 		WindowManager.addFrame(hpframe);
 	}
 
