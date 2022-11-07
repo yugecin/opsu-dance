@@ -27,6 +27,7 @@ public class ObjectFrame extends JFrame
 
 	public void update()
 	{
+		int height = this.height + 31; // window border
 		if (lastGLUpdate > lastRender) {
 			if (this.getWidth() != width || this.getHeight() != height) {
 				this.setSize(width, height);
@@ -61,6 +62,7 @@ public class ObjectFrame extends JFrame
 			{
 				ObjectFrame.this.setLocation(WindowManager.offsetX + x, WindowManager.offsetY + y);
 			}
+			int height = ObjectFrame.this.height + 31; // window border
 			g.drawImage(WindowManager.a, 0, 0, width, height, x, y, x + width, y + height, null);
 			if (y < 0) {
 				int h = -y;

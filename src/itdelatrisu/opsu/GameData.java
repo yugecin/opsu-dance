@@ -760,7 +760,7 @@ public class GameData {
 			hpframe.x = 0;
 			hpframe.y = 0;
 			// size will only work if ki is not a dummy img (should take min of colour bar & ki but whatevs)
-			hpframe.height = (int) (colourY + ki.getHeight() / 3f * 2f);
+			hpframe.height = (int) (colourY + ki.getHeight() / 2);
 			hpframe.width = (int) colourX + colourCropped.getWidth() + ki.getWidth() / 2;
 			hpframe.lastGLUpdate = System.currentTimeMillis();
 
