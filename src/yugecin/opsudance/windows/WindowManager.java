@@ -17,7 +17,7 @@ public class WindowManager
 	private static List<ObjectFrame> frames = new ArrayList<>();
 
 	public static long lastGLRender;
-	public static ObjectFrame cursorFrame, skipbtnframe;
+	public static ObjectFrame cursorFrame, skipbtnframe, hpframe;
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
 	public static int offsetX, offsetY;
@@ -39,7 +39,9 @@ public class WindowManager
 		g.dispose();
 		cursorFrame = new ObjectFrame("cursor");
 		skipbtnframe = new ObjectFrame("skipbtn");
+		hpframe = new ObjectFrame("hp");
 		WindowManager.addFrame(cursorFrame);
+		WindowManager.addFrame(hpframe);
 	}
 
 	public static void swapBuffers()

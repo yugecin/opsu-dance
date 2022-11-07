@@ -46,6 +46,7 @@ import yugecin.opsudance.utils.SlickUtil;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.windows.WindowManager.hpframe;
 
 /**
  * Holds game data and renders all related elements.
@@ -399,8 +400,8 @@ public class GameData {
 					hitResult.curve.discardGeometry();
 			}
 		}
-		hitResultList = new LinkedBlockingDeque<HitObjectResult>();
-		hitErrorList = new LinkedBlockingDeque<HitErrorInfo>();
+		hitResultList = new LinkedBlockingDeque<>();
+		hitErrorList = new LinkedBlockingDeque<>();
 		fullObjectCount = 0;
 		combo = 0;
 		comboMax = 0;
@@ -442,7 +443,7 @@ public class GameData {
 		}
 
 		// score symbol images
-		scoreSymbols = new HashMap<Character, Image>(14);
+		scoreSymbols = new HashMap<>(14);
 		scoreSymbols.put('0', GameImage.SCORE_0.getImage());
 		scoreSymbols.put('1', GameImage.SCORE_1.getImage());
 		scoreSymbols.put('2', GameImage.SCORE_2.getImage());
@@ -752,6 +753,14 @@ public class GameData {
 				ki = GameImage.SCOREBAR_KI_DANGER.getImage();
 			else
 				ki = GameImage.SCOREBAR_KI_DANGER2.getImage();
+
+			hpframe.x = 0;
+			hpframe.y = 0;
+			// size will only work if ki is not a dummy img (should take min of colour bar & ki but whatevs)
+			hpframe.height = (int) (colourY + ki.getHeight() / 3f * 2f);
+			hpframe.width = (int) colourX + colourCropped.getWidth() + ki.getWidth() / 2;
+			hpframe.lastGLUpdate = System.currentTimeMillis();
+
 			if (comboPopTime < COMBO_POP_TIME)
 				ki = ki.getScaledCopy(1f + (0.45f * (1f - (float) comboPopTime / COMBO_POP_TIME)));
 			ki.setAlpha(alpha);

@@ -46,6 +46,9 @@ public class ObjectFrame extends JFrame
 				this.setVisible(true);
 			}
 		}
+		if (lastGLUpdate < WindowManager.lastGLRender - 200 && this.isVisible()) {
+			this.setVisible(false);
+		}
 	}
 
 	class ThingPanel extends JPanel
