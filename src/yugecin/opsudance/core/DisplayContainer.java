@@ -213,7 +213,7 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		state.enter();
 	}
 
-
+	private boolean wasingame;
 	public void run() throws Exception {
 		input.poll();
 		this.cursor.reset();
@@ -372,6 +372,18 @@ public class DisplayContainer implements ErrorDumpable, SkinChangedListener
 		WindowManager.swapBuffers();
 		WindowManager.lastGLRender = System.currentTimeMillis();
 		WindowManager.updateNow();
+
+		boolean ingame = state == gameState;
+		if (ingame) {
+			if (!wasingame) {
+				Display.setLocation(ss.width - 20, Display.getY());
+			}
+		} else {
+			if (wasingame) {
+				Display.setLocation((ss.width - width) / 2, Display.getY());
+			}
+		}
+		wasingame = ingame;
 
 				rendering = false;
 			}
