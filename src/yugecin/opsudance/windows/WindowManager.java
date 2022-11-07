@@ -41,6 +41,7 @@ public class WindowManager
 		skipbtnframe = new ObjectFrame("skipbtn");
 		hpframe = new ObjectFrame("hp");
 		WindowManager.addFrame(cursorFrame);
+		WindowManager.addFrame(skipbtnframe);
 		WindowManager.addFrame(hpframe);
 	}
 

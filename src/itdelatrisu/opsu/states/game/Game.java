@@ -72,8 +72,6 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.GLHelper;
-import yugecin.opsudance.windows.ObjectFrame;
-import yugecin.opsudance.windows.WindowManager;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
@@ -497,7 +495,6 @@ public class Game extends ComplexOpsuState {
 		}
 
 
-		boolean hasSkipButton = false;
 		// break periods
 		if (beatmap.breaks != null && breakIndex < beatmap.breaks.size() && breakTime > 0) {
 			int endTime = beatmap.breaks.get(breakIndex);
@@ -573,10 +570,6 @@ public class Game extends ComplexOpsuState {
 					skipButton.draw();
 					Image img = skipButton.getImage();
 					if (img != null) {
-						hasSkipButton = true;
-						if (!WindowManager.hasFrame(skipbtnframe)) {
-							WindowManager.addFrame(skipbtnframe);
-						}
 						skipbtnframe.width = img.getWidth();
 						skipbtnframe.height = img.getHeight();
 						skipbtnframe.x = (int) skipButton.getX() - skipbtnframe.width / 2;
@@ -656,10 +649,6 @@ public class Game extends ComplexOpsuState {
 					skipButton.draw();
 					Image img = skipButton.getImage();
 					if (img != null) {
-						hasSkipButton = true;
-						if (!WindowManager.hasFrame(skipbtnframe)) {
-							WindowManager.addFrame(skipbtnframe);
-						}
 						skipbtnframe.width = img.getWidth();
 						skipbtnframe.height = img.getHeight();
 						skipbtnframe.x = (int) skipButton.getX() - skipbtnframe.width / 2;
@@ -672,10 +661,6 @@ public class Game extends ComplexOpsuState {
 			// draw hit objects
 			if (!GameMod.FLASHLIGHT.isActive())
 				drawHitObjects(g, trackPosition);
-		}
-
-		if (!hasSkipButton) {
-			WindowManager.removeFrame(skipbtnframe);
 		}
 
 		// in-game scoreboard
@@ -1791,7 +1776,6 @@ public class Game extends ComplexOpsuState {
 	public void leave()
 	{
 		super.leave();
-		WindowManager.removeFrame(skipbtnframe);
 
 		Display.setTitle(Constants.PROJECT_NAME);
 
