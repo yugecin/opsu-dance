@@ -15,10 +15,9 @@ import yugecin.opsudance.core.InstanceContainer;
 public class WindowManager
 {
 	private static List<ObjectFrame> frames = new ArrayList<>();
-	private static ObjectFrame[] frameArray = new ObjectFrame[20];
 
 	public static long lastGLRender;
-	public static ObjectFrame cursorFrame;
+	public static ObjectFrame cursorFrame, skipbtnframe;
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
 	public static int offsetX, offsetY;
@@ -39,8 +38,8 @@ public class WindowManager
 		}
 		g.dispose();
 		cursorFrame = new ObjectFrame("cursor");
+		skipbtnframe = new ObjectFrame("skipbtn");
 		WindowManager.addFrame(cursorFrame);
-		//SwingUtilities.invokeLater(WindowManager::updateWindows);
 	}
 
 	public static void swapBuffers()
@@ -61,46 +60,29 @@ public class WindowManager
 
 	public static void updateNow2()
 	{
-		synchronized(frames) {
-			frameArray = frames.toArray(frameArray);
-		}
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 		offsetX = (ss.width - InstanceContainer.width) / 2;
 		offsetY = (ss.height - InstanceContainer.height) / 2;
-		for (ObjectFrame frame : frameArray) {
-			if (frame == null) {
-				break;
-			}
+		for (ObjectFrame frame : frames) {
 			frame.update();
 		}
 		Toolkit.getDefaultToolkit().sync();
 	}
 
-	public static void updateWindows()
-	{
-		synchronized(frames) {
-			frameArray = frames.toArray(frameArray);
-		}
-		for (ObjectFrame frame : frameArray) {
-			if (frame == null) {
-				break;
-			}
-			frame.update();
-		}
-		//SwingUtilities.invokeLater(WindowManager::updateWindows);
-	}
-
 	public static void addFrame(ObjectFrame frame)
 	{
-		synchronized(frames) {
-			frames.add(frame);
-		}
+		frames.add(frame);
 	}
 
 	public static void removeFrame(ObjectFrame frame)
 	{
-		synchronized(frames) {
-			frames.remove(frame);
+		if (frames.remove(frame)) {
+			frame.setVisible(false);
 		}
+	}
+
+	public static boolean hasFrame(ObjectFrame frame)
+	{
+		return frames.contains(frame);
 	}
 }

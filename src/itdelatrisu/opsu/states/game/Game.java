@@ -72,6 +72,8 @@ import yugecin.opsudance.ui.OptionsOverlay;
 import yugecin.opsudance.ui.StoryboardOverlay;
 import yugecin.opsudance.ui.cursor.colors.CursorColorManager;
 import yugecin.opsudance.utils.GLHelper;
+import yugecin.opsudance.windows.ObjectFrame;
+import yugecin.opsudance.windows.WindowManager;
 
 import static itdelatrisu.opsu.GameImage.*;
 import static itdelatrisu.opsu.ui.Colors.*;
@@ -80,6 +82,7 @@ import static java.lang.System.arraycopy;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
+import static yugecin.opsudance.windows.WindowManager.skipbtnframe;
 
 /**
  * "Game" state.
@@ -493,6 +496,8 @@ public class Game extends ComplexOpsuState {
 			g.setDrawMode(Graphics.MODE_NORMAL);
 		}
 
+
+		boolean hasSkipButton = false;
 		// break periods
 		if (beatmap.breaks != null && breakIndex < beatmap.breaks.size() && breakTime > 0) {
 			int endTime = beatmap.breaks.get(breakIndex);
@@ -564,7 +569,21 @@ public class Game extends ComplexOpsuState {
 				// skip beginning
 				if (objectIndex == 0 &&
 						trackPosition < beatmap.objects[0].getTime() - SKIP_OFFSET)
+				{
 					skipButton.draw();
+					Image img = skipButton.getImage();
+					if (img != null) {
+						hasSkipButton = true;
+						if (!WindowManager.hasFrame(skipbtnframe)) {
+							WindowManager.addFrame(skipbtnframe);
+						}
+						skipbtnframe.width = img.getWidth();
+						skipbtnframe.height = img.getHeight();
+						skipbtnframe.x = (int) skipButton.getX() - skipbtnframe.width / 2;
+						skipbtnframe.y = (int) skipButton.getY() - skipbtnframe.height / 2;
+						skipbtnframe.lastGLUpdate = System.currentTimeMillis();
+					}
+				}
 
 				// show retries
 				if (retries >= 2 && timeDiff >= -1000) {
@@ -633,12 +652,30 @@ public class Game extends ComplexOpsuState {
 				// skip beginning
 				if (objectIndex == 0 &&
 					trackPosition < beatmap.objects[0].getTime() - SKIP_OFFSET)
+				{
 					skipButton.draw();
+					Image img = skipButton.getImage();
+					if (img != null) {
+						hasSkipButton = true;
+						if (!WindowManager.hasFrame(skipbtnframe)) {
+							WindowManager.addFrame(skipbtnframe);
+						}
+						skipbtnframe.width = img.getWidth();
+						skipbtnframe.height = img.getHeight();
+						skipbtnframe.x = (int) skipButton.getX() - skipbtnframe.width / 2;
+						skipbtnframe.y = (int) skipButton.getY() - skipbtnframe.height / 2;
+						skipbtnframe.lastGLUpdate = System.currentTimeMillis();
+					}
+				}
 			}
 
 			// draw hit objects
 			if (!GameMod.FLASHLIGHT.isActive())
 				drawHitObjects(g, trackPosition);
+		}
+
+		if (!hasSkipButton) {
+			WindowManager.removeFrame(skipbtnframe);
 		}
 
 		// in-game scoreboard
@@ -726,7 +763,7 @@ public class Game extends ComplexOpsuState {
 
 			displayContainer.cursor.draw(expandCursor);
 		}
-		
+
 		super.render(g);
 
 		if (OPTION_DANCE_ENABLE_SB.state) {
@@ -737,7 +774,7 @@ public class Game extends ComplexOpsuState {
 	@Override
 	public void preRenderUpdate() {
 		super.preRenderUpdate();
-		
+
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			optionsOverlay.preRenderUpdate();
 		}
@@ -1389,7 +1426,7 @@ public class Game extends ComplexOpsuState {
 		}
 
 		e.consume();
-		
+
 		if (gameFinished) {
 			return;
 		}
@@ -1754,6 +1791,7 @@ public class Game extends ComplexOpsuState {
 	public void leave()
 	{
 		super.leave();
+		WindowManager.removeFrame(skipbtnframe);
 
 		Display.setTitle(Constants.PROJECT_NAME);
 
@@ -1769,7 +1807,7 @@ public class Game extends ComplexOpsuState {
 		if (OPTION_DANCE_ENABLE_SB.state) {
 			storyboardOverlay.onLeave();
 		}
-		
+
 		optionsOverlay.hide();
 
 		isInGame = false;
@@ -1794,7 +1832,7 @@ public class Game extends ComplexOpsuState {
 		if (isReplay)
 			GameMod.loadModState(previousMods);
 	}
-	
+
 	void adjustLocalMusicOffset(int amount)
 	{
 		int newOffset = beatmap.localMusicOffset + amount;
