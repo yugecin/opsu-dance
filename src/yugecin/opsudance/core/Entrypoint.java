@@ -90,6 +90,7 @@ public class Entrypoint
 		}
 
 		logImpl.close();
+		System.exit(0);
 	}
 
 	private static void setRuntimeInfo()
