@@ -46,6 +46,7 @@ public class ObjectFrame extends JFrame
 			this.lastRender = System.currentTimeMillis();
 			if (!this.isVisible()) {
 				this.setVisible(true);
+				WindowManager.madeframevisiblethisupdate = true;
 			}
 		}
 		if (lastGLUpdate < WindowManager.lastGLRender - 200 && this.isVisible()) {

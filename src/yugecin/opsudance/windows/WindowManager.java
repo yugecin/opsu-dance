@@ -21,6 +21,7 @@ public class WindowManager
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
 	public static int offsetX, offsetY;
+	public static boolean madeframevisiblethisupdate;
 
 	public static void kickstart()
 	{
@@ -42,7 +43,6 @@ public class WindowManager
 		comboframe = new ObjectFrame("combo");
 		scoreframe = new ObjectFrame("score");
 		hpframe = new ObjectFrame("hp");
-		WindowManager.addFrame(cursorFrame);
 		WindowManager.addFrame(skipbtnframe);
 		WindowManager.addFrame(comboframe);
 		WindowManager.addFrame(scoreframe);
@@ -70,8 +70,15 @@ public class WindowManager
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 		offsetX = (ss.width - InstanceContainer.width) / 2;
 		offsetY = (ss.height - InstanceContainer.height) / 2;
+		madeframevisiblethisupdate = false;
 		for (ObjectFrame frame : frames) {
 			frame.update();
+		}
+		boolean madevisible = madeframevisiblethisupdate;
+		cursorFrame.update();
+		if (madevisible && cursorFrame.isVisible()) {
+			// hide frame so it'll reshow next frame and be in front without being in focus
+			cursorFrame.setVisible(false);
 		}
 		Toolkit.getDefaultToolkit().sync();
 	}
