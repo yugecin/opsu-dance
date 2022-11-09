@@ -122,6 +122,7 @@ public class Circle extends GameObject {
 		if (frame == null) {
 			frame = WindowManager.addFrame("c" + hitObject.getTime());
 		}
+		approachScale = 2f;
 		frame.width = gameObjectRenderer.hitcircle.getWidth();
 		frame.width = Math.max(frame.width, gameObjectRenderer.hitcircleOverlay.getWidth());
 		frame.width = Math.max(frame.width, (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale));
