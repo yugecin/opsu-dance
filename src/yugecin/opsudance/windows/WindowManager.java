@@ -76,12 +76,11 @@ public class WindowManager
 		for (ObjectFrame frame : frames) {
 			frame.update();
 		}
-		boolean madevisible = madeframevisiblethisupdate;
-		cursorFrame.update();
-		if (madevisible && cursorFrame.isVisible()) {
+		if (madeframevisiblethisupdate && cursorFrame.isVisible()) {
 			// hide frame so it'll reshow next frame and be in front without being in focus
 			cursorFrame.setVisible(false);
 		}
+		cursorFrame.update();
 		Toolkit.getDefaultToolkit().sync();
 	}
 
