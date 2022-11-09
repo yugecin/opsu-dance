@@ -18,6 +18,7 @@ public class WindowManager
 
 	public static long lastGLRender;
 	public static ObjectFrame cursorFrame, skipbtnframe, hpframe, comboframe, scoreframe;
+	public static ObjectFrame breakframe, wa1frame, wa2frame, wa3frame, wa4frame;
 	public static BufferedImage a, b;
 	public static BufferedImage missing;
 	public static int offsetX, offsetY;
@@ -43,6 +44,11 @@ public class WindowManager
 		comboframe = WindowManager.addFrame("combo");
 		scoreframe = WindowManager.addFrame("score");
 		hpframe = WindowManager.addFrame("hp");
+		wa1frame = WindowManager.addFrame("wa1");
+		wa2frame = WindowManager.addFrame("wa2");
+		wa3frame = WindowManager.addFrame("wa3");
+		wa4frame = WindowManager.addFrame("wa4");
+		breakframe = WindowManager.addFrame("break");
 	}
 
 	public static void swapBuffers()

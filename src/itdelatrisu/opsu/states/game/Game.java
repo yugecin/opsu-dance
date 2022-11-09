@@ -80,7 +80,7 @@ import static java.lang.System.arraycopy;
 import static org.lwjgl.input.Keyboard.*;
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
-import static yugecin.opsudance.windows.WindowManager.skipbtnframe;
+import static yugecin.opsudance.windows.WindowManager.*;
 
 /**
  * "Game" state.
@@ -523,24 +523,51 @@ public class Game extends ComplexOpsuState {
 				trackPosition - breakTime > 2000 &&
 				trackPosition - breakTime < 5000) {
 				// show break start
+				Image img;
 				if (data.getHealth() >= 50) {
-					GameImage.SECTION_PASS.getImage().drawCentered(width / 2f, height / 2f);
+					img = GameImage.SECTION_PASS.getImage();
 					if (!breakSound) {
 						SoundController.playSound(SoundEffect.SECTIONPASS);
 						breakSound = true;
 					}
 				} else {
-					GameImage.SECTION_FAIL.getImage().drawCentered(width / 2f, height / 2f);
+					img = GameImage.SECTION_FAIL.getImage();
 					if (!breakSound) {
 						SoundController.playSound(SoundEffect.SECTIONFAIL);
 						breakSound = true;
 					}
 				}
+				img.drawCentered(width / 2f, height / 2f);
+				breakframe.width = img.getWidth();
+				breakframe.height = img.getHeight();
+				breakframe.x = (width - breakframe.width) / 2;
+				breakframe.y = (height - breakframe.height) / 2;
+				breakframe.lastGLUpdate = System.currentTimeMillis();
 			} else if (breakLength >= 4000) {
 				// show break end (flash eight times for 125ms)
 				int endTimeDiff = endTime - trackPosition;
 				if (endTimeDiff < 2000 && (endTimeDiff / 125 % 2) == 1) {
 					Image arrow = GameImage.WARNINGARROW.getImage();
+					wa1frame.width = arrow.getWidth();
+					wa2frame.width = wa1frame.width;
+					wa3frame.width = wa1frame.width;
+					wa4frame.width = wa1frame.width;
+					wa1frame.height = arrow.getHeight();
+					wa2frame.height = wa1frame.height;
+					wa3frame.height = wa1frame.height;
+					wa4frame.height = wa1frame.height;
+					wa1frame.x = (int) (width * .15f);
+					wa2frame.x = (int) (width * .15f);
+					wa3frame.x = (int) (width * .75f);
+					wa4frame.x = (int) (width * .75f);
+					wa1frame.y = (int) (height * .15f);
+					wa2frame.y = (int) (height * .75f);
+					wa3frame.y = (int) (height * .15f);
+					wa4frame.y = (int) (height * .75f);
+					wa1frame.lastGLUpdate = System.currentTimeMillis();
+					wa2frame.lastGLUpdate = System.currentTimeMillis();
+					wa3frame.lastGLUpdate = System.currentTimeMillis();
+					wa4frame.lastGLUpdate = System.currentTimeMillis();
 					arrow.setRotation(0);
 					arrow.draw(width * 0.15f, height * 0.15f);
 					arrow.draw(width * 0.15f, height * 0.75f);
