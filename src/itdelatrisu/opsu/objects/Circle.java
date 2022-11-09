@@ -30,6 +30,8 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.ObjectColorOverrides;
+import yugecin.opsudance.windows.ObjectFrame;
+import yugecin.opsudance.windows.WindowManager;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -56,6 +58,8 @@ public class Circle extends GameObject {
 	private boolean comboEnd;
 
 	private int comboColorIndex;
+
+	private ObjectFrame frame;
 
 	/**
 	 * Constructor.
@@ -115,10 +119,29 @@ public class Circle extends GameObject {
 		}
 		gameObjectRenderer.renderHitCircle(x, y, color, hitObject.getComboNumber(), alpha);
 
+		if (frame == null) {
+			frame = WindowManager.addFrame("c" + hitObject.getTime());
+		}
+		frame.width = gameObjectRenderer.hitcircle.getWidth();
+		frame.width = Math.max(frame.width, gameObjectRenderer.hitcircleOverlay.getWidth());
+		frame.width = Math.max(frame.width, (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale));
+		frame.height = gameObjectRenderer.hitcircle.getHeight();
+		frame.height = Math.max(frame.height, gameObjectRenderer.hitcircleOverlay.getHeight());
+		frame.height = Math.max(frame.height, (int) (gameObjectRenderer.approachCircle.getHeight() * approachScale));
+		frame.x = (int) (x - frame.width / 2f);
+		frame.y = (int) (y - frame.height / 2f);
+		frame.lastGLUpdate = System.currentTimeMillis();
+
 		Colors.WHITE_FADE.a = oldAlpha;
 
 		g.popTransform();
 		color = orig;
+	}
+
+	@Override
+	protected void finalize() throws Throwable
+	{
+		WindowManager.removeFrame(frame);
 	}
 
 	/**

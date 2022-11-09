@@ -93,7 +93,7 @@ public class WindowManager
 
 	public static void removeFrame(ObjectFrame frame)
 	{
-		if (frames.remove(frame)) {
+		if (frames.remove(frame) && frame.isVisible()) {
 			frame.setVisible(false);
 		}
 	}

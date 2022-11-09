@@ -23,9 +23,9 @@ public class GameObjectRenderer
 	public float circleDiameter;
 	public int circleDiameterInt;
 
-	private Image hitcircle;
-	private Image hitcircleOverlay;
-	private Image approachCircle;
+	public Image hitcircle;
+	public Image hitcircleOverlay;
+	public Image approachCircle;
 
 	public void initForGame(GameData gameData, float circleDiameter) {
 		this.gameData = gameData;
