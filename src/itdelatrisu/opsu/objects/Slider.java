@@ -36,6 +36,8 @@ import org.newdawn.slick.Image;
 import yugecin.opsudance.Dancer;
 import yugecin.opsudance.ObjectColorOverrides;
 import yugecin.opsudance.skinning.SkinService;
+import yugecin.opsudance.windows.ObjectFrame;
+import yugecin.opsudance.windows.WindowManager;
 
 import static yugecin.opsudance.core.InstanceContainer.*;
 import static yugecin.opsudance.options.Options.*;
@@ -123,6 +125,14 @@ public class Slider extends GameObject {
 
 	public int curveStartIndex;
 
+	private ObjectFrame frame;
+
+	@Override
+	protected void finalize() throws Throwable
+	{
+		WindowManager.removeFrame(frame);
+	}
+
 	/**
 	 * Initializes the Slider data type with images and dimensions.
 	 * @param circleDiameter the circle diameter
@@ -184,6 +194,7 @@ public class Slider extends GameObject {
 		repeats = hitObject.getRepeatCount();
 	}
 
+	int fminx, fminy, fmaxx, fmaxy;
 	@Override
 	public void draw(Graphics g, int trackPosition, float mirrorAngle) {
 		if (trackPosition > getEndTime()) {
@@ -207,6 +218,8 @@ public class Slider extends GameObject {
 		float oldAlpha = Colors.WHITE_FADE.a;
 		Colors.WHITE_FADE.a = color.a = alpha;
 		Vec2f endPos = curve.pointAt(1);
+
+		fminx = 10000; fminy = 10000; fmaxx = -10000; fmaxy = -10000;
 
 		float oldWhiteFadeAlpha = Colors.WHITE_FADE.a;
 		float sliderAlpha = 1f;
@@ -326,6 +339,11 @@ public class Slider extends GameObject {
 			}
 			if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
+				int s = (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale);
+				fminx = Math.min(fminx, (int) x - s / 2);
+				fminy = Math.min(fminy, (int) y - s / 2);
+				fmaxx = Math.max(fmaxx, (int) x + s / 2);
+				fmaxy = Math.max(fmaxy, (int) y + s / 2);
 			}
 			g.popTransform();
 		} else {
@@ -383,6 +401,17 @@ public class Slider extends GameObject {
 					Colors.BLACK_ALPHA.a = oldAlphaBlack;
 				}
 			}
+		}
+
+		if (fminx != 10000) {
+			if (frame == null) {
+				frame = WindowManager.addFrame("s" + hitObject.getTime());
+			}
+			frame.x = fminx;
+			frame.y = fminy;
+			frame.width = fmaxx - fminx;
+			frame.height = fmaxy - fminy;
+			frame.lastGLUpdate = System.currentTimeMillis();
 		}
 
 		Colors.WHITE_FADE.a = oldAlpha;
@@ -458,6 +487,14 @@ public class Slider extends GameObject {
 			if (sliderprogress > 0) {
 				curveIntervalFrom = sliderprogress;
 			}
+		}
+		for (float x = curveIntervalFrom; x < curveIntervalTo; x += 0.01f) {
+			Vec2f p = curve.pointAt(x);
+			int s = gameObjectRenderer.circleDiameterInt;
+			fminx = Math.min(fminx, (int) p.x - s / 2);
+			fminy = Math.min(fminy, (int) p.y - s / 2);
+			fmaxx = Math.max(fmaxx, (int) p.x + s / 2);
+			fmaxy = Math.max(fmaxy, (int) p.y + s / 2);
 		}
 		if (!OPTION_FALLBACK_SLIDERS.state &&
 			OPTION_MERGING_SLIDERS.state &&
