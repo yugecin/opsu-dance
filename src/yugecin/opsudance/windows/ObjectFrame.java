@@ -45,6 +45,7 @@ public class ObjectFrame extends JFrame
 			tp.repaint();
 			this.lastRender = System.currentTimeMillis();
 			if (!this.isVisible()) {
+				this.setLocation(WindowManager.offsetX + x, WindowManager.offsetY + y);
 				this.setVisible(true);
 				WindowManager.madeframevisiblethisupdate = true;
 			}

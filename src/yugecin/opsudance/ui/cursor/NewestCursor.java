@@ -56,6 +56,9 @@ public class NewestCursor implements Cursor
 		WindowManager.cursorFrame.lastGLUpdate = System.currentTimeMillis();
 		WindowManager.cursorFrame.x = InstanceContainer.mouseX - w;
 		WindowManager.cursorFrame.y = InstanceContainer.mouseY - h;
+		// for auto:
+		//WindowManager.cursorFrame.x = trail.lastX - w;
+		//WindowManager.cursorFrame.y = trail.lastY - h;
 		WindowManager.cursorFrame.width = w * 2;
 		WindowManager.cursorFrame.height = h * 2;
 
