@@ -49,7 +49,7 @@ public class ObjectFrame extends JFrame
 				WindowManager.madeframevisiblethisupdate = true;
 			}
 		}
-		if (lastGLUpdate < WindowManager.lastGLRender - 200 && this.isVisible()) {
+		if (lastGLUpdate < WindowManager.lastGLRender - 60 && this.isVisible()) {
 			this.setVisible(false);
 		}
 	}

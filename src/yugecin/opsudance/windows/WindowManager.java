@@ -39,14 +39,10 @@ public class WindowManager
 		}
 		g.dispose();
 		cursorFrame = new ObjectFrame("cursor");
-		skipbtnframe = new ObjectFrame("skipbtn");
-		comboframe = new ObjectFrame("combo");
-		scoreframe = new ObjectFrame("score");
-		hpframe = new ObjectFrame("hp");
-		WindowManager.addFrame(skipbtnframe);
-		WindowManager.addFrame(comboframe);
-		WindowManager.addFrame(scoreframe);
-		WindowManager.addFrame(hpframe);
+		skipbtnframe = WindowManager.addFrame("skipbtn");
+		comboframe = WindowManager.addFrame("combo");
+		scoreframe = WindowManager.addFrame("score");
+		hpframe = WindowManager.addFrame("hp");
 	}
 
 	public static void swapBuffers()
@@ -83,9 +79,11 @@ public class WindowManager
 		Toolkit.getDefaultToolkit().sync();
 	}
 
-	public static void addFrame(ObjectFrame frame)
+	public static ObjectFrame addFrame(String title)
 	{
+		ObjectFrame frame = new ObjectFrame(title);
 		frames.add(frame);
+		return frame;
 	}
 
 	public static void removeFrame(ObjectFrame frame)
