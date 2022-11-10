@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import yugecin.opsudance.core.InstanceContainer;
+import yugecin.opsudance.options.Options;
 
 public class ObjectFrame extends JFrame
 {
@@ -19,8 +20,10 @@ public class ObjectFrame extends JFrame
 	{
 		this.setTitle(title);
 		this.setResizable(false);
-		this.setType(Type.UTILITY);
 		this.setType(Type.POPUP);
+		if (Options.OPTION_WINDOW_TOOLWINDOW.state) {
+			this.setType(Type.UTILITY);
+		}
 		this.setLayout(null);
 		this.add(tp = new ThingPanel());
 	}

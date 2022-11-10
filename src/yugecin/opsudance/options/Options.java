@@ -801,6 +801,7 @@ public class Options
 	public static final ToggleOption OPTION_DANCE_ONLY_CIRCLE_STACKS = new ToggleOption("Only circle stacks", "CircleStacks", "Only do circle movement on stacks", false);
 	public static final ToggleOption OPTION_DANCE_CIRCLE_STREAMS = new ToggleOption("Circle streams", "CircleStreams", "Make circles while streaming", false);
 	public static final ToggleOption OPTION_DANCE_MIRROR = new ToggleOption("Mirror collage", "MirrorCollage", "Hypnotizing stuff. Toggle this ingame by pressing the M key.", false);
+	public static final ToggleOption OPTION_WINDOW_TOOLWINDOW = new ToggleOption("Use utility windows", "WindowUtility", "Use windows that don't fill the task bar", false);
 	public static final ToggleOption OPTION_WINDOW_CURSOR_RESIZE = new ToggleOption("Resize with cursor trail", "WindowCursorResize", "Resize the cursor window based on the trail", false);
 	public static final ToggleOption OPTION_WINDOW_SLIDER_RESIZE = new ToggleOption("Resize with snaking sliders", "WindowApproachResize", "Resize the window based on snaking slider size", false);
 	public static final ToggleOption OPTION_WINDOW_APPROACH_RESIZE = new ToggleOption("Resize with approach circles", "WindowApproachResize", "Let the approach circle dictate the size of the windows", false);
