@@ -46,9 +46,7 @@ import yugecin.opsudance.utils.SlickUtil;
 
 import static yugecin.opsudance.options.Options.*;
 import static yugecin.opsudance.core.InstanceContainer.*;
-import static yugecin.opsudance.windows.WindowManager.hpframe;
-import static yugecin.opsudance.windows.WindowManager.comboframe;
-import static yugecin.opsudance.windows.WindowManager.scoreframe;
+import static yugecin.opsudance.windows.WindowManager.*;
 
 /**
  * Holds game data and renders all related elements.
@@ -86,6 +84,9 @@ public class GameData {
 
 	/** Time, in milliseconds, for the hit result text to fade. */
 	private static final int HITCIRCLE_TEXT_FADE_TIME = 833;
+
+	private long comboBurstTime;
+	private boolean comboBurstRight;
 
 	/** Letter grades. */
 	public enum Grade {
@@ -204,12 +205,6 @@ public class GameData {
 
 	/** Index of the current combo burst image. */
 	private int comboBurstIndex;
-
-	/** Alpha level of the current combo burst image (for fade out). */
-	private float comboBurstAlpha;
-
-	/** Current x coordinate of the combo burst image (for sliding animation). */
-	private float comboBurstX;
 
 	/** Time offsets for obtaining each hit result (indexed by HIT_* constants to HIT_MAX). */
 	private int[] hitResultOffset;
@@ -785,11 +780,28 @@ public class GameData {
 			ki.drawCentered(colourX + colourCropped.getWidth(), colourY);
 			ki.setAlpha(1f);
 
+			long time = System.currentTimeMillis();
+			int burstTime = (int) (time - comboBurstTime);
 			// combo burst
-			if (comboBurstIndex != -1 && comboBurstAlpha > 0f) {
+			if (comboBurstIndex != -1 && burstTime < 1500) {
+
 				Image comboBurst = comboBurstImages[comboBurstIndex];
-				comboBurst.setAlpha(comboBurstAlpha);
-				comboBurstImages[comboBurstIndex].draw(comboBurstX, height - comboBurst.getHeight());
+				int w = comboBurst.getWidth();
+				float t = Utils.clamp(AnimationEquation.OUT_QUART.calc(burstTime / 1200f), 0f, 1f);
+				float x = comboBurstRight ? width - w * t : -w * (1f - t);
+				comboBurst.setAlpha(burstTime < 1000 ? 0.8f : Utils.lerp(0.8f, 0f, (burstTime - 1000) / 500f));
+				comboBurstImages[comboBurstIndex].draw(x, height - comboBurst.getHeight());
+				if (x < 0) {
+					w += x;
+					x = 0;
+				} else if (x + w > width) {
+					w = width - (int) x;
+				}
+				cmbburstframe.x = (int) x;
+				cmbburstframe.y = height - comboBurst.getHeight();
+				cmbburstframe.height = comboBurst.getHeight();
+				cmbburstframe.width = w;
+				cmbburstframe.lastGLUpdate = System.currentTimeMillis();
 			}
 
 			// combo count
@@ -1231,25 +1243,6 @@ public class GameData {
 			}
 		}
 
-		// combo burst
-		if (comboBurstIndex > -1 && OPTION_SHOW_COMBO_BURSTS.state) {
-			int leftX  = 0;
-			int rightX = width - comboBurstImages[comboBurstIndex].getWidth();
-			if (comboBurstX < leftX) {
-				comboBurstX += (delta / 2f) * GameImage.getUIscale();
-				if (comboBurstX > leftX)
-					comboBurstX = leftX;
-			} else if (comboBurstX > rightX) {
-				comboBurstX -= (delta / 2f) * GameImage.getUIscale();
-				if (comboBurstX < rightX)
-					comboBurstX = rightX;
-			} else if (comboBurstAlpha > 0f) {
-				comboBurstAlpha -= (delta / 1200f);
-				if (comboBurstAlpha < 0f)
-					comboBurstAlpha = 0f;
-			}
-		}
-
 		// combo pop
 		comboPopTime += delta;
 		if (comboPopTime > COMBO_POP_TIME)
@@ -1284,6 +1277,7 @@ public class GameData {
 
 		// combo bursts (at 30, 60, 100+50x)
 		if (OPTION_SHOW_COMBO_BURSTS.state && (combo == 30 || combo == 60 || (combo >= 100 && combo % 50 == 0))) {
+			comboBurstTime = System.currentTimeMillis();
 			if (SkinService.skin.isComboBurstRandom()) {
 				comboBurstIndex = (int) (Math.random() * comboBurstImages.length);
 			} else {
@@ -1293,12 +1287,7 @@ public class GameData {
 					comboBurstIndex = (comboBurstIndex + 1) % comboBurstImages.length;
 				}
 			}
-			comboBurstAlpha = 0.8f;
-			if ((comboBurstIndex % 2) == 0) {
-				comboBurstX = width;
-			} else {
-				comboBurstX = comboBurstImages[0].getWidth() * -1;
-			}
+			comboBurstRight = (comboBurstIndex % 2) == 0;
 		}
 	}
 
