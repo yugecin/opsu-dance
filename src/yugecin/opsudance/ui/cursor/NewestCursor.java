@@ -62,6 +62,19 @@ public class NewestCursor implements Cursor
 		WindowManager.cursorFrame.width = w * 2;
 		WindowManager.cursorFrame.height = h * 2;
 
+		// full trail
+		if (trail.first != null && trail.first != trail.last) {
+			int minx = 10000, miny = 10000, maxx = -10000, maxy = -10000;
+			minx = Math.min(trail.lastX, trail.first.value.x) - w;
+			maxx = Math.max(trail.lastX, trail.first.value.x) + w;
+			miny = Math.min(trail.lastY, trail.first.value.y) - h;
+			maxy = Math.max(trail.lastY, trail.first.value.y) + h;
+			WindowManager.cursorFrame.x = minx;
+			WindowManager.cursorFrame.y = miny;
+			WindowManager.cursorFrame.width = maxx - minx;
+			WindowManager.cursorFrame.height = maxy - miny;
+		}
+
 		this.cursorAngle = (this.cursorAngle + renderDelta / 40f) % 360f;
 
 		if (OPTION_BLEND_TRAIL.state) {

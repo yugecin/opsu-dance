@@ -15,33 +15,33 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 
 	private final Runnable trailLengthOptionListener;
 
-	private Node first;
-	private Node last;
+	public Node first;
+	public Node last;
 	private int fadeoff;
 
 	int lastX, lastY;
 	int size;
-	
+
 	CursorTrail()
 	{
 		this.reset();
-		
+
 		this.trailLengthOptionListener = this::updateFadeoff;
 		OPTION_DANCE_CURSOR_TRAIL_OVERRIDE.addListener(this.trailLengthOptionListener);
 		this.updateFadeoff();
 	}
-	
+
 	void dispose()
 	{
 		OPTION_DANCE_CURSOR_TRAIL_OVERRIDE.removeListener(this.trailLengthOptionListener);
 	}
-	
+
 	private void updateFadeoff()
 	{
 		final NumericOption opt = OPTION_DANCE_CURSOR_TRAIL_OVERRIDE;
 		this.fadeoff = opt.val == opt.min ? 175 : (int) (1000f * opt.percentage());
 	}
-	
+
 	void reset()
 	{
 		this.lastX = mouseX;
@@ -146,7 +146,7 @@ class CursorTrail implements Iterable<CursorTrail.Part>
 		};
 	}
 
-	private static class Node
+	static class Node
 	{
 		Node next;
 		Part value;
