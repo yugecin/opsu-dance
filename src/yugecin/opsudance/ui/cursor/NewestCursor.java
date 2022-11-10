@@ -63,7 +63,7 @@ public class NewestCursor implements Cursor
 		WindowManager.cursorFrame.height = h * 2;
 
 		// full trail
-		if (trail.first != null && trail.first != trail.last) {
+		if (OPTION_WINDOW_CURSOR_RESIZE.state && trail.first != null && trail.first != trail.last) {
 			int minx = 10000, miny = 10000, maxx = -10000, maxy = -10000;
 			minx = Math.min(trail.lastX, trail.first.value.x) - w;
 			maxx = Math.max(trail.lastX, trail.first.value.x) + w;

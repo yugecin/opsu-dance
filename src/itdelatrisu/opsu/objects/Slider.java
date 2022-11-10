@@ -339,7 +339,9 @@ public class Slider extends GameObject {
 			}
 			if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
-				approachScale = 2f;
+				if (!OPTION_WINDOW_APPROACH_RESIZE.state) {
+					approachScale = 3f * OPTION_WINDOW_STATIC_APPROACH_SIZE.val / 100f;
+				}
 				int s = (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale);
 				fminx = Math.min(fminx, (int) x - s / 2);
 				fminy = Math.min(fminy, (int) y - s / 2);
@@ -489,8 +491,9 @@ public class Slider extends GameObject {
 				curveIntervalFrom = sliderprogress;
 			}
 		}
-		//for (float x = curveIntervalFrom; x < curveIntervalTo; x += 0.01f) {
-		for (float x = 0f; x < 1f; x += 0.01f) {
+		float a = OPTION_WINDOW_SLIDER_RESIZE.state ? curveIntervalFrom : 0f;
+		float b = OPTION_WINDOW_SLIDER_RESIZE.state ? curveIntervalTo : 1f;
+		for (float x = a; x < b; x += 0.01f) {
 			Vec2f p = curve.pointAt(x);
 			int s = gameObjectRenderer.circleDiameterInt;
 			fminx = Math.min(fminx, (int) p.x - s / 2);

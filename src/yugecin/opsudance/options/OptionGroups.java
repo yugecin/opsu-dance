@@ -170,6 +170,12 @@ public class OptionGroups {
 		new OptionTab("MIRROR", new Option[] {
 			OPTION_DANCE_MIRROR,
 		}),
+		new OptionTab("WINDOWS", new Option[] {
+			OPTION_WINDOW_CURSOR_RESIZE,
+			OPTION_WINDOW_SLIDER_RESIZE,
+			OPTION_WINDOW_APPROACH_RESIZE,
+			OPTION_WINDOW_STATIC_APPROACH_SIZE,
+		}),
 		new OptionTab ("Pippi", GameImage.MENU_NAV_PIPPI),
 		new OptionTab ("GENERAL", new Option[]{
 			OPTION_PIPPI_ENABLE,
