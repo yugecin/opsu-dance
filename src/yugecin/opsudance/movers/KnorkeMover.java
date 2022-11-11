@@ -35,7 +35,7 @@ public class KnorkeMover extends Mover {
 
 		Vec2f s = start.end;
 		Vec2f e = end.start;
-		
+
 		double scaleddistance = totalTime;
 
 		if (firstpoint) {
@@ -86,8 +86,8 @@ public class KnorkeMover extends Mover {
 
 			double maxdist = 0f;
 			double midx = (startX + endX) / 2, midy = (startY + endY) / 2;
-			for (int i = 0; i < 20; i++) {
-				double[] p = getPointAt(i / 20f);
+			for (int i = 0; i < 200; i++) {
+				double[] p = getPointAt(i / 200f);
 				if (p[0] < 0 || p[1] < 0 || p[0] > width || p[1] > height) {
 					double d = Utils.distance(midx, midy, p[0], p[1]);
 					if (d > maxdist) {
@@ -96,7 +96,7 @@ public class KnorkeMover extends Mover {
 				}
 			}
 			if (maxdist > 0) {
-				maxdist *= 2;
+				maxdist *= 1.2f;
 				// this  - MATH.PI / 2 modification is to make it less boring,
 				// because when using the unmodified newAngle it just goes too
 				// straight. Maybe find a better way. Random?
@@ -105,25 +105,35 @@ public class KnorkeMover extends Mover {
 				double y = e.y + Math.sin(newAngle + d) * maxdist;
 				int m = (int) (x / width);
 				int n = (int) (y / height);
+				if (x < 0) {
+					m--;
+				}
+				if (y < 0) {
+					n--;
+				}
 				if (Math.abs(m) % 2 == 1) {
 					endX = width - e.x;
+					p2.x = width - p2.x;
 					mirrorx = true;
 				}
 				endX += m * width;
+				p2.x += m * width;
 				if (Math.abs(n) % 2 == 1) {
 					endY = height - e.y;
+					p2.y = height - p2.y;
 					mirrory = true;
 				}
 				endY += n * height;
+				p2.y += n * height;
 				e.y = (float) endY;
 				e.x = (float) endX;
-				continue;
+				//continue;
 			}
 			break;
 		}
 
 		if (scaleddistance > 1) {
-			float dy = -e.y + p1.y, dx = -e.x + p1.x;
+			float dy = - e.y + p2.y, dx = - e.x + p1.x;
 			if (mirrorx) {
 				dx = -dx;
 			}
