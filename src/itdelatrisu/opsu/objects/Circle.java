@@ -123,7 +123,7 @@ public class Circle extends GameObject {
 			frame = WindowManager.addFrame("c" + hitObject.getTime());
 		}
 		if (!OPTION_WINDOW_APPROACH_RESIZE.state) {
-			approachScale = 3f * OPTION_WINDOW_STATIC_APPROACH_SIZE.val / 100f;
+			approachScale = 1f + 2f * OPTION_WINDOW_STATIC_APPROACH_SIZE.val / 100f;
 		}
 		frame.width = gameObjectRenderer.hitcircle.getWidth();
 		frame.width = Math.max(frame.width, gameObjectRenderer.hitcircleOverlay.getWidth());

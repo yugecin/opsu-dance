@@ -340,13 +340,15 @@ public class Slider extends GameObject {
 			if (!GameMod.HIDDEN.isActive() && OPTION_DANCE_DRAW_APPROACH.state) {
 				gameObjectRenderer.renderApproachCircle(x, y, color, approachScale);
 				if (!OPTION_WINDOW_APPROACH_RESIZE.state) {
-					approachScale = 3f * OPTION_WINDOW_STATIC_APPROACH_SIZE.val / 100f;
+					approachScale = 1f + 2f * OPTION_WINDOW_STATIC_APPROACH_SIZE.val / 100f;
 				}
-				int s = (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale);
-				fminx = Math.min(fminx, (int) x - s / 2);
-				fminy = Math.min(fminy, (int) y - s / 2);
-				fmaxx = Math.max(fmaxx, (int) x + s / 2);
-				fmaxy = Math.max(fmaxy, (int) y + s / 2);
+				if (approachScale > 1.01f) {
+					int s = (int) (gameObjectRenderer.approachCircle.getWidth() * approachScale);
+					fminx = Math.min(fminx, (int) x - s / 2);
+					fminy = Math.min(fminy, (int) y - s / 2);
+					fmaxx = Math.max(fmaxx, (int) x + s / 2);
+					fmaxy = Math.max(fmaxy, (int) y + s / 2);
+				}
 			}
 			g.popTransform();
 		} else {

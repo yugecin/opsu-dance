@@ -805,7 +805,7 @@ public class Options
 	public static final ToggleOption OPTION_WINDOW_CURSOR_RESIZE = new ToggleOption("Resize with cursor trail", "WindowCursorResize", "Resize the cursor window based on the trail", false);
 	public static final ToggleOption OPTION_WINDOW_SLIDER_RESIZE = new ToggleOption("Resize with snaking sliders", "WindowApproachResize", "Resize the window based on snaking slider size", false);
 	public static final ToggleOption OPTION_WINDOW_APPROACH_RESIZE = new ToggleOption("Resize with approach circles", "WindowApproachResize", "Let the approach circle dictate the size of the windows", false);
-	public static final NumericOption OPTION_WINDOW_STATIC_APPROACH_SIZE = new NumericOption("Static size percentage", "WindowStaticSize", "Extra size of the window, based on approach circle's biggest size", 66, 0, 100) {
+	public static final NumericOption OPTION_WINDOW_STATIC_APPROACH_SIZE = new NumericOption("Static size percentage", "WindowStaticSize", "Extra size of the window, based on approach circle's biggest size", 50, 0, 100) {
 		@Override
 		public boolean showCondition()
 		{
