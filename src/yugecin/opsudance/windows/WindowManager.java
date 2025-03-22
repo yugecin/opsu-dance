@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import yugecin.opsudance.core.InstanceContainer;
+import yugecin.opsudance.options.Options;
 
 public class WindowManager
 {
@@ -78,7 +79,7 @@ public class WindowManager
 		for (ObjectFrame frame : frames) {
 			frame.update();
 		}
-		if (madeframevisiblethisupdate && cursorFrame.isVisible()) {
+		if (madeframevisiblethisupdate && cursorFrame.isVisible() && !Options.OPTION_WINDOW_CURSOR_RESIZE.state) {
 			// hide frame so it'll reshow next frame and be in front without being in focus
 			cursorFrame.setVisible(false);
 		}
