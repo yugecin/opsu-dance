@@ -4,8 +4,8 @@
 
 * [What](#what) - [Why](#why) - [Downloads](#downloads) - [Running](#running) - [Building a JAR](#building-a-jar) - [Credits](#credits) - [License](#license)
 
-![main menu](https://robin.basdon.net/blog/002/opsu-d-0.5.0-mainmenu-options.png)
-![song list](https://robin.basdon.net/blog/002/opsu-d-0.5.0-songmenu.png)
+<img src=./screenshot-opsu-d-0.5.0-mainmenu-options.png alt="main menu" />
+<img src=./screenshot-opsu-d-0.5.0-songmenu.png alt="song list" />
 
 What
 ----
